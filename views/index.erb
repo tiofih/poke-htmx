@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Pokemon Team</title>
+    <script src="https://unpkg.com/htmx.org@0.0.4"></script>
+  </head>
+
+  <body>
+    <label for="pokemons">Choose a pocket monster:</label>
+
+    <select name="name" id="pokemons" hx-target="#pokemon" hx-trigger="change" hx-get="/pokemon">
+      <option value="..." selected disabled>...</option>
+      <% @pokemons.map do |pokemon| %>
+        <option value="<%= pokemon["name"] %>"><%= pokemon["name"] %></option>
+      <% end %>
+    </select>
+
+    <div id="pokemon"> </div>
+  </body>
+</html>
