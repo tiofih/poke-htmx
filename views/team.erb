@@ -1,0 +1,13 @@
+<% @team.map.with_index do |ch, idx| %>
+  <form
+      hx-get="/team"
+      hx-target="#team"
+      hx-swap="innerHTML">
+    <div id='team-pokemon-<%= idx %>'>
+      <input type="image" src=<%= ch.sprite %>>
+      <%= ch.name %>
+      <input type="hidden" name="index" value=<%= idx %>>
+      <button class="btn">Remove from Team</button>
+    </div>
+  </form>
+<% end %>

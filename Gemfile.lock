@@ -1,14 +1,43 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    coderay (1.1.3)
+    concurrent-ruby (1.2.2)
+    dry-core (1.0.1)
+      concurrent-ruby (~> 1.0)
+      zeitwerk (~> 2.6)
+    dry-inflector (1.0.0)
+    dry-logic (1.5.0)
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 1.0, < 2)
+      zeitwerk (~> 2.6)
+    dry-struct (1.6.0)
+      dry-core (~> 1.0, < 2)
+      dry-types (>= 1.7, < 2)
+      ice_nine (~> 0.11)
+      zeitwerk (~> 2.6)
+    dry-types (1.7.1)
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 1.0)
+      dry-inflector (~> 1.0)
+      dry-logic (~> 1.4)
+      zeitwerk (~> 2.6)
     faraday (2.7.10)
       faraday-net_http (>= 2.0, < 3.1)
       ruby2_keywords (>= 0.0.4)
     faraday-net_http (3.0.2)
+    ice_nine (0.11.2)
+    method_source (1.0.0)
     multi_json (1.15.0)
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
     nio4r (2.5.9)
+    pry (0.14.2)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
+    pry-doc (1.4.0)
+      pry (~> 0.11)
+      yard (~> 0.9.11)
     puma (6.3.0)
       nio4r (~> 2.0)
     rack (2.2.8)
@@ -27,12 +56,17 @@ GEM
       sinatra (= 3.1.0)
       tilt (~> 2.0)
     tilt (2.2.0)
+    yard (0.9.34)
+    zeitwerk (2.6.11)
 
 PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  dry-struct
   faraday
+  pry
+  pry-doc
   puma
   sinatra
   sinatra-contrib
