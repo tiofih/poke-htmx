@@ -1,13 +1,23 @@
 <% @team.map.with_index do |ch, idx| %>
-  <form
-      hx-get="/team"
-      hx-target="#team"
-      hx-swap="innerHTML">
-    <div id='team-pokemon-<%= idx %>'>
-      <input type="image" src=<%= ch.sprite %>>
-      <%= ch.name %>
-      <input type="hidden" name="index" value=<%= idx %>>
-      <button class="btn">Remove from Team</button>
-    </div>
-  </form>
+  <div id='team-pokemon-<%= idx %>'>
+    <input type="image" src=<%= ch.sprite %>><br>
+    <%= ch.name %><br>
+    <input type="hidden" name="index" value=<%= idx %>>
+    <button
+        class="btn"
+        hx-get="/team"
+        hx-target="#team"
+        hx-swap="innerHTML"
+        hx-params="*">
+      Remove from Team
+    </button><br>
+    <button
+        class="btn"
+        hx-get="/team"
+        hx-target="#team"
+        hx-swap="innerHTML"
+        hx-params="*">
+      Swap Position
+    </button><br>
+  </div>
 <% end %>
