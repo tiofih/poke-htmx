@@ -16,6 +16,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [ ] Nenhuma regressão na suíte existente.
 - [ ] `REQUIREMENTS.md` e `SESSIONS.md` **atualizados** no mesmo commit.
 - [ ] Commit realizado após cada `green` (TDD).
+- [ ] Commit realizado ao concluir e validar cada fase de **refinamento** (critérios de aceite e plano TDD fechados).
 
 ## Stack
 
@@ -85,6 +86,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - Toda implementação **começa por um teste que falha** (red), depois implementação mínima (green) e depois refatoração.
 - Framework: **Minitest**.
 - **Commit obrigatório após cada green.**
+- **Commit obrigatório após cada fase de refinamento concluída e validada** (documento da sessão com critérios de aceite e plano TDD fechados e verificados).
 - `REQUIREMENTS.md` e `SESSIONS.md` sempre atualizados no mesmo escopo.
 - Suíte cobre regras de negócio (persistência da equipe, adicionar/remover, consulta à PokéAPI) e rotas do servidor.
 

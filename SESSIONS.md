@@ -39,7 +39,7 @@ Detalhes em `sessions/0001-persist-postgres.md`. Atualizar este arquivo conforme
 
 | # | Sessão | Fase | Status |
 | --- | --- | --- | --- |
-| 0001 | Persistir equipe em PostgreSQL (RNF-02) | Refinamento | Preparando |
+| 0001 | Persistir equipe em PostgreSQL (RNF-02) | Refinamento | Concluída (aguardando aprovação) |
 | 0002 | Remoção semântica (`DELETE /team/:key`) | — | Backlog |
 | 0003 | Equipe por usuário (sessão/cookie) | — | Backlog |
 | 0004 | Página de detalhes (tipos, stats, evoluções) | — | Backlog |

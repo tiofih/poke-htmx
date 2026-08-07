@@ -1,0 +1,30 @@
+# Ruby / Bundler
+.bundle/
+vendor/bundle/
+tmp/
+log/
+coverage/
+*.gem
+
+# Node / opencode tooling
+node_modules/
+package.json
+package-lock.json
+
+# IDE / editors
+.ruby-lsp/
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Banco de dados local
+*.sqlite3
