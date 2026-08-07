@@ -3,6 +3,8 @@
 > **Fluxo:** cada passo de implementação é uma **sessão** (arquivo próprio em `sessions/`).
 > Fonte da verdade: `REQUIREMENTS.md`.
 
+> **Sequência rígida (RNF-04):** um passo só é iniciado quando **todas as fases do passo anterior** estiverem devidamente concluídas e validadas (red → green → refactor → validação + critérios verificados).
+
 ## Ciclo de cada sessão (SDD em fases)
 
 Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa quando a fase atual estiver concluída (cada fase marcada como `Done` no arquivo da sessão):
@@ -33,14 +35,14 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 ## Próxima sessão
 
 **Sessão 0001** — Persistir equipe em PostgreSQL (RNF-02).
-Refinamento concluído e validado; implementação TDD em andamento — passos 0–1 verdes (infra de testes + `TeamRepository#all`). Próximo: passo 2 (`#add`).
+Passos 0–1 verdes e **validados** (suíte Minitest verde, lint ok, `rake db:setup` idempotente). Próximo passo: 2 (`TeamRepository#add`), conforme a regra de sequência.
 Detalhes em `sessions/0001-persist-postgres.md`. Atualizar este arquivo conforme o progresso.
 
 ## Progresso das sessões
 
 | # | Sessão | Fase | Status |
 | --- | --- | --- | --- |
-| 0001 | Persistir equipe em PostgreSQL (RNF-02) | Implementação | Em andamento (passos 0–1) |
+| 0001 | Persistir equipe em PostgreSQL (RNF-02) | Implementação | Em andamento (passos 0–1 verdes e validados) |
 | 0002 | Remoção semântica (`DELETE /team/:key`) | — | Backlog |
 | 0003 | Equipe por usuário (sessão/cookie) | — | Backlog |
 | 0004 | Página de detalhes (tipos, stats, evoluções) | — | Backlog |

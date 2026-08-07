@@ -17,6 +17,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [ ] `REQUIREMENTS.md` e `SESSIONS.md` **atualizados** no mesmo commit.
 - [ ] Commit realizado após cada `green` (TDD).
 - [ ] Commit realizado ao concluir e validar cada fase de **refinamento** (critérios de aceite e plano TDD fechados).
+- [ ] Um **passo** só é considerado concluído após a **validação** (suíte verde + critérios verificados) — o passo seguinte só é iniciado quando todas as fases do passo anterior estiverem devidamente concluídas e validadas.
 
 ## Stack
 
@@ -89,6 +90,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - **Commit obrigatório após cada fase de refinamento concluída e validada** (documento da sessão com critérios de aceite e plano TDD fechados e verificados).
 - `REQUIREMENTS.md` e `SESSIONS.md` sempre atualizados no mesmo escopo.
 - Suíte cobre regras de negócio (persistência da equipe, adicionar/remover, consulta à PokéAPI) e rotas do servidor.
+- **Sequenciamento:** um passo só é iniciado quando todas as fases do passo anterior estiverem concluídas e validadas (nada de começar novo passo sobre trabalho não validado).
 
 ## Limitações Conhecidas / Pontos de Refinamento
 
