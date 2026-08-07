@@ -4,9 +4,19 @@ source "https://rubygems.org"
 
 gem "dry-struct"
 gem "faraday"
+gem "pg"
 gem "pry"
 gem "pry-doc"
-gem "pg"
 gem "puma"
 gem "sinatra"
 gem "sinatra-contrib"
+
+group :test do
+  gem "minitest"
+  gem "rack-test"
+  gem "rake"
+end
+
+group :development do
+  gem "rubocop"
+end

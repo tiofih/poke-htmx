@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+# Garantir que o banco esteja de pé antes de rodar a suíte
+docker compose up -d db
+
+if [ "$(docker compose ps --filter status=running --services | grep -c '^web$')" -eq 1 ]; then
+  echo "w> Container 'web' de pé — executando testes nele."
+  docker compose exec -T web bundle exec rake test "$@"
+else
+  echo "w> Container 'web' parado — subindo one-off para os testes."
+  docker compose run --rm web bundle exec rake test "$@"
+fi
