@@ -73,17 +73,19 @@ Preencher após a implementação:
 
 ### Progresso da implementação
 
-- **Passo 0** (infra de testes) — green: `test/test_helper.rb` + `test/smoke_test.rb` (commit `456c4da`).
+- **Passo 0** (infra de testes) — `test/test_helper.rb` + `test/smoke_test.rb` (commit `456c4da`).
 - **Passo 1** (banco vazio: `TeamRepository#all` retorna `[]`) — green: `lib/team_repository.rb`, `db/schema.sql`, `rake db:setup`, `test/team_repository_test.rb` (commit `e666b57`). Tabela `team_pokemons` aplicada em `dev` e teste.
-- **Próximo:** passo 2 — `TeamRepository#add(pokemon)` persiste e `all` o retorna (só inicia com a validação abaixo concluída, regra de sequenciamento RNF-04).
+- **Passo 2** (`TeamRepository#add(pokemon)` persiste e `all` retorna `Pokemon`) — green: `INSERT` em `team_pokemons` e `all` mapeando para `Pokemon` (commit `1fb23e9`).
+- **Próximo:** passo 3 — `TeamRepository#remove(id)` remove do banco (`DELETE ... WHERE id = $1`) — só inicia com a validação do passo 2 concluída (regra de sequência RNF-04).
 
-### Validação dos passos 0–1 (concluída em 2026-08-07)
+### Validação dos passos 0–2 (atualizada em 2026-08-07)
 
-- [x] Suíte completa verde (Minitest): `2 runs, 2 assertions, 0 failures, 0 errors, 0 skips` via `./scripts/test`.
+- [x] Suíte completa verde (Minitest): via `./scripts/test`.
 - [x] Lint verde: `./scripts/lint` sem ofensas.
 - [x] `rake db:setup` idempotente — tabela `team_pokemons` presente em `dev` e teste.
+- [x] Passo 2 validado: `add` persiste (INSERT com parâmetros $1–$3) e `all` mapeia linhas para `Pokemon`; suite `3 runs, 0 errors`.
 - [x] Critérios de aceite do escopo entregue verificados: infra de testes (item 7) e `DATABASE_URL` + schema via `rake db:setup` (itens 4–6).
-- [x] Pendente (passos 2–5): POST persistindo, sobrevivência a restart, rotas no repositório, teste HTTP integrado — critérios 1–3 da seção 3.
+- [x] Pendente (passos 3–5): remoção por id, rotas no repositório, teste HTTP integrado — critérios 1–3 da seção 3.
 
 ### Validação do refinamento (concluída em 2026-08-07)
 
