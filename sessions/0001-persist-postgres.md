@@ -4,10 +4,10 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | Concluída (aguardando aprovação) |
+| Refinamento | Concluída (validada em 2026-08-07) |
 | Implementação | Pendente |
 | Validação | Pendente |
-| Sessão | Não iniciada |
+| Sessão | Iniciada (infra de testes pronta) |
 
 ---
 
@@ -22,7 +22,8 @@ Substituir a equipe em memória (`settings.team` em `server.rb`) por persistênc
   - `GET /team` **remove** um membro pelo índice `params[:index]`
 - Modelo `Pokemon` (`lib/pokemon.rb`, `Dry::Struct`): `name`, `sprite`, `number`.
 - `docker-compose.yml` já tem o serviço `db` (Postgres 16) e a gem `pg` no `Gemfile`.
-- **Sem infraestrutura de testes** (`RNF-04`): não há `minitest`, `rack-test` nem diretório `test/`.
+- **Infra de testes já criada nesta sprint**: gems `minitest`, `rack-test`, `rake`; `Rakefile` com `rake test`/`rake lint`; `.rubocop.yml`; `test/test_helper.rb` ainda a escrever.
+- **Scripts docker**: `scripts/run`, `scripts/test`, `scripts/lint` (usam o container `web` de pé ou one-off).
 - As rotas chamam `PokeApi.find` no meio do request (depende de rede) — precisa ser substituível no teste.
 
 ## 3. Critérios de aceite (referencia RF-01/RF-04 e RNF-02)
@@ -69,3 +70,11 @@ Preencher após a implementação:
 
 - Ao concluir: marcar `RNF-02` como `Done` no `REQUIREMENTS.md`.
 - `SESSIONS.md`: marcar 0001 como concluída, apontar **sessão 0002** (remoção semântica).
+
+### Validação do refinamento (concluída em 2026-08-07)
+
+- [x] Critérios de aceite da sessão fechados (seção 3).
+- [x] Decisões de design registradas (seção 4).
+- [x] Plano TDD com passos red/green definidos (seção 5).
+- [x] Infra de testes montada: `minitest`/`rack-test`/`rake` no `Gemfile`, `Rakefile` com `rake test`/`rake lint`, `scripts/test`, `scripts/lint` e docker `web` no ar (commit `e7b3f2a`).
+- [x] `REQUIREMENTS.md` e `SESSIONS.md` atualizados no mesmo escopo (regra RNF-04).

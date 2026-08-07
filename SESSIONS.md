@@ -33,13 +33,14 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 ## Próxima sessão
 
 **Sessão 0001** — Persistir equipe em PostgreSQL (RNF-02).
+Refinamento concluído e validado; próximos passos: implementação TDD (passos 0–5 em `sessions/0001-persist-postgres.md`).
 Detalhes em `sessions/0001-persist-postgres.md`. Atualizar este arquivo conforme o progresso.
 
 ## Progresso das sessões
 
 | # | Sessão | Fase | Status |
 | --- | --- | --- | --- |
-| 0001 | Persistir equipe em PostgreSQL (RNF-02) | Refinamento | Concluída (aguardando aprovação) |
+| 0001 | Persistir equipe em PostgreSQL (RNF-02) | Refinamento | Concluída (validada) |
 | 0002 | Remoção semântica (`DELETE /team/:key`) | — | Backlog |
 | 0003 | Equipe por usuário (sessão/cookie) | — | Backlog |
 | 0004 | Página de detalhes (tipos, stats, evoluções) | — | Backlog |
