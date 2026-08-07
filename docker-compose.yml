@@ -1,7 +1,25 @@
-web:
-  build: .
-  volumes:
-    - .:/var/www/pokedex/
-  ports:
-    - "3000:3000"
+services:
+  web:
+    build: .
+    volumes:
+      - .:/var/www/pokedex/
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgres://pokedex:pokedex@db:5432/pokedex"
 
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pokedex
+      POSTGRES_PASSWORD: pokedex
+      POSTGRES_DB: pokedex
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
