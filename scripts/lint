@@ -4,9 +4,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 if [ "$(docker compose ps --filter status=running --services | grep -c '^web$')" -eq 1 ]; then
-  echo "w> Containerizando 'web' de pé — executando lint nele."
+  echo "lint> Container 'web' ativo — rubocop nele."
   docker compose exec -T web bundle exec rubocop "$@"
 else
-  echo "w> Container 'web' parado — executando one-off para o lint."
+  echo "lint> Container 'web' inativo — one-off para rubocop."
   docker compose run --rm web bundle exec rubocop "$@"
 fi
