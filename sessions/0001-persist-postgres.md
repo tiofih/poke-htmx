@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída (validada em 2026-08-07) |
-| Implementação | Pendente |
+| Implementação | Em andamento (passos 0–1 verdes) |
 | Validação | Pendente |
 | Sessão | Iniciada (infra de testes pronta) |
 
@@ -70,6 +70,12 @@ Preencher após a implementação:
 
 - Ao concluir: marcar `RNF-02` como `Done` no `REQUIREMENTS.md`.
 - `SESSIONS.md`: marcar 0001 como concluída, apontar **sessão 0002** (remoção semântica).
+
+### Progresso da implementação
+
+- **Passo 0** (infra de testes) — green: `test/test_helper.rb` + `test/smoke_test.rb` (commit `456c4da`).
+- **Passo 1** (banco vazio: `TeamRepository#all` retorna `[]`) — green: `lib/team_repository.rb`, `db/schema.sql`, `rake db:setup`, `test/team_repository_test.rb` (commit `e666b57`). Tabela `team_pokemons` aplicada em `dev` e teste.
+- **Próximo:** passo 2 — `TeamRepository#add(pokemon)` persiste e `all` o retorna.
 
 ### Validação do refinamento (concluída em 2026-08-07)
 
