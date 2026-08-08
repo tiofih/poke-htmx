@@ -43,13 +43,18 @@
 - **Plano TDD:** passos 0–5 verdes (75 runs/319 asserts) — aguardando validação.
 
 ### B2. Efetividade de tipos
+- **Status:** em execução — sessão 0010 (RF-10), implementado aguardando validação.
 - **Objetivo:** precisão de dano por tipo (fraqueza x2, resistência x0.5, imune x0, STAB).
 - **Decisões:** fonte = tabela da PokéAPI (`damage_relations` de `GET /type/:name`),
   carregada com cache (como RF-01); lookup `(tipo_atacante, tipo_defensor) → fator`;
-  STAB = 1.5 quando o atacante tem o tipo do golpe. Sem rede nos testes (stub).
-- **Critérios:** `[ ]` fator correto p/ (fire → grass)=2, (fire→water)=0.5, (electric
-  → ground)=0, STAB quando senão; tabela completa para os 18 tipos; cache.
-- **Plano TDD [0]**: lookup pure; **[1]** fetcher+stub; **[2]** STAB; **[3]** cache.
+  STAB = 1.5 quando o atacante tem o tipo do golpe. `PokeApi.type_relations` carrega os
+  18 tipos (memoizado) e `TypeEffectiveness` é puro (domínio) — `from_relations`,
+  `factor`, `effectiveness` (multi-tipo), `stab` e `damage_multiplier`. Sem rede nos
+  testes (stub `PokeApiStub.with_type`).
+- **Critérios:** `[x]` fator correto p/ (fire → grass)=2, (fire→water)=0.5, (electric
+  → ground)=0, STAB quando senão; tabela completa para os 18 tipos; cache — sessão 0010,
+  aguardando validação.
+- **Plano TDD:** passos 0–7 verdes (93 runs/357 asserts).
 
 ### B3. Motor de auto-batalha (o game loop)
 - **Objetivo:** simular 6v6 automático usando os 6 slots; retorna log + vencedor.

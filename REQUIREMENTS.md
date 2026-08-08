@@ -149,6 +149,30 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Domínio puro (sem PG/rede); suíte e lint verdes; commit a cada green; RF-01..RF-08
       sem regressão; `REQUIREMENTS.md`/`SESSIONS.md` atualizados no mesmo escopo.
 
+### RF-10 — Efetividade de tipos (B2) — `Em implementação` (sessão 0010)
+- Precisão de dano por tipo para o futuro motor de auto-batalha (B3): fraqueza **×2**,
+  resistência **×0.5**, imune **×0**, neutro **×1**; **STAB** ×1.5 quando o atacante tem o
+  tipo do golpe; defensor com **dois tipos** multiplica os fatores de cada um.
+- Domínio puro (`TypeEffectiveness`) **sem rede**; a fonte é `PokeApi.type_relations`
+  (`GET /type/:name` → `damage_relations`), carregada com cache em memória (padrão RF-01).
+- Não muda schema, rotas nem `BattlePokemon`; nenhuma regressão (RF-01..RF-09).
+
+**Critérios de aceite:**
+- [ ] `TypeEffectiveness.from_relations(tabela)` monta o objeto a partir da estrutura
+      de `damage_relations` (atacante → `double`/`half`/`no`).
+- [ ] `factor(attack_type, defender_type)` → **2.0**/**0.5**/**0.0**/**1.0** (ex.: fire→grass=2,
+      fire→water=0.5, electric→ground=0, normal→ghost=0; relação inexistente → 1).
+- [ ] `effectiveness(attack_type, defender_types)` multiplica o fator de cada tipo do
+      defensor (ex.: `fire` contra `["water","fire"]` = 0.25); lista vazia → 1.0.
+- [ ] `stab(attack_types, move_type)` = 1.5 quando o atacante tem o tipo do golpe, senão 1.0.
+- [ ] `damage_multiplier(attacker_types:, move_type:, defender_types:)` =
+      `effectiveness × stab` (ex.: `(["fire"], "fire", ["water"])` = 0.75).
+- [ ] `PokeApi.extract_type_relations(json)` puro converte `damage_relations`.
+- [ ] `PokeApi.type_relations` carrega os **18 tipos** (`/type/:name`) com cache
+      (memoização) — 2ª chamada sem nova rede; `TypeEffectiveness.load` integra a fonte.
+- [ ] Domínio puro (sem rede no `TypeEffectiveness`); suíte e lint verdes; commit a cada
+      green; RF-01..RF-09 sem regressão; docs atualizadas no mesmo escopo.
+
 ### RF-07 — Montagem de times (base do auto-battler) — `Done` (sessão 0007)
 - Time por usuário limitado a **6 vagas** (`MAX_TEAM_SIZE = 6`), com **`slot` de
   posição (1..N)** persistido e **sem duplicados** (mesmo `number` da PokéAPI).
@@ -224,7 +248,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 7 | Montagem de times — cap 6 + slots + sem duplicados (RF-07, base do auto-battler) | Done (sessão 0007) |
 | 8 | Reordenação manual de slots (RF-08, A1) | Done (sessão 0008) |
 | 9 | Modelo de batalha (BattlePokemon, RF-09, B1) | Done (sessão 0009) |
-| 10 | Efetividade de tipos (B2) | Backlog |
+| 10 | Efetividade de tipos (B2) | Em implementação (sessão 0010) |
 | 11 | Motor de auto-batalha (B3) | Backlog |
 | 12 | UI: layout e estilos externos | Backlog |
 
@@ -239,7 +263,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - **Game loop (auto-battler):** combate automático por turnos usando os 6 slots do time
   como ordem de ação; stats (RF-06) e tipos como base de dano/efetividade; estado de
   HP/status persistido ou em memória a definir em refinamento próprio.
-  **B1 (modelo de batalha) em execução na sessão 0009; B2/B3 seguem em refinamento
-  próprio (ver draft-auto-battler.md).**
+  **B1 (modelo de batalha) e B2 (efetividade de tipos) em execução nas sessões
+  0009/0010; B3 segue em refinamento próprio (ver draft-auto-battler.md).**
 - **Layout/estilos externos:** extrair layout, navbar e estilos compartilhados
   (a antiga sessão 0007-UI volta ao backlog como 0009+).

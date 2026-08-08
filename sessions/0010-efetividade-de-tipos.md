@@ -4,7 +4,9 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | Em andamento |
+| Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-08 |
+| Implementação | Concluída — passos 0–7 verdes (93 runs/357 asserts, lint 0 offenses) |
+| Validação | Em andamento — aguardando feedback do usuário (fase executada pelo usuário) |
 
 ---
 
@@ -103,7 +105,7 @@ Nem rota, nem schema, nem rede em testes (stub).
 | 5 | `PokeApi.type_relations` carrega 18 tipos (fetch por tipo) e memoiza (2ª chamada sem novo fetch) — stubbed via `PokeApiStub.with_type` | `type_relations` com `@type_relations ||=` e lista de tipos |
 | 6 | `TypeEffectiveness.load` == `from_relations(PokeApi.type_relations)`: fator sobe da fonte (stubbed) até o `factor/effectiveness` | `TypeEffectiveness.load` |
 | 7 | suíte completa verde + lint 0 | checagem global |
-| 8 | `REQUIREMENTS.md` (RF-10, roadmap/B2), `SESSIONS.md` (0010), `draft-auto-battler.md` B2 marcado em execução | documento |
+| 8 | `REQUIREMENTS.md` (RF-10, roadmap/B2), `SESSIONS.md` (0010), `draft-auto-battler.md` B2 marcado em execução (aguardando validação) | documento |
 
 ## 6. Observações e próximo passo
 
