@@ -11,7 +11,10 @@ class TeamRepository
   end
 
   def all(user_id)
-    connection.exec("SELECT * FROM team_pokemons ORDER BY id").map do |row|
+    connection.exec_params(
+      "SELECT * FROM team_pokemons WHERE user_id = $1 ORDER BY id",
+      [user_id]
+    ).map do |row|
       Pokemon.new(id: row["id"], name: row["name"], sprite: row["sprite"], number: row["number"])
     end
   end

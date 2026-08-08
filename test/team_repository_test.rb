@@ -39,7 +39,32 @@ class TeamRepositoryTest < Minitest::Test
     assert_equal %w[bulbasaur], remaining.map(&:name)
   end
 
+  def test_all_returns_only_own_users_pokemon
+    pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
+    bulbasaur = Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1)
+    @repository.add("user-a", pikachu)
+    @repository.add("user-b", bulbasaur)
+
+    assert_equal %w[pikachu], @repository.all("user-a").map(&:name)
+    assert_equal %w[bulbasaur], @repository.all("user-b").map(&:name)
+  end
+
+  def test_add_persists_pokemon_with_user_id
+    pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
+    @repository.add("user-a", pikachu)
+
+    row = team_row("pikachu")
+    assert_equal "user-a", row["user_id"]
+  end
+
   private
+
+  def team_row(name)
+    connection = PG.connect(ENV.fetch("DATABASE_URL"))
+    connection.exec_params("SELECT * FROM team_pokemons WHERE name = $1", [name]).first
+  ensure
+    connection&.close
+  end
 
   def team_id(name, user_id)
     connection = PG.connect(ENV.fetch("DATABASE_URL"))
