@@ -85,7 +85,8 @@ Preencher após a implementação:
 - [x] Suíte completa verde (Minitest): via `./scripts/test`.
 - [x] Lint verde: `./scripts/lint` sem ofensas.
 - [x] `rake db:setup` idempotente — tabela `team_pokemons` presente em `dev` e teste (NOTICE suprimido com `client_min_messages=warning`).
-- [x] Passo 4 validado: `POST /team`/`GET /team` usam o repositório; testes HTTP (`test/server_test.rb`) com `PokeApi.find` stubado via `PokeApiStub` (sem rede); remoção por `id`; servidor real em pé (curl 200). Suite `6 runs, 0 errors`.
+- [x] Passo 4 validado: rotas `POST /team`/`GET /team` usam o repositório; testes HTTP (`test/server_test.rb`) com `PokeApi.find` stubado via `PokeApiStub` (sem rede); remoção por `id`; servidor real sobe com o guard `run!` (curl 200). Suite `6 runs, 0 errors`.
+- [x] **Fix do botão remover (retorno do navegador):** `hx-get` sem form não serializava o `<input hidden>` — membros agora são `<form hx-get="/team">` (commit `eef33c1`); `GET /team` sem `index` deixa de estourar 500. Teste de regressão cobre o `name="index" value=<id>`. Fluxo real validado: add (200, `index=68`) e remove (200, db 0).
 - [x] Critérios de aceite do escopo entregue verificados: infra de testes (item 7) e `DATABASE_URL` + schema via `rake db:setup` (itens 4–6).
 - [x] Pendente (passo 5): validação da suíte integrada completa — critérios 1–3 da seção 3 (POST persistindo, sobrevivência a restart).
 
