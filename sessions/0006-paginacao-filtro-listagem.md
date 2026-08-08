@@ -4,8 +4,8 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | Concluída (aguardando TDD) |
-| Implementação | Planejada (plano TDD abaixo) |
+| Refinamento | Concluída |
+| Implementação | Concluída (passos 0–6 green, suíte/lint verdes) — aguardando validação do usuário |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -85,6 +85,13 @@ server-side com cache) — mantendo o `<select>` (RF-01) e a interação 100% ht
 ## 6. Observações e próximo passo
 
 - Esta sessão resolve parcialmente a limitação RF-01 ("listagem massiva"): a UI páginas
-  o `<select>` e filtra por substring. A busca parcial da PokéAPI continua sendo uma
-  limitação da API (oauth via cache local).
+  o `<select>` e filtra por substring. A busca parcial server-side da PokéAPI continua sendo
+  uma limitação da API (oauth via cache local).
 - Próximo passo após validação: **sessão 0007** (UI: layout e estilos externo).
+
+### Validação da implementação (aguardando usuário)
+
+- [ ] Usuário validar a fase 2 (TDD).
+- [ ] Suíte completa verde (`./scripts/test`).
+- [ ] Lint verde (`./scripts/lint`).
+- [ ] Critérios da seção 3 verificados contra a implementação.

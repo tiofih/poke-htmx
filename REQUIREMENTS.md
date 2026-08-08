@@ -35,7 +35,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
-### RF-01 — Listar Pokémon — `Em refinamento` (sessão 0006)
+### RF-01 — Listar Pokémon — `Em implementação` (sessão 0006)
 - Exibir um `<select>` com os Pokémon da PokéAPI, **paginação (100 por página)**
   e **filtro por nome** (sessão 0006) — substituindo o `limit=100000` único.
 - O valor de cada opção é o nome do Pokémon; o `<select>` dispara `hx-get="/pokemon"`.
@@ -157,5 +157,5 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 3 | Equipe por usuário (sessão/cookie, RF-05) | Done (sessão 0003) |
 | 4 | Página de detalhes (tipos, stats, evoluções) | Done (sessões 0004+0005) |
 | 5 | Navegação pela sprite para o detalhe + Fechar/Voltar (RF-06) | Done (sessões 0004+0005) |
-| 6 | Paginação/filtro na listagem | Em refinamento (sessão 0006) |
+| 6 | Paginação/filtro na listagem | Em implementação (sessão 0006, aguardando validação) |
 | 7 | UI: layout e estilos externo | Backlog |
