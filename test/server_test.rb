@@ -428,6 +428,21 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/AbcSize
+  def test_index_renders_first_page_with_filter_input
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="pokemon-list"'
+    assert_equal 100, last_response.body.scan("<option value=\"pokemon").size
+    assert_includes last_response.body, 'name="q"'
+    assert_includes last_response.body, "Página 1 de 3"
+    assert_includes last_response.body, 'id="pokemons"'
+  end
+  # rubocop:enable Metrics/AbcSize
+
   private
 
   def distinct_user_ids

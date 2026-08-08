@@ -33,7 +33,9 @@ class Server < Sinatra::Base
   end
 
   get "/" do
-    @pokemons = PokeApi.all
+    @offset = 0
+    @q = ""
+    @page = PokeApi.paginate(offset: @offset, query: @q)
     erb :index
   end
 

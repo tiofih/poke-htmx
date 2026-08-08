@@ -3,17 +3,24 @@
     <meta charset="UTF-8">
     <title>Pokemon Team</title>
     <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sakura.css/css/sakura.css" type="text/css">
   </head>
 
   <body>
     <label for="pokemons">Choose a pocket monster:</label>
 
-    <select name="name" id="pokemons" hx-target="#pokemon" hx-trigger="change" hx-get="/pokemon">
-      <option value="..." selected disabled>...</option>
-      <% @pokemons.map do |pokemon| %>
-        <option value="<%= pokemon["name"] %>"><%= pokemon["name"] %></option>
-      <% end %>
-    </select>
+    <input
+      type="text"
+      name="q"
+      placeholder="Filter by name"
+      hx-target="#pokemon-list"
+      hx-trigger="keyup changed delay:300ms"
+      hx-get="/pokemons"
+      hx-swap="innerHTML">
+
+    <div id="pokemon-list">
+      <%= erb :pokemon_list %>
+    </div>
 
     <div id="pokemon"> </div>
     <div id="team" hx-get="/team" hx-trigger="load"> </div>
