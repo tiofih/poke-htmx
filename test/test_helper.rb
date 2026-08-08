@@ -8,6 +8,7 @@ require "rack/test"
 require "pg"
 
 require_relative "../lib/pokemon"
+require_relative "../lib/poke_api"
 require_relative "../lib/team_repository"
 
 module TestDatabase
@@ -49,6 +50,19 @@ module PokeApiStub
       PokeApi.define_singleton_method(:detail, original)
     else
       PokeApi.singleton_class.send(:remove_method, :detail)
+    end
+  end
+
+  def self.with_all_names(names)
+    existed = PokeApi.respond_to?(:fetch_all_names)
+    original = existed ? PokeApi.method(:fetch_all_names) : nil
+    PokeApi.define_singleton_method(:fetch_all_names) { names }
+    yield
+  ensure
+    if existed
+      PokeApi.define_singleton_method(:fetch_all_names, original)
+    else
+      PokeApi.singleton_class.send(:remove_method, :fetch_all_names)
     end
   end
 end

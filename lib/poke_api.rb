@@ -17,6 +17,16 @@ class PokeApi
     JSON.parse(response)["results"]
   end
 
+  def self.fetch_all_names
+    @all_names ||= all.map { |pokemon| pokemon["name"] }
+  end
+
+  def self.paginate(offset: 0, limit: 100, q: nil)
+    names = fetch_all_names
+    names = names.select { |name| name.downcase.include?(q.downcase) } if q && !q.empty?
+    { names: names[offset, limit].to_a, total: names.size }
+  end
+
   def self.find(name)
     response = Faraday.get("https://pokeapi.co/api/v2/pokemon/#{name}").body
     resp = JSON.parse(response)
