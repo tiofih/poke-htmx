@@ -35,8 +35,8 @@ class Server < Sinatra::Base
     erb :team
   end
 
-  get "/team" do
-    settings.team.remove(params[:index]) if params[:index]
+  delete "/team" do
+    settings.team.remove(params[:id]) if params[:id]
     @team = settings.team.all
     erb :team
   end

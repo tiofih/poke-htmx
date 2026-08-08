@@ -1,13 +1,13 @@
 <% @team.each do |poke| %>
   <form
       id='team-pokemon-<%= poke.id %>'
-      hx-get="/team"
+      hx-delete="/team"
       hx-target="#team"
       hx-swap="innerHTML"
       hx-params="*">
     <input type="image" src="<%= poke.sprite %>"><br>
     <%= poke.name %><br>
-    <input type="hidden" name="index" value="<%= poke.id %>">
+    <input type="hidden" name="id" value="<%= poke.id %>">
     <button type="submit" class="btn">Remove from Team</button>
   </form>
 <% end %>

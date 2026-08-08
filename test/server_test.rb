@@ -31,23 +31,24 @@ class ServerTest < Minitest::Test
     team = @repository.all
     assert_equal 1, team.size
     assert_equal "pikachu", team.first.name
-    assert_includes last_response.body, %(name="index" value="#{team.first.id}")
+    assert_includes last_response.body, %(name="id" value="#{team.first.id}")
+    assert_includes last_response.body, "hx-delete=\"/team\""
   end
   # rubocop:enable Metrics/AbcSize
 
-  def test_get_team_removes_pokemon_by_id
+  def test_delete_team_removes_pokemon_by_id
     @repository.add(pikachu_pokemon)
     id = @repository.all.first.id
 
-    get "/team", index: id
+    delete "/team", id: id
 
     assert last_response.ok?
     assert_empty @repository.all
     refute_includes last_response.body, "pikachu"
   end
 
-  def test_get_team_without_index_does_not_break
-    get "/team"
+  def test_delete_team_without_id_does_not_break
+    delete "/team"
 
     assert last_response.ok?
   end
