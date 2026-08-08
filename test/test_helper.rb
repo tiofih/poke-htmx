@@ -66,6 +66,7 @@ module PokeApiStub
     end
   end
 
+  # rubocop:disable Metrics/MethodLength
   def self.with_type(table)
     existed = PokeApi.respond_to?(:fetch_type_json)
     original = existed ? PokeApi.method(:fetch_type_json) : nil
@@ -80,4 +81,5 @@ module PokeApiStub
     end
     PokeApi.instance_variable_set(:@type_relations, nil)
   end
+  # rubocop:enable Metrics/MethodLength
 end

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class TypeEffectiveness
+  FACTORS = { "double" => 2.0, "half" => 0.5, "no" => 0.0 }.freeze
+
   def self.from_relations(relations)
     new(relations)
   end
@@ -17,15 +19,10 @@ class TypeEffectiveness
     relation = @relations[attack_type]
     return 1.0 unless relation
 
-    if relation["double"].include?(defender_type)
-      2.0
-    elsif relation["half"].include?(defender_type)
-      0.5
-    elsif relation["no"].include?(defender_type)
-      0.0
-    else
-      1.0
+    FACTORS.each do |kind, multiplier|
+      return multiplier if relation[kind].include?(defender_type)
     end
+    1.0
   end
 
   def effectiveness(attack_type, defender_types)

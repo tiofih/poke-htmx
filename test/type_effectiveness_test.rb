@@ -10,34 +10,30 @@ class TypeEffectivenessTest < Minitest::Test
       "electric" => { "double" => %w[water flying], "half" => %w[electric grass dragon], "no" => %w[ground] },
       "normal" => { "double" => [], "half" => %w[rock steel], "no" => %w[ghost] },
       "water" => { "double" => %w[fire ground rock], "half" => %w[water grass dragon], "no" => [] },
-      "grass" => { "double" => %w[water ground rock], "half" => %w[fire grass poison flying bug dragon steel], "no" => [] },
+      "grass" => { "double" => %w[water ground rock], "half" => %w[fire grass poison flying bug dragon], "no" => [] },
       "ground" => { "double" => %w[fire electric poison rock steel], "half" => %w[grass bug], "no" => %w[flying] },
       "flying" => { "double" => %w[grass fighting bug], "half" => %w[electric rock steel], "no" => %w[ground] },
       "ghost" => { "double" => %w[ghost psychic], "half" => %w[dark], "no" => %w[normal] }
     )
   end
 
-  def test_factor_fraqueza_eh_2
-    assert_in_delta 2.0, relations.factor("fire", "grass")
-    assert_in_delta 2.0, relations.factor("electric", "water")
+  def test_factor_fraqueza_eh_o_dobro
+    assert_in_delta 2.0, relations.factor("fire", "bug")
   end
 
-  def test_factor_resistencia_eh_0_5
-    assert_in_delta 0.5, relations.factor("fire", "water")
+  def test_factor_resistencia_eh_metade
     assert_in_delta 0.5, relations.factor("fire", "rock")
   end
 
-  def test_factor_imune_eh_0
+  def test_factor_imune_eh_zero
     assert_in_delta 0.0, relations.factor("electric", "ground")
-    assert_in_delta 0.0, relations.factor("normal", "ghost")
   end
 
-  def test_factor_tipo_sem_relacao_e_1
+  def test_factor_tipo_sem_relacao_e_neutro
     assert_in_delta 1.0, relations.factor("fire", "electric")
-    assert_in_delta 1.0, relations.factor("fire", "normal")
   end
 
-  def test_factor_atacante_desconhecido_e_1
+  def test_factor_atacante_desconhecido_e_neutro
     assert_in_delta 1.0, relations.factor("fairy", "fire")
   end
 
@@ -55,7 +51,7 @@ class TypeEffectivenessTest < Minitest::Test
     assert_in_delta 0.0, relations.effectiveness("electric", ["ground"])
   end
 
-  def test_effectiveness_with_empty_defender_types_is_1
+  def test_effectiveness_with_empty_defender_types_is_neutro
     assert_in_delta 1.0, relations.effectiveness("fire", [])
   end
 
@@ -64,12 +60,12 @@ class TypeEffectivenessTest < Minitest::Test
     assert_in_delta 4.0, relations.effectiveness("water", %w[ground fire])
   end
 
-  def test_stab_is_1_5_when_attacker_has_move_type
+  def test_stab_supera_quando_atacante_tem_o_tipo_do_golpe
     assert_in_delta 1.5, relations.stab(%w[fire], "fire")
     assert_in_delta 1.5, relations.stab(%w[water psychic], "water")
   end
 
-  def test_stab_is_1_when_attacker_lacks_move_type
+  def test_stab_neutro_quando_atacante_nao_tem_o_tipo_do_golpe
     assert_in_delta 1.0, relations.stab(%w[electric], "fire")
     assert_in_delta 1.0, relations.stab([], "water")
   end

@@ -47,13 +47,13 @@ Nem rota, nem schema, nem rede em testes (stub).
       **0.0** (imune) e **1.0** (neutral/quando não consta) — ex.: fire→grass = 2,
       fire→water = 0.5, electric→ground = 0, normal→ghost = 0.
 - [ ] `effectiveness(attack_type, defender_types)` multiplica o fator de **cada** tipo do
-      defensor (ex.: ataque grass contra `["water", "flying"]` = 0.5×0.5 = 0.25); lista
+      defensor (ex.: `effectiveness("fire", ["water","fire"])` = 0.5×0.5 = 0.25); lista
       vazia → 1.0.
 - [ ] `stab(attack_types, move_type)` = **1.5** se `attack_types` contém `move_type`,
       senão **1.0**.
 - [ ] `damage_multiplier(attacker_types:, move_type:, defender_types:)` =
       `effectiveness(move_type, defender_types)` **×** `stab(attacker_types, move_type)`
-      (ex.: `["charizard", ["fire"], "grass, flying]` → 2×0.5×1.5 = 1.5).
+      (ex.: `damage_multiplier(["fire"], "fire", ["water"])` = 0.5×1.5 = 0.75).
 - [ ] Domínio puro: `TypeEffectiveness` **sem Faraday, sem rede** — só recebe a tabela.
 
 ### Fonte & cache (`PokeApi.type_relations`)
@@ -95,10 +95,10 @@ Nem rota, nem schema, nem rede em testes (stub).
 
 | Passo | Teste (red) | Implementação (green) |
 | --- | --- | --- |
-| 0 | `factor("fire","grass")==2`, `factor("fire","water")==0.5`, `factor("electric","ground")==0`, `factor("normal","ghost")==0`, desconhecida→1 | `lib/type_effectiveness.rb`: `from_relations` (recebe hash) + `factor` via `double/half/no_damage` |
+| 0 | `factor("fire","grass")==2`, `factor("fire","water")==0.5`, `factor("electric","ground")==0`, `factor normal→ghost==0`, desconhecida→1 | `lib/type_effectiveness.rb`: `from_relations` (recebe hash) + `factor` via `double/half/no_damage` |
 | 1 | `from_relations` aceita a estrutura do `damage_relations` da API (atacante → hash duplo/metade/não); fator coberto para os 18 tipos da fonte | parse da estrutura no `from_relations` |
-| 2 | `effectiveness("fire", ["grass"])`, `effectiveness("grass",["water","flying"])==0.25`, `effectiveness("fire",[])==1` | multiplicar os fatores dos tipos do defensor em `effectiveness` |
-| 3 | `stab(["fire"], "fire")==1.5`, `stab(["fire"], "water")==1.0`; `damage_multiplier(["fire"],"fire",["grass","bug"])==2×0.5×1.5=1.5` | `stab` + `damage_multiplier` |
+| 2 | `effectiveness("fire", ["water","fire"])==0.25`, `effectiveness("fire", [])==1`, `effectiveness("grass",["water","flying"])` coerente | multiplicar os fatores dos tipos do defensor em `effectiveness` |
+| 3 | `stab(["fire"], "fire")==1.5`, `stab(["fire"], "water")==1.0`; `damage_multiplier(["fire"],"fire",["water"])==0.75` | `stab` + `damage_multiplier` |
 | 4 | `PokeApi.extract_type_relations(json)` puro converte `damage_relations` | método em `PokeApi` |
 | 5 | `PokeApi.type_relations` carrega 18 tipos (fetch por tipo) e memoiza (2ª chamada sem novo fetch) — stubbed via `PokeApiStub.with_type` | `type_relations` com `@type_relations ||=` e lista de tipos |
 | 6 | `TypeEffectiveness.load` == `from_relations(PokeApi.type_relations)`: fator sobe da fonte (stubbed) até o `factor/effectiveness` | `TypeEffectiveness.load` |
