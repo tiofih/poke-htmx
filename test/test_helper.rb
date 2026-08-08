@@ -14,6 +14,7 @@ module TestDatabase
   def self.setup!
     schema = File.read(File.expand_path("../db/schema.sql", __dir__))
     connection = PG.connect(ENV.fetch("DATABASE_URL"))
+    connection.exec("SET client_min_messages TO warning")
     connection.exec(schema)
   ensure
     connection&.close
