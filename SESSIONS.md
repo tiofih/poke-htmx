@@ -40,8 +40,8 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0007** — UI: layout e estilos externo.
-Sessão 0006 validada pelo usuário em 2026-08-08 (RF-01 Done — paginação/filtro na listagem).
+**Sessão 0007** — Montagem de times — cap 6 + slots + sem duplicados (RF-07,
+base do auto-battler). Em refinamento.
 
 ## Progresso das sessões
 
@@ -53,7 +53,7 @@ Sessão 0006 validada pelo usuário em 2026-08-08 (RF-01 Done — paginação/fi
 | 0004 | Página de detalhes (tipos, stats, evoluções) | Concluída | Done (passos 0–4, validado em 2026-08-08) |
 | 0005 | Navegação pela sprite + Fechar/Voltar (RF-06) | Concluída | Done (passos 0–3, validado em 2026-08-08) |
 | 0006 | Paginação/filtro na listagem | Concluída | Done (passos 0–6, validado em 2026-08-08) |
-| 0007 | UI: layout e estilos externo | — | Backlog |
+| 0007 | Montagem de times — cap 6 + slots + sem duplicados (RF-07) | Refinamento | Em refinamento (decisões fechadas em 2026-08-08) |
 
 ## Estrutura do arquivo de sessão
 
