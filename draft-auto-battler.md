@@ -1,10 +1,4 @@
 # Draft — Fases do auto-battler (detalhamento)
-
-> **Natureza deste arquivo:** rascunho de ideias detalhadas, FORA do fluxo de sessão
-> (RNF-04). Nada está refinado nem agendado. Só virará sessão (refinamento → TDD →
-> validação) **após a sessão 0007 ser implementada e validada** e após batermos o
-> martelo do que entra, do que sai e da ordem.
-
 ---
 
 ## Fase A — Esquadrão (montagem do time)
