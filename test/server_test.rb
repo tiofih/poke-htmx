@@ -122,6 +122,39 @@ class ServerTest < Minitest::Test
     assert_empty @repository.all("user-b")
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_post_team_when_full_returns_warning_and_keeps_six
+    six = (1..6).map do |n|
+      Pokemon.new(name: "pokemon#{n}", sprite: "https://example.com/#{n}.png", number: n)
+    end
+    six.each { |poke| @repository.add("user-a", poke) }
+    seventh = Pokemon.new(name: "meowth", sprite: "https://example.com/meowth.png", number: 52)
+
+    PokeApiStub.with_find(seventh) do
+      post "/team", { pokeName: "meowth" }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Time cheio"
+    assert_equal 6, @repository.all("user-a").size
+    refute_includes @repository.all("user-a").map(&:name), "meowth"
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_post_team_with_duplicate_returns_warning_and_does_not_insert
+    @repository.add("user-a", pikachu_pokemon)
+
+    PokeApiStub.with_find(pikachu_pokemon) do
+      post "/team", { pokeName: "pikachu" }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "pikachu já está no time."
+    assert_equal 1, @repository.all("user-a").size
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
   def test_get_team_returns_own_session_team
     @repository.add("user-a", pikachu_pokemon)
 

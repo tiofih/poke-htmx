@@ -1,3 +1,6 @@
+<% if @notice %>
+  <p class="notice"><%= @notice %></p>
+<% end %>
 <% @team.each do |poke| %>
   <form
       id='team-pokemon-<%= poke.id %>'

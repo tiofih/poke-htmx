@@ -67,7 +67,11 @@ class Server < Sinatra::Base
 
   post "/team" do
     pokemon = PokeApi.find(params[:pokeName])
-    settings.team.add(current_user, pokemon)
+    begin
+      settings.team.add(current_user, pokemon)
+    rescue TeamRepository::TeamFullError, TeamRepository::DuplicateError => e
+      @notice = e.message
+    end
     @team = settings.team.all(current_user)
     erb :team
   end
