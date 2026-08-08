@@ -39,10 +39,11 @@ Tudo roda **via `./scripts/*`** (usa o container `web` / sobe o `db`) — **não
 
 | Comando | O que faz |
 | --- | --- |
-| `./scripts/test` | Suíte Minitest completa sem rede. Filtro: `./scripts/test -n /regex/` |
+| `./scripts/test` | Suíte Minitest completa sem rede. Filtro por arquivo: `./scripts/test test/server_test.rb` (aceita vários). Por nome (regex): `./scripts/test -n /regex/` (ou `--name=`). |
+| `./scripts/rake` | Rake genérico no container: sem args roda `test` (suíte total); com args passa adiante (`db:setup`, `lint`, `test TEST=...`). |
 | `./scripts/lint` | RuboCop (mesmo fluxo docker). Objetivo: 0 offenses. |
 | `./scripts/run` | `docker compose up --build` — sobe o app (porta 3000) para validação manual. |
-| `rake db:setup` (no container) | Aplica `db/schema.sql` + `db/migrations/*.sql` em ordem (idempotente). |
+| `rake db:setup` | Aplica `db/schema.sql` + `db/migrations/*.sql` em ordem (idempotente) — via `./scripts/rake db:setup`. |
 
 ## Mapa do código
 

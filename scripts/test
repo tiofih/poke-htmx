@@ -6,10 +6,45 @@ cd "$(dirname "$0")/.."
 # Garantir que o banco esteja de pé antes de rodar a suíte
 docker compose up -d db
 
+TEST_FILES=()
+NAME_FILTER=""
+EXTRA_ARGS=()
+NEXT_IS_NAME=false
+
+for arg in "$@"; do
+  if [ "$NEXT_IS_NAME" = true ]; then
+    NAME_FILTER="$arg"
+    NEXT_IS_NAME=false
+  elif [ "$arg" = "-n" ] || [ "$arg" = "--name" ]; then
+    NEXT_IS_NAME=true
+  elif [[ "$arg" == -n=* ]]; then
+    NAME_FILTER="${arg#-n=}"
+  elif [[ "$arg" == --name=* ]]; then
+    NAME_FILTER="${arg#--name=}"
+  elif [ -f "$arg" ]; then
+    TEST_FILES+=("$arg")
+  else
+    EXTRA_ARGS+=("$arg")
+  fi
+done
+
+if [ "$NEXT_IS_NAME" = true ]; then
+  echo "test> -n/--name requer um valor (ex.: -n /isolated/)" >&2
+  exit 2
+fi
+
+if [ "${#TEST_FILES[@]}" -gt 0 ]; then
+  EXTRA_ARGS+=(TEST="$(IFS=,; echo "${TEST_FILES[*]}")")
+fi
+
+if [ -n "$NAME_FILTER" ]; then
+  EXTRA_ARGS+=(TESTOPTS="--name=$NAME_FILTER")
+fi
+
 if [ "$(docker compose ps --filter status=running --services | grep -c '^web$')" -eq 1 ]; then
   echo "test> Container 'web' ativo — rake test nele."
-  docker compose exec -T web bundle exec rake test "$@"
+  docker compose exec -T web bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
 else
   echo "test> Container 'web' inativo — one-off para rake test."
-  docker compose run --rm web bundle exec rake test "$@"
+  docker compose run --rm web bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
 fi
