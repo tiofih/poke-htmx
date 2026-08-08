@@ -40,9 +40,9 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0009** — a definir: game loop do auto-battler (B1 modelo de batalha, domínio
-puro) e/ou UI/layout (A2). RF-08 (reordenação de slots) está `Done`. Aguardando
-decisão do usuário.
+**Sessão 0009** — modelo de batalha (RF-09, B1): `BattlePokemon` puro implementado
+(passos 0–5 verdes) e **aguardando validação do usuário**. Próxima após a 0009
+validada: **B2 — efetividade de tipos** (ou decidir novo escopo em refinamento).
 
 ## Progresso das sessões
 
@@ -56,6 +56,7 @@ decisão do usuário.
 | 0006 | Paginação/filtro na listagem | Concluída | Done (passos 0–6, validado em 2026-08-08) |
 | 0007 | Montagem de times — cap 6 + slots + sem duplicados (RF-07) | Concluída | Done (passos 0–9, validado em 2026-08-08) |
 | 0008 | Reordenação manual de slots (RF-08) | Concluída | Done (passos 0–8, validado em 2026-08-08) |
+| 0009 | Modelo de batalha (RF-09, B1) — BattlePokemon puro | Implementação | Concluída — passos 0–5 verdes (75 runs/319 asserts, lint 0) — **aguardando validação do usuário** |
 
 ## Estrutura do arquivo de sessão
 

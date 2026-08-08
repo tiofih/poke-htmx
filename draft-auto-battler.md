@@ -31,14 +31,16 @@
 ## Fase B — Núcleo do game loop (domínio, SEM rede)
 
 ### B1. Modelo de batalha
+- **Status:** em execução — sessão 0009 (RF-09), implementado aguardando validação.
 - **Objetivo:** transformar `Pokemon` em unidade de combate (covarde = do board).
 - **Decisões:** `BattlePokemon` pura (Dry::Struct ou dado simples): `hp_max` derivado do
   base stat HP, `hp_current`, `types`, `stats`, `energy`... estado por rodada; métodos
-  `take_damage`, `alive?`, `fainted?`.
-- **Critérios:** `[ ]` conversão de `Pokemon` → `BattlePokemon` (hp_max calculado);
-  `[ ]` `take_damage` reduz HP sem ir negativo; `[ ]` `alive?`/`fainted?` coerentes;
-  `[ ]` 100% de domínio puro (sem PG, sem rede).
-- **Plano TDD:** testes de unidade puros.
+  `take_damage`, `alive?`, `fainted?`. (em 0009: `hp_max` = HP bruto, `take_damage`
+  funcional/imutável; `energy` ficou anotado para jogadas futuras — fora do escopo 0009).
+- **Critérios:** `[x]` conversão de `Pokemon` → `BattlePokemon` (`hp_max` calculado) — sessão 0009;
+  `[x]` `take_damage` reduz HP sem ir negativo; `[x]` `alive?`/`fainted?`
+  coerentes; `[x]` 100% de domínio puro (sem PG, sem rede).
+- **Plano TDD:** passos 0–5 verdes (75 runs/319 asserts) — aguardando validação.
 
 ### B2. Efetividade de tipos
 - **Objetivo:** precisão de dano por tipo (fraqueza x2, resistência x0.5, imune x0, STAB).

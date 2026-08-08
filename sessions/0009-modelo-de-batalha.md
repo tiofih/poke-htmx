@@ -4,9 +4,9 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | Em andamento — decisões com o usuário em 2026-08-08 |
-| Implementação | Não iniciada |
-| Validação | Não iniciada |
+| Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-08 |
+| Implementação | Concluída — passos 0–5 verdes (75 runs/319 asserts, lint 0 offenses) |
+| Validação | Pendente — executada pelo usuário |
 
 ---
 
@@ -36,32 +36,32 @@ Serve de fundação para B2 (efetividade de tipos) e B3 (motor de auto-batalha).
 
 ### Conversão (`BattlePokemon.from`)
 
-- [ ] `BattlePokemon.from(pokemon)` converte um `Pokemon` → `BattlePokemon` com
+- [x] `BattlePokemon.from(pokemon)` converte um `Pokemon` → `BattlePokemon` com
       `number`, `name`, `types` e `stats` preservados.
-- [ ] `hp_max` = **base stat HP bruto** (ex.: Pikachu HP 45 → `hp_max 45`);
+- [x] `hp_max` = **base stat HP bruto** (ex.: Pikachu HP 45 → `hp_max 45`);
       `hp_current` inicial = `hp_max`.
-- [ ] `Pokemon` **sem** stat HP (sem `stats` ou stat ausente) → `hp_max 1`
+- [x] `Pokemon` **sem** stat HP (sem `stats` ou stat ausente) → `hp_max 1`
       (mínimo para ficar `alive?`).
-- [ ] É um Dry::Struct imutável (atributos `hp_max`, `hp_current`, `types`,
+- [x] É um Dry::Struct imutável (atributos `hp_max`, `hp_current`, `types`,
       `stats`, `number`, `name`).
 
 ### Combate (`take_damage`, `alive?`, `fainted?`)
 
-- [ ] `take_damage(dano)` **funcional/immutável**: retorna **nova** instância com
+- [x] `take_damage(dano)` **funcional/imutável**: retorna **nova** instância com
       `hp_current` reduzido; a original não muda.
-- [ ] Dano **não leva a HP negativo**: `ahp < dano` → `hp_current = 0` (clamp).
-- [ ] `dano <= 0` (0 ou negativo) → retorna instância idêntica (HP intacto, liberado).
-- [ ] `alive?` é `hp_current > 0`; `fainted?` é `hp_current == 0`; coerentes entre si
+- [x] Dano **não leva a HP negativo**: `dano >= hp` → `hp_current = 0` (clamp).
+- [x] `dano <= 0` (0 ou negativo) → retorna instância idêntica (HP intacto, sem efeito).
+- [x] `alive?` é `hp_current > 0`; `fainted?` é `hp_current == 0`; coerentes entre si
       e após `take_damage` até zerar.
 
 ### Garantias (RNF)
 
-- [ ] **Domínio puro:** sem PG (nenhuma conexão/schema), sem rede, sem PokeApi;
+- [x] **Domínio puro:** sem PG (nenhuma conexão/schema), sem rede, sem PokeApi;
       apenas Dry::Struct e testes de unidade.
-- [ ] Testes sem rede, suíte completa verde (`./scripts/test` + `test/...)`) e lint
-      verde; commit a cada green (RNF-04).
-- [ ] Nenhum comportamento existente muda (Sem regressão RF-01..RF-08).
-- [ ] `REQUIREMENTS.md` (novo **RF-09 — Modelo de batalha (B1)**) e `SESSIONS.md`
+- [x] Testes sem rede, suíte completa verde (`./scripts/test`) e lint verde;
+      commit a cada green (RNF-04).
+- [x] Nenhum comportamento existente muda (sem regressão RF-01..RF-08).
+- [x] `REQUIREMENTS.md` (novo **RF-09 — Modelo de batalha (B1)**) e `SESSIONS.md`
       (0009) atualizados no mesmo escopo.
 
 ## 4. Decisões de refinamento
@@ -102,3 +102,10 @@ Serve de fundação para B2 (efetividade de tipos) e B3 (motor de auto-batalha).
 - B2 (efetividade de tipos) e B3 (motor) consomem este `BattlePokemon` no futuro
   (ordem sugerida B1 → B2 → B3 → B4 → C1).
 - Próximo passo sugerido após validação: **B2 — efetividade de tipos**.
+
+## 7. Validação (pendente)
+
+- Suíte completa: **75 runs / 319 assertions, 0 failures/0 errors**; lint **0 offenses**.
+- Critérios de aceite **todos marcados `[x]`** (conversão `from`, `hp_max` derivado,
+  `take_damage` funcional com clamp, `alive?`/`fainted?` coerentes, domínio puro).
+- **Aguardando validação do usuário** (fase 3 executada pelo usuário).

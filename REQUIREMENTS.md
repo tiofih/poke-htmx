@@ -129,7 +129,25 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] `team.erb` ganha botões ▲/▼ (forms `hx-post="/team/:id/move"` com hidden
       `new_slot`, alvo `#team`), irmãos do form de remoção; ▲ slot 1 / ▼ último = no-op.
 - [x] Sem regressão: RF-01..RF-07 seguem verdes; teste sem rede; commit a cada green.
+- [x] Sem regressão: RF-01..RF-07 seguem verdes; teste sem rede; commit a cada green.
 - [x] `REQUIREMENTS.md`/`SESSIONS.md` atualizados no mesmo escopo.
+
+### RF-09 — Modelo de batalha (B1) — `Implementado — aguardando validação` (sessão 0009)
+- Transformar `Pokemon` (RF-06) em unidade de combate pura: `BattlePokemon`
+  (Dry::Struct) com `hp_max` derivado do **base stat HP** e `hp_current`.
+- **Domínio puro** (sem PG, sem rede): métodos `take_damage` (funcional/imutável),
+  `alive?` e `fainted?` — fundação do motor de auto-batalha (B2/B3).
+- Não muda schema, rotas ou `Pokemon`; nenhuma regressão (RF-01..RF-08).
+
+**Critérios de aceite:**
+- [x] `BattlePokemon.from(pokemon)` preserva `number`, `name`, `types`, `stats`;
+      `hp_max` = HP bruto (Pikachu 45 → 45) e `hp_current` inicial = `hp_max`.
+- [x] `Pokemon` sem stat HP → `hp_max = 1` (mínimo para `alive?`).
+- [x] `take_damage(dano)` **funcional**: retorna nova instância; original intacta;
+      clamp em 0 (nunca negativo); dano `<= 0` → sem efeito.
+- [x] `alive?` (`hp > 0`), `fainted?` (`hp == 0`) — coerentes após dano até zerar.
+- [x] Domínio puro (sem PG/rede); suíte e lint verdes; commit a cada green; RF-01..RF-08
+      sem regressão; `REQUIREMENTS.md`/`SESSIONS.md` atualizados no mesmo escopo.
 
 ### RF-07 — Montagem de times (base do auto-battler) — `Done` (sessão 0007)
 - Time por usuário limitado a **6 vagas** (`MAX_TEAM_SIZE = 6`), com **`slot` de
@@ -205,17 +223,23 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 6 | Paginação/filtro na listagem | Done (sessão 0006) |
 | 7 | Montagem de times — cap 6 + slots + sem duplicados (RF-07, base do auto-battler) | Done (sessão 0007) |
 | 8 | Reordenação manual de slots (RF-08, A1) | Done (sessão 0008) |
-| 9 | UI: layout e estilos externo | Backlog |
+| 9 | Modelo de batalha (BattlePokemon, RF-09, B1) | Aguardando validação (sessão 0009) |
+| 10 | Efetividade de tipos (B2) | Backlog |
+| 11 | Motor de auto-batalha (B3) | Backlog |
+| 12 | UI: layout e estilos externos | Backlog |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
 > Regra RNF-04: escopos grandes são anotados aqui e só viram sessão **após** a sessão
 > corrente ser concluída e validada. A 0007 (montagem de times) é `Done` (2026-08-08)
 > — os itens abaixo passam a poder virar sessões. **A1 (reordenação de slots) virou
-> RF-08/sessão 0008.** Refinamento de UI/layout volta ao roadmap como 0009+.
+> RF-08/sessão 0008; B1 (modelo de batalha) virou RF-09/sessão 0009.**
+> Refinamento de UI/layout volta ao roadmap como 0009+.
 
 - **Game loop (auto-battler):** combate automático por turnos usando os 6 slots do time
   como ordem de ação; stats (RF-06) e tipos como base de dano/efetividade; estado de
   HP/status persistido ou em memória a definir em refinamento próprio.
+  **B1 (modelo de batalha) em execução na sessão 0009; B2/B3 seguem em refinamento
+  próprio (ver draft-auto-battler.md).**
 - **Layout/estilos externos:** extrair layout, navbar e estilos compartilhados
   (a antiga sessão 0007-UI volta ao backlog como 0009+).
