@@ -198,6 +198,45 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
+  def charizard_evolution_pokemons
+    {
+      charmander: Pokemon.new(name: "charmander", sprite: "https://example.com/charmander.png", number: 4),
+      charmeleon: Pokemon.new(name: "charmeleon", sprite: "https://example.com/charmeleon.png", number: 5),
+      charizard: Pokemon.new(name: "charizard", sprite: "https://example.com/charizard.png", number: 6)
+    }
+  end
+
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_pokemon_detail_renders_evolution_chain
+    chain = charizard_evolution_pokemons
+    charizard = Pokemon.new(
+      name: "charizard",
+      sprite: chain[:charizard].sprite,
+      number: 6,
+      evolutions: [chain[:charmander], chain[:charmeleon], chain[:charizard]]
+    )
+
+    PokeApiStub.with_detail(charizard) do
+      get "/pokemon/6"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "charmander"
+    assert_includes last_response.body, "https://example.com/charmander.png"
+    assert_includes last_response.body, "charmeleon"
+    assert_includes last_response.body, "https://example.com/charmeleon.png"
+    assert_includes last_response.body, "charizard"
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
+  def test_pokemon_detail_without_evolutions_does_not_break
+    PokeApiStub.with_detail(pikachu_pokemon) do
+      get "/pokemon/25"
+    end
+
+    assert last_response.ok?
+  end
+
   private
 
   def distinct_user_ids

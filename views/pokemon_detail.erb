@@ -8,3 +8,13 @@
     <li><%= stat[:name] %>: <%= stat[:value] %></li>
   <% end %>
 </ul>
+<% unless @pokemon.evolutions.empty? %>
+  <ul class="evolutions">
+    <% @pokemon.evolutions.each do |evolution| %>
+      <li class="evolution">
+        <img src="<%= evolution.sprite %>">
+        <%= evolution.name %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
