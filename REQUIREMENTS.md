@@ -132,7 +132,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Sem regressão: RF-01..RF-07 seguem verdes; teste sem rede; commit a cada green.
 - [x] `REQUIREMENTS.md`/`SESSIONS.md` atualizados no mesmo escopo.
 
-### RF-09 — Modelo de batalha (B1) — `Implementado — aguardando validação` (sessão 0009)
+### RF-09 — Modelo de batalha (B1) — `Done` (sessão 0009)
 - Transformar `Pokemon` (RF-06) em unidade de combate pura: `BattlePokemon`
   (Dry::Struct) com `hp_max` derivado do **base stat HP** e `hp_current`.
 - **Domínio puro** (sem PG, sem rede): métodos `take_damage` (funcional/imutável),
@@ -223,7 +223,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 6 | Paginação/filtro na listagem | Done (sessão 0006) |
 | 7 | Montagem de times — cap 6 + slots + sem duplicados (RF-07, base do auto-battler) | Done (sessão 0007) |
 | 8 | Reordenação manual de slots (RF-08, A1) | Done (sessão 0008) |
-| 9 | Modelo de batalha (BattlePokemon, RF-09, B1) | Aguardando validação (sessão 0009) |
+| 9 | Modelo de batalha (BattlePokemon, RF-09, B1) | Done (sessão 0009) |
 | 10 | Efetividade de tipos (B2) | Backlog |
 | 11 | Motor de auto-batalha (B3) | Backlog |
 | 12 | UI: layout e estilos externos | Backlog |

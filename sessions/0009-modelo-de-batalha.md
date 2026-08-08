@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-08 |
 | Implementação | Concluída — passos 0–5 verdes (75 runs/319 asserts, lint 0 offenses) |
-| Validação | Pendente — executada pelo usuário |
+| Validação | Concluída — validado pelo usuário em 2026-08-08 |
 
 ---
 
@@ -103,9 +103,11 @@ Serve de fundação para B2 (efetividade de tipos) e B3 (motor de auto-batalha).
   (ordem sugerida B1 → B2 → B3 → B4 → C1).
 - Próximo passo sugerido após validação: **B2 — efetividade de tipos**.
 
-## 7. Validação (pendente)
+## 7. Validação (2026-08-08)
 
-- Suíte completa: **75 runs / 319 assertions, 0 failures/0 errors**; lint **0 offenses**.
-- Critérios de aceite **todos marcados `[x]`** (conversão `from`, `hp_max` derivado,
-  `take_damage` funcional com clamp, `alive?`/`fainted?` coerentes, domínio puro).
-- **Aguardando validação do usuário** (fase 3 executada pelo usuário).
+- Suíte completa: **75 runs / 319 assertions, 0 failures/errors**; lint **0 offenses**.
+- Critérios de aceite **todos verificados pelo usuário** (conversão `from`, `hp_max`
+  derivado, `take_damage` funcional com clamp, `alive?`/`fainted?` coerentes e domínio
+  pur sem regressão): **RF-09 Done**.
+- Próxima sessão: **0010** — candidatos anotados no draft/REQUIREMENTS (B2 — efetividade
+  de tipos; e/ou B3 motor / C1 batalha htmx).
