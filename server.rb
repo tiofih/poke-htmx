@@ -1,5 +1,6 @@
 require "sinatra/base"
 require "sinatra/reloader"
+require "securerandom"
 require "pry"
 require_relative "lib/poke_api"
 require_relative "lib/team_repository"
@@ -11,6 +12,8 @@ class Server < Sinatra::Base
 
   configure do
     enable :logging
+    enable :sessions
+    set :session_secret, ENV["SESSION_SECRET"] || "706f6b656465782d6465762d7365637265742d30313233343536373839616263646566"
     set :bind, "0.0.0.0"
     set :port, 3000
     set :views, "views"
@@ -18,9 +21,13 @@ class Server < Sinatra::Base
     register Sinatra::Reloader
   end
 
+  before do
+    session[:user_id] ||= SecureRandom.uuid
+  end
+
   helpers do
     def current_user
-      "test-user"
+      session[:user_id]
     end
   end
 
