@@ -5,12 +5,14 @@ require_relative "pokemon"
 
 class TeamRepository
   DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
+  MAX_TEAM_SIZE = 6
+
+  class TeamFullError < StandardError; end
+  class DuplicateError < StandardError; end
 
   def initialize(db_url: ENV["DATABASE_URL"] || DEFAULT_DATABASE_URL)
     @db_url = db_url
   end
-
-  MAX_TEAM_SIZE = 6
 
   def all(user_id)
     connection.exec_params(
@@ -23,6 +25,8 @@ class TeamRepository
 
   def add(user_id, pokemon)
     slot = next_free_slot(user_id)
+    raise TeamFullError, "Time cheio (máx. #{MAX_TEAM_SIZE})." if slot.nil?
+
     connection.exec_params(
       "INSERT INTO team_pokemons (user_id, name, sprite, number, slot) VALUES ($1, $2, $3, $4, $5)",
       [user_id, pokemon.name, pokemon.sprite, pokemon.number, slot]

@@ -55,6 +55,19 @@ class TeamRepositoryTest < Minitest::Test
     assert_equal %w[bulbasaur], @repository.all("user-b").map(&:name)
   end
 
+  def test_add_rejects_seventh_pokemon_with_team_full_error
+    six = (1..6).map do |n|
+      Pokemon.new(name: "pokemon#{n}", sprite: "https://example.com/#{n}.png", number: n)
+    end
+    six.each { |poke| @repository.add("user-a", poke) }
+
+    seventh = Pokemon.new(name: "meowth", sprite: "https://example.com/meowth.png", number: 52)
+    error = assert_raises(TeamRepository::TeamFullError) { @repository.add("user-a", seventh) }
+
+    assert_match(/cheio|full/i, error.message)
+    assert_equal 6, @repository.all("user-a").size
+  end
+
   def test_add_assigns_slots_in_insertion_order_and_persists_slot
     pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
     bulbasaur = Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1)
