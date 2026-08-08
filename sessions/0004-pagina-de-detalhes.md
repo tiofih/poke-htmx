@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída (validada em 2026-08-08) |
-| Implementação | — |
-| Validação | — |
+| Implementação | Concluída (passos 0–4, validado em 2026-08-08) |
+| Validação | Concluída em 2026-08-08 (usuário: "tudo certo, validado") |
 
 ---
 
@@ -125,3 +125,12 @@ usa o **id único da API** (`GET /pokemon/:poke_id`), mais estável que o nome
   para `GET /pokemon/:poke_id` (id único da PokéAPI, mais estável que o nome).
 - Próximo passo: **fase 2 (TDD)** — passo 0 (red): `Pokemon` com os campos +
   `PokeApi.detail` + rota `GET /pokemon/:poke_id`.
+
+### Validação da implementação (concluída em 2026-08-08)
+
+- [x] Usuário validou fase 2 (TDD): "tudo certo, validado".
+- [x] Suíte completa verde (`./scripts/test`): 24 runs / 104 assertions.
+- [x] Lint verde (`./scripts/lint`): 0 offenses.
+- [x] Critérios da seção 3 verificados contra a implementação (passos 0–4).
+- [x] Fragmento de detalhe exibe sprite, nome, tipos, 6 stats e linda de evolução;
+      botão "Fechar" e navegação por sprite tratados na sessão 0005.

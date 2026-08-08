@@ -40,10 +40,9 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0005** — Navegação pelo sprite para o detalhe (RF-06, correção do
-`<input type="image">` que submetia os forms de equipe).
-Refinamento concluído e validado — critérios de aceite e plano TDD fechados no
-`sessions/0005-navegacao-sprite-detalhe.md`; aguardando fase 2 (TDD, passo 0).
+**Sessão 0006** — Paginação/filtro na listagem.
+Sessões 0004 e 0005 validadas pelo usuário (RF-06 Done); roadmap renumerado.
+Backlog (0007 — UI: layout e estilos externo) após a 0006.
 
 ## Progresso das sessões
 
@@ -52,8 +51,8 @@ Refinamento concluído e validado — critérios de aceite e plano TDD fechados 
 | 0001 | Persistir equipe em PostgreSQL (RNF-02) | Concluída | Done (passos 0–5 validados) |
 | 0002 | Remoção semântica (`DELETE /team`, RF-04) | Concluída | Done (passos 0–5 validados) |
 | 0003 | Equipe por usuário (sessão/cookie, RF-05) | Concluída | Done (passos 0–6 + S1, validado em 2026-08-08) |
-| 0004 | Página de detalhes (tipos, stats, evoluções) | Implementação | Passos 0–4 verde; aguardando validação do usuário (fase 3) |
-| 0005 | Navegação pela sprite para o detalhe + Fechar/Voltar (RF-06) | Refinamento | Em andamento |
+| 0004 | Página de detalhes (tipos, stats, evoluções) | Concluída | Done (passos 0–4, validado em 2026-08-08) |
+| 0005 | Navegação pela sprite + Fechar/Voltar (RF-06) | Concluída | Done (passos 0–3, validado em 2026-08-08) |
 | 0006 | Paginação/filtro na listagem | — | Backlog |
 | 0007 | UI: layout e estilos externo | — | Backlog |
 

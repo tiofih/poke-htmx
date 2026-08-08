@@ -4,9 +4,9 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | Em andamento |
-| Implementação | — |
-| Validação | — |
+| Refinamento | Concluída (validado em 2026-08-08) |
+| Implementação | Concluída (passos 0–3, validado em 2026-08-08) |
+| Validação | Concluída em 2026-08-08 (usuário: "tudo certo, validado") |
 
 ---
 
@@ -78,6 +78,17 @@ e a remoção/adicionar ficam restritas aos botões explícitos.
 
 ## 6. Observações e próximo passo
 
-- A sessão 0004 continua aguardando validação do usuário (fase 3); o bug de sprite vira
-  esta sessão 0005 e não bloqueia a conclusão do restante da 0004.
-- Próximo passo: **fase 2 (TDD)** — passo 0 (red): `GET /team` sem `input type="image"`.
+- A sessão 0004 foi validada pelo usuário junto com esta (0005); o bug de sprite
+  identificado na 0004 virou esta sessão 0005 e foi resolvido (sprite vira link).
+- Próximo passo após validação: **sessão 0006** (paginação/filtro na listagem).
+
+### Validação da implementação (concluída em 2026-08-08)
+
+- [x] Usuário validou fase 2 (TDD): "tudo certo, validado".
+- [x] Suíte completa verde (`./scripts/test`): 29 runs / 134 assertions.
+- [x] Lint verde (`./scripts/lint`): 0 offenses.
+- [x] Critérios da seção 3 verificados: sprites são links `hx-get` (sem `input
+      type="image"`), botão "Fechar" limpa o alvo `#pokemon`, remoção por botão
+      sem regressão.
+- [x] Escopo adicional acordado durante a fase: botão "Fechar"/"Voltar" (registrado
+      no refinamento, seções 3/4/5).

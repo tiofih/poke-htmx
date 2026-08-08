@@ -83,24 +83,25 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] `DELETE /team` só remove membro do próprio usuário; id de outro usuário é idempotente (200).
 - [x] Sessão Sinatra gera `user_id` no 1º acesso; rotas e `team.erb` usam o usuário da sessão.
 
-### RF-06 — Página de detalhes — `Em refinamento` (sessão 0004, refinamento validado)
+### RF-06 — Página de detalhes — `Done` (sessões 0004 + 0005)
 - Ao clicar no nome/sprite de um Pokémon (na listagem `#pokemon` ou na equipe),
   renderizar no alvo `#pokemon` os **detalhes**: sprite, nome, tipos, stats base e evoluções.
 - Interação 100% htmx (RNF-01); o botão "Add to Team" é preservado no detalhe.
 - A rota de detalhe usa o **id único da API** (`GET /pokemon/:poke_id`), mais estável que o nome.
+- Botão "Fechar"/"Voltar" limpa o alvo `#pokemon` (apaga status e linha evolutiva).
 
 **Critérios de aceite:**
-- [ ] `GET /pokemon/:poke_id` responde o fragmento de detalhe (sprite, nome, tipos, stats, evoluções).
-- [ ] Tipos: exibe todos os tipos do Pokémon (ex.: pikachu → electric; bulbasaur → grass, poison).
-- [ ] Stats: exibe os 6 base stats com nome e valor (HP, Attack, Defense, Sp.Atk, Sp.Def, Speed).
-- [ ] Evoluções: exibe a cadeia de evolução (sprite + nome) via species → evolution_chain; sem evolução não quebra.
-- [ ] Nomes em `pokemon.erb` e `team.erb` clicáveis com `hx-get="/pokemon/:poke_id"` (alvo `#pokemon`).
-- [ ] Sprites em `pokemon.erb` e `team.erb` clicáveis com `hx-get="/pokemon/:poke_id"`
+- [x] `GET /pokemon/:poke_id` responde o fragmento de detalhe (sprite, nome, tipos, stats, evoluções).
+- [x] Tipos: exibe todos os tipos do Pokémon (ex.: pikachu → electric; bulbasaur → grass, poison).
+- [x] Stats: exibe os 6 base stats com nome e valor (HP, Attack, Defense, Sp.Atk, Sp.Def, Speed).
+- [x] Evoluções: exibe a cadeia de evolução (sprite + nome) via species → evolution_chain; sem evolução não quebra.
+- [x] Nomes em `pokemon.erb` e `team.erb` clicáveis com `hx-get="/pokemon/:poke_id"` (alvo `#pokemon`).
+- [x] Sprites em `pokemon.erb` e `team.erb` clicáveis com `hx-get="/pokemon/:poke_id"`
       (alvo `#pokemon`) — **sem** `<input type="image">` (não submete os forms de equipe) (sessão 0005).
-- [ ] Detalhe ganha **botão "Fechar"/"Voltar"** (`hx-get="/pokemon/close"` → swap
+- [x] Detalhe ganha **botão "Fechar"/"Voltar"** (`hx-get="/pokemon/close"` → swap
       innerHTML no alvo `#pokemon`), que apaga status e linda evolutiva da tela (sessão 0005).
-- [ ] Fragmento de detalhe mantém o form `hx-post /team` (Add to Team, RF-03).
-- [ ] `GET /pokemon?name=` (fragment add atual) permanece funcional.
+- [x] Fragmento de detalhe mantém o form `hx-post /team` (Add to Team, RF-03).
+- [x] `GET /pokemon?name=` (fragment add atual) permanece funcional.
 
 ## Requisitos Não-Funcionais
 
@@ -141,7 +142,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 1 | Persistir equipe em PostgreSQL (RNF-02) | Done |
 | 2 | Remoção semântica (`DELETE /team`, RF-04) | Done (sessão 0002) |
 | 3 | Equipe por usuário (sessão/cookie, RF-05) | Done (sessão 0003) |
-| 4 | Página de detalhes (tipos, stats, evoluções) | Em refinamento (sessão 0004) |
-| 5 | Navegação pela sprite para o detalhe + Fechar/Voltar (RF-06) | Em refinamento (sessão 0005) |
+| 4 | Página de detalhes (tipos, stats, evoluções) | Done (sessões 0004+0005) |
+| 5 | Navegação pela sprite para o detalhe + Fechar/Voltar (RF-06) | Done (sessões 0004+0005) |
 | 6 | Paginação/filtro na listagem | Backlog |
 | 7 | UI: layout e estilos externo | Backlog |
