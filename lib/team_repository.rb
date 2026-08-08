@@ -12,7 +12,7 @@ class TeamRepository
 
   def all
     connection.exec("SELECT * FROM team_pokemons ORDER BY id").map do |row|
-      Pokemon.new(name: row["name"], sprite: row["sprite"], number: row["number"])
+      Pokemon.new(id: row["id"], name: row["name"], sprite: row["sprite"], number: row["number"])
     end
   end
 

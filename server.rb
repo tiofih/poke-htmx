@@ -2,6 +2,7 @@ require "sinatra/base"
 require "sinatra/reloader"
 require "pry"
 require_relative "lib/poke_api"
+require_relative "lib/team_repository"
 
 class Server < Sinatra::Base
   configure :development do
@@ -13,7 +14,7 @@ class Server < Sinatra::Base
     set :bind, "0.0.0.0"
     set :port, 3000
     set :views, "views"
-    set :team, []
+    set :team, TeamRepository.new
     register Sinatra::Reloader
   end
 
@@ -28,16 +29,17 @@ class Server < Sinatra::Base
   end
 
   post "/team" do
-    @team = settings.team
-    @team << PokeApi.find(params[:pokeName])
+    pokemon = PokeApi.find(params[:pokeName])
+    settings.team.add(pokemon)
+    @team = settings.team.all
     erb :team
   end
 
   get "/team" do
-    @team = settings.team
-    @team.delete_at(params[:index].to_i)
+    settings.team.remove(params[:index])
+    @team = settings.team.all
     erb :team
   end
 
-  run!
+  run! if $PROGRAM_NAME == app_file
 end

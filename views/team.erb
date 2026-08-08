@@ -1,8 +1,8 @@
 <% @team.map.with_index do |poke, idx| %>
-  <div id='team-pokemon-<%= idx %>'>
+  <div id='team-pokemon-<%= poke.id %>'>
     <input type="image" src=<%= poke.sprite %>><br>
     <%= poke.name %><br>
-    <input type="hidden" name="index" value=<%= idx %>>
+    <input type="hidden" name="index" value=<%= poke.id %>>
     <button
         class="btn"
         hx-get="/team"

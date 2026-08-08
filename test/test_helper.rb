@@ -27,3 +27,13 @@ module TestDatabase
     connection&.close
   end
 end
+
+module PokeApiStub
+  def self.with_find(pokemon)
+    original = PokeApi.method(:find)
+    PokeApi.define_singleton_method(:find) { |_name| pokemon }
+    yield
+  ensure
+    PokeApi.define_singleton_method(:find, original)
+  end
+end
