@@ -5,7 +5,9 @@
       hx-target="#team"
       hx-swap="innerHTML"
       hx-params="*">
-    <input type="image" src="<%= poke.sprite %>"><br>
+    <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#pokemon" hx-swap="innerHTML">
+      <img src="<%= poke.sprite %>">
+    </a><br>
     <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#pokemon" hx-swap="innerHTML">
       <%= poke.name %>
     </a><br>

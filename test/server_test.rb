@@ -267,6 +267,19 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, "hx-target=\"#pokemon\""
   end
 
+  # rubocop:disable Metrics/AbcSize
+  def test_team_member_sprite_is_link_not_submit
+    @repository.add("user-a", pikachu_pokemon)
+
+    get "/team", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 2, last_response.body.scan(%r{hx-get="/pokemon/25"}).size
+    refute_includes last_response.body, 'input type="image"'
+    assert_includes last_response.body, 'hx-delete="/team"'
+  end
+  # rubocop:enable Metrics/AbcSize
+
   private
 
   def distinct_user_ids
