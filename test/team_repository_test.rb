@@ -57,6 +57,19 @@ class TeamRepositoryTest < Minitest::Test
     assert_equal "user-a", row["user_id"]
   end
 
+  def test_remove_only_deletes_own_users_pokemon
+    pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
+    bulbasaur = Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1)
+    @repository.add("user-a", pikachu)
+    @repository.add("user-b", bulbasaur)
+
+    bulbasaur_id = team_id("bulbasaur", "user-b")
+    @repository.remove("user-a", bulbasaur_id)
+
+    assert_equal %w[pikachu], @repository.all("user-a").map(&:name)
+    assert_equal %w[bulbasaur], @repository.all("user-b").map(&:name)
+  end
+
   private
 
   def team_row(name)

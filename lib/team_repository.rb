@@ -27,7 +27,7 @@ class TeamRepository
   end
 
   def remove(user_id, id)
-    connection.exec_params("DELETE FROM team_pokemons WHERE id = $1", [id])
+    connection.exec_params("DELETE FROM team_pokemons WHERE id = $1 AND user_id = $2", [id, user_id])
   end
 
   private
