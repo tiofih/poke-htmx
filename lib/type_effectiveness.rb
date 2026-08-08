@@ -29,4 +29,12 @@ class TypeEffectiveness
 
     defender_types.reduce(1.0) { |acc, type| acc * factor(attack_type, type) }
   end
+
+  def stab(attack_types, move_type)
+    attack_types.include?(move_type) ? 1.5 : 1.0
+  end
+
+  def damage_multiplier(attacker_types:, move_type:, defender_types:)
+    effectiveness(move_type, defender_types) * stab(attacker_types, move_type)
+  end
 end

@@ -63,4 +63,26 @@ class TypeEffectivenessTest < Minitest::Test
     assert_in_delta 1.0, relations.effectiveness("grass", %w[water flying])
     assert_in_delta 4.0, relations.effectiveness("water", %w[ground fire])
   end
+
+  def test_stab_is_1_5_when_attacker_has_move_type
+    assert_in_delta 1.5, relations.stab(%w[fire], "fire")
+    assert_in_delta 1.5, relations.stab(%w[water psychic], "water")
+  end
+
+  def test_stab_is_1_when_attacker_lacks_move_type
+    assert_in_delta 1.0, relations.stab(%w[electric], "fire")
+    assert_in_delta 1.0, relations.stab([], "water")
+  end
+
+  def test_damage_multiplier_combines_effectiveness_and_stab
+    assert_in_delta 0.75, relations.damage_multiplier(
+      attacker_types: %w[fire], move_type: "fire", defender_types: ["water"]
+    )
+  end
+
+  def test_damage_multiplier_without_stab_keeps_effectiveness
+    assert_in_delta 1.0, relations.damage_multiplier(
+      attacker_types: %w[electric], move_type: "water", defender_types: ["normal"]
+    )
+  end
 end
