@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 AllCops:
+  SuggestExtensions: false
   NewCops: enable
   TargetRubyVersion: 3.3
   Exclude:
