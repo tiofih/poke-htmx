@@ -54,7 +54,7 @@ UI/layout (A2). Aguardando a sessão 0008 (reordenação de slots) ser validada.
 | 0005 | Navegação pela sprite + Fechar/Voltar (RF-06) | Concluída | Done (passos 0–3, validado em 2026-08-08) |
 | 0006 | Paginação/filtro na listagem | Concluída | Done (passos 0–6, validado em 2026-08-08) |
 | 0007 | Montagem de times — cap 6 + slots + sem duplicados (RF-07) | Concluída | Done (passos 0–9, validado em 2026-08-08) |
-| 0008 | Reordenação manual de slots (RF-08) | Refinamento | Em andamento (decisões fechadas) |
+| 0008 | Reordenação manual de slots (RF-08) | Implementação | Concluída — passos 0–8 verdes (67 runs/293 asserts, lint 0) — **aguardando validação do usuário** |
 
 ## Estrutura do arquivo de sessão
 

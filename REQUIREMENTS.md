@@ -110,7 +110,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Fragmento de detalhe mantém o form `hx-post /team` (Add to Team, RF-03).
 - [x] `GET /pokemon?name=` (fragment add atual) permanece funcional.
 
-### RF-08 — Reordenação manual de slots (A1) — `Em refinamento` (sessão 0008)
+### RF-08 — Reordenação manual de slots (A1) — `Implementado — aguardando validação` (sessão 0008)
 - Permitir que o usuário **reordene manualmente** os membros do seu time (slots 1..N)
   via botões ▲/▼ — hoje a posição só muda na remoção (sessão 0007).
 - A **ordem resultante é o input do futuro game loop**: `all(user_id)` já retorna
@@ -118,18 +118,18 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - Nenhuma mudança de schema (RF-07 já persistiu `slot` + índices únicos).
 
 **Critérios de aceite:**
-- [ ] `TeamRepository#move(user_id, id, new_slot)` move para slot `new_slot` (1..N)
+- [x] `TeamRepository#move(user_id, id, new_slot)` move para slot `new_slot` (1..N)
       mantendo slots contíguos 1..N (reindexa os demais), para cima e para baixo.
-- [ ] Idempotente: `new_slot` igual ao atual, fora de `1..N`, ou id inexistente →
+- [x] Idempotente: `new_slot` igual ao atual, fora de `1..N`, ou id inexistente →
       time intacto (sem efeito, sem raise).
-- [ ] Isolamento (RF-05): id de outro usuário → no-op; time do dono intacto.
-- [ ] Reordenação não viola `UNIQUE (user_id, slot)` (transação com slot temporário).
-- [ ] `POST /team/:id/move` com `new_slot` re-renderiza `#team` (200) na ordem nova;
+- [x] Isolamento (RF-05): id de outro usuário → no-op; time do dono intacto.
+- [x] Reordenação não viola `UNIQUE (user_id, slot)` (transação com slot temporário).
+- [x] `POST /team/:id/move` com `new_slot` re-renderiza `#team` (200) na ordem nova;
       inválido/igual/outro usuário → 200 com time intacto.
-- [ ] `team.erb` ganha botões ▲/▼ (forms `hx-post="/team/:id/move"` com hidden
+- [x] `team.erb` ganha botões ▲/▼ (forms `hx-post="/team/:id/move"` com hidden
       `new_slot`, alvo `#team`), irmãos do form de remoção; ▲ slot 1 / ▼ último = no-op.
-- [ ] Sem regressão: RF-01..RF-07 seguem verdes; teste sem rede; commit a cada green.
-- [ ] `REQUIREMENTS.md`/`SESSIONS.md` atualizados no mesmo escopo.
+- [x] Sem regressão: RF-01..RF-07 seguem verdes; teste sem rede; commit a cada green.
+- [x] `REQUIREMENTS.md`/`SESSIONS.md` atualizados no mesmo escopo.
 
 ### RF-07 — Montagem de times (base do auto-battler) — `Done` (sessão 0007)
 - Time por usuário limitado a **6 vagas** (`MAX_TEAM_SIZE = 6`), com **`slot` de

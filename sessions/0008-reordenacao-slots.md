@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-08 |
-| Implementação | — |
-| Validação | — |
+| Implementação | Concluída — passos 0–8 verdes (67 runs/293 asserts, lint 0 offenses) |
+| Validação | Pendente — executada pelo usuário |
 
 ---
 
@@ -35,37 +35,37 @@ essa ordem. Nenhuma mudança de schema é necessária (RF-07 já persistiu `slot
 
 ### Domínio (`TeamRepository#move`)
 
-- [ ] `#move(user_id, id, new_slot)` move o membro para o slot `new_slot` (1..N) e
+- [x] `#move(user_id, id, new_slot)` move o membro para o slot `new_slot` (1..N) e
       **mantém slots contíguos 1..N** (reindexa os demais, como `#remove`).
-- [ ] Move para **cima** (novo slot menor) e para **baixo** (novo slot maior):
+- [x] Move para **cima** (novo slot menor) e para **baixo** (novo slot maior):
       time [A,B,C,D] → move C(3)→1 dá [C,A,B,D]; move A(1)→4 dá [B,C,D,A];
       `#all` retorna a nova ordem.
-- [ ] **Idempotente:** `new_slot` igual ao atual, fora de `1..size(time)`, ou id
+- [x] **Idempotente:** `new_slot` igual ao atual, fora de `1..size(time)`, ou id
       inexistente → **sem efeito** (time intacto, sem raise).
-- [ ] **Isolamento (RF-05):** id de membro de outro usuário → no-op; o time do dono
+- [x] **Isolamento (RF-05):** id de membro de outro usuário → no-op; o time do dono
       não muda (`WHERE id AND user_id`).
-- [ ] **Unicidade preservada:** a reordenação não viola `UNIQUE (user_id, slot)`
+- [x] **Unicidade preservada:** a reordenação não viola `UNIQUE (user_id, slot)`
       (transação com slot temporário para liberar a origem antes do shift).
 
 ### Camada web (htmx, RNF-01)
 
-- [ ] `POST /team/:id/move` com `new_slot` re-renderiza o fragmento `#team` (200) na
+- [x] `POST /team/:id/move` com `new_slot` re-renderiza o fragmento `#team` (200) na
       **ordem nova**; `new_slot` inválido/igual/outro usuário → 200 com time intacto
       (contrato htmx, sem `responseHandling`).
-- [ ] `views/team.erb` ganha botões **▲/▼** por membro — cada um é um form
+- [x] `views/team.erb` ganha botões **▲/▼** por membro — cada um é um form
       `hx-post="/team/:id/move"` (hidden `new_slot = slot ∓ 1`, alvo `#team`,
       `innerHTML`), **irmão** do form de remoção (não aninhado).
-- [ ] Botões sempre renderizados: ▲ no slot 1 e ▼ no último slot são **no-ops
+- [x] Botões sempre renderizados: ▲ no slot 1 e ▼ no último slot são **no-ops
       idempotentes** (novo slot 0 ou N+1 → 200, time intacto).
-- [ ] Sem regressão: remoção (`hx-delete`), detalhe (links sprite/nome) e demais
+- [x] Sem regressão: remoção (`hx-delete`), detalhe (links sprite/nome) e demais
       rotas seguem verdes.
 
 ### Garantias (RNF)
 
-- [ ] Testes sem rede (stub), suíte completa verde (`./scripts/test`) e lint verde
+- [x] Testes sem rede (stub), suíte completa verde (`./scripts/test`) e lint verde
       (`./scripts/lint`), commit a cada green (RNF-04).
-- [ ] Sem migração de schema (RF-07 já cobre `slot`); sem regressão RF-01..RF-07.
-- [ ] `REQUIREMENTS.md` (novo **RF-08 — Reordenação manual de slots**, A1 sai das
+- [x] Sem migração de schema (RF-07 já cobre `slot`); sem regressão RF-01..RF-07.
+- [x] `REQUIREMENTS.md` (novo **RF-08 — Reordenação manual de slots**, A1 sai das
       "Ideias de auto-battler") e `SESSIONS.md` (0008) atualizados no mesmo escopo.
 
 ## 4. Decisões de refinamento
@@ -106,9 +106,13 @@ essa ordem. Nenhuma mudança de schema é necessária (RF-07 já persistiu `slot
   `all(user_id)` já na ordem definida aqui.
 - Após esta sessão, o time do usuário tem ordem **explícita e estável** — input
   direto do motor de batalha (draft fase B/C).
+- A reordenação usa transação com slot temporário (-1): cada UPDATE movimenta uma
+  linha para um slot livre, evitando violar `UNIQUE (user_id, slot)`.
 - Próximo passo sugerido: **B1 — modelo de batalha** (domínio puro) quando esta
   sessão for validada.
 
-## 7. Validação
+## 7. Validação (2026-08-08)
 
-- (preenchido após a fase de validação — executada pelo usuário)
+- Suíte completa: **67 runs / 293 assertions, 0 failures/0 errors**; lint **0 offenses**.
+- (Resultado da checagem dos critérios + verificação do usuário pendente — preenchido
+  após a validação.)
