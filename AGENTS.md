@@ -23,6 +23,20 @@
 - Somente **após** a conclusão/validação da sessão corrente, a anotação pode virar uma
   **nova sessão** (refinamento → TDD → validação).
 
+## Draft de ideias — anotar para fases futuras
+
+- **Ideias, refatorações e decisões de mudanças grandes** (identificadas em qualquer
+  fase da sessão) são **anotadas em `draft-auto-battler.md`** (ou em um arquivo de
+  draft dedicado) para serem **incluídas em fases futuras** — seja em uma fase
+  específica mais adiante, seja quando todas as fases correntes/agendadas estiverem
+  finalizadas.
+- O draft é **fora do fluxo** (não gera critérios de aceite nem plano TDD na hora).
+  Registrar uma ideia no draft **não** abre novo escopo nem atrasa a sessão em curso.
+- Ao concluir as fases, o draft é **revisado**: o que entra vira sessão, o que não se
+  aplica é descartado — decisão do usuário.
+- Convenção de commit para anotações do tipo: `Draft: <resumo do que foi anotado>`
+  (contexto `Draft:`, seguindo o formato de commit do projeto).
+
 ## Formato de commit (regra do projeto)
 
 - **Idioma:** português (sem exigir acentuação no título).
