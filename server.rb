@@ -42,6 +42,10 @@ class Server < Sinatra::Base
     erb :pokemon
   end
 
+  get "/pokemon/close" do
+    erb :pokemon_close
+  end
+
   get "/pokemon/:poke_id" do
     @pokemon = PokeApi.detail(params[:poke_id])
     erb :pokemon_detail

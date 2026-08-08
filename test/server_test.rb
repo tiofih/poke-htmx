@@ -198,6 +198,23 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
+  def test_pokemon_close_route_returns_empty_fragment
+    get "/pokemon/close"
+
+    assert last_response.ok?
+    assert_empty last_response.body
+  end
+
+  def test_pokemon_detail_has_close_button
+    PokeApiStub.with_detail(pikachu_pokemon) do
+      get "/pokemon/25"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "hx-get=\"/pokemon/close\""
+    assert_includes last_response.body, "hx-target=\"#pokemon\""
+  end
+
   def charizard_evolution_pokemons
     {
       charmander: Pokemon.new(name: "charmander", sprite: "https://example.com/charmander.png", number: 4),
