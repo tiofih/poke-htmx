@@ -65,4 +65,28 @@ class PokeApiTest < Minitest::Test
       assert_equal 3, second[:total]
     end
   end
+
+  def fire_type_json
+    {
+      "name" => "fire",
+      "damage_relations" => {
+        "double_damage_to" => %w[bug steel grass ice].map { |name| { "name" => name } },
+        "half_damage_to" => %w[rock fire water dragon].map { |name| { "name" => name } },
+        "no_damage_to" => []
+      }
+    }
+  end
+
+  def test_extract_type_relations_normalizes_damage_relations
+    extracted = PokeApi.extract_type_relations(fire_type_json)
+
+    assert_equal %w[bug steel grass ice], extracted["fire"]["double"]
+    assert_equal %w[rock fire water dragon], extracted["fire"]["half"]
+    assert_empty extracted["fire"]["no"]
+  end
+
+  def test_extract_type_relations_handles_no_damage_list
+    json = { "name" => "electric", "damage_relations" => { "no_damage_to" => [{ "name" => "ground" }] } }
+    assert_equal %w[ground], PokeApi.extract_type_relations(json)["electric"]["no"]
+  end
 end

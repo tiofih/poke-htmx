@@ -67,4 +67,15 @@ class PokeApi
     chain["evolves_to"].each { |stage| names.concat(flatten_chain(stage)) }
     names
   end
+
+  def self.extract_type_relations(json)
+    relations = json["damage_relations"] || {}
+    {
+      json["name"] => {
+        "double" => relations["double_damage_to"].to_a.map { |type| type["name"] },
+        "half" => relations["half_damage_to"].to_a.map { |type| type["name"] },
+        "no" => relations["no_damage_to"].to_a.map { |type| type["name"] }
+      }
+    }
+  end
 end
