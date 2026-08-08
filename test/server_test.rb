@@ -47,6 +47,20 @@ class ServerTest < Minitest::Test
     refute_includes last_response.body, "pikachu"
   end
 
+  # rubocop:disable Metrics/AbcSize
+  def test_delete_team_with_unknown_id_keeps_team_intact
+    @repository.add(pikachu_pokemon)
+    id = @repository.all.first.id
+    unknown_id = (id.to_i + 999).to_s
+
+    delete "/team", id: unknown_id
+
+    assert last_response.ok?
+    assert_equal 1, @repository.all.size
+    assert_includes last_response.body, "pikachu"
+  end
+  # rubocop:enable Metrics/AbcSize
+
   def test_delete_team_without_id_does_not_break
     delete "/team"
 
