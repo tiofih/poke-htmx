@@ -257,6 +257,17 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, "hx-target=\"#pokemon\""
   end
 
+  def test_pokemon_name_fragment_sprite_is_link_not_submit
+    PokeApiStub.with_find(pikachu_pokemon) do
+      get "/pokemon", name: "pikachu"
+    end
+
+    assert last_response.ok?
+    assert_equal 2, last_response.body.scan(%r{hx-get="/pokemon/25"}).size
+    refute_includes last_response.body, 'input type="image"'
+    assert_includes last_response.body, 'hx-post="/team"'
+  end
+
   def test_team_member_links_to_detail
     @repository.add("user-a", pikachu_pokemon)
 
