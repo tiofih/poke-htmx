@@ -53,7 +53,7 @@ Refinamento concluído e validado — critérios de aceite e plano TDD fechados 
 | 0002 | Remoção semântica (`DELETE /team`, RF-04) | Concluída | Done (passos 0–5 validados) |
 | 0003 | Equipe por usuário (sessão/cookie, RF-05) | Concluída | Done (passos 0–6 + S1, validado em 2026-08-08) |
 | 0004 | Página de detalhes (tipos, stats, evoluções) | Implementação | Passos 0–4 verde; aguardando validação do usuário (fase 3) |
-| 0005 | Navegação pela sprite para o detalhe (RF-06) | Refinamento | Em andamento |
+| 0005 | Navegação pela sprite para o detalhe + Fechar/Voltar (RF-06) | Refinamento | Em andamento |
 | 0006 | Paginação/filtro na listagem | — | Backlog |
 | 0007 | UI: layout e estilos externo | — | Backlog |
 

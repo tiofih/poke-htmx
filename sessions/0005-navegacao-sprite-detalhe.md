@@ -36,6 +36,8 @@ e a remoção/adicionar ficam restritas aos botões explícitos.
 - [ ] `GET /pokemon?name=` renderiza o sprite como link `hx-get="/pokemon/{number}"`
       (alvo `#pokemon`) e **não** contém `<input type="image">`.
 - [ ] Clicar no sprite **não** remove da equipe nem adiciona à equipe (sem submit).
+- [ ] Detalhe ganha **botão "Fechar"/"Voltar"**: `hx-get` a uma rota que limpa o alvo
+      `#pokemon` (swap innerHTML), apagando status e linda evolutiva da tela.
 - [ ] Remover/adicionar seguem funcionais via botões ("Remove from Team" / "Add to Team").
 - [ ] Sem JS customizado (RNF-01) — só atributos htmx.
 - [ ] Suíte completa verde (`./scripts/test`), lint verde (`./scripts/lint`) e
@@ -52,6 +54,9 @@ e a remoção/adicionar ficam restritas aos botões explícitos.
 - **Alvo/swap:** `hx-target="#pokemon"` + `hx-swap="innerHTML"` (mesmo container do detalhe).
 - **Botões preservados:** `Remove from Team` e `Add to Team` continuam como único submittion.
 - **Sem server-side novo:** a rota de detalhe já existe; mudança é só nas views + testes.
+- **Fechar/Voltar:** nova rota mínima `GET /pokemon/close` que responde fragmento vazio
+  (swap `innerHTML` no alvo `#pokemon`); o botão no `pokemon_detail.erb` dispara com
+  `hx-trigger="click"` — sem JS customizado (RNF-01).
 - **Sem schema/DB:** nenhuma migração.
 
 ## 5. Plano TDD (passos)
@@ -60,8 +65,9 @@ e a remoção/adicionar ficam restritas aos botões explícitos.
 | --- | --- | --- |
 | 0 | `GET /team` (com membro) não contém `input type="image"` e contém link `hx-get="/pokemon/{number}"` para o sprite | `views/team.erb`: sprite vira `<a href="#" hx-get=...><img ...></a>` (alvo `#pokemon`) |
 | 1 | `GET /pokemon?name=` não contém `input type="image"` e contém link `hx-get="/pokemon/{number}"` no sprite | `views/pokemon.erb`: mesma troca |
-| 2 | ações de equipe sem regressão: botão Remove (submit) persiste; botão Add persiste | checagem da suíte completa + lint; sem alteração de rota |
-| 3 | suíte completa + lint verdes; `REQUIREMENTS.md`/`SESSIONS.md` atualizados | ajustes finais e documento |
+| 2 | `GET /pokemon/close` responde fragmento vazio; detalhe contém botão "Fechar" com `hx-get="/pokemon/close"` | rota `get "/pokemon/close"` → erb vazio; botão no `pokemon_detail.erb` |
+| 3 | ações de equipe sem regressão: botão Remove (submit) persiste; botão Add persiste | checagem da suíte completa + lint; sem alteração de rota |
+| 4 | suíte completa + lint verdes; `REQUIREMENTS.md`/`SESSIONS.md` atualizados | ajustes finais e documento |
 
 ## 5b. Observações de TDD
 
