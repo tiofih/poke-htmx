@@ -65,4 +65,23 @@ class BattlePokemonTest < Minitest::Test
     assert_equal 45, fighter.take_damage(-5).hp_current
     assert_equal 45, fighter.hp_current
   end
+
+  def test_alive_and_fainted_are_coherent
+    fighter = BattlePokemon.from(pikachu)
+
+    assert_predicate fighter, :alive?
+    refute_predicate fighter, :fainted?
+  end
+
+  def test_alive_and_fainted_update_after_damage_until_zero
+    fighter = BattlePokemon.from(pikachu)
+
+    fighter = fighter.take_damage(44)
+    assert_predicate fighter, :alive?
+    refute_predicate fighter, :fainted?
+
+    fighter = fighter.take_damage(1)
+    refute_predicate fighter, :alive?
+    assert_predicate fighter, :fainted?
+  end
 end

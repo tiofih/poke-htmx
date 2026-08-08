@@ -31,4 +31,12 @@ class BattlePokemon < Dry::Struct
     new_hp = [hp_current - amount, 0].max
     new(hp_current: new_hp)
   end
+
+  def alive?
+    hp_current.positive?
+  end
+
+  def fainted?
+    !alive?
+  end
 end
