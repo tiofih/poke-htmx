@@ -438,6 +438,21 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/AbcSize
+  def test_team_fragment_renders_slot_badge_and_ordered_by_slot
+    @repository.add("user-a", bulbasaur_pokemon)
+    @repository.add("user-a", pikachu_pokemon)
+
+    get "/team", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "#1"
+    assert_includes last_response.body, "#2"
+    order = last_response.body.index("bulbasaur") < last_response.body.index("pikachu")
+    assert order, "expected bulbasaur (slot 1) before pikachu (slot 2)"
+  end
+  # rubocop:enable Metrics/AbcSize
+
   def test_team_member_links_to_detail
     @repository.add("user-a", pikachu_pokemon)
 

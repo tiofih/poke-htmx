@@ -2,6 +2,7 @@
   <p class="notice"><%= @notice %></p>
 <% end %>
 <% @team.each do |poke| %>
+  <p class="slot">#<%= poke.slot %></p>
   <form
       id='team-pokemon-<%= poke.id %>'
       hx-delete="/team"
