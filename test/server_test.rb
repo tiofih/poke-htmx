@@ -20,6 +20,7 @@ class ServerTest < Minitest::Test
     Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
   end
 
+  # rubocop:disable Metrics/AbcSize
   def test_post_team_persists_pokemon_in_database
     PokeApiStub.with_find(pikachu_pokemon) do
       post "/team", pokeName: "pikachu"
@@ -30,7 +31,9 @@ class ServerTest < Minitest::Test
     team = @repository.all
     assert_equal 1, team.size
     assert_equal "pikachu", team.first.name
+    assert_includes last_response.body, %(name="index" value="#{team.first.id}")
   end
+  # rubocop:enable Metrics/AbcSize
 
   def test_get_team_removes_pokemon_by_id
     @repository.add(pikachu_pokemon)
@@ -41,5 +44,11 @@ class ServerTest < Minitest::Test
     assert last_response.ok?
     assert_empty @repository.all
     refute_includes last_response.body, "pikachu"
+  end
+
+  def test_get_team_without_index_does_not_break
+    get "/team"
+
+    assert last_response.ok?
   end
 end

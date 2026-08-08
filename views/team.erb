@@ -1,15 +1,13 @@
-<% @team.map.with_index do |poke, idx| %>
-  <div id='team-pokemon-<%= poke.id %>'>
-    <input type="image" src=<%= poke.sprite %>><br>
+<% @team.each do |poke| %>
+  <form
+      id='team-pokemon-<%= poke.id %>'
+      hx-get="/team"
+      hx-target="#team"
+      hx-swap="innerHTML"
+      hx-params="*">
+    <input type="image" src="<%= poke.sprite %>"><br>
     <%= poke.name %><br>
-    <input type="hidden" name="index" value=<%= poke.id %>>
-    <button
-        class="btn"
-        hx-get="/team"
-        hx-target="#team"
-        hx-swap="innerHTML"
-        hx-params="*">
-      Remove from Team
-    </button><br>
-  </div>
+    <input type="hidden" name="index" value="<%= poke.id %>">
+    <button type="submit" class="btn">Remove from Team</button>
+  </form>
 <% end %>
