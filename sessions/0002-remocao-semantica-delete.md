@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída (validada em 2026-08-08) |
-| Implementação | Não iniciada |
-| Validação | Não iniciada |
+| Implementação | Concluída (TDD, validada em 2026-08-08) |
+| Validação | Concluída (suíte + lint + critérios, validada em 2026-08-08) |
 
 ---
 
@@ -30,19 +30,19 @@ fluxo 100% htmx (RNF-01) e a re-renderização do fragmento `#team` como respost
 
 ## 3. Critérios de aceite
 
-- [ ] `DELETE /team` com `id=<id>` remove o Pokémon persistido (`TeamRepository#remove`)
+- [x] `DELETE /team` com `id=<id>` remove o Pokémon persistido (`TeamRepository#remove`)
       e responde o fragmento `#team` **sem** o membro removido (HTTP 200).
-- [ ] A view `team.erb` usa `hx-delete="/team"` (sem `hx-get`), mantendo o campo oculto
+- [x] A view `team.erb` usa `hx-delete="/team"` (sem `hx-get`), mantendo o campo oculto
       `name="id"` com o id persistido.
-- [ ] `DELETE /team` com `id` inexistente responde **200** e re-renderiza a equipe
+- [x] `DELETE /team` com `id` inexistente responde **200** e re-renderiza a equipe
       intacta (idempotente; sem erro).
-- [ ] `DELETE /team` **sem** `id` não quebra: re-renderiza a equipe (200).
-- [ ] A rota `GET /team` é **removida** do `server.rb` (remoção só via `DELETE /team`;
+- [x] `DELETE /team` **sem** `id` não quebra: re-renderiza a equipe (200).
+- [x] A rota `GET /team` é **removida** do `server.rb` (remoção só via `DELETE /team`;
       a re-renderização vem das respostas dos POST/DELETE).
-- [ ] Testes atualizados para o novo verbo; suíte completa verde sem rede
+- [x] Testes atualizados para o novo verbo; suíte completa verde sem rede
       (`./scripts/test`).
-- [ ] Lint verde (`./scripts/lint`) e commit pós-green (RNF-04).
-- [ ] `REQUIREMENTS.md` (RF-04 status e ponto de refinamento) e `SESSIONS.md`
+- [x] Lint verde (`./scripts/lint`) e commit pós-green (RNF-04).
+- [x] `REQUIREMENTS.md` (RF-04 status e ponto de refinamento) e `SESSIONS.md`
       atualizados no mesmo escopo.
 
 ## 4. Decisões de refinamento
@@ -73,7 +73,19 @@ fluxo 100% htmx (RNF-01) e a re-renderização do fragmento `#team` como respost
 | 4 | `DELETE /team` sem `id` → 200 re-render | Guard: `remove` só se `params[:id]` presente |
 | 5 | `GET /team` deixa de existir (404) | Remover rota; suíte completa + lint verdes |
 
-## 6. Validação (por preencher)
+## 6. Validação (concluída em 2026-08-08)
+
+- **Suíte:** `./scripts/test` → 9 runs, 28 assertions, 0 failures, 0 errors (sem rede:
+  `PokeApiStub` e adição direta via repositório).
+- **Lint:** `./scripts/lint` → 10 files inspected, no offenses detected.
+- **Passos TDD:** 0 (red: migração GET→DELETE) → 1–2 (rota `delete "/team"` + view
+  `hx-delete`) → 3–4 (idempotência: `id` inexistente/ausente, guard `if params[:id]`) →
+  5 (`GET /team` removido, 404). Commits pós-green: `dce0008`, `b74d247`, `8ebc22c`.
+- **Critérios de aceite:** todos marcados `[x]` na seção 3, verificados contra a
+  implementação final.
+- **Observação de TDD:** passos 3–4 ficaram verdes na 1ª execução porque a
+  idempotência já era garantida pela implementação do passo 1 (`remove` silencioso +
+  guard `if params[:id]`); os testes foram adicionados para fixar o comportamento.
 
 ## 7. Observações e próximo passo
 

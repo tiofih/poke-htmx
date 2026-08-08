@@ -34,17 +34,16 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0002** — Remoção semântica (`DELETE /team`) (RF-04).
-Em refinamento — aguardando fechamento do refinamento (critérios de aceite e plano TDD já
-registrados em `sessions/0002-remocao-semantica-delete.md`). A sessão 0001 está concluída e
-validada, então a regra de sequência (RNF-04) permite iniciar a 0002.
+**Sessão 0003** — Equipe por usuário (sessão/cookie).
+No backlog — a sessão 0002 está concluída e validada, então a regra de sequência
+(RNF-04) permite iniciar a 0003.
 
 ## Progresso das sessões
 
 | # | Sessão | Fase | Status |
 | --- | --- | --- | --- |
 | 0001 | Persistir equipe em PostgreSQL (RNF-02) | Concluída | Done (passos 0–5 validados) |
-| 0002 | Remoção semântica (`DELETE /team`, RF-04) | Refinamento | Em andamento |
+| 0002 | Remoção semântica (`DELETE /team`, RF-04) | Concluída | Done (passos 0–5 validados) |
 | 0003 | Equipe por usuário (sessão/cookie) | — | Backlog |
 | 0004 | Página de detalhes (tipos, stats, evoluções) | — | Backlog |
 | 0005 | Paginação/filtro na listagem | — | Backlog |
