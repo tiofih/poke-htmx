@@ -285,6 +285,23 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, 'hx-post="/team"'
   end
 
+  # rubocop:disable Metrics/AbcSize
+  def test_team_remove_button_still_deletes_after_sprite_link
+    @repository.add("user-a", pikachu_pokemon)
+    @repository.add("user-a", bulbasaur_pokemon)
+    pikachu_id = @repository.all("user-a").find { |poke| poke.name == "pikachu" }.id
+
+    delete "/team", { id: pikachu_id }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 1, @repository.all("user-a").size
+    refute_includes @repository.all("user-a").map(&:name), "pikachu"
+    assert_includes @repository.all("user-a").map(&:name), "bulbasaur"
+    assert_includes last_response.body, "Remove from Team"
+    assert_includes last_response.body, "bulbasaur"
+  end
+  # rubocop:enable Metrics/AbcSize
+
   def test_team_member_links_to_detail
     @repository.add("user-a", pikachu_pokemon)
 
