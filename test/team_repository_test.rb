@@ -55,6 +55,21 @@ class TeamRepositoryTest < Minitest::Test
     assert_equal %w[bulbasaur], @repository.all("user-b").map(&:name)
   end
 
+  def test_add_assigns_slots_in_insertion_order_and_persists_slot
+    pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
+    bulbasaur = Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1)
+    charmander = Pokemon.new(name: "charmander", sprite: "https://example.com/charmander.png", number: 4)
+
+    @repository.add("user-a", pikachu)
+    @repository.add("user-a", bulbasaur)
+    @repository.add("user-a", charmander)
+
+    rows = @repository.all("user-a")
+    assert_equal [1, 2, 3], rows.map(&:slot)
+    assert_equal %w[pikachu bulbasaur charmander], rows.map(&:name)
+    assert_equal 3, team_row("charmander")["slot"].to_i
+  end
+
   def test_add_persists_pokemon_with_user_id
     pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
     @repository.add("user-a", pikachu)
