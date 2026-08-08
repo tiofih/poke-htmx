@@ -48,4 +48,19 @@ class TypeEffectivenessTest < Minitest::Test
     assert_in_delta 0.0, relations.factor("ghost", "normal")
     assert_in_delta 2.0, relations.factor("flying", "grass")
   end
+
+  def test_effectiveness_multiplies_factors_for_each_defender_type
+    assert_in_delta 0.25, relations.effectiveness("fire", %w[water fire])
+    assert_in_delta 1.0, relations.effectiveness("fire", ["electric"])
+    assert_in_delta 0.0, relations.effectiveness("electric", ["ground"])
+  end
+
+  def test_effectiveness_with_empty_defender_types_is_1
+    assert_in_delta 1.0, relations.effectiveness("fire", [])
+  end
+
+  def test_effectiveness_single_and_multi_dupla
+    assert_in_delta 1.0, relations.effectiveness("grass", %w[water flying])
+    assert_in_delta 4.0, relations.effectiveness("water", %w[ground fire])
+  end
 end

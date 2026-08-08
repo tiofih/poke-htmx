@@ -23,4 +23,10 @@ class TypeEffectiveness
       1.0
     end
   end
+
+  def effectiveness(attack_type, defender_types)
+    return 1.0 if defender_types.empty?
+
+    defender_types.reduce(1.0) { |acc, type| acc * factor(attack_type, type) }
+  end
 end
