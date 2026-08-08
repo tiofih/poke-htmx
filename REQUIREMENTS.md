@@ -95,6 +95,8 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [ ] Stats: exibe os 6 base stats com nome e valor (HP, Attack, Defense, Sp.Atk, Sp.Def, Speed).
 - [ ] Evoluções: exibe a cadeia de evolução (sprite + nome) via species → evolution_chain; sem evolução não quebra.
 - [ ] Nomes em `pokemon.erb` e `team.erb` clicáveis com `hx-get="/pokemon/:poke_id"` (alvo `#pokemon`).
+- [ ] Sprites em `pokemon.erb` e `team.erb` clicáveis com `hx-get="/pokemon/:poke_id"`
+      (alvo `#pokemon`) — **sem** `<input type="image">` (não submete os forms de equipe) (sessão 0005).
 - [ ] Fragmento de detalhe mantém o form `hx-post /team` (Add to Team, RF-03).
 - [ ] `GET /pokemon?name=` (fragment add atual) permanece funcional.
 
@@ -138,5 +140,6 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 2 | Remoção semântica (`DELETE /team`, RF-04) | Done (sessão 0002) |
 | 3 | Equipe por usuário (sessão/cookie, RF-05) | Done (sessão 0003) |
 | 4 | Página de detalhes (tipos, stats, evoluções) | Em refinamento (sessão 0004) |
-| 5 | Paginação/filtro na listagem | Backlog |
-| 6 | UI: layout e estilos externo | Backlog |
+| 5 | Navegação pelo sprite para o detalhe (RF-06) | Em refinamento (sessão 0005) |
+| 6 | Paginação/filtro na listagem | Backlog |
+| 7 | UI: layout e estilos externo | Backlog |
