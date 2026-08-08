@@ -111,6 +111,20 @@
 
 ---
 
+## Refatorações a revisar (anotadas na sessão 0007)
+
+- **Reduzir `rubocop:disable` nos testes:** em `test/server_test.rb`,
+  `test/team_repository_test.rb` e `test/schema_test.rb` há disables de
+  `Metrics/AbcSize` / `Metrics/MethodLength` / `Metrics/ClassLength`. Refatorar para
+  extrair helpers/builder de fixture (ex.: `build_pokemon(n)`, montar times via
+  loop único) e reduzir asserts por método, com objetivo de remover os disables e
+  voltar a métricas padrão. Fora do fluxo (RNF-04); vira sessão própria após a 0007.
+- **Sugestões:** teste de schema (`index_exists`) encapsular em `TestDatabase`
+  (helper de introspection, aproveitável nas próximas migrações); `team_repository_test`
+  ganhar factories simples (`build_pokemon(name, number)`).
+
+---
+
 ## Próximos passos (fora deste arquivo)
 
 1. **0007**: implementar + validar (TDD) — montagem de times é pré-requisito de B/C.
