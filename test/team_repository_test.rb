@@ -2,6 +2,7 @@
 
 require_relative "test_helper"
 
+# rubocop:disable Metrics/ClassLength
 class TeamRepositoryTest < Minitest::Test
   def setup
     TestDatabase.setup!
@@ -104,6 +105,7 @@ class TeamRepositoryTest < Minitest::Test
     assert_equal "user-a", row["user_id"]
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def test_remove_recompacts_slots
     pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
     bulbasaur = Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1)
@@ -122,6 +124,7 @@ class TeamRepositoryTest < Minitest::Test
     @repository.add("user-a", Pokemon.new(name: "squirtle", sprite: "https://example.com/squirtle.png", number: 7))
     assert_equal [1, 2, 3], @repository.all("user-a").map(&:slot)
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def test_slots_are_independent_per_user
     pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
@@ -167,3 +170,4 @@ class TeamRepositoryTest < Minitest::Test
     connection&.close
   end
 end
+# rubocop:enable Metrics/ClassLength

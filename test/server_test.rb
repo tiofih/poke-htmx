@@ -141,7 +141,6 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def test_post_team_with_duplicate_returns_warning_and_does_not_insert
     @repository.add("user-a", pikachu_pokemon)
 
@@ -153,7 +152,6 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, "pikachu já está no time."
     assert_equal 1, @repository.all("user-a").size
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def test_get_team_returns_own_session_team
     @repository.add("user-a", pikachu_pokemon)

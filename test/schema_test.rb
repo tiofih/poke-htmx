@@ -32,6 +32,7 @@ class SchemaTest < Minitest::Test
     connection&.close
   end
 
+  # rubocop:disable Metrics/MethodLength
   def index_exists(table, column_a, column_b)
     connection = PG.connect(ENV.fetch("DATABASE_URL"))
     connection.exec_params(
@@ -45,4 +46,5 @@ class SchemaTest < Minitest::Test
   ensure
     connection&.close
   end
+  # rubocop:enable Metrics/MethodLength
 end
