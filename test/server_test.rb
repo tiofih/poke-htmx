@@ -3,6 +3,7 @@
 require_relative "test_helper"
 require_relative "../server"
 
+# rubocop:disable Metrics/ClassLength
 class ServerTest < Minitest::Test
   include Rack::Test::Methods
 
@@ -121,10 +122,23 @@ class ServerTest < Minitest::Test
     assert_empty @repository.all("user-b")
   end
 
-  def test_get_team_route_is_removed
+  def test_get_team_returns_own_session_team
+    @repository.add("user-a", pikachu_pokemon)
+
     get "/team", {}, user_session("user-a")
 
-    assert last_response.not_found?
+    assert last_response.ok?
+    assert_includes last_response.body, "pikachu"
+    assert_includes last_response.body, "hx-delete=\"/team\""
+  end
+
+  def test_get_team_is_isolated_per_session
+    @repository.add("user-a", pikachu_pokemon)
+
+    get "/team", {}, user_session("user-b")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "pikachu"
   end
 
   private
@@ -136,3 +150,4 @@ class ServerTest < Minitest::Test
     connection&.close
   end
 end
+# rubocop:enable Metrics/ClassLength
