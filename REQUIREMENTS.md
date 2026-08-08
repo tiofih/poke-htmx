@@ -35,13 +35,20 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
-### RF-01 — Listar Pokémon — `Approved`
-- Exibir um `<select>` com todos os Pokémon disponíveis na PokéAPI (versão `limite=100000` atual, já pontuado em RNF-05).
-- O valor de cada opção é o nome do Pokémon.
+### RF-01 — Listar Pokémon — `Em refinamento` (sessão 0006)
+- Exibir um `<select>` com os Pokémon da PokéAPI, **paginação (100 por página)**
+  e **filtro por nome** (sessão 0006) — substituindo o `limit=100000` único.
+- O valor de cada opção é o nome do Pokémon; o `<select>` dispara `hx-get="/pokemon"`.
 
 **Critérios de aceite:**
-- [ ] Ao acessar `GET /`, a página contém um elemento `<select name="name" id="pokemons" hx-get="/pokemon">`.
-- [ ] O `<select>` contém uma opção para cada Pokémon retornado pela PokéAPI, com `value` = nome do Pokémon.
+- [x] Ao acessar `GET /`, a página contém um elemento `<select name="name" id="pokemons" hx-get="/pokemon">`.
+- [x] `GET /` renderiza as opções da **primeira página** (máx. 100), sem `limit=100000`.
+- [ ] `GET /pokemons` (fragmento) re-renderiza o `<select>` com a página solicitada (`offset`)
+      + controles "Anterior"/"Próxima" htmx + contador "Página X de Y".
+- [ ] `GET /pokemons?q=<texto>` filtra por substring sobre a lista cacheada e pagina
+      o resultado filtrado; `q` vazio = lista completa.
+- [ ] Paginação/filtro sem JS customizado (RNF-01); o `<select>` continua disparando
+      `hx-get="/pokemon"` ao trocar a opção.
 
 ### RF-02 — Visualizar Pokémon — `Draft`
 - Ao selecionar um Pokémon no `<select>`, disparar `hx-get /pokemon?name=<nome>` em `#change`.
@@ -135,7 +142,9 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 - [x] **Estado efêmero e global** — resolvido no escopo de equipe (RF-05, sessão 0003): persistência por usuário; tratamento de erros global segue em backlog.
 - [x] **Rota de remoção ambígua** (`GET /team` com `index`) — migrar para `DELETE /team` (RF-04, sessão 0002).
-- [ ] **Listagem massiva** — `limit=100000` lento e sem paginação/filtro (RF-01).
+- [x] **Listagem massiva** — resolvido no escopo RF-01 (sessão 0006): paginação (100/página)
+      + filtro por nome com cache; busca parcial server-side da PokéAPI segue limitada
+      (lista completa cacheada em memória).
 - [ ] **Sem tratamento de erros** — nome inválido, rate-limit da PokéAPI, time sem membros, duplicados.
 - [ ] **HTML parcial sem layout único** — extrair layout/navbar/estilos.
 
@@ -148,5 +157,5 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 3 | Equipe por usuário (sessão/cookie, RF-05) | Done (sessão 0003) |
 | 4 | Página de detalhes (tipos, stats, evoluções) | Done (sessões 0004+0005) |
 | 5 | Navegação pela sprite para o detalhe + Fechar/Voltar (RF-06) | Done (sessões 0004+0005) |
-| 6 | Paginação/filtro na listagem | Backlog |
+| 6 | Paginação/filtro na listagem | Em refinamento (sessão 0006) |
 | 7 | UI: layout e estilos externo | Backlog |
