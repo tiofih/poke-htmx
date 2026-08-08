@@ -8,7 +8,12 @@ class TypeEffectivenessTest < Minitest::Test
     TypeEffectiveness.from_relations(
       "fire" => { "double" => %w[grass bug ice steel], "half" => %w[fire water rock dragon], "no" => [] },
       "electric" => { "double" => %w[water flying], "half" => %w[electric grass dragon], "no" => %w[ground] },
-      "normal" => { "double" => [], "half" => %w[rock steel], "no" => %w[ghost] }
+      "normal" => { "double" => [], "half" => %w[rock steel], "no" => %w[ghost] },
+      "water" => { "double" => %w[fire ground rock], "half" => %w[water grass dragon], "no" => [] },
+      "grass" => { "double" => %w[water ground rock], "half" => %w[fire grass poison flying bug dragon steel], "no" => [] },
+      "ground" => { "double" => %w[fire electric poison rock steel], "half" => %w[grass bug], "no" => %w[flying] },
+      "flying" => { "double" => %w[grass fighting bug], "half" => %w[electric rock steel], "no" => %w[ground] },
+      "ghost" => { "double" => %w[ghost psychic], "half" => %w[dark], "no" => %w[normal] }
     )
   end
 
@@ -34,5 +39,13 @@ class TypeEffectivenessTest < Minitest::Test
 
   def test_factor_atacante_desconhecido_e_1
     assert_in_delta 1.0, relations.factor("fairy", "fire")
+  end
+
+  def test_factor_multiplicadores_tipos_reais
+    assert_in_delta 2.0, relations.factor("water", "ground")
+    assert_in_delta 0.5, relations.factor("grass", "flying")
+    assert_in_delta 0.0, relations.factor("ground", "flying")
+    assert_in_delta 0.0, relations.factor("ghost", "normal")
+    assert_in_delta 2.0, relations.factor("flying", "grass")
   end
 end
