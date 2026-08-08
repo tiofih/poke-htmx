@@ -11,6 +11,24 @@
 - Ao receber o feedback, registrar a validação no arquivo da sessão e só então
   atualizar `REQUIREMENTS.md`/`SESSIONS.md` e commitar a validação.
 
+## Formato de commit (regra do projeto)
+
+- **Idioma:** português (sem exigir acentuação no título).
+- **Formato:** uma linha `Contexto: descrição concisa`. **Sem** prefixos
+  genéricos (`feat:`, `fix:`, `chore:`). Descrever o que mudou e por quê
+  (resultado), não "teste"/"implementação".
+- **Corpo opcional:** linha em branco + bullets para detalhar decisões.
+
+| Contexto | Quando usar | Exemplo |
+| --- | --- | --- |
+| `Passo N:` | green do passo TDD `N` | `Passo 1: TeamRepository#all via PostgreSQL (schema.sql + rake db:setup)` |
+| `Passos N-M:` | green de passos agrupados | `Passos 3-4: testes de DELETE idempotente (id inexistente e ausente)` |
+| `Sessao 00NN: refinamento concluido — ...` | refinamento (fase 1) fechado | `Sessao 0002: refinamento concluido — DELETE /team (RF-04), criterios e plano TDD fechados` |
+| `Validacao sessao 00NN: ...` | validação do usuário (fase 3) | `Validacao sessao 0002: RF-04 Done, implementacao + criterios verificados, prox sessao 0003` |
+| `Sessao 00NN concluida: ...` | sessão fechada | `Sessao 0001 concluida: RNF-02 e RF-03 Done, validacao integrada, proxima sessao 0002` |
+| `Regra: ...` | mudança de convenção/regra | `Regra: validacao e feita pelo usuario — parar ao chegar na fase 3 e aguardar feedback` |
+| `Atualizar progresso da sessão 00NN (...)` | checkpoint de progresso | `Atualizar progresso da sessão 0001 (passo 4 verde e validado)` |
+
 ---
 
 # context-mode — MANDATORY routing rules
