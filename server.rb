@@ -82,5 +82,11 @@ class Server < Sinatra::Base
     erb :team
   end
 
+  post "/team/:id/move" do
+    settings.team.move(current_user, params[:id], params[:new_slot].to_i)
+    @team = settings.team.all(current_user)
+    erb :team
+  end
+
   run! if $PROGRAM_NAME == app_file
 end

@@ -475,6 +475,58 @@ class ServerTest < Minitest::Test
   # rubocop:enable Metrics/AbcSize
 
   # rubocop:disable Metrics/AbcSize
+  def test_post_team_move_reorders_team_fragment
+    add_four_pokemon_team("user-a")
+    charmander_id = @repository.all("user-a").find { |poke| poke.name == "charmander" }.id
+
+    post "/team/#{charmander_id}/move", { new_slot: 1 }, user_session("user-a")
+
+    assert last_response.ok?
+    order = last_response.body.index("charmander") < last_response.body.index("pikachu")
+    assert order, "expected charmander (slot 1) before pikachu"
+    assert_includes last_response.body, "#1"
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def test_team_move_invalid_slot_keeps_team_intact
+    add_four_pokemon_team("user-a")
+    pikachu_id = @repository.all("user-a").find { |poke| poke.name == "pikachu" }.id
+
+    post "/team/#{pikachu_id}/move", { new_slot: 99 }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal %w[pikachu bulbasaur charmander squirtle], @repository.all("user-a").map(&:name)
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def test_team_move_of_other_users_member_is_noop
+    @repository.add("user-a", pikachu_pokemon)
+    @repository.add("user-b", bulbasaur_pokemon)
+    bulbasaur_id = @repository.all("user-b").first.id
+
+    post "/team/#{bulbasaur_id}/move", { new_slot: 1 }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal %w[pikachu], @repository.all("user-a").map(&:name)
+    assert_equal %w[bulbasaur], @repository.all("user-b").map(&:name)
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  # rubocop:disable Metrics/AbcSize
+  def test_team_move_does_not_break_delete
+    add_four_pokemon_team("user-a")
+    pikachu_id = @repository.all("user-a").find { |poke| poke.name == "pikachu" }.id
+
+    post "/team/#{pikachu_id}/move", { new_slot: 1 }, user_session("user-a")
+    delete "/team", { id: pikachu_id }, user_session("user-a")
+
+    assert last_response.ok?
+    refute_includes @repository.all("user-a").map(&:name), "pikachu"
+    assert_includes last_response.body, "Remove from Team"
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  # rubocop:disable Metrics/AbcSize
   def test_index_renders_first_page_with_filter_input
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/"
@@ -490,6 +542,17 @@ class ServerTest < Minitest::Test
   # rubocop:enable Metrics/AbcSize
 
   private
+
+  def add_four_pokemon_team(user_id)
+    [["pikachu", 25], ["bulbasaur", 1], ["charmander", 4], ["squirtle", 7]].each do |name, number|
+      pokemon = Pokemon.new(
+        name: name,
+        sprite: "https://example.com/#{name}.png",
+        number: number
+      )
+      @repository.add(user_id, pokemon)
+    end
+  end
 
   def distinct_user_ids
     connection = PG.connect(ENV.fetch("DATABASE_URL"))
