@@ -76,14 +76,15 @@ Preencher após a implementação:
 - **Passo 0** (infra de testes) — `test/test_helper.rb` + `test/smoke_test.rb` (commit `456c4da`).
 - **Passo 1** (banco vazio: `TeamRepository#all` retorna `[]`) — green: `lib/team_repository.rb`, `db/schema.sql`, `rake db:setup`, `test/team_repository_test.rb` (commit `e666b57`). Tabela `team_pokemons` aplicada em `dev` e teste.
 - **Passo 2** (`TeamRepository#add(pokemon)` persiste e `all` retorna `Pokemon`) — green: `INSERT` em `team_pokemons` e `all` mapeando para `Pokemon` (commit `1fb23e9`).
-- **Próximo:** passo 3 — `TeamRepository#remove(id)` remove do banco (`DELETE ... WHERE id = $1`) — só inicia com a validação do passo 2 concluída (regra de sequência RNF-04).
+- **Passo 3** (`TeamRepository#remove(id)` remove do banco) — green: `DELETE FROM team_pokemons WHERE id = $1` (commit `cc1828d`).
+- **Próximo:** passo 4 — rotas usam `TeamRepository` (teste HTTP, `PokeApi.find` stubado) — só inicia com a validação do passo 3 concluída (regra de sequência RNF-04).
 
-### Validação dos passos 0–2 (atualizada em 2026-08-07)
+### Validação dos passos 0–3 (atualizada em 2026-08-07)
 
 - [x] Suíte completa verde (Minitest): via `./scripts/test`.
 - [x] Lint verde: `./scripts/lint` sem ofensas.
-- [x] `rake db:setup` idempotente — tabela `team_pokemons` presente em `dev` e teste.
-- [x] Passo 2 validado: `add` persiste (INSERT com parâmetros $1–$3) e `all` mapeia linhas para `Pokemon`; suite `3 runs, 0 errors`.
+- [x] `rake db:setup` idempotente — tabela `team_pokemons` presente em `dev` e teste (NOTICE suprimido com `client_min_messages=warning`).
+- [x] Passo 3 validado: `remove(id)` com `DELETE ... WHERE id = $1` (id obtido via `team_id` no teste); suite `4 runs, 0 errors`.
 - [x] Critérios de aceite do escopo entregue verificados: infra de testes (item 7) e `DATABASE_URL` + schema via `rake db:setup` (itens 4–6).
 - [x] Pendente (passos 3–5): remoção por id, rotas no repositório, teste HTTP integrado — critérios 1–3 da seção 3.
 
