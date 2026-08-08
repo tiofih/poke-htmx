@@ -169,6 +169,35 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/MethodLength
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_pokemon_detail_renders_six_base_stats
+    pikachu = Pokemon.new(
+      name: "pikachu",
+      sprite: "https://example.com/pikachu.png",
+      number: 25,
+      stats: [
+        { name: "HP", value: 35 },
+        { name: "Attack", value: 55 },
+        { name: "Defense", value: 40 },
+        { name: "Sp.Atk", value: 50 },
+        { name: "Sp.Def", value: 50 },
+        { name: "Speed", value: 90 }
+      ]
+    )
+
+    PokeApiStub.with_detail(pikachu) do
+      get "/pokemon/25"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "HP"
+    assert_includes last_response.body, "35"
+    assert_includes last_response.body, "55"
+    assert_includes last_response.body, "Speed"
+    assert_includes last_response.body, "90"
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
   private
 
   def distinct_user_ids

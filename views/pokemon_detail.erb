@@ -2,4 +2,9 @@
 <%= @pokemon.name %><br>
 <% @pokemon.types.each do |type| %>
   <span class="type"><%= type %></span>
-<% end %>
+<% end %><br>
+<ul class="stats">
+  <% @pokemon.stats.each do |stat| %>
+    <li><%= stat[:name] %>: <%= stat[:value] %></li>
+  <% end %>
+</ul>
