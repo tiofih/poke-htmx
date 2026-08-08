@@ -24,4 +24,11 @@ class BattlePokemon < Dry::Struct
       hp_current: hp || 1
     )
   end
+
+  def take_damage(amount)
+    return self if amount <= 0
+
+    new_hp = [hp_current - amount, 0].max
+    new(hp_current: new_hp)
+  end
 end
