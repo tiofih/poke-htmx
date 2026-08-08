@@ -37,6 +37,13 @@ class Server < Sinatra::Base
     erb :index
   end
 
+  get "/pokemons" do
+    @offset = params[:offset].to_i
+    @q = params[:q].to_s
+    @page = PokeApi.paginate(offset: @offset, query: @q)
+    erb :pokemon_list
+  end
+
   get "/pokemon" do
     @pokemon = PokeApi.find(params[:name])
     erb :pokemon

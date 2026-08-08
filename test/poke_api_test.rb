@@ -39,7 +39,7 @@ class PokeApiTest < Minitest::Test
 
   def test_paginate_filters_by_substring_case_insensitive
     PokeApiStub.with_all_names(fifteen_names) do
-      page = PokeApi.paginate(offset: 0, limit: 10, q: "PIK")
+      page = PokeApi.paginate(offset: 0, limit: 10, query: "PIK")
 
       assert_equal %w[pikachu pikachu-raichu], page[:names]
       assert_equal 2, page[:total]
@@ -48,7 +48,7 @@ class PokeApiTest < Minitest::Test
 
   def test_paginate_with_empty_q_returns_all
     PokeApiStub.with_all_names(fifteen_names) do
-      page = PokeApi.paginate(offset: 0, limit: 100, q: "")
+      page = PokeApi.paginate(offset: 0, limit: 100, query: "")
 
       assert_equal 15, page[:names].size
       assert_equal 15, page[:total]
@@ -57,8 +57,8 @@ class PokeApiTest < Minitest::Test
 
   def test_paginate_filters_then_paginates
     PokeApiStub.with_all_names(fifteen_names) do
-      first = PokeApi.paginate(offset: 0, limit: 1, q: "char")
-      second = PokeApi.paginate(offset: 1, limit: 1, q: "char")
+      first = PokeApi.paginate(offset: 0, limit: 1, query: "char")
+      second = PokeApi.paginate(offset: 1, limit: 1, query: "char")
 
       assert_equal %w[charmander], first[:names]
       assert_equal %w[charmeleon], second[:names]

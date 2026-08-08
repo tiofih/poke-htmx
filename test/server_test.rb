@@ -264,6 +264,60 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, "pokeName"
   end
 
+  def two_hundred_fifty_names
+    (1..250).map { |index| "pokemon#{index}" }
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def test_pokemons_fragment_renders_first_page
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/pokemons"
+    end
+
+    assert last_response.ok?
+    assert_equal 100, last_response.body.scan("<option value=\"pokemon").size
+    assert_includes last_response.body, "id=\"pokemons\""
+    assert_includes last_response.body, "hx-get=\"/pokemon\""
+    assert_includes last_response.body, "Página 1 de 3"
+    assert_includes last_response.body, "Próxima"
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def test_pokemons_first_page_has_no_previous_link
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/pokemons"
+    end
+
+    assert last_response.ok?
+    refute_includes last_response.body, ">Anterior<"
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def test_pokemons_middle_page_has_previous_and_next_links
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/pokemons", offset: 100
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "offset=0"
+    assert_includes last_response.body, "offset=200"
+    assert_includes last_response.body, "Página 2 de 3"
+    assert_includes last_response.body, ">Anterior<"
+    assert_includes last_response.body, ">Próxima<"
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def test_pokemons_last_page_has_no_next_link
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/pokemons", offset: 200
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Página 3 de 3"
+    refute_includes last_response.body, ">Próxima<"
+    assert_includes last_response.body, ">Anterior<"
+  end
+
   def test_pokemon_name_fragment_links_to_detail
     PokeApiStub.with_find(pikachu_pokemon) do
       get "/pokemon", name: "pikachu"

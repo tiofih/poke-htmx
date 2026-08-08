@@ -18,12 +18,12 @@ class PokeApi
   end
 
   def self.fetch_all_names
-    @all_names ||= all.map { |pokemon| pokemon["name"] }
+    @fetch_all_names ||= all.map { |pokemon| pokemon["name"] }
   end
 
-  def self.paginate(offset: 0, limit: 100, q: nil)
+  def self.paginate(offset: 0, limit: 100, query: nil)
     names = fetch_all_names
-    names = names.select { |name| name.downcase.include?(q.downcase) } if q && !q.empty?
+    names = names.select { |name| name.downcase.include?(query.downcase) } if query && !query.empty?
     { names: names[offset, limit].to_a, total: names.size }
   end
 
