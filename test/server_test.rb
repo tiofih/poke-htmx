@@ -106,6 +106,17 @@ class ServerTest < Minitest::Test
     assert last_response.ok?
   end
 
+  def test_delete_team_only_removes_own_session_member
+    @repository.add("user-a", pikachu_pokemon)
+    id = @repository.all("user-a").first.id
+
+    delete "/team", { id: id }, user_session("user-b")
+
+    assert last_response.ok?
+    assert_equal 1, @repository.all("user-a").size
+    assert_empty @repository.all("user-b")
+  end
+
   def test_get_team_route_is_removed
     get "/team", {}, user_session("user-a")
 
