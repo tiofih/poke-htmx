@@ -23,12 +23,18 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 - **Commit obrigatório após cada green.**
 - Atualizar `REQUIREMENTS.md`/`SESSIONS.md` no mesmo trabalho quando o comportamento mudar.
 
-### 3. Validação (verificação)
+### 3. Validação (verificação) — executada pelo USUÁRIO
 
-- Rodar a **suíte completa** (Minitest) e confirmar tudo verde.
+- A **validação é feita pelo usuário**. Ao terminar a fase 2 (implementação TDD, suíte
+  e lint verdes), o agente **para** e aguarda o feedback do usuário — não marca fases
+  como concluídas, não atualiza `REQUIREMENTS.md`/`SESSIONS.md` com status de validação
+  e não commita a conclusão da sessão antes disso.
+- Com o feedback em mãos, o usuário roda a **suíte completa** (Minitest) e confirma
+  tudo verde.
 - Verificar os **critérios de aceite** da sessão contra a implementação.
-- Registrar resultados e problemas no arquivo da sessão.
-- Atualizar `REQUIREMENTS.md` (status dos requisitos) e `SESSIONS.md` (progresso + próxima sessão).
+- Registrar resultados e problemas no arquivo da sessão (feito junto ao usuário).
+- Atualizar `REQUIREMENTS.md` (status dos requisitos) e `SESSIONS.md` (progresso +
+  próxima sessão) apenas após a validação do usuário.
 
 ---
 

@@ -1,3 +1,18 @@
+# Poke-HTMX — MANDATORY workflow rules
+
+## Validação é do usuário — PARE na fase de validação
+
+- A **fase de validação** (fase 3 do ciclo de cada sessão) é executada pelo **usuário**.
+- Ao concluir a fase de **implementação (TDD, fase 2)** — todos os passos red→green→commit
+  feitos e suíte/lint verdes — o agente **DEVE PARAR** e **aguardar o feedback do usuário**.
+- **Não** marcar fases como `Concluída`/`Done` no arquivo da sessão, **não** atualizar
+  `REQUIREMENTS.md`/`SESSIONS.md` com status de validação e **não** commitar a
+  conclusão da sessão até o usuário validar explicitamente.
+- Ao receber o feedback, registrar a validação no arquivo da sessão e só então
+  atualizar `REQUIREMENTS.md`/`SESSIONS.md` e commitar a validação.
+
+---
+
 # context-mode — MANDATORY routing rules
 
 context-mode MCP tools available. Rules protect context window from flooding. One unrouted command dumps 56 KB into context.
