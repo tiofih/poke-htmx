@@ -40,9 +40,10 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0003** — Equipe por usuário (sessão/cookie).
-No backlog — a sessão 0002 está concluída e validada, então a regra de sequência
-(RNF-04) permite iniciar a 0003.
+**Sessão 0003** — Equipe por usuário (sessão/cookie, RF-05).
+Em refinamento — critérios de aceite e plano TDD já registrados em
+`sessions/0003-equipe-por-usuario.md`. A sessão 0002 está concluída e validada,
+então a regra de sequência (RNF-04) permite a fase 2 da 0003.
 
 ## Progresso das sessões
 
@@ -50,7 +51,7 @@ No backlog — a sessão 0002 está concluída e validada, então a regra de seq
 | --- | --- | --- | --- |
 | 0001 | Persistir equipe em PostgreSQL (RNF-02) | Concluída | Done (passos 0–5 validados) |
 | 0002 | Remoção semântica (`DELETE /team`, RF-04) | Concluída | Done (passos 0–5 validados) |
-| 0003 | Equipe por usuário (sessão/cookie) | — | Backlog |
+| 0003 | Equipe por usuário (sessão/cookie, RF-05) | Refinamento | Concluída (validado em 2026-08-08) |
 | 0004 | Página de detalhes (tipos, stats, evoluções) | — | Backlog |
 | 0005 | Paginação/filtro na listagem | — | Backlog |
 | 0006 | UI: layout e estilos externo | — | Backlog |

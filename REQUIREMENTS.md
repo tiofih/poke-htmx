@@ -70,6 +70,17 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] `id` inexistente ou ausente não quebra: re-renderiza a equipe (idempotente).
 - [x] Rota `GET /team` deixa de manipular remoção.
 
+### RF-05 — Equipe por usuário — `Em refino` (sessão 0003)
+- Cada navegador (sessão/cookie) tem a **própria equipe**, isolada das demais.
+- `POST /team` e `DELETE /team` persistem e buscam apenas os Pokémon do usuário da sessão corrente.
+
+**Critérios de aceite:**
+- [ ] `team_pokemons` ganha `user_id` (`TEXT NOT NULL`); migração trunca dados antigos.
+- [ ] `TeamRepository` opera por usuário: `all(user_id)`, `add(user_id, pokemon)`, `remove(user_id, id)`.
+- [ ] Pokémon de um usuário não aparece na equipe de outro (isolamento).
+- [ ] `DELETE /team` só remove membro do próprio usuário; id de outro usuário é idempotente (200).
+- [ ] Sessão Sinatra gera `user_id` no 1º acesso; rotas e `team.erb` usam o usuário da sessão.
+
 ## Requisitos Não-Funcionais
 
 ### RNF-01 — Arquitetura — `Executado`
@@ -108,7 +119,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | --- | --- | --- |
 | 1 | Persistir equipe em PostgreSQL (RNF-02) | Done |
 | 2 | Remoção semântica (`DELETE /team`, RF-04) | Done (sessão 0002) |
-| 3 | Equipe por usuário (sessão/cookie) | Backlog |
+| 3 | Equipe por usuário (sessão/cookie, RF-05) | Em refino (sessão 0003) |
 | 4 | Página de detalhes (tipos, stats, evoluções) | Backlog |
 | 5 | Paginação/filtro na listagem | Backlog |
 | 6 | UI: layout e estilos externo | Backlog |
