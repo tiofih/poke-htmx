@@ -527,6 +527,21 @@ class ServerTest < Minitest::Test
   # rubocop:enable Metrics/AbcSize
 
   # rubocop:disable Metrics/AbcSize
+  def test_team_fragment_renders_move_buttons
+    add_four_pokemon_team("user-a")
+
+    get "/team", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 8, last_response.body.scan("hx-post=\"/team/").size
+    assert_includes last_response.body, ">▲</button>"
+    assert_includes last_response.body, ">▼</button>"
+    assert_includes last_response.body, 'name="new_slot"'
+    assert_includes last_response.body, 'hx-target="#team"'
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  # rubocop:disable Metrics/AbcSize
   def test_index_renders_first_page_with_filter_input
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/"

@@ -3,18 +3,32 @@
 <% end %>
 <% @team.each do |poke| %>
   <p class="slot">#<%= poke.slot %></p>
+  <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#pokemon" hx-swap="innerHTML">
+    <img src="<%= poke.sprite %>">
+  </a><br>
+  <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#pokemon" hx-swap="innerHTML">
+    <%= poke.name %>
+  </a><br>
+  <form
+      hx-post="/team/<%= poke.id %>/move"
+      hx-target="#team"
+      hx-swap="innerHTML">
+    <input type="hidden" name="new_slot" value="<%= poke.slot - 1 %>">
+    <button type="submit">▲</button>
+  </form>
+  <form
+      hx-post="/team/<%= poke.id %>/move"
+      hx-target="#team"
+      hx-swap="innerHTML">
+    <input type="hidden" name="new_slot" value="<%= poke.slot + 1 %>">
+    <button type="submit">▼</button>
+  </form>
   <form
       id='team-pokemon-<%= poke.id %>'
       hx-delete="/team"
       hx-target="#team"
       hx-swap="innerHTML"
       hx-params="*">
-    <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#pokemon" hx-swap="innerHTML">
-      <img src="<%= poke.sprite %>">
-    </a><br>
-    <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#pokemon" hx-swap="innerHTML">
-      <%= poke.name %>
-    </a><br>
     <input type="hidden" name="id" value="<%= poke.id %>">
     <button type="submit" class="btn">Remove from Team</button>
   </form>
