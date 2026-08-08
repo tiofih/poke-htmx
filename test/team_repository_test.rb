@@ -9,6 +9,19 @@ class TeamRepositoryTest < Minitest::Test
     @repository = TeamRepository.new
   end
 
+  def test_add_rejects_duplicate_number_with_duplicate_error
+    pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
+    pikachu_raichu = Pokemon.new(name: "pikachu-raichu", sprite: "https://example.com/raichu.png", number: 26)
+    @repository.add("user-a", pikachu)
+    @repository.add("user-a", pikachu_raichu)
+
+    dup = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 26)
+    error = assert_raises(TeamRepository::DuplicateError) { @repository.add("user-a", dup) }
+
+    assert_match(/já está|repetid/i, error.message)
+    assert_equal 2, @repository.all("user-a").size
+  end
+
   def test_all_returns_empty_array_for_empty_database
     assert_equal [], @repository.all("user-a")
   end

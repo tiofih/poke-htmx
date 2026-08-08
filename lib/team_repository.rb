@@ -26,6 +26,7 @@ class TeamRepository
   def add(user_id, pokemon)
     slot = next_free_slot(user_id)
     raise TeamFullError, "Time cheio (máx. #{MAX_TEAM_SIZE})." if slot.nil?
+    raise DuplicateError, "#{pokemon.name} já está no time." if duplicate?(user_id, pokemon.number)
 
     connection.exec_params(
       "INSERT INTO team_pokemons (user_id, name, sprite, number, slot) VALUES ($1, $2, $3, $4, $5)",
@@ -45,6 +46,13 @@ class TeamRepository
       [user_id]
     ).map { |row| row["slot"].to_i }
     (1..MAX_TEAM_SIZE).find { |slot| !taken.include?(slot) }
+  end
+
+  def duplicate?(user_id, number)
+    connection.exec_params(
+      "SELECT 1 FROM team_pokemons WHERE user_id = $1 AND number = $2",
+      [user_id, number]
+    ).ntuples.positive?
   end
 
   def connection
