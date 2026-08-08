@@ -126,6 +126,10 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - `REQUIREMENTS.md` e `SESSIONS.md` sempre atualizados no mesmo escopo.
 - Suíte cobre regras de negócio (persistência da equipe, adicionar/remover, consulta à PokéAPI) e rotas do servidor.
 - **Sequenciamento:** um passo só é iniciado quando todas as fases do passo anterior estiverem concluídas e validadas (nada de começar novo passo sobre trabalho não validado).
+- **Ideias/escopos grandes fora da fase:** ideias, melhorias e escopos grandes identificados
+  durante uma sessão são **anotados** no `REQUIREMENTS.md` (limitações/roadmap) ou nas
+  observações do arquivo da sessão, mas só seguem o fluxo (refinamento → TDD → validação)
+  **após a sessão corrente ser concluída e validada** — nada de abrir novo escopo no meio.
 
 ## Limitações Conhecidas / Pontos de Refinamento
 

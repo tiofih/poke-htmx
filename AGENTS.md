@@ -11,6 +11,18 @@
 - Ao receber o feedback, registrar a validação no arquivo da sessão e só então
   atualizar `REQUIREMENTS.md`/`SESSIONS.md` e commitar a validação.
 
+## Ideias, melhorias e escopos grandes — anotar, refinar depois
+
+- Ideias, melhorias e escopos **grandes** identificados durante uma sessão (em qualquer
+  fase) são **anotados** — no `REQUIREMENTS.md` (limitações/roadmap) ou na seção de
+  observações do arquivo da sessão — mas **não** são refinados nem seguem o fluxo
+  (novo arquivo de sessão + critérios de aceite + plano TDD) **enquanto a sessão atual
+  não estiver concluída e validada**.
+- A **regra da fase atual** continua valendo (RNF-04): nada de abrir novo escopo no meio
+  de uma sessão; a anotação não bloqueia nem altera o fluxo corrente.
+- Somente **após** a conclusão/validação da sessão corrente, a anotação pode virar uma
+  **nova sessão** (refinamento → TDD → validação).
+
 ## Formato de commit (regra do projeto)
 
 - **Idioma:** português (sem exigir acentuação no título).
