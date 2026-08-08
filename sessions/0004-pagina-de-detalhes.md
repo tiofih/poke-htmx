@@ -4,7 +4,7 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | Em andamento |
+| Refinamento | Concluída (validada em 2026-08-08) |
 | Implementação | — |
 | Validação | — |
 
@@ -115,8 +115,13 @@ usa o **id único da API** (`GET /pokemon/:poke_id`), mais estável que o nome
 - Próximo passo após validação: **fase 2 (TDD)** — passo 0 (red): `Pokemon`
   com os campos + `PokeApi.detail` + rota `GET /pokemon/:poke_id`.
 
-### Validação do refinamento (a ser preenchida quando o usuário validar)
+### Validação do refinamento (concluída em 2026-08-08)
 
-- [ ] Critérios de aceite fechados (seção 3) e decisões de design registradas (seção 4).
-- [ ] Plano TDD com 6 passos red/green definidos (seção 5).
-- [ ] `REQUIREMENTS.md` (novo RF) e `SESSIONS.md` (0004 em refinamento) atualizados no mesmo escopo.
+- [x] Critérios de aceite fechados (seção 3) e decisões de design registradas (seção 4).
+- [x] Plano TDD com 6 passos red/green definidos (seção 5).
+- [x] `REQUIREMENTS.md` (RF-06, rota `GET /pokemon/:poke_id`) e `SESSIONS.md`
+      (0004 em refinamento) atualizados no mesmo escopo.
+- Ajuste durante o refinamento: a rota de detalhe passou de `GET /pokemon/:name`
+  para `GET /pokemon/:poke_id` (id único da PokéAPI, mais estável que o nome).
+- Próximo passo: **fase 2 (TDD)** — passo 0 (red): `Pokemon` com os campos +
+  `PokeApi.detail` + rota `GET /pokemon/:poke_id`.

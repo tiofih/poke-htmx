@@ -83,7 +83,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] `DELETE /team` só remove membro do próprio usuário; id de outro usuário é idempotente (200).
 - [x] Sessão Sinatra gera `user_id` no 1º acesso; rotas e `team.erb` usam o usuário da sessão.
 
-### RF-06 — Página de detalhes — `Em refinamento` (sessão 0004)
+### RF-06 — Página de detalhes — `Em refinamento` (sessão 0004, refinamento validado)
 - Ao clicar no nome/sprite de um Pokémon (na listagem `#pokemon` ou na equipe),
   renderizar no alvo `#pokemon` os **detalhes**: sprite, nome, tipos, stats base e evoluções.
 - Interação 100% htmx (RNF-01); o botão "Add to Team" é preservado no detalhe.
