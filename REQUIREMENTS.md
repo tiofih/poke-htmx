@@ -60,13 +60,15 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] `POST /team` com `pokeName=pikachu` persiste o Pokémon na equipe (Postgres) e responde o fragment atualizado.
 - [x] O fragmento `#team` lista, para cada membro, sprite, nome e botão "Remove from Team".
 
-### RF-04 — Remover da equipe — `Completo` na implementação atual / em refino
-- Botão dispara `GET /team?index=<id>` (via form htmx) com alvo `#team`.
-- Remover o Pokémon pelo `id` persistido e re-renderizar a equipe.
+### RF-04 — Remover da equipe — `Em refino` (sessão 0002)
+- Botão dispara `DELETE /team` (via `form hx-delete` htmx) com alvo `#team`.
+- Remove o Pokémon pelo `id` persistido e re-renderiza a equipe.
 
 **Critérios de aceite:**
-- [ ] A ação de remoção é verbosa e explícita (refinar: `DELETE /team/:key` em sessão futura).
-- [x] Após a remoção, o fragmento `#team` não contém mais o Pokémon removido.
+- [ ] A ação de remoção é semântica: `DELETE /team` com `id=<id>` (em vez de `GET /team?index=<id>`).
+- [ ] Após a remoção, o fragmento `#team` não contém mais o Pokémon removido.
+- [ ] `id` inexistente ou ausente não quebra: re-renderiza a equipe (idempotente).
+- [ ] Rota `GET /team` deixa de manipular remoção.
 
 ## Requisitos Não-Funcionais
 
@@ -95,7 +97,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 ## Limitações Conhecidas / Pontos de Refinamento
 
 - [x] **Estado efêmero e global** — fase atual do roadmap: substituir memória por Postgres (RNF-02).
-- [ ] **Rota de remoção ambígua** (`GET /team` com `index`) — migrar para `DELETE /team/:key` (RF-04).
+- [ ] **Rota de remoção ambígua** (`GET /team` com `index`) — migrar para `DELETE /team` (RF-04, sessão 0002).
 - [ ] **Listagem massiva** — `limit=100000` lento e sem paginação/filtro (RF-01).
 - [ ] **Sem tratamento de erros** — nome inválido, rate-limit da PokéAPI, time sem membros, duplicados.
 - [ ] **HTML parcial sem layout único** — extrair layout/navbar/estilos.
@@ -105,7 +107,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | # | Sessão | Status |
 | --- | --- | --- |
 | 1 | Persistir equipe em PostgreSQL (RNF-02) | Done |
-| 2 | Remoção semântica (`DELETE /team/:key`) | Prevista |
+| 2 | Remoção semântica (`DELETE /team`, RF-04) | Em refino (sessão 0002) |
 | 3 | Equipe por usuário (sessão/cookie) | Backlog |
 | 4 | Página de detalhes (tipos, stats, evoluções) | Backlog |
 | 5 | Paginação/filtro na listagem | Backlog |
