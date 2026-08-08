@@ -7,5 +7,6 @@ CREATE TABLE IF NOT EXISTS team_pokemons (
   name TEXT NOT NULL,
   sprite TEXT NOT NULL,
   number INTEGER NOT NULL,
+  slot INTEGER NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
