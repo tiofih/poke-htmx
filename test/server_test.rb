@@ -141,6 +141,16 @@ class ServerTest < Minitest::Test
     refute_includes last_response.body, "pikachu"
   end
 
+  def test_pokemon_detail_route_returns_sprite_and_name
+    PokeApiStub.with_detail(pikachu_pokemon) do
+      get "/pokemon/25"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "pikachu"
+    assert_includes last_response.body, "https://example.com/pikachu.png"
+  end
+
   private
 
   def distinct_user_ids

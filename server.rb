@@ -42,6 +42,11 @@ class Server < Sinatra::Base
     erb :pokemon
   end
 
+  get "/pokemon/:poke_id" do
+    @pokemon = PokeApi.detail(params[:poke_id])
+    erb :pokemon_detail
+  end
+
   get "/team" do
     @team = settings.team.all(current_user)
     erb :team

@@ -38,4 +38,17 @@ module PokeApiStub
   ensure
     PokeApi.define_singleton_method(:find, original)
   end
+
+  def self.with_detail(pokemon)
+    existed = PokeApi.respond_to?(:detail)
+    original = existed ? PokeApi.method(:detail) : nil
+    PokeApi.define_singleton_method(:detail) { |_poke_id| pokemon }
+    yield
+  ensure
+    if existed
+      PokeApi.define_singleton_method(:detail, original)
+    else
+      PokeApi.singleton_class.send(:remove_method, :detail)
+    end
+  end
 end
