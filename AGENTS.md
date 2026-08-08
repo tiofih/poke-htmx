@@ -31,6 +31,43 @@
 
 ---
 
+# Projeto — índice rápido (leia na abertura de cada sessão)
+
+## Comandos
+
+Tudo roda **via `./scripts/*`** (usa o container `web` / sobe o `db`) — **não** rodar `rake`/`rubocop` no host.
+
+| Comando | O que faz |
+| --- | --- |
+| `./scripts/test` | Suíte Minitest completa sem rede. Filtro: `./scripts/test -n /regex/` |
+| `./scripts/lint` | RuboCop (mesmo fluxo docker). Objetivo: 0 offenses. |
+| `./scripts/run` | `docker compose up --build` — sobe o app (porta 3000) para validação manual. |
+| `rake db:setup` (no container) | Aplica `db/schema.sql` + `db/migrations/*.sql` em ordem (idempotente). |
+
+## Mapa do código
+
+| Caminho | Papel |
+| --- | --- |
+| `server.rb` | Rotas Sinatra + sessão: `enable :sessions` e `before { session[:user_id] \|\|= SecureRandom.uuid }`; helper `current_user`. Rotas: `GET /` (lista), `GET /pokemon?name=` (fragment add), `GET /team` (read-only, load inicial), `POST /team` (add), `DELETE /team` (remove). |
+| `lib/team_repository.rb` | Tudo por usuário: `all(user_id)`, `add(user_id, pokemon)`, `remove(user_id, id)` com `WHERE user_id = $N`. |
+| `lib/poke_api.rb` / `lib/pokemon.rb` | PokéAPI via Faraday (`.all`, `.find`) → `Pokemon` (Dry::Struct). Nunca em teste. |
+| `db/schema.sql` + `db/migrations/*.sql` | Schema + migrações idempotentes; `rake db:setup` e `TestDatabase.setup!` aplicam ambos em ordem. |
+| `views/index.erb` | Página única; `#pokemon`/`#team` são alvos htmx; `#team` tem `hx-get="/team" hx-trigger="load"`. |
+| `views/pokemon.erb`, `views/team.erb` | Fragmentos htmx re-renderizados (`hx-swap="innerHTML"`). |
+| `test/test_helper.rb` | `TestDatabase` (setup + `TRUNCATE`) e `PokeApiStub` (hoje só `with_find` — criar `with_all` se precisar). |
+| `test/server_test.rb` | Rotas: injeta sessão via `user_session(user_id)`; isolamento com `Rack::Test::Session` próprios. |
+| `test/team_repository_test.rb` | Persistência/isolamento por usuário. |
+
+## Armadilhas conhecidas (lições da sessão 0003)
+
+- **`session_secret`**: Sinatra 3.1 usa `Rack::Protection::EncryptedCookie` (AES-256-GCM) → valor **string hex ≥ 32 bytes**; string livre estoura com `ArgumentError: key must be 32 bytes`. Override p/ prod: `ENV["SESSION_SECRET"]`.
+- **Sessão em teste**: injetar `"rack.session" => { "user_id" => "..." }` no env do request; vários navegadores = `Rack::Test::Session.new(Rack::MockSession.new(app))`.
+- **Mudança de schema**: adicionar migração idempotente em `db/migrations/` (`ADD COLUMN IF NOT EXISTS` / `CREATE INDEX IF NOT EXISTS`); `rake db:setup`/`TestDatabase.setup!` já aplicam todas — não duplicar.
+- **Sem rede em testes**: rotas que tocam `PokeApi` exigem stub (`PokeApiStub.with_find`).
+- **RuboCop em testes**: seguir o padrão local (`# rubocop:disable Metrics/AbcSize, Metrics/MethodLength`; `Metrics/ClassLength` na classe) em vez de reestruturar.
+
+---
+
 # context-mode — MANDATORY routing rules
 
 context-mode MCP tools available. Rules protect context window from flooding. One unrouted command dumps 56 KB into context.
