@@ -77,16 +77,17 @@ Preencher após a implementação:
 - **Passo 1** (banco vazio: `TeamRepository#all` retorna `[]`) — green: `lib/team_repository.rb`, `db/schema.sql`, `rake db:setup`, `test/team_repository_test.rb` (commit `e666b57`). Tabela `team_pokemons` aplicada em `dev` e teste.
 - **Passo 2** (`TeamRepository#add(pokemon)` persiste e `all` retorna `Pokemon`) — green: `INSERT` em `team_pokemons` e `all` mapeando para `Pokemon` (commit `1fb23e9`).
 - **Passo 3** (`TeamRepository#remove(id)` remove do banco) — green: `DELETE FROM team_pokemons WHERE id = $1` (commit `cc1828d`).
-- **Próximo:** passo 4 — rotas usam `TeamRepository` (teste HTTP, `PokeApi.find` stubado) — só inicia com a validação do passo 3 concluída (regra de sequência RNF-04).
+- **Passo 4** (rotas usam `TeamRepository` via `settings` + teste HTTP com `PokeApi.find` stubado) — green: `server.rb` troca `settings.team` (lista) pelo repositório; `Pokemon` ganha `id` opcional; `team.erb` envia `id`; `PokeApiStub.with_find` para testes sem rede; guard do `run!` (`$PROGRAM_NAME == app_file`) para o app carregar no rack-test (commit `cc544ad`).
+- **Próximo:** passo 5 — `POST /team` grava no banco de teste (suíte integrada completa) — só inicia com a validação do passo 4 concluída (regra de sequência RNF-04).
 
-### Validação dos passos 0–3 (atualizada em 2026-08-07)
+### Validação dos passos 0–4 (atualizada em 2026-08-07)
 
 - [x] Suíte completa verde (Minitest): via `./scripts/test`.
 - [x] Lint verde: `./scripts/lint` sem ofensas.
 - [x] `rake db:setup` idempotente — tabela `team_pokemons` presente em `dev` e teste (NOTICE suprimido com `client_min_messages=warning`).
-- [x] Passo 3 validado: `remove(id)` com `DELETE ... WHERE id = $1` (id obtido via `team_id` no teste); suite `4 runs, 0 errors`.
+- [x] Passo 4 validado: `POST /team`/`GET /team` usam o repositório; testes HTTP (`test/server_test.rb`) com `PokeApi.find` stubado via `PokeApiStub` (sem rede); remoção por `id`; servidor real em pé (curl 200). Suite `6 runs, 0 errors`.
 - [x] Critérios de aceite do escopo entregue verificados: infra de testes (item 7) e `DATABASE_URL` + schema via `rake db:setup` (itens 4–6).
-- [x] Pendente (passos 3–5): remoção por id, rotas no repositório, teste HTTP integrado — critérios 1–3 da seção 3.
+- [x] Pendente (passo 5): validação da suíte integrada completa — critérios 1–3 da seção 3 (POST persistindo, sobrevivência a restart).
 
 ### Validação do refinamento (concluída em 2026-08-07)
 
