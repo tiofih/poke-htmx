@@ -25,4 +25,26 @@ class TeamRepositoryTest < Minitest::Test
     assert_equal "https://example.com/pikachu.png", rows.first.sprite
     assert_equal 25, rows.first.number
   end
+
+  def test_remove_deletes_pokemon_by_id
+    pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
+    bulbasaur = Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1)
+    @repository.add(pikachu)
+    @repository.add(bulbasaur)
+
+    first_id = team_id("pikachu")
+    @repository.remove(first_id)
+
+    remaining = @repository.all
+    assert_equal %w[bulbasaur], remaining.map(&:name)
+  end
+
+  private
+
+  def team_id(name)
+    connection = PG.connect(ENV.fetch("DATABASE_URL"))
+    connection.exec_params("SELECT id FROM team_pokemons WHERE name = $1", [name]).first["id"]
+  ensure
+    connection&.close
+  end
 end

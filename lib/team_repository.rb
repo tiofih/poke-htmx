@@ -23,6 +23,10 @@ class TeamRepository
     )
   end
 
+  def remove(id)
+    connection.exec_params("DELETE FROM team_pokemons WHERE id = $1", [id])
+  end
+
   private
 
   def connection
