@@ -123,6 +123,18 @@ class TeamRepositoryTest < Minitest::Test
     assert_equal [1, 2, 3], @repository.all("user-a").map(&:slot)
   end
 
+  def test_slots_are_independent_per_user
+    pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
+    bulbasaur = Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1)
+    squirtle = Pokemon.new(name: "squirtle", sprite: "https://example.com/squirtle.png", number: 7)
+    @repository.add("user-a", pikachu)
+    @repository.add("user-b", bulbasaur)
+    @repository.add("user-a", squirtle)
+
+    assert_equal [1, 2], @repository.all("user-a").map(&:slot)
+    assert_equal [1], @repository.all("user-b").map(&:slot)
+  end
+
   def test_remove_only_deletes_own_users_pokemon
     pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
     bulbasaur = Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1)
