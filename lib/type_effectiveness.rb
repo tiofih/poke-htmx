@@ -5,6 +5,10 @@ class TypeEffectiveness
     new(relations)
   end
 
+  def self.load
+    from_relations(PokeApi.type_relations)
+  end
+
   def initialize(relations)
     @relations = relations
   end

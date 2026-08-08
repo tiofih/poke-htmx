@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "test_helper"
+require_relative "../lib/type_effectiveness"
 
 class PokeApiTest < Minitest::Test
   def fifteen_names
@@ -124,9 +125,20 @@ class PokeApiTest < Minitest::Test
     PokeApi.instance_variable_set(:@type_relations, nil)
   end
 
+  def test_type_effectiveness_load_integra_fonte_stubbed
+    PokeApiStub.with_type(build_type_json_table) do
+      effectiveness = TypeEffectiveness.load
+
+      assert_in_delta 2.0, effectiveness.factor("fire", "grass")
+      assert_in_delta 0.0, effectiveness.factor("electric", "ground")
+      assert_in_delta 0.75, effectiveness.damage_multiplier(
+        attacker_types: %w[fire], move_type: "fire", defender_types: %w[water]
+      )
+    end
+  end
+
   private
 
-  # retorna a tabela esperada de eiptic relations para os 18 tipos
   def type_relations_table
     {
       "fire" => { "double" => %w[grass bug ice steel], "half" => %w[rock fire water dragon], "no" => [] },
