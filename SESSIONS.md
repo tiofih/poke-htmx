@@ -34,15 +34,15 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0001** — Persistir equipe em PostgreSQL (RNF-02).
-Passos 0–4 verdes e **validados** (suíte Minitest verde, lint ok, servidor real de pé). Próximo passo: 5 (validação da suíte integrada completa / `POST /team` no banco), conforme a regra de sequência.
-Detalhes em `sessions/0001-persist-postgres.md`. Atualizar este arquivo conforme o progresso.
+**Sessão 0002** — Remoção semântica (`DELETE /team/:key`) (RF-04).
+Não iniciada — aguardando refinamento (a regra de sequência exige todas as fases da sessão anterior concluídas e validadas, e a 0001 está fechada).
+Detalhes futuros em `sessions/`. Atualizar este arquivo conforme o progresso.
 
 ## Progresso das sessões
 
 | # | Sessão | Fase | Status |
 | --- | --- | --- | --- |
-| 0001 | Persistir equipe em PostgreSQL (RNF-02) | Implementação | Em andamento (passos 0–4 verdes e validados) |
+| 0001 | Persistir equipe em PostgreSQL (RNF-02) | Concluída | Done (passos 0–5 validados) |
 | 0002 | Remoção semântica (`DELETE /team/:key`) | — | Backlog |
 | 0003 | Equipe por usuário (sessão/cookie) | — | Backlog |
 | 0004 | Página de detalhes (tipos, stats, evoluções) | — | Backlog |

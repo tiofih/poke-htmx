@@ -52,21 +52,21 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [ ] O fragmento inclui um botão "Add to Team" (`Add to Team`).
 - [ ] O fragmento contém um campo oculto `pokeName` com o valor do nome do Pokémon.
 
-### RF-03 — Formar equipe — `Draft`
+### RF-03 — Formar equipe — `Done` (sessão 0001)
 - Formulário envia `hx-post /team` com `pokeName` (nome do Pokémon), renderizando o fragment `#team`.
 - Exibir cada membro da equipe com sprite e nome, e um botão "Remove from Team".
 
 **Critérios de aceite:**
-- [ ] `POST /team` com `pokeName=pikachu` persiste o Pokémon na equipe (Postgres) e responde o fragment atualizado.
-- [ ] O fragmento `#team` lista, para cada membro, sprite, nome e botão "Remove from Team".
+- [x] `POST /team` com `pokeName=pikachu` persiste o Pokémon na equipe (Postgres) e responde o fragment atualizado.
+- [x] O fragmento `#team` lista, para cada membro, sprite, nome e botão "Remove from Team".
 
 ### RF-04 — Remover da equipe — `Completo` na implementação atual / em refino
-- Botão dispara `hx-get /team?index=<idx>` com alvo `#team`.
-- Remover o Pokémon na posição indexada e re-renderizar a equipe.
+- Botão dispara `GET /team?index=<id>` (via form htmx) com alvo `#team`.
+- Remover o Pokémon pelo `id` persistido e re-renderizar a equipe.
 
 **Critérios de aceite:**
 - [ ] A ação de remoção é verbosa e explícita (refinar: `DELETE /team/:key` em sessão futura).
-- [ ] Após a remoção, o fragmento `#team` não contém mais o Pokémon removido.
+- [x] Após a remoção, o fragmento `#team` não contém mais o Pokémon removido.
 
 ## Requisitos Não-Funcionais
 
@@ -74,10 +74,10 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - Aplicação server-rendered; **sem JavaScript customizado** — toda interação via htmx.
 - Backend consome a PokéAPI externa via Faraday.
 
-### RNF-02 — Estado / Persistência — `Approved`
-- A sprint pretende trocar o estado em memória por **PostgreSQL** (gem `pg`, sem ORM).
-- Ligar via `DATABASE_URL` (ex.: `postgres://pokedex:pokedex@db:5432/pokedex`).
-- Servidor `db` no `docker-compose.yml`, banco `pokedex`.
+### RNF-02 — Estado / Persistência — `Done` (sessão 0001)
+- Estado da equipe persistido em **PostgreSQL** (gem `pg`, sem ORM).
+- Ligado via `DATABASE_URL` (ex.: `postgres://pokedex:pokedex@db:5432/pokedex`).
+- Servidor `db` no `docker-compose.yml`, banco `pokedex`; tabela `team_pokemons` via `rake db:setup`; testes cobrem persistência, add e remoção (sem rede).
 
 ### RNF-03 — Ambiente — `Approved`
 - Desenvolvimento via `docker compose up` (volume em `/var/www/pokedex`, porta 3000).
@@ -104,8 +104,8 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 | # | Sessão | Status |
 | --- | --- | --- |
-| 1 | Persistir equipe em PostgreSQL (RNF-02) | Prevista |
-| 2 | Remoção semântico (`DELETE /team/:key`) | Prevista |
+| 1 | Persistir equipe em PostgreSQL (RNF-02) | Done |
+| 2 | Remoção semântica (`DELETE /team/:key`) | Prevista |
 | 3 | Equipe por usuário (sessão/cookie) | Backlog |
 | 4 | Página de detalhes (tipos, stats, evoluções) | Backlog |
 | 5 | Paginação/filtro na listagem | Backlog |

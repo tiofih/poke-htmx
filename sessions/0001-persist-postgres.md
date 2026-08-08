@@ -5,9 +5,9 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída (validada em 2026-08-07) |
-| Implementação | Em andamento (passos 0–1 verdes) |
-| Validação | Em andamento (passos 0–1 validados — suíte verde) |
-| Sessão | Em andamento (próximo: passo 2) |
+| Implementação | Concluída (passos 0–5 verdes) |
+| Validação | Concluída (passos 0–5 validados em 2026-08-07) |
+| Sessão | **Concluída** (próxima: sessão 0002) |
 
 ---
 
@@ -28,15 +28,15 @@ Substituir a equipe em memória (`settings.team` em `server.rb`) por persistênc
 
 ## 3. Critérios de aceite (referencia RF-01/RF-04 e RNF-02)
 
-- [ ] `POST /team` com `pokeName=pikachu` persiste o registro no Postgres (presente após a requisição).
-- [ ] A equipe **sobrevive** a um restart do servidor (não fica mais em memória).
-- [ ] As rotas existentes (listar/visualizar/adicionar/remover) continuam funcionando sem regressão.
-- [ ] Conexão usa `DATABASE_URL` (ex.: `postgres://pokedex:pokedex@db:5432/pokedex`).
-- [ ] Tabela `team_pokemons` criada via `rake db:setup`.
-- [ ] Infra de testes: gems `minitest` + `rack-test` + `rake`, `test/` com `test_helper.rb`, tarefa `rake test`.
-- [ ] Testes não dependem de rede: `PokeApi.find` substituível no teste (stub/DI).
-- [ ] Commit a cada `green`.
-- [ ] `REQUIREMENTS.md`/`SESSIONS.md` atualizados no mesmo escopo.
+- [x] `POST /team` com `pokeName=pikachu` persiste o registro no Postgres (presente após a requisição).
+- [x] A equipe **sobrevive** a um restart do servidor (não fica mais em memória).
+- [x] As rotas existentes (listar/visualizar/adicionar/remover) continuam funcionando sem regressão.
+- [x] Conexão usa `DATABASE_URL` (ex.: `postgres://pokedex:pokedex@db:5432/pokedex`).
+- [x] Tabela `team_pokemons` criada via `rake db:setup`.
+- [x] Infra de testes: gems `minitest` + `rack-test` + `rake`, `test/` com `test_helper.rb`, tarefa `rake test`.
+- [x] Testes não dependem de rede: `PokeApi.find` substituível no teste (stub/DI).
+- [x] Commit a cada `green`.
+- [x] `REQUIREMENTS.md`/`SESSIONS.md` atualizados no mesmo escopo.
 
 ## 4. Decisões de refinamento
 
@@ -58,18 +58,16 @@ Substituir a equipe em memória (`settings.team` em `server.rb`) por persistênc
 | 4 | Rotas usam `TeamRepository` (teste HTTP, `PokeApi.find` stubado) | Integrar repositório no `server.rb` via `settings` |
 | 5 | `POST /team` grava o dado no banco de teste | Rodar suíte integrada completa |
 
-## 6. Validação (Fase 3)
+## 6. Validação (Fase 3) — CONCLUÍDA em 2026-08-07
 
-Preencher após a implementação:
-
-- [ ] Suíte completa verde (Minitest)
-- [ ] Critérios de aceite verificados (itens 1–6 acima)
-- [ ] Resultados/manutenção registrados
+- [x] Suíte completa verde (Minitest) — `7 runs, 21 assertions, 0 failures, 0 errors` via `./scripts/test`; lint sem ofensas.
+- [x] Critérios de aceite verificados (itens 1–9) — todos marcados na seção 3.
+- [x] Resultados/manutenção registrados — ver seções abaixo; restart do servidor testado ao vivo (membro persistido permanece após `docker compose restart web`).
 
 ## 7. Observações e próximo passo
 
-- Ao concluir: marcar `RNF-02` como `Done` no `REQUIREMENTS.md`.
-- `SESSIONS.md`: marcar 0001 como concluída, apontar **sessão 0002** (remoção semântica).
+- Ao concluir: marcar `RNF-02` como `Done` no `REQUIREMENTS.md`. — **Feito.**
+- `SESSIONS.md`: marcar 0001 como concluída, apontar **sessão 0002** (remoção semântica). — **Feito.**
 
 ### Progresso da implementação
 
