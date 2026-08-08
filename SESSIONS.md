@@ -40,8 +40,9 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0007** — Montagem de times — cap 6 + slots + sem duplicados (RF-07,
-base do auto-battler). Em refinamento.
+**Sessão 0008** — a definir: candidatos anotados no `REQUIREMENTS.md`/draft
+(reordenação manual de slots A1, game loop do auto-battler B/C, UI/layout).
+Aguardando decisão do usuário. RF-07 (montagem de times) está `Done`.
 
 ## Progresso das sessões
 
@@ -53,7 +54,7 @@ base do auto-battler). Em refinamento.
 | 0004 | Página de detalhes (tipos, stats, evoluções) | Concluída | Done (passos 0–4, validado em 2026-08-08) |
 | 0005 | Navegação pela sprite + Fechar/Voltar (RF-06) | Concluída | Done (passos 0–3, validado em 2026-08-08) |
 | 0006 | Paginação/filtro na listagem | Concluída | Done (passos 0–6, validado em 2026-08-08) |
-| 0007 | Montagem de times — cap 6 + slots + sem duplicados (RF-07) | Refinamento | Em refinamento (decisões fechadas em 2026-08-08) |
+| 0007 | Montagem de times — cap 6 + slots + sem duplicados (RF-07) | Concluída | Done (passos 0–9, validado em 2026-08-08) |
 
 ## Estrutura do arquivo de sessão
 

@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-08 |
-| Implementação | — |
-| Validação | — |
+| Implementação | Concluída — passos 0–9 verdes (56 runs/257 asserts, lint 0 offenses) |
+| Validação | Concluída — validado pelo usuário em 2026-08-08 |
 
 ---
 
@@ -33,39 +33,39 @@ a estrutura que o game loop vai consumir: **time limitado a 6, com `slot` de pos
 
 ### Regras de montagem (domínio)
 
-- [ ] `team_pokemons` ganha **`slot INTEGER NOT NULL`** (posição 1..N, N ≤ 6), com
+- [x] `team_pokemons` ganha **`slot INTEGER NOT NULL`** (posição 1..N, N ≤ 6), com
       migração idempotente em `db/migrations/0007_add_slot.sql`.
-- [ ] **Slide de unicidade:** `UNIQUE (user_id, number)` impede Pokémon repetido no
+- [x] **Slide de unicidade:** `UNIQUE (user_id, number)` impede Pokémon repetido no
       time de um usuário; `UNIQUE (user_id, slot)` garante posições distintas.
       (Índices únicos via `CREATE UNIQUE INDEX IF NOT EXISTS`.)
-- [ ] `TeamRepository` ganha `MAX_TEAM_SIZE = 6`.
-- [ ] **Cap 6:** ao adicionar com time já com 6, `TeamRepository#add` **não insere** e
+- [x] `TeamRepository` ganha `MAX_TEAM_SIZE = 6`.
+- [x] **Cap 6:** ao adicionar com time já com 6, `TeamRepository#add` **não insere** e
       sinaliza erro de time cheio (`TeamFullError`).
-- [ ] **Sem duplicados:** ao adicionar Pokémon cujo `number` já existe no time do
+- [x] **Sem duplicados:** ao adicionar Pokémon cujo `number` já existe no time do
       usuário, `#add` não insere e sinaliza `DuplicateError`.
-- [ ] **Slots contíguos:** `#add` preenche o próximo slot livre (1..N, sempre 1..6);
+- [x] **Slots contíguos:** `#add` preenche o próximo slot livre (1..N, sempre 1..6);
       `#remove` **recompacta** — ao remover o slot `k`, os slots `> k` descem uma casa
       (time sempre ocupa 1..N sem lacunas).
-- [ ] **Ordenação:** `TeamRepository#all(user_id)` retorna membros **ordenados por slot**.
+- [x] **Ordenação:** `TeamRepository#all(user_id)` retorna membros **ordenados por slot**.
 
 ### Camada web (htmx, RNF-01)
 
-- [ ] `POST /team` bloqueado (time cheio ou duplicado) responde **200** com o fragmento
+- [x] `POST /team` bloqueado (time cheio ou duplicado) responde **200** com o fragmento
       `#team` contendo uma **mensagem de aviso** (ex.: "Time cheio (máx. 6)." /
       "<nome> já está no time.") — e **não duplica** o registro.
-- [ ] `POST /team` com sucesso segue devolvendo o fragmento `#team` com o novo membro;
+- [x] `POST /team` com sucesso segue devolvendo o fragmento `#team` com o novo membro;
       `GET /team` e `DELETE /team` (RF-04/RF-05) sem regressão.
-- [ ] O fragmento `#team` torna visível a **posição (slot)** de cada membro (ex.: badge
+- [x] O fragmento `#team` torna visível a **posição (slot)** de cada membro (ex.: badge
       `#3`), na ordem de slot — insumo visual da montagem.
 
 ### Garantias (RNF)
 
-- [ ] Testes sem rede (stub: `PokeApiStub.with_find`), suíte completa verde
+- [x] Testes sem rede (stub: `PokeApiStub.with_find`), suíte completa verde
       (`./scripts/test`) e lint verde (`./scripts/lint`), commit a cada green (RNF-04).
-- [ ] Sem regressão: RF-01..RF-06 seguem verdes (detalhe, paginação/filtro, equipe por
+- [x] Sem regressão: RF-01..RF-06 seguem verdes (detalhe, paginação/filtro, equipe por
       usuário, remove idempotente, isolamento por sessão).
-- [ ] `REQUIREMENTS.md` (novo **RF-07 — Montagem de times**) e `SESSIONS.md` (0007 em
-      refinamento) atualizados no mesmo escopo.
+- [x] `REQUIREMENTS.md` (novo **RF-07 — Montagem de times**) e `SESSIONS.md` (0007
+      concluída) atualizados no mesmo escopo.
 
 ## 4. Decisões de refinamento
 
@@ -114,3 +114,12 @@ a estrutura que o game loop vai consumir: **time limitado a 6, com `slot` de pos
   por slot — nenhuma migração de dados será necessária para iniciar combates.
 - Ideias de auto-battler e a antiga sessão UI foram para `REQUIREMENTS.md`
   (roadmap/limitações) — não estarão nesta sessão.
+
+## 7. Validação (2026-08-08)
+
+- Suíte completa: **56 runs / 257 assertions, 0 failures/0 errors**; lint **0 offenses**.
+- Critérios de aceite **todos verificados** pelo usuário (comportamento do time
+  limitado a 6, sem duplicados, slots contíguos e avisos no fragmento);
+  **RF-07 Done**.
+- Próxima sessão: **0008** — candidatos anotados no draft/Roadmap (reordenação de
+  slots A1 e/ou game loop B1; UI/layout volta ao backlog).

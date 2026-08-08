@@ -110,7 +110,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Fragmento de detalhe mantém o form `hx-post /team` (Add to Team, RF-03).
 - [x] `GET /pokemon?name=` (fragment add atual) permanece funcional.
 
-### RF-07 — Montagem de times (base do auto-battler) — `Em refinamento` (sessão 0007)
+### RF-07 — Montagem de times (base do auto-battler) — `Done` (sessão 0007)
 - Time por usuário limitado a **6 vagas** (`MAX_TEAM_SIZE = 6`), com **`slot` de
   posição (1..N)** persistido e **sem duplicados** (mesmo `number` da PokéAPI).
 - `TeamRepository` garante: adicionar respeita o cap e a unicidade, remover
@@ -122,17 +122,17 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
   fragmento `#team` com aviso (200), sem JS customizado.
 
 **Critérios de aceite:**
-- [ ] `team_pokemons` ganha `slot INTEGER NOT NULL` (posição) + índices únicos
+- [x] `team_pokemons` ganha `slot INTEGER NOT NULL` (posição) + índices únicos
       `(user_id, number)` e `(user_id, slot)`; migração idempotente.
-- [ ] `TeamRepository::MAX_TEAM_SIZE = 6`; `add` com time cheio não insere e sinaliza
+- [x] `TeamRepository::MAX_TEAM_SIZE = 6`; `add` com time cheio não insere e sinaliza
       `TeamFullError`; com Pokémon duplicado (`number` repetido) sinaliza `DuplicateError`.
-- [ ] `add` preenche o próximo slot livre (1..6); `remove` recompacta (sem lacunas);
+- [x] `add` preenche o próximo slot livre (1..6); `remove` recompacta (sem lacunas);
       `all(user_id)` ordena por slot.
-- [ ] `POST /team` bloqueado devolve 200 com fragmento `#team` + aviso ("Time cheio
+- [x] `POST /team` bloqueado devolve 200 com fragmento `#team` + aviso ("Time cheio
       (máx. 6)." / "<nome> já está no time.") e não duplica registro.
-- [ ] Fragmento `#team` exibe a posição (slot) de cada membro, na ordem de slot.
-- [ ] Sem regressão: RF-01..RF-06 seguem verdes; teste sem rede; commit a cada green.
-- [ ] `REQUIREMENTS.md`/`SESSIONS.md` atualizados no mesmo escopo.
+- [x] Fragmento `#team` exibe a posição (slot) de cada membro, na ordem de slot.
+- [x] Sem regressão: RF-01..RF-06 seguem verdes; teste sem rede; commit a cada green.
+- [x] `REQUIREMENTS.md`/`SESSIONS.md` atualizados no mesmo escopo.
 
 ## Requisitos Não-Funcionais
 
@@ -182,14 +182,15 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 4 | Página de detalhes (tipos, stats, evoluções) | Done (sessões 0004+0005) |
 | 5 | Navegação pela sprite para o detalhe + Fechar/Voltar (RF-06) | Done (sessões 0004+0005) |
 | 6 | Paginação/filtro na listagem | Done (sessão 0006) |
-| 7 | Montagem de times — cap 6 + slots + sem duplicados (RF-07, base do auto-battler) | Em refinamento (sessão 0007) |
+| 7 | Montagem de times — cap 6 + slots + sem duplicados (RF-07, base do auto-battler) | Done (sessão 0007) |
 | 8 | UI: layout e estilos externo | Backlog |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
 > Regra RNF-04: escopos grandes são anotados aqui e só viram sessão **após** a sessão
-> corrente (0007) ser concluída e validada. Refinamento de UI/layout sai da 0007 e
-> volta ao roadmap como 0008+.
+> corrente ser concluída e validada. A 0007 (montagem de times) é `Done` (2026-08-08)
+> — os itens abaixo passam a poder virar sessões. Refinamento de UI/layout volta ao
+> roadmap como 0008+.
 
 - **Game loop (auto-battler):** combate automático por turnos usando os 6 slots do time
   como ordem de ação; stats (RF-06) e tipos como base de dano/efetividade; estado de
