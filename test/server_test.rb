@@ -66,4 +66,10 @@ class ServerTest < Minitest::Test
 
     assert last_response.ok?
   end
+
+  def test_get_team_route_is_removed
+    get "/team"
+
+    assert last_response.not_found?
+  end
 end
