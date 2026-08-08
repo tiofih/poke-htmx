@@ -151,6 +151,24 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, "https://example.com/pikachu.png"
   end
 
+  # rubocop:disable Metrics/MethodLength
+  def test_pokemon_detail_renders_types
+    pikachu = Pokemon.new(
+      name: "pikachu",
+      sprite: "https://example.com/pikachu.png",
+      number: 25,
+      types: ["electric"]
+    )
+
+    PokeApiStub.with_detail(pikachu) do
+      get "/pokemon/25"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "electric"
+  end
+  # rubocop:enable Metrics/MethodLength
+
   private
 
   def distinct_user_ids

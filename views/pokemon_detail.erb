@@ -1,2 +1,5 @@
 <img src="<%= @pokemon.sprite %>">
-<%= @pokemon.name %>
+<%= @pokemon.name %><br>
+<% @pokemon.types.each do |type| %>
+  <span class="type"><%= type %></span>
+<% end %>
