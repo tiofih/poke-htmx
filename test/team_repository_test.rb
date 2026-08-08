@@ -104,6 +104,25 @@ class TeamRepositoryTest < Minitest::Test
     assert_equal "user-a", row["user_id"]
   end
 
+  def test_remove_recompacts_slots
+    pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
+    bulbasaur = Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1)
+    charmander = Pokemon.new(name: "charmander", sprite: "https://example.com/charmander.png", number: 4)
+    @repository.add("user-a", pikachu)
+    @repository.add("user-a", bulbasaur)
+    @repository.add("user-a", charmander)
+
+    bulbasaur_id = team_id("bulbasaur", "user-a")
+    @repository.remove("user-a", bulbasaur_id)
+
+    remaining = @repository.all("user-a")
+    assert_equal [1, 2], remaining.map(&:slot)
+    assert_equal %w[pikachu charmander], remaining.map(&:name)
+
+    @repository.add("user-a", Pokemon.new(name: "squirtle", sprite: "https://example.com/squirtle.png", number: 7))
+    assert_equal [1, 2, 3], @repository.all("user-a").map(&:slot)
+  end
+
   def test_remove_only_deletes_own_users_pokemon
     pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
     bulbasaur = Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1)

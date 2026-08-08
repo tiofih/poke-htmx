@@ -35,7 +35,17 @@ class TeamRepository
   end
 
   def remove(user_id, id)
-    connection.exec_params("DELETE FROM team_pokemons WHERE id = $1 AND user_id = $2", [id, user_id])
+    removed = connection.exec_params(
+      "DELETE FROM team_pokemons WHERE id = $1 AND user_id = $2 RETURNING slot",
+      [id, user_id]
+    ).first
+    return unless removed
+
+    slot = removed["slot"].to_i
+    connection.exec_params(
+      "UPDATE team_pokemons SET slot = slot - 1 WHERE user_id = $1 AND slot > $2",
+      [user_id, slot]
+    )
   end
 
   private
