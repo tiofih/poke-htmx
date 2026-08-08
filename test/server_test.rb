@@ -318,6 +318,55 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, ">Anterior<"
   end
 
+  def filtered_names
+    %w[pikachu pichu raichu pikachu-alola bulbasaur]
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def test_pokemons_filters_by_substring_case_insensitive
+    PokeApiStub.with_all_names(filtered_names) do
+      get "/pokemons", q: "PIK"
+    end
+
+    assert last_response.ok?
+    assert_equal 2, last_response.body.scan("<option value=\"pikachu").size
+    refute_includes last_response.body, "value=\"bulbasaur\""
+    assert_includes last_response.body, "Página 1 de 1"
+    refute_includes last_response.body, ">Próxima<"
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def test_pokemons_filter_without_matches_renders_empty_select
+    PokeApiStub.with_all_names(filtered_names) do
+      get "/pokemons", q: "zzzz"
+    end
+
+    assert last_response.ok?
+    assert_equal 1, last_response.body.scan("<option ").size
+    assert_includes last_response.body, 'id="pokemons"'
+    refute_includes last_response.body, 'value="pikachu"'
+  end
+
+  def test_pokemons_empty_q_returns_full_list
+    PokeApiStub.with_all_names(filtered_names) do
+      get "/pokemons", q: ""
+    end
+
+    assert last_response.ok?
+    %w[pikachu pichu raichu pikachu-alola bulbasaur].each do |name|
+      assert_includes last_response.body, "value=\"#{name}\""
+    end
+  end
+
+  def test_pokemons_paginates_filtered_results
+    PokeApiStub.with_all_names(filtered_names) do
+      get "/pokemons", q: "i"
+    end
+
+    assert last_response.ok?
+    assert_equal 5, last_response.body.scan("<option value=").size
+  end
+
   def test_pokemon_name_fragment_links_to_detail
     PokeApiStub.with_find(pikachu_pokemon) do
       get "/pokemon", name: "pikachu"
