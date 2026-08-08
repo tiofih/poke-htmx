@@ -83,6 +83,20 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] `DELETE /team` só remove membro do próprio usuário; id de outro usuário é idempotente (200).
 - [x] Sessão Sinatra gera `user_id` no 1º acesso; rotas e `team.erb` usam o usuário da sessão.
 
+### RF-06 — Página de detalhes — `Em refinamento` (sessão 0004)
+- Ao clicar no nome/sprite de um Pokémon (na listagem `#pokemon` ou na equipe),
+  renderizar no alvo `#pokemon` os **detalhes**: sprite, nome, tipos, stats base e evoluções.
+- Interação 100% htmx (RNF-01); o botão "Add to Team" é preservado no detalhe.
+
+**Critérios de aceite:**
+- [ ] `GET /pokemon/:name` responde o fragmento de detalhe (sprite, nome, tipos, stats, evoluções).
+- [ ] Tipos: exibe todos os tipos do Pokémon (ex.: pikachu → electric; bulbasaur → grass, poison).
+- [ ] Stats: exibe os 6 base stats com nome e valor (HP, Attack, Defense, Sp.Atk, Sp.Def, Speed).
+- [ ] Evoluções: exibe a cadeia de evolução (sprite + nome) via species → evolution_chain; sem evolução não quebra.
+- [ ] Nomes em `pokemon.erb` e `team.erb` clicáveis com `hx-get="/pokemon/:name"` (alvo `#pokemon`).
+- [ ] Fragmento de detalhe mantém o form `hx-post /team` (Add to Team, RF-03).
+- [ ] `GET /pokemon?name=` (fragment add atual) permanece funcional.
+
 ## Requisitos Não-Funcionais
 
 ### RNF-01 — Arquitetura — `Executado`
@@ -122,6 +136,6 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 1 | Persistir equipe em PostgreSQL (RNF-02) | Done |
 | 2 | Remoção semântica (`DELETE /team`, RF-04) | Done (sessão 0002) |
 | 3 | Equipe por usuário (sessão/cookie, RF-05) | Done (sessão 0003) |
-| 4 | Página de detalhes (tipos, stats, evoluções) | Backlog |
+| 4 | Página de detalhes (tipos, stats, evoluções) | Em refinamento (sessão 0004) |
 | 5 | Paginação/filtro na listagem | Backlog |
 | 6 | UI: layout e estilos externo | Backlog |

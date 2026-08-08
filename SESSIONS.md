@@ -41,8 +41,8 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 ## Próxima sessão
 
 **Sessão 0004** — Página de detalhes (tipos, stats, evoluções).
-Em backlog — ainda não refinada; a sessão 0003 está concluída e validada, então
-a regra de sequência (RNF-04) libera iniciar a 0004 quando o refinamento começar.
+Em refinamento — critérios de aceite e plano TDD fechados no
+`sessions/0004-pagina-de-detalhes.md` (aguardando fase 2 TDD).
 
 ## Progresso das sessões
 
@@ -51,7 +51,7 @@ a regra de sequência (RNF-04) libera iniciar a 0004 quando o refinamento começ
 | 0001 | Persistir equipe em PostgreSQL (RNF-02) | Concluída | Done (passos 0–5 validados) |
 | 0002 | Remoção semântica (`DELETE /team`, RF-04) | Concluída | Done (passos 0–5 validados) |
 | 0003 | Equipe por usuário (sessão/cookie, RF-05) | Concluída | Done (passos 0–6 + S1, validado em 2026-08-08) |
-| 0004 | Página de detalhes (tipos, stats, evoluções) | — | Backlog |
+| 0004 | Página de detalhes (tipos, stats, evoluções) | Refinamento | Em refinamento |
 | 0005 | Paginação/filtro na listagem | — | Backlog |
 | 0006 | UI: layout e estilos externo | — | Backlog |
 
