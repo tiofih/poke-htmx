@@ -15,7 +15,7 @@ module TestDatabase
     connection = PG.connect(ENV.fetch("DATABASE_URL"))
     connection.exec("SET client_min_messages TO warning")
     connection.exec(File.read(File.expand_path("../db/schema.sql", __dir__)))
-    Dir[File.expand_path("../db/migrations/*.sql", __dir__)].sort.each do |migration|
+    Dir[File.expand_path("../db/migrations/*.sql", __dir__)].each do |migration|
       connection.exec(File.read(migration))
     end
   ensure

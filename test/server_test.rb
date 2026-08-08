@@ -41,6 +41,7 @@ class ServerTest < Minitest::Test
     assert_includes last_response.headers["Set-Cookie"], "rack.session"
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def test_two_sessions_keep_isolated_teams
     session_a = rack_test_session
     session_b = rack_test_session
@@ -59,8 +60,9 @@ class ServerTest < Minitest::Test
 
     assert_equal 2, distinct_user_ids.size
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def test_post_team_persists_pokemon_for_session_user
     PokeApiStub.with_find(pikachu_pokemon) do
       post "/team", { pokeName: "pikachu" }, user_session("user-a")
@@ -75,7 +77,7 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, "hx-delete=\"/team\""
     assert_empty @repository.all("user-b")
   end
-  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def test_delete_team_removes_pokemon_from_own_session
     @repository.add("user-a", pikachu_pokemon)
@@ -88,6 +90,7 @@ class ServerTest < Minitest::Test
     refute_includes last_response.body, "pikachu"
   end
 
+  # rubocop:disable Metrics/AbcSize
   def test_delete_team_with_unknown_id_keeps_team_intact
     @repository.add("user-a", pikachu_pokemon)
     id = @repository.all("user-a").first.id
@@ -99,6 +102,7 @@ class ServerTest < Minitest::Test
     assert_equal 1, @repository.all("user-a").size
     assert_includes last_response.body, "pikachu"
   end
+  # rubocop:enable Metrics/AbcSize
 
   def test_delete_team_without_id_does_not_break
     delete "/team", {}, user_session("user-a")

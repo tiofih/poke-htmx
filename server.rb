@@ -13,7 +13,8 @@ class Server < Sinatra::Base
   configure do
     enable :logging
     enable :sessions
-    set :session_secret, ENV["SESSION_SECRET"] || "706f6b656465782d6465762d7365637265742d30313233343536373839616263646566"
+    set :session_secret, ENV["SESSION_SECRET"] ||
+                         "706f6b656465782d6465762d7365637265742d30313233343536373839616263646566"
     set :bind, "0.0.0.0"
     set :port, 3000
     set :views, "views"

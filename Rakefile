@@ -19,7 +19,7 @@ namespace :db do
     connection = PG.connect(db_url)
     connection.exec("SET client_min_messages TO warning")
     connection.exec(File.read("db/schema.sql"))
-    Dir["db/migrations/*.sql"].sort.each do |migration|
+    Dir["db/migrations/*.sql"].each do |migration|
       connection.exec(File.read(migration))
     end
   ensure
