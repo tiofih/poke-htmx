@@ -28,7 +28,7 @@ class ServerTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "pikachu"
-    team = @repository.all
+    team = @repository.all("test-user")
     assert_equal 1, team.size
     assert_equal "pikachu", team.first.name
     assert_includes last_response.body, %(name="id" value="#{team.first.id}")
@@ -37,26 +37,26 @@ class ServerTest < Minitest::Test
   # rubocop:enable Metrics/AbcSize
 
   def test_delete_team_removes_pokemon_by_id
-    @repository.add(pikachu_pokemon)
-    id = @repository.all.first.id
+    @repository.add("test-user", pikachu_pokemon)
+    id = @repository.all("test-user").first.id
 
     delete "/team", id: id
 
     assert last_response.ok?
-    assert_empty @repository.all
+    assert_empty @repository.all("test-user")
     refute_includes last_response.body, "pikachu"
   end
 
   # rubocop:disable Metrics/AbcSize
   def test_delete_team_with_unknown_id_keeps_team_intact
-    @repository.add(pikachu_pokemon)
-    id = @repository.all.first.id
+    @repository.add("test-user", pikachu_pokemon)
+    id = @repository.all("test-user").first.id
     unknown_id = (id.to_i + 999).to_s
 
     delete "/team", id: unknown_id
 
     assert last_response.ok?
-    assert_equal 1, @repository.all.size
+    assert_equal 1, @repository.all("test-user").size
     assert_includes last_response.body, "pikachu"
   end
   # rubocop:enable Metrics/AbcSize

@@ -10,14 +10,14 @@ class TeamRepositoryTest < Minitest::Test
   end
 
   def test_all_returns_empty_array_for_empty_database
-    assert_equal [], @repository.all
+    assert_equal [], @repository.all("user-a")
   end
 
   def test_add_persists_pokemon_and_all_returns_it
     pokemon = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
 
-    @repository.add(pokemon)
-    rows = @repository.all
+    @repository.add("user-a", pokemon)
+    rows = @repository.all("user-a")
 
     assert_equal 1, rows.size
     assert_instance_of Pokemon, rows.first
@@ -29,21 +29,24 @@ class TeamRepositoryTest < Minitest::Test
   def test_remove_deletes_pokemon_by_id
     pikachu = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
     bulbasaur = Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1)
-    @repository.add(pikachu)
-    @repository.add(bulbasaur)
+    @repository.add("user-a", pikachu)
+    @repository.add("user-a", bulbasaur)
 
-    first_id = team_id("pikachu")
-    @repository.remove(first_id)
+    first_id = team_id("pikachu", "user-a")
+    @repository.remove("user-a", first_id)
 
-    remaining = @repository.all
+    remaining = @repository.all("user-a")
     assert_equal %w[bulbasaur], remaining.map(&:name)
   end
 
   private
 
-  def team_id(name)
+  def team_id(name, user_id)
     connection = PG.connect(ENV.fetch("DATABASE_URL"))
-    connection.exec_params("SELECT id FROM team_pokemons WHERE name = $1", [name]).first["id"]
+    connection.exec_params(
+      "SELECT id FROM team_pokemons WHERE name = $1 AND user_id = $2",
+      [name, user_id]
+    ).first["id"]
   ensure
     connection&.close
   end

@@ -12,10 +12,12 @@ require_relative "../lib/team_repository"
 
 module TestDatabase
   def self.setup!
-    schema = File.read(File.expand_path("../db/schema.sql", __dir__))
     connection = PG.connect(ENV.fetch("DATABASE_URL"))
     connection.exec("SET client_min_messages TO warning")
-    connection.exec(schema)
+    connection.exec(File.read(File.expand_path("../db/schema.sql", __dir__)))
+    Dir[File.expand_path("../db/migrations/*.sql", __dir__)].sort.each do |migration|
+      connection.exec(File.read(migration))
+    end
   ensure
     connection&.close
   end

@@ -12,13 +12,16 @@ require "rubocop/rake_task"
 RuboCop::RakeTask.new(:lint)
 
 namespace :db do
-  desc "Create tables from db/schema.sql"
+  desc "Create tables from db/schema.sql and apply migrations in order"
   task :setup do
     require "pg"
     db_url = ENV["DATABASE_URL"] || "postgres://pokedex:pokedex@localhost:5432/pokedex"
     connection = PG.connect(db_url)
     connection.exec("SET client_min_messages TO warning")
     connection.exec(File.read("db/schema.sql"))
+    Dir["db/migrations/*.sql"].sort.each do |migration|
+      connection.exec(File.read(migration))
+    end
   ensure
     connection&.close
   end

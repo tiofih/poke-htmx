@@ -18,6 +18,12 @@ class Server < Sinatra::Base
     register Sinatra::Reloader
   end
 
+  helpers do
+    def current_user
+      "test-user"
+    end
+  end
+
   get "/" do
     @pokemons = PokeApi.all
     erb :index
@@ -30,14 +36,14 @@ class Server < Sinatra::Base
 
   post "/team" do
     pokemon = PokeApi.find(params[:pokeName])
-    settings.team.add(pokemon)
-    @team = settings.team.all
+    settings.team.add(current_user, pokemon)
+    @team = settings.team.all(current_user)
     erb :team
   end
 
   delete "/team" do
-    settings.team.remove(params[:id]) if params[:id]
-    @team = settings.team.all
+    settings.team.remove(current_user, params[:id]) if params[:id]
+    @team = settings.team.all(current_user)
     erb :team
   end
 
