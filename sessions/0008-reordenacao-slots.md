@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-08 |
 | Implementação | Concluída — passos 0–8 verdes (67 runs/293 asserts, lint 0 offenses) |
-| Validação | Pendente — executada pelo usuário |
+| Validação | Concluída — validado pelo usuário em 2026-08-08 |
 
 ---
 
@@ -114,5 +114,8 @@ essa ordem. Nenhuma mudança de schema é necessária (RF-07 já persistiu `slot
 ## 7. Validação (2026-08-08)
 
 - Suíte completa: **67 runs / 293 assertions, 0 failures/0 errors**; lint **0 offenses**.
-- (Resultado da checagem dos critérios + verificação do usuário pendente — preenchido
-  após a validação.)
+- Critérios de aceite **todos verificados pelo usuário** (`#move` reordena/contiguo,
+  idempotência, isolamento, rota 200 + `#team` reordenado, botões ▲/▼ e sem regressão):
+  **RF-08 Done**.
+- Próxima sessão: **0009** — candidatos anotados no draft/REQUIREMENTS (B1 — modelo de
+  batalha, domínio puro; e/ou UI/layout A2).

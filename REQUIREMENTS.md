@@ -110,7 +110,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Fragmento de detalhe mantém o form `hx-post /team` (Add to Team, RF-03).
 - [x] `GET /pokemon?name=` (fragment add atual) permanece funcional.
 
-### RF-08 — Reordenação manual de slots (A1) — `Implementado — aguardando validação` (sessão 0008)
+### RF-08 — Reordenação manual de slots (A1) — `Done` (sessão 0008)
 - Permitir que o usuário **reordene manualmente** os membros do seu time (slots 1..N)
   via botões ▲/▼ — hoje a posição só muda na remoção (sessão 0007).
 - A **ordem resultante é o input do futuro game loop**: `all(user_id)` já retorna
@@ -204,7 +204,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 5 | Navegação pela sprite para o detalhe + Fechar/Voltar (RF-06) | Done (sessões 0004+0005) |
 | 6 | Paginação/filtro na listagem | Done (sessão 0006) |
 | 7 | Montagem de times — cap 6 + slots + sem duplicados (RF-07, base do auto-battler) | Done (sessão 0007) |
-| 8 | Reordenação manual de slots (RF-08, A1) | Em refinamento (sessão 0008) |
+| 8 | Reordenação manual de slots (RF-08, A1) | Done (sessão 0008) |
 | 9 | UI: layout e estilos externo | Backlog |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
