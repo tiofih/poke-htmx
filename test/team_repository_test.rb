@@ -13,6 +13,12 @@ class TeamRepositoryTest < Minitest::Test
     assert_equal [], @repository.all("user-a")
   end
 
+  def test_pokemon_slot_defaults_to_nil_and_accepts_value
+    assert_nil Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25).slot
+    with_slot = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25, slot: 3)
+    assert_equal 3, with_slot.slot
+  end
+
   def test_add_persists_pokemon_and_all_returns_it
     pokemon = Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25)
 
