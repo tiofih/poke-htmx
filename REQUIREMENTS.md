@@ -87,13 +87,14 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - Ao clicar no nome/sprite de um Pokémon (na listagem `#pokemon` ou na equipe),
   renderizar no alvo `#pokemon` os **detalhes**: sprite, nome, tipos, stats base e evoluções.
 - Interação 100% htmx (RNF-01); o botão "Add to Team" é preservado no detalhe.
+- A rota de detalhe usa o **id único da API** (`GET /pokemon/:poke_id`), mais estável que o nome.
 
 **Critérios de aceite:**
-- [ ] `GET /pokemon/:name` responde o fragmento de detalhe (sprite, nome, tipos, stats, evoluções).
+- [ ] `GET /pokemon/:poke_id` responde o fragmento de detalhe (sprite, nome, tipos, stats, evoluções).
 - [ ] Tipos: exibe todos os tipos do Pokémon (ex.: pikachu → electric; bulbasaur → grass, poison).
 - [ ] Stats: exibe os 6 base stats com nome e valor (HP, Attack, Defense, Sp.Atk, Sp.Def, Speed).
 - [ ] Evoluções: exibe a cadeia de evolução (sprite + nome) via species → evolution_chain; sem evolução não quebra.
-- [ ] Nomes em `pokemon.erb` e `team.erb` clicáveis com `hx-get="/pokemon/:name"` (alvo `#pokemon`).
+- [ ] Nomes em `pokemon.erb` e `team.erb` clicáveis com `hx-get="/pokemon/:poke_id"` (alvo `#pokemon`).
 - [ ] Fragmento de detalhe mantém o form `hx-post /team` (Add to Team, RF-03).
 - [ ] `GET /pokemon?name=` (fragment add atual) permanece funcional.
 

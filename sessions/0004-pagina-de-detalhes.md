@@ -17,15 +17,18 @@ Criar a **página de detalhes de um Pokémon**: ao clicar no nome/sprite do Pok�
 `#pokemon`, tipos, os 6 stats base (HP, Attack, Defense, Sp.Atk, Sp.Def, Speed) e a
 **cadeia de evolução** (sprite + nome de cada forma). A interação continua
 100% htmx (RNF-01), o botão "Add to Team" é preservado no detalhe e o `GET
-/pokemon?name=` atual (fragmento "Add to Team") permanece intacto.
+/pokemon?name=` atual (fragmento "Add to Team") permanece intacto. A nova rota
+usa o **id único da API** (`GET /pokemon/:poke_id`), mais estável que o nome
+(ex.: `farfetch'd`, `nidoran-f`).
 
 ## 2. Contexto (estado atual)
 
 - `server.rb` expõe `GET /` (lista), `GET /pokemon?name=` (fragment add),
   `GET /team` (read-only load inicial), `POST /team`, `DELETE /team` — todos
   escopados por `session[:user_id]` (RF-05).
-- `PokeApi.find(name)` retorna um `Pokemon` (Dry::Struct) com apenas
-  `name`, `sprite`, `number` — sem tipos, stats nem evoluções.
+- `PokeApi.find(name)` retorna um `Pokemon` (Dry::Struct) com
+  `name`, `sprite`, `number` (o `number` é o id da PokéAPI) — sem tipos, stats
+  nem evoluções.
 - `Pokemon` (`lib/pokemon.rb`) é usado pelo time/equipe (persistência).
 - Visualizações: `views/index.erb` (single page), `views/pokemon.erb`
   (fragment add), `views/team.erb` (membros + remoção).
@@ -35,7 +38,7 @@ Criar a **página de detalhes de um Pokémon**: ao clicar no nome/sprite do Pok�
 
 ## 3. Critérios de aceite
 
-- [ ] **Rota de detalhe:** `GET /pokemon/:name` responde com o fragmento de
+- [ ] **Rota de detalhe:** `GET /pokemon/:poke_id` responde com o fragmento de
       detalhe (`#pokemon`) contendo sprite, nome, tipos, stats e evoluções do
       Pokémon — sem rede, via stub.
 - [ ] **Tipos:** o fragmento exibe **todos** os tipos do Pokémon (ex.: pikachu →
@@ -46,7 +49,7 @@ Criar a **página de detalhes de um Pokémon**: ao clicar no nome/sprite do Pok�
       (sprite + nome de cada forma), obtida via `pokemon-species` →
       `evolution_chain`; Pokémon sem evoluções não quebra a página.
 - [ ] **Navegação htmx:** os nomes no fragment `pokemon.erb` e em `team.erb`
-      tornam-se clicáveis com `hx-get="/pokemon/:name"` (alvo `#pokemon`); sem
+      tornam-se clicáveis com `hx-get="/pokemon/:poke_id"` (alvo `#pokemon`); sem
       JS customizado (RNF-01).
 - [ ] **Add to Team preservado:** o fragmento de detalhe mantém o form
       `hx-post /team` (pokeName = nome) para adicionar à equipe (mesmo
@@ -60,16 +63,17 @@ Criar a **página de detalhes de um Pokémon**: ao clicar no nome/sprite do Pok�
 
 ## 4. Decisões de refinamento
 
-- **Rota:** `GET /pokemon/:name` é a nova página de detalhe; o target/swap
+- **Rota:** `GET /pokemon/:poke_id` é a nova página de detalhe (o `poke_id` é o
+  `number` do `Pokemon`, id único da PokéAPI). O target/swap
   é o mesmo `#pokemon` usado pelo fragment add — troca de conteúdo no mesmo
   container, mantendo a natureza de página única htmx. `GET /pokemon?name=`
   **não muda** (fragment add da listagem).
 - **Navegação:** cliques vêm de dois pontos: o fragmento `pokemon.erb`
   (nome clicável no fragment add) e `team.erb` (nome do membro vira link).
-  Ambos usam `hx-get="/pokemon/:name"` → `hx-target="#pokemon"` → swap
+  Ambos usam `hx-get="/pokemon/:poke_id"` → `hx-target="#pokemon"` → swap
   `innerHTML`.
-- **Como obter evoluções:** `PokeApi.detail(name)` é o novo método público que
-  monta o `Pokemon` completo numa única fonte de dados: (1) `GET /pokemon/:name`
+- **Como obter evoluções:** `PokeApi.detail(poke_id)` é o novo método público que
+  monta o `Pokemon` completo numa única fonte de dados: (1) `GET /pokemon/:id`
   → `types` + `stats` + `species.url`; (2) `GET pokemon-species`
   → `evolution_chain.url`; (3) `GET evolution-chain` → cadeia aninhada
   `chain → species`, com `evolves_to`; (4) para cada `species` da cadeia, buscar
@@ -82,7 +86,7 @@ Criar a **página de detalhes de um Pokémon**: ao clicar no nome/sprite do Pok�
 - **Sem schema/DB:** detalhe é visualização pura da PokéAPI; não há migração.
   `team_pokemons` continua como está.
 - **Stub:** `PokeApiStub` ganha `with_detail(pokemon)` (análogo do `with_find`),
-  que stubs `PokemonApi.detail` para o corpo do detalhe — testes HTTP do detalhe
+  que stubs `PokeApi.detail` para o corpo do detalhe — testes HTTP do detalhe
   nunca tocam rede.
 - **Sem ORM e sem infra nova:** mesma stack (Faraday, Dry::Struct, Sinatra).
 
@@ -90,11 +94,11 @@ Criar a **página de detalhes de um Pokémon**: ao clicar no nome/sprite do Pok�
 
 | Passo | Teste (red) | Implementação (green) |
 | --- | --- | --- |
-| 0 | `GET /pokemon/pikachu` responde 404 hoje (rota não existe); `Pokemon` sem campos de detalhe | `Pokemon` com `types`/`stats`/`evolutions` `default []`; `PokeApi.detail(name)` (preenche tipos/stats, evoluções vazias); rota `get "/pokemon/:name"` → `erb pokemon_detail` com sprite+nome |
+| 0 | `GET /pokemon/25` responde 404 hoje (rota não existe); `Pokemon` sem campos de detalhe | `Pokemon` com `types`/`stats`/`evolutions` `default []`; `PokeApi.detail(25)` (preenche tipos/stats, evoluções vazias); rota `get "/pokemon/:poke_id"` → `erb pokemon_detail` com sprite+nome |
 | 1 | fragmento de detalhe de pikachu contém `electric` | renderização do `types` na `views/pokemon_detail.erb` |
 | 2 | fragmento contém os 6 stats base nome+valor (hp=35, attack=55 em pikachu) | renderização dos `stats` na view |
 | 3 | fragmento da cadeia de evolução de charizard contém `charmander`, `charmeleon`, `charizard` (com sprites) | `PokeApi.detail` preenche `evolutions` via species → chain → sprites; view renderiza cadeia |
-| 4 | nomes em `pokemon.erb` e `team.erb` são links `hx-get="/pokemon/:name"` (alvo `#pokemon`) | views atualizadas; form add mantido no detalhe |
+| 4 | nomes em `pokemon.erb` e `team.erb` são links `hx-get="/pokemon/:poke_id"` (alvo `#pokemon`) | views atualizadas; form add mantido no detalhe |
 | 5 | suíte completa + lint verdes; `REQUIREMENTS.md`/`SESSIONS.md` atualizados | ajustes finais e documento |
 
 ## 5b. Observações de TDD
@@ -109,7 +113,7 @@ Criar a **página de detalhes de um Pokémon**: ao clicar no nome/sprite do Pok�
 - **Parcial do RF-06:** tipos e stats vêm do mesmo endpoint `GET /pokemon/:name`;
   apenas evoluções exigem saltos de `pokemon-species` e `evolution-chain`.
 - Próximo passo após validação: **fase 2 (TDD)** — passo 0 (red): `Pokemon`
-  com os campos + `PokeApi.detail` + rota `GET /pokemon/:name`.
+  com os campos + `PokeApi.detail` + rota `GET /pokemon/:poke_id`.
 
 ### Validação do refinamento (a ser preenchida quando o usuário validar)
 
