@@ -35,7 +35,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
-### RF-01 — Listar Pokémon — `Em implementação` (sessão 0006)
+### RF-01 — Listar Pokémon — `Done` (sessão 0006)
 - Exibir um `<select>` com os Pokémon da PokéAPI, **paginação (100 por página)**
   e **filtro por nome** (sessão 0006) — substituindo o `limit=100000` único.
 - O valor de cada opção é o nome do Pokémon; o `<select>` dispara `hx-get="/pokemon"`.
@@ -43,11 +43,11 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 **Critérios de aceite:**
 - [x] Ao acessar `GET /`, a página contém um elemento `<select name="name" id="pokemons" hx-get="/pokemon">`.
 - [x] `GET /` renderiza as opções da **primeira página** (máx. 100), sem `limit=100000`.
-- [ ] `GET /pokemons` (fragmento) re-renderiza o `<select>` com a página solicitada (`offset`)
+- [x] `GET /pokemons` (fragmento) re-renderiza o `<select>` com a página solicitada (`offset`)
       + controles "Anterior"/"Próxima" htmx + contador "Página X de Y".
-- [ ] `GET /pokemons?q=<texto>` filtra por substring sobre a lista cacheada e pagina
+- [x] `GET /pokemons?q=<texto>` filtra por substring sobre a lista cacheada e pagina
       o resultado filtrado; `q` vazio = lista completa.
-- [ ] Paginação/filtro sem JS customizado (RNF-01); o `<select>` continua disparando
+- [x] Paginação/filtro sem JS customizado (RNF-01); o `<select>` continua disparando
       `hx-get="/pokemon"` ao trocar a opção.
 
 ### RF-02 — Visualizar Pokémon — `Draft`
@@ -157,5 +157,5 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 3 | Equipe por usuário (sessão/cookie, RF-05) | Done (sessão 0003) |
 | 4 | Página de detalhes (tipos, stats, evoluções) | Done (sessões 0004+0005) |
 | 5 | Navegação pela sprite para o detalhe + Fechar/Voltar (RF-06) | Done (sessões 0004+0005) |
-| 6 | Paginação/filtro na listagem | Em implementação (sessão 0006, aguardando validação) |
+| 6 | Paginação/filtro na listagem | Done (sessão 0006) |
 | 7 | UI: layout e estilos externo | Backlog |

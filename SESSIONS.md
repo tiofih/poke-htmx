@@ -40,9 +40,8 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0006** — Paginação/filtro na listagem.
-RF-01 ganha paginação (100/página) + filtro por nome com cache; implementação TDD
-concluída (passos 0–6 green, suíte/lint verdes) — aguardando validação do usuário.
+**Sessão 0007** — UI: layout e estilos externo.
+Sessão 0006 validada pelo usuário em 2026-08-08 (RF-01 Done — paginação/filtro na listagem).
 
 ## Progresso das sessões
 
@@ -53,7 +52,7 @@ concluída (passos 0–6 green, suíte/lint verdes) — aguardando validação d
 | 0003 | Equipe por usuário (sessão/cookie, RF-05) | Concluída | Done (passos 0–6 + S1, validado em 2026-08-08) |
 | 0004 | Página de detalhes (tipos, stats, evoluções) | Concluída | Done (passos 0–4, validado em 2026-08-08) |
 | 0005 | Navegação pela sprite + Fechar/Voltar (RF-06) | Concluída | Done (passos 0–3, validado em 2026-08-08) |
-| 0006 | Paginação/filtro na listagem | Implementação | Em implementação (passos 0–6 green, suíte/lint verdes) — aguardando validação |
+| 0006 | Paginação/filtro na listagem | Concluída | Done (passos 0–6, validado em 2026-08-08) |
 | 0007 | UI: layout e estilos externo | — | Backlog |
 
 ## Estrutura do arquivo de sessão

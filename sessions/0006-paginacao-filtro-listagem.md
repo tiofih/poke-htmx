@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída |
-| Implementação | Concluída (passos 0–6 green, suíte/lint verdes) — aguardando validação do usuário |
-| Validação | Pendente (executada pelo usuário) |
+| Implementação | Concluída (passos 0–6 green, suíte/lint verdes) |
+| Validação | Concluída em 2026-08-08 (usuário: "implementação validada") |
 
 ---
 
@@ -31,22 +31,22 @@ server-side com cache) — mantendo o `<select>` (RF-01) e a interação 100% ht
 
 ## 3. Critérios de aceite
 
-- [ ] `GET /` renderiza o `<select>` com no máximo **100 opções** (primeira página)
+- [x] `GET /` renderiza o `<select>` com no máximo **100 opções** (primeira página)
       e o contador "Página X de Y" (sem `limit=100000` para todas as opções).
-- [ ] `GET /pokemons` (nova rota de fragmento) devolve o `<select>` com as opções
-      da página corrente (`offset`, 100 por páginas) + controle "Anterior"/"Próxima"
+- [x] `GET /pokemons` (nova rota de fragmento) devolve o `<select>` com as opções
+      da página corrente (`offset`, 100 por página) + controle "Anterior"/"Próxima"
       + contador "Página X de Y".
-- [ ] `GET /pokemons?q=<texto>` filtra por substring (case-insensitive) sobre a
+- [x] `GET /pokemons?q=<texto>` filtra por substring (case-insensitive) sobre a
       lista cacheada e pagina **o resultado filtrado**; `q` vazio = lista completa.
-- [ ] "Anterior" some na primeira página; "Próxima" some na última; links mantêm
+- [x] "Anterior" some na primeira página; "Próxima" some na última; links mantêm
       o `q` e o `offset` via `hx-get` (alvo `#pokemon-list`).
-- [ ] A navegação/filtro é 100% htmx, sem JS customizado (RNF-01).
-- [ ] O `<select>` continua disparando `hx-get="/pokemon"` ao trocar a opção
+- [x] A navegação/filtro é 100% htmx, sem JS customizado (RNF-01).
+- [x] O `<select>` continua disparando `hx-get="/pokemon"` ao trocar a opção
       (fragment add de RF-02/RF-03, sem regressão).
-- [ ] Suíte completa verde (`./scripts/test`), lint verde (`./scripts/lint`) e
+- [x] Suíte completa verde (`./scripts/test`), lint verde (`./scripts/lint`) e
       **commit a cada green** (RNF-04).
-- [ ] Testes sem rede: stub de `PokeApi.fetch_all_names` (novo `PokeApiStub.with_all_names`).
-- [ ] `REQUIREMENTS.md` (RF-01 — paginação/filtro) e `SESSIONS.md` (0006 em
+- [x] Testes sem rede: stub de `PokeApi.fetch_all_names` (novo `PokeApiStub.with_all_names`).
+- [x] `REQUIREMENTS.md` (RF-01 — paginação/filtro) e `SESSIONS.md` (0006 em
       refinamento) atualizados no mesmo escopo.
 
 ## 4. Decisões de refinamento
@@ -89,9 +89,15 @@ server-side com cache) — mantendo o `<select>` (RF-01) e a interação 100% ht
   uma limitação da API (oauth via cache local).
 - Próximo passo após validação: **sessão 0007** (UI: layout e estilos externo).
 
-### Validação da implementação (aguardando usuário)
+### Validação da implementação (concluída em 2026-08-08)
 
-- [ ] Usuário validar a fase 2 (TDD).
-- [ ] Suíte completa verde (`./scripts/test`).
-- [ ] Lint verde (`./scripts/lint`).
-- [ ] Critérios da seção 3 verificados contra a implementação.
+- [x] Usuário validou a fase 2 (TDD): "implementação validada".
+- [x] Suíte completa verde (`./scripts/test`): 44 runs / 218 assertions.
+- [x] Lint verde (`./scripts/lint`): 0 offenses.
+- [x] Critérios da seção 3 verificados contra a implementação:
+  - `GET /` renderiza o `<select>` com ≤100 opções (1ª página) + contador "Página X de Y";
+  - `GET /pokemons` devolve o select paginado (offset, 100/página) + Anterior/Próxima + contador;
+  - `GET /pokemons?q=` filtra por substring case-insensitive com paginação do resultado;
+  - controles de paginação 100% htmx (RNF-01) mantendo o `q` e o `offset`;
+  - `<select>` segue disparando `hx-get="/pokemon"` (RF-02/RF-03 sem regressão);
+  - testes sem rede via `PokeApiStub.with_all_names`.
