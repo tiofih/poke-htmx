@@ -40,9 +40,8 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0008** — a definir: candidatos anotados no `REQUIREMENTS.md`/draft
-(reordenação manual de slots A1, game loop do auto-battler B/C, UI/layout).
-Aguardando decisão do usuário. RF-07 (montagem de times) está `Done`.
+**Sessão 0009** — a definir: game loop do auto-battler (B1 modelo de batalha) e/ou
+UI/layout (A2). Aguardando a sessão 0008 (reordenação de slots) ser validada.
 
 ## Progresso das sessões
 
@@ -55,6 +54,7 @@ Aguardando decisão do usuário. RF-07 (montagem de times) está `Done`.
 | 0005 | Navegação pela sprite + Fechar/Voltar (RF-06) | Concluída | Done (passos 0–3, validado em 2026-08-08) |
 | 0006 | Paginação/filtro na listagem | Concluída | Done (passos 0–6, validado em 2026-08-08) |
 | 0007 | Montagem de times — cap 6 + slots + sem duplicados (RF-07) | Concluída | Done (passos 0–9, validado em 2026-08-08) |
+| 0008 | Reordenação manual de slots (RF-08) | Refinamento | Em andamento (decisões fechadas) |
 
 ## Estrutura do arquivo de sessão
 

@@ -110,6 +110,27 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Fragmento de detalhe mantém o form `hx-post /team` (Add to Team, RF-03).
 - [x] `GET /pokemon?name=` (fragment add atual) permanece funcional.
 
+### RF-08 — Reordenação manual de slots (A1) — `Em refinamento` (sessão 0008)
+- Permitir que o usuário **reordene manualmente** os membros do seu time (slots 1..N)
+  via botões ▲/▼ — hoje a posição só muda na remoção (sessão 0007).
+- A **ordem resultante é o input do futuro game loop**: `all(user_id)` já retorna
+  `ORDER BY slot`, e o usuário passa a controlar essa ordem.
+- Nenhuma mudança de schema (RF-07 já persistiu `slot` + índices únicos).
+
+**Critérios de aceite:**
+- [ ] `TeamRepository#move(user_id, id, new_slot)` move para slot `new_slot` (1..N)
+      mantendo slots contíguos 1..N (reindexa os demais), para cima e para baixo.
+- [ ] Idempotente: `new_slot` igual ao atual, fora de `1..N`, ou id inexistente →
+      time intacto (sem efeito, sem raise).
+- [ ] Isolamento (RF-05): id de outro usuário → no-op; time do dono intacto.
+- [ ] Reordenação não viola `UNIQUE (user_id, slot)` (transação com slot temporário).
+- [ ] `POST /team/:id/move` com `new_slot` re-renderiza `#team` (200) na ordem nova;
+      inválido/igual/outro usuário → 200 com time intacto.
+- [ ] `team.erb` ganha botões ▲/▼ (forms `hx-post="/team/:id/move"` com hidden
+      `new_slot`, alvo `#team`), irmãos do form de remoção; ▲ slot 1 / ▼ último = no-op.
+- [ ] Sem regressão: RF-01..RF-07 seguem verdes; teste sem rede; commit a cada green.
+- [ ] `REQUIREMENTS.md`/`SESSIONS.md` atualizados no mesmo escopo.
+
 ### RF-07 — Montagem de times (base do auto-battler) — `Done` (sessão 0007)
 - Time por usuário limitado a **6 vagas** (`MAX_TEAM_SIZE = 6`), com **`slot` de
   posição (1..N)** persistido e **sem duplicados** (mesmo `number` da PokéAPI).
@@ -183,19 +204,18 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 5 | Navegação pela sprite para o detalhe + Fechar/Voltar (RF-06) | Done (sessões 0004+0005) |
 | 6 | Paginação/filtro na listagem | Done (sessão 0006) |
 | 7 | Montagem de times — cap 6 + slots + sem duplicados (RF-07, base do auto-battler) | Done (sessão 0007) |
-| 8 | UI: layout e estilos externo | Backlog |
+| 8 | Reordenação manual de slots (RF-08, A1) | Em refinamento (sessão 0008) |
+| 9 | UI: layout e estilos externo | Backlog |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
 > Regra RNF-04: escopos grandes são anotados aqui e só viram sessão **após** a sessão
 > corrente ser concluída e validada. A 0007 (montagem de times) é `Done` (2026-08-08)
-> — os itens abaixo passam a poder virar sessões. Refinamento de UI/layout volta ao
-> roadmap como 0008+.
+> — os itens abaixo passam a poder virar sessões. **A1 (reordenação de slots) virou
+> RF-08/sessão 0008.** Refinamento de UI/layout volta ao roadmap como 0009+.
 
 - **Game loop (auto-battler):** combate automático por turnos usando os 6 slots do time
   como ordem de ação; stats (RF-06) e tipos como base de dano/efetividade; estado de
   HP/status persistido ou em memória a definir em refinamento próprio.
-- **Reordenação de slots:** mover Pokémon manualmente entre slots (a 0007 só reindexa
-  na remoção; "manter lacunas" e "mover para slot arbitrário" são variantes futuras).
 - **Layout/estilos externos:** extrair layout, navbar e estilos compartilhados
-  (a antiga sessão 0007-UI volta ao backlog como 0008+).
+  (a antiga sessão 0007-UI volta ao backlog como 0009+).
