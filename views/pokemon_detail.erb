@@ -18,3 +18,10 @@
     <% end %>
   </ul>
 <% end %>
+<form
+    hx-post="/team"
+    hx-target="#team"
+    hx-swap="innerHTML">
+  <input type="hidden" name="pokeName" value="<%= @pokemon.name %>">
+  <button class="btn">Add to Team</button>
+</form>

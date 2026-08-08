@@ -237,6 +237,36 @@ class ServerTest < Minitest::Test
     assert last_response.ok?
   end
 
+  def test_pokemon_detail_keeps_add_to_team_form
+    PokeApiStub.with_detail(pikachu_pokemon) do
+      get "/pokemon/25"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "hx-post=\"/team\""
+    assert_includes last_response.body, "pokeName"
+  end
+
+  def test_pokemon_name_fragment_links_to_detail
+    PokeApiStub.with_find(pikachu_pokemon) do
+      get "/pokemon", name: "pikachu"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "hx-get=\"/pokemon/25\""
+    assert_includes last_response.body, "hx-target=\"#pokemon\""
+  end
+
+  def test_team_member_links_to_detail
+    @repository.add("user-a", pikachu_pokemon)
+
+    get "/team", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "hx-get=\"/pokemon/25\""
+    assert_includes last_response.body, "hx-target=\"#pokemon\""
+  end
+
   private
 
   def distinct_user_ids

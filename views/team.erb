@@ -6,7 +6,9 @@
       hx-swap="innerHTML"
       hx-params="*">
     <input type="image" src="<%= poke.sprite %>"><br>
-    <%= poke.name %><br>
+    <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#pokemon" hx-swap="innerHTML">
+      <%= poke.name %>
+    </a><br>
     <input type="hidden" name="id" value="<%= poke.id %>">
     <button type="submit" class="btn">Remove from Team</button>
   </form>
