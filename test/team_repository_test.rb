@@ -151,7 +151,88 @@ class TeamRepositoryTest < Minitest::Test
     assert_equal %w[bulbasaur], @repository.all("user-b").map(&:name)
   end
 
+  # rubocop:disable Metrics/MethodLength
+  def test_move_moves_member_up_and_keeps_slots_contiguous
+    four_pokemon_team("user-a")
+    charmander_id = team_id("charmander", "user-a")
+
+    @repository.move("user-a", charmander_id, 1)
+
+    rows = @repository.all("user-a")
+    assert_equal %w[charmander pikachu bulbasaur squirtle], rows.map(&:name)
+    assert_equal [1, 2, 3, 4], rows.map(&:slot)
+  end
+
+  def test_move_moves_member_down_and_keeps_slots_contiguous
+    four_pokemon_team("user-a")
+
+    pikachu_id = team_id("pikachu", "user-a")
+    @repository.move("user-a", pikachu_id, 4)
+
+    rows = @repository.all("user-a")
+    assert_equal %w[bulbasaur charmander squirtle pikachu], rows.map(&:name)
+    assert_equal [1, 2, 3, 4], rows.map(&:slot)
+
+    squirtle_id = team_id("squirtle", "user-a")
+    @repository.move("user-a", squirtle_id, 2)
+
+    rows = @repository.all("user-a")
+    assert_equal %w[bulbasaur squirtle charmander pikachu], rows.map(&:name)
+    assert_equal [1, 2, 3, 4], rows.map(&:slot)
+  end
+  # rubocop:enable Metrics/MethodLength
+
+  def test_move_to_same_slot_is_noop
+    four_pokemon_team("user-a")
+    charmander_id = team_id("charmander", "user-a")
+
+    @repository.move("user-a", charmander_id, 3)
+
+    assert_equal %w[pikachu bulbasaur charmander squirtle], @repository.all("user-a").map(&:name)
+  end
+
+  def test_move_to_out_of_range_slot_is_noop
+    four_pokemon_team("user-a")
+    charmander_id = team_id("charmander", "user-a")
+
+    @repository.move("user-a", charmander_id, 0)
+    assert_equal [1, 2, 3, 4], @repository.all("user-a").map(&:slot)
+
+    @repository.move("user-a", charmander_id, 99)
+    assert_equal [1, 2, 3, 4], @repository.all("user-a").map(&:slot)
+  end
+
+  def test_move_with_unknown_id_is_noop
+    four_pokemon_team("user-a")
+
+    @repository.move("user-a", "999999", 1)
+
+    assert_equal %w[pikachu bulbasaur charmander squirtle], @repository.all("user-a").map(&:name)
+  end
+
+  def test_move_of_other_users_member_is_noop
+    four_pokemon_team("user-a")
+    four_pokemon_team("user-b")
+
+    charmander_b_id = team_id("charmander", "user-b")
+    @repository.move("user-a", charmander_b_id, 1)
+
+    assert_equal %w[pikachu bulbasaur charmander squirtle], @repository.all("user-a").map(&:name)
+    assert_equal %w[pikachu bulbasaur charmander squirtle], @repository.all("user-b").map(&:name)
+  end
+
   private
+
+  def four_pokemon_team(user_id)
+    [["pikachu", 25], ["bulbasaur", 1], ["charmander", 4], ["squirtle", 7]].each do |name, number|
+      pokemon = Pokemon.new(
+        name: name,
+        sprite: "https://example.com/#{name}.png",
+        number: number
+      )
+      @repository.add(user_id, pokemon)
+    end
+  end
 
   def team_row(name)
     connection = PG.connect(ENV.fetch("DATABASE_URL"))

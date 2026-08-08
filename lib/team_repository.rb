@@ -3,6 +3,7 @@
 require "pg"
 require_relative "pokemon"
 
+# rubocop:disable Metrics/ClassLength
 class TeamRepository
   DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
   MAX_TEAM_SIZE = 6
@@ -48,7 +49,77 @@ class TeamRepository
     )
   end
 
+  def move(user_id, id, new_slot)
+    from = current_slot(user_id, id)
+    return unless from && movable?(user_id, from, new_slot)
+
+    connection.transaction do
+      park_member(user_id, id)
+      shift_slots(user_id, from, new_slot)
+      assign_slot(user_id, id, new_slot)
+    end
+  end
+
   private
+
+  def current_slot(user_id, id)
+    row = connection.exec_params(
+      "SELECT slot FROM team_pokemons WHERE id = $1 AND user_id = $2",
+      [id, user_id]
+    ).first
+    row && row["slot"].to_i
+  end
+
+  def team_size(user_id)
+    connection.exec_params(
+      "SELECT COUNT(*) FROM team_pokemons WHERE user_id = $1",
+      [user_id]
+    ).first["count"].to_i
+  end
+
+  def movable?(user_id, from, new_slot)
+    new_slot.between?(1, team_size(user_id)) && new_slot != from
+  end
+
+  def park_member(user_id, id)
+    connection.exec_params(
+      "UPDATE team_pokemons SET slot = -1 WHERE id = $1 AND user_id = $2",
+      [id, user_id]
+    )
+  end
+
+  def assign_slot(user_id, id, new_slot)
+    connection.exec_params(
+      "UPDATE team_pokemons SET slot = $1 WHERE id = $2 AND user_id = $3",
+      [new_slot, id, user_id]
+    )
+  end
+
+  def shift_slots(user_id, from, new_slot)
+    if new_slot < from
+      (new_slot...from).reverse_each do |slot|
+        increment_slot(user_id, slot)
+      end
+    else
+      ((from + 1)..new_slot).each do |slot|
+        decrement_slot(user_id, slot)
+      end
+    end
+  end
+
+  def increment_slot(user_id, slot)
+    connection.exec_params(
+      "UPDATE team_pokemons SET slot = $1 WHERE user_id = $2 AND slot = $3",
+      [slot + 1, user_id, slot]
+    )
+  end
+
+  def decrement_slot(user_id, slot)
+    connection.exec_params(
+      "UPDATE team_pokemons SET slot = $1 WHERE user_id = $2 AND slot = $3",
+      [slot - 1, user_id, slot]
+    )
+  end
 
   def next_free_slot(user_id)
     taken = connection.exec_params(
@@ -69,3 +140,4 @@ class TeamRepository
     @connection ||= PG.connect(@db_url)
   end
 end
+# rubocop:enable Metrics/ClassLength
