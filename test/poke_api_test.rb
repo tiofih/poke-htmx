@@ -89,4 +89,77 @@ class PokeApiTest < Minitest::Test
     json = { "name" => "electric", "damage_relations" => { "no_damage_to" => [{ "name" => "ground" }] } }
     assert_equal %w[ground], PokeApi.extract_type_relations(json)["electric"]["no"]
   end
+
+  def test_type_relations_builds_table_for_all_18_types
+    fake = build_type_json_table
+    PokeApiStub.with_type(fake) do
+      relations = PokeApi.type_relations
+
+      assert_equal 18, relations.size
+      assert_equal %w[grass bug ice steel], relations["fire"]["double"]
+      assert_equal %w[rock fire water dragon], relations["fire"]["half"]
+      assert_empty relations["fire"]["no"]
+      assert_equal %w[water grass dragon], relations["water"]["half"]
+      assert_equal %w[ground], relations["flying"]["no"]
+    end
+  end
+
+  def test_type_relations_is_memoized
+    PokeApi.instance_variable_set(:@type_relations, nil)
+    calls = 0
+    test_self = self
+
+    original = PokeApi.method(:fetch_type_json)
+    PokeApi.define_singleton_method(:fetch_type_json) do |name|
+      calls += 1
+      test_self.send(:type_json_for, name)
+    end
+
+    PokeApi.type_relations
+    PokeApi.type_relations
+
+    assert_equal 18, calls
+  ensure
+    PokeApi.define_singleton_method(:fetch_type_json, original)
+    PokeApi.instance_variable_set(:@type_relations, nil)
+  end
+
+  private
+
+  # retorna a tabela esperada de eiptic relations para os 18 tipos
+  def type_relations_table
+    {
+      "fire" => { "double" => %w[grass bug ice steel], "half" => %w[rock fire water dragon], "no" => [] },
+      "water" => { "double" => %w[fire ground rock], "half" => %w[water grass dragon], "no" => [] },
+      "electric" => { "double" => %w[water flying], "half" => %w[grass electric dragon], "no" => %w[ground] },
+      "grass" => { "double" => %w[water ground rock], "half" => %w[fire grass poison flying bug dragon steel], "no" => [] },
+      "ice" => { "double" => %w[grass ground flying dragon], "half" => %w[fire water ice steel], "no" => [] },
+      "fighting" => { "double" => %w[normal ice rock dark steel], "half" => %w[flying poison bug psychic ghost fairy], "no" => [] },
+      "poison" => { "double" => %w[grass fairy], "half" => %w[poison ground rock ghost], "no" => %w[steel] },
+      "ground" => { "double" => %w[fire electric poison rock steel], "half" => %w[grass bug], "no" => %w[flying] },
+      "flying" => { "double" => %w[grass fighting bug], "half" => %w[electric rock steel], "no" => %w[ground] },
+      "psychic" => { "double" => %w[fighting poison], "half" => %w[psychic steel], "no" => %w[dark] },
+      "bug" => { "double" => %w[grass psychic dark], "half" => %w[fire fighting poison flying ghost steel], "no" => [] },
+      "rock" => { "double" => %w[fire ice flying bug], "half" => %w[fighting ground steel], "no" => [] },
+      "ghost" => { "double" => %w[ghost psychic], "half" => %w[dark], "no" => %w[normal] },
+      "dark" => { "double" => %w[ghost psychic], "half" => %w[fighting dark fairy], "no" => [] },
+      "dragon" => { "double" => %w[dragon], "half" => %w[steel], "no" => %w[fairy] },
+      "steel" => { "double" => %w[ice rock fairy], "half" => %w[fire water electric steel], "no" => %w[poison] },
+      "fairy" => { "double" => %w[fighting dragon dark], "half" => %w[fighting poison steel], "no" => [] },
+      "normal" => { "double" => [], "half" => %w[rock steel], "no" => %w[ghost] }
+    }
+  end
+
+  def build_type_json_table
+    type_relations_table.to_h do |name, relations|
+      dmg = { "double_damage_to" => relations["double"].map { |t| { "name" => t } },
+              "half_damage_to" => relations["half"].map { |t| { "name" => t } },
+              "no_damage_to" => relations["no"].map { |t| { "name" => t } } }
+      [name, { "name" => name, "damage_relations" => dmg }]
+    end
+  end
+
+  def type_json_for(name)
+    build_type_json_table[name]
+  end
 end

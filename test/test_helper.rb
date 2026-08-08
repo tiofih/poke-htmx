@@ -65,4 +65,19 @@ module PokeApiStub
       PokeApi.singleton_class.send(:remove_method, :fetch_all_names)
     end
   end
+
+  def self.with_type(table)
+    existed = PokeApi.respond_to?(:fetch_type_json)
+    original = existed ? PokeApi.method(:fetch_type_json) : nil
+    PokeApi.define_singleton_method(:fetch_type_json) { |name| table[name] }
+    PokeApi.instance_variable_set(:@type_relations, nil)
+    yield
+  ensure
+    if existed
+      PokeApi.define_singleton_method(:fetch_type_json, original)
+    else
+      PokeApi.singleton_class.send(:remove_method, :fetch_type_json)
+    end
+    PokeApi.instance_variable_set(:@type_relations, nil)
+  end
 end

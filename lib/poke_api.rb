@@ -78,4 +78,21 @@ class PokeApi
       }
     }
   end
+
+  TYPE_NAMES = %w[normal fire water electric grass ice fighting poison ground flying
+                  psychic bug rock ghost dark dragon steel fairy].freeze
+
+  def self.fetch_type_json(name)
+    JSON.parse(Faraday.get("https://pokeapi.co/api/v2/type/#{name}").body)
+  end
+
+  def self.type_relations
+    @type_relations ||= TYPE_NAMES.each_with_object({}) do |name, acc|
+      acc.merge!(extract_type_json(name))
+    end
+  end
+
+  def self.extract_type_json(name)
+    extract_type_relations(fetch_type_json(name))
+  end
 end
