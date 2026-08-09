@@ -42,8 +42,8 @@
   <% unless last_round.empty? %>
     <ul class="battle-log">
       <% last_round.each do |entry| %>
-        <% attacker_name = entry[:attacker].zero? ? "Seu Time" : "Oponente" %>
-        <li><%= attacker_name %> atacou (<%= entry[:move] %>/<%= entry[:move_type] %>), <%= entry[:damage] %> de dano<%= entry[:ko] ? " — KO!" : "" %></li>
+        <% attacker_side = entry[:attacker].zero? ? "Seu Time" : "Oponente" %>
+        <li><%= attacker_side %>: <strong><%= entry[:attacker_name] %></strong> usou <%= entry[:move] || entry[:move_type] %> em <strong><%= entry[:target_name] %></strong>, <%= entry[:damage] %> de dano<%= entry[:ko] ? " — KO!" : "" %></li>
       <% end %>
     </ul>
   <% end %>

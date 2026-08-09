@@ -789,7 +789,7 @@ class ServerTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "Rodada 1"
-    assert_includes last_response.body, "atacou"
+    assert_includes last_response.body, "usou thunder-shock em"
   end
 
   def test_battle_play_reuses_state_between_requests
@@ -858,7 +858,7 @@ class ServerTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "thunder-shock"
-    assert_includes last_response.body, "atacou"
+    assert_includes last_response.body, "usou thunder-shock em"
   end
 
   # rubocop:disable Metrics/MethodLength
