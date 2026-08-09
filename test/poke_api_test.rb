@@ -142,6 +142,53 @@ class PokeApiTest < Minitest::Test
     end
   end
 
+  def test_find_returns_nil_when_pokemon_not_found
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |_url|
+      Struct.new(:status, :body).new(404, "Not Found")
+    end
+
+    assert_nil PokeApi.find("urshifu")
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
+  # rubocop:disable Metrics/MethodLength
+  def test_evolution_chain_skips_stages_without_pokemon_endpoint
+    original_find = PokeApi.method(:find)
+    PokeApi.define_singleton_method(:find) do |name|
+      if name == "urshifu"
+        nil
+      else
+        Pokemon.new(name: "kubfu", sprite: "https://example.com/kubfu.png", number: 891)
+      end
+    end
+
+    stub_responses = {
+      "https://pokeapi.co/api/v2/pokemon-species/x" => {
+        "evolution_chain" => { "url" => "https://pokeapi.co/api/v2/evolution-chain/1" }
+      },
+      "https://pokeapi.co/api/v2/evolution-chain/1" => {
+        "chain" => {
+          "species" => { "name" => "kubfu" },
+          "evolves_to" => [{ "species" => { "name" => "urshifu" }, "evolves_to" => [] }]
+        }
+      }
+    }
+    original_faraday = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |url|
+      Struct.new(:body).new(JSON.generate(stub_responses.fetch(url)))
+    end
+
+    evolutions = PokeApi.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
+
+    assert_equal %w[kubfu], evolutions.map(&:name)
+  ensure
+    PokeApi.define_singleton_method(:find, original_find)
+    Faraday.define_singleton_method(:get, original_faraday)
+  end
+  # rubocop:enable Metrics/MethodLength
+
   private
 
   # rubocop:disable Layout/LineLength, Metrics/MethodLength

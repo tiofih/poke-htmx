@@ -28,8 +28,10 @@ class PokeApi
   end
 
   def self.find(name)
-    response = Faraday.get("https://pokeapi.co/api/v2/pokemon/#{name}").body
-    resp = JSON.parse(response)
+    response = Faraday.get("https://pokeapi.co/api/v2/pokemon/#{name}")
+    return nil unless response.status == 200
+
+    resp = JSON.parse(response.body)
     Pokemon.new(name: resp["name"], sprite: resp["sprites"]["front_default"], number: resp["id"])
   end
 
@@ -59,7 +61,7 @@ class PokeApi
     return [] unless chain_url
 
     chain = JSON.parse(Faraday.get(chain_url).body)["chain"]
-    flatten_chain(chain).map { |name| find(name) }
+    flatten_chain(chain).filter_map { |name| find(name) }
   end
 
   def self.flatten_chain(chain)
