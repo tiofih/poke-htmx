@@ -40,9 +40,9 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0014** — a definir: **A2 — UI: layout e estilos externos** (roadmap item 14)
-e/ou itens D1–D3 do draft auto-battler. RF-13 (C1) está `Done` (validado em 2026-08-09).
-Aguardando decisão do usuário.
+**Sessão 0015** — a definir: itens D1–D3 do draft auto-battler (golpes/PP, XP/evolução,
+histórico/rank). RF-14 (A2) está implementado na sessão 0014 (2026-08-09) **aguardando
+validação** do usuário. Aguardando decisão do usuário.
 
 ## Progresso das sessões
 
@@ -61,6 +61,7 @@ Aguardando decisão do usuário.
 | 0011 | Motor de auto-batalha (RF-11, B3) — BattleEngine puro 6v6 | Concluída | Done (passos 0–9, validado em 2026-08-08) |
 | 0012 | Oponente automático (RF-12, B4) — OpponentGenerator puro | Concluída | Done (passos 0–5, validado em 2026-08-08) |
 | 0013 | Batalha na web (RF-13, C1) — BattleEngine incremental + rotas htmx | Concluída | Done (passos 0–7, validado em 2026-08-09) |
+| 0014 | UI: layout e estilos externos (RF-14, A2) — layout.erb + nav + style.css | Implementação | Passos 0–4 verdes (139 runs/535 asserts) + lint 0; aguardando validação do usuário |
 
 ## Estrutura do arquivo de sessão
 

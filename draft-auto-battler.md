@@ -19,12 +19,16 @@
 - **Plano TDD [0]** repo `#move` + documento; **[1]** rota; **[2]** UI ▲/▼; **[3]** isolamento/regressão.
 
 ### A2. UI: layout e estilos externos
+- **Status:** implementado como **RF-14** (sessão 0014) — passos 0–4 verdes (139
+  runs/535 asserts) e lint 0; **aguardando validação do usuário (2026-08-09)**.
 - **Objetivo:** extrair layout/navbar/estilos compartilhados (a antiga "0007-UI",
   estrada como 0008+). Preparar telas mais ricas (batalha não acontece em página crua).
-- **Decisões:** layout único em `views/layout.erb`, CSS externo (substitui sakura CDN ou
-  embolha sobre ele); fragmentos mantêm o mesmo contrato htmx.
-- **Critérios:** `[ ]` `GET /` usa layout único; `[ ]` navegação (lista/time/detalhe)
-  consistente; `[ ]` 0 regressão nas rotas/fragmentos atuais.
+- **Decisões:** layout único em `views/layout.erb` (+ nav Lista/Time/Batalha na página
+  única, sem novas rotas), CSS externo (sakura CDN como base + `public/style.css`
+  sobreposto — decisão do usuário); fragmentos mantêm o mesmo contrato htmx
+  (`layout: false`, resposta parcial).
+- **Critérios:** `[x]` `GET /` usa layout único (um único `<html>`); `[x]` navegação
+  (lista/time/detalhe) consistente; `[x]` 0 regressão nas rotas/fragmentos atuais.
 
 ---
 

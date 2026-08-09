@@ -35,6 +35,33 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
+### RF-14 — Layout e estilos externos (A2) — `Implementado — aguardando validação (sessão 0014)`
+- Extrair **layout/navbar/estilos compartilhados** (A2 do draft auto-battler, roadmap
+  item 14): layout único `views/layout.erb` usado por `GET /`, navegação consistente
+  (Lista/Time/Batalha) na **página única** e **CSS externo** estilizando as classes dos
+  fragmentos — **sakura (CDN) como base** + `public/style.css` sobreposto.
+- Fragmentos htmx permanecem **parciais** (`layout: false`): nenhuma mudança de
+  contrato (alvos, swaps, forms).
+
+**Critérios de aceite:**
+- [x] `views/layout.erb` = `<html>` único (charset, título, script htmx 2.0.3, sakura
+      CDN + link `/style.css`) + `<nav>` com título da app e links Lista/Time/Batalha.
+- [x] `GET /` responde o layout único; `index.erb` vira **parcial**; a resposta contém
+      **exatamente um** `<html>`, com conteúdo preservado (filtro, `#pokemon-list`,
+      `#pokemon`, `#team`, `#battle`).
+- [x] Navegação consistente na página única (Lista → `#pokemon-list`, Time → `#team`,
+      Batalha → `hx-get="/battle"` no alvo `#battle`), sem JS custom (RNF-01).
+- [x] Fragmentos htmx (`/pokemons`, `/pokemon`, `/pokemon/:poke_id`, `/pokemon/close`,
+      `/team`, `POST /team`, `DELETE /team`, `POST /team/:id/move`, `/battle`,
+      `POST /battle/play`) continuam **parciais** (`layout: false`) — resposta sem
+      `<html>/<head>` e com o mesmo contrato de antes.
+- [x] `public/style.css` estiliza as classes atuais dos fragmentos (listagem, detalhe,
+      team, batalha) sobre a base sakura; `GET /style.css` responde 200 via pasta pública.
+- [x] Suíte completa verde (139 runs/535 asserts) e lint 0; 0 regressão RF-01..RF-13;
+      commit a cada green; `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md`
+      atualizados no mesmo escopo.
+      **Aguardando validação do usuário (sessão 0014).**
+
 ### RF-13 — Batalha na web (C1) — `Done` (sessão 0013, validado em 2026-08-09)
 - Expor o motor de auto-batalha (RF-11/B3) e o oponente automático (RF-12/B4) na UI
   com **100% htmx** (RNF-01): o usuário entra em uma batalha contra um time adversário
@@ -317,7 +344,8 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       + filtro por nome com cache; busca parcial server-side da PokéAPI segue limitada
       (lista completa cacheada em memória).
 - [ ] **Sem tratamento de erros** — nome inválido, rate-limit da PokéAPI, time sem membros, duplicados.
-- [ ] **HTML parcial sem layout único** — extrair layout/navbar/estilos.
+- [x] **HTML parcial sem layout único** — resolvido na sessão 0014 (RF-14): layout único
+      `views/layout.erb` + navegação (Lista/Time/Batalha) + CSS externo sobre a base sakura.
 
 ## Roadmap (executado em `SESSIONS.md`)
 
@@ -336,7 +364,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 11 | Motor de auto-batalha (B3) | Done (sessão 0011, validado em 2026-08-08) |
 | 12 | Oponente automático (B4) | Done (sessão 0012, validado em 2026-08-08) |
 | 13 | Batalha na web (C1) | Done (sessão 0013, validado em 2026-08-09) |
-| 14 | UI: layout e estilos externos | Backlog |
+| 14 | UI: layout e estilos externos | Implementado — aguardando validação (sessão 0014) |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
