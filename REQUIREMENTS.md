@@ -35,6 +35,37 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
+### RF-13 — Batalha na web (C1) — implementado (sessão 0013), aguardando validação
+- Expor o motor de auto-batalha (RF-11/B3) e o oponente automático (RF-12/B4) na UI
+  com **100% htmx** (RNF-01): o usuário entra em uma batalha contra um time adversário
+  e cada "jogar" avança **uma rodada** do `BattleEngine`, re-renderizando o fragmento
+  `#battle` com os dois painéis (time do jogador × oponente), **HP atual** por membro,
+  o **log do último round** e, ao fim, o **vencedor** + botão "Novo confronto".
+- `BattleEngine` ganha API **incremental** (`play_round`, `finished?`, `winner`,
+  `rounds`, `log`, `teams`) mantendo `battle` como loop (0 regressão em B3).
+- Estado da batalha entre requests em **memória** (`BattleRegistry` por `user_id`) —
+  batalha não é estado persistente (RF-02).
+
+**Critérios de aceite:**
+- [x] `BattleEngine#play_round` público: executa **uma rodada**, incrementa `rounds`,
+      acumula `@log` e expõe o estado dos times (HP por membro via `teams`).
+- [x] `finished?`, `winner`, `rounds`, `log` públicos; `battle` vira loop de
+      `play_round!` → mesmo `BattleResult` de antes (B3 sem regressão).
+- [x] `play_round` após o fim é **idempotente** (não quebra, não gera log novo).
+- [x] `BattleRegistry` guarda por `user_id` a batalha corrente (`fetch`/`set`/`clear`).
+- [x] `GET /battle` abre/recria a batalha: monta time do jogador via
+      `BattlePokemon.from(PokeApi.detail(member.number))` (por membro), oponente via
+      `OpponentGenerator`, cria `BattleEngine` e renderiza `battle.erb` (alvo `#battle`).
+- [x] `POST /battle/play` avança **uma rodada** e re-renderiza `battle.erb`; painéis
+      mostram nome + sprite + `HP current/max` dos dois lados; log mostra as ações do round.
+- [x] Batalha finalizada: fragmento mostra **vencedor** (Seu Time / Oponente) e botão
+      "Novo confronto" (`hx-get="/battle"` → recria).
+- [x] Time vazio → mensagem amigável ("Forme seu time para batalhar.") sem erro.
+- [x] `index.erb` ganha entrada "Batalha" (`hx-get="/battle" hx-target="#battle"`).
+- [x] Sem JS custom (RNF-01); testes sem rede (`with_all_names`/`with_detail`/`with_type`).
+- [x] Suíte completa verde (135 runs/481 asserts) e lint 0; sem regressão RF-01..RF-12;
+      `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo escopo.
+
 ### RF-12 — Oponente automático (B4) — `Done` (sessão 0012, validado em 2026-08-08)
 - Gerar o time adversário para o jogador enfrentar sem montar time próprio — lado
   `team_b` do `BattleEngine` (RF-11) num futuro C1 (batalha na web).

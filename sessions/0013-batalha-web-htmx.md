@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-09 |
-| Implementação | Pendente |
+| Implementação | Concluída — passos 0–7 TDD, suíte 135 runs/481 asserts e lint 0 verdes |
 | Validação | Pendente — executada pelo usuário |
 
 ---
