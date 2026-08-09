@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-09 |
-| Implementação | Em andamento — plano TDD da seção 5 |
+| Implementação | Concluída — suíte completa (171 runs / 610 asserts) e lint 0 verdes (passos 0–7) |
 | Validação | Pendente — executada pelo usuário |
 
 ---
@@ -51,56 +51,56 @@ regressão nas suítes 0011/0013/0014.
 
 ### Modelo de golpe (D1 — domínio puro, sem rede)
 
-- [ ] `lib/move.rb`: `Move < Dry::Struct` com `name`, `type`, `power` (Integer ou nil —
+- [x] `lib/move.rb`: `Move < Dry::Struct` com `name`, `type`, `power` (Integer ou nil —
       golpes de status), `accuracy` (Integer ou nil) e `pp` (Integer).
-- [ ] `BattlePokemon` ganha a attribute `moves` (`Array.of(Move)`, default `[]` —
+- [x] `BattlePokemon` ganha a attribute `moves` (`Array.of(Move)`, default `[]` —
       `from(pokemon, moves:)` aceita a lista; sem `moves` → `[]` e caminho legado).
 
 ### Fonte dos golpes (PokéAPI, com cache e stub)
 
-- [ ] `PokeApi.move(name)` → `Move` (fetch `GET /move/:name`, memoizado por nome).
-- [ ] `PokeApi.moves_for(number)` → até **4 golpes** do Pokémon (via
+- [x] `PokeApi.move(name)` → `Move` (fetch `GET /move/:name`, memoizado por nome).
+- [x] `PokeApi.moves_for(number)` → até **4 golpes** do Pokémon (via
       `pokemon_data(id)["moves"]`, os **04 últimos** da lista da API), memoizado por
       número; usa `Move` puros.
-- [ ] Golpes sem dano (power `nil`/`0`) são carregados como `Move` mas ficam
+- [x] Golpes sem dano (power `nil`/`0`) são carregados como `Move` mas ficam
       **inutilizáveis** pelo motor (não escolhidos para atacar).
 
 ### Motor com golpes (B3 revisitada — determinística)
 
-- [ ] `BattleEngine` escolhe o golpe **deterministicamente**: o de **maior dano
+- [x] `BattleEngine` escolhe o golpe **deterministicamente**: o de **maior dano
       esperado** = `power × effectiveness(move.type) × STAB(move.type)` contra o alvo;
       desempate → maior `power`; empate → primeira posição na lista.
-- [ ] Dano do golpe = `max(1, Attack − Defense) × (power / 50) × multiplicador do
+- [x] Dano do golpe = `max(1, Attack − Defense) × (power / 50) × multiplicador do
       tipo do golpe` (arredondado), mínimo 1; `move_type` no log = tipo do golpe usado.
-- [ ] **PP decai em 1** a cada uso (funcional: novo Move com `pp−1` substituído no
+- [x] **PP decai em 1** a cada uso (funcional: novo Move com `pp−1` substituído no
       `BattlePokemon`); golpe com `pp == 0` deixa de ser escolhido.
-- [ ] Sem golpe utilizável (todos `pp == 0` ou só golpes de status) → **Struggle**:
+- [x] Sem golpe utilizável (todos `pp == 0` ou só golpes de status) → **Struggle**:
       dano fixo baixo (`power` = 10), tipo do atacante, **sem custo de PP**, entra no log.
-- [ ] Pokémon **sem `moves`** (`[]`) → **caminho legado preservado**: exatamente o
+- [x] Pokémon **sem `moves`** (`[]`) → **caminho legado preservado**: exatamente o
       ataque por melhor tipo de B3 (dano `A−D`, multiplicador, mesma shape de log)
       — suíte 0011 continua verde **sem edição** (0 regressão).
-- [ ] Log de ação com golpe usado ganha a chave **`move`** (nome do golpe);
+- [x] Log de ação com golpe usado ganha a chave **`move`** (nome do golpe);
       entries legado continuam com `round/attacker/move_type/damage/ko`.
-- [ ] `Accuracy` **não é aplicada** neste escopo (dados preservados no `Move`, uso em
+- [x] `Accuracy` **não é aplicada** neste escopo (dados preservados no `Move`, uso em
       iteração futura com RNG) — anotado.
 
 ### Batalha web (C1) exibe os golpes
 
-- [ ] `GET /battle` carrega os golpes dos dois lados: jogador via `moves_for` por membro;
+- [x] `GET /battle` carrega os golpes dos dois lados: jogador via `moves_for` por membro;
       oponente via `moves_for` por membro do `OpponentGenerator` (síntese de Struggle
       quando `moves_for` vier vazio → `moves_for` nunca devolve `[]` na rota).
-- [ ] `battle.erb`: cada fighter mostra seus golpes com **PP restante** (`move — PP n`);
+- [x] `battle.erb`: cada fighter mostra seus golpes com **PP restante** (`move — PP n`);
       log do round mostra o **nome do golpe** usado (+ Struggle quando for o caso).
-- [ ] Sem JS customizado (RNF-01); testes de rota sem rede (stubs existentes +
+- [x] Sem JS customizado (RNF-01); testes de rota sem rede (stubs existentes +
       `PokeApiStub.with_moves_for`/`with_move`).
 
 ### Garantias (RNF)
 
-- [ ] Testes **sem rede**; suíte completa verde (`./scripts/test`) e lint 0; commit a
+- [x] Testes **sem rede**; suíte completa verde (`./scripts/test`) e lint 0; commit a
       cada green.
-- [ ] 0 regressão: RF-01..RF-14 seguem verdes (0011 em especial, sem editar
+- [x] 0 regressão: RF-01..RF-14 seguem verdes (0011 em especial, sem editar
       `battle_engine_test.rb`).
-- [ ] `REQUIREMENTS.md` (**RF-15 — Golpes/PP (D1)**), `SESSIONS.md` (0015) e
+- [x] `REQUIREMENTS.md` (**RF-15 — Golpes/PP (D1)**), `SESSIONS.md` (0015) e
       `draft-auto-battler.md` (D1) atualizados no mesmo escopo.
 
 ## 4. Decisões de refinamento (fechadas com o usuário em 2026-08-09)
@@ -130,16 +130,16 @@ regressão nas suítes 0011/0013/0014.
 
 ## 5. Plano TDD (passos)
 
-| Passo | Teste (red) | Implementação (green) |
-| --- | --- | --- |
-| 0 | `Move` Dry::Struct (name/type/power/accuracy/pp); `BattlePokemon` aceita `moves` (default `[]`) e `from(pokemon, moves:)` incorpora | `lib/move.rb` + attribute `moves` em `BattlePokemon` |
-| 1 | `PokeApi.move(name)` → `Move` memoizado; `PokeApi.moves_for(number)` → 4 últimos golpes memoizado (stubs `with_move`/`with_moves_for`) | `PokeApi.move` / `moves_for` + cache `@moves`; stubs no `PokeApiStub` |
-| 2 | motor: escolhe maior dano esperado e usa o **power** no dano; `move_type` vira o tipo do golpe; `move` no log; PP decai no `BattlePokemon` funcional | `BattleEngine.act` com seleção de golpe + `use_move`/pp no `BattlePokemon` |
-| 3 | motor: sem golpe utilizável → **Struggle** (tipo do atacante, power 10, sem PP, log `move: "Struggle"`) | fallback Struggle no motor |
-| 4 | regressão: suíte 0011 continua verde **sem editar** `battle_engine_test.rb`; B3 aceita `pokemon without moves` (legado) | — (garantido por desenho; rodar suíte) |
-| 5 | `GET /battle` carrega golpes (jogador + oponente) e `battle.erb` mostra PP por fighter + nome do golpe no log | rotas `get "/battle"` + `views/battle.erb` (helper moves) |
-| 6 | suíte completa `./scripts/test` + `./scripts/lint` 0 | checagem geral |
-| 7 | docs: `REQUIREMENTS.md` (RF-15 D1), `SESSIONS.md` (0015), `draft-auto-battler.md` (D1) | documento |
+| Passo | Teste (red) | Implementação (green) | Status |
+| --- | --- | --- | --- |
+| 0 | `Move` Dry::Struct (name/type/power/accuracy/pp); `BattlePokemon` aceita `moves` (default `[]`) e `from(pokemon, moves:)` incorpora | `lib/move.rb` + attribute `moves` em `BattlePokemon` | ✅ `19120b4` |
+| 1 | `PokeApi.move(name)` → `Move` memoizado; `PokeApi.moves_for(number)` → 4 últimos golpes memoizado (stubs `with_move`/`with_moves_for`) | `PokeApi.move` / `moves_for` + cache `@moves`; stubs no `PokeApiStub` | ✅ `49cfb70` |
+| 2 | motor: escolhe maior dano esperado e usa o **power** no dano; `move_type` vira o tipo do golpe; `move` no log; PP decai no `BattlePokemon` funcional | `BattleEngine.act` com seleção de golpe + `use_move`/pp no `BattlePokemon` | ✅ `20fd8c7` |
+| 3 | motor: sem golpe utilizável → **Struggle** (tipo do atacante, power 10, sem PP, log `move: "Struggle"`) | fallback Struggle no motor | ✅ `5b10bad` |
+| 4 | regressão: suíte 0011 continua verde **sem editar** `battle_engine_test.rb`; B3 aceita `pokemon without moves` (legado) | — (garantido por desenho; rodar suíte) | ✅ checado (suíte 0011 verde) |
+| 5 | `GET /battle` carrega golpes (jogador + oponente) e `battle.erb` mostra PP por fighter + nome do golpe no log | rotas `get "/battle"` + `views/battle.erb` (helper moves) | ✅ `464286d` |
+| 6 | suíte completa `./scripts/test` + `./scripts/lint` 0 | checagem geral | ✅ `1b5dadd` |
+| 7 | docs: `REQUIREMENTS.md` (RF-15 D1), `SESSIONS.md` (0015), `draft-auto-battler.md` (D1) | documento | ⏳ neste passo |
 
 ## 6. Observações e próximo passo
 
@@ -147,6 +147,12 @@ regressão nas suítes 0011/0013/0014.
   `move_type_for`/`damage_for` atuais — `battle_engine_test.rb` (0011) não precisa
   ser editado. Novos testes de golpe ficam em arquivo próprio (`test/move_test.rb`,
   `test/move_engine_test.rb` ou casos adicionais) para não tocar os existentes.
+- **Implementação (passos 0–7, suíte 171 runs/610 asserts e lint 0 verdes):**
+  `lib/move.rb` (Move Dry::Struct), `BattlePokemon#moves` + `from(pokemon, moves:)` +
+  `use_move(index)`, `PokeApi.move`/`moves_for` (memoizados), `BattleEngine` com
+  `choose_move`/`struggle_move`/`move_damage_for` e log com `move`, `GET /battle`
+  (helper `battle_moves_for`, fallback Struggle) e `battle.erb` mostrando `move — PP n`
+  + nome do golpe no log. Validação (fase 3) é do usuário — pendente.
 - **Escolha deterministic:** avaliar o melhor golpe por alvo a cada ação — sem estado
   de "preferência" persistente entre rounds (só o PP decai).
 - **PP como dado imutável:** usar a mesma filosofia do `take_damage` (retorna nova

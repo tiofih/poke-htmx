@@ -35,6 +35,52 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
+### RF-15 — Golpes (moves) e PP (D1) — `Implementado` (sessão 0015, validação pendente do usuário)
+- Dar **multi-move** à simulação de batalha (D1 do `draft-auto-battler.md`, roadmap
+  item 15): cada `BattlePokemon` passa a ter uma **lista de golpes** (nome, tipo,
+  poder, precisão, PP). O `BattleEngine` **escolhe deterministicamente** qual golpe
+  usar (maior dano esperado), aplica o **poder do golpe** no dano, **decai o PP** a
+  cada uso e, sem golpe utilizável, usa **Struggle** (dano baixo fixo, tipo do
+  atacante, sem PP). Sem RNG — escolha determinística e testável.
+- `PokeApi.moves_for(number)` busca até **4 golpes** (últimos da lista `moves` de
+  `GET /pokemon/:id`, memoizado) e `PokeApi.move(name)` via `GET /move/:name`
+  (memoizado). A batalha web (C1/RF-13) carrega os golpes dos dois lados e exibe:
+  log mostra o golpe usado e cada painel mostra os golpes com **PP restante**.
+- Revisita B3/RF-11 (motor) e toca C1/RF-13 (battle.erb + `GET /battle`) **sem
+  regressão**: `BattlePokemon` sem `moves` mantém o caminho legado (ataque por
+  melhor tipo, dano `A−D`, mesma shape de log) — suíte 0011 verde sem edição.
+
+**Critérios de aceite:**
+- [x] `lib/move.rb`: `Move < Dry::Struct` com `name`, `type`, `power` (Integer ou nil),
+      `accuracy` (Integer ou nil) e `pp` (Integer).
+- [x] `BattlePokemon` ganha a attribute `moves` (`Array.of(Move)`, default `[]`);
+      `from(pokemon, moves:)` aceita a lista — sem `moves` → `[]` (caminho legado).
+- [x] `PokeApi.move(name)` → `Move` memoizado; `PokeApi.moves_for(number)` → até 4
+      golpes (últimos da lista da API) memoizado; golpes de status (power nil/0)
+      carregados mas **inutilizáveis** pelo motor.
+- [x] Motor escolhe determinísticamente o golpe de **maior dano esperado**
+      (`power × effectiveness × STAB`); desempate maior `power`, depois primeira posição.
+- [x] Dano do golpe = `max(1, Attack − Defense) × (power / 50) × multiplicador do tipo
+      do golpe` (redondo, min 1); `move_type` no log = tipo do golpe usado.
+- [x] **PP decai em 1** a cada uso (funcional); golpe com `pp == 0` deixa de ser escolhido.
+- [x] Sem golpe utilizável (todos `pp == 0` ou só status) → **Struggle** (power 10,
+      tipo do atacante, sem PP, entra no log com `move: "Struggle"`).
+- [x] Pokémon **sem `moves`** (`[]`) → caminho legado de B3 preservado (0 regressão,
+      suíte 0011 verde sem editar `battle_engine_test.rb`).
+- [x] Log de ação com golpe ganha a chave `move` (nome do golpe); entries legado
+      continuam `round/attacker/move_type/damage/ko`.
+- [x] `Accuracy` preservada no `Move` mas **não aplicada** (sem RNG neste escopo) — anotado.
+- [x] `GET /battle` carrega os golpes dos dois lados (`moves_for`); rota sintetiza
+      Struggle quando `moves_for` vazio (nunca expõe `[]`).
+- [x] `battle.erb`: cada fighter mostra seus golpes com **PP restante** (`move — PP n`);
+      log do round mostra o **nome do golpe** usado (+ Struggle quando for o caso).
+- [x] Sem JS customizado (RNF-01); testes de rota sem rede (stubs incluem
+      `PokeApiStub.with_moves_for`/`with_move`).
+- [x] Suíte completa verde (171 runs/610 asserts) e lint 0; commit a cada green;
+      0 regressão RF-01..RF-14; `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md`
+      atualizados no mesmo escopo.
+      **Validação pendente — executada pelo usuário (AGENTS.md).**
+
 ### RF-14 — Layout e estilos externos (A2) — `Done` (sessão 0014, validado em 2026-08-09)
 - Extrair **layout/navbar/estilos compartilhados** (A2 do draft auto-battler, roadmap
   item 14): layout único `views/layout.erb` usado por `GET /`, navegação consistente
@@ -377,6 +423,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 12 | Oponente automático (B4) | Done (sessão 0012, validado em 2026-08-08) |
 | 13 | Batalha na web (C1) | Done (sessão 0013, validado em 2026-08-09) |
 | 14 | UI: layout e estilos externos | Done (sessão 0014, validado em 2026-08-09) |
+| 15 | Golpes (moves) e PP (D1) | Implementado (sessão 0015, validação pendente do usuário) |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 

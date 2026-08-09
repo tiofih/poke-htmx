@@ -119,12 +119,30 @@
 ## Fase D — Opcionais (anotados — NÃO agendar agora)
 
 ### D1. Golpes (moves/PP) por Pokémon
+- **Status:** Implementado — **RF-15** (sessão 0015), suíte completa 171 runs/610
+  asserts, lint 0. **Validação pendente do usuário** (unit 0015 é entregue na fase 2 —
+  a validação é da fase 3).
+- **Decisões (fechadas com o usuário em 2026-08-09):** escolha do golpe
+  **determinística** (maior dano esperado = power × efetividade × STAB; desempate
+  power/ordem; sem RNG); fallback **Struggle determinístico** (power 10, tipo do
+  atacante, sem PP) quando todos PP zerados ou só status moves; logo + PP no painel
+  (sem seletor). `BattlePokemon` sem `moves` mantém o caminho legado (0 regressão).
+- **Implementado:** `lib/move.rb` (`Move` Dry::Struct: name/type/power/accuracy/pp);
+  `BattlePokemon#moves` + `from(pokemon, moves:)` + `use_move(index)` (PP decai);
+  `PokeApi.moves_for(number)` (até 4, últimos da lista, memoizado) + `PokeApi.move(name)`
+  (memoizado); `BattleEngine` escolhe golpe (dano esperado), dano usa o power do golpe
+  (`max(1, A−D) × power/50 × multiplicador`), log ganha `move`; Struggle fallback;
+  `GET /battle` carrega golpes dos dois lados e `battle.erb` mostra `move — PP n` +
+  nome do golpe no log.
+- **Nota RNG (anotado — iteração futura):** escolha de golpe é determinística neste
+  escopo (decisão do usuário). Variar partidas/falhas de golpe (accuracy) fica para
+  iteração com `rng` injetável.
 - **Objetivo:** dar "multi-move" à simulação (em vez de só atacar). 
 - **Pontos:** PokéAPI `/move` (nome, tipo, power, accuracy, pp); memoizar 4 moves por
   Pokémon; o motor escolhe (aleatório/peso por estado/estratégia); pp decai.
 - **Impacto:** revisita B2/B3; tabela de moves é pesada → cache.
-- **Critérios (esboço):** `[ ]` pokémon com lista de moves limitada (ex.: 4); `[ ]`
-  motor usa o gasto correto de `pp`; `[ ]` escolha determinística testável.
+- **Critérios (esboço):** `[x]` pokémon com lista de moves limitada (4); `[x]`
+  motor usa o gasto correto de `pp`; `[x]` escolha determinística testável.
 
 ### D2. XP/evolução que melhora stats
 - **Objetivo:** progressão entre batalhas (XP → melhorar stats, evoluir o Pokémon).
