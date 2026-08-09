@@ -40,10 +40,9 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0013 (C1 — Batalha na web, RF-13)**: implementação dos passos 0–5 concluída
-(suíte 135 runs/481 asserts + lint 0 verdes), aguardando **validação do usuário**.
-Após validar: próxima sessão sugerida **A2 — UI: layout e estilos externos**
-(roadmap item 13) e/ou itens D1–D3 do draft.
+**Sessão 0014** — a definir: **A2 — UI: layout e estilos externos** (roadmap item 14)
+e/ou itens D1–D3 do draft auto-battler. RF-13 (C1) está `Done` (validado em 2026-08-09).
+Aguardando decisão do usuário.
 
 ## Progresso das sessões
 
@@ -61,7 +60,7 @@ Após validar: próxima sessão sugerida **A2 — UI: layout e estilos externos*
 | 0010 | Efetividade de tipos (RF-10, B2) — lookup puro + tabela via PokéAPI | Concluída | Done (passos 0–8, validado em 2026-08-08) |
 | 0011 | Motor de auto-batalha (RF-11, B3) — BattleEngine puro 6v6 | Concluída | Done (passos 0–9, validado em 2026-08-08) |
 | 0012 | Oponente automático (RF-12, B4) — OpponentGenerator puro | Concluída | Done (passos 0–5, validado em 2026-08-08) |
-| 0013 | Batalha na web (RF-13, C1) — BattleEngine incremental + rotas htmx | Implementação | Passos 0–5 verdes (135 runs/481 asserts) + lint 0; aguardando validação |
+| 0013 | Batalha na web (RF-13, C1) — BattleEngine incremental + rotas htmx | Concluída | Done (passos 0–7, validado em 2026-08-09) |
 
 ## Estrutura do arquivo de sessão
 

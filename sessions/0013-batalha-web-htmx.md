@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-09 |
 | Implementação | Concluída — passos 0–7 TDD, suíte 135 runs/481 asserts e lint 0 verdes |
-| Validação | Pendente — executada pelo usuário |
+| Validação | Concluída — validada pelo usuário em 2026-08-09 |
 
 ---
 
@@ -122,3 +122,14 @@ Não é uma reescrita do motor: o `BattleEngine` ganha uma API **incremental**
   no draft-auto-battler.md.
 - Estado em memória: documentar limitação (batalha é por process). Concorrência de
   acionamento não é alvo.
+
+## 7. Validação (a preencher pelo usuário)
+
+- **Validada pelo usuário em 2026-08-09** ("ok, comportamento validado também").
+  Suíte completa verde (135 runs/481 asserts) e lint 0 confirmados; critérios de
+  aceite da seção 3 verificados contra a implementação (`BattleEngine#play_round`
+  incremental idempotente, `BattleRegistry` por user, `GET /battle` + `POST /battle/play`
+  com fragmento `#battle`, HP/log/vencedor visíveis, Reset recriando, time vazio
+  amigável, entrada htmx no index). RF-01..RF-12 sem regressão.
+- Sessão 0013 **concluída**; próxima sessão sugerida: **A2 — UI: layout e estilos
+  externos** (roadmap item 13) e/ou itens D1–D3 do draft.

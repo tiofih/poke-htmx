@@ -35,7 +35,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
-### RF-13 — Batalha na web (C1) — implementado (sessão 0013), aguardando validação
+### RF-13 — Batalha na web (C1) — `Done` (sessão 0013, validado em 2026-08-09)
 - Expor o motor de auto-batalha (RF-11/B3) e o oponente automático (RF-12/B4) na UI
   com **100% htmx** (RNF-01): o usuário entra em uma batalha contra um time adversário
   e cada "jogar" avança **uma rodada** do `BattleEngine`, re-renderizando o fragmento
@@ -65,6 +65,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Sem JS custom (RNF-01); testes sem rede (`with_all_names`/`with_detail`/`with_type`).
 - [x] Suíte completa verde (135 runs/481 asserts) e lint 0; sem regressão RF-01..RF-12;
       `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo escopo.
+      **Validado pelo usuário em 2026-08-09.**
 
 ### RF-12 — Oponente automático (B4) — `Done` (sessão 0012, validado em 2026-08-08)
 - Gerar o time adversário para o jogador enfrentar sem montar time próprio — lado
@@ -334,7 +335,8 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 10 | Efetividade de tipos (B2) | Done (sessão 0010) |
 | 11 | Motor de auto-batalha (B3) | Done (sessão 0011, validado em 2026-08-08) |
 | 12 | Oponente automático (B4) | Done (sessão 0012, validado em 2026-08-08) |
-| 13 | UI: layout e estilos externos | Backlog |
+| 13 | Batalha na web (C1) | Done (sessão 0013, validado em 2026-08-09) |
+| 14 | UI: layout e estilos externos | Backlog |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 

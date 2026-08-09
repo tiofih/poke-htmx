@@ -107,8 +107,8 @@
 - **Critérios:** `[ ]` estados (pre/battle, playing, fim) gerenciados no servidor;
   `[ ]` cada "jogar" avança 1 rodada e devolve fragmento; `[ ]` HP/time/resultado
   visíveis; `[ ]` sem JS custom (RNF-01); testes via stub do motor.
-- **Status (sessão 0013):** implementado como **RF-13** — steps 0–5 verdes (135
-  runs/481 asserts) e lint 0; aguardando validação do usuário.
+- **Status (sessão 0013):** implementado como **RF-13** — steps 0–7 verdes (135
+  runs/481 asserts) e lint 0; **validado pelo usuário em 2026-08-09**.
 
 ## Fase D — Opcionais (anotados — NÃO agendar agora)
 
