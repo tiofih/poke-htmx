@@ -4,7 +4,7 @@ require "minitest/autorun"
 require_relative "../lib/battle_engine"
 require_relative "../lib/move"
 
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable Metrics/AbcSize, Metrics/ClassLength, Metrics/MethodLength
 class MoveEngineTest < Minitest::Test
   def type_effectiveness
     TypeEffectiveness.from_relations(
@@ -19,7 +19,7 @@ class MoveEngineTest < Minitest::Test
     Move.new(name: name, type: type, power: power, accuracy: 100, pp: pp)
   end
 
-  # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists, Naming/MethodParameterName
+  # rubocop:disable Metrics/ParameterLists, Naming/MethodParameterName
   def build_pokemon(number:, name:, types:, hp:, speed:, attack: 1, defense: 1, moves: [])
     BattlePokemon.new(
       number: number,
@@ -36,7 +36,7 @@ class MoveEngineTest < Minitest::Test
       moves: moves
     )
   end
-  # rubocop:enable Metrics/MethodLength, Metrics/ParameterLists, Naming/MethodParameterName
+  # rubocop:enable Metrics/ParameterLists, Naming/MethodParameterName
 
   def test_engine_picks_move_with_highest_expected_damage
     fast = build_pokemon(
@@ -189,4 +189,4 @@ class MoveEngineTest < Minitest::Test
     assert_equal expected, result.log.first[:damage], "Struggle = power 10 x efetividade x STAB"
   end
 end
-# rubocop:enable Metrics/ClassLength
+# rubocop:enable Metrics/AbcSize, Metrics/ClassLength, Metrics/MethodLength

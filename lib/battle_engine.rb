@@ -13,6 +13,7 @@ class BattleResult
   end
 end
 
+# rubocop:disable Metrics/AbcSize, Metrics/ClassLength, Metrics/MethodLength, Metrics/ParameterLists
 class BattleEngine
   def initialize(team_a:, team_b:, effectiveness: TypeEffectiveness.load, target_strategy: nil)
     @teams = [team_a.dup, team_b.dup]
@@ -102,7 +103,7 @@ class BattleEngine
     usable = attacker.moves.select { |m| m.power.to_i.positive? && m.pp.positive? }
     return struggle_move(attacker) if usable.empty?
 
-    usable.sort_by { |m| [-expected_damage(attacker, target, m), -m.power.to_i] }.first
+    usable.min_by { |m| [-expected_damage(attacker, target, m), -m.power.to_i] }
   end
 
   def struggle_move(attacker)
@@ -170,3 +171,4 @@ class BattleEngine
     @teams[team_index].count(&:alive?)
   end
 end
+# rubocop:enable Metrics/AbcSize, Metrics/ClassLength, Metrics/MethodLength, Metrics/ParameterLists

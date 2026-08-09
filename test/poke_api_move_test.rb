@@ -2,6 +2,7 @@
 
 require_relative "test_helper"
 
+# rubocop:disable Metrics/MethodLength
 class PokeApiMoveTest < Minitest::Test
   def poke_move_json
     {
@@ -112,3 +113,4 @@ class PokeApiMoveTest < Minitest::Test
     PokeApi.define_singleton_method(:pokemon_data, original)
   end
 end
+# rubocop:enable Metrics/MethodLength

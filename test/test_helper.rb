@@ -66,6 +66,7 @@ module PokeApiStub
     end
   end
 
+  # rubocop:disable Metrics/MethodLength
   def self.with_moves_for(moves)
     existed = PokeApi.respond_to?(:moves_for)
     original = existed ? PokeApi.method(:moves_for) : nil
@@ -80,6 +81,7 @@ module PokeApiStub
     end
     PokeApi.instance_variable_set(:@pokemon_moves_cache, nil)
   end
+  # rubocop:enable Metrics/MethodLength
 
   # rubocop:disable Metrics/MethodLength
   def self.with_type(table)

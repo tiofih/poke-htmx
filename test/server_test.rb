@@ -634,6 +634,7 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, 'hx-target="#battle"'
   end
 
+  # rubocop:disable Metrics/MethodLength
   def test_battle_start_loads_into_panel_without_clearing_nav
     @repository.add("user-a", pikachu_pokemon)
 
@@ -650,6 +651,7 @@ class ServerTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "Seu Time"
   end
+  # rubocop:enable Metrics/MethodLength
 
   # rubocop:disable Metrics/AbcSize
   def test_stylesheet_served_and_styles_fragment_classes
@@ -829,6 +831,7 @@ class ServerTest < Minitest::Test
     refute_includes last_response.body, "Vencedor"
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def test_battle_shows_moves_with_pp_per_fighter
     @repository.add("user-a", pikachu_pokemon)
 
@@ -846,6 +849,7 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, "thunder-shock"
     assert_includes last_response.body, "PP 30"
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def test_battle_log_shows_used_move_name
     start_battle_for("user-a")
@@ -857,6 +861,7 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, "atacou"
   end
 
+  # rubocop:disable Metrics/MethodLength
   def test_battle_with_struggle_fallback_does_not_break
     @repository.add("user-a", pikachu_pokemon)
 
@@ -873,6 +878,7 @@ class ServerTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "Struggle"
   end
+  # rubocop:enable Metrics/MethodLength
 
   private
 

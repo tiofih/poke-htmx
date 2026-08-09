@@ -4,7 +4,6 @@ require "minitest/autorun"
 require_relative "../lib/move"
 require_relative "../lib/battle_pokemon"
 
-# rubocop:disable Metrics/ClassLength
 class MoveTest < Minitest::Test
   def test_move_has_all_attributes
     move = Move.new(name: "tacle", type: "normal", power: 40, accuracy: 100, pp: 35)
@@ -51,6 +50,7 @@ class MoveTest < Minitest::Test
     assert_equal [move], battle_pokemon.moves
   end
 
+  # rubocop:disable Metrics/MethodLength
   def test_use_move_decrements_pp_functionally
     move = Move.new(name: "tacle", type: "normal", power: 40, accuracy: 100, pp: 35)
     pokemon = BattlePokemon.new(
@@ -83,5 +83,5 @@ class MoveTest < Minitest::Test
 
     assert_equal 0, pokemon.use_move(0).moves.first.pp
   end
+  # rubocop:enable Metrics/MethodLength
 end
-# rubocop:enable Metrics/ClassLength

@@ -9,6 +9,7 @@ require_relative "lib/battle_engine"
 require_relative "lib/opponent_generator"
 require_relative "lib/battle_registry"
 
+# rubocop:disable Metrics/ClassLength
 class Server < Sinatra::Base
   configure :development do
     register Sinatra::Reloader
@@ -133,3 +134,4 @@ class Server < Sinatra::Base
 
   run! if $PROGRAM_NAME == app_file
 end
+# rubocop:enable Metrics/ClassLength

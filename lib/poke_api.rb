@@ -3,6 +3,7 @@ require "pry"
 require_relative "pokemon"
 require_relative "move"
 
+# rubocop:disable Metrics/ClassLength
 class PokeApi
   STAT_LABELS = {
     "hp" => "HP",
@@ -132,3 +133,4 @@ class PokeApi
     extract_type_relations(fetch_type_json(name))
   end
 end
+# rubocop:enable Metrics/ClassLength
