@@ -173,7 +173,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Domínio puro (sem rede no `TypeEffectiveness`); suíte e lint verdes; commit a cada
       green; RF-01..RF-09 sem regressão; docs atualizadas no mesmo escopo.
 
-### RF-11 — Motor de auto-batalha (B3) — `Em implementação` (sessão 0011, aguardando validação do usuário)
+### RF-11 — Motor de auto-batalha (B3) — `Done` (sessão 0011, validado em 2026-08-08)
 - Simular **combate automático 6v6** entre dois times de `BattlePokemon` — o **game loop**
   do auto-battler. Dados dois times (cada um por slot, ex. `all(user_id)` de RF-07), o
   motor: resolve **turnos por rodada**, calcula **dano** a partir de stats + tipos
@@ -198,6 +198,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Motor 100% domínio puro (sem PG/rede), determinístico; testes sem rede
       (`TypeEffectiveness.from_relations`), suíte completa verde (110 runs/398 asserts),
       lint 0; sem regressão RF-01..RF-10; docs atualizadas no mesmo escopo.
+      **Validado pelo usuário em 2026-08-08.**
 
 ### RF-07 — Montagem de times (base do auto-battler) — `Done` (sessão 0007)
 - Time por usuário limitado a **6 vagas** (`MAX_TEAM_SIZE = 6`), com **`slot` de
@@ -275,7 +276,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 8 | Reordenação manual de slots (RF-08, A1) | Done (sessão 0008) |
 | 9 | Modelo de batalha (BattlePokemon, RF-09, B1) | Done (sessão 0009) |
 | 10 | Efetividade de tipos (B2) | Done (sessão 0010) |
-| 11 | Motor de auto-batalha (B3) — implementado aguardando validação (sessão 0011) | Em implementação |
+| 11 | Motor de auto-batalha (B3) | Done (sessão 0011, validado em 2026-08-08) |
 | 12 | UI: layout e estilos externos | Backlog |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
@@ -290,7 +291,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
   como ordem de combate; stats (RF-06) e tipos como base de dano/efetividade; estado de
   HP/status persistido ou em memória a definir em refinamento próprio.
   **B1 (modelo de batalha) e B2 (efetividade de tipos) `Done` (sessões 0009/0010);
-  B3 (motor de auto-batalha) implementado na sessão 0011, aguardando validação
-  (ver draft-auto-battler.md).**
+  B3 (motor de auto-batalha) `Done` (sessão 0011, validado em 2026-08-08;
+  ver draft-auto-battler.md).**
 - **Layout/estilos externos:** extrair layout, navbar e estilos compartilhados
   (a antiga sessão 0007-UI volta ao backlog como 0009+).

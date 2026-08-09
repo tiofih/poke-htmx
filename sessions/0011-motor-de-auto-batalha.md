@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-08 |
 | Implementação | Concluída — passos 0–9 TDD, suíte 110 runs/398 asserts e lint 0 verdes |
-| Validação | Pendente (executada pelo usuário) |
+| Validação | Concluída — validada pelo usuário em 2026-08-08 |
 
 ---
 
@@ -153,7 +153,9 @@ futura (ver Observações/draft).
 
 ## 7. Validação (a preencher pelo usuário)
 
-- Pendente. Implementação TDD concluída em 2026-08-08 (passos 0–9; suíte completa 110
-  runs/398 asserts e lint 0 verdes; commits por green). Critérios de aceite da seção 3
-  implementados (marcados `[x]` em `REQUIREMENTS.md` como "aguardando validação").
-- Aguardando feedback do usuário para verificar os critérios e fechar a sessão.
+- **Validada pelo usuário em 2026-08-08.** Suíte completa verde (110 runs/398 asserts)
+  e lint 0 offenses confirmados; critérios de aceite da seção 3 verificados contra a
+  implementação (`stat`, `BattleEngine` 6v6, dano/tipos, ordem por Speed, KO, log,
+  edge cases, domínio puro determinístico). RF-01..RF-10 sem regressão.
+- Sessão 0011 **concluída**; próxima sessão sugerida: **B4 — Oponente automático** e/ou
+  **C1 — Batalha na web (htmx)** consumindo o `BattleEngine`.

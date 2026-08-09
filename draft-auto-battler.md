@@ -57,7 +57,7 @@
 - **Plano TDD:** passos 0–7 verdes (93 runs/357 asserts) — lint 0 offenses.
 
 ### B3. Motor de auto-batalha (o game loop)
-- **Status:** em execução — sessão 0011 (RF-11), implementado aguardando validação.
+- **Status:** Done — sessão 0011 (RF-11), validado em 2026-08-08.
 - **Implementado:** `BattleEngine` + `BattleResult` (`lib/battle_engine.rb`); `BattlePokemon#stat` (extensão B1); cobertura `test/battle_engine_test.rb`.
 
 > **Nota RNG (anotado — iteração futura):** hoje o motor é 100% determinístico para
@@ -71,11 +71,11 @@
   para o alvo (inclui STAB; melhor tipo imune → neutro); alvo = **primeiro vivo por slot**
   do adversário (estratégia injetável no futuro); HP 0 → KO; fim quando um lado zerar
   (danos nunca zeram → sem loop); log de ações (`round`, atacante, move_type, dano, KO);
-  **100% determinístico** (sem RNG) — aguardando a validação.
-- **Critérios:** `[ ]` `BattlePokemon#stat(name)` (default 1); `[ ]` dano base
-  `max(1, Attack−Defense)` com multiplicador por melhor tipo (STAB incluso); `[ ]` ordem
-  por Speed (desempate time 0 → slot); `[ ]` 6v6 não perde com times parciais; `[ ]` log
-  completo e vencedor; `[ ]` times vazios → derrota/empate; `[ ]` domínio puro, sem rede;
+  **100% determinístico** (sem RNG) — validado em 2026-08-08.
+- **Critérios:** `[x]` `BattlePokemon#stat(name)` (default 1); `[x]` dano base
+  `max(1, Attack−Defense)` com multiplicador por melhor tipo (STAB incluso); `[x]` ordem
+  por Speed (desempate time 0 → slot); `[x]` 6v6 não perde com times parciais; `[x]` log
+  completo e vencedor; `[x]` times vazios → derrota/empate; `[x]` domínio puro, sem rede;
   coberto 100% por unit tests; determinístico.
 - **Plano TDD [0]**: `stat`; **[1]** esqueleto + rodada única; **[2]** dano (A−D min 1 +
   multiplicador); **[3]** move_type melhor tipo + neutro; **[4]** ordem por speed;
