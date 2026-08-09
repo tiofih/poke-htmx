@@ -84,4 +84,18 @@ class BattlePokemonTest < Minitest::Test
     refute_predicate fighter, :alive?
     assert_predicate fighter, :fainted?
   end
+
+  def test_stat_returns_the_stat_value
+    fighter = BattlePokemon.from(pikachu)
+
+    assert_equal 90, fighter.stat("Speed")
+    assert_equal 45, fighter.stat("HP")
+  end
+
+  def test_stat_defaults_to_one_when_missing
+    fighter = BattlePokemon.from(pikachu)
+
+    assert_equal 1, fighter.stat("Attack")
+    assert_equal 1, fighter.stat("Defense")
+  end
 end

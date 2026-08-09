@@ -32,6 +32,10 @@ class BattlePokemon < Dry::Struct
     new(hp_current: new_hp)
   end
 
+  def stat(name)
+    stats.find { |stat| stat[:name] == name }&.fetch(:value) || 1
+  end
+
   def alive?
     hp_current.positive?
   end
