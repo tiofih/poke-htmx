@@ -83,18 +83,18 @@
   **[9]** docs.
 
 ### B4. Oponente automático
-- **Status:** em refinamento — sessão 0012, sorteador determinístico sendo definido
-  (aguardando commit e implementação).
+- **Status:** implementado — sessão 0012 (RF-12); aguardando validação do usuário
+  (suíte 118 runs/416 asserts + lint 0).
 - **Objetivo:** gerar adversário para o usuário enfrentar sem montar time próprio.
 - **Decisões:** `OpponentGenerator` recebe `names:` (slugs candidatos, ex.
   `PokeApi.fetch_all`) + `size` (default 6) + `rng` injetável (default `Random.new`, seed
   em testes) + `fetcher` (default `PokeApi.method(:detail)`, stub nos testes);
-  `team` sortela `size` slugs **sem repetição** e devolve `[BattlePokemon]` na ordem do
+  `team` sortear `size` slugs **sem repetição** e devolve `[BattlePokemon]` na ordem do
   sorteio (posição = slot, pronto p/ `team_b` do `BattleEngine`); domínio puro (sem
   rede/PG); determinístico sob seed.
-- **Critérios:** `[ ]` gera time do tamanho definido (default 6; `names` menor → total
-  disponível); `[ ]` semuri no time; `[ ]` `names == []`/`size <= 0` → `[]`; `[ ]` mesmo
-  seed → mesmo time/ordem; `[ ]` domínio puro (stubs nos testes); `[ ]` RF-01..RF-11 sem
+- **Critérios:** `[x]` gera time do tamanho definido (default 6; `names` menor → total
+  disponível); `[x]` sem duplicados no time; `[x]` `names == []`/`size <= 0` → `[]`; `[x]` mesmo
+  seed → mesmo time/ordem; `[x]` domínio puro (stubs nos testes); `[x]` RF-01..RF-11 sem
   regressão.
 
 ## Fase C — Batalha na web (htmx)

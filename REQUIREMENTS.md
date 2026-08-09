@@ -35,6 +35,30 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
+### RF-12 — Oponente automático (B4) — em implementação (sessão 0012, aguardando validação)
+- Gerar o time adversário para o jogador enfrentar sem montar time próprio — lado
+  `team_b` do `BattleEngine` (RF-11) num futuro C1 (batalha na web).
+- `OpponentGenerator` sorteia N slugs de uma lista de candidatos (ex: `PokeApi.fetch_all`),
+  **sem repetição**, e monta `[BattlePokemon]` na ordem do sorteio (posição = slot).
+- **Domínio puro** (sem PG, sem rede): `names:` (lista) e `fetcher:` (name → `Pokemon`)
+  são injetados no construtor; `rng` injetável com **seed** (default `Random.new`) →
+  determinístico sob mesma seed, variável entre confrontos.
+- Sem rota/UI/schema nesta entrega (C1 no roadmap seguinte).
+
+**Critérios de aceite:**
+- [x] `OpponentGenerator.new(names:, size: DEFAULT_TEAM_SIZE=6, rng:, fetcher: default
+      `PokeApi.method(:detail)`)` — `names` é o array de slugs candidatos; `size` default 6
+      (cap RF-07); `rng`/`fetcher` injetáveis.
+- [x] `team` devolve `[BattlePokemon]` (via `BattlePokemon.from`) na ordem do sorteio;
+      `team_names` devolve os slugs sorteados.
+- [x] Sorteio **sem repetição**; `names` menores que `size` → usa o total disponível;
+      `names == []` ou `size <= 0` → `[]` (sem erro).
+- [x] Determinístico sob seed fixa (`Random.new(42)`) — mesma `team`/ordem; seeds
+      diferentes variam.
+- [x] Domínio puro: `names`/`fetcher` injetados, testes sem rede (stub `fetcher`);
+      suíte completa verde (118 runs/416 asserts) e lint 0; sem regressão RF-01..RF-11.
+- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo escopo.
+
 ### RF-01 — Listar Pokémon — `Done` (sessão 0006)
 - Exibir um `<select>` com os Pokémon da PokéAPI, **paginação (100 por página)**
   e **filtro por nome** (sessão 0006) — substituindo o `limit=100000` único.
@@ -277,7 +301,8 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 9 | Modelo de batalha (BattlePokemon, RF-09, B1) | Done (sessão 0009) |
 | 10 | Efetividade de tipos (B2) | Done (sessão 0010) |
 | 11 | Motor de auto-batalha (B3) | Done (sessão 0011, validado em 2026-08-08) |
-| 12 | UI: layout e estilos externos | Backlog |
+| 12 | Oponente automático (B4) | Em implementação (sessão 0012) |
+| 13 | UI: layout e estilos externos | Backlog |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
