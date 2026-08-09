@@ -617,6 +617,38 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
+  def test_battle_close_route_returns_empty_fragment
+    get "/battle/close"
+
+    assert last_response.ok?
+    assert_empty last_response.body
+  end
+
+  def test_nav_links_clear_battle_fragment_when_leaving_battle
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'hx-get="/battle/close"'
+    assert_includes last_response.body, 'hx-target="#battle"'
+  end
+
+  def test_battle_start_loads_into_panel_without_clearing_nav
+    @repository.add("user-a", pikachu_pokemon)
+
+    PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_detail(battle_pokemon_for_test) do
+          get "/battle", {}, user_session("user-a")
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Seu Time"
+  end
+
   # rubocop:disable Metrics/AbcSize
   def test_stylesheet_served_and_styles_fragment_classes
     get "/style.css"

@@ -11,8 +11,8 @@
     <header>
       <nav>
         <strong>Poké-HTMX</strong>
-        <a href="#pokemon-list">Lista</a>
-        <a href="#team">Time</a>
+        <a href="#pokemon-list" hx-get="/battle/close" hx-target="#battle" hx-swap="innerHTML">Lista</a>
+        <a href="#team" hx-get="/battle/close" hx-target="#battle" hx-swap="innerHTML">Time</a>
         <a href="#battle" hx-get="/battle" hx-target="#battle" hx-swap="innerHTML">Batalha</a>
       </nav>
     </header>

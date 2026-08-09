@@ -50,6 +50,9 @@ fragmentos atuais — o contrato htmx (alvos, swaps, forms) permanece intacto.
 - [ ] Navegação consistente na página única: Lista → `#pokemon-list`; Time → `#team`;
       Batalha → `hx-get="/battle"` no alvo `#battle` (mantém o comportamento atual),
       100% htmx/âncoras, sem JS custom (RNF-01).
+- [ ] Ao sair da aba Batalha (Lista/Time), `#battle` é limpo (`GET /battle/close`,
+      fragmento vazio) — a mensagem "Forme seu time para batalhar." não permanece
+      na tela ao trocar de aba.
 
 ### Fragmentos htmx continuam parciais
 

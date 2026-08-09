@@ -116,5 +116,9 @@ class Server < Sinatra::Base
     erb :battle, layout: false
   end
 
+  get "/battle/close" do
+    erb :battle_close, layout: false
+  end
+
   run! if $PROGRAM_NAME == app_file
 end

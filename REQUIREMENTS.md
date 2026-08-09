@@ -51,6 +51,9 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       `#pokemon`, `#team`, `#battle`).
 - [x] Navegação consistente na página única (Lista → `#pokemon-list`, Time → `#team`,
       Batalha → `hx-get="/battle"` no alvo `#battle`), sem JS custom (RNF-01).
+- [x] Ao sair da aba Batalha (Lista/Time), o painel `#battle` é limpo via
+      `GET /battle/close` (fragmento vazio, padrão `/pokemon/close`) — avisos como
+      "Forme seu time para batalhar." deixam de permanecer na tela.
 - [x] Fragmentos htmx (`/pokemons`, `/pokemon`, `/pokemon/:poke_id`, `/pokemon/close`,
       `/team`, `POST /team`, `DELETE /team`, `POST /team/:id/move`, `/battle`,
       `POST /battle/play`) continuam **parciais** (`layout: false`) — resposta sem
