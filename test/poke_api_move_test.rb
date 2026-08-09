@@ -164,6 +164,18 @@ class PokeApiMoveTest < Minitest::Test
     Faraday.define_singleton_method(:get, original)
   end
 
+  def test_available_move_names_returns_empty_when_request_fails
+    response = Struct.new(:status, :body).new(503, "<html>rate limited</html>")
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) { |_url| response }
+    PokeApi.instance_variable_set(:@available_moves_cache, nil)
+
+    assert_equal [], PokeApi.available_move_names(25)
+  ensure
+    Faraday.define_singleton_method(:get, original)
+    PokeApi.instance_variable_set(:@available_moves_cache, nil)
+  end
+
   def test_move_returns_nil_for_unknown_move
     original = PokeApi.method(:fetch_move_json)
     PokeApi.define_singleton_method(:fetch_move_json) { |_name| nil }

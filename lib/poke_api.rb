@@ -58,7 +58,10 @@ class PokeApi
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def self.pokemon_data(poke_id)
-    JSON.parse(Faraday.get("https://pokeapi.co/api/v2/pokemon/#{poke_id}").body)
+    response = Faraday.get("https://pokeapi.co/api/v2/pokemon/#{poke_id}")
+    return nil unless response.status == 200
+
+    JSON.parse(response.body)
   end
 
   def self.evolution_chain(species_url)
@@ -88,7 +91,7 @@ class PokeApi
     @pokemon_moves_cache ||= {}
     @pokemon_moves_cache[number] ||= begin
       data = pokemon_data(number)
-      move_entries = data["moves"].to_a
+      move_entries = data.to_h["moves"].to_a
       last_four = move_entries.last(4).map { |entry| entry.dig("move", "name") }
       last_four.map { |move_name| move(move_name) }.compact
     end
@@ -98,7 +101,7 @@ class PokeApi
     @available_moves_cache ||= {}
     @available_moves_cache[number] ||= begin
       data = pokemon_data(number)
-      data["moves"].to_a.map { |entry| entry.dig("move", "name") }.compact.sort
+      data.to_h["moves"].to_a.map { |entry| entry.dig("move", "name") }.compact.sort
     end
   end
 
