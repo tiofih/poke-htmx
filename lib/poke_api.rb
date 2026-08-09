@@ -1,6 +1,7 @@
 require "faraday"
 require "pry"
 require_relative "pokemon"
+require_relative "move"
 
 class PokeApi
   STAT_LABELS = {
@@ -72,6 +73,35 @@ class PokeApi
     names = [chain["species"]["name"]]
     chain["evolves_to"].each { |stage| names.concat(flatten_chain(stage)) }
     names
+  end
+
+  def self.move(name)
+    @move_cache ||= {}
+    @move_cache[name] ||= extract_move(fetch_move_json(name))
+  end
+
+  def self.moves_for(number)
+    @pokemon_moves_cache ||= {}
+    @pokemon_moves_cache[number] ||= begin
+      data = pokemon_data(number)
+      move_entries = data["moves"].to_a
+      last_four = move_entries.last(4).map { |entry| entry.dig("move", "name") }
+      last_four.map { |move_name| move(move_name) }
+    end
+  end
+
+  def self.extract_move(json)
+    Move.new(
+      name: json["name"],
+      type: json.dig("type", "name"),
+      power: json["power"],
+      accuracy: json["accuracy"],
+      pp: json["pp"] || 1
+    )
+  end
+
+  def self.fetch_move_json(name)
+    JSON.parse(Faraday.get("https://pokeapi.co/api/v2/move/#{name}").body)
   end
 
   def self.extract_type_relations(json)
