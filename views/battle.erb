@@ -1,0 +1,44 @@
+<% if @message %>
+  <p class="notice"><%= @message %></p>
+<% elsif @engine %>
+  <h1>Batalha</h1>
+  <p class="round">Rodada <%= @engine.rounds %><% if @engine.finished? %> — Fim de batalha<% end %></p>
+
+  <div class="battle-pane">
+    <h2>Seu Time</h2>
+    <% @engine.teams[0].each do |poke| %>
+      <p class="fighter">
+        <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
+        <%= poke.name %> — HP <%= poke.hp_current %>/<%= poke.hp_max %>
+      </p>
+    <% end %>
+  </div>
+
+  <div class="battle-pane">
+    <h2>Oponente</h2>
+    <% @engine.teams[1].each do |poke| %>
+      <p class="fighter">
+        <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
+        <%= poke.name %> — HP <%= poke.hp_current %>/<%= poke.hp_max %>
+      </p>
+    <% end %>
+  </div>
+
+  <% last_round = @engine.log.select { |entry| entry[:round] == @engine.rounds } %>
+  <% unless last_round.empty? %>
+    <ul class="battle-log">
+      <% last_round.each do |entry| %>
+        <% attacker_name = entry[:attacker].zero? ? "Seu Time" : "Oponente" %>
+        <li><%= attacker_name %> atacou (<%= entry[:move_type] %>), <%= entry[:damage] %> de dano<%= entry[:ko] ? " — KO!" : "" %></li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% if @engine.finished? %>
+    <% winner_name = @engine.winner.zero? ? "Seu Time" : "Oponente" %>
+    <p class="winner"><strong>Vencedor: <%= winner_name %></strong></p>
+    <button hx-get="/battle" hx-target="#battle" hx-swap="innerHTML">Novo confronto</button>
+  <% else %>
+    <button hx-post="/battle/play" hx-target="#battle" hx-swap="innerHTML">Jogar</button>
+  <% end %>
+<% end %>

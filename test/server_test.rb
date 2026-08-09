@@ -556,6 +556,84 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/MethodLength
+  def battle_pokemon_for_test
+    Pokemon.new(
+      name: "pikachu",
+      sprite: "https://example.com/pikachu.png",
+      number: 25,
+      types: ["electric"],
+      stats: [
+        { name: "HP", value: 45 },
+        { name: "Attack", value: 55 },
+        { name: "Defense", value: 40 },
+        { name: "Speed", value: 90 }
+      ]
+    )
+  end
+  # rubocop:enable Metrics/MethodLength
+
+  def neutral_type_json_table
+    PokeApi::TYPE_NAMES.to_h { |type| [type, type_json_for(type)] }
+  end
+
+  def type_json_for(type)
+    {
+      "name" => type,
+      "damage_relations" => {
+        "double_damage_to" => [],
+        "half_damage_to" => [],
+        "no_damage_to" => []
+      }
+    }
+  end
+
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_battle_renders_panels_with_team_and_opponent
+    @repository.add("user-a", pikachu_pokemon)
+
+    PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_detail(battle_pokemon_for_test) do
+          get "/battle", {}, user_session("user-a")
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Seu Time"
+    assert_includes last_response.body, "Oponente"
+    assert_includes last_response.body, "pikachu"
+    assert_includes last_response.body, "45/45"
+    assert_includes last_response.body, "hx-target=\"#battle\""
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_battle_fragment_has_play_button
+    @repository.add("user-a", pikachu_pokemon)
+
+    PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_detail(battle_pokemon_for_test) do
+          get "/battle", {}, user_session("user-a")
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "hx-post=\"/battle/play\""
+    refute_includes last_response.body, "Vencedor"
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
+  def test_battle_with_empty_team_shows_friendly_message
+    get "/battle", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Forme seu time"
+  end
+
   private
 
   def add_four_pokemon_team(user_id)

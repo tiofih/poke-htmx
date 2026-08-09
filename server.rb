@@ -4,6 +4,10 @@ require "securerandom"
 require "pry"
 require_relative "lib/poke_api"
 require_relative "lib/team_repository"
+require_relative "lib/battle_pokemon"
+require_relative "lib/battle_engine"
+require_relative "lib/opponent_generator"
+require_relative "lib/battle_registry"
 
 class Server < Sinatra::Base
   configure :development do
@@ -19,6 +23,7 @@ class Server < Sinatra::Base
     set :port, 3000
     set :views, "views"
     set :team, TeamRepository.new
+    set :battles, BattleRegistry.new
     register Sinatra::Reloader
   end
 
@@ -86,6 +91,29 @@ class Server < Sinatra::Base
     settings.team.move(current_user, params[:id], params[:new_slot].to_i)
     @team = settings.team.all(current_user)
     erb :team
+  end
+
+  get "/battle" do
+    team = settings.team.all(current_user)
+    if team.empty?
+      @message = "Forme seu time para batalhar."
+      return erb :battle
+    end
+
+    player_team = team.map { |member| BattlePokemon.from(PokeApi.detail(member.number)) }
+    opponent = OpponentGenerator.new(names: PokeApi.fetch_all_names).team
+    engine = BattleEngine.new(team_a: player_team, team_b: opponent)
+    settings.battles.set(current_user, engine)
+    @engine = engine
+    erb :battle
+  end
+
+  post "/battle/play" do
+    @engine = settings.battles.fetch(current_user)
+    return erb :battle unless @engine
+
+    @engine.play_round
+    erb :battle
   end
 
   run! if $PROGRAM_NAME == app_file
