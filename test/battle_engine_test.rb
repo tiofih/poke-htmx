@@ -218,6 +218,7 @@ class BattleEngineTest < Minitest::Test
     assert_includes [0, 1], engine.winner, "uma rodada só não termina a batalha"
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def testincremental_play_reaches_same_result_as_battle
     team_a = Array.new(3) do |i|
       build_pokemon(number: i + 1, name: "a#{i}", types: [], hp: 200, speed: 100, attack: 100, defense: 10)
@@ -235,7 +236,9 @@ class BattleEngineTest < Minitest::Test
     assert_equal batch.rounds, engine.rounds
     assert_equal batch.log, engine.log
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
+  # rubocop:disable Metrics/AbcSize
   def test_play_round_after_finished_is_idempotent
     a = build_pokemon(number: 1, name: "a", types: ["fire"], hp: 100, speed: 100, attack: 60, defense: 10)
     b = build_pokemon(number: 2, name: "b", types: ["grass"], hp: 100, speed: 10, attack: 20, defense: 40)
@@ -251,5 +254,6 @@ class BattleEngineTest < Minitest::Test
     assert_equal rounds, engine.rounds
     assert_includes [0, 1], engine.winner
   end
+  # rubocop:enable Metrics/AbcSize
 end
 # rubocop:enable Metrics/ClassLength
