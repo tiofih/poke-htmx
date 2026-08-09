@@ -163,4 +163,34 @@ def test_damage_is_attack_minus_defense
     assert_equal 0, result.winner
     assert result.log.map { |entry| entry[:round] }.uniq.length == result.rounds
   end
+
+  def test_empty_team_loses_without_actions
+    team_a = []
+    team_b = [build_pokemon(number: 2, name: "b", types: [], hp: 100, speed: 1, attack: 1, defense: 40)]
+
+    result = BattleEngine.new(team_a: team_a, team_b: team_b, effectiveness: type_effectiveness).battle
+
+    assert_equal 1, result.winner
+    assert_empty result.log
+    assert_equal 0, result.rounds
+  end
+
+  def test_empty_team_b_loses_without_actions
+    team_a = [build_pokemon(number: 1, name: "a", types: [], hp: 100, speed: 1, attack: 1, defense: 40)]
+    team_b = []
+
+    result = BattleEngine.new(team_a: team_a, team_b: team_b, effectiveness: type_effectiveness).battle
+
+    assert_equal 0, result.winner
+    assert_empty result.log
+    assert_equal 0, result.rounds
+  end
+
+  def test_both_empty_teams_draw
+    result = BattleEngine.new(team_a: [], team_b: [], effectiveness: type_effectiveness).battle
+
+    assert_nil result.winner
+    assert_empty result.log
+    assert_equal 0, result.rounds
+  end
 end
