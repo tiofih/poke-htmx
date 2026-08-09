@@ -556,6 +556,16 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize
 
+  def test_index_has_battle_entry_fragment
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "hx-get=\"/battle\""
+    assert_includes last_response.body, 'id="battle"'
+  end
+
   # rubocop:disable Metrics/MethodLength
   def battle_pokemon_for_test
     Pokemon.new(
