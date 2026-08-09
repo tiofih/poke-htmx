@@ -624,6 +624,70 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize
 
+  def test_post_team_moves_saves_selected_moves
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+
+    PokeApiStub.with_available_move_names(%w[growl quick-attack thunder-shock]) do
+      post "/team/#{pikachu_id}/moves", { moves: %w[growl thunder-shock] }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_equal %w[growl thunder-shock], @repository.all("user-a").first.moves
+  end
+
+  def test_post_team_moves_rerenders_manage_fragment
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+
+    PokeApiStub.with_available_move_names(%w[growl thunder-shock]) do
+      post "/team/#{pikachu_id}/moves", { moves: ["thunder-shock"] }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'name="moves"'
+    assert_includes last_response.body, 'value="thunder-shock" checked'
+    refute_includes last_response.body, "<html"
+  end
+
+  def test_post_team_moves_with_more_than_four_shows_notice_and_does_not_save
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    PokeApiStub.with_available_move_names(%w[a b c d e f]) do
+      post "/team/#{pikachu_id}/moves", { moves: %w[a b c d e f] }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_empty @repository.all("user-a").first.moves
+    assert_includes last_response.body, "máximo"
+  end
+
+  def test_post_team_moves_with_move_outside_available_shows_notice_and_does_not_save
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+
+    PokeApiStub.with_available_move_names(%w[growl]) do
+      post "/team/#{pikachu_id}/moves", { moves: %w[not-a-real-move] }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_empty @repository.all("user-a").first.moves
+    assert_includes last_response.body, "dispon"
+  end
+
+  def test_post_team_moves_of_other_users_member_is_noop
+    @repository.add("user-a", pikachu_pokemon)
+    @repository.add("user-b", bulbasaur_pokemon)
+    bulbasaur_id = @repository.all("user-b").first.id
+
+    PokeApiStub.with_available_move_names(%w[growl]) do
+      post "/team/#{bulbasaur_id}/moves", { moves: ["growl"] }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_empty @repository.all("user-b").first.moves
+  end
+
   # rubocop:disable Metrics/AbcSize
   def test_index_renders_first_page_with_filter_input
     PokeApiStub.with_all_names(two_hundred_fifty_names) do

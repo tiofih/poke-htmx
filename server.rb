@@ -109,6 +109,25 @@ class Server < Sinatra::Base
     erb :team, layout: false
   end
 
+  post "/team/:id/moves" do
+    @team = settings.team.all(current_user)
+    @available_moves = @team.to_h do |member|
+      [member.id, PokeApi.available_move_names(member.number)]
+    end
+    member = @team.find { |poke| poke.id.to_s == params[:id].to_s }
+    selected = Array(params[:moves])
+    available = member ? @available_moves[member.id] : []
+    if selected.size > TeamRepository::MAX_MOVES_PER_POKEMON
+      @notice = "Selecione no máximo #{TeamRepository::MAX_MOVES_PER_POKEMON} golpes."
+    elsif selected.any? { |move| !available.include?(move) }
+      @notice = "Golpe não disponível para este Pokémon."
+    elsif member
+      settings.team.set_moves(current_user, member.id, selected)
+      @team = settings.team.all(current_user)
+    end
+    erb :team_manage, layout: false
+  end
+
   get "/battle" do
     team = settings.team.all(current_user)
     if team.empty?
