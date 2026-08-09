@@ -173,6 +173,32 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Domínio puro (sem rede no `TypeEffectiveness`); suíte e lint verdes; commit a cada
       green; RF-01..RF-09 sem regressão; docs atualizadas no mesmo escopo.
 
+### RF-11 — Motor de auto-batalha (B3) — `Em implementação` (sessão 0011, aguardando validação do usuário)
+- Simular **combate automático 6v6** entre dois times de `BattlePokemon` — o **game loop**
+  do auto-battler. Dados dois times (cada um por slot, ex. `all(user_id)` de RF-07), o
+  motor: resolve **turnos por rodada**, calcula **dano** a partir de stats + tipos
+  (`TypeEffectiveness`, RF-10), aplica **KO** ao zerar HP, acumula um **log de ações**
+  e devolve o **vencedor** (ou empate).
+- **Domínio puro** — sem golpes (D1 fora de escopo) e sem rede; determinístico
+  (RNG injetável anotado para iteração futura).
+- Não muda schema, rotas nem `TypeEffectiveness`; única extensão em B1 é `BattlePokemon#stat`.
+
+**Critérios de aceite:**
+- [x] `BattlePokemon#stat(name)` devolve o valor do stat (ex.: `stat("Speed")` → 90) e `1` quando ausente.
+- [x] `BattleEngine.new(team_a:, team_b:, effectiveness:)` — times de `BattlePokemon` em
+      ordem de slot; `effectiveness` injetado (default `TypeEffectiveness.load`); sem rede no motor.
+- [x] Uma **rodada** = cada vivo age uma vez; ação escolhe alvo, aplica dano e marca KO se zerar.
+- [x] **Ordem de ação** = Speed decrescente; desempate time 0, depois slot menor.
+- [x] **Alvo** = primeiro vivo por slot do adversário (estratégia injetável).
+- [x] **Dano** = `max(1, Attack − Defense)` × multiplicador do **melhor tipo** do atacante (inclui STAB); imune (×0) → golpe neutro (×1, sem STAB); dano final ≥ 1.
+- [x] **KO**: HP ≤ 0 → `fainted?`; fainted não age nem é alvo.
+- [x] **Fim**: lado sem vivos perde; ambos zeram na mesm ação → empate; times vazios → vence o não-vazio (ambos vazios → empate).
+- [x] `BattleResult` com `winner` (0/1/nil), `log` (por ação: `round`, `attacker`,
+      `move_type`, `damage`, `ko`) e `rounds`.
+- [x] Motor 100% domínio puro (sem PG/rede), determinístico; testes sem rede
+      (`TypeEffectiveness.from_relations`), suíte completa verde (110 runs/398 asserts),
+      lint 0; sem regressão RF-01..RF-10; docs atualizadas no mesmo escopo.
+
 ### RF-07 — Montagem de times (base do auto-battler) — `Done` (sessão 0007)
 - Time por usuário limitado a **6 vagas** (`MAX_TEAM_SIZE = 6`), com **`slot` de
   posição (1..N)** persistido e **sem duplicados** (mesmo `number` da PokéAPI).
@@ -249,7 +275,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 8 | Reordenação manual de slots (RF-08, A1) | Done (sessão 0008) |
 | 9 | Modelo de batalha (BattlePokemon, RF-09, B1) | Done (sessão 0009) |
 | 10 | Efetividade de tipos (B2) | Done (sessão 0010) |
-| 11 | Motor de auto-batalha (B3) | Backlog |
+| 11 | Motor de auto-batalha (B3) — implementado aguardando validação (sessão 0011) | Em implementação |
 | 12 | UI: layout e estilos externos | Backlog |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
@@ -264,6 +290,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
   como ordem de combate; stats (RF-06) e tipos como base de dano/efetividade; estado de
   HP/status persistido ou em memória a definir em refinamento próprio.
   **B1 (modelo de batalha) e B2 (efetividade de tipos) `Done` (sessões 0009/0010);
-  B3 segue em refinamento próprio (ver draft-auto-battler.md).**
+  B3 (motor de auto-batalha) implementado na sessão 0011, aguardando validação
+  (ver draft-auto-battler.md).**
 - **Layout/estilos externos:** extrair layout, navbar e estilos compartilhados
   (a antiga sessão 0007-UI volta ao backlog como 0009+).

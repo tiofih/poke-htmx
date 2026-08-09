@@ -40,8 +40,9 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0011** — a definir: **B3 — motor de auto-batalha** (game loop 6v6, draft).
-RF-10 (efetividade de tipos, B2) está `Done`. Aguardando decisão do usuário.
+**Sessão 0011** (motor de auto-batalha, RF-11/B3) — **implementação concluída,
+aguardando validação do usuário** (suíte 110 runs/398 asserts e lint 0 verdes).
+Após validar: B4 (oponente automático) e/ou C1 (batalha na web/htmx).
 
 ## Progresso das sessões
 
@@ -57,6 +58,7 @@ RF-10 (efetividade de tipos, B2) está `Done`. Aguardando decisão do usuário.
 | 0008 | Reordenação manual de slots (RF-08) | Concluída | Done (passos 0–8, validado em 2026-08-08) |
 | 0009 | Modelo de batalha (RF-09, B1) — BattlePokemon puro | Concluída | Done (passos 0–5, validado em 2026-08-08) |
 | 0010 | Efetividade de tipos (RF-10, B2) — lookup puro + tabela via PokéAPI | Concluída | Done (passos 0–8, validado em 2026-08-08) |
+| 0011 | Motor de auto-batalha (RF-11, B3) — BattleEngine puro 6v6 | Em implementação | Implementação TDD feita (passos 0–8), aguardando validação do usuário |
 
 ## Estrutura do arquivo de sessão
 

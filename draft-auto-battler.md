@@ -57,8 +57,13 @@
 - **Plano TDD:** passos 0–7 verdes (93 runs/357 asserts) — lint 0 offenses.
 
 ### B3. Motor de auto-batalha (o game loop)
-- **Status:** em refinamento — sessão 0011 (RF-11), critérios e plano TDD fechados
-  em 2026-08-08 (aguardando fechamento/commit e implementação).
+- **Status:** em execução — sessão 0011 (RF-11), implementado aguardando validação.
+- **Implementado:** `BattleEngine` + `BattleResult` (`lib/battle_engine.rb`); `BattlePokemon#stat` (extensão B1); cobertura `test/battle_engine_test.rb`.
+
+> **Nota RNG (anotado — iteração futura):** hoje o motor é 100% determinístico para
+> testar/iterar rápido (decisão do usuário). Quando quiser variar as partidas, o
+> `BattleEngine` (e o seletor de golpe) ganha um `rng` injetável (default
+> `Random.new(0)`/seed fixa), preservando os testes com seeds. Não é escopo da 0011.
 - **Objetivo:** simular 6v6 automático usando os 6 slots; retorna log + vencedor.
 - **Decisões:** `BattleEngine` recebe dois times (`[BattlePokemon]` ordenados por slot);
   a cada rodada: todos os vivos agem em ordem de **Speed** (empate → time 0, depois slot
@@ -76,11 +81,6 @@
   multiplicador); **[3]** move_type melhor tipo + neutro; **[4]** ordem por speed;
   **[5]** loop 6v6/winner; **[6]** log; **[7]** edge (times vazios/empate); **[8]** suíte/lint;
   **[9]** docs.
-
-> **Nota RNG (anotado — iteração futura):** hoje o motor é 100% determinístico para
-> testar/iterar rápido (decisão do usuário). Quando quiser variar as partidas, o
-> `BattleEngine` (e o seletor de golpe) ganha um `rng` injetável (default
-> `Random.new(0)`/seed fixa), preservando os testes com seeds. Não é escopo da 0011.
 
 ### B4. Oponente automático
 - **Objetivo:** gerar adversário para o usuário enfrentar sem montar time próprio.

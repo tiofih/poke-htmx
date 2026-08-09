@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-08 |
-| Implementação | Pendente |
+| Implementação | Concluída — passos 0–9 TDD, suíte 110 runs/398 asserts e lint 0 verdes |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -153,4 +153,7 @@ futura (ver Observações/draft).
 
 ## 7. Validação (a preencher pelo usuário)
 
-- Pendente.
+- Pendente. Implementação TDD concluída em 2026-08-08 (passos 0–9; suíte completa 110
+  runs/398 asserts e lint 0 verdes; commits por green). Critérios de aceite da seção 3
+  implementados (marcados `[x]` em `REQUIREMENTS.md` como "aguardando validação").
+- Aguardando feedback do usuário para verificar os critérios e fechar a sessão.
