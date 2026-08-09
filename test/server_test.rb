@@ -687,6 +687,26 @@ class ServerTest < Minitest::Test
     assert last_response.ok?
   end
 
+  def test_battle_end_shows_winner_and_reset_button
+    start_battle_for("user-a")
+    20.times { post "/battle/play", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Vencedor:"
+    assert_includes last_response.body, "hx-get=\"/battle\""
+  end
+
+  def test_battle_reset_starts_a_fresh_battle
+    start_battle_for("user-a")
+    20.times { post "/battle/play", {}, user_session("user-a") }
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Rodada 0"
+    refute_includes last_response.body, "Vencedor"
+  end
+
   private
 
   def add_four_pokemon_team(user_id)
