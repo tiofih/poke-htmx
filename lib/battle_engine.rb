@@ -25,14 +25,43 @@ class BattleEngine
     rounds = 0
     until finished?
       rounds += 1
-      play_round(rounds)
+      play_round!(rounds)
     end
     BattleResult.new(winner: winner, log: @log, rounds: rounds)
   end
 
+  def play_round
+    @rounds ||= 0
+    return @rounds if finished?
+
+    @rounds += 1
+    play_round!(@rounds)
+  end
+
+  def rounds
+    @rounds ||= 0
+  end
+
+  def log
+    @log
+  end
+
+  def finished?
+    alive_count(0).zero? || alive_count(1).zero?
+  end
+
+  def winner
+    a_alive = alive_count(0)
+    b_alive = alive_count(1)
+    return nil if a_alive.zero? && b_alive.zero?
+    return 1 if a_alive.zero?
+
+    0
+  end
+
   private
 
-  def play_round(round)
+  def play_round!(round)
     alive_and_actionable.each do |team_index, index|
       break if finished?
 
@@ -104,18 +133,5 @@ class BattleEngine
 
   def alive_count(team_index)
     @teams[team_index].count(&:alive?)
-  end
-
-  def finished?
-    alive_count(0).zero? || alive_count(1).zero?
-  end
-
-  def winner
-    a_alive = alive_count(0)
-    b_alive = alive_count(1)
-    return nil if a_alive.zero? && b_alive.zero?
-    return 1 if a_alive.zero?
-
-    0
   end
 end

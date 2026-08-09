@@ -204,5 +204,52 @@ class BattleEngineTest < Minitest::Test
     assert_empty result.log
     assert_equal 0, result.rounds
   end
+
+  def test_play_round_advances_one_round_and_exposes_state
+    a = build_pokemon(number: 1, name: "a", types: ["fire"], hp: 100, speed: 100, attack: 60, defense: 10)
+    b = build_pokemon(number: 2, name: "b", types: ["grass"], hp: 100, speed: 10, attack: 20, defense: 40)
+
+    engine = BattleEngine.new(team_a: [a], team_b: [b], effectiveness: type_effectiveness)
+
+    refute engine.finished?
+    engine.play_round
+    assert_equal 1, engine.rounds
+    refute_empty engine.log
+    assert_includes [0, 1], engine.winner, "uma rodada só não termina a batalha"
+  end
+
+  def testincremental_play_reaches_same_result_as_battle
+    team_a = Array.new(3) do |i|
+      build_pokemon(number: i + 1, name: "a#{i}", types: [], hp: 200, speed: 100, attack: 100, defense: 10)
+    end
+    team_b = Array.new(3) do |i|
+      build_pokemon(number: i + 10, name: "b#{i}", types: ["electric"], hp: 200, speed: 5, attack: 1, defense: 40)
+    end
+
+    batch = BattleEngine.new(team_a: team_a.dup, team_b: team_b.dup, effectiveness: type_effectiveness).battle
+
+    engine = BattleEngine.new(team_a: team_a, team_b: team_b, effectiveness: type_effectiveness)
+    engine.play_round until engine.finished?
+
+    assert_equal batch.winner, engine.winner
+    assert_equal batch.rounds, engine.rounds
+    assert_equal batch.log, engine.log
+  end
+
+  def test_play_round_after_finished_is_idempotent
+    a = build_pokemon(number: 1, name: "a", types: ["fire"], hp: 100, speed: 100, attack: 60, defense: 10)
+    b = build_pokemon(number: 2, name: "b", types: ["grass"], hp: 100, speed: 10, attack: 20, defense: 40)
+
+    engine = BattleEngine.new(team_a: [a], team_b: [b], effectiveness: type_effectiveness)
+    engine.play_round until engine.finished?
+    log_size = engine.log.size
+    rounds = engine.rounds
+
+    engine.play_round
+
+    assert_equal log_size, engine.log.size, "play_round após o fim não gera log novo"
+    assert_equal rounds, engine.rounds
+    assert_includes [0, 1], engine.winner
+  end
 end
 # rubocop:enable Metrics/ClassLength
