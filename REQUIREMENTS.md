@@ -35,6 +35,43 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
+### RF-17 — Página de gerenciamento de time (A3) — implementado na sessão 0017, aguardando validação
+- Página própria para gerenciar o time (A3 do `draft-auto-battler.md`, anotado na
+  validação da 0015): o usuário **escolhe a posição (slot) de cada Pokémon** e
+  **escolhe os golpes de cada um** — hoje a posição só muda via ▲/▼ no `#team`
+  (RF-08) e os golpes são fixos (últimos 4 da PokéAPI, RF-15).
+- A escolha de golpes **persiste** entre batalhas/sessões: nova coluna
+  `moves TEXT[]` em `team_pokemons`; o seletor oferece a **lista completa** de
+  moves do Pokémon (`PokeApi.available_move_names`) e `GET /battle` passa a usar
+  os golpes salvos do jogador (fallback para o comportamento da RF-15 quando vazio).
+
+**Critérios de aceite (sessão 0017):**
+- [x] Migração idempotente `0017_add_moves.sql` — `team_pokemons.moves TEXT[]
+      NOT NULL DEFAULT '{}'` (sem `TRUNCATE`).
+- [x] `Pokemon` ganha attribute `moves` (default `[]`); `all` devolve os moves;
+      `add` persiste `pokemon.moves`.
+- [x] `TeamRepository::MAX_MOVES_PER_POKEMON = 4`; `set_moves(user_id, id, moves)`
+      persiste no máximo 4, só do próprio usuário; outro usuário/id inexistente →
+      no-op.
+- [x] `PokeApi.available_move_names(number)` — todos os nomes de moves do Pokémon
+      (sem carregar `/move`), ordenados, memoizado por número.
+- [x] `PokeApi.move(name)` → `nil` em status ≠ 200 (robustez, padrão 0014).
+- [x] `GET /team/manage` renderiza `team_manage.erb` (checkbox de golpes por
+      membro + ▲/▼ de slot reusando `POST /team/:id/move` + Voltar), alvo `#team`,
+      sem `<html>`; link "Gerenciar" no `team.erb`.
+- [x] `POST /team/:id/moves` salva a seleção via `set_moves` e re-renderiza
+      `team_manage.erb`; > 4 selecionados ou nome fora da lista disponível → aviso
+      (`@notice`) e não salva.
+- [x] `GET /battle` usa os golpes persistidos do jogador (nome → `PokeApi.move`,
+      memoizado); lista vazia/inresolvível → fallback `PokeApi.moves_for` (RF-15 sem
+      regressão); oponente mantém os 4 defaults.
+- [x] Sem JS customizado (RNF-01); testes sem rede (stubs novos
+      `with_available_move_names`/`with_move`).
+- [x] Suíte completa verde (`./scripts/test` — 198 runs/707 asserts) e lint 0;
+      commit a cada green; 0 regressão RF-01..RF-16.
+- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo
+      escopo.
+
 ### RF-16 — Logs de batalha detalhados (C1) — `Done` (sessão 0016, validado em 2026-08-09)
 - Melhorar os **logs de batalha** (C1 do `draft-auto-battler.md`, anotado na validação
   da 0015): hoje o log mostra apenas o **lado** atacante ("Seu Time"/"Oponente"), o
@@ -463,6 +500,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 14 | UI: layout e estilos externos | Done (sessão 0014, validado em 2026-08-09) |
 | 15 | Golpes (moves) e PP (D1) | Done (sessão 0015, validado em 2026-08-09) |
 | 16 | Logs de batalha detalhados (C1) | Done (sessão 0016, validado em 2026-08-09) |
+| 17 | Página de gerenciamento de time (A3) | Em implementação (sessão 0017, aguardando validação) |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
@@ -479,7 +517,8 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
   2026-08-09).**
 - **A3 — Página própria de gerenciamento de time:** escolher os **golpes de cada
   Pokémon** e a **posição no time** em página dedicada (cruza com A1 — slots — e D1 —
-  golpes). Anotado em 2026-08-09 durante a validação da sessão 0015.
+  golpes). Anotado em 2026-08-09 durante a validação da sessão 0015. **Virou
+  RF-17/sessão 0017 (implementado em 2026-08-09, aguardando validação).**
 
 - **Game loop (auto-battler):** combate automático por turnos usando os 6 slots do time
   como ordem de combate; stats (RF-06) e tipos como base de dano/efetividade; estado de

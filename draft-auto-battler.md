@@ -33,23 +33,27 @@
   (lista/time/detalhe) consistente; `[x]` 0 regressão nas rotas/fragmentos atuais.
 
 ### A3. Página própria de gerenciamento de time (slot + golpes)
-- **Status:** anotado — não agendar agora (fora do fluxo, RNF-04).
+- **Status:** implementado — **RF-17** (sessão 0017), 2026-08-09 (suíte 198
+  runs/707 asserts, lint 0), aguardando validação do usuário.
 - **Objetivo:** criar uma **página própria** para gerenciar o time onde o usuário possa
   **escolher a posição (slot) de cada Pokémon** e **escolher os golpes de cada um**
   (hoje: posição só via ▲/▼ no fragmento `#team` (A1/RF-08) e golpes são fixos —
   últimos 4 da PokéAPI — com escolha determinística pelo motor (D1/RF-15)).
-- **Pontos:** UI dedicada por membro do time (não mais fragmento único); seleção de
-  golpes usando `PokeApi.moves_for(number)` como candidatos; persistir a escolha de
-  golpes por usuário (novo dado na `team_pokemons` ou por Pokémon escolhido — cruza
-  com D1, D2, sobretudo se XP/level entrar); reordenar slots dentro da página própria.
-- **Decisão a tomar em refinamento:** os golpes escolhidos devem **persistir** (estado
-  persistente) ou vale o seletor runtime por batalha? **Fonte dos golpes** (lista
-  completa vs 4 defaults da D1)? Como a escolha do usuário interage com o motor
-  determinístico (D1) — o usuário escolhe o **conjunto** de golpes, o motor continua
-  escolhendo qual usar a cada ação.
-- **Impacto:** revisita A1 (slots), D1 (golpes) e a camada web/rotas; candidata forte
-  a sessão própria após a 0015 (e depende de que more gems/schema decididas em
-  refinamento). Anotado em 2026-08-09 durante a validação da sessão 0015.
+- **Decisões (fechadas com o usuário em 2026-08-09):** golpes **persistem** no
+  Postgres (`team_pokemons.moves TEXT[]`, migração idempotente 0017); fonte dos
+  golpes = **lista completa** da PokéAPI (`PokeApi.available_move_names`, só nomes,
+  sem carregar cada `/move`; detalhe via `PokeApi.move` memoizado só para os
+  escolhidos); página com **golpes + slots** (reusa `POST /team/:id/move`);
+  `MAX_MOVES_PER_POKEMON = 4`; `PokeApi.move` tolerante (nil em status ≠ 200, padrão
+  0014); `GET /battle` usa os golpes salvos do jogador (fallback `moves_for`).
+- **Implementado:** `GET /team/manage` + `views/team_manage.erb` (checkbox de golpes
+  + ▲/▼ de slot + Voltar, alvo `#team`), link "Gerenciar" no `team.erb`;
+  `POST /team/:id/moves` (valida ≤ 4 e nomes disponíveis, aviso quando inválido);
+  `TeamRepository#set_moves` + `Pokemon#moves`; stubs `with_available_move_names`/
+  `with_move`.
+- **Impacto:** revisita A1 (slots), D1 (golpes) e a camada web/rotas; cruza com a
+  futura D2 (XP) — os golpes escolhidos já estão persistidos por linha do time.
+- **Próximo:** validação pelo usuário.
 
 ---
 

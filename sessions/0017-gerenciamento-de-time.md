@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-09 |
-| Implementação | Pendente |
+| Implementação | Concluída — suíte completa (198 runs / 707 asserts) e lint 0 verdes (passos 0–4) |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -123,11 +123,11 @@ batalhas/sessões.
 
 | Passo | Teste (red) | Implementação (green) | Status |
 | --- | --- | --- | --- |
-| 0 | repo/schema: `set_moves` persiste (até 4, isolamento, no-op p/ outro usuário); `all` devolve `moves`; `Pokemon` com `moves` default `[]` | migração `0017_add_moves.sql` + attribute `moves` em `Pokemon` + `set_moves`/parse na `all`/insert na `add` | pendente |
-| 1 | api: `available_move_names` lista completa, ordenada, memoizada; `move` → `nil` em status ≠ 200 | `PokeApi.available_move_names` (cache) + guarda de status em `move`; stubs `with_available_move_names`/`with_move` | pendente |
-| 2 | rota/UI: `GET /team/manage` renderiza fragmento com checkboxes (disponíveis + atuais) e ▲/▼ por membro + Voltar; link "Gerenciar" no `team.erb` | rota `GET /team/manage` + `views/team_manage.erb` + link em `team.erb` | pendente |
-| 3 | rota/UI: `POST /team/:id/moves` salva seleção (≤4); >4 ou nome fora da lista → aviso e não salva; re-renderiza manage | rota `POST /team/:id/moves` + `@notice` | pendente |
-| 4 | battle: `GET /battle` usa os golpes salvos do jogador (nome → `PokeApi.move`); vazio → fallback `moves_for`; oponente = defaults | `battle_moves_for` lê `pokemon.moves` persistidos | pendente |
+| 0 | repo/schema: `set_moves` persiste (até 4, isolamento, no-op p/ outro usuário); `all` devolve `moves`; `Pokemon` com `moves` default `[]` | migração `0017_add_moves.sql` + attribute `moves` em `Pokemon` + `set_moves`/parse na `all`/insert na `add` | ✅ `8f2cde4` |
+| 1 | api: `available_move_names` lista completa, ordenada, memoizada; `move` → `nil` em status ≠ 200 | `PokeApi.available_move_names` (cache) + guarda de status em `move`; stubs `with_available_move_names`/`with_move` | ✅ `3564190` |
+| 2 | rota/UI: `GET /team/manage` renderiza fragmento com checkboxes (disponíveis + atuais) e ▲/▼ por membro + Voltar; link "Gerenciar" no `team.erb` | rota `GET /team/manage` + `views/team_manage.erb` + link em `team.erb` | ✅ `5cde983` |
+| 3 | rota/UI: `POST /team/:id/moves` salva seleção (≤4); >4 ou nome fora da lista → aviso e não salva; re-renderiza manage | rota `POST /team/:id/moves` + `@notice` | ✅ `fac083d` |
+| 4 | battle: `GET /battle` usa os golpes salvos do jogador (nome → `PokeApi.move`); vazio → fallback `moves_for`; oponente = defaults | `battle_moves_for` lê `pokemon.moves` persistidos | ✅ `70c8432` |
 | 5 | docs: `REQUIREMENTS.md` (RF-17), `SESSIONS.md` (0017 + progresso + próxima), `draft-auto-battler.md` (A3) | documento | pendente |
 
 ## 6. Observações
