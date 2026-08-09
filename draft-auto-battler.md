@@ -57,16 +57,30 @@
 - **Plano TDD:** passos 0–7 verdes (93 runs/357 asserts) — lint 0 offenses.
 
 ### B3. Motor de auto-batalha (o game loop)
+- **Status:** em refinamento — sessão 0011 (RF-11), critérios e plano TDD fechados
+  em 2026-08-08 (aguardando fechamento/commit e implementação).
 - **Objetivo:** simular 6v6 automático usando os 6 slots; retorna log + vencedor.
-- **Decisões:** `BattleEngine` recebe dois times (`[BattlePokemon]` ordenados por slot
-  e computed por Speed); a cada rodada: todos os vivos agem em ordem de **Speed**
-  (empate → slot menor); golpe aplica `danobase * tipo * STAB`; HP 0 → KO; fim quando
-  um lado zerar; log de ações (`t` rodada, atacante, alvo, dano, KO).
-- **Critérios:** `[ ]` resultado determinístico (seed) e/ou com RNG injetável;
-  `[ ]`6v6 não quebra com times parciais; `[ ]` log completo e vencedor; `[ ]` domínio
-  puro, ~sem rede; coberto 100% por unit tests.
-- **Plano TDD [0]**: rodada single (ataque+danor); **[1]** ordem por speed; **[2]**
-  loop até KO do side; **[3]** log/vencedor; **[4]** edge (times vazios).
+- **Decisões:** `BattleEngine` recebe dois times (`[BattlePokemon]` ordenados por slot);
+  a cada rodada: todos os vivos agem em ordem de **Speed** (empate → time 0, depois slot
+  menor); dano = `max(1, Attack−Defense)` × multiplicador do **melhor tipo** do atacante
+  para o alvo (inclui STAB; melhor tipo imune → neutro); alvo = **primeiro vivo por slot**
+  do adversário (estratégia injetável no futuro); HP 0 → KO; fim quando um lado zerar
+  (danos nunca zeram → sem loop); log de ações (`round`, atacante, move_type, dano, KO);
+  **100% determinístico** (sem RNG) — aguardando a validação.
+- **Critérios:** `[ ]` `BattlePokemon#stat(name)` (default 1); `[ ]` dano base
+  `max(1, Attack−Defense)` com multiplicador por melhor tipo (STAB incluso); `[ ]` ordem
+  por Speed (desempate time 0 → slot); `[ ]` 6v6 não perde com times parciais; `[ ]` log
+  completo e vencedor; `[ ]` times vazios → derrota/empate; `[ ]` domínio puro, sem rede;
+  coberto 100% por unit tests; determinístico.
+- **Plano TDD [0]**: `stat`; **[1]** esqueleto + rodada única; **[2]** dano (A−D min 1 +
+  multiplicador); **[3]** move_type melhor tipo + neutro; **[4]** ordem por speed;
+  **[5]** loop 6v6/winner; **[6]** log; **[7]** edge (times vazios/empate); **[8]** suíte/lint;
+  **[9]** docs.
+
+> **Nota RNG (anotado — iteração futura):** hoje o motor é 100% determinístico para
+> testar/iterar rápido (decisão do usuário). Quando quiser variar as partidas, o
+> `BattleEngine` (e o seletor de golpe) ganha um `rng` injetável (default
+> `Random.new(0)`/seed fixa), preservando os testes com seeds. Não é escopo da 0011.
 
 ### B4. Oponente automático
 - **Objetivo:** gerar adversário para o usuário enfrentar sem montar time próprio.
