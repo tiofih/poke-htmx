@@ -141,4 +141,26 @@ def test_damage_is_attack_minus_defense
     assert_equal 1, result.log.count { |entry| entry[:attacker] == 0 }, "apos dar KO no unico b, o b nao age"
     assert_equal 1, result.log.count
   end
+
+  def test_log_entries_carry_full_action_shape_and_rounds
+    a = build_pokemon(number: 1, name: "a", types: ["fire"], hp: 60, speed: 100, attack: 100, defense: 10)
+    d = build_pokemon(number: 2, name: "d", types: ["grass"], hp: 60, speed: 1, attack: 1, defense: 40)
+
+    result = BattleEngine.new(team_a: [a], team_b: [d], effectiveness: type_effectiveness).battle
+
+    assert_equal %i[round attacker move_type damage ko], result.log.first.keys
+    assert_equal({ round: 1, attacker: 0, move_type: "fire", damage: 180, ko: true }, result.log.first)
+    assert_equal 1, result.rounds
+  end
+
+  def test_rounds_counts_each_round_of_actions_taken
+    team_a = [build_pokemon(number: 1, name: "a", types: [], hp: 100, speed: 100, attack: 100, defense: 10)]
+    team_b = [build_pokemon(number: 2, name: "b", types: [], hp: 250, speed: 1, attack: 1, defense: 40)]
+
+    result = BattleEngine.new(team_a: team_a, team_b: team_b, effectiveness: type_effectiveness).battle
+
+    assert result.rounds >= 2
+    assert_equal 0, result.winner
+    assert result.log.map { |entry| entry[:round] }.uniq.length == result.rounds
+  end
 end
