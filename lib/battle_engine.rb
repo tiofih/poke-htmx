@@ -41,9 +41,10 @@ class BattleEngine
   end
 
   def alive_and_actionable
-    @teams.each_with_index.flat_map do |team, team_index|
+    entries = @teams.each_with_index.flat_map do |team, team_index|
       team.each_with_index.filter_map { |pokemon, index| [team_index, index] if pokemon.alive? }
-    end.sort_by do |team_index, index|
+    end
+    entries.sort_by do |team_index, index|
       [-@teams[team_index][index].stat("Speed"), team_index, index]
     end
   end
@@ -51,16 +52,24 @@ class BattleEngine
   def act(attacker_team_index, attacker_index, round)
     target_team_index = 1 - attacker_team_index
     target_index = @target_strategy.call(@teams[target_team_index])
-
     attacker = @teams[attacker_team_index][attacker_index]
     target = @teams[target_team_index][target_index]
     damage = damage_for(attacker, target)
+    damaged = apply_damage(target_team_index, target_index, target, damage)
+    @log << action_entry(round, attacker_team_index, move_type_for(attacker, target), damage, damaged)
+  end
+
+  def apply_damage(target_team_index, target_index, target, damage)
     damaged = target.take_damage(damage)
     @teams[target_team_index][target_index] = damaged
-    @log << {
+    damaged
+  end
+
+  def action_entry(round, attacker_team_index, move_type, damage, damaged)
+    {
       round: round,
       attacker: attacker_team_index,
-      move_type: move_type_for(attacker, target),
+      move_type: move_type,
       damage: damage,
       ko: damaged.fainted?
     }

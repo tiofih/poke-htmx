@@ -3,6 +3,7 @@
 require "minitest/autorun"
 require_relative "../lib/battle_engine"
 
+# rubocop:disable Metrics/ClassLength
 class BattleEngineTest < Minitest::Test
   def type_effectiveness
     TypeEffectiveness.from_relations(
@@ -13,6 +14,7 @@ class BattleEngineTest < Minitest::Test
     )
   end
 
+  # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists, Naming/MethodParameterName
   def build_pokemon(number:, name:, types:, hp:, speed:, attack: 1, defense: 1)
     BattlePokemon.new(
       number: number,
@@ -28,6 +30,7 @@ class BattleEngineTest < Minitest::Test
       hp_current: hp
     )
   end
+  # rubocop:enable Metrics/MethodLength, Metrics/ParameterLists, Naming/MethodParameterName
 
   def test_new_accepts_two_teams_and_effectiveness
     a = build_pokemon(number: 1, name: "a", types: ["fire"], hp: 100, speed: 100, attack: 60, defense: 10)
@@ -41,6 +44,7 @@ class BattleEngineTest < Minitest::Test
     assert_equal 0, result.winner, "time A é mais rápido e causa mais dano"
   end
 
+  # rubocop:disable Metrics/AbcSize
   def test_battle_logs_the_actions
     a = build_pokemon(number: 1, name: "a", types: ["fire"], hp: 100, speed: 100, attack: 60, defense: 10)
     b = build_pokemon(number: 2, name: "b", types: ["grass"], hp: 100, speed: 10, attack: 20, defense: 40)
@@ -52,8 +56,9 @@ class BattleEngineTest < Minitest::Test
     assert result.log.first.key?(:round)
     assert result.log.first.key?(:attacker)
   end
+  # rubocop:enable Metrics/AbcSize
 
-def test_damage_is_attack_minus_defense
+  def test_damage_is_attack_minus_defense
     a = build_pokemon(number: 1, name: "a", types: [], hp: 100, speed: 100, attack: 100, defense: 10)
     d = build_pokemon(number: 2, name: "d", types: ["electric"], hp: 100, speed: 1, attack: 1, defense: 40)
 
@@ -110,12 +115,17 @@ def test_damage_is_attack_minus_defense
       effectiveness: type_effectiveness
     ).battle
 
-    assert_equal [0, 1, 0, 1], result.log.take(4).map { |entry| entry[:attacker] }
+    assert_equal([0, 1, 0, 1], result.log.take(4).map { |entry| entry[:attacker] })
   end
 
+  # rubocop:disable Metrics/MethodLength
   def test_full_battle_ends_when_one_side_has_no_alive
-    team_a = Array.new(3) { |i| build_pokemon(number: i + 1, name: "a#{i}", types: [], hp: 200, speed: 100, attack: 100, defense: 10) }
-    team_b = Array.new(3) { |i| build_pokemon(number: i + 10, name: "b#{i}", types: ["electric"], hp: 200, speed: 5, attack: 1, defense: 40) }
+    team_a = Array.new(3) do |i|
+      build_pokemon(number: i + 1, name: "a#{i}", types: [], hp: 200, speed: 100, attack: 100, defense: 10)
+    end
+    team_b = Array.new(3) do |i|
+      build_pokemon(number: i + 10, name: "b#{i}", types: ["electric"], hp: 200, speed: 5, attack: 1, defense: 40)
+    end
 
     result = BattleEngine.new(
       team_a: team_a,
@@ -126,6 +136,7 @@ def test_damage_is_attack_minus_defense
     assert_includes [0, 1], result.winner
     assert result.log.last[:ko], "última ação da batalha é um KO"
   end
+  # rubocop:enable Metrics/MethodLength
 
   def test_fainted_pokemon_do_not_act
     team_a = [build_pokemon(number: 1, name: "a", types: [], hp: 100, speed: 100, attack: 100, defense: 10)]
@@ -138,7 +149,7 @@ def test_damage_is_attack_minus_defense
     ).battle
 
     assert_equal 0, result.winner
-    assert_equal 1, result.log.count { |entry| entry[:attacker] == 0 }, "apos dar KO no unico b, o b nao age"
+    assert_equal 1, result.log.count { |entry| entry[:attacker].zero? }, "apos dar KO no unico b, o b nao age"
     assert_equal 1, result.log.count
   end
 
@@ -194,3 +205,4 @@ def test_damage_is_attack_minus_defense
     assert_equal 0, result.rounds
   end
 end
+# rubocop:enable Metrics/ClassLength
