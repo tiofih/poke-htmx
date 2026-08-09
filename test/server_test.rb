@@ -566,6 +566,51 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, 'id="battle"'
   end
 
+  def test_index_has_header_navigation_links
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "<nav"
+    assert_includes last_response.body, "Lista"
+    assert_includes last_response.body, "Time"
+    assert_includes last_response.body, "Batalha"
+    assert_includes last_response.body, 'href="#pokemon-list"'
+    assert_includes last_response.body, 'href="#team"'
+    assert_includes last_response.body, 'hx-get="/battle"'
+    assert_includes last_response.body, 'hx-target="#battle"'
+  end
+
+  def test_index_uses_single_layout_with_external_css
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/"
+    end
+
+    assert last_response.ok?
+    assert_equal 1, last_response.body.scan("<html").size
+    assert_includes last_response.body, "<title>"
+    assert_includes last_response.body, 'href="/style.css"'
+    assert_includes last_response.body, 'id="pokemon-list"'
+    assert_includes last_response.body, 'id="battle"'
+  end
+
+  def test_fragments_remain_partial_without_html_wrapper
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/pokemons"
+    end
+    refute_includes last_response.body, "<html"
+    refute_includes last_response.body, "<head>"
+    assert_includes last_response.body, 'id="pokemons"'
+
+    @repository.add("user-a", pikachu_pokemon)
+    get "/team", {}, user_session("user-a")
+
+    refute_includes last_response.body, "<html"
+    refute_includes last_response.body, "<head>"
+    assert_includes last_response.body, "Remove from Team"
+  end
+
   # rubocop:disable Metrics/MethodLength
   def battle_pokemon_for_test
     Pokemon.new(

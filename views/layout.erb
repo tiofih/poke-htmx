@@ -1,0 +1,24 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Poké-HTMX</title>
+    <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sakura.css/css/sakura.css" type="text/css">
+    <link rel="stylesheet" href="/style.css" type="text/css">
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <strong>Poké-HTMX</strong>
+        <a href="#pokemon-list">Lista</a>
+        <a href="#team">Time</a>
+        <a href="#battle" hx-get="/battle" hx-target="#battle" hx-swap="innerHTML">Batalha</a>
+      </nav>
+    </header>
+
+    <main>
+      <%= yield %>
+    </main>
+  </body>
+</html>

@@ -1,13 +1,4 @@
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Pokemon Team</title>
-    <script src="https://unpkg.com/htmx.org@2.0.3"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sakura.css/css/sakura.css" type="text/css">
-  </head>
-
-  <body>
-    <label for="pokemons">Choose a pocket monster:</label>
+<label for="pokemons">Choose a pocket monster:</label>
 
     <input
       type="text"
@@ -19,12 +10,9 @@
       hx-swap="innerHTML">
 
     <div id="pokemon-list">
-      <%= erb :pokemon_list %>
+      <%= erb :pokemon_list, layout: false %>
     </div>
 
     <div id="pokemon"> </div>
     <div id="team" hx-get="/team" hx-trigger="load"> </div>
-    <a href="#" hx-get="/battle" hx-target="#battle" hx-swap="innerHTML">Batalha</a>
     <div id="battle"> </div>
-  </body>
-</html>

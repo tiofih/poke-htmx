@@ -48,26 +48,26 @@ class Server < Sinatra::Base
     @offset = params[:offset].to_i
     @q = params[:q].to_s
     @page = PokeApi.paginate(offset: @offset, query: @q)
-    erb :pokemon_list
+    erb :pokemon_list, layout: false
   end
 
   get "/pokemon" do
     @pokemon = PokeApi.find(params[:name])
-    erb :pokemon
+    erb :pokemon, layout: false
   end
 
   get "/pokemon/close" do
-    erb :pokemon_close
+    erb :pokemon_close, layout: false
   end
 
   get "/pokemon/:poke_id" do
     @pokemon = PokeApi.detail(params[:poke_id])
-    erb :pokemon_detail
+    erb :pokemon_detail, layout: false
   end
 
   get "/team" do
     @team = settings.team.all(current_user)
-    erb :team
+    erb :team, layout: false
   end
 
   post "/team" do
@@ -78,26 +78,26 @@ class Server < Sinatra::Base
       @notice = e.message
     end
     @team = settings.team.all(current_user)
-    erb :team
+    erb :team, layout: false
   end
 
   delete "/team" do
     settings.team.remove(current_user, params[:id]) if params[:id]
     @team = settings.team.all(current_user)
-    erb :team
+    erb :team, layout: false
   end
 
   post "/team/:id/move" do
     settings.team.move(current_user, params[:id], params[:new_slot].to_i)
     @team = settings.team.all(current_user)
-    erb :team
+    erb :team, layout: false
   end
 
   get "/battle" do
     team = settings.team.all(current_user)
     if team.empty?
       @message = "Forme seu time para batalhar."
-      return erb :battle
+      return erb :battle, layout: false
     end
 
     player_team = team.map { |member| BattlePokemon.from(PokeApi.detail(member.number)) }
@@ -105,15 +105,15 @@ class Server < Sinatra::Base
     engine = BattleEngine.new(team_a: player_team, team_b: opponent)
     settings.battles.set(current_user, engine)
     @engine = engine
-    erb :battle
+    erb :battle, layout: false
   end
 
   post "/battle/play" do
     @engine = settings.battles.fetch(current_user)
-    return erb :battle unless @engine
+    return erb :battle, layout: false unless @engine
 
     @engine.play_round
-    erb :battle
+    erb :battle, layout: false
   end
 
   run! if $PROGRAM_NAME == app_file
