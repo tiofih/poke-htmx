@@ -23,6 +23,12 @@ class BattlePokemonTest < Minitest::Test
     assert_equal [{ name: "HP", value: 45 }, { name: "Speed", value: 90 }], fighter.stats
   end
 
+  def test_from_preserves_sprite
+    fighter = BattlePokemon.from(pikachu)
+
+    assert_equal "https://example.com/pikachu.png", fighter.sprite
+  end
+
   def test_from_derives_hp_max_and_current_from_hp_base_stat
     fighter = BattlePokemon.from(pikachu)
 

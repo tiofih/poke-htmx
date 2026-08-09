@@ -8,6 +8,7 @@ class BattlePokemon < Dry::Struct
 
   attribute :number, Types::Coercible::Integer
   attribute :name, Types::Strict::String
+  attribute :sprite, Types::Coercible::String.default("")
   attribute :types, Types::Strict::Array.of(Types::Coercible::String).default([].freeze)
   attribute :stats, Types::Strict::Array.of(Types::Hash.schema(name: Types::Coercible::String, value: Types::Coercible::Integer)).default([].freeze)
   attribute :hp_max, BC_HP
@@ -18,6 +19,7 @@ class BattlePokemon < Dry::Struct
     new(
       number: pokemon.number,
       name: pokemon.name,
+      sprite: pokemon.sprite.to_s,
       types: pokemon.types,
       stats: pokemon.stats,
       hp_max: hp || 1,
