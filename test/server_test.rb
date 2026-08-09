@@ -564,7 +564,7 @@ class ServerTest < Minitest::Test
       number: 25,
       types: ["electric"],
       stats: [
-        { name: "HP", value: 45 },
+        { name: "HP", value: 200 },
         { name: "Attack", value: 55 },
         { name: "Defense", value: 40 },
         { name: "Speed", value: 90 }
@@ -604,7 +604,7 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, "Seu Time"
     assert_includes last_response.body, "Oponente"
     assert_includes last_response.body, "pikachu"
-    assert_includes last_response.body, "45/45"
+    assert_includes last_response.body, "200/200"
     assert_includes last_response.body, "hx-target=\"#battle\""
   end
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
@@ -632,6 +632,59 @@ class ServerTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "Forme seu time"
+  end
+
+  def stub_battle_start(&block)
+    PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_detail(battle_pokemon_for_test, &block)
+      end
+    end
+  end
+
+  def start_battle_for(user_id)
+    add_three_pokemon_team(user_id) if @repository.all(user_id).empty?
+    stub_battle_start { get "/battle", {}, user_session(user_id) }
+  end
+
+  def add_three_pokemon_team(user_id)
+    %w[pikachu bulbasaur charmander].each_with_index do |name, index|
+      pokemon = Pokemon.new(
+        name: name,
+        sprite: "https://example.com/#{name}.png",
+        number: 25 + index
+      )
+      @repository.add(user_id, pokemon)
+    end
+  end
+
+  def test_battle_play_advances_one_round_and_refreshes_fragment
+    start_battle_for("user-a")
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Rodada 1"
+    assert_includes last_response.body, "atacou"
+  end
+
+  def test_battle_play_reuses_state_between_requests
+    start_battle_for("user-a")
+
+    post "/battle/play", {}, user_session("user-a")
+    round_one_hp = last_response.body
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Rodada 2"
+    refute_equal round_one_hp, last_response.body, "estado avança (HP/log mudam) a cada play"
+  end
+
+  def test_battle_play_without_started_battle_does_not_break
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
   end
 
   private
