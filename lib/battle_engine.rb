@@ -60,7 +60,7 @@ class BattleEngine
     @log << {
       round: round,
       attacker: attacker_team_index,
-      move_type: move_type_for(attacker),
+      move_type: move_type_for(attacker, target),
       damage: damage,
       ko: damaged.fainted?
     }
@@ -68,7 +68,7 @@ class BattleEngine
 
   def damage_for(attacker, target)
     base = [attacker.stat("Attack") - target.stat("Defense"), 1].max
-    move_type = move_type_for(attacker)
+    move_type = move_type_for(attacker, target)
     multiplier = damage_multiplier_for(attacker, target, move_type)
     [(base * multiplier).round, 1].max
   end
@@ -83,8 +83,14 @@ class BattleEngine
     )
   end
 
-  def move_type_for(attacker)
-    attacker.types.first
+  def move_type_for(attacker, target)
+    type_options = attacker.types.map { |type| [type, damage_multiplier_for(attacker, target, type)] }
+    return nil if type_options.empty?
+
+    type, multiplier = type_options.max_by(&:last)
+    return nil if multiplier.zero?
+
+    type
   end
 
   def alive_count(team_index)

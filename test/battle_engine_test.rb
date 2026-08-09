@@ -79,4 +79,22 @@ def test_damage_is_attack_minus_defense
 
     assert_equal 180, result.log.first[:damage]
   end
+
+  def test_move_type_is_the_best_type_against_the_target
+    a = build_pokemon(number: 1, name: "a", types: %w[grass poison], hp: 100, speed: 100, attack: 100, defense: 10)
+    d = build_pokemon(number: 2, name: "d", types: ["water"], hp: 100, speed: 1, attack: 1, defense: 40)
+
+    result = BattleEngine.new(team_a: [a], team_b: [d], effectiveness: type_effectiveness).battle
+
+    assert_equal "grass", result.log.first[:move_type]
+  end
+
+  def test_immune_best_type_falls_back_to_neutral_damage
+    a = build_pokemon(number: 1, name: "a", types: ["electric"], hp: 100, speed: 100, attack: 100, defense: 10)
+    d = build_pokemon(number: 2, name: "d", types: ["ground"], hp: 100, speed: 1, attack: 1, defense: 40)
+
+    result = BattleEngine.new(team_a: [a], team_b: [d], effectiveness: type_effectiveness).battle
+
+    assert_equal 60, result.log.first[:damage]
+  end
 end
