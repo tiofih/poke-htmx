@@ -170,6 +170,11 @@
 - **Nota RNG (anotado — iteração futura):** escolha de golpe é determinística neste
   escopo (decisão do usuário). Variar partidas/falhas de golpe (accuracy) fica para
   iteração com `rng` injetável.
+- **Nota (anotado — iteração futura):** puxar **mais informações dos golpes** além de
+  nome/tipo/power/accuracy/pp — p.ex. **nivel em que o Pokémon pode aprender** o golpe
+  (cada entry de `moves` da PokéAPI já traz `version_group_details` com
+  `level_learned_at` e método de aprendizado), PP/PP máximo, dano etc. Relevante quando
+  D2 (XP/nível) entrar, para decidir o que o Pokémon pode aprender em cada nível.
 - **Objetivo:** dar "multi-move" à simulação (em vez de só atacar). 
 - **Pontos:** PokéAPI `/move` (nome, tipo, power, accuracy, pp); memoizar 4 moves por
   Pokémon; o motor escolhe (aleatório/peso por estado/estratégia); pp decai.
@@ -183,6 +188,14 @@
   XP; stats derivados dos base + nível; evolução collapsa evolutions (RF-06).
 - **Risco:** persistir progressão por usuário em nova tabela `team_pokemons` (coluna
   level/xp) ou `battle_stats`.
+- **Visão (anotado — decidida em 2026-08-09, fora do fluxo):** os Pokémon escolhidos
+  são **sempre a primeira evolução** (ou os sem evolução), **sempre nível 1** na
+  montagem. **A cada batalha** o time ganha **XP**: os Pokémon **aprendem novos
+  movimentos** (config. do nível de aprendizado), **aprimoram automáticamente os
+  atributos** (stats escalam com o nível) e **podem evoluir**. O **time inimigo
+  acompanha o nível do time do jogador** (difícil balancear evolução/leveling com o
+  oponente). Isso redefine a relação com B/C: batalha deixa de ser só simulação e vira
+  loop de progressão persistida (cruza com D1 para golpes aprendíveis por nível).
 
 ### D3. Histórico/rank de batalhas
 - **Objetivo:** registrar resultado das partidas por usuário.
