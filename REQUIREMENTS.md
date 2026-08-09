@@ -35,6 +35,35 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
+### RF-16 — Logs de batalha detalhados (C1) — implementado na sessão 0016 (aguardando validação)
+- Melhorar os **logs de batalha** (C1 do `draft-auto-battler.md`, anotado na validação
+  da 0015): hoje o log mostra apenas o **lado** atacante ("Seu Time"/"Oponente"), o
+  golpe e o dano — não diz **qual Pokémon** bateu em **qual**. O log passa a indicar
+  **quem atacou quem**, com **qual golpe** e o **dano causado** (ex.: "Seu Time:
+  pikachu usou thunder-shock em bulbasaur, 12 de dano").
+- `BattleEngine` grava **`attacker_name`** e **`target_name`** em **toda** entry do
+  log (contrato uniforme, decisão do usuário) e `battle.erb` re-renderiza o log com
+  os dois nomes — comportamento da batalha (dano/vencedor/ordem/rounds) intacto.
+
+**Critérios de aceite (sessão 0016):**
+- [x] Toda entry do log ganha `attacker_name`/`target_name` (nome do `BattlePokemon`
+      atacante e do alvo), em todos os caminhos (legado e com moves) — chaves
+      existentes preservadas com os mesmos valores.
+- [x] Comportamento da batalha inalterado: dano, vencedor, rounds e ordem de ação
+      idênticos — asserts de shape exato atualizados (`battle_engine_test.rb` e
+      `move_engine_test.rb`) para o novo contrato (não é regressão: é o deliverable).
+- [x] `battle.erb` (log do último round) mostra lado + nome do atacante + "usou" +
+      golpe (`entry[:move]` quando presente, senão `entry[:move_type]`) + "em" + nome
+      do alvo + dano + KO (`entry[:ko]`); caminho legado também exibe nomes.
+- [x] Sem JS customizado (RNF-01); testes de rota sem rede (stubs
+      `with_detail`/`with_moves_for`) verificando o novo formato no fragmento de
+      `GET /battle` e `POST /battle/play`.
+- [x] Suíte completa verde (`./scripts/test`) e lint 0; commit a cada green; sem
+      regressão de comportamento em RF-01..RF-15.
+- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo
+      escopo.
+      **Validação pendente — executada pelo usuário (fase 3).**
+
 ### RF-15 — Golpes (moves) e PP (D1) — `Done` (sessão 0015, validado em 2026-08-09)
 - Dar **multi-move** à simulação de batalha (D1 do `draft-auto-battler.md`, roadmap
   item 15): cada `BattlePokemon` passa a ter uma **lista de golpes** (nome, tipo,
@@ -445,7 +474,8 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 - **Melhores logs de batalha (C1):** mostrar **qual Pokémon bateu em qual**, com qual
   golpe e dano causado (hoje o log só mostra o lado atacante). Anotado em 2026-08-09
-  durante a validação da sessão 0015.
+  durante a validação da sessão 0015. **Virou RF-16/sessão 0016** (implementado em
+  2026-08-09, aguardando validação).
 - **A3 — Página própria de gerenciamento de time:** escolher os **golpes de cada
   Pokémon** e a **posição no time** em página dedicada (cruza com A1 — slots — e D1 —
   golpes). Anotado em 2026-08-09 durante a validação da sessão 0015.

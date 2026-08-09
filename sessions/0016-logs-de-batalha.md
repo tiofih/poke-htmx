@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-09 |
-| Implementação | Pendente |
+| Implementação | Concluída — suíte completa (172 runs / 614 asserts) e lint 0 verdes (passos 0–2) |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -109,10 +109,10 @@ log.
 
 | Passo | Teste (red) | Implementação (green) | Status |
 | --- | --- | --- | --- |
-| 0 | engine: entry ganha `attacker_name`/`target_name` em todos os caminhos; asserts de shape exato (`battle_engine_test.rb:162-163`, `move_engine_test.rb:100`) atualizados com as novas chaves | `BattleEngine#action_entry` (recebe os nomes de `act`) | pendente |
-| 1 | rota/UI: fragmento de batalha mostra "Lado: atacante usou golpe em alvo, dano" (com move e no legado) | `views/battle.erb` (bloco do log do último round) | pendente |
-| 2 | regressão: suíte completa `./scripts/test` + `./scripts/lint` 0 | checagem geral | pendente |
-| 3 | docs: `REQUIREMENTS.md` (RF-16), `SESSIONS.md` (0016), `draft-auto-battler.md` (nota C1) | documento | pendente |
+| 0 | engine: entry ganha `attacker_name`/`target_name` em todos os caminhos; asserts de shape exato (`battle_engine_test.rb:162-163`, `move_engine_test.rb:100`) atualizados com as novas chaves | `BattleEngine#action_entry` (recebe os nomes de `act`) | ✅ `e96f3cc` |
+| 1 | rota/UI: fragmento de batalha mostra "Lado: atacante usou golpe em alvo, dano" (com move e no legado) | `views/battle.erb` (bloco do log do último round) | ✅ `dc8b3dd` |
+| 2 | regressão: suíte completa `./scripts/test` + `./scripts/lint` 0 | checagem geral + ajuste de estilo (`Style/OptionalArguments` — `move_name` por último) | ✅ `87bd336` |
+| 3 | docs: `REQUIREMENTS.md` (RF-16), `SESSIONS.md` (0016), `draft-auto-battler.md` (nota C1) | documento | ✅ pendente de commit |
 
 ## 6. Observações e próximo passo
 

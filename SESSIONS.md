@@ -40,11 +40,11 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0015 (Golpes/moves e PP — D1/RF-15) está `Done`** — implementada e validada
-pelo usuário em 2026-08-09 (suíte 171 runs/610 asserts, lint 0). Candidatas anotadas
-no draft para a próxima sessão: **D2 (XP/evolução)**, **D3 (histórico/rank)**, **A3
-(página própria de gerenciamento de time com escolha de golpes e posição)** e a
-melhoria dos **logs de batalha** (C1) — decisão do usuário.
+**Sessão 0016 (Logs de batalha detalhados, C1/RF-16) está em implementação** — passos
+0–2 verdes (suíte completa 172 runs/614 asserts, lint 0), **aguardando validação do
+usuário**. Após a 0016 validada, candidatas anotadas no draft seguem disponíveis:
+**D2 (XP/evolução)**, **D3 (histórico/rank)** e **A3 (página própria de gerenciamento
+de time com escolha de golpes e posição)** — decisão do usuário.
 
 ## Progresso das sessões
 
@@ -65,6 +65,7 @@ melhoria dos **logs de batalha** (C1) — decisão do usuário.
 | 0013 | Batalha na web (RF-13, C1) — BattleEngine incremental + rotas htmx | Concluída | Done (passos 0–7, validado em 2026-08-09) |
 | 0014 | UI: layout e estilos externos (RF-14, A2) — layout.erb + nav + style.css | Concluída | Done (passos 0–4, validado em 2026-08-09) |
 | 0015 | Golpes/moves e PP (RF-15, D1) — Move + moves_for + BattleEngine determinístico + battle.erb | Concluída | Done (passos 0–7, validado em 2026-08-09) |
+| 0016 | Logs de batalha detalhados (RF-16, C1) — entry com attacker_name/target_name + battle.erb | Implementação | Passos 0–2 verdes (172 runs/614 asserts, lint 0); aguardando validação |
 
 ## Estrutura do arquivo de sessão
 
