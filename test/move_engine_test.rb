@@ -145,5 +145,48 @@ class MoveEngineTest < Minitest::Test
 
     assert_equal "fire-move", result.log.first[:move], "golpe sem poder nunca e escolhido"
   end
+
+  def test_engine_uses_struggle_when_all_moves_are_out_of_pp
+    fast = build_pokemon(
+      number: 1, name: "flame", types: ["fire"], hp: 200, speed: 100, attack: 100, defense: 10,
+      moves: [move(name: "fire-move", type: "fire", power: 40, pp: 0)]
+    )
+    slow = build_pokemon(number: 2, name: "leaf", types: ["grass"], hp: 200, speed: 1, defense: 40)
+
+    engine = BattleEngine.new(team_a: [fast], team_b: [slow], effectiveness: type_effectiveness)
+    engine.play_round
+
+    entry = engine.log.first
+    assert_equal "Struggle", entry[:move], "todos com pp 0 -> Struggle"
+    assert_equal "fire", entry[:move_type], "Struggle usa o tipo do atacante"
+    assert_equal 0, engine.teams[0].first.moves.first.pp, "Struggle nao altera o pp dos golpes guardados"
+  end
+
+  def test_engine_uses_struggle_when_only_status_moves_are_available
+    fast = build_pokemon(
+      number: 1, name: "flame", types: ["fire"], hp: 200, speed: 100, attack: 100, defense: 10,
+      moves: [move(name: "growl", type: "normal", power: nil, pp: 30)]
+    )
+    slow = build_pokemon(number: 2, name: "leaf", types: ["grass"], hp: 200, speed: 1, defense: 40)
+
+    result = BattleEngine.new(team_a: [fast], team_b: [slow], effectiveness: type_effectiveness).battle
+
+    assert_equal "Struggle", result.log.first[:move]
+  end
+
+  def test_struggle_still_deals_damage
+    fast = build_pokemon(
+      number: 1, name: "flame", types: ["fire"], hp: 200, speed: 100, attack: 100, defense: 10,
+      moves: [move(name: "fire-move", type: "fire", power: 40, pp: 0)]
+    )
+    slow = build_pokemon(number: 2, name: "leaf", types: ["grass"], hp: 200, speed: 1, defense: 40)
+
+    result = BattleEngine.new(team_a: [fast], team_b: [slow], effectiveness: type_effectiveness).battle
+
+    base = [100 - 40, 1].max
+    multiplier = 2.0 * 1.5
+    expected = (base * (10 / 50.0) * multiplier).round
+    assert_equal expected, result.log.first[:damage], "Struggle = power 10 x efetividade x STAB"
+  end
 end
 # rubocop:enable Metrics/ClassLength
