@@ -97,4 +97,19 @@ def test_damage_is_attack_minus_defense
 
     assert_equal 60, result.log.first[:damage]
   end
+
+  def test_actions_follow_speed_order_with_team_then_slot_tiebreak
+    fast_a1 = build_pokemon(number: 1, name: "a1", types: [], hp: 100, speed: 80, attack: 100, defense: 10)
+    slow_a2 = build_pokemon(number: 2, name: "a2", types: [], hp: 100, speed: 10, attack: 100, defense: 10)
+    fast_b1 = build_pokemon(number: 3, name: "b1", types: [], hp: 100, speed: 80, attack: 1, defense: 10)
+    slow_b2 = build_pokemon(number: 4, name: "b2", types: [], hp: 100, speed: 5, attack: 1, defense: 10)
+
+    result = BattleEngine.new(
+      team_a: [fast_a1, slow_a2],
+      team_b: [fast_b1, slow_b2],
+      effectiveness: type_effectiveness
+    ).battle
+
+    assert_equal [0, 1, 0, 1], result.log.take(4).map { |entry| entry[:attacker] }
+  end
 end
