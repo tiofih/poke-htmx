@@ -33,8 +33,11 @@
   (lista/time/detalhe) consistente; `[x]` 0 regressão nas rotas/fragmentos atuais.
 
 ### A3. Página própria de gerenciamento de time (slot + golpes)
-- **Status:** implementado — **RF-17** (sessão 0017), 2026-08-09 (suíte 198
-  runs/707 asserts, lint 0), aguardando validação do usuário.
+- **Status:** Done — **RF-17** (sessão 0017), validado pelo usuário em 2026-08-09
+  (suíte final 199 runs/708 asserts, lint 0). Durante a validação: link "Time" do nav
+  passou a apontar para o gerenciador (o botão interno "Gerenciar" sumia ao navegar)
+  e `pokemon_data` ficou tolerante (nil em status ≠ 200) para a rota não 500 quando a
+  PokéAPI responde falha.
 - **Objetivo:** criar uma **página própria** para gerenciar o time onde o usuário possa
   **escolher a posição (slot) de cada Pokémon** e **escolher os golpes de cada um**
   (hoje: posição só via ▲/▼ no fragmento `#team` (A1/RF-08) e golpes são fixos —
@@ -53,7 +56,8 @@
   `with_move`.
 - **Impacto:** revisita A1 (slots), D1 (golpes) e a camada web/rotas; cruza com a
   futura D2 (XP) — os golpes escolhidos já estão persistidos por linha do time.
-- **Próximo:** validação pelo usuário.
+- **Próximo:** D2 (XP/evolução) — visão anotada abaixo; o time inimigo acompanha o
+  nível do jogador.
 
 ---
 

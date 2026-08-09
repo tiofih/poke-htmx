@@ -40,10 +40,11 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0017 (Página de gerenciamento de time, A3/RF-17) está na fase de
-validação** — implementação concluída em 2026-08-09 (suíte 198 runs/707 asserts,
-lint 0), aguardando validação do usuário. Com 0017 validada, as próximas candidatas
-do draft são **D2 (XP/evolução)** e **D3 (histórico/rank)** — decisão do usuário.
+**Sessão 0017 (Página de gerenciamento de time, A3/RF-17) concluída e validada em
+2026-08-09** (199 runs/708 asserts, lint 0). Próximas candidatas do draft, decisão do
+usuário: **D2 (XP/evolução)** — visão de progressão por batalha (pokémon sempre 1ª
+evolução nível 1, ganham XP, aprendem movimentos e evoluem; oponente no mesmo nível do
+jogador) — e **D3 (histórico/rank)**.
 
 ## Progresso das sessões
 
@@ -65,7 +66,7 @@ do draft são **D2 (XP/evolução)** e **D3 (histórico/rank)** — decisão do 
 | 0014 | UI: layout e estilos externos (RF-14, A2) — layout.erb + nav + style.css | Concluída | Done (passos 0–4, validado em 2026-08-09) |
 | 0015 | Golpes/moves e PP (RF-15, D1) — Move + moves_for + BattleEngine determinístico + battle.erb | Concluída | Done (passos 0–7, validado em 2026-08-09) |
 | 0016 | Logs de batalha detalhados (RF-16, C1) — entry com attacker_name/target_name + battle.erb | Concluída | Done (passos 0–3, validado em 2026-08-09) |
-| 0017 | Página de gerenciamento de time (RF-17, A3) — slot + golpes persistidos + team_manage.erb | Implementação | Concluída (passos 0–4 verdes, 198 runs/707 asserts, lint 0) — aguardando validação |
+| 0017 | Página de gerenciamento de time (RF-17, A3) — slot + golpes persistidos + team_manage.erb | Concluída | Done (passos 0–6 + ajustes de validação, 199 runs/708 asserts, validado em 2026-08-09) |
 
 ## Estrutura do arquivo de sessão
 

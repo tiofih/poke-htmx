@@ -35,7 +35,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
-### RF-17 — Página de gerenciamento de time (A3) — implementado na sessão 0017, aguardando validação
+### RF-17 — Página de gerenciamento de time (A3) — `Done` (sessão 0017, validado em 2026-08-09)
 - Página própria para gerenciar o time (A3 do `draft-auto-battler.md`, anotado na
   validação da 0015): o usuário **escolhe a posição (slot) de cada Pokémon** e
   **escolhe os golpes de cada um** — hoje a posição só muda via ▲/▼ no `#team`
@@ -67,10 +67,20 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       regressão); oponente mantém os 4 defaults.
 - [x] Sem JS customizado (RNF-01); testes sem rede (stubs novos
       `with_available_move_names`/`with_move`).
-- [x] Suíte completa verde (`./scripts/test` — 198 runs/707 asserts) e lint 0;
+- [x] Suíte completa verde (`./scripts/test` — 199 runs/708 asserts) e lint 0;
       commit a cada green; 0 regressão RF-01..RF-16.
 - [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo
       escopo.
+      **Validado pelo usuário em 2026-08-09.**
+
+> **Validação (2026-08-09):** durante a validação, dois ajustes: (1) o link "Gerenciar"
+> interno ao `team.erb` sumia ao navegar — o **link "Time" do nav passou a apontar para
+> o gerenciador** (`hx-get="/team/manage"` no alvo `#team`) e o botão interno foi
+> removido; (2) **500 em `GET /team/manage`** quando a PokéAPI responde falha
+> (rate-limit devolve 404/HTML) — `pokemon_data` agora retorna `nil` em status ≠ 200
+> (padrão `find`/`fetch_move_json`) e `available_move_names`/`moves_for` viram `[]`.
+> Anotado no draft: puxar mais informações dos golpes (nível de aprendizado) e visão de
+> XP/evolução por batalha com oponente no mesmo nível do jogador (D2).
 
 ### RF-16 — Logs de batalha detalhados (C1) — `Done` (sessão 0016, validado em 2026-08-09)
 - Melhorar os **logs de batalha** (C1 do `draft-auto-battler.md`, anotado na validação
@@ -500,7 +510,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 14 | UI: layout e estilos externos | Done (sessão 0014, validado em 2026-08-09) |
 | 15 | Golpes (moves) e PP (D1) | Done (sessão 0015, validado em 2026-08-09) |
 | 16 | Logs de batalha detalhados (C1) | Done (sessão 0016, validado em 2026-08-09) |
-| 17 | Página de gerenciamento de time (A3) | Em implementação (sessão 0017, aguardando validação) |
+| 17 | Página de gerenciamento de time (A3) | Done (sessão 0017, validado em 2026-08-09) |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
@@ -518,7 +528,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - **A3 — Página própria de gerenciamento de time:** escolher os **golpes de cada
   Pokémon** e a **posição no time** em página dedicada (cruza com A1 — slots — e D1 —
   golpes). Anotado em 2026-08-09 durante a validação da sessão 0015. **Virou
-  RF-17/sessão 0017 (implementado em 2026-08-09, aguardando validação).**
+  RF-17/sessão 0017, `Done` (validado em 2026-08-09).**
 
 - **Game loop (auto-battler):** combate automático por turnos usando os 6 slots do time
   como ordem de combate; stats (RF-06) e tipos como base de dano/efetividade; estado de

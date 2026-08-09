@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-09 |
-| Implementação | Concluída — suíte completa (198 runs / 707 asserts) e lint 0 verdes (passos 0–4) |
-| Validação | Pendente (executada pelo usuário) |
+| Implementação | Concluída — suíte completa (199 runs / 708 asserts) e lint 0 verdes (passos 0–6) |
+| Validação | Concluída — validado pelo usuário em 2026-08-09 |
 
 ---
 
@@ -76,6 +76,7 @@ batalhas/sessões.
       pad) — sem JS customizado (RNF-01).
 - [ ] Entrada na página: link "Gerenciar" dentro do fragmento `#team`
       (`hx-get="/team/manage" hx-target="#team"`); layout/nav de RF-14 **intactos**.
+      *(ajuste de validação: link "Time" do nav aponta para o gerenciador, botão interno removido)*
 
 ### Batalha usa os golpes escolhidos
 
@@ -128,7 +129,35 @@ batalhas/sessões.
 | 2 | rota/UI: `GET /team/manage` renderiza fragmento com checkboxes (disponíveis + atuais) e ▲/▼ por membro + Voltar; link "Gerenciar" no `team.erb` | rota `GET /team/manage` + `views/team_manage.erb` + link em `team.erb` | ✅ `5cde983` |
 | 3 | rota/UI: `POST /team/:id/moves` salva seleção (≤4); >4 ou nome fora da lista → aviso e não salva; re-renderiza manage | rota `POST /team/:id/moves` + `@notice` | ✅ `fac083d` |
 | 4 | battle: `GET /battle` usa os golpes salvos do jogador (nome → `PokeApi.move`); vazio → fallback `moves_for`; oponente = defaults | `battle_moves_for` lê `pokemon.moves` persistidos | ✅ `70c8432` |
-| 5 | docs: `REQUIREMENTS.md` (RF-17), `SESSIONS.md` (0017 + progresso + próxima), `draft-auto-battler.md` (A3) | documento | pendente |
+| 5 | docs: `REQUIREMENTS.md` (RF-17), `SESSIONS.md` (0017 + progresso + próxima), `draft-auto-battler.md` (A3) | documento | ✅ `e024e28` |
+| 6 | robustez: `GET /team/manage` não 500 quando a PokéAPI falha (`available_move_names` → `[]` em status ≠ 200) | `pokemon_data` tolerante (nil em status ≠ 200) + `available_move_names`/`moves_for` nil-safe | ✅ `1969bda` |
+
+Ajuste de validação (2026-08-09): o link "Gerenciar" vivia dentro de `team.erb` e
+sumia ao navegar (Lista/Time/Batalha) — o **link "Time" do nav passou a apontar para o
+gerenciador** (`hx-get="/team/manage"` no alvo `#team`) e o botão interno foi removido
+(`1072b64`).
+
+## 5. Validação (executada pelo usuário — 2026-08-09)
+
+- **Suíte completa verde:** 199 runs / 708 asserts, 0 failures, lint 0 offenses
+  (`./scripts/test` + `./scripts/lint`).
+- **Critérios verificados:** todos os itens da seção 3 implementados e funcionando —
+  migração `0017_add_moves.sql`, `set_moves`/`MAX_MOVES_PER_POKEMON` (≤4, isolamento,
+  no-op), `available_move_names`/`PokeApi.move` tolerante, `GET /team/manage` (checkboxes
+  + ▲/▼ + Voltar), `POST /team/:id/moves` (aviso quando >4 ou nome fora da lista),
+  `GET /battle` usando os golpes salvos do jogador (fallback `moves_for`).
+- **Ajustes de validação feitos durante esta fase:**
+  - O link "Gerenciar" interno ao `team.erb` **sumia ao navegar** (Lista/Time/Batalha) —
+    o link **"Time" do nav passou a apontar para o gerenciador**
+    (`hx-get="/team/manage"` no alvo `#team`) e o botão interno foi removido
+    (`1072b64`).
+  - **500 em `GET /team/manage`** quando a PokéAPI responde falha (rate-limit/sobrecarga
+    devolve 404/HTML): `pokemon_data` fazia `JSON.parse` sem checar status →
+    `JSON::ParserError`. `pokemon_data` agora retorna `nil` em status ≠ 200 (padrão
+    `find`/`fetch_move_json`) e `available_move_names`/`moves_for` viram `[]`
+    (`1969bda`, passo 6).
+- **Resultado: sessão 0017 concluída e validada** — próxima: D2 (XP/evolução) ou D3
+  (histórico/rank), decisão do usuário.
 
 ## 6. Observações
 
