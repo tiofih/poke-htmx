@@ -52,4 +52,31 @@ class BattleEngineTest < Minitest::Test
     assert result.log.first.key?(:round)
     assert result.log.first.key?(:attacker)
   end
+
+def test_damage_is_attack_minus_defense
+    a = build_pokemon(number: 1, name: "a", types: [], hp: 100, speed: 100, attack: 100, defense: 10)
+    d = build_pokemon(number: 2, name: "d", types: ["electric"], hp: 100, speed: 1, attack: 1, defense: 40)
+
+    result = BattleEngine.new(team_a: [a], team_b: [d], effectiveness: type_effectiveness).battle
+
+    assert_equal 60, result.log.first[:damage]
+  end
+
+  def test_damage_never_goes_below_one
+    a = build_pokemon(number: 1, name: "a", types: ["fire"], hp: 100, speed: 100, attack: 20, defense: 40)
+    d = build_pokemon(number: 2, name: "d", types: ["electric"], hp: 100, speed: 90, attack: 1, defense: 40)
+
+    result = BattleEngine.new(team_a: [a], team_b: [d], effectiveness: type_effectiveness).battle
+
+    assert result.log.first[:damage] >= 1
+  end
+
+  def test_damage_applies_type_multiplier_with_stab
+    a = build_pokemon(number: 1, name: "a", types: ["fire"], hp: 200, speed: 100, attack: 100, defense: 10)
+    d = build_pokemon(number: 2, name: "d", types: ["grass"], hp: 200, speed: 1, attack: 1, defense: 40)
+
+    result = BattleEngine.new(team_a: [a], team_b: [d], effectiveness: type_effectiveness).battle
+
+    assert_equal 180, result.log.first[:damage]
+  end
 end

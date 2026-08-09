@@ -67,7 +67,20 @@ class BattleEngine
   end
 
   def damage_for(attacker, target)
-    [attacker.stat("Attack") - target.stat("Defense"), 1].max
+    base = [attacker.stat("Attack") - target.stat("Defense"), 1].max
+    move_type = move_type_for(attacker)
+    multiplier = damage_multiplier_for(attacker, target, move_type)
+    [(base * multiplier).round, 1].max
+  end
+
+  def damage_multiplier_for(attacker, target, move_type)
+    return 1.0 unless move_type
+
+    @effectiveness.damage_multiplier(
+      attacker_types: attacker.types,
+      move_type: move_type,
+      defender_types: target.types
+    )
   end
 
   def move_type_for(attacker)
