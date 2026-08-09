@@ -566,6 +566,7 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, 'id="battle"'
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def test_index_has_header_navigation_links
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/"
@@ -581,7 +582,9 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, 'hx-get="/battle"'
     assert_includes last_response.body, 'hx-target="#battle"'
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
+  # rubocop:disable Metrics/AbcSize
   def test_index_uses_single_layout_with_external_css
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/"
@@ -594,7 +597,9 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, 'id="pokemon-list"'
     assert_includes last_response.body, 'id="battle"'
   end
+  # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def test_fragments_remain_partial_without_html_wrapper
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/pokemons"
@@ -610,6 +615,22 @@ class ServerTest < Minitest::Test
     refute_includes last_response.body, "<head>"
     assert_includes last_response.body, "Remove from Team"
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
+  # rubocop:disable Metrics/AbcSize
+  def test_stylesheet_served_and_styles_fragment_classes
+    get "/style.css"
+
+    assert last_response.ok?
+    assert_includes last_response.body, ".battle-pane"
+    assert_includes last_response.body, ".fighter"
+    assert_includes last_response.body, ".battle-log"
+    assert_includes last_response.body, ".pagination"
+    assert_includes last_response.body, ".notice"
+    assert_includes last_response.body, ".slot"
+    assert_includes last_response.body, ".type"
+  end
+  # rubocop:enable Metrics/AbcSize
 
   # rubocop:disable Metrics/MethodLength
   def battle_pokemon_for_test

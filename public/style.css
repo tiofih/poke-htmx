@@ -1,27 +1,86 @@
-.main {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-column-gap: 36px;
-  margin: 200px;
+/*
+ * Poke-HTMX — estilos próprios sobre a base sakura (CDN).
+ * As classes abaixo são as usadas pelos fragmentos htmx.
+ */
+
+/* Layout interno das seções da página única */
+#pokemon-list {
+  margin-bottom: 1.5em;
 }
 
-.list {
-  margin-bottom: 10px;
+#pokemon,
+#team,
+#battle {
+  margin-bottom: 1.5em;
 }
 
-.list-title {
-  display: flex;
-  align-items: center;
-  justify-content: middle;
+/* Navegação */
+header nav a {
+  margin-right: 1em;
 }
 
-.ryu {
-  height: 50px;
-  width: 50px;
-  display: inline;
-
+/* Listagem / paginação */
+.pagination a {
+  margin: 0 0.5em;
 }
 
-.validation-error {
-  color: red;
+/* Detalhe */
+.type {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-right: 4px;
+  background: #eee;
+  font-size: 0.85em;
+}
+
+.stats,
+.evolutions {
+  list-style: none;
+  padding-left: 0;
+}
+
+.evolution img {
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+/* Time */
+.slot {
+  display: inline-block;
+  border-radius: 50%;
+  padding: 2px 8px;
+  background: #ddd;
+  font-weight: bold;
+}
+
+.notice {
+  color: #b00;
+}
+
+/* Batalha */
+.battle-pane {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.8em 1em;
+  margin-bottom: 1em;
+}
+
+.fighter {
+  margin: 0.4em 0;
+}
+
+.fighter img {
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.battle-log {
+  list-style-position: inside;
+  padding-left: 0;
+  font-size: 0.9em;
+}
+
+.winner {
+  font-size: 1.1em;
 }
