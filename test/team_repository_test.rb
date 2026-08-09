@@ -221,6 +221,82 @@ class TeamRepositoryTest < Minitest::Test
     assert_equal %w[pikachu bulbasaur charmander squirtle], @repository.all("user-b").map(&:name)
   end
 
+  def test_pokemon_moves_defaults_to_empty_array
+    assert_equal [], Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25).moves
+    with_moves = Pokemon.new(
+      name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25,
+      moves: %w[thunder-shock quick-attack]
+    )
+    assert_equal %w[thunder-shock quick-attack], with_moves.moves
+  end
+
+  def test_all_returns_empty_moves_by_default
+    @repository.add("user-a", Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25))
+
+    assert_equal [], @repository.all("user-a").first.moves
+  end
+
+  def test_add_persists_moves
+    pikachu = Pokemon.new(
+      name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25,
+      moves: %w[thunder-shock quick-attack]
+    )
+    @repository.add("user-a", pikachu)
+
+    assert_equal %w[thunder-shock quick-attack], @repository.all("user-a").first.moves
+  end
+
+  def test_set_moves_persists_moves_and_all_returns_them
+    @repository.add("user-a", Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25))
+    pikachu_id = team_id("pikachu", "user-a")
+
+    @repository.set_moves("user-a", pikachu_id, %w[thunder-shock quick-attack])
+
+    assert_equal %w[thunder-shock quick-attack], @repository.all("user-a").first.moves
+  end
+
+  def test_set_moves_caps_at_max_moves_per_pokemon
+    @repository.add("user-a", Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25))
+    pikachu_id = team_id("pikachu", "user-a")
+
+    @repository.set_moves("user-a", pikachu_id, %w[a b c d e f])
+
+    assert_equal 4, @repository.all("user-a").first.moves.size
+    assert_equal %w[a b c d], @repository.all("user-a").first.moves
+  end
+
+  def test_set_moves_clears_moves_when_empty
+    @repository.add("user-a", Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25))
+    pikachu_id = team_id("pikachu", "user-a")
+    @repository.set_moves("user-a", pikachu_id, %w[thunder-shock])
+
+    @repository.set_moves("user-a", pikachu_id, [])
+
+    assert_equal [], @repository.all("user-a").first.moves
+  end
+
+  def test_set_moves_of_other_users_member_is_noop
+    @repository.add("user-a", Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25))
+    @repository.add("user-b", Pokemon.new(name: "bulbasaur", sprite: "https://example.com/bulbasaur.png", number: 1))
+    pikachu_id = team_id("pikachu", "user-a")
+    bulbasaur_id = team_id("bulbasaur", "user-b")
+
+    @repository.set_moves("user-a", bulbasaur_id, %w[thunder-shock])
+
+    assert_equal [], @repository.all("user-b").first.moves
+    @repository.set_moves("user-a", pikachu_id, %w[thunder-shock])
+    assert_equal [], @repository.all("user-b").first.moves
+  end
+
+  def test_set_moves_with_unknown_id_is_noop
+    @repository.add("user-a", Pokemon.new(name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25))
+
+    @repository.set_moves("user-a", "999999", %w[thunder-shock])
+
+    assert_equal 1, @repository.all("user-a").size
+    assert_equal [], @repository.all("user-a").first.moves
+  end
+
   private
 
   def four_pokemon_team(user_id)

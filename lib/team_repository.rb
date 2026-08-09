@@ -7,6 +7,7 @@ require_relative "pokemon"
 class TeamRepository
   DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
   MAX_TEAM_SIZE = 6
+  MAX_MOVES_PER_POKEMON = 4
 
   class TeamFullError < StandardError; end
   class DuplicateError < StandardError; end
@@ -20,7 +21,14 @@ class TeamRepository
       "SELECT * FROM team_pokemons WHERE user_id = $1 ORDER BY slot",
       [user_id]
     ).map do |row|
-      Pokemon.new(id: row["id"], name: row["name"], sprite: row["sprite"], number: row["number"], slot: row["slot"])
+      Pokemon.new(
+        id: row["id"],
+        name: row["name"],
+        sprite: row["sprite"],
+        number: row["number"],
+        slot: row["slot"],
+        moves: parse_moves(row["moves"])
+      )
     end
   end
 
@@ -30,8 +38,15 @@ class TeamRepository
     raise DuplicateError, "#{pokemon.name} já está no time." if duplicate?(user_id, pokemon.number)
 
     connection.exec_params(
-      "INSERT INTO team_pokemons (user_id, name, sprite, number, slot) VALUES ($1, $2, $3, $4, $5)",
-      [user_id, pokemon.name, pokemon.sprite, pokemon.number, slot]
+      "INSERT INTO team_pokemons (user_id, name, sprite, number, slot, moves) VALUES ($1, $2, $3, $4, $5, $6)",
+      [user_id, pokemon.name, pokemon.sprite, pokemon.number, slot, array_literal(pokemon.moves)]
+    )
+  end
+
+  def set_moves(user_id, id, moves)
+    connection.exec_params(
+      "UPDATE team_pokemons SET moves = $3 WHERE id = $1 AND user_id = $2",
+      [id, user_id, array_literal(moves.first(MAX_MOVES_PER_POKEMON))]
     )
   end
 
@@ -138,6 +153,16 @@ class TeamRepository
 
   def connection
     @connection ||= PG.connect(@db_url)
+  end
+
+  def parse_moves(value)
+    return [] if value.nil? || value.empty?
+
+    value[1..-2].split(",")
+  end
+
+  def array_literal(names)
+    "{#{names.join(',')}}"
   end
 end
 # rubocop:enable Metrics/ClassLength
