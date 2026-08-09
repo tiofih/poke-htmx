@@ -112,4 +112,33 @@ def test_damage_is_attack_minus_defense
 
     assert_equal [0, 1, 0, 1], result.log.take(4).map { |entry| entry[:attacker] }
   end
+
+  def test_full_battle_ends_when_one_side_has_no_alive
+    team_a = Array.new(3) { |i| build_pokemon(number: i + 1, name: "a#{i}", types: [], hp: 200, speed: 100, attack: 100, defense: 10) }
+    team_b = Array.new(3) { |i| build_pokemon(number: i + 10, name: "b#{i}", types: ["electric"], hp: 200, speed: 5, attack: 1, defense: 40) }
+
+    result = BattleEngine.new(
+      team_a: team_a,
+      team_b: team_b,
+      effectiveness: type_effectiveness
+    ).battle
+
+    assert_includes [0, 1], result.winner
+    assert result.log.last[:ko], "última ação da batalha é um KO"
+  end
+
+  def test_fainted_pokemon_do_not_act
+    team_a = [build_pokemon(number: 1, name: "a", types: [], hp: 100, speed: 100, attack: 100, defense: 10)]
+    team_b = [build_pokemon(number: 2, name: "b", types: [], hp: 1, speed: 1, attack: 1, defense: 40)]
+
+    result = BattleEngine.new(
+      team_a: team_a,
+      team_b: team_b,
+      effectiveness: type_effectiveness
+    ).battle
+
+    assert_equal 0, result.winner
+    assert_equal 1, result.log.count { |entry| entry[:attacker] == 0 }, "apos dar KO no unico b, o b nao age"
+    assert_equal 1, result.log.count
+  end
 end
