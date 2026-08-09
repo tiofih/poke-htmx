@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-08 |
-| Implementação | Concluída — passos 0–7 verdes (93 runs/357 asserts, lint 0 offenses) |
-| Validação | Em andamento — aguardando feedback do usuário (fase executada pelo usuário) |
+| Implementação | Concluída — passos 0–8 verdes (93 runs/357 asserts, lint 0 offenses) |
+| Validação | Concluída — validado pelo usuário em 2026-08-08 |
 
 ---
 
@@ -118,6 +118,11 @@ Nem rota, nem schema, nem rede em testes (stub).
 - Próximo passo sugerido após validação: **B3 — motor de auto-batalha** (game loop 6v6),
   consumindo `TypeEffectiveness` + `BattlePokemon`.
 
-## 7. Validação (a definir — usuário)
+## 7. Validação (2026-08-08)
 
-- Pendente (fase de validação é do usuário — ver AGENTS.md).
+- Suíte completa: **93 runs / 357 assertions, 0 failures/errors**; lint **0 offenses**.
+- Critérios de aceite **todos verificados pelo usuário** (`factor` x2/x0.5/x0/x1,
+  `effectiveness` multi-tipo, `stab`/`damage_multiplier`, `extract_type_relations` puro,
+  `type_relations` com cache dos 18 tipos e `load` integrando a fonte): **RF-10 Done**.
+- Próxima sessão: **0011** — candidato principal: **B3 — motor de auto-batalha**
+  (game loop 6v6) consumindo `TypeEffectiveness` + `BattlePokemon`.
