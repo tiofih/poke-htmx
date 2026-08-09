@@ -96,7 +96,7 @@ class BattleEngine
     end
 
     damaged = apply_damage(target_team_index, target_index, target, damage)
-    @log << action_entry(round, attacker_team_index, move_type, damage, damaged, move&.name, attacker.name, target.name)
+    @log << action_entry(round, attacker_team_index, move_type, damage, damaged, attacker.name, target.name, move&.name)
   end
 
   def choose_move(attacker, target)
@@ -120,7 +120,7 @@ class BattleEngine
     damaged
   end
 
-  def action_entry(round, attacker_team_index, move_type, damage, damaged, move_name = nil, attacker_name, target_name)
+  def action_entry(round, attacker_team_index, move_type, damage, damaged, attacker_name, target_name, move_name = nil)
     entry = {
       round: round,
       attacker: attacker_team_index,
