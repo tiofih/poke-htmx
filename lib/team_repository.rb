@@ -16,6 +16,7 @@ class TeamRepository
     @db_url = db_url
   end
 
+  # rubocop:disable Metrics/MethodLength
   def all(user_id)
     connection.exec_params(
       "SELECT * FROM team_pokemons WHERE user_id = $1 ORDER BY slot",
@@ -31,6 +32,7 @@ class TeamRepository
       )
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   def add(user_id, pokemon)
     slot = next_free_slot(user_id)

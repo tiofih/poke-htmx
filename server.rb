@@ -38,6 +38,9 @@ class Server < Sinatra::Base
     end
 
     def battle_moves_for(pokemon)
+      saved = pokemon.moves.filter_map { |name| PokeApi.move(name) }
+      return saved unless saved.empty?
+
       moves = PokeApi.moves_for(pokemon.number)
       return moves unless moves.empty?
 

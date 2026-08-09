@@ -2,7 +2,7 @@
 
 require_relative "test_helper"
 
-# rubocop:disable Metrics/MethodLength
+# rubocop:disable Metrics/ClassLength, Metrics/MethodLength
 class PokeApiMoveTest < Minitest::Test
   def poke_move_json
     {
@@ -154,7 +154,7 @@ class PokeApiMoveTest < Minitest::Test
     PokeApi.instance_variable_set(:@available_moves_cache, nil)
   end
 
-  def test_fetch_move_json_returns_nil_when_status_is_not_200
+  def test_fetch_move_json_returns_nil_when_status_has_failure_code
     response = Struct.new(:status).new(404)
     original = Faraday.method(:get)
     Faraday.define_singleton_method(:get) { |_url| response }
@@ -175,4 +175,4 @@ class PokeApiMoveTest < Minitest::Test
     PokeApi.instance_variable_set(:@move_cache, nil)
   end
 end
-# rubocop:enable Metrics/MethodLength
+# rubocop:enable Metrics/ClassLength, Metrics/MethodLength

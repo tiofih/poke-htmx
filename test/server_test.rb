@@ -552,7 +552,7 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, "Gerenciar"
   end
 
-  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def test_team_manage_renders_move_checkboxes_for_each_member
     @repository.add("user-a", pikachu_pokemon)
     PokeApiStub.with_available_move_names(%w[growl quick-attack thunder-shock]) do
@@ -568,9 +568,9 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, 'hx-post="/team/'
     assert_includes last_response.body, 'hx-get="/team"'
   end
-  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
-  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
   def test_team_manage_checks_currently_selected_moves
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
@@ -584,7 +584,7 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, 'value="thunder-shock" checked'
     refute_includes last_response.body, 'value="growl" checked'
   end
-  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
 
   def test_team_manage_is_isolated_per_session
     @repository.add("user-a", pikachu_pokemon)
@@ -595,6 +595,7 @@ class ServerTest < Minitest::Test
     refute_includes last_response.body, "pikachu"
   end
 
+  # rubocop:disable Metrics/AbcSize
   def test_team_manage_renders_slot_controls_and_back_link
     add_four_pokemon_team("user-a")
 
@@ -609,8 +610,8 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, 'hx-get="/team"'
     assert_includes last_response.body, "Voltar"
   end
+  # rubocop:enable Metrics/AbcSize
 
-  # rubocop:disable Metrics/AbcSize
   def test_team_manage_fragment_has_no_html_wrapper
     @repository.add("user-a", pikachu_pokemon)
 
@@ -622,7 +623,6 @@ class ServerTest < Minitest::Test
     refute_includes last_response.body, "<html"
     refute_includes last_response.body, "<head>"
   end
-  # rubocop:enable Metrics/AbcSize
 
   def test_post_team_moves_saves_selected_moves
     @repository.add("user-a", pikachu_pokemon)
@@ -636,6 +636,7 @@ class ServerTest < Minitest::Test
     assert_equal %w[growl thunder-shock], @repository.all("user-a").first.moves
   end
 
+  # rubocop:disable Metrics/AbcSize
   def test_post_team_moves_rerenders_manage_fragment
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
@@ -649,7 +650,9 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, 'value="thunder-shock" checked'
     refute_includes last_response.body, "<html"
   end
+  # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/AbcSize
   def test_post_team_moves_with_more_than_four_shows_notice_and_does_not_save
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
@@ -661,7 +664,9 @@ class ServerTest < Minitest::Test
     assert_empty @repository.all("user-a").first.moves
     assert_includes last_response.body, "máximo"
   end
+  # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/AbcSize
   def test_post_team_moves_with_move_outside_available_shows_notice_and_does_not_save
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
@@ -674,7 +679,9 @@ class ServerTest < Minitest::Test
     assert_empty @repository.all("user-a").first.moves
     assert_includes last_response.body, "dispon"
   end
+  # rubocop:enable Metrics/AbcSize
 
+  # rubocop:disable Metrics/AbcSize
   def test_post_team_moves_of_other_users_member_is_noop
     @repository.add("user-a", pikachu_pokemon)
     @repository.add("user-b", bulbasaur_pokemon)
@@ -687,6 +694,7 @@ class ServerTest < Minitest::Test
     assert last_response.ok?
     assert_empty @repository.all("user-b").first.moves
   end
+  # rubocop:enable Metrics/AbcSize
 
   # rubocop:disable Metrics/AbcSize
   def test_index_renders_first_page_with_filter_input
@@ -1026,6 +1034,79 @@ class ServerTest < Minitest::Test
     assert_includes last_response.body, "Struggle"
   end
   # rubocop:enable Metrics/MethodLength
+
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_battle_uses_saved_moves_for_player
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @repository.set_moves("user-a", pikachu_id, %w[quick-attack])
+
+    PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_detail(battle_pokemon_for_test) do
+          PokeApiStub.with_moves_for(battle_moves_for_test) do
+            PokeApiStub.with_move({ "quick-attack" => Move.new(name: "quick-attack", type: "normal", power: 40,
+                                                               accuracy: 100, pp: 30) }) do
+              get "/battle", {}, user_session("user-a")
+            end
+          end
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "quick-attack"
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_battle_play_log_uses_saved_move_name
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @repository.set_moves("user-a", pikachu_id, %w[quick-attack])
+
+    PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_detail(battle_pokemon_for_test) do
+          PokeApiStub.with_moves_for(battle_moves_for_test) do
+            PokeApiStub.with_move({ "quick-attack" => Move.new(name: "quick-attack", type: "normal", power: 40,
+                                                               accuracy: 100, pp: 30) }) do
+              get "/battle", {}, user_session("user-a")
+            end
+          end
+        end
+      end
+    end
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "usou quick-attack em"
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_battle_with_unresolvable_saved_moves_falls_back_to_default
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @repository.set_moves("user-a", pikachu_id, %w[obsolete-move])
+
+    PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_detail(battle_pokemon_for_test) do
+          PokeApiStub.with_moves_for(battle_moves_for_test) do
+            PokeApiStub.with_move({}) do
+              get "/battle", {}, user_session("user-a")
+            end
+          end
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "thunder-shock"
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   private
 
