@@ -81,9 +81,36 @@ class BattleEngine
     target_index = @target_strategy.call(@teams[target_team_index])
     attacker = @teams[attacker_team_index][attacker_index]
     target = @teams[target_team_index][target_index]
-    damage = damage_for(attacker, target)
+
+    if attacker.moves.empty?
+      move = nil
+      move_type = move_type_for(attacker, target)
+      damage = damage_for(attacker, target)
+    else
+      move = choose_move(attacker, target)
+      move_type = move.type
+      damage = move_damage_for(attacker, target, move)
+      used_index = attacker.moves.find_index { |m| m.name == move.name }
+      @teams[attacker_team_index][attacker_index] = attacker.use_move(used_index) if used_index
+    end
+
     damaged = apply_damage(target_team_index, target_index, target, damage)
-    @log << action_entry(round, attacker_team_index, move_type_for(attacker, target), damage, damaged)
+    @log << action_entry(round, attacker_team_index, move_type, damage, damaged, move&.name)
+  end
+
+  def choose_move(attacker, target)
+    usable = attacker.moves.select { |m| m.power.to_i.positive? && m.pp.positive? }
+    return struggle_move(attacker) if usable.empty?
+
+    usable.sort_by { |m| [-expected_damage(attacker, target, m), -m.power.to_i] }.first
+  end
+
+  def struggle_move(attacker)
+    Move.new(name: "Struggle", type: attacker.types.first || "normal", power: 10, accuracy: nil, pp: 100)
+  end
+
+  def expected_damage(attacker, target, move)
+    move.power.to_f * damage_multiplier_for(attacker, target, move.type)
   end
 
   def apply_damage(target_team_index, target_index, target, damage)
@@ -92,14 +119,16 @@ class BattleEngine
     damaged
   end
 
-  def action_entry(round, attacker_team_index, move_type, damage, damaged)
-    {
+  def action_entry(round, attacker_team_index, move_type, damage, damaged, move_name = nil)
+    entry = {
       round: round,
       attacker: attacker_team_index,
       move_type: move_type,
       damage: damage,
       ko: damaged.fainted?
     }
+    entry[:move] = move_name if move_name
+    entry
   end
 
   def damage_for(attacker, target)
@@ -107,6 +136,14 @@ class BattleEngine
     move_type = move_type_for(attacker, target)
     multiplier = damage_multiplier_for(attacker, target, move_type)
     [(base * multiplier).round, 1].max
+  end
+
+  def move_damage_for(attacker, target, move)
+    base = [attacker.stat("Attack") - target.stat("Defense"), 1].max
+    power_factor = move.power.to_i / 50.0
+    multiplier = damage_multiplier_for(attacker, target, move.type)
+    multiplier = 1.0 if multiplier.zero?
+    [(base * power_factor * multiplier).round, 1].max
   end
 
   def damage_multiplier_for(attacker, target, move_type)
