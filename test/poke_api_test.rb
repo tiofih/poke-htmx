@@ -189,6 +189,52 @@ class PokeApiTest < Minitest::Test
   end
   # rubocop:enable Metrics/MethodLength
 
+  # rubocop:disable Metrics/MethodLength
+  def test_detail_tolerates_null_sprite
+    original_data = PokeApi.method(:pokemon_data)
+    original_chain = PokeApi.method(:evolution_chain)
+    PokeApi.define_singleton_method(:pokemon_data) do |_id|
+      {
+        "name" => "offender",
+        "sprites" => { "front_default" => nil },
+        "id" => 999,
+        "types" => [],
+        "stats" => [],
+        "species" => { "url" => "https://pokeapi.co/api/v2/pokemon-species/999" }
+      }
+    end
+    PokeApi.define_singleton_method(:evolution_chain) { |_url| [] }
+
+    pokemon = PokeApi.detail(999)
+
+    assert_equal "", pokemon.sprite
+    assert_equal "offender", pokemon.name
+    assert_equal 999, pokemon.number
+  ensure
+    PokeApi.define_singleton_method(:pokemon_data, original_data)
+    PokeApi.define_singleton_method(:evolution_chain, original_chain)
+  end
+  # rubocop:enable Metrics/MethodLength
+
+  # rubocop:disable Metrics/MethodLength
+  def test_find_tolerates_null_sprite
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |_url|
+      Struct.new(:status, :body).new(
+        200,
+        JSON.generate("name" => "offender", "sprites" => { "front_default" => nil }, "id" => 999)
+      )
+    end
+
+    pokemon = PokeApi.find("offender")
+
+    assert_equal "", pokemon.sprite
+    assert_equal "offender", pokemon.name
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+  # rubocop:enable Metrics/MethodLength
+
   private
 
   # rubocop:disable Layout/LineLength, Metrics/MethodLength

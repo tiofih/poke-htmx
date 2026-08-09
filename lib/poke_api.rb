@@ -32,7 +32,11 @@ class PokeApi
     return nil unless response.status == 200
 
     resp = JSON.parse(response.body)
-    Pokemon.new(name: resp["name"], sprite: resp["sprites"]["front_default"], number: resp["id"])
+    Pokemon.new(
+      name: resp["name"],
+      sprite: resp.dig("sprites", "front_default").to_s,
+      number: resp["id"]
+    )
   end
 
   # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
@@ -40,7 +44,7 @@ class PokeApi
     data = pokemon_data(poke_id)
     Pokemon.new(
       name: data["name"],
-      sprite: data["sprites"]["front_default"],
+      sprite: data.dig("sprites", "front_default").to_s,
       number: data["id"],
       types: data["types"].map { |type| type["type"]["name"] },
       stats: data["stats"].map do |stat|
