@@ -83,8 +83,7 @@
   **[9]** docs.
 
 ### B4. Oponente automático
-- **Status:** implementado — sessão 0012 (RF-12); aguardando validação do usuário
-  (suíte 118 runs/416 asserts + lint 0).
+- **Status:** Done — sessão 0012 (RF-12), validado em 2026-08-08.
 - **Objetivo:** gerar adversário para o usuário enfrentar sem montar time próprio.
 - **Decisões:** `OpponentGenerator` recebe `names:` (slugs candidatos, ex.
   `PokeApi.fetch_all`) + `size` (default 6) + `rng` injetável (default `Random.new`, seed

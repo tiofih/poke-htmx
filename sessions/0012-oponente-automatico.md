@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-08 |
-| Implementação | Implementada — passos 0–5 TDD, suíte 118 runs/416 asserts e lint 0 verdes |
-| Validação | Pendente — aguardando validação do usuário |
+| Implementação | Concluída — passos 0–5 TDD, suíte 118 runs/416 asserts e lint 0 verdes |
+| Validação | Concluída — validada pelo usuário em 2026-08-08 |
 
 ---
 
@@ -107,4 +107,10 @@ para a próxima sessão).
 
 ## 7. Validação (a preencher pelo usuário)
 
-- **(pendente)** — o usuário roda a suíte completa e confirma critérios de aceite.
+- **Validada pelo usuário em 2026-08-08.** Suíte completa verde (118 runs/416 asserts)
+  e lint 0 offenses confirmados; critérios de aceite da seção 3 verificados contra a
+  implementação (`OpponentGenerator#team`/`team_names`, sorteio sem repetição, seed
+  determinística, edges `names==[]`/`size<=0`, domínio puro com `names`/`fetcher`
+  injetados). RF-01..RF-11 sem regressão.
+- Sessão 0012 **concluída**; próxima sessão sugerida: **C1 — Batalha na web (htmx)**
+  consumindo `BattleEngine` e/ou **A2 — UI: layout e estilos externos**.

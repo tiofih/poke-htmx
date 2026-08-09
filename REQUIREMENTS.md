@@ -35,7 +35,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
-### RF-12 — Oponente automático (B4) — em implementação (sessão 0012, aguardando validação)
+### RF-12 — Oponente automático (B4) — `Done` (sessão 0012, validado em 2026-08-08)
 - Gerar o time adversário para o jogador enfrentar sem montar time próprio — lado
   `team_b` do `BattleEngine` (RF-11) num futuro C1 (batalha na web).
 - `OpponentGenerator` sorteia N slugs de uma lista de candidatos (ex: `PokeApi.fetch_all`),
@@ -58,6 +58,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Domínio puro: `names`/`fetcher` injetados, testes sem rede (stub `fetcher`);
       suíte completa verde (118 runs/416 asserts) e lint 0; sem regressão RF-01..RF-11.
 - [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo escopo.
+      **Validado pelo usuário em 2026-08-08.**
 
 ### RF-01 — Listar Pokémon — `Done` (sessão 0006)
 - Exibir um `<select>` com os Pokémon da PokéAPI, **paginação (100 por página)**
@@ -301,7 +302,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 9 | Modelo de batalha (BattlePokemon, RF-09, B1) | Done (sessão 0009) |
 | 10 | Efetividade de tipos (B2) | Done (sessão 0010) |
 | 11 | Motor de auto-batalha (B3) | Done (sessão 0011, validado em 2026-08-08) |
-| 12 | Oponente automático (B4) | Em implementação (sessão 0012) |
+| 12 | Oponente automático (B4) | Done (sessão 0012, validado em 2026-08-08) |
 | 13 | UI: layout e estilos externos | Backlog |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)

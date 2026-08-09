@@ -42,8 +42,7 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 **Sessão 0013** — a definir: **C1 — Batalha na web (htmx)** consumindo `BattleEngine`
 (team do jogador × `OpponentGenerator`) e/ou **A2 — UI: layout e estilos externos**
-(roadmap item 13). RF-12 (B4) está implementado **aguardando validação** (2026-08-08).
-A confirmar após validar a 0012.
+(roadmap item 13). RF-12 (B4) está `Done` (validado em 2026-08-08). Aguardando decisão do usuário.
 
 ## Progresso das sessões
 
@@ -60,7 +59,7 @@ A confirmar após validar a 0012.
 | 0009 | Modelo de batalha (RF-09, B1) — BattlePokemon puro | Concluída | Done (passos 0–5, validado em 2026-08-08) |
 | 0010 | Efetividade de tipos (RF-10, B2) — lookup puro + tabela via PokéAPI | Concluída | Done (passos 0–8, validado em 2026-08-08) |
 | 0011 | Motor de auto-batalha (RF-11, B3) — BattleEngine puro 6v6 | Concluída | Done (passos 0–9, validado em 2026-08-08) |
-| 0012 | Oponente automático (RF-12, B4) — OpponentGenerator puro | Implementação | Aguardando validação do usuário |
+| 0012 | Oponente automático (RF-12, B4) — OpponentGenerator puro | Concluída | Done (passos 0–5, validado em 2026-08-08) |
 
 ## Estrutura do arquivo de sessão
 
