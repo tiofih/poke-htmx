@@ -35,7 +35,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
-### RF-14 — Layout e estilos externos (A2) — `Implementado — aguardando validação (sessão 0014)`
+### RF-14 — Layout e estilos externos (A2) — `Done` (sessão 0014, validado em 2026-08-09)
 - Extrair **layout/navbar/estilos compartilhados** (A2 do draft auto-battler, roadmap
   item 14): layout único `views/layout.erb` usado por `GET /`, navegação consistente
   (Lista/Time/Batalha) na **página única** e **CSS externo** estilizando as classes dos
@@ -60,10 +60,16 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       `<html>/<head>` e com o mesmo contrato de antes.
 - [x] `public/style.css` estiliza as classes atuais dos fragmentos (listagem, detalhe,
       team, batalha) sobre a base sakura; `GET /style.css` responde 200 via pasta pública.
-- [x] Suíte completa verde (139 runs/535 asserts) e lint 0; 0 regressão RF-01..RF-13;
+- [x] Suíte completa verde (146 runs/553 asserts) e lint 0; 0 regressão RF-01..RF-13;
       commit a cada green; `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md`
       atualizados no mesmo escopo.
-      **Aguardando validação do usuário (sessão 0014).**
+      **Validado pelo usuário em 2026-08-09.**
+
+> **Validação (2026-08-09):** durante a validação, ajustes de robustez no `GET /battle`
+> (defeitos encontrados pelo usuário): `GET /battle/close` limpa `#battle` ao sair da
+> aba Batalha; `PokeApi.find` retorna `nil` em status ≠ 200 (espécie sem `/pokemon`) e
+> `evolution_chain` ignora o estágio; `find`/`detail` mapeiam sprite `front_default`
+> nulo para `""` — commits `0cc8d81`, `e5fb57c`, `3abf7f6`.
 
 ### RF-13 — Batalha na web (C1) — `Done` (sessão 0013, validado em 2026-08-09)
 - Expor o motor de auto-batalha (RF-11/B3) e o oponente automático (RF-12/B4) na UI
@@ -349,6 +355,9 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [ ] **Sem tratamento de erros** — nome inválido, rate-limit da PokéAPI, time sem membros, duplicados.
 - [x] **HTML parcial sem layout único** — resolvido na sessão 0014 (RF-14): layout único
       `views/layout.erb` + navegação (Lista/Time/Batalha) + CSS externo sobre a base sakura.
+- [x] **Robustez na batalha (dados da PokéAPI)** — resolvido na validação da sessão 0014:
+      espécies sem `/pokemon` (urshifu/dudunsparce) e sprite `front_default` nulo não
+      derrubam mais `GET /battle` (`PokeApi.find`/`evolution_chain` tolerantes).
 
 ## Roadmap (executado em `SESSIONS.md`)
 
@@ -367,7 +376,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 11 | Motor de auto-batalha (B3) | Done (sessão 0011, validado em 2026-08-08) |
 | 12 | Oponente automático (B4) | Done (sessão 0012, validado em 2026-08-08) |
 | 13 | Batalha na web (C1) | Done (sessão 0013, validado em 2026-08-09) |
-| 14 | UI: layout e estilos externos | Implementado — aguardando validação (sessão 0014) |
+| 14 | UI: layout e estilos externos | Done (sessão 0014, validado em 2026-08-09) |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 

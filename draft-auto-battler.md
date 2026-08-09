@@ -19,8 +19,10 @@
 - **Plano TDD [0]** repo `#move` + documento; **[1]** rota; **[2]** UI ▲/▼; **[3]** isolamento/regressão.
 
 ### A2. UI: layout e estilos externos
-- **Status:** implementado como **RF-14** (sessão 0014) — passos 0–4 verdes (139
-  runs/535 asserts) e lint 0; **aguardando validação do usuário (2026-08-09)**.
+- **Status:** Done — **RF-14** (sessão 0014), validado pelo usuário em 2026-08-09
+  (suíte final 146 runs/553 asserts, lint 0). Durante a validação: ajustes de robustez
+  — `GET /battle/close` limpa `#battle` ao sair da aba, `PokeApi.find` tolera espécie
+  sem `/pokemon` (404) e sprite `front_default` nulo.
 - **Objetivo:** extrair layout/navbar/estilos compartilhados (a antiga "0007-UI",
   estrada como 0008+). Preparar telas mais ricas (batalha não acontece em página crua).
 - **Decisões:** layout único em `views/layout.erb` (+ nav Lista/Time/Batalha na página

@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-09 |
-| Implementação | Concluída — passos 0–4 TDD, suíte 139 runs/535 asserts e lint 0 verdes (aguardando validação) |
-| Validação | (a preencher pelo usuário) |
+| Implementação | Concluída — passos 0–4 TDD, suíte 139 runs/535 asserts e lint 0 verdes (validação em 2026-08-09) |
+| Validação | Concluída — validado pelo usuário em 2026-08-09 (critérios da seção 3; suíte final 146 runs/553 asserts, lint 0) |
 
 ---
 
@@ -111,6 +111,29 @@ fragmentos atuais — o contrato htmx (alvos, swaps, forms) permanece intacto.
 - Após a 0014 validada: D1–D3 (golpes, XP/evolução, histórico/rank) seguem no
   `draft-auto-battler.md` como candidatos à próxima sessão.
 
-## 7. Validação (a preencher pelo usuário)
+## 7. Validação (pelo usuário — 2026-08-09)
 
-- (aguardando validação do usuário — suíte completa + critérios da seção 3)
+- **Feedback do usuário:** comportamento validado em 2026-08-09 ("agora sim,
+  comportamento validado").
+- **Suíte final:** 146 runs / 553 assertions, 0 failures; lint 0.
+- **Critérios (seção 3) verificados:**
+  - Layout único (`views/layout.erb`, exatamente um `<html>`), `index.erb` parcial,
+    fragmentos htmx com `layout: false` — contrato (alvos, swaps, forms) preservado.
+  - Nav Lista/Time/Batalha + `GET /battle/close` limpa `#battle` ao sair da aba Batalha.
+  - `/style.css` responde 200 (pasta pública) estilizando as classes dos fragmentos
+    sobre a base sakura.
+- **Ajustes realizados durante a validação** (defeitos encontrados pelo usuário
+  testando o app real, fora do plano da sessão):
+  - Sair da aba Batalha deixava o painel `#battle` com "Forme seu time para batalhar." →
+    criado `GET /battle/close` (fragmento vazio) — commit `0cc8d81`.
+  - `GET /battle` → 500: `PokeApi.evolution_chain` buscava espécie sem `/pokemon`
+    (`urshifu`/`dudunsparce`, 404 "Not Found" → `JSON::ParserError`) → `find` retorna
+    `nil` em status ≠ 200 e `evolution_chain` ignora o estágio — commit `e5fb57c`.
+  - `GET /battle` → 500: Pokémon com `sprites.front_default: null` →
+    `Dry::Struct::Error` em `:sprite` → `find`/`detail` mapeiam sprite `nil` para `""`
+    + 4 testes de regressão (404 e sprite nulo) — commit `3abf7f6`.
+  - Re-prova real pós-fix: 60 batalhas + plays seguidos, todos 200 (antes do fix o 500
+    caía em ~1 a cada 12–17 batalhas).
+- **Observação de backlog:** rate-limit (429) da PokéAPI em rajada de requests ainda
+  pode gerar 500 — permanece no item "Sem tratamento de erros" (Limitações).
+- **Próxima sessão:** a definir (D1–D3 do `draft-auto-battler.md`).
