@@ -25,7 +25,7 @@ class OpponentGeneratorTest < Minitest::Test
     team = generator.team
 
     assert_equal 6, team.size
-    assert team.all? { |member| member.is_a?(BattlePokemon) }
+    assert team.all?(BattlePokemon)
     assert_equal [["normal"]], team.map(&:types).uniq
   end
 
