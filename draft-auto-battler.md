@@ -135,15 +135,16 @@
 - **Status (sessão 0013):** implementado como **RF-13** — steps 0–7 verdes (135
   runs/481 asserts) e lint 0; **validado pelo usuário em 2026-08-09**.
 
-> **Nota (em implementação — sessão 0016 / RF-16): melhorar os logs de batalha.**
+> **Nota (em execução — sessão 0016 / RF-16): melhorar os logs de batalha.**
 > Hoje o log de cada ação mostra apenas o **lado** atacante ("Seu Time" / "Oponente"),
 > o golpe e o dano — não diz **qual Pokémon** bateu em **qual Pokémon**. Melhoria
 > desejada (validada pelo usuário em 2026-08-09, durante a validação da sessão 0015):
 > o log deve indicar **quem atacou quem**, com **qual golpe** e o **dano causado**
 > (ex.: "Seu Time: pikachu usou thunder-shock em bulbasaur, 12 de dano").**Implementado
-> na sessão 0016 (2026-08-09):** `BattleEngine` grava `attacker_name`/`target_name` em
-> toda entry (contrato uniforme) e `battle.erb` re-renderiza o log com os dois nomes —
-> passos 0–2 verdes (172 runs/614 asserts, lint 0), aguardando validação do usuário.
+> e validado na sessão 0016 (2026-08-09):** `BattleEngine` grava
+> `attacker_name`/`target_name` em toda entry (contrato uniforme) e `battle.erb`
+> re-renderiza o log com os dois nomes — suíte 172 runs/614 asserts, lint 0, validado
+> pelo usuário.
 
 ## Fase D — Opcionais (anotados — NÃO agendar agora)
 

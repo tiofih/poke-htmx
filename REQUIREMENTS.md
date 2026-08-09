@@ -35,7 +35,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
-### RF-16 — Logs de batalha detalhados (C1) — implementado na sessão 0016 (aguardando validação)
+### RF-16 — Logs de batalha detalhados (C1) — `Done` (sessão 0016, validado em 2026-08-09)
 - Melhorar os **logs de batalha** (C1 do `draft-auto-battler.md`, anotado na validação
   da 0015): hoje o log mostra apenas o **lado** atacante ("Seu Time"/"Oponente"), o
   golpe e o dano — não diz **qual Pokémon** bateu em **qual**. O log passa a indicar
@@ -62,7 +62,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       regressão de comportamento em RF-01..RF-15.
 - [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo
       escopo.
-      **Validação pendente — executada pelo usuário (fase 3).**
+      **Validado pelo usuário em 2026-08-09.**
 
 ### RF-15 — Golpes (moves) e PP (D1) — `Done` (sessão 0015, validado em 2026-08-09)
 - Dar **multi-move** à simulação de batalha (D1 do `draft-auto-battler.md`, roadmap
@@ -462,6 +462,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 13 | Batalha na web (C1) | Done (sessão 0013, validado em 2026-08-09) |
 | 14 | UI: layout e estilos externos | Done (sessão 0014, validado em 2026-08-09) |
 | 15 | Golpes (moves) e PP (D1) | Done (sessão 0015, validado em 2026-08-09) |
+| 16 | Logs de batalha detalhados (C1) | Done (sessão 0016, validado em 2026-08-09) |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
@@ -469,13 +470,13 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 > corrente ser concluída e validada. A 0007 (montagem de times) é `Done` (2026-08-08)
 > — os itens abaixo passam a poder virar sessões. **A1 (reordenação de slots) virou
 > RF-08/sessão 0008; B1 (modelo de batalha) virou RF-09/sessão 0009; D1 (golpes/PP)
-> virou RF-15/sessão 0015.**
+> virou RF-15/sessão 0015; melhores logs de batalha virou RF-16/sessão 0016.**
 > Refinamento de UI/layout volta ao roadmap como 0009+.
 
 - **Melhores logs de batalha (C1):** mostrar **qual Pokémon bateu em qual**, com qual
   golpe e dano causado (hoje o log só mostra o lado atacante). Anotado em 2026-08-09
-  durante a validação da sessão 0015. **Virou RF-16/sessão 0016** (implementado em
-  2026-08-09, aguardando validação).
+  durante a validação da sessão 0015. **Virou RF-16/sessão 0016, `Done` (validado em
+  2026-08-09).**
 - **A3 — Página própria de gerenciamento de time:** escolher os **golpes de cada
   Pokémon** e a **posição no time** em página dedicada (cruza com A1 — slots — e D1 —
   golpes). Anotado em 2026-08-09 durante a validação da sessão 0015.

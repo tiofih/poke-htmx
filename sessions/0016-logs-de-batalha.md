@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-09 |
 | Implementação | Concluída — suíte completa (172 runs / 614 asserts) e lint 0 verdes (passos 0–2) |
-| Validação | Pendente (executada pelo usuário) |
+| Validação | Concluída — executada pelo usuário em 2026-08-09 |
 
 ---
 
@@ -126,6 +126,12 @@ log.
 - Após 0016 validada: **D2 (XP/evolução)**, **D3 (histórico/rank)** e **A3
   (página de gerenciamento de time)** seguem como candidatas do draft.
 
-## 7. Validação (a preencher pelo usuário)
+## 7. Validação
 
-- Pendente — executada pelo usuário (fase 3).
+- **Validado pelo usuário em 2026-08-09:** suíte completa verde (172 runs / 614
+  asserts) e o log do round passou a exibir **quem atacou quem**, com o golpe usado
+  e o dano causado (ex.: "Seu Time: pikachu usou thunder-shock em ..."). Critérios
+  de aceite (seção 3) verificados.
+- Próximo passo sugerido: **D2 (XP/evolução)**, **D3 (histórico/rank)** ou **A3
+  (página de gerenciamento de time)** — decisão do usuário na abertura da próxima
+  sessão.
