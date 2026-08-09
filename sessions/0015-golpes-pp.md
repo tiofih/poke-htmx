@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-09 |
 | Implementação | Concluída — suíte completa (171 runs / 610 asserts) e lint 0 verdes (passos 0–7) |
-| Validação | Pendente — executada pelo usuário |
+| Validação | Concluída — executada pelo usuário em 2026-08-09 |
 
 ---
 
@@ -139,7 +139,7 @@ regressão nas suítes 0011/0013/0014.
 | 4 | regressão: suíte 0011 continua verde **sem editar** `battle_engine_test.rb`; B3 aceita `pokemon without moves` (legado) | — (garantido por desenho; rodar suíte) | ✅ checado (suíte 0011 verde) |
 | 5 | `GET /battle` carrega golpes (jogador + oponente) e `battle.erb` mostra PP por fighter + nome do golpe no log | rotas `get "/battle"` + `views/battle.erb` (helper moves) | ✅ `464286d` |
 | 6 | suíte completa `./scripts/test` + `./scripts/lint` 0 | checagem geral | ✅ `1b5dadd` |
-| 7 | docs: `REQUIREMENTS.md` (RF-15 D1), `SESSIONS.md` (0015), `draft-auto-battler.md` (D1) | documento | ⏳ neste passo |
+| 7 | docs: `REQUIREMENTS.md` (RF-15 D1), `SESSIONS.md` (0015), `draft-auto-battler.md` (D1) | documento | ✅ `5a52780` — validado em 2026-08-09 |
 
 ## 6. Observações e próximo passo
 
@@ -166,4 +166,17 @@ regressão nas suítes 0011/0013/0014.
 
 ## 7. Validação (a preencher pelo usuário)
 
-- Pendente — executada pelo usuário após a fase 2 (implementação TDD, suíte/lint verdes) concluída.
+- **Validado pelo usuário em 2026-08-09:** comportamento confirmado com o app rodando
+  (`./scripts/run`, porta 3000) — batalha abre, golpes com PP exibidos por fighter,
+  log mostra o nome do golpe usado e avançar rodadas funciona.
+- Difícil durante a validação: **500 em `GET /battle`** — causa: processo Puma com
+  `PokeApi` antigo (sem `moves_for`) vs `server.rb` recarregado (Sinatra::Reloader não
+  recarrega libs novas). Resolvido com `docker restart poke-htmx-web-1` e verificado de
+  ponta a ponta via HTTP (200 + `battle.erb` + play). Não é bug de código da sessão —
+  é limitação do reloader em ambiente dev.
+- Anotado no draft durante a validação (iteração futura, fora do fluxo):
+  - **Melhores logs de batalha** (C1): mostrar qual Pokémon bateu em qual, com qual
+    golpe e dano causado (hoje o log só mostra o lado atacante).
+  - **A3 — página própria de gerenciamento de time**: escolher golpes de cada Pokémon
+    e a posição no time (nova página dedicada).
+- Critérios de aceite (seção 3) verificados na validação.

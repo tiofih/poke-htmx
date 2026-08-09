@@ -35,7 +35,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
-### RF-15 — Golpes (moves) e PP (D1) — `Implementado` (sessão 0015, validação pendente do usuário)
+### RF-15 — Golpes (moves) e PP (D1) — `Done` (sessão 0015, validado em 2026-08-09)
 - Dar **multi-move** à simulação de batalha (D1 do `draft-auto-battler.md`, roadmap
   item 15): cada `BattlePokemon` passa a ter uma **lista de golpes** (nome, tipo,
   poder, precisão, PP). O `BattleEngine` **escolhe deterministicamente** qual golpe
@@ -79,7 +79,16 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Suíte completa verde (171 runs/610 asserts) e lint 0; commit a cada green;
       0 regressão RF-01..RF-14; `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md`
       atualizados no mesmo escopo.
-      **Validação pendente — executada pelo usuário (AGENTS.md).**
+      **Validado pelo usuário em 2026-08-09.**
+
+> **Validação (2026-08-09):** comportamento confirmado com o app rodando (batalha abre,
+> golpes com PP exibidos, log mostra o golpe usado, play avança rodadas). Durante a
+> validação houve um **500 em `GET /battle`** por limitação do Sinatra::Reloader em dev
+> (processo Puma com `PokeApi` antigo, sem `moves_for`, apesar de `server.rb` recarregado)
+> — resolvido com `docker restart poke-htmx-web-1`; não é bug da implementação. Anotado
+> no draft: melhorar logs de batalha (qual pokemon bateu em qual, com qual golpe e dano)
+> e **A3 — página própria de gerenciamento de time** (escolher golpes de cada pokemon e
+> posição no time).
 
 ### RF-14 — Layout e estilos externos (A2) — `Done` (sessão 0014, validado em 2026-08-09)
 - Extrair **layout/navbar/estilos compartilhados** (A2 do draft auto-battler, roadmap
@@ -423,15 +432,23 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 12 | Oponente automático (B4) | Done (sessão 0012, validado em 2026-08-08) |
 | 13 | Batalha na web (C1) | Done (sessão 0013, validado em 2026-08-09) |
 | 14 | UI: layout e estilos externos | Done (sessão 0014, validado em 2026-08-09) |
-| 15 | Golpes (moves) e PP (D1) | Implementado (sessão 0015, validação pendente do usuário) |
+| 15 | Golpes (moves) e PP (D1) | Done (sessão 0015, validado em 2026-08-09) |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
 > Regra RNF-04: escopos grandes são anotados aqui e só viram sessão **após** a sessão
 > corrente ser concluída e validada. A 0007 (montagem de times) é `Done` (2026-08-08)
 > — os itens abaixo passam a poder virar sessões. **A1 (reordenação de slots) virou
-> RF-08/sessão 0008; B1 (modelo de batalha) virou RF-09/sessão 0009.**
+> RF-08/sessão 0008; B1 (modelo de batalha) virou RF-09/sessão 0009; D1 (golpes/PP)
+> virou RF-15/sessão 0015.**
 > Refinamento de UI/layout volta ao roadmap como 0009+.
+
+- **Melhores logs de batalha (C1):** mostrar **qual Pokémon bateu em qual**, com qual
+  golpe e dano causado (hoje o log só mostra o lado atacante). Anotado em 2026-08-09
+  durante a validação da sessão 0015.
+- **A3 — Página própria de gerenciamento de time:** escolher os **golpes de cada
+  Pokémon** e a **posição no time** em página dedicada (cruza com A1 — slots — e D1 —
+  golpes). Anotado em 2026-08-09 durante a validação da sessão 0015.
 
 - **Game loop (auto-battler):** combate automático por turnos usando os 6 slots do time
   como ordem de combate; stats (RF-06) e tipos como base de dano/efetividade; estado de

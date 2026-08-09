@@ -148,9 +148,8 @@
 ## Fase D — Opcionais (anotados — NÃO agendar agora)
 
 ### D1. Golpes (moves/PP) por Pokémon
-- **Status:** Implementado — **RF-15** (sessão 0015), suíte completa 171 runs/610
-  asserts, lint 0. **Validação pendente do usuário** (unit 0015 é entregue na fase 2 —
-  a validação é da fase 3).
+- **Status:** Done — **RF-15** (sessão 0015), validado pelo usuário em 2026-08-09
+  (suíte completa 171 runs/610 asserts, lint 0).
 - **Decisões (fechadas com o usuário em 2026-08-09):** escolha do golpe
   **determinística** (maior dano esperado = power × efetividade × STAB; desempate
   power/ordem; sem RNG); fallback **Struggle determinístico** (power 10, tipo do

@@ -40,11 +40,11 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0015 — em andamento (implementação concluída, aguardando validação do
-usuário):** Golpes/moves e PP (D1/RF-15). Suíte completa 171 runs/610 asserts e lint 0
-verdes; a validação (fase 3) é executada pelo usuário (AGENTS.md). Após validada, as
-candidatas seguem os itens restantes D2–D3 do draft auto-battler (XP/evolução,
-histórico/rank) — decisão do usuário.
+**Sessão 0015 (Golpes/moves e PP — D1/RF-15) está `Done`** — implementada e validada
+pelo usuário em 2026-08-09 (suíte 171 runs/610 asserts, lint 0). Candidatas anotadas
+no draft para a próxima sessão: **D2 (XP/evolução)**, **D3 (histórico/rank)**, **A3
+(página própria de gerenciamento de time com escolha de golpes e posição)** e a
+melhoria dos **logs de batalha** (C1) — decisão do usuário.
 
 ## Progresso das sessões
 
@@ -64,7 +64,7 @@ histórico/rank) — decisão do usuário.
 | 0012 | Oponente automático (RF-12, B4) — OpponentGenerator puro | Concluída | Done (passos 0–5, validado em 2026-08-08) |
 | 0013 | Batalha na web (RF-13, C1) — BattleEngine incremental + rotas htmx | Concluída | Done (passos 0–7, validado em 2026-08-09) |
 | 0014 | UI: layout e estilos externos (RF-14, A2) — layout.erb + nav + style.css | Concluída | Done (passos 0–4, validado em 2026-08-09) |
-| 0015 | Golpes/moves e PP (RF-15, D1) — Move + moves_for + BattleEngine determinístico + battle.erb | Implementação | Em andamento — passos 0–7 implementados (suíte 171/610 e lint 0 verdes); validação pendente do usuário |
+| 0015 | Golpes/moves e PP (RF-15, D1) — Move + moves_for + BattleEngine determinístico + battle.erb | Concluída | Done (passos 0–7, validado em 2026-08-09) |
 
 ## Estrutura do arquivo de sessão
 
