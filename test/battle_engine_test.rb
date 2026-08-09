@@ -239,6 +239,21 @@ class BattleEngineTest < Minitest::Test
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   # rubocop:disable Metrics/AbcSize
+  def test_play_round_exposes_team_state_with_hp_per_member
+    a = build_pokemon(number: 1, name: "a", types: ["fire"], hp: 100, speed: 100, attack: 60, defense: 10)
+    b = build_pokemon(number: 2, name: "b", types: ["grass"], hp: 100, speed: 10, attack: 20, defense: 40)
+
+    engine = BattleEngine.new(team_a: [a], team_b: [b], effectiveness: type_effectiveness)
+
+    assert_equal 2, engine.teams.size
+    assert_equal 1, engine.teams[0].size
+    assert_equal 100, engine.teams[0].first.hp_current
+
+    engine.play_round
+
+    assert_operator engine.teams[1].first.hp_current, :<, 100, "b apanha na primeira rodada"
+  end
+
   def test_play_round_after_finished_is_idempotent
     a = build_pokemon(number: 1, name: "a", types: ["fire"], hp: 100, speed: 100, attack: 60, defense: 10)
     b = build_pokemon(number: 2, name: "b", types: ["grass"], hp: 100, speed: 10, attack: 20, defense: 40)

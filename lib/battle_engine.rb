@@ -42,7 +42,7 @@ class BattleEngine
     @rounds ||= 0
   end
 
-  attr_reader :log
+  attr_reader :log, :teams
 
   def finished?
     alive_count(0).zero? || alive_count(1).zero?
