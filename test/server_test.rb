@@ -541,15 +541,15 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize
 
-  def test_team_fragment_has_manage_link
-    add_four_pokemon_team("user-a")
-
-    get "/team", {}, user_session("user-a")
+  def test_index_nav_time_link_points_to_manage_fragment
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/"
+    end
 
     assert last_response.ok?
     assert_includes last_response.body, 'hx-get="/team/manage"'
     assert_includes last_response.body, 'hx-target="#team"'
-    assert_includes last_response.body, "Gerenciar"
+    assert_includes last_response.body, 'href="#team"'
   end
 
   # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
