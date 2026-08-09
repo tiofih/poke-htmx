@@ -35,6 +35,13 @@ class Server < Sinatra::Base
     def current_user
       session[:user_id]
     end
+
+    def battle_moves_for(pokemon)
+      moves = PokeApi.moves_for(pokemon.number)
+      return moves unless moves.empty?
+
+      [Move.new(name: "Struggle", type: pokemon.types.first || "normal", power: 10, accuracy: nil, pp: 100)]
+    end
   end
 
   get "/" do
@@ -100,8 +107,12 @@ class Server < Sinatra::Base
       return erb :battle, layout: false
     end
 
-    player_team = team.map { |member| BattlePokemon.from(PokeApi.detail(member.number)) }
+    player_team = team.map do |member|
+      detail = PokeApi.detail(member.number)
+      BattlePokemon.from(detail, moves: battle_moves_for(member))
+    end
     opponent = OpponentGenerator.new(names: PokeApi.fetch_all_names).team
+    opponent = opponent.map { |battle_pokemon| battle_pokemon.new(moves: battle_moves_for(battle_pokemon)) }
     engine = BattleEngine.new(team_a: player_team, team_b: opponent)
     settings.battles.set(current_user, engine)
     @engine = engine

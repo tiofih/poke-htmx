@@ -11,6 +11,13 @@
         <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
         <%= poke.name %> — HP <%= poke.hp_current %>/<%= poke.hp_max %>
       </p>
+      <% unless poke.moves.empty? %>
+        <ul class="moves">
+          <% poke.moves.each do |move| %>
+            <li><%= move.name %> — <span class="pp">PP <%= move.pp %></span></li>
+          <% end %>
+        </ul>
+      <% end %>
     <% end %>
   </div>
 
@@ -21,6 +28,13 @@
         <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
         <%= poke.name %> — HP <%= poke.hp_current %>/<%= poke.hp_max %>
       </p>
+      <% unless poke.moves.empty? %>
+        <ul class="moves">
+          <% poke.moves.each do |move| %>
+            <li><%= move.name %> — <span class="pp">PP <%= move.pp %></span></li>
+          <% end %>
+        </ul>
+      <% end %>
     <% end %>
   </div>
 
@@ -29,7 +43,7 @@
     <ul class="battle-log">
       <% last_round.each do |entry| %>
         <% attacker_name = entry[:attacker].zero? ? "Seu Time" : "Oponente" %>
-        <li><%= attacker_name %> atacou (<%= entry[:move_type] %>), <%= entry[:damage] %> de dano<%= entry[:ko] ? " — KO!" : "" %></li>
+        <li><%= attacker_name %> atacou (<%= entry[:move] %>/<%= entry[:move_type] %>), <%= entry[:damage] %> de dano<%= entry[:ko] ? " — KO!" : "" %></li>
       <% end %>
     </ul>
   <% end %>

@@ -66,6 +66,21 @@ module PokeApiStub
     end
   end
 
+  def self.with_moves_for(moves)
+    existed = PokeApi.respond_to?(:moves_for)
+    original = existed ? PokeApi.method(:moves_for) : nil
+    PokeApi.define_singleton_method(:moves_for) { |_number| moves }
+    PokeApi.instance_variable_set(:@pokemon_moves_cache, nil)
+    yield
+  ensure
+    if existed
+      PokeApi.define_singleton_method(:moves_for, original)
+    else
+      PokeApi.singleton_class.send(:remove_method, :moves_for)
+    end
+    PokeApi.instance_variable_set(:@pokemon_moves_cache, nil)
+  end
+
   # rubocop:disable Metrics/MethodLength
   def self.with_type(table)
     existed = PokeApi.respond_to?(:fetch_type_json)

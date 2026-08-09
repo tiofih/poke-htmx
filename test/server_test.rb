@@ -640,7 +640,9 @@ class ServerTest < Minitest::Test
     PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
       PokeApiStub.with_type(neutral_type_json_table) do
         PokeApiStub.with_detail(battle_pokemon_for_test) do
-          get "/battle", {}, user_session("user-a")
+          PokeApiStub.with_moves_for(battle_moves_for_test) do
+            get "/battle", {}, user_session("user-a")
+          end
         end
       end
     end
@@ -681,6 +683,10 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/MethodLength
 
+  def battle_moves_for_test
+    [Move.new(name: "thunder-shock", type: "electric", power: 40, accuracy: 100, pp: 30)]
+  end
+
   def neutral_type_json_table
     PokeApi::TYPE_NAMES.to_h { |type| [type, type_json_for(type)] }
   end
@@ -703,7 +709,9 @@ class ServerTest < Minitest::Test
     PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
       PokeApiStub.with_type(neutral_type_json_table) do
         PokeApiStub.with_detail(battle_pokemon_for_test) do
-          get "/battle", {}, user_session("user-a")
+          PokeApiStub.with_moves_for(battle_moves_for_test) do
+            get "/battle", {}, user_session("user-a")
+          end
         end
       end
     end
@@ -724,7 +732,9 @@ class ServerTest < Minitest::Test
     PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
       PokeApiStub.with_type(neutral_type_json_table) do
         PokeApiStub.with_detail(battle_pokemon_for_test) do
-          get "/battle", {}, user_session("user-a")
+          PokeApiStub.with_moves_for(battle_moves_for_test) do
+            get "/battle", {}, user_session("user-a")
+          end
         end
       end
     end
@@ -745,7 +755,11 @@ class ServerTest < Minitest::Test
   def stub_battle_start(&block)
     PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
       PokeApiStub.with_type(neutral_type_json_table) do
-        PokeApiStub.with_detail(battle_pokemon_for_test, &block)
+        PokeApiStub.with_detail(battle_pokemon_for_test) do
+          PokeApiStub.with_moves_for(battle_moves_for_test) do
+            block.call
+          end
+        end
       end
     end
   end
@@ -813,6 +827,51 @@ class ServerTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "Rodada 0"
     refute_includes last_response.body, "Vencedor"
+  end
+
+  def test_battle_shows_moves_with_pp_per_fighter
+    @repository.add("user-a", pikachu_pokemon)
+
+    PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_detail(battle_pokemon_for_test) do
+          PokeApiStub.with_moves_for(battle_moves_for_test) do
+            get "/battle", {}, user_session("user-a")
+          end
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "thunder-shock"
+    assert_includes last_response.body, "PP 30"
+  end
+
+  def test_battle_log_shows_used_move_name
+    start_battle_for("user-a")
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "thunder-shock"
+    assert_includes last_response.body, "atacou"
+  end
+
+  def test_battle_with_struggle_fallback_does_not_break
+    @repository.add("user-a", pikachu_pokemon)
+
+    PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_detail(battle_pokemon_for_test) do
+          PokeApiStub.with_moves_for([]) do
+            get "/battle", {}, user_session("user-a")
+          end
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Struggle"
   end
 
   private
