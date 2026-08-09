@@ -78,6 +78,14 @@ class Server < Sinatra::Base
     erb :team, layout: false
   end
 
+  get "/team/manage" do
+    @team = settings.team.all(current_user)
+    @available_moves = @team.to_h do |member|
+      [member.id, PokeApi.available_move_names(member.number)]
+    end
+    erb :team_manage, layout: false
+  end
+
   post "/team" do
     pokemon = PokeApi.find(params[:pokeName])
     begin

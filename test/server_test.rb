@@ -541,6 +541,89 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize
 
+  def test_team_fragment_has_manage_link
+    add_four_pokemon_team("user-a")
+
+    get "/team", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'hx-get="/team/manage"'
+    assert_includes last_response.body, 'hx-target="#team"'
+    assert_includes last_response.body, "Gerenciar"
+  end
+
+  # rubocop:disable Metrics/MethodLength
+  def test_team_manage_renders_move_checkboxes_for_each_member
+    @repository.add("user-a", pikachu_pokemon)
+    PokeApiStub.with_available_move_names(%w[growl quick-attack thunder-shock]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "pikachu"
+    assert_includes last_response.body, 'name="moves"'
+    assert_includes last_response.body, 'value="growl"'
+    assert_includes last_response.body, 'value="quick-attack"'
+    assert_includes last_response.body, 'value="thunder-shock"'
+    assert_includes last_response.body, 'hx-post="/team/'
+    assert_includes last_response.body, 'hx-get="/team"'
+  end
+  # rubocop:enable Metrics/MethodLength
+
+  # rubocop:disable Metrics/MethodLength
+  def test_team_manage_checks_currently_selected_moves
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @repository.set_moves("user-a", pikachu_id, %w[thunder-shock])
+
+    PokeApiStub.with_available_move_names(%w[growl thunder-shock]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'value="thunder-shock" checked'
+    refute_includes last_response.body, 'value="growl" checked'
+  end
+  # rubocop:enable Metrics/MethodLength
+
+  def test_team_manage_is_isolated_per_session
+    @repository.add("user-a", pikachu_pokemon)
+
+    get "/team/manage", {}, user_session("user-b")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "pikachu"
+  end
+
+  def test_team_manage_renders_slot_controls_and_back_link
+    add_four_pokemon_team("user-a")
+
+    PokeApiStub.with_available_move_names(%w[growl]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'name="new_slot"'
+    assert_includes last_response.body, ">▲</button>"
+    assert_includes last_response.body, ">▼</button>"
+    assert_includes last_response.body, 'hx-get="/team"'
+    assert_includes last_response.body, "Voltar"
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def test_team_manage_fragment_has_no_html_wrapper
+    @repository.add("user-a", pikachu_pokemon)
+
+    PokeApiStub.with_available_move_names(%w[growl]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    refute_includes last_response.body, "<html"
+    refute_includes last_response.body, "<head>"
+  end
+  # rubocop:enable Metrics/AbcSize
+
   # rubocop:disable Metrics/AbcSize
   def test_index_renders_first_page_with_filter_input
     PokeApiStub.with_all_names(two_hundred_fifty_names) do

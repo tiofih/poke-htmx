@@ -1,6 +1,7 @@
 <% if @notice %>
   <p class="notice"><%= @notice %></p>
 <% end %>
+<a href="#" hx-get="/team/manage" hx-target="#team" hx-swap="innerHTML">Gerenciar</a>
 <% @team.each do |poke| %>
   <p class="slot">#<%= poke.slot %></p>
   <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#pokemon" hx-swap="innerHTML">
