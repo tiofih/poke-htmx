@@ -96,7 +96,7 @@ class BattleEngine
     end
 
     damaged = apply_damage(target_team_index, target_index, target, damage)
-    @log << action_entry(round, attacker_team_index, move_type, damage, damaged, move&.name)
+    @log << action_entry(round, attacker_team_index, move_type, damage, damaged, move&.name, attacker.name, target.name)
   end
 
   def choose_move(attacker, target)
@@ -120,7 +120,7 @@ class BattleEngine
     damaged
   end
 
-  def action_entry(round, attacker_team_index, move_type, damage, damaged, move_name = nil)
+  def action_entry(round, attacker_team_index, move_type, damage, damaged, move_name = nil, attacker_name, target_name)
     entry = {
       round: round,
       attacker: attacker_team_index,
@@ -129,6 +129,8 @@ class BattleEngine
       ko: damaged.fainted?
     }
     entry[:move] = move_name if move_name
+    entry[:attacker_name] = attacker_name
+    entry[:target_name] = target_name
     entry
   end
 

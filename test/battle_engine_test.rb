@@ -159,9 +159,22 @@ class BattleEngineTest < Minitest::Test
 
     result = BattleEngine.new(team_a: [a], team_b: [d], effectiveness: type_effectiveness).battle
 
-    assert_equal %i[round attacker move_type damage ko], result.log.first.keys
-    assert_equal({ round: 1, attacker: 0, move_type: "fire", damage: 180, ko: true }, result.log.first)
+    assert_equal %i[round attacker move_type damage ko attacker_name target_name], result.log.first.keys
+    assert_equal(
+      { round: 1, attacker: 0, move_type: "fire", damage: 180, ko: true, attacker_name: "a", target_name: "d" },
+      result.log.first
+    )
     assert_equal 1, result.rounds
+  end
+
+  def test_log_records_attacker_and_target_names
+    a = build_pokemon(number: 1, name: "a", types: ["fire"], hp: 60, speed: 100, attack: 100, defense: 10)
+    d = build_pokemon(number: 2, name: "d", types: ["grass"], hp: 60, speed: 1, attack: 1, defense: 40)
+
+    result = BattleEngine.new(team_a: [a], team_b: [d], effectiveness: type_effectiveness).battle
+
+    assert_equal "a", result.log.first[:attacker_name]
+    assert_equal "d", result.log.first[:target_name]
   end
 
   def test_rounds_counts_each_round_of_actions_taken

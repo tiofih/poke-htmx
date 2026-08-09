@@ -97,8 +97,10 @@ class MoveEngineTest < Minitest::Test
 
     result = BattleEngine.new(team_a: [fast], team_b: [slow], effectiveness: type_effectiveness).battle
 
-    assert_equal %i[round attacker move_type damage ko move], result.log.first.keys
+    assert_equal %i[round attacker move_type damage ko move attacker_name target_name], result.log.first.keys
     assert_equal "fire-move", result.log.first[:move]
+    assert_equal "flame", result.log.first[:attacker_name]
+    assert_equal "leaf", result.log.first[:target_name]
   end
 
   def test_engine_uses_move_with_its_type_for_effectiveness
