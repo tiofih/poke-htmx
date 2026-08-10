@@ -236,19 +236,17 @@
   requests (cada batalha monta times + golpes repetidos). **Aguarda sessão (RNF-04).**
 - **Tratamento de erros (E2):** nome inválido, rate-limit da PokéAPI, time sem membros,
   duplicados — hoje sem tratamento global (backlog). Transversal e barato; candidato a
-  requisito/sessão própria antes dos demais. **Virou RF-18/sessão 0018** (robustez da
-  fonte + fragmentos amigáveis 200 + handler global `error 500`); implementado em
-  2026-08-09 — **aguardando validação do usuário**.
+  requisito/sessão própria antes dos demais. **Virou RF-18/sessão 0018, `Done` (validado
+  em 2026-08-09)** — robustez da fonte + fragmentos amigáveis 200 + handler global `error 500`.
 
 ---
 
 ## Próximos passos (fora deste arquivo)
 
-1. **Sessão 0018 (E2/RF-18) em validação (usuário)** — implementação TDD concluída em
-   2026-08-09 (222 runs/778 asserts, lint 0). Próximas candidatas após fechar 0018,
-   decisão do usuário: **D2 (XP/evolução)** — provável próxima — depois
-   **D3 (histórico/rank)** e **D4 (modos de draft temático)**; **E1 (cache de
-   detalhes)** ganha peso quando D2 entrar.
+1. **Sessão 0018 (E2/RF-18) concluída e validada em 2026-08-09** (222 runs/778 asserts,
+   lint 0). Próximas candidatas, decisão do usuário: **D2 (XP/evolução)** — provável
+   próxima — depois **D3 (histórico/rank)** e **D4 (modos de draft temático)**;
+   **E1 (cache de detalhes)** ganha peso quando D2 entrar.
 2. Logo após decidir: **elencar o que fica e o que sai** da lista acima,
    definir ordem e transformar os escolhidos em **documentos de sessão** com
    critérios fechados e plano TDD (como a 0007).

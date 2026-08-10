@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-09 |
-| Implementação | Executada (TDD passos 0–5 verdes, 222 runs/778 asserts, lint 0) — **aguarda validação** |
-| Validação | Pendente (executada pelo usuário) |
+| Implementação | Concluída (TDD passos 0–5 verdes, 222 runs/778 asserts, lint 0) |
+| Validação | Concluída — validada pelo usuário em 2026-08-09 |
 
 ---
 
@@ -132,7 +132,15 @@ Diagnóstico do tratamento de erros hoje (levantado em 2026-08-09):
 | 4 | handler global: rota que lança exceção inesperada → 200 fragmento `error.erb` (sem `<html>`), erro logado, stack não vaza | `error 500 do ... end` no `server.rb` + `views/error.erb` | ✅ |
 | 5 | docs: `REQUIREMENTS.md` (RF-18 + limitação resolvida), `SESSIONS.md` (0018 + progresso + próxima), `draft-auto-battler.md` (E2 Done) | documento | ✅ |
 
-## 6. Observações
+## 6. Validação (executada pelo usuário)
+
+**Validada pelo usuário em 2026-08-09.** Suíte completa verde (222 runs/778 asserts) e
+lint 0; critérios de aceite da RF-18 verificados: fonte tolerante (status/rede/parse),
+fragmentos amigáveis 200 (listagem vazia, "Pokémon não encontrado.", `POST /team` sem
+inserir, batalha com fonte falhando) e handler global `error 500` (200, `layout: false`,
+sem stacktrace). Sessão fechada — próxima sessão: D2 (XP/evolução).
+
+## 7. Observações
 
 - **Sem nova tabela/gem**: E2 é robustez transversal — escopo em `lib/poke_api.rb` e
   `server.rb` + um fragmento novo (`views/error.erb`).

@@ -35,7 +35,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
-### RF-18 — Tratamento de erros (E2) — Implementado (sessão 0018, aguardando validação)
+### RF-18 — Tratamento de erros (E2) — `Done` (sessão 0018, validado em 2026-08-09)
 - Implementar o **tratamento de erros** de ponta a ponta (E2 do `draft-auto-battler.md`,
   levantamento de roadmap 2026-08-09): **nenhuma rota devolve 500** quando a fonte
   (PokéAPI) falha ou recebe input inválido — cada falha devolve um **fragmento
@@ -73,7 +73,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Suíte completa verde (222 runs/778 asserts) e lint 0; commit a cada green;
       0 regressão RF-01..RF-17.
 - [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo escopo.
-      **Aguardando validação do usuário (fase 3).**
+      **Validado pelo usuário em 2026-08-09.**
 
 ### RF-17 — Página de gerenciamento de time (A3) — `Done` (sessão 0017, validado em 2026-08-09)
 - Página própria para gerenciar o time (A3 do `draft-auto-battler.md`, anotado na
@@ -527,9 +527,9 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] **Listagem massiva** — resolvido no escopo RF-01 (sessão 0006): paginação (100/página)
       + filtro por nome com cache; busca parcial server-side da PokéAPI segue limitada
       (lista completa cacheada em memória).
-- [x] **Sem tratamento de erros** — resolvido no escopo RF-18 (sessão 0018):
-      nenhuma rota devolve 500 quando a PokéAPI falha (fragmento amigável 200) e
-      handler global `error 500` cobre erros não previstos (aguardando validação).
+- [x] **Sem tratamento de erros** — resolvido no escopo RF-18 (sessão 0018, validado em
+      2026-08-09): nenhuma rota devolve 500 quando a PokéAPI falha (fragmento amigável 200)
+      e handler global `error 500` cobre erros não previstos.
 - [ ] **Cache local de detalhes da PokéAPI** — `GET /battle`/RF-06 fazem N requests na
   PokéAPI (1 por membro do time); hoje não há cache de detalhes (só listagem/nomes).
   *Emergeu da observação da sessão 0013 ("fora do escopo" na época); ganha peso quando
@@ -561,7 +561,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 15 | Golpes (moves) e PP (D1) | Done (sessão 0015, validado em 2026-08-09) |
 | 16 | Logs de batalha detalhados (C1) | Done (sessão 0016, validado em 2026-08-09) |
 | 17 | Página de gerenciamento de time (A3) | Done (sessão 0017, validado em 2026-08-09) |
-| 18 | Tratamento de erros (E2) | Implementado (sessão 0018 — aguardando validação) |
+| 18 | Tratamento de erros (E2) | Done (sessão 0018, validado em 2026-08-09) |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
@@ -592,9 +592,9 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ### Candidatas do draft para a próxima sessão (levantamento de roadmap, 2026-08-09)
 
-> **E2 (tratamento de erros) virou RF-18/sessão 0018** (implementado, aguardando
-> validação). Sessão 0018 em fase de validação (usuário). Após fechar, próximas
-> candidatas do `draft-auto-battler.md`, **decisão do usuário** (RNF-04):
+> **E2 (tratamento de erros) virou RF-18/sessão 0018, `Done` (validado em 2026-08-09).**
+> Próximas candidatas do `draft-auto-battler.md`, **decisão do usuário** na abertura da
+> próxima sessão (RNF-04):
 > **D2 (XP/evolução)** — provável próxima sessão — seguida de **D3 (histórico/rank)** e
 > **D4 (modos de draft temático)**. D2 cruza com D1 (nível de aprendizado dos golpes).
 > Ver detalhamento no `draft-auto-battler.md` (visão D2 fechada em 2026-08-09).
