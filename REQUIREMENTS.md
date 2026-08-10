@@ -530,11 +530,10 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] **Sem tratamento de erros** — resolvido no escopo RF-18 (sessão 0018, validado em
       2026-08-09): nenhuma rota devolve 500 quando a PokéAPI falha (fragmento amigável 200)
       e handler global `error 500` cobre erros não previstos.
-- [x] **Cache local de detalhes da PokéAPI** — implementado no escopo E1 (sessões 0021/0022,
-      2026-08-10): gateway `PokeApi` (interface) + adapter real `PokeApiHttp` + decorator
-      `PokeApiCache` (TTL 600s / LRU máx 1000 fixos) sobre `PokeApi.instance`;
+- [x] **Cache local de detalhes da PokéAPI** — resolvido no escopo E1 (sessões 0021/0022,
+      validado em 2026-08-10): gateway `PokeApi` (interface) + adapter real `PokeApiHttp` +
+      decorator `PokeApiCache` (TTL 600s / LRU máx 1000 fixos) sobre `PokeApi.instance`;
       `GET /battle`/RF-06 reutilizam detalhes/golpes sem refetch por até 10 min.
-      *Validação do usuário pendente (fase 3 da sessão 0022).*
 - [x] **HTML parcial sem layout único** — resolvido na sessão 0014 (RF-14): layout único
       `views/layout.erb` + navegação (Lista/Time/Batalha) + CSS externo sobre a base sakura.
 - [x] **Robustez na batalha (dados da PokéAPI)** — resolvido na validação da sessão 0014:
@@ -565,7 +564,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 18 | Tratamento de erros (E2) | Done (sessão 0018, validado em 2026-08-09) |
 | 19 | Refactor de produção (respiro) — 7 `rubocop:disable` de `lib/**`+`server.rb` | Done (sessão 0020, validado em 2026-08-10) |
 | 20 | E1 — Cache de detalhes da PokéAPI (gateway/cache): **E1-A (interface `PokeApi` + adapter real `PokeApiHttp` + adapter fake + injeção via `settings.api`/`PokeApi.instance`)** | Done (sessão 0021, validado em 2026-08-10) |
-| 20b | E1-B — decorator de cache TTL/LRU fixos (remove a memoização do `PokeApiHttp`) | Implementada (sessão 0022, phase-2 em 2026-08-10; validação pendente) |
+| 20b | E1-B — decorator de cache TTL/LRU fixos (remove a memoização do `PokeApiHttp`) | Done (sessão 0022, validado em 2026-08-10) |
 | 21 | D2 — XP/evolução (progressão entre batalhas) | Planejada (E1 → D2) |
 | 22 | D3 — Histórico/rank de batalhas | Planejada (após D2) |
 | 23 | Fase Eco — moeda (Eco-1), Poke Center (Eco-2), Poke Mart (Eco-3), itens em batalha (Eco-4) | Planejada (após D3) |

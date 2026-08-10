@@ -316,7 +316,7 @@
   requests (cada batalha monta times + golpes repetidos). **Implementado em 2026-08-10
   (E1-A sessão 0021 + E1-B sessão 0022): gateway `PokeApi` (interface) + `PokeApiHttp`
   (adapter real estateless) + decorator `PokeApiCache` (TTL 600s / LRU máx 1000 fixos);
-  validação do usuário pendente (fase 3 da 0022).**
+  validado pelo usuário em 2026-08-10.**
 - **Tratamento de erros (E2):** nome inválido, rate-limit da PokéAPI, time sem membros,
   duplicados — hoje sem tratamento global (backlog). Transversal e barato; candidato a
   requisito/sessão própria antes dos demais. **Virou RF-18/sessão 0018, `Done` (validado

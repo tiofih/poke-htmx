@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluído — decisões do usuário em 2026-08-10 (TTL/LRU fixos: 600s / máx 1000) |
-| Implementação | Pendente |
-| Validação | Pendente — executada pelo usuário |
+| Implementação | Concluída — passos 1–6 red→green→commit, suíte 256/849, lint 0 |
+| Validação | Concluída — validado pelo usuário em 2026-08-10 |
 
 ---
 
@@ -154,13 +154,15 @@ PokeApiCache (decorator TTL/LRU) [E1]` em `lib/gateways/`.
 
 ## 6. Validação (executada pelo usuário)
 
-**Status: pendente — aguardando o usuário.**
+**Status: validado pelo usuário em 2026-08-10.**
 
-- [ ] Suíte completa verde (baseline **239 runs/821 asserts** preservado + novos testes do decorator).
-- [ ] Lint RuboCop 0; sem `rubocop:disable` novo em produção.
-- [ ] `grep 'PokeApi\.[a-z]' lib server.rb` → somente `PokeApi.instance` (sem integração estática).
-- [ ] Adapter `PokeApiHttp` sem estado de cache (`grep 'instance_variable_set(:@' em testes de lib` limpo nos pontos migrados).
-- [ ] `./scripts/run`: Lista/Detalhe/Time/Time-Manage/Batalha funcionando (decorator ativo em dev).
+- [x] Suíte completa verde (baseline **239 runs/821 asserts** preservado → **256 runs/849
+      asserts** com os novos testes do decorator).
+- [x] Lint RuboCop 0; sem `rubocop:disable` novo em produção.
+- [x] `grep 'PokeApi\.[a-z]' lib server.rb` → somente `PokeApi.instance` (sem integração estática).
+- [x] Adapter `PokeApiHttp` sem estado de cache (`grep 'instance_variable_set(:@'` nos pontos
+      migrados → 0 nos testes de lib).
+- [x] `./scripts/run`: Lista/Detalhe/Time/Time-Manage/Batalha funcionando (decorator ativo em dev).
 
 ## 6b. Progresso da implementação (passos 1–6)
 
@@ -193,7 +195,8 @@ PokeApiCache (decorator TTL/LRU) [E1]` em `lib/gateways/`.
   cache resolvida + roadmap 20b), `SESSIONS.md` (tabela 0022 em fase 2 + próxima sessão),
   `draft-auto-battler.md` (E1 implementado). Suíte **256/849**, lint 0.
 - **Fase 2 concluída** — todos os passos red→green→commit feitos, suíte/lint verdes.
-  **Parar aqui: fase 3 (validação) é do usuário.**
+  **Validado pelo usuário em 2026-08-10** (seção 6) — sessão 0022 fechada; E1 encerrada;
+  próxima: sessão 0023 (D2, XP/evolução).
 
 ## 7. Observações
 
