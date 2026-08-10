@@ -83,6 +83,22 @@ mais tensiona a arquitetura atual.
 batalhar de novo. D2 (XP) e Eco-1 compartilham exatamente o mesmo ponto de gancho
 (terminal da batalha) — fazem sentido juntos ou na sequência.
 
+### Novas ideias emergentes J1/J2/J3 (anotadas 2026-08-10, fora do fluxo)
+
+> Registradas em `draft-auto-battler.md` (Cadastro de ideias 2026-08-10). Cruzamento com
+> o estudo de arquitetura:
+
+| Ideia | Essência | Impacto no roadmap/arquitetura |
+| --- | --- | --- |
+| **J1 — Seleção inicial de time** | Fim do dropdown + busca paginada (RF-01/RF-06); no início de cada partida, lista de Pokémon **base** para montar o time inicial de 6. | Redefine a entrada do jogo — `#pokemon-list`/`#pokemon` deixam de ser o hub. Pode entrar como "núcleo da jornada" (virar porta de entrada antes de D2). Cruz com D4 (draft). |
+| **J2 — Personalização entre batalhas** | 3ª opção entre batalhas: dar **itens seguráveis**, **adicionar/trocar skills**, **usar itens**, **mudar estratégia de ataque do time** e reordenar Pokémon. | Estende A3 (`/team/manage`) + Eco-3/4. **Estratégia selecionável do time já é decisão 12.** Vira provável sessão própria pós-Eco. |
+| **J3 — Ranking S–F de balanceamento** | Classificar cada Pokémon de **S a F** por stats + moves para balancear os times adversários que aparecem na jornada. | Fonte de verdade do `OpponentGenerator` (hoje sorteio puro) e do balanceamento por progressão. Sugere **`PokemonRating`** (domínio puro, molde de `TypeEffectiveness`). |
+
+**J3 é o que mais interessa ao estudo de padrões:** gera um componente de domínio puro
+(`PokemonRating#rate(pokemon) → :S..:F`) consumido pelo gerador de oponentes — sem rede,
+TDD-ável, no mesmo molde das policies (seção 5). J1/J2 misturam fluxo de jogo + UI (refinam
+com os wireframes de `docs/screens/`).
+
 ---
 
 ## 3. Padrões de projeto HOJE (presentes na base)
@@ -124,6 +140,7 @@ batalhar de novo. D2 (XP) e Eco-1 compartilham exatamente o mesmo ponto de ganch
 | **Presenter / decorator de view** | D3 + battle.erb + Eco-2/3 | Apresentar payloads prontos (ex.: `BattleLogPresenter`, fighter row, `InventoryPresenter`), eliminando a duplicação de loops nos ERB. |
 | **Composition Root / injeção simples** | Todos | Construir serviços/repositórios no boot (Sinatra `set :services`, `set :api`), sem framework DI — manter o estilo leve. |
 | **Rule/Policy objects** | D2/D4/Eco | Políticas puras: `ExperienceCurve` (XP→nível), `EvolutionRule` (nível→evolução), `DraftRule` (validação de montagem temática), **`RewardRule` (moeda/XP por resultado)** e **`HealCostPolicy`** (custo do Poke Center). Genéricas e TDD-áveis sem rede, no molde de `TypeEffectiveness`/`BattleEngine`. |
+| **Rating (classificador de balanceamento)** | **J3** | **`PokemonRating`** — domínio puro que classifica um Pokémon em **S–F** por stats + moves (fórmula a definir). Consumido pelo `OpponentGenerator` e pelo balanceamento por progressão. Sem rede; mesma família das policies. |
 | **Command (ação de batalha)** | Eco-4 | Consumíveis em combate (poção) são **ações não-ofensivas** no motor — modelar como comando/evento no half-FSM (seção 6.1) em vez de ramificar `BattleEngine#act` com if/else. |
 
 ---
@@ -234,3 +251,17 @@ re-modelagem do motor inteiro.
 **Sequência de sessões encaminhada — ver seção 2 (roadmap consolidado):** refactor
 produção → E1 → D2 → D3 → Eco-1..4. A estratégia selecionável do time (decisão 12)
 impacta o `BattleEngine`/`OpponentGenerator` — política a detalhar na fase própria.
+
+### Perguntas em aberto — ideias J1/J2/J3 (anotadas 2026-08-10)
+
+- [ ] **J1 (seleção inicial):** a lista base é fixa (iniciais/famílias clássicas),
+      sorteada do pool ou por gen? Quantas opções por tela? Entra **antes** de D2
+      (virar porta de entrada da jornada) ou depois do refactor?
+- [ ] **J2 (personalização):** tela própria ou extensão de `/team/manage`?
+      Estratégia de ataque é **por time ou por Pokémon**? Trocar skills tem custo
+      (Eco) ou é livre?
+- [ ] **J3 (rating S–F):** fórmula dos pontos (peso por stats + moves aprendíveis)?
+      Classificação computada **offline/via cache** ou na montagem do oponente?
+      Rank é exibido na UI?
+- [ ] **J1 + D4 (draft temático):** seleção inicial e draft temático se sobrepõem —
+      unificar ou manter separados?

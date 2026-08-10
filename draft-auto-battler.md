@@ -256,6 +256,48 @@
 
 ---
 
+## Cadastro de ideias emergentes (levantamento de roadmap, 2026-08-10)
+
+### J1. Seleção inicial de time (fim do dropdown + busca paginada)
+
+- **Ideia:** no **começo de cada partida**, em vez do dropdown + busca paginada (RF-01/RF-06),
+  apresentar uma **lista de Pokémon base** para o jogador **escolher e montar o time
+  inicial de 6** e seguir a jornada.
+- **Impacto:** redefinição da entrada do jogo (RF-01/RF-06 e navegação `#pokemon-list`/
+  `#pokemon`). Muda o fluxo: seleção inicial → jornada → batalhas → (Eco) serviços.
+  A listagem que conhecemos deixa de ser o "hub".
+- **Aberto:** a lista base é fixa (ex.: iniciais/famílias clássicas), sorteada do pool
+  total, ou por gen? Quantas opções por tela? Cruz com **D4 (draft temático)**.
+- **Aguarda sessão (RNF-04).**
+
+### J2. Personalização de Pokémon entre batalhas (terceira opção)
+
+- **Ideia:** além de Batalha e (futuro) Poke Center/Poke Mart, uma **terceira opção de
+  personalização entre batalhas**: dar **itens seguráveis** (hold items), **adicionar/
+  trocar skills aprendidas**, **usar itens**, **mudar a estratégia de ataque do time** e
+  **reordenar os Pokémon**.
+- **Impacto:** estende A3 (gerência de time — hoje só slots + golpes) e Eco-3/Eco-4
+  (itens). A **estratégia de ataque do time** vira escolha do jogador (já decidida na
+  seção 6.1 do draft de arquitetura: automático no início, depois selecionável).
+- **Aberto:** onde mora esta tela (extensão de `/team/manage` ou tela própria)? Estratégia
+  é por time ou por Pokémon? Skills trocadas com custo (Eco) ou livre?
+- **Aguarda sessão (RNF-04).**
+
+### J3. Ranking S–F para balanceamento (pokémon + times adversários)
+
+- **Ideia:** **classificar cada Pokémon em um rank de S a F** considerando **stats e
+  moves**, para **balancear os times de adversários** que aparecem ao longo do caminho.
+- **Impacto:** vira fonte de verdade para o `OpponentGenerator` (B4) e para o balanceamento
+  por progressão (D2/Eco) — hoje o oponente sorteia nomes do pool e escala "com o nível".
+  Sugere um **componente de rating** (ex.: `PokemonRating#rate(pokemon) → :S..:F`) no
+  domínio puro, tábua de balanceamento consultada pelo gerador de oponentes.
+- **Aberto:** fórmula do rating (stats ponderados + power dos moves aprendíveis?),
+  granularidade (rank puro vs pontos), onde a classificação é computada (offline/na
+  montagem do oponente), se expõe o rank na UI uma hora.
+- **Aguarda sessão (RNF-04).**
+
+---
+
 ## Cadastro de ideias emergentes (levantamento de roadmap, 2026-08-09)
 
 - **Cache local de detalhes da PokéAPI (E1):** `GET /battle`/RF-06 fazem N requests na
