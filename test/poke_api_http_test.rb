@@ -52,4 +52,119 @@ class PokeApiHttpTest < Minitest::Test
 
     assert_equal %w[m3 m4 m5 m6], moves.map(&:name)
   end
+
+  def setup_next_evolutions_stubs(pokemon_data:, chain_json:, find_map: {})
+    @api.define_singleton_method(:pokemon_data) { |_number| pokemon_data }
+    @api.define_singleton_method(:find) do |name|
+      map = find_map[name]
+      map ? Pokemon.new(name: name, sprite: "", number: map) : nil
+    end
+    @original_faraday = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |url|
+      if url.include?("pokemon-species") || url.include?("evolution-chain")
+        Struct.new(:status, :body).new(200, JSON.generate(chain_json))
+      else
+        Struct.new(:status, :body).new(404, "")
+      end
+    end
+  end
+
+  def teardown
+    Faraday.define_singleton_method(:get, @original_faraday) if defined?(@original_faraday) && @original_faraday
+  end
+
+  def test_next_evolutions_returns_level_up_stages_only
+    setup_next_evolutions_stubs(
+      pokemon_data: {
+        "species" => { "url" => "https://pokeapi.co/api/v2/pokemon-species/4/" },
+        "name" => "charmander"
+      },
+      chain_json: {
+        "evolution_chain" => { "url" => "https://pokeapi.co/api/v2/evolution-chain/2/" },
+        "chain" => {
+          "species" => { "name" => "charmander" },
+          "evolves_to" => [{
+            "species" => { "name" => "charmeleon" },
+            "evolution_details" => [{ "trigger" => { "name" => "level-up" }, "min_level" => 16 }],
+            "evolves_to" => [{
+              "species" => { "name" => "charizard" },
+              "evolution_details" => [{ "trigger" => { "name" => "level-up" }, "min_level" => 36 }],
+              "evolves_to" => []
+            }]
+          }]
+        }
+      },
+      find_map: { "charmeleon" => 5, "charizard" => 6 }
+    )
+
+    result = @api.next_evolutions(4)
+
+    assert_equal 1, result.size
+    assert_equal 5, result.first[:number]
+    assert_equal "charmeleon", result.first[:name]
+    assert_equal 16, result.first[:min_level]
+  end
+
+  def test_next_evolutions_returns_empty_for_non_level_up_triggers
+    setup_next_evolutions_stubs(
+      pokemon_data: { "species" => { "url" => "https://pokeapi.co/api/v2/pokemon-species/133/" }, "name" => "eevee" },
+      chain_json: {
+        "evolution_chain" => { "url" => "https://pokeapi.co/api/v2/evolution-chain/67/" },
+        "chain" => {
+          "species" => { "name" => "eevee" },
+          "evolves_to" => [
+            { "species" => { "name" => "vaporeon" },
+              "evolution_details" => [{ "trigger" => { "name" => "use-item" } }], "evolves_to" => [] },
+            { "species" => { "name" => "jolteon" },
+              "evolution_details" => [{ "trigger" => { "name" => "use-item" } }], "evolves_to" => [] }
+          ]
+        }
+      },
+      find_map: { "vaporeon" => 134, "jolteon" => 135 }
+    )
+
+    result = @api.next_evolutions(133)
+
+    assert_equal [], result
+  end
+
+  def test_next_evolutions_returns_empty_when_no_evolution
+    setup_next_evolutions_stubs(
+      pokemon_data: { "species" => { "url" => "https://pokeapi.co/api/v2/pokemon-species/150/" }, "name" => "mewtwo" },
+      chain_json: {
+        "evolution_chain" => { "url" => "https://pokeapi.co/api/v2/evolution-chain/77/" },
+        "chain" => {
+          "species" => { "name" => "mewtwo" },
+          "evolves_to" => []
+        }
+      },
+      find_map: {}
+    )
+
+    result = @api.next_evolutions(150)
+
+    assert_equal [], result
+  end
+
+  def test_next_evolutions_returns_empty_when_pokemon_data_nil
+    @api.define_singleton_method(:pokemon_data) { |_number| nil }
+
+    result = @api.next_evolutions(999)
+
+    assert_equal [], result
+  end
+
+  def test_next_evolutions_returns_empty_on_faraday_error
+    @api.define_singleton_method(:pokemon_data) do |_number|
+      { "species" => { "url" => "https://pokeapi.co/api/v2/pokemon-species/4/" }, "name" => "charmander" }
+    end
+    @original_faraday = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "timeout" }
+
+    result = @api.next_evolutions(4)
+
+    assert_equal [], result
+  ensure
+    Faraday.define_singleton_method(:get, @original_faraday)
+  end
 end

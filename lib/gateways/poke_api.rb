@@ -13,6 +13,7 @@ module PokeApi
   #   available_move_names(number)                -> [String]
   #   move(name)                                  -> Move | nil
   #   moves_for(number)                           -> [Move]
+  #   next_evolutions(number)                     -> [{number:, name:, min_level:}]
   #   type_relations                              -> { tipo => { double:, half:, no: } }
   #   fetch_all_names                             -> [String]
   #
