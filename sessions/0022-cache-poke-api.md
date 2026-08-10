@@ -162,6 +162,39 @@ PokeApiCache (decorator TTL/LRU) [E1]` em `lib/gateways/`.
 - [ ] Adapter `PokeApiHttp` sem estado de cache (`grep 'instance_variable_set(:@' em testes de lib` limpo nos pontos migrados).
 - [ ] `./scripts/run`: Lista/Detalhe/Time/Time-Manage/Batalha funcionando (decorator ativo em dev).
 
+## 6b. Progresso da implementação (passos 1–6)
+
+> Preenchido durante a fase 2 (TDD). Não marcar como validado até o usuário validar.
+
+- **Passo 1 — `PokeApiCache` (TTL + delegação)** ✅ commit `79110ce`: classe nova
+  `lib/gateways/poke_api_cache.rb` (construtor `(api, ttl:, max_entries:, clock:)`,
+  delega o contrato ao inner, cacheia `[método, *args]` com `fetched_at` e refresh ao TTL;
+  `clock:` injetável default monotônico). Suíte **244/828**, lint 0.
+- **Passo 2 — LRU (max_entries)** ✅ commit `df5c44c`: evicção da entrada menos rec
+  utilizada ao exceder `max_entries` (ordem de recência mantida por inserção —
+  `store`/`touch` re-inserem no fim; `shift` remove o LRU). Suíte **247/831**, lint 0.
+- **Passo 3 — Robustez/semântica por operação** ✅ commit `17c5b64`: `find`/`detail`/`move`
+  não cacheiam **nil** (falha transitória re-tentada); `fetch_all_names` não cacheia lista
+  vazia (RF-18); `moves_for`/`available_move_names`/`type_relations` cacheiam o valor;
+  chaves `[método, *args]` isoladas por operação e argumento. Suíte **255/851**, lint 0.
+- **Passo 4 — Remover memoização do adapter** ✅ commit `13e7323`: `@fetch_all_names`/
+  `@move_cache`/`@pokemon_moves_cache`/`@available_moves_cache`/`@type_relations` removidos
+  de `PokeApiHttp`+`PokeApiMoves`+`PokeApiTypes` (volta a ser estateless); 7 asserts de
+  memoização migrados de `poke_api_http_test`/`poke_api_test`/`poke_api_move_test` para
+  `poke_api_cache_test.rb` (com `CountingApi` + `FakeClock`). Suíte **255/846**, lint 0,
+  grep `instance_variable_set(:@memo…)` nos testes → 0.
+- **Passo 5 — Composition root** ✅ commit `6b6cd4e`: `PokeApi.instance` default decorado —
+  `PokeApiCache.new(PokeApiHttp.new, ttl: 600, max_entries: 1000)` (accessor de `poke_api.rb`);
+  `PokeApiCache` expõe `inner`/`ttl`/`max_entries`; `gateway_interface_test.rb` verifica
+  cache + valores fixos. Suíte **256/849**, lint 0; `grep 'PokeApi\.[a-z]' lib server.rb` →
+  só `PokeApi.instance`.
+- **Passo 6 — Docs** ✅ (em progresso): `draft-arquitetura-design-patterns.md` (seção 2 E1-B
+  feita, seção 6 E1 implementado, decisão 9 valores 600/1000), `REQUIREMENTS.md` (limitação
+  cache resolvida + roadmap 20b), `SESSIONS.md` (tabela 0022 em fase 2 + próxima sessão),
+  `draft-auto-battler.md` (E1 implementado). Suíte **256/849**, lint 0.
+- **Fase 2 concluída** — todos os passos red→green→commit feitos, suíte/lint verdes.
+  **Parar aqui: fase 3 (validação) é do usuário.**
+
 ## 7. Observações
 
 - **E1-B não muda contrato de rota nem comportamento:** é infra — cache TTL/LRU sob a

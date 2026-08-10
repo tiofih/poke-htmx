@@ -40,28 +40,19 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0021 (E1-A — gateway da PokéAPI) concluída e validada em 2026-08-10**
-(interface `PokeApi` + adapter real `PokeApiHttp` + adapter fake `PokeApiFake` + injeção via
-`settings.api`/`PokeApi.instance`; static `lib/poke_api.rb` e `PokeApiStub.stub_singleton` removidos;
-suíte 239/821, lint 0, `grep 'PokeApi\.[a-z]' lib server.rb` → só `PokeApi.instance`).
-Próxima sessão (**decisão do usuário em 2026-08-10**):
+**Sessão 0022 (E1-B — decorator de cache da PokéAPI, TTL/LRU fixos)** com **fase 2 (TDD)
+concluída em 2026-08-10** — `PokeApiCache` (TTL **600s** / LRU máx **1000**, valores fixos,
+decisão 9) decorando a interface `PokeApi`; memoização interna do `PokeApiHttp` removida;
+`PokeApi.instance` default decorado no boot; suíte **256/849**, lint 0. **Aguardando a
+validação do usuário (fase 3)** antes de marcar `Done`.
 
-> **Sessão 0022 — E1-B: decorator de cache de detalhes da PokéAPI** (TTL/LRU **fixos**,
-> decisão 9 do `draft-arquitetura-design-patterns.md`), sobre o gateway (remove a memoização
-> interna do `PokeApiHttp`). Entra por composição sobre a interface — transparente para
-> servidor/domínio (é o motivo da injeção criada na 0021). Sequência já fechada:
-> **E1-B → D2 (XP/evolução) → D3 (histórico/rank) → Fase Eco (Eco-1..4)**. Ver
-> `draft-arquitetura-design-patterns.md` (seções 2 e 8).
-
-Após a E1, sequência fechada em 2026-08-10 (decisões 2/9–13 do
+Após a 0022 ser validada, sequência fechada em 2026-08-10 (decisões 2/9–13 do
 `draft-arquitetura-design-patterns.md`):
 
-> **E1-B (cache de detalhes da PokéAPI — decorator TTL/LRU sobre o gateway, pós-E1-A/sessão
-> 0021)** → **D2 (XP/evolução — progres-
-> são persistida, oponente escalando com o nível)** → **D3 (histórico/rank)** →
-> **Fase Eco (Eco-1 moeda pós-batalha, Eco-2 Poke Center, Eco-3 Poke Mart, Eco-4 itens
-> em batalha)** → candidatos futuros (D4 draft temático, D1 nível de aprendizado,
-> J1 seleção inicial, J2 personalização, J3 ranking S–F).
+> **D2 (XP/evolução — progressão persistida, oponente escalando com o nível)** → **D3
+> (histórico/rank)** → **Fase Eco (Eco-1 moeda pós-batalha, Eco-2 Poke Center, Eco-3
+> Poke Mart, Eco-4 itens em batalha)** → candidatos futuros (D4 draft temático, D1 nível
+> de aprendizado, J1 seleção inicial, J2 personalização, J3 ranking S–F).
 
 ## Progresso das sessões
 
@@ -88,6 +79,7 @@ Após a E1, sequência fechada em 2026-08-10 (decisões 2/9–13 do
 | 0019 | Respiro: refatoração de testes — remoção dos `rubocop:disable` (6 arquivos, orçamentos em `test/.rubocop.yml`, `TestSupport`/`TestDatabase`/`PokeApiStub` genérico) | Concluída | Done (passos 1–6, 222 runs/778 asserts preservados, lint 0, validado em 2026-08-10) |
 | 0020 | Respiro: refatoração de produção — remoção dos 7 `rubocop:disable` de `lib/**` + `server.rb` (5 arquivos, módulos por área, suíte 222/778 + lint 0 preservados) | Concluída | Done (passos 1–6, suíte 222/778, lint 0, grep `rubocop:` em lib+server → 0, validado em 2026-08-10) |
 | 0021 | E1-A: gateway da PokéAPI — interface `PokeApi` + adapter real `PokeApiHttp` + adapter fake `PokeApiFake` + injeção (`settings.api`/`PokeApi.instance`); static `lib/poke_api.rb` e `PokeApiStub.stub_singleton` removidos | Concluída | Done (passos 1–6, suíte 239/821, lint 0, grep `PokeApi\.[a-z]` em lib+server → só `PokeApi.instance`, validado em 2026-08-10) |
+| 0022 | E1-B: decorator de cache TTL/LRU fixos — `PokeApiCache` (TTL 600s / máx 1000) sobre a interface `PokeApi`, remove a memoização interna do `PokeApiHttp`, `PokeApi.instance` decorado no boot | Implementação | Em fase 2 (passos 1–6 verdes: passos 1–5 commitados, suíte 256/849, lint 0; passo 6 docs em andamento) — **validação pendente (usuário)** |
 
 ## Estrutura do arquivo de sessão
 

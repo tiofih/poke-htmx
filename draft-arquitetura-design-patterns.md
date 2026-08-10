@@ -60,6 +60,15 @@ contrato público".
 > `PokeApiStub` virou construtor de `PokeApiFake` + swap de `Server.api`) → **E1-B —
 > sessão 0022** (decorator `PokeApiCache` TTL/LRU **fixos**, remove a memoização do adapter
 > real). Sequência: E1-A → E1-B → D2 → D3 → Eco.
+
+> **E1-B concluída (sessão 0022, 2026-08-10):** `PokeApiCache` (decorator TTL **600s** / LRU
+> **máx 1000** — valores fixos, decisão 9) sobre a interface `PokeApi`, implementando o
+> contrato e cacheando `[método, *args]` (`find`/`detail`/`move` não cacheiam nil;
+> `fetch_all_names` só lista não-vazia — RF-18 preservado). A **memoização interna do
+> `PokeApiHttp` foi removida** (`@fetch_all_names`/`@move_cache`/`@pokemon_moves_cache`/
+> `@available_moves_cache`/`@type_relations`) — o adapter voltou a ser estateless; o cache
+> vive no decorator. Composition root: `PokeApi.instance = PokeApiCache.new(PokeApiHttp.new)`.
+> Testes do decorator com relógio injetável. E1 encerrada → próxima: **D2 (sessão 0023)**.
 | **3** | **D2 — XP/evolução** | Tabela nova `team_pokemon_progress` (decisão 3); 1ª evolução/nível 1 na montagem (4); `ExperienceCurve` **linear** por ora (5); aprendizado de golpes por nível cruza com D1; oponente escala com o nível do jogador; **`RewardRule`** já estrutura o gancho `:finished` (XP). | 1, 2 (volume de requests) |
 | **4** | **D3 — Histórico/rank** | Tabela `battles`; vitórias/derrotas por usuário + oponente serializado + data (6); rank **local e global** (7). Resolve o `BattleRegistry` no ponto mais atômico (8). | 3 (`:finished` já concede recompensa) |
 | **5** | **Eco-1 — Moeda pós-batalha** | Tabela `wallet`; `RewardRule` passa a conceder **XP + dinheiro** no `:finished` (decisão 10 — moeda ao final da batalha como um todo). | 3 (mesmo hook), 4 (resultado persistido) |
@@ -180,7 +189,9 @@ lib/gateways/     ← PokeApi (interface) + PokeApiHttp (real, via Faraday)
 **Benefícios diretos para o roadmap:**
 - D2 (XP/evolução): policies puras + ProgressionRepository entram sem engordar `BattleEngine`.
 - D3 (histórico): `BattleRepository` + Presenter; sem tocar no domínio.
-- E1 (cache): trocar o adapter real por decorator — transparente para serviços.
+- E1 (cache): ✅ **implementado (E1-A sessão 0021 + E1-B sessão 0022)** — `PokeApi.instance`
+  = `PokeApiCache.new(PokeApiHttp.new)` (TTL 600s / LRU 1000 fixos); adapter real estateless;
+  transparente para serviços.
 - Eco (moeda/Center/Mart): `WalletRepository`/`InventoryRepository` + `Item` (Value Object)
   + serviços `HealService`/`ShopService` seguem o mesmo molde; **o hook de `:finished`
   agrega XP + moeda numa só política de recompensa** (seção 6.1).
@@ -249,7 +260,7 @@ re-modelagem do motor inteiro.
 | 6 | D3: dimensões do histórico | Confirmado: vitórias/derrotas por usuário, oponente serializado, data |
 | 7 | D3: rank | **Local e global** (por usuário + líder no geral) |
 | 8 | `BattleRegistry` (efêmero) | Resolver no que for **mais atômico** (persistir no D3 ou ajuste no refactor — o que implicar menor toque) |
-| 9 | E1: cache | **TTL/LRU fixos** (sem configuração por tipo por ora) |
+| 9 | E1: cache | **TTL/LRU fixos** (sem configuração por tipo por ora) — **aplicado na sessão 0022**: TTL **600s**, LRU **máx 1000 entradas** |
 | 10 | Eco: quando conceder moeda | **Ao final da batalha como um todo** — XP + moeda conjugados no hook `:finished` (`RewardRule`) |
 | 11 | Poke Center: custo | **Proporcional ao HP faltante** (`HealCostPolicy`) |
 | 12 | Consumível em batalha (Eco-4) | **Automático no início** (estratégia decide); depois abrir para o jogador escolher — **o mesmo vale para a estratégia do time** (estratégias selecionáveis) |
