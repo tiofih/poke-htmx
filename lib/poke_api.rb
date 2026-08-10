@@ -3,6 +3,7 @@ require "pry"
 require_relative "gateways/poke_api_parsing"
 require_relative "gateways/poke_api_moves"
 require_relative "gateways/poke_api_types"
+require_relative "gateways/poke_api_http"
 
 class PokeApi
   TYPE_NAMES = PokeApiTypes::TYPE_NAMES
@@ -10,6 +11,14 @@ class PokeApi
   extend PokeApiParsing
   extend PokeApiMoves
   extend PokeApiTypes
+
+  class << self
+    def instance
+      @instance ||= PokeApiHttp.new
+    end
+
+    attr_writer :instance
+  end
 
   def self.all
     response = Faraday.get("https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0")
