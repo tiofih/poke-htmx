@@ -1108,6 +1108,67 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
+  def test_pokemons_with_empty_source_and_no_filter_shows_notice
+    PokeApiStub.with_all_names([]) do
+      get "/pokemons"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Não foi possível carregar a lista de Pokémon."
+    refute_includes last_response.body, "<html"
+  end
+
+  def test_pokemons_with_empty_source_and_filter_has_no_notice
+    PokeApiStub.with_all_names([]) do
+      get "/pokemons", q: "pikachu"
+    end
+
+    assert last_response.ok?
+    refute_includes last_response.body, "Não foi possível carregar a lista de Pokémon."
+  end
+
+  def test_index_with_empty_source_and_no_filter_shows_notice
+    PokeApiStub.with_all_names([]) do
+      get "/"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Não foi possível carregar a lista de Pokémon."
+  end
+
+  def test_battle_with_member_detail_nil_shows_friendly_message
+    @repository.add("user-a", pikachu_pokemon)
+
+    PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
+      PokeApiStub.with_detail(nil) do
+        get "/battle", {}, user_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Não foi possível preparar a batalha."
+    refute_includes last_response.body, "<html"
+  end
+
+  # rubocop:disable Metrics/MethodLength
+  def test_battle_with_empty_opponent_shows_friendly_message
+    @repository.add("user-a", pikachu_pokemon)
+
+    PokeApiStub.with_all_names([]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_detail(battle_pokemon_for_test) do
+          PokeApiStub.with_moves_for(battle_moves_for_test) do
+            get "/battle", {}, user_session("user-a")
+          end
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Não foi possível preparar a batalha."
+  end
+  # rubocop:enable Metrics/MethodLength
+
   def test_pokemon_name_with_unknown_name_shows_friendly_notice
     PokeApiStub.with_find(nil) do
       get "/pokemon", name: "xyz"

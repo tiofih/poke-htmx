@@ -1,3 +1,6 @@
+<% if @notice %>
+  <p class="notice"><%= @notice %></p>
+<% end %>
 <select name="name" id="pokemons" hx-target="#pokemon" hx-trigger="change" hx-get="/pokemon">
   <option value="..." selected disabled>...</option>
   <% @page[:names].each do |pokemon_name| %>

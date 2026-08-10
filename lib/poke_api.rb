@@ -81,19 +81,22 @@ class PokeApi
 
   def self.evolution_chain(species_url)
     species_response = Faraday.get(species_url)
-    return [] unless species_response.respond_to?(:status) && species_response.status == 200
+    return [] unless ok?(species_response)
 
-    species = JSON.parse(species_response.body)
-    chain_url = species.dig("evolution_chain", "url")
+    chain_url = JSON.parse(species_response.body).dig("evolution_chain", "url")
     return [] unless chain_url
 
     chain_response = Faraday.get(chain_url)
-    return [] unless chain_response.respond_to?(:status) && chain_response.status == 200
+    return [] unless ok?(chain_response)
 
     chain = JSON.parse(chain_response.body)["chain"]
     flatten_chain(chain).filter_map { |name| find(name) }
   rescue Faraday::Error, JSON::ParserError
     []
+  end
+
+  def self.ok?(response)
+    response.respond_to?(:status) && response.status == 200
   end
 
   def self.flatten_chain(chain)

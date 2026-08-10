@@ -52,6 +52,7 @@ class Server < Sinatra::Base
     @offset = 0
     @q = ""
     @page = PokeApi.paginate(offset: @offset, query: @q)
+    @notice = "Não foi possível carregar a lista de Pokémon." if @page[:names].empty? && @q.empty?
     erb :index
   end
 
@@ -59,6 +60,7 @@ class Server < Sinatra::Base
     @offset = params[:offset].to_i
     @q = params[:q].to_s
     @page = PokeApi.paginate(offset: @offset, query: @q)
+    @notice = "Não foi possível carregar a lista de Pokémon." if @page[:names].empty? && @q.empty?
     erb :pokemon_list, layout: false
   end
 
@@ -152,11 +154,21 @@ class Server < Sinatra::Base
       return erb :battle, layout: false
     end
 
-    player_team = team.map do |member|
+    player_team = team.filter_map do |member|
       detail = PokeApi.detail(member.number)
-      BattlePokemon.from(detail, moves: battle_moves_for(member))
+      detail && BattlePokemon.from(detail, moves: battle_moves_for(member))
     end
+    if player_team.size < team.size
+      @message = "Não foi possível preparar a batalha. Tente novamente."
+      return erb :battle, layout: false
+    end
+
     opponent = OpponentGenerator.new(names: PokeApi.fetch_all_names).team
+    if opponent.empty?
+      @message = "Não foi possível preparar a batalha. Tente novamente."
+      return erb :battle, layout: false
+    end
+
     opponent = opponent.map { |battle_pokemon| battle_pokemon.new(moves: battle_moves_for(battle_pokemon)) }
     engine = BattleEngine.new(team_a: player_team, team_b: opponent)
     settings.battles.set(current_user, engine)
