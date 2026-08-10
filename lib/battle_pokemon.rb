@@ -16,21 +16,24 @@ class BattlePokemon < Dry::Struct
   attribute :hp_current, BC_HP
   attribute :moves, Types::Strict::Array.of(Move).default([].freeze)
 
-  # rubocop:disable Metrics/MethodLength
   def self.from(pokemon, moves: [])
-    hp = pokemon.stats.find { |stat| stat[:name] == "HP" }&.fetch(:value)
-    new(
-      number: pokemon.number,
-      name: pokemon.name,
-      sprite: pokemon.sprite.to_s,
-      types: pokemon.types,
-      stats: pokemon.stats,
-      hp_max: hp || 1,
-      hp_current: hp || 1,
-      moves: moves
-    )
+    new(**attributes_for(pokemon, moves: moves))
   end
-  # rubocop:enable Metrics/MethodLength
+
+  class << self
+    private
+
+    def attributes_for(pokemon, moves:)
+      hp = base_hp(pokemon)
+      { number: pokemon.number, name: pokemon.name, sprite: pokemon.sprite.to_s,
+        types: pokemon.types, stats: pokemon.stats, hp_max: hp, hp_current: hp,
+        moves: moves }
+    end
+
+    def base_hp(pokemon)
+      pokemon.stats.find { |stat| stat[:name] == "HP" }&.fetch(:value) || 1
+    end
+  end
 
   def use_move(index)
     updated = moves.map.with_index do |move, i|
