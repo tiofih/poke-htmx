@@ -16,9 +16,9 @@ class OpponentGeneratorTest < Minitest::Test
     )
   end
 
-  def generator(names: NAMES, size: 6, seed: 42, fetcher: nil)
+  def generator(names: NAMES, size: 6, seed: 42, fetcher: nil, level: 1)
     fetcher ||= ->(name) { build_pokemon(name) }
-    OpponentGenerator.new(names: names, size: size, rng: Random.new(seed), fetcher: fetcher)
+    OpponentGenerator.new(names: names, size: size, rng: Random.new(seed), fetcher: fetcher, level: level)
   end
 
   def test_team_returns_battle_pokemon_built_from_fetched_details
@@ -71,5 +71,19 @@ class OpponentGeneratorTest < Minitest::Test
   def test_team_with_non_positive_size_returns_empty
     assert_empty generator(size: 0).team
     assert_empty generator(size: -1).team
+  end
+
+  def test_team_defaults_to_level_one_per_member
+    team = generator.team
+
+    assert_equal [1], team.map(&:level).uniq
+    assert_equal 50, team.first.hp_max, "HP base sem escala"
+  end
+
+  def test_team_with_explicit_level_scales_each_member
+    team = generator(level: 5).team
+
+    assert_equal [5], team.map(&:level).uniq
+    assert_equal 52, team.first.hp_max, "HP 50 + (5-1)*0.5 = 52"
   end
 end

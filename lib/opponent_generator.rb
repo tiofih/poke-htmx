@@ -6,11 +6,12 @@ require_relative "battle_pokemon"
 class OpponentGenerator
   DEFAULT_TEAM_SIZE = 6
 
-  def initialize(names:, size: DEFAULT_TEAM_SIZE, rng: Random.new, fetcher: PokeApi.instance.method(:detail))
+  def initialize(names:, size: DEFAULT_TEAM_SIZE, rng: Random.new, fetcher: PokeApi.instance.method(:detail), level: 1)
     @names = names
     @size = size
     @rng = rng
     @fetcher = fetcher
+    @level = level
   end
 
   def team_names
@@ -20,6 +21,6 @@ class OpponentGenerator
   end
 
   def team
-    team_names.map { |name| BattlePokemon.from(@fetcher.call(name)) }
+    team_names.map { |name| BattlePokemon.from(@fetcher.call(name), level: @level) }
   end
 end
