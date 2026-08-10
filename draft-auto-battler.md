@@ -192,6 +192,12 @@
   XP; stats derivados dos base + nível; evolução collapsa evolutions (RF-06).
 - **Risco:** persistir progressão por usuário em nova tabela `team_pokemons` (coluna
   level/xp) ou `battle_stats`.
+- **Divisão A/B (decisão do usuário, 2026-08-10):** **D2-A (sessão 0023)** = XP/nível
+  persistidos (`team_pokemon_progress` por `team_pokemon_id`, curva linear `nível*100`,
+  `RewardRule` no `:finished`, stats escalam, oponente escala); **D2-B (sessão 0024)** =
+  evolução por nível + aprendizado de golpes por nível com **dados oficiais da species**
+  (`evolution_chain` + `level_learned_at` — ver `draft-arquitetura-design-patterns.md`
+  seção 8, decisão 15).
 - **Visão (anotado — decidida em 2026-08-09, fora do fluxo):** os Pokémon escolhidos
   são **sempre a primeira evolução** (ou os sem evolução), **sempre nível 1** na
   montagem. **A cada batalha** o time ganha **XP**: os Pokémon **aprendem novos

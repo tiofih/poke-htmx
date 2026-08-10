@@ -69,7 +69,17 @@ contrato público".
 > `@available_moves_cache`/`@type_relations`) — o adapter voltou a ser estateless; o cache
 > vive no decorator. Composition root: `PokeApi.instance = PokeApiCache.new(PokeApiHttp.new)`.
 > Testes do decorator com relógio injetável. E1 encerrada → próxima: **D2 (sessão 0023)**.
-| **3** | **D2 — XP/evolução** | Tabela nova `team_pokemon_progress` (decisão 3); 1ª evolução/nível 1 na montagem (4); `ExperienceCurve` **linear** por ora (5); aprendizado de golpes por nível cruza com D1; oponente escala com o nível do jogador; **`RewardRule`** já estrutura o gancho `:finished` (XP). | 1, 2 (volume de requests) |
+
+> **D2 dividida em A/B (decisão do usuário, 2026-08-10):** esta divisão **não muda a ordem do
+> roadmap** (D2 → D3 → Eco), apenas detalha a entrega. **D2-A — sessão 0023**
+> (opcionalmente 0023/0024): tabela nova `team_pokemon_progress` (decisão 3), 1ª evolução/
+> nível 1 na montagem (4), `ExperienceCurve` **linear** por ora (5), stats escalam com o nível,
+> `RewardRule` estrutura o gancho `:finished` (XP), `BattleEngine#result` (half-FSM terminal),
+> oponente escala com o nível do jogador. **D2-B — sessão 0024** (evolução por nível +
+> aprendizado de golpes por nível — cruz com D1) usando **dados oficiais da species**
+> (`evolution_chain` + `level_learned_at`, decisão do usuário em 2026-08-10 — ver seção 8,
+> decisão 15).
+| **3** | **D2 — XP/evolução** | **D2-A (sessão 0023):** tabela `team_pokemon_progress` (3); nível 1 na montagem (4); `ExperienceCurve` linear (5); stats escalam; `RewardRule` no `:finished` + `BattleEngine#result` (half-FSM); oponente escala. **D2-B (sessão 0024):** evolução + aprendizado por nível, dados oficiais da species (15). | 1, 2 (volume de requests) |
 | **4** | **D3 — Histórico/rank** | Tabela `battles`; vitórias/derrotas por usuário + oponente serializado + data (6); rank **local e global** (7). Resolve o `BattleRegistry` no ponto mais atômico (8). | 3 (`:finished` já concede recompensa) |
 | **5** | **Eco-1 — Moeda pós-batalha** | Tabela `wallet`; `RewardRule` passa a conceder **XP + dinheiro** no `:finished` (decisão 10 — moeda ao final da batalha como um todo). | 3 (mesmo hook), 4 (resultado persistido) |
 | **6** | **Eco-2 — Poke Center** | `HealService` + `HealCostPolicy` **proporcional ao HP faltante** (11); rota htmx + fragmento; cobra do saldo. | 5 (saldo) |
@@ -266,6 +276,7 @@ re-modelagem do motor inteiro.
 | 12 | Consumível em batalha (Eco-4) | **Automático no início** (estratégia decide); depois abrir para o jogador escolher — **o mesmo vale para a estratégia do time** (estratégias selecionáveis) |
 | 13 | Itens seguráveis | **Escopo simples**: 1 slot por Pokémon, modula só Attack/Speed por ora |
 | 14 | Commit deste draft | `Draft: levantamento de arquitetura e design patterns (2026-08-10) — base para D2/E1/refactor de produção e fase Eco (moeda, Poke Center, Poke Mart)` |
+| 15 | D2: fonte de evolução e aprendizado | **Dados oficiais da species** (`evolution_chain` + `level_learned_at`) — não níveis fixos padrão. Aplicado na D2-B (sessão 0024) |
 
 **Sequência de sessões encaminhada — ver seção 2 (roadmap consolidado):** refactor
 produção → E1 → D2 → D3 → Eco-1..4. A estratégia selecionável do time (decisão 12)
