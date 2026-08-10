@@ -299,6 +299,11 @@ re-modelagem do motor inteiro.
 produção → E1 → D2 → D3 → Eco-1..4. A estratégia selecionável do time (decisão 12)
 impacta o `BattleEngine`/`OpponentGenerator` — política a detalhar na fase própria.
 
+**Regra para refinamentos futuros (2026-08-10, validação da 0024):** todo refinamento
+deve incluir **seeds** nos cenários de validação para acelerar a verificação manual
+(ex.: seed com níveis altos para forçar evolução em uma única vitória, em vez de
+precisar grindar batalhas).
+
 ### Perguntas em aberto — ideias J1/J2/J3 (anotadas 2026-08-10)
 
 - [ ] **J1 (seleção inicial):** a lista base é fixa (iniciais/famílias clássicas),

@@ -204,6 +204,13 @@ Resultado e status desejado preenchidos aqui após o feedback.
   `draft-arquitetura-design-patterns.md`), depois Fase Eco (Eco-1 moeda, Eco-2 Poke
   Center, Eco-3 Poke Mart, Eco-4 itens em batalha), depois candidatos (D4, D1 nível de
   aprendizado gating, J1, J2, J3).
+- **Hotfix pós-implementação (2026-08-10):** Pokémon agora começam com golpes de nível 1
+  já aprendidos na montagem (`pokemon_with_level_one_moves` em `server.rb`, commit
+  `b0e85de`).
+- **Nota do usuário (validação):** refinamentos futuros devem incluir seeds para
+  validação mais rápida dos cenários. Nesta sessão, idealmente o cenário de validação
+  deveria permitir que, ao vencer uma batalha, um ou todos os Pokémon evoluíssem (seed
+  com níveis altos + cadeia evolutiva curta para forçar evolução em uma única vitória).
 - **Notas para o draft (fora do fluxo desta sessão, RNF-04):**
   - Evoluções não-`level-up` (pedra/troca/amizade) e **itens evolutivos** → candidatos
     para a Fase Eco (Eco-3 Poke Mart).
