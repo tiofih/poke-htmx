@@ -80,21 +80,6 @@ module TestDatabase
 end
 
 module PokeApiStub
-  def self.stub_singleton(method_name, implementation, cache: nil)
-    existed = PokeApi.respond_to?(method_name)
-    original = existed ? PokeApi.method(method_name) : nil
-    PokeApi.instance_variable_set(cache, nil) if cache
-    PokeApi.define_singleton_method(method_name, &implementation)
-    yield
-  ensure
-    if existed
-      PokeApi.define_singleton_method(method_name, original)
-    else
-      PokeApi.singleton_class.send(:remove_method, method_name)
-    end
-    PokeApi.instance_variable_set(cache, nil) if cache
-  end
-
   def self.with_gateway(**configs, &)
     merged = if defined?(Server) && Server.settings.api.is_a?(PokeApiFake)
                Server.settings.api.config.merge(configs)
@@ -112,47 +97,33 @@ module PokeApiStub
   end
 
   def self.with_find(pokemon, &)
-    stub_singleton(:find, proc { |_name| pokemon }) do
-      with_gateway(find: pokemon, &)
-    end
+    with_gateway(find: pokemon, &)
   end
 
   def self.with_detail(pokemon, &)
-    stub_singleton(:detail, proc { |_poke_id| pokemon }) do
-      with_gateway(detail: pokemon, &)
-    end
+    with_gateway(detail: pokemon, &)
   end
 
   def self.with_all_names(names, &)
-    stub_singleton(:fetch_all_names, proc { names }) do
-      with_gateway(fetch_all_names: names, &)
-    end
+    with_gateway(fetch_all_names: names, &)
   end
 
   def self.with_moves_for(moves, &)
-    stub_singleton(:moves_for, proc { |_number| moves }, cache: :@pokemon_moves_cache) do
-      with_gateway(moves_for: moves, &)
-    end
+    with_gateway(moves_for: moves, &)
   end
 
   def self.with_move(move_map, &)
-    stub_singleton(:move, proc { |name| move_map[name] }, cache: :@move_cache) do
-      with_gateway(move: move_map, &)
-    end
+    with_gateway(move: move_map, &)
   end
 
   def self.with_available_move_names(names, &)
-    stub_singleton(:available_move_names, proc { |_number| names }, cache: :@available_moves_cache) do
-      with_gateway(available_move_names: names, &)
-    end
+    with_gateway(available_move_names: names, &)
   end
 
   def self.with_type(table, &)
     relations = table.each_with_object({}) do |(_name, json), acc|
-      acc.merge!(PokeApi.extract_type_relations(json)) if json
+      acc.merge!(PokeApiHttp.new.extract_type_relations(json)) if json
     end
-    stub_singleton(:fetch_type_json, proc { |name| table[name] }, cache: :@type_relations) do
-      with_gateway(type_relations: relations, &)
-    end
+    with_gateway(type_relations: relations, &)
   end
 end

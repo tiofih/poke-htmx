@@ -2,16 +2,38 @@
 
 require_relative "test_helper"
 require_relative "../lib/type_effectiveness"
+require_relative "../lib/gateways/poke_api_http"
 
 class PokeApiTest < Minitest::Test
+  def api
+    @api ||= PokeApiHttp.new
+  end
+
   def fifteen_names
     %w[bulbasaur ivysaur venusaur charmander charmeleon charizard squirtle wartortle
        blastoise caterpie metapod butterfree pikachu pikachu-raichu raichu]
   end
 
+  def names_json
+    {
+      "results" => fifteen_names.map { |name| { "name" => name } },
+      "count" => fifteen_names.size
+    }
+  end
+
+  def stub_all_names_response(json)
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |_url|
+      Struct.new(:status, :body).new(200, JSON.generate(json))
+    end
+    yield
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
   def test_paginate_returns_names_for_offset_with_total
-    PokeApiStub.with_all_names(fifteen_names) do
-      page = PokeApi.paginate(offset: 0, limit: 10)
+    stub_all_names_response(names_json) do
+      page = api.paginate(offset: 0, limit: 10)
 
       assert_equal 10, page[:names].size
       assert_equal 15, page[:total]
@@ -20,8 +42,8 @@ class PokeApiTest < Minitest::Test
   end
 
   def test_paginate_slices_by_offset
-    PokeApiStub.with_all_names(fifteen_names) do
-      page = PokeApi.paginate(offset: 10, limit: 10)
+    stub_all_names_response(names_json) do
+      page = api.paginate(offset: 10, limit: 10)
 
       assert_equal 5, page[:names].size
       assert_equal %w[pikachu pikachu-raichu raichu], page[:names][2..]
@@ -30,8 +52,8 @@ class PokeApiTest < Minitest::Test
   end
 
   def test_paginate_returns_empty_when_offset_beyond_end
-    PokeApiStub.with_all_names(fifteen_names) do
-      page = PokeApi.paginate(offset: 100, limit: 10)
+    stub_all_names_response(names_json) do
+      page = api.paginate(offset: 100, limit: 10)
 
       assert_empty page[:names]
       assert_equal 15, page[:total]
@@ -39,8 +61,8 @@ class PokeApiTest < Minitest::Test
   end
 
   def test_paginate_filters_by_substring_case_insensitive
-    PokeApiStub.with_all_names(fifteen_names) do
-      page = PokeApi.paginate(offset: 0, limit: 10, query: "PIK")
+    stub_all_names_response(names_json) do
+      page = api.paginate(offset: 0, limit: 10, query: "PIK")
 
       assert_equal %w[pikachu pikachu-raichu], page[:names]
       assert_equal 2, page[:total]
@@ -48,8 +70,8 @@ class PokeApiTest < Minitest::Test
   end
 
   def test_paginate_with_empty_q_returns_all
-    PokeApiStub.with_all_names(fifteen_names) do
-      page = PokeApi.paginate(offset: 0, limit: 100, query: "")
+    stub_all_names_response(names_json) do
+      page = api.paginate(offset: 0, limit: 100, query: "")
 
       assert_equal 15, page[:names].size
       assert_equal 15, page[:total]
@@ -57,9 +79,9 @@ class PokeApiTest < Minitest::Test
   end
 
   def test_paginate_filters_then_paginates
-    PokeApiStub.with_all_names(fifteen_names) do
-      first = PokeApi.paginate(offset: 0, limit: 1, query: "char")
-      second = PokeApi.paginate(offset: 1, limit: 1, query: "char")
+    stub_all_names_response(names_json) do
+      first = api.paginate(offset: 0, limit: 1, query: "char")
+      second = api.paginate(offset: 1, limit: 1, query: "char")
 
       assert_equal %w[charmander], first[:names]
       assert_equal %w[charmeleon], second[:names]
@@ -79,7 +101,7 @@ class PokeApiTest < Minitest::Test
   end
 
   def test_extract_type_relations_normalizes_damage_relations
-    extracted = PokeApi.extract_type_relations(fire_type_json)
+    extracted = api.extract_type_relations(fire_type_json)
 
     assert_equal %w[bug steel grass ice], extracted["fire"]["double"]
     assert_equal %w[rock fire water dragon], extracted["fire"]["half"]
@@ -88,41 +110,49 @@ class PokeApiTest < Minitest::Test
 
   def test_extract_type_relations_handles_no_damage_list
     json = { "name" => "electric", "damage_relations" => { "no_damage_to" => [{ "name" => "ground" }] } }
-    assert_equal %w[ground], PokeApi.extract_type_relations(json)["electric"]["no"]
+    assert_equal %w[ground], api.extract_type_relations(json)["electric"]["no"]
   end
 
   def test_type_relations_builds_table_for_all_18_types
-    fake = build_type_json_table
-    PokeApiStub.with_type(fake) do
-      relations = PokeApi.type_relations
+    test_self = self
+    api.define_singleton_method(:fetch_type_json) { |name| test_self.send(:build_type_json_table)[name] }
 
-      assert_equal 18, relations.size
-      assert_equal %w[grass bug ice steel], relations["fire"]["double"]
-      assert_equal %w[rock fire water dragon], relations["fire"]["half"]
-      assert_empty relations["fire"]["no"]
-      assert_equal %w[water grass dragon], relations["water"]["half"]
-      assert_equal %w[ground], relations["flying"]["no"]
-    end
+    relations = api.type_relations
+
+    assert_equal 18, relations.size
+    assert_equal %w[grass bug ice steel], relations["fire"]["double"]
+    assert_equal %w[rock fire water dragon], relations["fire"]["half"]
+    assert_empty relations["fire"]["no"]
+    assert_equal %w[water grass dragon], relations["water"]["half"]
+    assert_equal %w[ground], relations["flying"]["no"]
   end
 
   def test_type_relations_is_memoized
-    PokeApi.instance_variable_set(:@type_relations, nil)
     calls = 0
     test_self = self
-
-    original = PokeApi.method(:fetch_type_json)
-    PokeApi.define_singleton_method(:fetch_type_json) do |name|
+    api.define_singleton_method(:fetch_type_json) do |name|
       calls += 1
       test_self.send(:type_json_for, name)
     end
 
-    PokeApi.type_relations
-    PokeApi.type_relations
+    api.type_relations
+    api.type_relations
 
     assert_equal 18, calls
-  ensure
-    PokeApi.define_singleton_method(:fetch_type_json, original)
-    PokeApi.instance_variable_set(:@type_relations, nil)
+  end
+
+  def test_type_relations_skips_types_that_fail_to_load
+    test_self = self
+    api.define_singleton_method(:fetch_type_json) do |name|
+      return nil if name == "fire"
+
+      test_self.send(:type_json_for, name)
+    end
+
+    relations = api.type_relations
+
+    assert_equal 17, relations.size
+    refute_includes relations.keys, "fire"
   end
 
   def test_type_effectiveness_load_integra_fonte_stubbed
@@ -143,14 +173,13 @@ class PokeApiTest < Minitest::Test
       Struct.new(:status, :body).new(404, "Not Found")
     end
 
-    assert_nil PokeApi.find("urshifu")
+    assert_nil api.find("urshifu")
   ensure
     Faraday.define_singleton_method(:get, original)
   end
 
   def test_evolution_chain_skips_stages_without_pokemon_endpoint
-    original_find = PokeApi.method(:find)
-    PokeApi.define_singleton_method(:find) do |name|
+    api.define_singleton_method(:find) do |name|
       if name == "urshifu"
         nil
       else
@@ -174,18 +203,15 @@ class PokeApiTest < Minitest::Test
       Struct.new(:status, :body).new(200, JSON.generate(stub_responses.fetch(url)))
     end
 
-    evolutions = PokeApi.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
+    evolutions = api.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
 
     assert_equal %w[kubfu], evolutions.map(&:name)
   ensure
-    PokeApi.define_singleton_method(:find, original_find)
     Faraday.define_singleton_method(:get, original_faraday)
   end
 
   def test_detail_tolerates_null_sprite
-    original_data = PokeApi.method(:pokemon_data)
-    original_chain = PokeApi.method(:evolution_chain)
-    PokeApi.define_singleton_method(:pokemon_data) do |_id|
+    api.define_singleton_method(:pokemon_data) do |_id|
       {
         "name" => "offender",
         "sprites" => { "front_default" => nil },
@@ -195,16 +221,13 @@ class PokeApiTest < Minitest::Test
         "species" => { "url" => "https://pokeapi.co/api/v2/pokemon-species/999" }
       }
     end
-    PokeApi.define_singleton_method(:evolution_chain) { |_url| [] }
+    api.define_singleton_method(:evolution_chain) { |_url| [] }
 
-    pokemon = PokeApi.detail(999)
+    pokemon = api.detail(999)
 
     assert_equal "", pokemon.sprite
     assert_equal "offender", pokemon.name
     assert_equal 999, pokemon.number
-  ensure
-    PokeApi.define_singleton_method(:pokemon_data, original_data)
-    PokeApi.define_singleton_method(:evolution_chain, original_chain)
   end
 
   def test_find_tolerates_null_sprite
@@ -216,7 +239,7 @@ class PokeApiTest < Minitest::Test
       )
     end
 
-    pokemon = PokeApi.find("offender")
+    pokemon = api.find("offender")
 
     assert_equal "", pokemon.sprite
     assert_equal "offender", pokemon.name
@@ -225,19 +248,16 @@ class PokeApiTest < Minitest::Test
   end
 
   def test_detail_returns_nil_when_pokemon_data_is_nil
-    original_data = PokeApi.method(:pokemon_data)
-    PokeApi.define_singleton_method(:pokemon_data) { |_id| nil }
+    api.define_singleton_method(:pokemon_data) { |_id| nil }
 
-    assert_nil PokeApi.detail(999)
-  ensure
-    PokeApi.define_singleton_method(:pokemon_data, original_data)
+    assert_nil api.detail(999)
   end
 
   def test_find_returns_nil_on_network_error
     original = Faraday.method(:get)
     Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "network down" }
 
-    assert_nil PokeApi.find("pikachu")
+    assert_nil api.find("pikachu")
   ensure
     Faraday.define_singleton_method(:get, original)
   end
@@ -246,7 +266,7 @@ class PokeApiTest < Minitest::Test
     original = Faraday.method(:get)
     Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "network down" }
 
-    assert_nil PokeApi.fetch_move_json("thunder-shock")
+    assert_nil api.fetch_move_json("thunder-shock")
   ensure
     Faraday.define_singleton_method(:get, original)
   end
@@ -257,7 +277,7 @@ class PokeApiTest < Minitest::Test
       Struct.new(:status, :body).new(404, "Not Found")
     end
 
-    assert_empty PokeApi.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
+    assert_empty api.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
   ensure
     Faraday.define_singleton_method(:get, original)
   end
@@ -266,7 +286,7 @@ class PokeApiTest < Minitest::Test
     original = Faraday.method(:get)
     Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "network down" }
 
-    assert_empty PokeApi.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
+    assert_empty api.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
   ensure
     Faraday.define_singleton_method(:get, original)
   end
@@ -277,7 +297,7 @@ class PokeApiTest < Minitest::Test
       Struct.new(:status, :body).new(200, "<html>rate limit</html>")
     end
 
-    assert_empty PokeApi.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
+    assert_empty api.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
   ensure
     Faraday.define_singleton_method(:get, original)
   end
@@ -288,7 +308,7 @@ class PokeApiTest < Minitest::Test
       Struct.new(:status, :body).new(404, "Not Found")
     end
 
-    assert_nil PokeApi.fetch_type_json("fire")
+    assert_nil api.fetch_type_json("fire")
   ensure
     Faraday.define_singleton_method(:get, original)
   end
@@ -297,28 +317,9 @@ class PokeApiTest < Minitest::Test
     original = Faraday.method(:get)
     Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "network down" }
 
-    assert_nil PokeApi.fetch_type_json("fire")
+    assert_nil api.fetch_type_json("fire")
   ensure
     Faraday.define_singleton_method(:get, original)
-  end
-
-  def test_type_relations_skips_types_that_fail_to_load
-    PokeApi.instance_variable_set(:@type_relations, nil)
-    original = PokeApi.method(:fetch_type_json)
-    test_self = self
-    PokeApi.define_singleton_method(:fetch_type_json) do |name|
-      return nil if name == "fire"
-
-      test_self.send(:type_json_for, name)
-    end
-
-    relations = PokeApi.type_relations
-
-    assert_equal 17, relations.size
-    refute_includes relations.keys, "fire"
-  ensure
-    PokeApi.define_singleton_method(:fetch_type_json, original)
-    PokeApi.instance_variable_set(:@type_relations, nil)
   end
 
   def test_all_returns_empty_when_status_not_ok
@@ -327,7 +328,7 @@ class PokeApiTest < Minitest::Test
       Struct.new(:status, :body).new(404, "Not Found")
     end
 
-    assert_empty PokeApi.all
+    assert_empty api.all
   ensure
     Faraday.define_singleton_method(:get, original)
   end
@@ -338,7 +339,7 @@ class PokeApiTest < Minitest::Test
       Struct.new(:status, :body).new(200, "<html>rate limit</html>")
     end
 
-    assert_empty PokeApi.all
+    assert_empty api.all
   ensure
     Faraday.define_singleton_method(:get, original)
   end
@@ -347,13 +348,12 @@ class PokeApiTest < Minitest::Test
     original = Faraday.method(:get)
     Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "network down" }
 
-    assert_empty PokeApi.all
+    assert_empty api.all
   ensure
     Faraday.define_singleton_method(:get, original)
   end
 
   def test_fetch_all_names_memoizes_non_empty_list
-    PokeApi.instance_variable_set(:@fetch_all_names, nil)
     calls = 0
     original = Faraday.method(:get)
     Faraday.define_singleton_method(:get) do |_url|
@@ -361,16 +361,14 @@ class PokeApiTest < Minitest::Test
       Struct.new(:status, :body).new(200, JSON.generate("results" => [{ "name" => "pikachu" }]))
     end
 
-    2.times { assert_equal %w[pikachu], PokeApi.fetch_all_names }
+    2.times { assert_equal %w[pikachu], api.fetch_all_names }
 
     assert_equal 1, calls
   ensure
     Faraday.define_singleton_method(:get, original)
-    PokeApi.instance_variable_set(:@fetch_all_names, nil)
   end
 
   def test_fetch_all_names_does_not_memoize_failure
-    PokeApi.instance_variable_set(:@fetch_all_names, nil)
     calls = 0
     original = Faraday.method(:get)
     Faraday.define_singleton_method(:get) do |_url|
@@ -380,12 +378,11 @@ class PokeApiTest < Minitest::Test
       Struct.new(:status, :body).new(200, JSON.generate("results" => [{ "name" => "pikachu" }]))
     end
 
-    assert_empty PokeApi.fetch_all_names
-    assert_equal %w[pikachu], PokeApi.fetch_all_names
+    assert_empty api.fetch_all_names
+    assert_equal %w[pikachu], api.fetch_all_names
     assert_equal 2, calls
   ensure
     Faraday.define_singleton_method(:get, original)
-    PokeApi.instance_variable_set(:@fetch_all_names, nil)
   end
 
   private
