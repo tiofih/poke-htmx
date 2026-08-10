@@ -10,127 +10,115 @@ require "pg"
 require_relative "../lib/pokemon"
 require_relative "../lib/poke_api"
 require_relative "../lib/team_repository"
+require_relative "test_support"
 
 module TestDatabase
   def self.setup!
-    connection = PG.connect(ENV.fetch("DATABASE_URL"))
-    connection.exec("SET client_min_messages TO warning")
-    connection.exec(File.read(File.expand_path("../db/schema.sql", __dir__)))
-    Dir[File.expand_path("../db/migrations/*.sql", __dir__)].each do |migration|
-      connection.exec(File.read(migration))
+    with_db do |connection|
+      connection.exec("SET client_min_messages TO warning")
+      connection.exec(File.read(File.expand_path("../db/schema.sql", __dir__)))
+      Dir[File.expand_path("../db/migrations/*.sql", __dir__)].each do |migration|
+        connection.exec(File.read(migration))
+      end
     end
+  end
+
+  def self.clear_team!
+    with_db { |connection| connection.exec("TRUNCATE team_pokemons") }
+  end
+
+  def self.with_db
+    connection = PG.connect(ENV.fetch("DATABASE_URL"))
+    yield connection
   ensure
     connection&.close
   end
 
-  def self.clear_team!
-    connection = PG.connect(ENV.fetch("DATABASE_URL"))
-    connection.exec("TRUNCATE team_pokemons")
-  ensure
-    connection&.close
+  def self.team_row(name)
+    with_db do |connection|
+      connection.exec_params("SELECT * FROM team_pokemons WHERE name = $1", [name]).first
+    end
+  end
+
+  def self.team_id(name, user_id)
+    with_db do |connection|
+      connection.exec_params(
+        "SELECT id FROM team_pokemons WHERE name = $1 AND user_id = $2",
+        [name, user_id]
+      ).first["id"]
+    end
+  end
+
+  def self.distinct_user_ids
+    with_db do |connection|
+      connection.exec("SELECT DISTINCT user_id FROM team_pokemons").map { |row| row["user_id"] }
+    end
+  end
+
+  def self.column_info(column)
+    with_db do |connection|
+      connection.exec_params(
+        "SELECT is_nullable FROM information_schema.columns WHERE table_name = $1 AND column_name = $2",
+        %w[team_pokemons] + [column]
+      ).first
+    end
+  end
+
+  def self.index_exists(table, column_a, column_b)
+    with_db do |connection|
+      connection.exec_params(
+        <<~SQL,
+          SELECT 1 FROM pg_indexes
+          WHERE tablename = $1 AND indexdef ILIKE '%UNIQUE%'
+            AND indexdef ILIKE '%(#{%(#{column_a}, #{column_b})})%'
+        SQL
+        [table]
+      ).ntuples.positive?
+    end
   end
 end
 
 module PokeApiStub
-  def self.with_find(pokemon)
-    original = PokeApi.method(:find)
-    PokeApi.define_singleton_method(:find) { |_name| pokemon }
-    yield
-  ensure
-    PokeApi.define_singleton_method(:find, original)
-  end
-
-  def self.with_detail(pokemon)
-    existed = PokeApi.respond_to?(:detail)
-    original = existed ? PokeApi.method(:detail) : nil
-    PokeApi.define_singleton_method(:detail) { |_poke_id| pokemon }
+  def self.stub_singleton(method_name, implementation, cache: nil)
+    existed = PokeApi.respond_to?(method_name)
+    original = existed ? PokeApi.method(method_name) : nil
+    PokeApi.instance_variable_set(cache, nil) if cache
+    PokeApi.define_singleton_method(method_name, &implementation)
     yield
   ensure
     if existed
-      PokeApi.define_singleton_method(:detail, original)
+      PokeApi.define_singleton_method(method_name, original)
     else
-      PokeApi.singleton_class.send(:remove_method, :detail)
+      PokeApi.singleton_class.send(:remove_method, method_name)
     end
+    PokeApi.instance_variable_set(cache, nil) if cache
   end
 
-  def self.with_all_names(names)
-    existed = PokeApi.respond_to?(:fetch_all_names)
-    original = existed ? PokeApi.method(:fetch_all_names) : nil
-    PokeApi.define_singleton_method(:fetch_all_names) { names }
-    yield
-  ensure
-    if existed
-      PokeApi.define_singleton_method(:fetch_all_names, original)
-    else
-      PokeApi.singleton_class.send(:remove_method, :fetch_all_names)
-    end
+  def self.with_find(pokemon, &)
+    stub_singleton(:find, proc { |_name| pokemon }, &)
   end
 
-  # rubocop:disable Metrics/MethodLength
-  def self.with_moves_for(moves)
-    existed = PokeApi.respond_to?(:moves_for)
-    original = existed ? PokeApi.method(:moves_for) : nil
-    PokeApi.define_singleton_method(:moves_for) { |_number| moves }
-    PokeApi.instance_variable_set(:@pokemon_moves_cache, nil)
-    yield
-  ensure
-    if existed
-      PokeApi.define_singleton_method(:moves_for, original)
-    else
-      PokeApi.singleton_class.send(:remove_method, :moves_for)
-    end
-    PokeApi.instance_variable_set(:@pokemon_moves_cache, nil)
+  def self.with_detail(pokemon, &)
+    stub_singleton(:detail, proc { |_poke_id| pokemon }, &)
   end
-  # rubocop:enable Metrics/MethodLength
 
-  # rubocop:disable Metrics/MethodLength
-  def self.with_move(move_map)
-    existed = PokeApi.respond_to?(:move)
-    original = existed ? PokeApi.method(:move) : nil
-    PokeApi.define_singleton_method(:move) { |name| move_map[name] }
-    PokeApi.instance_variable_set(:@move_cache, nil)
-    yield
-  ensure
-    if existed
-      PokeApi.define_singleton_method(:move, original)
-    else
-      PokeApi.singleton_class.send(:remove_method, :move)
-    end
-    PokeApi.instance_variable_set(:@move_cache, nil)
+  def self.with_all_names(names, &)
+    stub_singleton(:fetch_all_names, proc { names }, &)
   end
-  # rubocop:enable Metrics/MethodLength
 
-  # rubocop:disable Metrics/MethodLength
-  def self.with_available_move_names(names)
-    existed = PokeApi.respond_to?(:available_move_names)
-    original = existed ? PokeApi.method(:available_move_names) : nil
-    PokeApi.define_singleton_method(:available_move_names) { |_number| names }
-    PokeApi.instance_variable_set(:@available_moves_cache, nil)
-    yield
-  ensure
-    if existed
-      PokeApi.define_singleton_method(:available_move_names, original)
-    else
-      PokeApi.singleton_class.send(:remove_method, :available_move_names)
-    end
-    PokeApi.instance_variable_set(:@available_moves_cache, nil)
+  def self.with_moves_for(moves, &)
+    stub_singleton(:moves_for, proc { |_number| moves }, cache: :@pokemon_moves_cache, &)
   end
-  # rubocop:enable Metrics/MethodLength
 
-  # rubocop:disable Metrics/MethodLength
-  def self.with_type(table)
-    existed = PokeApi.respond_to?(:fetch_type_json)
-    original = existed ? PokeApi.method(:fetch_type_json) : nil
-    PokeApi.define_singleton_method(:fetch_type_json) { |name| table[name] }
-    PokeApi.instance_variable_set(:@type_relations, nil)
-    yield
-  ensure
-    if existed
-      PokeApi.define_singleton_method(:fetch_type_json, original)
-    else
-      PokeApi.singleton_class.send(:remove_method, :fetch_type_json)
-    end
-    PokeApi.instance_variable_set(:@type_relations, nil)
+  def self.with_move(move_map, &)
+    stub_singleton(:move, proc { |name| move_map[name] }, cache: :@move_cache, &)
   end
-  # rubocop:enable Metrics/MethodLength
+
+  def self.with_available_move_names(names, &)
+    stub_singleton(:available_move_names, proc { |_number| names }, cache: :@available_moves_cache, &)
+  end
+
+  def self.with_type(table, &)
+    stub_singleton(:fetch_type_json, proc { |name| table[name] }, cache: :@type_relations, &)
+  end
 end

@@ -2,7 +2,6 @@
 
 require_relative "test_helper"
 
-# rubocop:disable Metrics/ClassLength, Metrics/MethodLength
 class PokeApiMoveTest < Minitest::Test
   def poke_move_json
     {
@@ -187,4 +186,3 @@ class PokeApiMoveTest < Minitest::Test
     PokeApi.instance_variable_set(:@move_cache, nil)
   end
 end
-# rubocop:enable Metrics/ClassLength, Metrics/MethodLength

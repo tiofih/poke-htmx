@@ -1,0 +1,23 @@
+# frozen_string_literal: true
+
+inherit_from: ../.rubocop.yml
+
+# Orçamentos específicos para testes (sessão 0019).
+# Os testes priorizam legibilidade (uma sequência de asserts por teste) e recebem
+# limites maiores que o root; a métrica continua ativa (sem rubocop:disable).
+# lib/** e server.rb seguem as métricas estritas do .rubocop.yml raiz.
+
+Metrics/AbcSize:
+  Max: 40
+
+Metrics/MethodLength:
+  Max: 40
+
+Metrics/ClassLength:
+  Max: 500
+
+Metrics/ParameterLists:
+  Max: 12
+
+Naming/MethodParameterName:
+  MinNameLength: 2

@@ -3,7 +3,6 @@
 require_relative "test_helper"
 require_relative "../lib/type_effectiveness"
 
-# rubocop:disable Metrics/ClassLength
 class PokeApiTest < Minitest::Test
   def fifteen_names
     %w[bulbasaur ivysaur venusaur charmander charmeleon charizard squirtle wartortle
@@ -92,7 +91,6 @@ class PokeApiTest < Minitest::Test
     assert_equal %w[ground], PokeApi.extract_type_relations(json)["electric"]["no"]
   end
 
-  # rubocop:disable Metrics/AbcSize
   def test_type_relations_builds_table_for_all_18_types
     fake = build_type_json_table
     PokeApiStub.with_type(fake) do
@@ -106,9 +104,7 @@ class PokeApiTest < Minitest::Test
       assert_equal %w[ground], relations["flying"]["no"]
     end
   end
-  # rubocop:enable Metrics/AbcSize
 
-  # rubocop:disable Metrics/MethodLength
   def test_type_relations_is_memoized
     PokeApi.instance_variable_set(:@type_relations, nil)
     calls = 0
@@ -128,7 +124,6 @@ class PokeApiTest < Minitest::Test
     PokeApi.define_singleton_method(:fetch_type_json, original)
     PokeApi.instance_variable_set(:@type_relations, nil)
   end
-  # rubocop:enable Metrics/MethodLength
 
   def test_type_effectiveness_load_integra_fonte_stubbed
     PokeApiStub.with_type(build_type_json_table) do
@@ -153,7 +148,6 @@ class PokeApiTest < Minitest::Test
     Faraday.define_singleton_method(:get, original)
   end
 
-  # rubocop:disable Metrics/MethodLength
   def test_evolution_chain_skips_stages_without_pokemon_endpoint
     original_find = PokeApi.method(:find)
     PokeApi.define_singleton_method(:find) do |name|
@@ -187,9 +181,7 @@ class PokeApiTest < Minitest::Test
     PokeApi.define_singleton_method(:find, original_find)
     Faraday.define_singleton_method(:get, original_faraday)
   end
-  # rubocop:enable Metrics/MethodLength
 
-  # rubocop:disable Metrics/MethodLength
   def test_detail_tolerates_null_sprite
     original_data = PokeApi.method(:pokemon_data)
     original_chain = PokeApi.method(:evolution_chain)
@@ -214,9 +206,7 @@ class PokeApiTest < Minitest::Test
     PokeApi.define_singleton_method(:pokemon_data, original_data)
     PokeApi.define_singleton_method(:evolution_chain, original_chain)
   end
-  # rubocop:enable Metrics/MethodLength
 
-  # rubocop:disable Metrics/MethodLength
   def test_find_tolerates_null_sprite
     original = Faraday.method(:get)
     Faraday.define_singleton_method(:get) do |_url|
@@ -233,7 +223,6 @@ class PokeApiTest < Minitest::Test
   ensure
     Faraday.define_singleton_method(:get, original)
   end
-  # rubocop:enable Metrics/MethodLength
 
   def test_detail_returns_nil_when_pokemon_data_is_nil
     original_data = PokeApi.method(:pokemon_data)
@@ -313,7 +302,6 @@ class PokeApiTest < Minitest::Test
     Faraday.define_singleton_method(:get, original)
   end
 
-  # rubocop:disable Metrics/MethodLength
   def test_type_relations_skips_types_that_fail_to_load
     PokeApi.instance_variable_set(:@type_relations, nil)
     original = PokeApi.method(:fetch_type_json)
@@ -332,7 +320,6 @@ class PokeApiTest < Minitest::Test
     PokeApi.define_singleton_method(:fetch_type_json, original)
     PokeApi.instance_variable_set(:@type_relations, nil)
   end
-  # rubocop:enable Metrics/MethodLength
 
   def test_all_returns_empty_when_status_not_ok
     original = Faraday.method(:get)
@@ -365,7 +352,6 @@ class PokeApiTest < Minitest::Test
     Faraday.define_singleton_method(:get, original)
   end
 
-  # rubocop:disable Metrics/MethodLength
   def test_fetch_all_names_memoizes_non_empty_list
     PokeApi.instance_variable_set(:@fetch_all_names, nil)
     calls = 0
@@ -382,9 +368,7 @@ class PokeApiTest < Minitest::Test
     Faraday.define_singleton_method(:get, original)
     PokeApi.instance_variable_set(:@fetch_all_names, nil)
   end
-  # rubocop:enable Metrics/MethodLength
 
-  # rubocop:disable Metrics/MethodLength
   def test_fetch_all_names_does_not_memoize_failure
     PokeApi.instance_variable_set(:@fetch_all_names, nil)
     calls = 0
@@ -403,11 +387,10 @@ class PokeApiTest < Minitest::Test
     Faraday.define_singleton_method(:get, original)
     PokeApi.instance_variable_set(:@fetch_all_names, nil)
   end
-  # rubocop:enable Metrics/MethodLength
 
   private
 
-  # rubocop:disable Layout/LineLength, Metrics/MethodLength
+  # rubocop:disable Layout/LineLength
   def type_relations_table
     {
       "fire" => { "double" => %w[grass bug ice steel], "half" => %w[rock fire water dragon], "no" => [] },
@@ -430,7 +413,7 @@ class PokeApiTest < Minitest::Test
       "normal" => { "double" => [], "half" => %w[rock steel], "no" => %w[ghost] }
     }
   end
-  # rubocop:enable Layout/LineLength, Metrics/MethodLength
+  # rubocop:enable Layout/LineLength
 
   def build_type_json_table
     type_relations_table.to_h do |name, relations|
@@ -445,4 +428,3 @@ class PokeApiTest < Minitest::Test
     build_type_json_table[name]
   end
 end
-# rubocop:enable Metrics/ClassLength
