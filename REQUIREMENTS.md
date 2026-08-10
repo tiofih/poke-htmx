@@ -593,10 +593,13 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 ### Candidatas do draft para a próxima sessão (levantamento de roadmap, 2026-08-09)
 
 > **E2 (tratamento de erros) virou RF-18/sessão 0018, `Done` (validado em 2026-08-09).**
+> **Refatoração de testes (respiro) virou sessão 0019, `Done` (validado em 2026-08-10)** —
+> `rubocop:disable` removidos dos 6 arquivos de teste via `TestSupport`/`TestDatabase`/
+> `PokeApiStub` genérico + orçamentos em `test/.rubocop.yml` (métricas do root mantidas).
 > Próximas candidatas do `draft-auto-battler.md`, **decisão do usuário** na abertura da
 > próxima sessão (RNF-04):
 > **D2 (XP/evolução)** — provável próxima sessão — seguida de **D3 (histórico/rank)** e
 > **D4 (modos de draft temático)**. D2 cruza com D1 (nível de aprendizado dos golpes).
 > Ver detalhamento no `draft-auto-battler.md` (visão D2 fechada em 2026-08-09).
-> Refatoração de testes (remover `rubocop:disable`, draft "Refatorações a revisar")
-> permanece candidata de respiro entre fases grandes.
+> Permanecem anotadas: tratar `rubocop:disable` também em **produção** (`lib/**` +
+> `server.rb`, 5 arquivos/7 disables) em sessão futura (ver draft "Refatorações a revisar").

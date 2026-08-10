@@ -229,8 +229,10 @@
   0017). Estratégia: extrair helpers/factories (`TestSupport`), `with_db`/introspection
   em `TestDatabase`, `PokeApiStub` genérico, dividir classes de teste por área
   (abaixo do `Metrics/ClassLength` default 100) + orçamentos em `test/.rubocop.yml`.
-  **Implementação executada (passos 1–6 verdes: suíte 222/778 + lint 0) em 2026-08-10 —
-  aguardando validação do usuário.**
+  **Executada (passos 1–6 verdes: suíte 222/778 + lint 0) e VALIDADA pelo usuário em
+  2026-08-10 — sessão 0019 Done.** Confirmado também que `lib/**`/`server.rb` não
+  foram tocados (RNF: sem mudança de comportamento) e que o bônus mecânico renderizou
+  disables redundantes removidos em 3 arquivos adicionais.
 
 ### Refatoração dos arquivos de produção (lib/ + server.rb) — anotada 2026-08-10
 
@@ -249,7 +251,8 @@
   **Separar em mais fases** apenas se, durante a fase, algum arquivo exigir mudança
   de contrato público (rotas/lib) ou refactor estrutural grosso (ex.: implodir
   `PokeApi`/`BattleEngine` em módulos) — aí a parte afetada vira sessão própria.
-  Decisão final na validação da 0019.
+  Decisão mantida como anotação para sessão futura (0019 validada em 2026-08-10 sem
+  abrir nova sessão).
 
 ---
 

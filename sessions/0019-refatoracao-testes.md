@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — critérios e plano fechados com o usuário em 2026-08-10 (respiro) |
-| Implementação | Executada (passos 1–6 verdes: suíte 222/778, lint 0) — aguardando validação do usuário |
-| Validação | Pendente (executada pelo usuário) |
+| Implementação | Executada (passos 1–6 verdes: suíte 222/778, lint 0) |
+| Validação | Concluída — usuário validou em 2026-08-10 |
 
 ---
 
@@ -145,12 +145,26 @@ classes. A refatoração é **verificada** por lint 0 + suíte verde.
 
 ## 6. Validação (executada pelo usuário)
 
-(Pendente — fase 3.)
+**Status: CONCLUÍDA — validada pelo usuário em 2026-08-10.**
+
+- [x] Suíte completa verde: **222 runs / 778 asserts, 0 failures/errors** (baseline preservado).
+- [x] Lint RuboCop: **0 offenses** (29 arquivos inspecionados).
+- [x] **Nenhum `# rubocop:disable`/`enable`** nos 6 arquivos de teste alvo
+      (`server_test.rb`, `server_test_helpers.rb`, `test_support.rb`, `team_repository_test.rb`,
+      motores, `schema_test.rb`) — conferido por `grep` + execução.
+- [x] Ambiente (`test/.rubocop.yml`) aplicado: `lib/**`/`server.rb` continuam nas métricas
+      estritas do root; testes têm orçamentos próprios sem desativar métrica.
+- [x] Bônus mecânico aceito: disables redundantes removidos em `poke_api_test.rb` (restou 1
+      `Layout/LineLength` legítimo), `move_test.rb`, `poke_api_move_test.rb`.
+- [x] `testincremental_play_reaches_same_result_as_battle` preservado (baseline 222 intacto).
+- [x] Nenhum comportamento alterado: 0 mudanças em `lib/**`/`server.rb` nesta sessão.
+
+**Resultado:** sessão **0019 concluída — Done** em 2026-08-10. Próxima sessão: **D2 (XP/evolução)**
+(decisão do usuário).
 
 ## 6b. Progresso da implementação (passos 1–6 verdes)
 
-> Executado em 2026-08-10. Aguardando validação do usuário antes de fechar (RNF: não
-> marcar `Done` nem commitar conclusão até o feedback).
+> Executado em 2026-08-10 e **validado pelo usuário** (fase 6 acima).
 
 - **Passos 1–5** (infra + motores + server + team_repository + schema/helper): commit
   `d17d4dc` — `test_support.rb` (`TestSupport`), `server_test_helpers.rb`, `test/.rubocop.yml`

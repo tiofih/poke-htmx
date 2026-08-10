@@ -40,11 +40,11 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0018 (Tratamento de erros, E2/RF-18) concluída e validada em 2026-08-09**
-(222 runs/778 asserts, lint 0). Próximas candidatas do draft, decisão do **usuário**:
+**Sessão 0019 (respiro — refatoração de testes) concluída e validada em 2026-08-10**
+(222 runs/778 asserts, lint 0). Próxima sessão, decisão do **usuário**:
 **D2 (XP/evolução)** — visão de progressão por batalha (pokémon sempre 1ª evolução
 nível 1, ganham XP, aprendem movimentos e evoluem; oponente no mesmo nível do jogador)
-— e **D3 (histórico/rank)**.
+— seguida de **D3 (histórico/rank)**. D1 (nível de aprendizado de golpes) cruza com D2.
 
 ## Progresso das sessões
 
@@ -68,6 +68,7 @@ nível 1, ganham XP, aprendem movimentos e evoluem; oponente no mesmo nível do 
 | 0016 | Logs de batalha detalhados (RF-16, C1) — entry com attacker_name/target_name + battle.erb | Concluída | Done (passos 0–3, validado em 2026-08-09) |
 | 0017 | Página de gerenciamento de time (RF-17, A3) — slot + golpes persistidos + team_manage.erb | Concluída | Done (passos 0–6 + ajustes de validação, 199 runs/708 asserts, validado em 2026-08-09) |
 | 0018 | Tratamento de erros (RF-18, E2) — robustez da fonte + fragmentos amigáveis 200 + handler global | Concluída | Done (passos 0–5, 222 runs/778 asserts, lint 0, validado em 2026-08-09) |
+| 0019 | Respiro: refatoração de testes — remoção dos `rubocop:disable` (6 arquivos, orçamentos em `test/.rubocop.yml`, `TestSupport`/`TestDatabase`/`PokeApiStub` genérico) | Concluída | Done (passos 1–6, 222 runs/778 asserts preservados, lint 0, validado em 2026-08-10) |
 
 ## Estrutura do arquivo de sessão
 
