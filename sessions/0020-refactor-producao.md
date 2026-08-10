@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluída — critérios e plano fechados com o usuário em 2026-08-10 (respiro) |
 | Implementação | Executada (passos 1–6 verdes: suíte 222/778, lint 0, grep 0) |
-| Validação | Pendente (executada pelo usuário) |
+| Validação | Concluída — usuário validou em 2026-08-10 |
 
 ---
 
@@ -159,21 +159,21 @@ comportamento de negócio muda (suíte completa 222 runs/778 asserts preservada)
 
 ## 6. Validação (executada pelo usuário)
 
-**Status: pendente — aguardando o usuário** (fase 3 do ciclo; ao concluir a fase 2,
-o agente para e não marca fases como concluídas nem commita a conclusão).
+**Status: CONCLUÍDA — validada pelo usuário em 2026-08-10.**
 
-- [ ] Suíte completa verde: **222 runs/778 asserts, 0 failures/errors** (baseline preservado).
-- [ ] Lint RuboCop: **0 offenses** (métricas padrão do root: `.rubocop.yml`).
-- [ ] `grep 'rubocop:' lib server.rb` → **0 ocorrências** (nenhum disable/enable de produção).
-- [ ] Nenhum comportamento alterado: rotas/domínio/schema/suíte de testes intactos;
+- [x] Suíte completa verde: **222 runs/778 asserts, 0 failures/errors** (baseline preservado).
+- [x] Lint RuboCop: **0 offenses** (métricas padrão do root: `.rubocop.yml`).
+- [x] `grep 'rubocop:' lib server.rb` → **0 ocorrências** (nenhum disable/enable de produção).
+- [x] Nenhum comportamento alterado: rotas/domínio/schema/suíte de testes intactos;
       0 mudanças em `test/**` nesta sessão.
-- [ ] `server.rb` funcionando em dev (`./scripts/run` + navegação Lista/Time/Batalha).
+- [x] `server.rb` funcionando em dev (`./scripts/run` + navegação Lista/Time/Batalha).
 
-**Resultado:** a preencher após validação do usuário.
+**Resultado:** sessão **0020 concluída — Done** em 2026-08-10. Comportamentos, testes
+e lint validados pelo usuário. Próxima sessão: **E1 (cache de detalhes da PokéAPI)**.
 
 ## 6b. Progresso da implementação (passos 1–6 verdes)
 
-> Executado em 2026-08-10, **aguardando validação do usuário** (fase 6 acima).
+> Executado em 2026-08-10 e **validado pelo usuário** (fase 6 acima).
 
 - **Passos 1–5** (battle_pokemon + team_repository + poke_api + battle_engine +
   server): commits `fc16fc1`, `8f779ea`, `aba3ae4`, `8312e87`, `22dd142` —

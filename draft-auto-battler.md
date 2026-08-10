@@ -253,14 +253,14 @@
   `PokeApi`/`BattleEngine` em módulos) — aí a parte afetada vira sessão própria.
   Decisão mantida como anotação para sessão futura (0019 validada em 2026-08-10 sem
   abrir nova sessão).
-- **Status:** **concluída como sessão 0020** — implementação (passos 1–6) feita em
-  2026-08-10: os 7 `rubocop:disable` removidos de `lib/**` + `server.rb` (5 arquivos)
-  via extração de métodos/módulos por área (`ServerCommon`/`ServerListActions`/
+- **Status:** **concluída e validada como sessão 0020 em 2026-08-10** — os 7
+  `rubocop:disable` removidos de `lib/**` + `server.rb` (5 arquivos) via extração de
+  métodos/módulos por área (`ServerCommon`/`ServerListActions`/
   `ServerTeamActions`/`ServerBattleActions` + rotas em módulos `registered`;
   `BattleActions`; `SlotOperations`; `PokeApiParsing`/`PokeApiMoves`/`PokeApiTypes`;
   `BattlePokemon.from`/`attributes_for`/`base_hp`), com suíte **222/778** + lint **0**
-  preservados e `grep 'rubocop:'` em `lib`/`server.rb` → 0. **Aguardando validação do
-  usuário** antes de marcar `Done`/atualizar o roadmap final. Constantes apontadas no
+  preservados e `grep 'rubocop:'` em `lib`/`server.rb` → 0. Validação do usuário em
+  2026-08-10 (comportamentos, testes e lint OK). Constantes apontadas no
   levantamento de arquitetura (`draft-arquitetura-design-patterns.md`, seções 1.1/2/8).
 
 ---
