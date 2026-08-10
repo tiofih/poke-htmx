@@ -9,7 +9,7 @@
     <% @engine.teams[0].each do |poke| %>
       <p class="fighter">
         <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
-        <%= poke.name %> — HP <%= poke.hp_current %>/<%= poke.hp_max %>
+        <%= poke.name %> — Nível <%= poke.level %> — HP <%= poke.hp_current %>/<%= poke.hp_max %>
       </p>
       <% unless poke.moves.empty? %>
         <ul class="moves">
@@ -26,7 +26,7 @@
     <% @engine.teams[1].each do |poke| %>
       <p class="fighter">
         <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
-        <%= poke.name %> — HP <%= poke.hp_current %>/<%= poke.hp_max %>
+        <%= poke.name %> — Nível <%= poke.level %> — HP <%= poke.hp_current %>/<%= poke.hp_max %>
       </p>
       <% unless poke.moves.empty? %>
         <ul class="moves">
@@ -51,6 +51,9 @@
   <% if @engine.finished? %>
     <% winner_name = @engine.winner.zero? ? "Seu Time" : "Oponente" %>
     <p class="winner"><strong>Vencedor: <%= winner_name %></strong></p>
+    <% if @xp_gained %>
+      <p class="xp-gained"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon.</strong></p>
+    <% end %>
     <button hx-get="/battle" hx-target="#battle" hx-swap="innerHTML">Novo confronto</button>
   <% else %>
     <button hx-post="/battle/play" hx-target="#battle" hx-swap="innerHTML">Jogar</button>

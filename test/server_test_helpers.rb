@@ -14,6 +14,7 @@ module ServerTestHelpers
     TestDatabase.setup!
     TestDatabase.clear_team!
     @repository = TeamRepository.new
+    @progression = ProgressionRepository.new
   end
 
   def pikachu_pokemon

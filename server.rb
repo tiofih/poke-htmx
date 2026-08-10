@@ -8,6 +8,8 @@ require_relative "lib/battle_pokemon"
 require_relative "lib/battle_engine"
 require_relative "lib/opponent_generator"
 require_relative "lib/battle_registry"
+require_relative "lib/progression_repository"
+require_relative "lib/reward_rule"
 
 module ServerCommon
   private
@@ -163,7 +165,7 @@ module ServerBattleActions
     player = player_team(team)
     return nil if player.size < team.size
 
-    opponent = opponent_team
+    opponent = opponent_team(team)
     return nil unless opponent
 
     BattleEngine.new(
@@ -176,18 +178,28 @@ module ServerBattleActions
   def player_team(team)
     team.filter_map do |member|
       detail = settings.api.detail(member.number)
-      detail && BattlePokemon.from(detail, moves: battle_moves_for(member))
+      detail && BattlePokemon.from(detail, moves: battle_moves_for(member), level: member_level(member))
     end
   end
 
-  def opponent_team
+  def member_level(member)
+    settings.progression.get(current_user, member.id)&.fetch(:level) || 1
+  end
+
+  def opponent_team(team)
     opponent = OpponentGenerator.new(
       names: settings.api.fetch_all_names,
-      fetcher: settings.api.method(:detail)
+      fetcher: settings.api.method(:detail),
+      level: average_player_level(team)
     ).team
     return nil if opponent.empty?
 
     opponent.map { |battle_pokemon| battle_pokemon.new(moves: battle_moves_for(battle_pokemon)) }
+  end
+
+  def average_player_level(team)
+    levels = team.map { |member| member_level(member) }
+    (levels.sum / levels.size.to_f).round
   end
 
   def empty_team_fragment
@@ -204,8 +216,18 @@ module ServerBattleActions
     @engine = settings.battles.fetch(current_user)
     return erb :battle, layout: false unless @engine
 
+    was_in_progress = !@engine.finished?
     @engine.play_round
+    grant_finished_xp if was_in_progress && @engine.finished?
+    @xp_gained = RewardRule.new.xp_for(@engine.result) if @engine.finished?
     erb :battle, layout: false
+  end
+
+  def grant_finished_xp
+    reward = RewardRule.new.xp_for(@engine.result)
+    settings.team.all(current_user).each do |member|
+      settings.progression.grant(current_user, member.id, reward)
+    end
   end
 end
 
@@ -319,6 +341,7 @@ class Server < Sinatra::Base
     set :port, 3000
     set :views, "views"
     set :team, TeamRepository.new
+    set :progression, ProgressionRepository.new
     set :battles, BattleRegistry.new
     set :api, PokeApi.instance
     register Sinatra::Reloader

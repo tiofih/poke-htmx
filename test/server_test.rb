@@ -1085,4 +1085,66 @@ class ServerBattleTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "Não foi possível preparar a batalha."
   end
+
+  def test_battle_renders_level_one_per_fighter_by_default
+    @repository.add("user-a", pikachu_pokemon)
+
+    stub_battle_start do
+      get "/battle", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Nível 1"
+    assert_includes last_response.body, "200/200", "nível 1 não escala stats"
+  end
+
+  def test_battle_uses_persisted_member_level_for_player_and_opponent
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.grant("user-a", pokemon_id, 600)
+
+    stub_battle_start do
+      get "/battle", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Nível 4"
+    assert_includes last_response.body, "202/202", "HP 200 escala para 202 no nível 4"
+  end
+
+  def test_battle_play_shows_xp_gained_message_at_finish
+    start_battle_for("user-a")
+    20.times { post "/battle/play", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_match(/Seu Time ganhou \d+ XP/, last_response.body)
+  end
+
+  def test_battle_play_grants_xp_once_on_transition_to_finished
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    start_battle_for("user-a")
+
+    20.times { post "/battle/play", {}, user_session("user-a") }
+
+    after_finish = TestDatabase.progress_row(pokemon_id)["xp"].to_i
+    assert_includes [20, 25, 50], after_finish, "XP concedido uma vez conforme o resultado"
+
+    5.times { post "/battle/play", {}, user_session("user-a") }
+
+    assert_equal after_finish, TestDatabase.progress_row(pokemon_id)["xp"].to_i,
+                 "play após o fim não concede XP de novo (guard de transição)"
+  end
+
+  def test_battle_reset_reflects_persisted_xp_on_new_confront
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    start_battle_for("user-a")
+    20.times { post "/battle/play", {}, user_session("user-a") }
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Nível #{TestDatabase.progress_row(pokemon_id)['level'].to_i}"
+  end
 end
