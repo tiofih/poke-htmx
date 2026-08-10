@@ -14,6 +14,7 @@ module PokeApi
   #   move(name)                                  -> Move | nil
   #   moves_for(number)                           -> [Move]
   #   next_evolutions(number)                     -> [{number:, name:, min_level:}]
+  #   learnable_moves(number)                     -> [{level:, name:}]
   #   type_relations                              -> { tipo => { double:, half:, no: } }
   #   fetch_all_names                             -> [String]
   #

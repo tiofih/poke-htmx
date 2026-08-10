@@ -167,4 +167,66 @@ class PokeApiHttpTest < Minitest::Test
   ensure
     Faraday.define_singleton_method(:get, @original_faraday)
   end
+
+  def test_learnable_moves_returns_level_up_moves_with_min_level_per_move
+    @api.define_singleton_method(:pokemon_data) do |_number|
+      {
+        "moves" => [
+          {
+            "move" => { "name" => "thunder-shock" },
+            "version_group_details" => [
+              { "level_learned_at" => 1, "move_learn_method" => { "name" => "level-up" } },
+              { "level_learned_at" => 0, "move_learn_method" => { "name" => "egg" } }
+            ]
+          },
+          {
+            "move" => { "name" => "quick-attack" },
+            "version_group_details" => [
+              { "level_learned_at" => 0, "move_learn_method" => { "name" => "tutor" } }
+            ]
+          },
+          {
+            "move" => { "name" => "thunderbolt" },
+            "version_group_details" => [
+              { "level_learned_at" => 26, "move_learn_method" => { "name" => "level-up" } },
+              { "level_learned_at" => 30, "move_learn_method" => { "name" => "level-up" } }
+            ]
+          }
+        ]
+      }
+    end
+
+    result = @api.learnable_moves(25)
+
+    assert_equal 2, result.size
+    assert_equal({ level: 1, name: "thunder-shock" }, result.first)
+    assert_equal({ level: 26, name: "thunderbolt" }, result.last)
+  end
+
+  def test_learnable_moves_returns_empty_when_pokemon_data_nil
+    @api.define_singleton_method(:pokemon_data) { |_number| nil }
+
+    result = @api.learnable_moves(999)
+
+    assert_equal [], result
+  end
+
+  def test_learnable_moves_excludes_machine_and_tutor_methods
+    @api.define_singleton_method(:pokemon_data) do |_number|
+      {
+        "moves" => [
+          {
+            "move" => { "name" => "water-gun" },
+            "version_group_details" => [
+              { "level_learned_at" => 0, "move_learn_method" => { "name" => "machine" } }
+            ]
+          }
+        ]
+      }
+    end
+
+    result = @api.learnable_moves(7)
+
+    assert_equal [], result
+  end
 end

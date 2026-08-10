@@ -21,6 +21,17 @@ module PokeApiMoves
     data.to_h["moves"].to_a.map { |entry| entry.dig("move", "name") }.compact.sort
   end
 
+  def learnable_moves(number)
+    data = pokemon_data(number)
+    return [] unless data
+
+    entries = data.to_h["moves"].to_a.filter_map do |entry|
+      level = min_level_learned_at(entry["version_group_details"].to_a)
+      level ? { level: level, name: entry.dig("move", "name") } : nil
+    end
+    entries.sort_by { |m| [m[:level], m[:name]] }
+  end
+
   def extract_move(json)
     Move.new(
       name: json["name"],
@@ -38,5 +49,14 @@ module PokeApiMoves
     JSON.parse(response.body)
   rescue Faraday::Error, JSON::ParserError
     nil
+  end
+
+  private
+
+  def min_level_learned_at(details)
+    levels = details.filter_map do |d|
+      d["level_learned_at"] if d.dig("move_learn_method", "name") == "level-up"
+    end
+    levels.min
   end
 end
