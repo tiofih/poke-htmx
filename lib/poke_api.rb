@@ -40,7 +40,7 @@ class PokeApi
 
   def self.find(name)
     response = Faraday.get("https://pokeapi.co/api/v2/pokemon/#{name}")
-    return nil unless response.status == 200
+    return nil unless response.respond_to?(:status) && response.status == 200
 
     resp = JSON.parse(response.body)
     Pokemon.new(
@@ -48,11 +48,15 @@ class PokeApi
       sprite: resp.dig("sprites", "front_default").to_s,
       number: resp["id"]
     )
+  rescue Faraday::Error, JSON::ParserError
+    nil
   end
 
   # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def self.detail(poke_id)
     data = pokemon_data(poke_id)
+    return nil unless data
+
     Pokemon.new(
       name: data["name"],
       sprite: data.dig("sprites", "front_default").to_s,
@@ -68,18 +72,28 @@ class PokeApi
 
   def self.pokemon_data(poke_id)
     response = Faraday.get("https://pokeapi.co/api/v2/pokemon/#{poke_id}")
-    return nil unless response.status == 200
+    return nil unless response.respond_to?(:status) && response.status == 200
 
     JSON.parse(response.body)
+  rescue Faraday::Error, JSON::ParserError
+    nil
   end
 
   def self.evolution_chain(species_url)
-    species = JSON.parse(Faraday.get(species_url).body)
+    species_response = Faraday.get(species_url)
+    return [] unless species_response.respond_to?(:status) && species_response.status == 200
+
+    species = JSON.parse(species_response.body)
     chain_url = species.dig("evolution_chain", "url")
     return [] unless chain_url
 
-    chain = JSON.parse(Faraday.get(chain_url).body)["chain"]
+    chain_response = Faraday.get(chain_url)
+    return [] unless chain_response.respond_to?(:status) && chain_response.status == 200
+
+    chain = JSON.parse(chain_response.body)["chain"]
     flatten_chain(chain).filter_map { |name| find(name) }
+  rescue Faraday::Error, JSON::ParserError
+    []
   end
 
   def self.flatten_chain(chain)
@@ -126,9 +140,11 @@ class PokeApi
 
   def self.fetch_move_json(name)
     response = Faraday.get("https://pokeapi.co/api/v2/move/#{name}")
-    return nil unless response.status == 200
+    return nil unless response.respond_to?(:status) && response.status == 200
 
     JSON.parse(response.body)
+  rescue Faraday::Error, JSON::ParserError
+    nil
   end
 
   def self.extract_type_relations(json)
@@ -146,17 +162,19 @@ class PokeApi
                   psychic bug rock ghost dark dragon steel fairy].freeze
 
   def self.fetch_type_json(name)
-    JSON.parse(Faraday.get("https://pokeapi.co/api/v2/type/#{name}").body)
+    response = Faraday.get("https://pokeapi.co/api/v2/type/#{name}")
+    return nil unless response.respond_to?(:status) && response.status == 200
+
+    JSON.parse(response.body)
+  rescue Faraday::Error, JSON::ParserError
+    nil
   end
 
   def self.type_relations
     @type_relations ||= TYPE_NAMES.each_with_object({}) do |name, acc|
-      acc.merge!(extract_type_json(name))
+      json = fetch_type_json(name)
+      acc.merge!(extract_type_relations(json)) if json
     end
-  end
-
-  def self.extract_type_json(name)
-    extract_type_relations(fetch_type_json(name))
   end
 end
 # rubocop:enable Metrics/ClassLength

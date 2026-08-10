@@ -177,7 +177,7 @@ class PokeApiTest < Minitest::Test
     }
     original_faraday = Faraday.method(:get)
     Faraday.define_singleton_method(:get) do |url|
-      Struct.new(:body).new(JSON.generate(stub_responses.fetch(url)))
+      Struct.new(:status, :body).new(200, JSON.generate(stub_responses.fetch(url)))
     end
 
     evolutions = PokeApi.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
@@ -232,6 +232,105 @@ class PokeApiTest < Minitest::Test
     assert_equal "offender", pokemon.name
   ensure
     Faraday.define_singleton_method(:get, original)
+  end
+  # rubocop:enable Metrics/MethodLength
+
+  def test_detail_returns_nil_when_pokemon_data_is_nil
+    original_data = PokeApi.method(:pokemon_data)
+    PokeApi.define_singleton_method(:pokemon_data) { |_id| nil }
+
+    assert_nil PokeApi.detail(999)
+  ensure
+    PokeApi.define_singleton_method(:pokemon_data, original_data)
+  end
+
+  def test_find_returns_nil_on_network_error
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "network down" }
+
+    assert_nil PokeApi.find("pikachu")
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
+  def test_fetch_move_json_returns_nil_on_network_error
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "network down" }
+
+    assert_nil PokeApi.fetch_move_json("thunder-shock")
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
+  def test_evolution_chain_returns_empty_when_status_not_ok
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |_url|
+      Struct.new(:status, :body).new(404, "Not Found")
+    end
+
+    assert_empty PokeApi.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
+  def test_evolution_chain_returns_empty_on_network_error
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "network down" }
+
+    assert_empty PokeApi.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
+  def test_evolution_chain_returns_empty_when_body_is_not_json
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |_url|
+      Struct.new(:status, :body).new(200, "<html>rate limit</html>")
+    end
+
+    assert_empty PokeApi.evolution_chain("https://pokeapi.co/api/v2/pokemon-species/x")
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
+  def test_fetch_type_json_returns_nil_when_status_not_ok
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |_url|
+      Struct.new(:status, :body).new(404, "Not Found")
+    end
+
+    assert_nil PokeApi.fetch_type_json("fire")
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
+  def test_fetch_type_json_returns_nil_on_network_error
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "network down" }
+
+    assert_nil PokeApi.fetch_type_json("fire")
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
+  # rubocop:disable Metrics/MethodLength
+  def test_type_relations_skips_types_that_fail_to_load
+    PokeApi.instance_variable_set(:@type_relations, nil)
+    original = PokeApi.method(:fetch_type_json)
+    test_self = self
+    PokeApi.define_singleton_method(:fetch_type_json) do |name|
+      return nil if name == "fire"
+
+      test_self.send(:type_json_for, name)
+    end
+
+    relations = PokeApi.type_relations
+
+    assert_equal 17, relations.size
+    refute_includes relations.keys, "fire"
+  ensure
+    PokeApi.define_singleton_method(:fetch_type_json, original)
+    PokeApi.instance_variable_set(:@type_relations, nil)
   end
   # rubocop:enable Metrics/MethodLength
 
