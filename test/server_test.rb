@@ -1108,6 +1108,37 @@ class ServerTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
+  def test_pokemon_name_with_unknown_name_shows_friendly_notice
+    PokeApiStub.with_find(nil) do
+      get "/pokemon", name: "xyz"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Pokémon não encontrado."
+    refute_includes last_response.body, "<html"
+  end
+
+  def test_pokemon_detail_with_unknown_id_shows_friendly_notice
+    PokeApiStub.with_detail(nil) do
+      get "/pokemon/999999"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Pokémon não encontrado."
+    refute_includes last_response.body, "<html"
+  end
+
+  def test_post_team_with_unknown_name_shows_notice_and_does_not_insert
+    PokeApiStub.with_find(nil) do
+      post "/team", { pokeName: "xyz" }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Pokémon não encontrado."
+    refute_includes last_response.body, "<html"
+    assert_empty @repository.all("user-a")
+  end
+
   private
 
   def add_four_pokemon_team(user_id)

@@ -64,7 +64,12 @@ class Server < Sinatra::Base
 
   get "/pokemon" do
     @pokemon = PokeApi.find(params[:name])
-    erb :pokemon, layout: false
+    if @pokemon
+      erb :pokemon, layout: false
+    else
+      @message = "Pokémon não encontrado."
+      erb :error, layout: false
+    end
   end
 
   get "/pokemon/close" do
@@ -73,7 +78,12 @@ class Server < Sinatra::Base
 
   get "/pokemon/:poke_id" do
     @pokemon = PokeApi.detail(params[:poke_id])
-    erb :pokemon_detail, layout: false
+    if @pokemon
+      erb :pokemon_detail, layout: false
+    else
+      @message = "Pokémon não encontrado."
+      erb :error, layout: false
+    end
   end
 
   get "/team" do
@@ -91,10 +101,14 @@ class Server < Sinatra::Base
 
   post "/team" do
     pokemon = PokeApi.find(params[:pokeName])
-    begin
-      settings.team.add(current_user, pokemon)
-    rescue TeamRepository::TeamFullError, TeamRepository::DuplicateError => e
-      @notice = e.message
+    if pokemon
+      begin
+        settings.team.add(current_user, pokemon)
+      rescue TeamRepository::TeamFullError, TeamRepository::DuplicateError => e
+        @notice = e.message
+      end
+    else
+      @notice = "Pokémon não encontrado."
     end
     @team = settings.team.all(current_user)
     erb :team, layout: false
