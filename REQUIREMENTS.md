@@ -562,6 +562,12 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 16 | Logs de batalha detalhados (C1) | Done (sessão 0016, validado em 2026-08-09) |
 | 17 | Página de gerenciamento de time (A3) | Done (sessão 0017, validado em 2026-08-09) |
 | 18 | Tratamento de erros (E2) | Done (sessão 0018, validado em 2026-08-09) |
+| 19 | Refactor de produção (respiro) — 7 `rubocop:disable` de `lib/**`+`server.rb` | **Próxima (sessão 0020)** — decidida em 2026-08-10 |
+| 20 | E1 — Cache de detalhes da PokéAPI (gateway/cache) | Planejada (após 0020) |
+| 21 | D2 — XP/evolução (progressão entre batalhas) | Planejada (E1 → D2) |
+| 22 | D3 — Histórico/rank de batalhas | Planejada (após D2) |
+| 23 | Fase Eco — moeda (Eco-1), Poke Center (Eco-2), Poke Mart (Eco-3), itens em batalha (Eco-4) | Planejada (após D3) |
+| 24 | Candidatos futuros — D4 (draft temático), D1 (nível de aprendizado), J1 (seleção inicial), J2 (personalização), J3 (ranking S–F) | Backlog |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
@@ -596,10 +602,12 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 > **Refatoração de testes (respiro) virou sessão 0019, `Done` (validado em 2026-08-10)** —
 > `rubocop:disable` removidos dos 6 arquivos de teste via `TestSupport`/`TestDatabase`/
 > `PokeApiStub` genérico + orçamentos em `test/.rubocop.yml` (métricas do root mantidas).
-> Próximas candidatas do `draft-auto-battler.md`, **decisão do usuário** na abertura da
-> próxima sessão (RNF-04):
-> **D2 (XP/evolução)** — provável próxima sessão — seguida de **D3 (histórico/rank)** e
-> **D4 (modos de draft temático)**. D2 cruza com D1 (nível de aprendizado dos golpes).
-> Ver detalhamento no `draft-auto-battler.md` (visão D2 fechada em 2026-08-09).
-> Permanecem anotadas: tratar `rubocop:disable` também em **produção** (`lib/**` +
-> `server.rb`, 5 arquivos/7 disables) em sessão futura (ver draft "Refatorações a revisar").
+> **Roadmap fechado em 2026-08-10 (decisão do usuário):** o respiro agora vai para a
+> **produção** — **sessão 0020, refactor dos 7 `rubocop:disable` de `lib/**` + `server.rb`**
+> (5 arquivos, mesmo molde da 0019 — suíte 222/778 + lint 0 preservados, sem mudança de
+> comportamento). Em sequência depois: **E1 (cache de detalhes da PokéAPI)** → **D2
+> (XP/evolução)** → **D3 (histórico/rank)** → **Fase Eco (Eco-1..4)** → candidatos futuros
+> (D4, D1, J1/J2/J3). Visão fechada de D2: pokémon sempre 1ª evolução nível 1 na montagem,
+> ganham XP a cada batalha, aprendem movimentos e evoluem; oponente no mesmo nível do
+> jogador. Ver `draft-arquitetura-design-patterns.md` (seções 2 e 8) e a tabela do
+> Roadmap acima.

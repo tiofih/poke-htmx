@@ -41,10 +41,22 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 ## Próxima sessão
 
 **Sessão 0019 (respiro — refatoração de testes) concluída e validada em 2026-08-10**
-(222 runs/778 asserts, lint 0). Próxima sessão, decisão do **usuário**:
-**D2 (XP/evolução)** — visão de progressão por batalha (pokémon sempre 1ª evolução
-nível 1, ganham XP, aprendem movimentos e evoluem; oponente no mesmo nível do jogador)
-— seguida de **D3 (histórico/rank)**. D1 (nível de aprendizado de golpes) cruza com D2.
+(222 runs/778 asserts, lint 0). Próxima sessão (**decisão do usuário em 2026-08-10**):
+
+> **Sessão 0020 — refactor de produção (respiro):** remover os 7 `rubocop:disable` de
+> `lib/**` + `server.rb` (5 arquivos) — mesmo molde/respiro da 0019, sem mudança de
+> comportamento (critério: suíte 222/778 + lint 0 preservados). Detalhamento em
+> `draft-auto-battler.md` ("Refatoração dos arquivos de produção") e
+> `draft-arquitetura-design-patterns.md` (seções 2 e 8).
+
+Após a 0020, sequência fechada em 2026-08-10 (decisões 2/9–13 do
+`draft-arquitetura-design-patterns.md`):
+
+> **E1 (cache de detalhes da PokéAPI — gateway/cache)** → **D2 (XP/evolução — progres-
+> são persistida, oponente escalando com o nível)** → **D3 (histórico/rank)** →
+> **Fase Eco (Eco-1 moeda pós-batalha, Eco-2 Poke Center, Eco-3 Poke Mart, Eco-4 itens
+> em batalha)** → candidatos futuros (D4 draft temático, D1 nível de aprendizado,
+> J1 seleção inicial, J2 personalização, J3 ranking S–F).
 
 ## Progresso das sessões
 
