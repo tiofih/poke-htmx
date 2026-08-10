@@ -112,4 +112,39 @@ class PokeApiCacheTest < Minitest::Test
     assert_same cached, @cache.find("pikachu")
     assert_equal 1, @inner.find_calls
   end
+
+  def test_evicts_least_recently_used_when_over_max_entries
+    cache = PokeApiCache.new(@inner, ttl: 600, max_entries: 2, clock: @clock)
+
+    cache.find("a")
+    cache.find("b")
+    cache.find("a")
+    cache.find("c")
+
+    assert_equal 3, @inner.find_calls
+  end
+
+  def test_evicted_entry_is_refetched
+    cache = PokeApiCache.new(@inner, ttl: 600, max_entries: 2, clock: @clock)
+
+    cache.find("a")
+    cache.find("b")
+    cache.find("a")
+    cache.find("c")
+    cache.find("b")
+
+    assert_equal 4, @inner.find_calls
+  end
+
+  def test_most_recently_used_survives_eviction
+    cache = PokeApiCache.new(@inner, ttl: 600, max_entries: 2, clock: @clock)
+
+    cache.find("a")
+    cache.find("b")
+    cache.find("a")
+    cache.find("c")
+    cache.find("a")
+
+    assert_equal 3, @inner.find_calls
+  end
 end
