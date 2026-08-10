@@ -17,10 +17,10 @@ module ServerCommon
   end
 
   def battle_moves_for(pokemon)
-    saved = pokemon.moves.filter_map { |name| PokeApi.move(name) }
+    saved = pokemon.moves.filter_map { |name| settings.api.move(name) }
     return saved unless saved.empty?
 
-    moves = PokeApi.moves_for(pokemon.number)
+    moves = settings.api.moves_for(pokemon.number)
     return moves unless moves.empty?
 
     [Move.new(name: "Struggle", type: pokemon.types.first || "normal", power: 10, accuracy: nil, pp: 100)]
@@ -33,7 +33,7 @@ module ServerListActions
   def render_index
     @offset = 0
     @q = ""
-    @page = PokeApi.paginate(offset: @offset, query: @q)
+    @page = settings.api.paginate(offset: @offset, query: @q)
     @notice = "Não foi possível carregar a lista de Pokémon." if @page[:names].empty? && @q.empty?
     erb :index
   end
@@ -41,13 +41,13 @@ module ServerListActions
   def render_pokemons_list
     @offset = params[:offset].to_i
     @q = params[:q].to_s
-    @page = PokeApi.paginate(offset: @offset, query: @q)
+    @page = settings.api.paginate(offset: @offset, query: @q)
     @notice = "Não foi possível carregar a lista de Pokémon." if @page[:names].empty? && @q.empty?
     erb :pokemon_list, layout: false
   end
 
   def render_pokemon_fragment
-    @pokemon = PokeApi.find(params[:name])
+    @pokemon = settings.api.find(params[:name])
     if @pokemon
       erb :pokemon, layout: false
     else
@@ -57,7 +57,7 @@ module ServerListActions
   end
 
   def render_pokemon_detail
-    @pokemon = PokeApi.detail(params[:poke_id])
+    @pokemon = settings.api.detail(params[:poke_id])
     if @pokemon
       erb :pokemon_detail, layout: false
     else
@@ -82,11 +82,11 @@ module ServerTeamActions
   end
 
   def moves_for_team
-    @team.to_h { |member| [member.id, PokeApi.available_move_names(member.number)] }
+    @team.to_h { |member| [member.id, settings.api.available_move_names(member.number)] }
   end
 
   def add_team_member
-    pokemon = PokeApi.find(params[:pokeName])
+    pokemon = settings.api.find(params[:pokeName])
     @notice = add_team_notice(pokemon)
     @team = settings.team.all(current_user)
     erb :team, layout: false
@@ -166,18 +166,25 @@ module ServerBattleActions
     opponent = opponent_team
     return nil unless opponent
 
-    BattleEngine.new(team_a: player, team_b: opponent)
+    BattleEngine.new(
+      team_a: player,
+      team_b: opponent,
+      effectiveness: TypeEffectiveness.load(settings.api)
+    )
   end
 
   def player_team(team)
     team.filter_map do |member|
-      detail = PokeApi.detail(member.number)
+      detail = settings.api.detail(member.number)
       detail && BattlePokemon.from(detail, moves: battle_moves_for(member))
     end
   end
 
   def opponent_team
-    opponent = OpponentGenerator.new(names: PokeApi.fetch_all_names).team
+    opponent = OpponentGenerator.new(
+      names: settings.api.fetch_all_names,
+      fetcher: settings.api.method(:detail)
+    ).team
     return nil if opponent.empty?
 
     opponent.map { |battle_pokemon| battle_pokemon.new(moves: battle_moves_for(battle_pokemon)) }
@@ -313,6 +320,7 @@ class Server < Sinatra::Base
     set :views, "views"
     set :team, TeamRepository.new
     set :battles, BattleRegistry.new
+    set :api, PokeApi.instance
     register Sinatra::Reloader
   end
 

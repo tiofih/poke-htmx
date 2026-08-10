@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative "poke_api"
+
 class TypeEffectiveness
   FACTORS = { "double" => 2.0, "half" => 0.5, "no" => 0.0 }.freeze
 
@@ -7,8 +9,8 @@ class TypeEffectiveness
     new(relations)
   end
 
-  def self.load
-    from_relations(PokeApi.type_relations)
+  def self.load(api = PokeApi.instance)
+    from_relations(api.type_relations)
   end
 
   def initialize(relations)

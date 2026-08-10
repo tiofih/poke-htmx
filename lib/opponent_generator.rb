@@ -6,7 +6,7 @@ require_relative "battle_pokemon"
 class OpponentGenerator
   DEFAULT_TEAM_SIZE = 6
 
-  def initialize(names:, size: DEFAULT_TEAM_SIZE, rng: Random.new, fetcher: PokeApi.method(:detail))
+  def initialize(names:, size: DEFAULT_TEAM_SIZE, rng: Random.new, fetcher: PokeApi.instance.method(:detail))
     @names = names
     @size = size
     @rng = rng

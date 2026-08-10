@@ -389,8 +389,13 @@ class ServerTeamTest < Minitest::Test
   def test_unexpected_error_renders_friendly_fragment_without_stack
     @repository.add("user-a", pikachu_pokemon)
 
-    original = PokeApi.method(:available_move_names)
-    PokeApi.define_singleton_method(:available_move_names) { |_number| raise "boom inesperado" }
+    raising_api = Class.new do
+      def available_move_names(_number)
+        raise "boom inesperado"
+      end
+    end.new
+    previous = Server.settings.api
+    Server.set :api, raising_api
 
     get "/team/manage", {}, user_session("user-a")
 
@@ -399,7 +404,7 @@ class ServerTeamTest < Minitest::Test
     refute_includes last_response.body, "<html"
     refute_includes last_response.body, "boom inesperado"
   ensure
-    PokeApi.define_singleton_method(:available_move_names, original)
+    Server.set :api, previous
   end
 end
 
