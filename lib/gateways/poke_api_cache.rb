@@ -48,6 +48,14 @@ class PokeApiCache
     fetch([:fetch_all_names], accept: ->(value) { !value.empty? }) { @inner.fetch_all_names }
   end
 
+  def next_evolutions(number)
+    fetch([:next_evolutions, number]) { @inner.next_evolutions(number) }
+  end
+
+  def learnable_moves(number)
+    fetch([:learnable_moves, number]) { @inner.learnable_moves(number) }
+  end
+
   private
 
   def fetch(key, accept: nil)

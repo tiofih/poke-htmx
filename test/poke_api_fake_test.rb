@@ -19,6 +19,8 @@ class PokeApiFakeTest < Minitest::Test
       assert_respond_to adapter, :moves_for
       assert_respond_to adapter, :available_move_names
       assert_respond_to adapter, :type_relations
+      assert_respond_to adapter, :next_evolutions
+      assert_respond_to adapter, :learnable_moves
     end
   end
 
@@ -71,5 +73,19 @@ class PokeApiFakeTest < Minitest::Test
     fake = PokeApiFake.new(type_relations: table)
 
     assert_same table, fake.type_relations
+  end
+
+  def test_next_evolutions_returns_configured_data
+    data = [{ number: 5, name: "charmeleon", min_level: 16 }]
+    fake = PokeApiFake.new(next_evolutions: data)
+
+    assert_equal data, fake.next_evolutions(4)
+  end
+
+  def test_learnable_moves_returns_configured_data
+    data = [{ level: 1, name: "thunder-shock" }]
+    fake = PokeApiFake.new(learnable_moves: data)
+
+    assert_equal data, fake.learnable_moves(25)
   end
 end

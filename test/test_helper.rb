@@ -154,4 +154,12 @@ module PokeApiStub
     end
     with_gateway(type_relations: relations, &)
   end
+
+  def self.with_next_evolutions(data, &)
+    with_gateway(next_evolutions: data, &)
+  end
+
+  def self.with_learnable_moves(data, &)
+    with_gateway(learnable_moves: data, &)
+  end
 end

@@ -6,7 +6,7 @@ require_relative "../lib/gateways/poke_api_cache"
 class CountingApi
   attr_reader :detail_calls, :find_calls, :fetch_all_names_calls,
               :move_calls, :moves_for_calls, :type_relations_calls,
-              :available_move_names_calls
+              :available_move_names_calls, :next_evolutions_calls, :learnable_moves_calls
 
   def initialize
     @detail_calls = 0
@@ -16,6 +16,8 @@ class CountingApi
     @moves_for_calls = 0
     @type_relations_calls = 0
     @available_move_names_calls = 0
+    @next_evolutions_calls = 0
+    @learnable_moves_calls = 0
   end
 
   def detail(poke_id)
@@ -57,6 +59,16 @@ class CountingApi
   def type_relations
     @type_relations_calls += 1
     { "normal" => { "double" => [], "half" => [], "no" => ["ghost"] } }
+  end
+
+  def next_evolutions(_number)
+    @next_evolutions_calls += 1
+    [{ number: 5, name: "charmeleon", min_level: 16 }]
+  end
+
+  def learnable_moves(_number)
+    @learnable_moves_calls += 1
+    [{ level: 1, name: "thunder-shock" }]
   end
 end
 
@@ -286,5 +298,33 @@ class PokeApiCacheTest < Minitest::Test
     @cache.available_move_names(6)
 
     assert_equal 2, @inner.available_move_names_calls
+  end
+
+  def test_next_evolutions_is_delegated_via_interface
+    @cache.next_evolutions(4)
+
+    assert_equal 1, @inner.next_evolutions_calls
+  end
+
+  def test_next_evolutions_is_cached_by_number
+    first = @cache.next_evolutions(4)
+    second = @cache.next_evolutions(4)
+
+    assert_same first, second
+    assert_equal 1, @inner.next_evolutions_calls
+  end
+
+  def test_learnable_moves_is_delegated_via_interface
+    @cache.learnable_moves(25)
+
+    assert_equal 1, @inner.learnable_moves_calls
+  end
+
+  def test_learnable_moves_is_cached_by_number
+    first = @cache.learnable_moves(25)
+    second = @cache.learnable_moves(25)
+
+    assert_same first, second
+    assert_equal 1, @inner.learnable_moves_calls
   end
 end
