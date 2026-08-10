@@ -227,10 +227,26 @@
 
 ---
 
+## Cadastro de ideias emergentes (levantamento de roadmap, 2026-08-09)
+
+- **Cache local de detalhes da PokéAPI (E1):** `GET /battle`/RF-06 fazem N requests na
+  PokéAPI (1 por membro do time); hoje só a listagem/nomes têm cache — os detalhes (por
+  membro e por golpe) são buscados a cada request. Emergiu da observação da sessão 0013
+  ("fora do escopo" na época). Pernosso quando D2 (XP/evolução) aumentar o volume de
+  requests (cada batalha monta times + golpes repetidos). **Aguarda sessão (RNF-04).**
+- **Tratamento de erros (E2):** nome inválido, rate-limit da PokéAPI, time sem membros,
+  duplicados — hoje sem tratamento global (backlog). Transversal e barato; candidato a
+  requisito/sessão própria antes dos demais. **Aguarda sessão (RNF-04).**
+
+---
+
 ## Próximos passos (fora deste arquivo)
 
-1. **0007**: implementar + validar (TDD) — montagem de times é pré-requisito de B/C.
-2. Logo após validar: **elencar o que fica e o que sai** da lista acima,
+1. **Sessão corrente concluída/validada (0017).** Próximas candidatas, decisão do usuário:
+   **D2 (XP/evolução)** — provável próxima — depois **D3 (histórico/rank)** e
+   **D4 (modos de draft temático)**; E2 (tratamento de erros) é candidato transversal
+   e E1 (cache de detalhes) ganha peso quando D2 entrar.
+2. Logo após decidir: **elencar o que fica e o que sai** da lista acima,
    definir ordem e transformar os escolhidos em **documentos de sessão** com
    critérios fechados e plano TDD (como a 0007).
 3. **Nota:** B3 (motor) destrav não depende de B1/B2 sequenciais A/B — ordem sugerida:

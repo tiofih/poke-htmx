@@ -274,7 +274,11 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Paginação/filtro sem JS customizado (RNF-01); o `<select>` continua disparando
       `hx-get="/pokemon"` ao trocar a opção.
 
-### RF-02 — Visualizar Pokémon — `Draft`
+### RF-02 — Visualizar Pokémon — `Draft` (Descartável — superado por RF-03 + RF-06)
+> Anotado no levantamento de roadmap (2026-08-09): este requisito está **obsoleto** —
+> o comportamento (visualizar sprite/nome + "Add to Team" ao selecionar) já é coberto
+> por RF-03 (formulário Add to Team) e RF-06 (página de detalhes com sprite/nome).
+> Mantido como `Draft` por convenção (RNF-04), mas **não deve virar sessão**.
 - Ao selecionar um Pokémon no `<select>`, disparar `hx-get /pokemon?name=<nome>` em `#change`.
 - Renderizar no alvo `#pokemon`: sprite, nome e botão "Add to Team".
 
@@ -484,6 +488,12 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       + filtro por nome com cache; busca parcial server-side da PokéAPI segue limitada
       (lista completa cacheada em memória).
 - [ ] **Sem tratamento de erros** — nome inválido, rate-limit da PokéAPI, time sem membros, duplicados.
+  *Candidato para refinamento (levantamento de roadmap, 2026-08-09): transversal e barato;
+  registrado para virar requisito/sessão própria no futuro (RNF-04).*
+- [ ] **Cache local de detalhes da PokéAPI** — `GET /battle`/RF-06 fazem N requests na
+  PokéAPI (1 por membro do time); hoje não há cache de detalhes (só listagem/nomes).
+  *Emergeu da observação da sessão 0013 ("fora do escopo" na época); ganha peso quando
+  D2 (XP) aumentar o volume de requests. Aguarda sessão (RNF-04).*
 - [x] **HTML parcial sem layout único** — resolvido na sessão 0014 (RF-14): layout único
       `views/layout.erb` + navegação (Lista/Time/Batalha) + CSS externo sobre a base sakura.
 - [x] **Robustez na batalha (dados da PokéAPI)** — resolvido na validação da sessão 0014:
@@ -538,3 +548,13 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
   ver draft-auto-battler.md).**
 - **Layout/estilos externos:** extrair layout, navbar e estilos compartilhados
   (a antiga sessão 0007-UI volta ao backlog como 0009+).
+
+### Candidatas do draft para a próxima sessão (levantamento de roadmap, 2026-08-09)
+
+> Sessão 0017 concluída e validada. Próximas candidatas do `draft-auto-battler.md`,
+> **decisão do usuário** na abertura da próxima sessão (RNF-04):
+> **D2 (XP/evolução)** — provável próxima sessão — seguida de **D3 (histórico/rank)** e
+> **D4 (modos de draft temático)**. D2 cruza com D1 (nível de aprendizado dos golpes).
+> Ver detalhamento no `draft-auto-battler.md` (visão D2 fechada em 2026-08-09).
+> Refatoração de testes (remover `rubocop:disable`, draft "Refatorações a revisar")
+> permanece candidata de respiro entre fases grandes.
