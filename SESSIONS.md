@@ -40,11 +40,11 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0017 (Página de gerenciamento de time, A3/RF-17) concluída e validada em
-2026-08-09** (199 runs/708 asserts, lint 0). Próximas candidatas do draft, decisão do
-usuário: **D2 (XP/evolução)** — visão de progressão por batalha (pokémon sempre 1ª
-evolução nível 1, ganham XP, aprendem movimentos e evoluem; oponente no mesmo nível do
-jogador) — e **D3 (histórico/rank)**.
+**Sessão 0018 (Tratamento de erros, E2/RF-18) em fase de implementação concluída —
+aguardando a validação do usuário (fase 3).** Após a validação, próximas candidatas do
+draft, decisão do usuário: **D2 (XP/evolução)** — visão de progressão por batalha
+(pokémon sempre 1ª evolução nível 1, ganham XP, aprendem movimentos e evoluem; oponente
+no mesmo nível do jogador) — e **D3 (histórico/rank)**.
 
 ## Progresso das sessões
 
@@ -67,6 +67,7 @@ jogador) — e **D3 (histórico/rank)**.
 | 0015 | Golpes/moves e PP (RF-15, D1) — Move + moves_for + BattleEngine determinístico + battle.erb | Concluída | Done (passos 0–7, validado em 2026-08-09) |
 | 0016 | Logs de batalha detalhados (RF-16, C1) — entry com attacker_name/target_name + battle.erb | Concluída | Done (passos 0–3, validado em 2026-08-09) |
 | 0017 | Página de gerenciamento de time (RF-17, A3) — slot + golpes persistidos + team_manage.erb | Concluída | Done (passos 0–6 + ajustes de validação, 199 runs/708 asserts, validado em 2026-08-09) |
+| 0018 | Tratamento de erros (RF-18, E2) — robustez da fonte + fragmentos amigáveis 200 + handler global | Implementação | TDD completo (222 runs/778 asserts, lint 0) — **aguardando validação** |
 
 ## Estrutura do arquivo de sessão
 

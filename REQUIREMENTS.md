@@ -35,6 +35,46 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ## Requisitos Funcionais
 
+### RF-18 — Tratamento de erros (E2) — Implementado (sessão 0018, aguardando validação)
+- Implementar o **tratamento de erros** de ponta a ponta (E2 do `draft-auto-battler.md`,
+  levantamento de roadmap 2026-08-09): **nenhuma rota devolve 500** quando a fonte
+  (PokéAPI) falha ou recebe input inválido — cada falha devolve um **fragmento
+  amigável com status 200** (padrão htmx `@notice`/`@message`) e um **handler global**
+  cobre erros não previstos (erro logado, sem stacktrace na resposta ao usuário).
+
+**Critérios de aceite (sessão 0018):**
+- [x] `PokeApi.all` → `[]` em status ≠ 200, body não-JSON (HTML) ou erro de rede
+      (`Faraday::Error`) — nunca levanta `JSON::ParserError`.
+- [x] `fetch_all_names` memoiza **apenas lista não-vazia**; falha transitória →
+      `[]` no request corrente e re-tenta no próximo (não trava a lista).
+- [x] `find`/`pokemon_data`/`detail` resgatam rede → `nil` (mantêm guard de status);
+      **`detail` nunca acessa campos de `nil`** (`pokemon_data` → nil ⇒ `detail` → nil).
+- [x] `evolution_chain` → `[]` em status ≠ 200/rede/parse inválido (protege `detail`).
+- [x] `move`/`fetch_move_json` resgatam rede → `nil`; `moves_for`/`available_move_names`
+      seguem `[]` quando `pokemon_data` é `nil` (já tolerante, 0 regressão).
+- [x] `fetch_type_json` → `nil` em status ≠ 200/rede; `type_relations` **pula o tipo
+      que falhou** (tabela parcial — `TypeEffectiveness.factor` neutro 1.0).
+- [x] `GET /` e `GET /pokemons`: fonte indisponível **e sem filtro** (`q` vazio) →
+      fragmento com aviso + select vazio, 200 — sem 500; filtro sem match (q não-vazio)
+      sem aviso (0 regressão).
+- [x] `GET /pokemon?name=` com `find` → `nil` → fragmento amigável ("Pokémon não
+      encontrado."), 200, sem `<html>`.
+- [x] `GET /pokemon/:poke_id` com `detail` → `nil` → fragmento amigável, 200, sem `<html>`.
+- [x] `POST /team` com nome inválido → re-renderiza `#team` com `@notice`, não insere,
+      200 — não chama `add` com `nil`.
+- [x] `GET /battle` com membro cujo `detail` → `nil` ou oponente vazio → mensagem
+      amigável (200) em vez de batalha quebrada; time vazio mantém "Forme seu time
+      para batalhar." (0 regressão).
+- [x] `error 500 do` no `server.rb` → `views/error.erb` (fragmento, `layout: false`,
+      status 200, sem `<html>`), mensagem amigável, erro original logado
+      (`logger.error`/`env["sinatra.error"]`), stacktrace não vaza.
+- [x] Em prod/teste o fragmento amigável é servido; em dev `show_exceptions` mantém a
+      página de erro padrão do Sinatra.
+- [x] Suíte completa verde (222 runs/778 asserts) e lint 0; commit a cada green;
+      0 regressão RF-01..RF-17.
+- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo escopo.
+      **Aguardando validação do usuário (fase 3).**
+
 ### RF-17 — Página de gerenciamento de time (A3) — `Done` (sessão 0017, validado em 2026-08-09)
 - Página própria para gerenciar o time (A3 do `draft-auto-battler.md`, anotado na
   validação da 0015): o usuário **escolhe a posição (slot) de cada Pokémon** e
@@ -487,9 +527,9 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] **Listagem massiva** — resolvido no escopo RF-01 (sessão 0006): paginação (100/página)
       + filtro por nome com cache; busca parcial server-side da PokéAPI segue limitada
       (lista completa cacheada em memória).
-- [ ] **Sem tratamento de erros** — nome inválido, rate-limit da PokéAPI, time sem membros, duplicados.
-  *Candidato para refinamento (levantamento de roadmap, 2026-08-09): transversal e barato;
-  registrado para virar requisito/sessão própria no futuro (RNF-04).*
+- [x] **Sem tratamento de erros** — resolvido no escopo RF-18 (sessão 0018):
+      nenhuma rota devolve 500 quando a PokéAPI falha (fragmento amigável 200) e
+      handler global `error 500` cobre erros não previstos (aguardando validação).
 - [ ] **Cache local de detalhes da PokéAPI** — `GET /battle`/RF-06 fazem N requests na
   PokéAPI (1 por membro do time); hoje não há cache de detalhes (só listagem/nomes).
   *Emergeu da observação da sessão 0013 ("fora do escopo" na época); ganha peso quando
@@ -521,6 +561,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 15 | Golpes (moves) e PP (D1) | Done (sessão 0015, validado em 2026-08-09) |
 | 16 | Logs de batalha detalhados (C1) | Done (sessão 0016, validado em 2026-08-09) |
 | 17 | Página de gerenciamento de time (A3) | Done (sessão 0017, validado em 2026-08-09) |
+| 18 | Tratamento de erros (E2) | Implementado (sessão 0018 — aguardando validação) |
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
@@ -551,8 +592,9 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ### Candidatas do draft para a próxima sessão (levantamento de roadmap, 2026-08-09)
 
-> Sessão 0017 concluída e validada. Próximas candidatas do `draft-auto-battler.md`,
-> **decisão do usuário** na abertura da próxima sessão (RNF-04):
+> **E2 (tratamento de erros) virou RF-18/sessão 0018** (implementado, aguardando
+> validação). Sessão 0018 em fase de validação (usuário). Após fechar, próximas
+> candidatas do `draft-auto-battler.md`, **decisão do usuário** (RNF-04):
 > **D2 (XP/evolução)** — provável próxima sessão — seguida de **D3 (histórico/rank)** e
 > **D4 (modos de draft temático)**. D2 cruza com D1 (nível de aprendizado dos golpes).
 > Ver detalhamento no `draft-auto-battler.md` (visão D2 fechada em 2026-08-09).

@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões fechadas com o usuário em 2026-08-09 |
-| Implementação | Pendente |
+| Implementação | Executada (TDD passos 0–5 verdes, 222 runs/778 asserts, lint 0) — **aguarda validação** |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -125,19 +125,29 @@ Diagnóstico do tratamento de erros hoje (levantado em 2026-08-09):
 
 | Passo | Teste (red) | Implementação (green) | Status |
 | --- | --- | --- | --- |
-| 0 | fonte: `all` → `[]` em status ≠ 200 / body HTML / rede; `fetch_all_names` memoiza só não-vazio (falha → `[]` e 2ª chamada tenta de novo) | `lib/poke_api.rb`: guard de status + rescue `Faraday::Error` em `all`; memoização condicional em `fetch_all_names` | ⬜ |
-| 1 | fonte: `detail` → `nil` quando `pokemon_data` → `nil`; `evolution_chain` → `[]` em status ≠ 200/rede/parse; `fetch_type_json` → `nil` em status ≠ 200/rede e `type_relations` pula tipo falho (neutro 1.0) | guards + rescues em `detail`/`evolution_chain`/`fetch_type_json`/`type_relations`; `find`/`fetch_move_json` resgatam rede | ⬜ |
-| 2 | rotas: `GET /pokemon?name=` com `find` nil → 200 fragmento com aviso (sem `<html>`); `GET /pokemon/:poke_id` com `detail` nil → 200 fragmento; `POST /team` nome inválido → 200 + aviso, não insere | `server.rb`: nil-guards + `@notice`/`@message`; novo `views/error.erb` (fragmento genérico amigável) | ⬜ |
-| 3 | rotas: `GET /`/`GET /pokemons` com lista vazia e `q` vazio → 200 + aviso; filtro sem match (q não-vazio) sem aviso (0 regressão); `GET /battle` com fonte falhando → 200 mensagem amigável | `pokemon_list.erb` aviso quando vazio sem `q`; `GET /battle` filtro de membros nil/oponente vazio + `@message` | ⬜ |
-| 4 | handler global: rota que lança exceção inesperada → 200 fragmento `error.erb` (sem `<html>`), erro logado, stack não vaza | `error 500 do ... end` no `server.rb` + `views/error.erb` | ⬜ |
-| 5 | docs: `REQUIREMENTS.md` (RF-18 + limitação resolvida), `SESSIONS.md` (0018 + progresso + próxima), `draft-auto-battler.md` (E2 Done) | documento | ⬜ |
+| 0 | fonte: `all` → `[]` em status ≠ 200 / body HTML / rede; `fetch_all_names` memoiza só não-vazio (falha → `[]` e 2ª chamada tenta de novo) | `lib/poke_api.rb`: guard de status + rescue `Faraday::Error` em `all`; memoização condicional em `fetch_all_names` | ✅ |
+| 1 | fonte: `detail` → `nil` quando `pokemon_data` → `nil`; `evolution_chain` → `[]` em status ≠ 200/rede/parse; `fetch_type_json` → `nil` em status ≠ 200/rede e `type_relations` pula tipo falho (neutro 1.0) | guards + rescues em `detail`/`evolution_chain`/`fetch_type_json`/`type_relations`; `find`/`fetch_move_json` resgatam rede | ✅ |
+| 2 | rotas: `GET /pokemon?name=` com `find` nil → 200 fragmento com aviso (sem `<html>`); `GET /pokemon/:poke_id` com `detail` nil → 200 fragmento; `POST /team` nome inválido → 200 + aviso, não insere | `server.rb`: nil-guards + `@notice`/`@message`; novo `views/error.erb` (fragmento genérico amigável) | ✅ |
+| 3 | rotas: `GET /`/`GET /pokemons` com lista vazia e `q` vazio → 200 + aviso; filtro sem match (q não-vazio) sem aviso (0 regressão); `GET /battle` com fonte falhando → 200 mensagem amigável | `pokemon_list.erb` aviso quando vazio sem `q`; `GET /battle` filtro de membros nil/oponente vazio + `@message` | ✅ |
+| 4 | handler global: rota que lança exceção inesperada → 200 fragmento `error.erb` (sem `<html>`), erro logado, stack não vaza | `error 500 do ... end` no `server.rb` + `views/error.erb` | ✅ |
+| 5 | docs: `REQUIREMENTS.md` (RF-18 + limitação resolvida), `SESSIONS.md` (0018 + progresso + próxima), `draft-auto-battler.md` (E2 Done) | documento | ✅ |
 
 ## 6. Observações
 
 - **Sem nova tabela/gem**: E2 é robustez transversal — escopo em `lib/poke_api.rb` e
   `server.rb` + um fragmento novo (`views/error.erb`).
 - **`error 500 do` cobre RNF-04/semântica htmx**: fragmento `layout: false` + 200 permite
-  o htmx fazer swap; em dev o `show_exceptions` continua exibindo a página de erro do Sinatra.
+  o htmx fazer swap; o erro original fica logado (`logger.error`) e o stack não vaza.
+- **Implementação (2026-08-09):** `find`/`pokemon_data`/`fetch_move_json`/
+  `fetch_type_json` resgatam rede (`Faraday::Error`); `all`/`evolution_chain` com guard
+  de status + rescue; `type_relations` pula tipo que falhou; `fetch_all_names` memoiza
+  só lista não-vazia. `GET /`/`GET /pokemons` avisam quando a fonte volta vazia sem
+  filtro; `GET /pokemon`/`GET /pokemon/:poke_id` servem `error.erb` ("Pokémon não
+  encontrado.", 200); `POST /team` com nome inválido avisa sem inserir; `GET /battle`
+  tolera `detail` nil de membro e oponente vazio; handler global `error 500` no
+  `server.rb`. `evolution_chain` refatorada com helper `ok?` (complexidade sob o limite).
+  222 runs/778 asserts, lint 0, commits a cada green (passos 0–5). **Aguardando
+  validação do usuário (fase 3).**
 - **E1 (cache de detalhes) e 404 customizado** seguem no draft/backlog para sessões próprias.
-- Após 0018: candidatas seguem **D2 (XP/evolução)** (provável próxima), **D3 (histórico/rank)**,
+- Após 0018 (validada): candidatas seguem **D2 (XP/evolução)** (provável próxima), **D3 (histórico/rank)**,
   **D4 (modos de draft temático)** e respiro de refatoração de testes (`rubocop:disable`).
