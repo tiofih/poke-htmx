@@ -1,17 +1,16 @@
+# frozen_string_literal: true
+
 require "faraday"
-require "pry"
-require_relative "gateways/poke_api_parsing"
-require_relative "gateways/poke_api_moves"
-require_relative "gateways/poke_api_types"
+require_relative "poke_api_parsing"
+require_relative "poke_api_moves"
+require_relative "poke_api_types"
 
-class PokeApi
-  TYPE_NAMES = PokeApiTypes::TYPE_NAMES
+class PokeApiHttp
+  include PokeApiParsing
+  include PokeApiMoves
+  include PokeApiTypes
 
-  extend PokeApiParsing
-  extend PokeApiMoves
-  extend PokeApiTypes
-
-  def self.all
+  def all
     response = Faraday.get("https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0")
     return [] unless response.respond_to?(:status) && response.status == 200
 
@@ -20,7 +19,7 @@ class PokeApi
     []
   end
 
-  def self.fetch_all_names
+  def fetch_all_names
     cached = @fetch_all_names
     return cached if cached
 
@@ -29,13 +28,13 @@ class PokeApi
     names
   end
 
-  def self.paginate(offset: 0, limit: 100, query: nil)
+  def paginate(offset: 0, limit: 100, query: nil)
     names = fetch_all_names
     names = names.select { |name| name.downcase.include?(query.downcase) } if query && !query.empty?
     { names: names[offset, limit].to_a, total: names.size }
   end
 
-  def self.find(name)
+  def find(name)
     response = Faraday.get("https://pokeapi.co/api/v2/pokemon/#{name}")
     return nil unless response.respond_to?(:status) && response.status == 200
 
@@ -49,7 +48,9 @@ class PokeApi
     nil
   end
 
-  def self.ok?(response)
+  private
+
+  def ok?(response)
     response.respond_to?(:status) && response.status == 200
   end
 end
