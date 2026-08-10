@@ -3,69 +3,7 @@
 require "pg"
 require_relative "pokemon"
 
-# rubocop:disable Metrics/ClassLength
-class TeamRepository
-  DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
-  MAX_TEAM_SIZE = 6
-  MAX_MOVES_PER_POKEMON = 4
-
-  class TeamFullError < StandardError; end
-  class DuplicateError < StandardError; end
-
-  def initialize(db_url: ENV["DATABASE_URL"] || DEFAULT_DATABASE_URL)
-    @db_url = db_url
-  end
-
-  # rubocop:disable Metrics/MethodLength
-  def all(user_id)
-    connection.exec_params(
-      "SELECT * FROM team_pokemons WHERE user_id = $1 ORDER BY slot",
-      [user_id]
-    ).map do |row|
-      Pokemon.new(
-        id: row["id"],
-        name: row["name"],
-        sprite: row["sprite"],
-        number: row["number"],
-        slot: row["slot"],
-        moves: parse_moves(row["moves"])
-      )
-    end
-  end
-  # rubocop:enable Metrics/MethodLength
-
-  def add(user_id, pokemon)
-    slot = next_free_slot(user_id)
-    raise TeamFullError, "Time cheio (máx. #{MAX_TEAM_SIZE})." if slot.nil?
-    raise DuplicateError, "#{pokemon.name} já está no time." if duplicate?(user_id, pokemon.number)
-
-    connection.exec_params(
-      "INSERT INTO team_pokemons (user_id, name, sprite, number, slot, moves) VALUES ($1, $2, $3, $4, $5, $6)",
-      [user_id, pokemon.name, pokemon.sprite, pokemon.number, slot, array_literal(pokemon.moves)]
-    )
-  end
-
-  def set_moves(user_id, id, moves)
-    connection.exec_params(
-      "UPDATE team_pokemons SET moves = $3 WHERE id = $1 AND user_id = $2",
-      [id, user_id, array_literal(moves.first(MAX_MOVES_PER_POKEMON))]
-    )
-  end
-
-  def remove(user_id, id)
-    removed = connection.exec_params(
-      "DELETE FROM team_pokemons WHERE id = $1 AND user_id = $2 RETURNING slot",
-      [id, user_id]
-    ).first
-    return unless removed
-
-    slot = removed["slot"].to_i
-    connection.exec_params(
-      "UPDATE team_pokemons SET slot = slot - 1 WHERE user_id = $1 AND slot > $2",
-      [user_id, slot]
-    )
-  end
-
+module SlotOperations
   def move(user_id, id, new_slot)
     from = current_slot(user_id, id)
     return unless from && movable?(user_id, from, new_slot)
@@ -114,13 +52,9 @@ class TeamRepository
 
   def shift_slots(user_id, from, new_slot)
     if new_slot < from
-      (new_slot...from).reverse_each do |slot|
-        increment_slot(user_id, slot)
-      end
+      (new_slot...from).reverse_each { |slot| increment_slot(user_id, slot) }
     else
-      ((from + 1)..new_slot).each do |slot|
-        decrement_slot(user_id, slot)
-      end
+      ((from + 1)..new_slot).each { |slot| decrement_slot(user_id, slot) }
     end
   end
 
@@ -135,6 +69,76 @@ class TeamRepository
     connection.exec_params(
       "UPDATE team_pokemons SET slot = $1 WHERE user_id = $2 AND slot = $3",
       [slot - 1, user_id, slot]
+    )
+  end
+
+  def reindex_after_removal(user_id, slot)
+    connection.exec_params(
+      "UPDATE team_pokemons SET slot = slot - 1 WHERE user_id = $1 AND slot > $2",
+      [user_id, slot]
+    )
+  end
+end
+
+class TeamRepository
+  DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
+  MAX_TEAM_SIZE = 6
+  MAX_MOVES_PER_POKEMON = 4
+
+  class TeamFullError < StandardError; end
+  class DuplicateError < StandardError; end
+
+  include SlotOperations
+
+  def initialize(db_url: ENV["DATABASE_URL"] || DEFAULT_DATABASE_URL)
+    @db_url = db_url
+  end
+
+  def all(user_id)
+    connection.exec_params(
+      "SELECT * FROM team_pokemons WHERE user_id = $1 ORDER BY slot",
+      [user_id]
+    ).map { |row| row_to_pokemon(row) }
+  end
+
+  def add(user_id, pokemon)
+    slot = next_free_slot(user_id)
+    raise TeamFullError, "Time cheio (máx. #{MAX_TEAM_SIZE})." if slot.nil?
+    raise DuplicateError, "#{pokemon.name} já está no time." if duplicate?(user_id, pokemon.number)
+
+    connection.exec_params(
+      "INSERT INTO team_pokemons (user_id, name, sprite, number, slot, moves) VALUES ($1, $2, $3, $4, $5, $6)",
+      [user_id, pokemon.name, pokemon.sprite, pokemon.number, slot, array_literal(pokemon.moves)]
+    )
+  end
+
+  def set_moves(user_id, id, moves)
+    connection.exec_params(
+      "UPDATE team_pokemons SET moves = $3 WHERE id = $1 AND user_id = $2",
+      [id, user_id, array_literal(moves.first(MAX_MOVES_PER_POKEMON))]
+    )
+  end
+
+  def remove(user_id, id)
+    removed = connection.exec_params(
+      "DELETE FROM team_pokemons WHERE id = $1 AND user_id = $2 RETURNING slot",
+      [id, user_id]
+    ).first
+    return unless removed
+
+    reindex_after_removal(user_id, removed["slot"].to_i)
+  end
+
+  private
+
+  def row_to_pokemon(row)
+    Pokemon.new(
+      id: row["id"],
+      name: row["name"],
+      sprite: row["sprite"],
+      number: row["number"],
+      slot: row["slot"],
+      moves: parse_moves(row["moves"])
     )
   end
 
@@ -167,4 +171,3 @@ class TeamRepository
     "{#{names.join(',')}}"
   end
 end
-# rubocop:enable Metrics/ClassLength
