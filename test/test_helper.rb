@@ -50,6 +50,21 @@ module TestDatabase
     end
   end
 
+  def self.progress_row(team_pokemon_id)
+    with_db do |connection|
+      connection.exec_params(
+        "SELECT * FROM team_pokemon_progress WHERE team_pokemon_id = $1",
+        [team_pokemon_id]
+      ).first
+    end
+  end
+
+  def self.progress_count
+    with_db do |connection|
+      connection.exec("SELECT COUNT(*) FROM team_pokemon_progress").first["count"].to_i
+    end
+  end
+
   def self.distinct_user_ids
     with_db do |connection|
       connection.exec("SELECT DISTINCT user_id FROM team_pokemons").map { |row| row["user_id"] }

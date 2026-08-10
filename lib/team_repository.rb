@@ -106,10 +106,9 @@ class TeamRepository
     raise TeamFullError, "Time cheio (máx. #{MAX_TEAM_SIZE})." if slot.nil?
     raise DuplicateError, "#{pokemon.name} já está no time." if duplicate?(user_id, pokemon.number)
 
-    connection.exec_params(
-      "INSERT INTO team_pokemons (user_id, name, sprite, number, slot, moves) VALUES ($1, $2, $3, $4, $5, $6)",
-      [user_id, pokemon.name, pokemon.sprite, pokemon.number, slot, array_literal(pokemon.moves)]
-    )
+    connection.transaction do
+      create_progress(insert_team_member(user_id, pokemon, slot))
+    end
   end
 
   def set_moves(user_id, id, moves)
@@ -130,6 +129,21 @@ class TeamRepository
   end
 
   private
+
+  def insert_team_member(user_id, pokemon, slot)
+    connection.exec_params(
+      "INSERT INTO team_pokemons (user_id, name, sprite, number, slot, moves) VALUES " \
+      "($1, $2, $3, $4, $5, $6) RETURNING id",
+      [user_id, pokemon.name, pokemon.sprite, pokemon.number, slot, array_literal(pokemon.moves)]
+    ).first["id"]
+  end
+
+  def create_progress(team_pokemon_id)
+    connection.exec_params(
+      "INSERT INTO team_pokemon_progress (team_pokemon_id, level, xp) VALUES ($1, 1, 0)",
+      [team_pokemon_id]
+    )
+  end
 
   def row_to_pokemon(row)
     Pokemon.new(

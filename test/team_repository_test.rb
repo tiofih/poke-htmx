@@ -300,3 +300,39 @@ class TeamMovesTest < Minitest::Test
     assert_equal [], @repository.all("user-a").first.moves
   end
 end
+
+class TeamProgressTest < Minitest::Test
+  include TeamRepositoryTestHelpers
+
+  def test_add_creates_progress_row_with_level_one_and_zero_xp
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+
+    progress = TestDatabase.progress_row(pokemon_id)
+
+    refute_nil progress, "esperava linha de progresso apos a montagem"
+    assert_equal 1, progress["level"].to_i
+    assert_equal 0, progress["xp"].to_i
+  end
+
+  def test_remove_deletes_progress_row_via_cascade
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+
+    @repository.remove("user-a", pokemon_id)
+
+    assert_nil TestDatabase.progress_row(pokemon_id)
+    assert_empty @repository.all("user-a")
+  end
+
+  def test_add_rolls_back_progress_when_insert_fails
+    add_pokemon("user-a", "pikachu", 25)
+
+    other_repo = TeamRepository.new
+    assert_raises(TeamRepository::DuplicateError) do
+      other_repo.add("user-a", build_pokemon_record("raichu", 25))
+    end
+
+    assert_equal 1, TestDatabase.progress_count
+  end
+end
