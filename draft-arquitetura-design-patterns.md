@@ -52,6 +52,12 @@ contrato público".
 | --- | --- | --- | --- |
 | **1** | **Refactor produção** (respiro, molde da 0019) | Remover os 7 `rubocop:disable` de `lib/**` + `server.rb` (seção 1.1). Critério: suíte 222/778 + lint 0 preservados, sem mudança de comportamento. | — (agora) |
 | **2** | **E1 — Cache de detalhes** (gateway/cache) | `PokeApi` → interface + adapter real (Faraday) + decorator de cache (TTL/LRU **fixos** — decisão 9). Refactor de `PokeApiStub` para adapter fake. | 1 (adapter reaproveita extração do `PokeApi`) |
+
+> **E1 dividida em 2 sessões (decisão do usuário, 2026-08-10):** **E1-A — sessão 0021**
+> (interface `PokeApi` + adapter real `PokeApiHttp` + adapter fake nos testes + injeção via
+> `settings.api`/`PokeApi.instance`; memoização atual permanece por instância) → **E1-B —
+> sessão 0022** (decorator `PokeApiCache` TTL/LRU **fixos**, remove a memoização do adapter
+> real). Sequência: E1-A → E1-B → D2 → D3 → Eco.
 | **3** | **D2 — XP/evolução** | Tabela nova `team_pokemon_progress` (decisão 3); 1ª evolução/nível 1 na montagem (4); `ExperienceCurve` **linear** por ora (5); aprendizado de golpes por nível cruza com D1; oponente escala com o nível do jogador; **`RewardRule`** já estrutura o gancho `:finished` (XP). | 1, 2 (volume de requests) |
 | **4** | **D3 — Histórico/rank** | Tabela `battles`; vitórias/derrotas por usuário + oponente serializado + data (6); rank **local e global** (7). Resolve o `BattleRegistry` no ponto mais atômico (8). | 3 (`:finished` já concede recompensa) |
 | **5** | **Eco-1 — Moeda pós-batalha** | Tabela `wallet`; `RewardRule` passa a conceder **XP + dinheiro** no `:finished` (decisão 10 — moeda ao final da batalha como um todo). | 3 (mesmo hook), 4 (resultado persistido) |
