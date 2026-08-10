@@ -224,11 +224,13 @@
 - **Sugestões:** teste de schema (`index_exists`) encapsular em `TestDatabase`
   (helper de introspection, aproveitável nas próximas migrações); `team_repository_test`
   ganhar factories simples (`build_pokemon(name, number)`).
-- **Status:** **sessão 0019 (respiro, em implementação)** — escopo ampliado pelo
-  usuário para **todos os arquivos de teste** (6 arquivos; `grep` 69 ocorrências no
-  total, 2 já resolvidas na 0017). Estratégia: extrair helpers/factories
-  (`TestSupport`), `with_db`/introspection em `TestDatabase`, `PokeApiStub` genérico
-  e dividir classes de teste por área (abaixo do `Metrics/ClassLength` default 100).
+- **Status:** **sessão 0019 (respiro)** — escopo ampliado pelo usuário para **todos os
+  arquivos de teste** (6 arquivos; `grep` 69 ocorrências no total, 2 já resolvidas na
+  0017). Estratégia: extrair helpers/factories (`TestSupport`), `with_db`/introspection
+  em `TestDatabase`, `PokeApiStub` genérico, dividir classes de teste por área
+  (abaixo do `Metrics/ClassLength` default 100) + orçamentos em `test/.rubocop.yml`.
+  **Implementação executada (passos 1–6 verdes: suíte 222/778 + lint 0) em 2026-08-10 —
+  aguardando validação do usuário.**
 
 ### Refatoração dos arquivos de produção (lib/ + server.rb) — anotada 2026-08-10
 

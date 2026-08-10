@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — critérios e plano fechados com o usuário em 2026-08-10 (respiro) |
-| Implementação | Pendente |
+| Implementação | Executada (passos 1–6 verdes: suíte 222/778, lint 0) — aguardando validação do usuário |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -147,6 +147,26 @@ classes. A refatoração é **verificada** por lint 0 + suíte verde.
 
 (Pendente — fase 3.)
 
+## 6b. Progresso da implementação (passos 1–6 verdes)
+
+> Executado em 2026-08-10. Aguardando validação do usuário antes de fechar (RNF: não
+> marcar `Done` nem commitar conclusão até o feedback).
+
+- **Passos 1–5** (infra + motores + server + team_repository + schema/helper): commit
+  `d17d4dc` — `test_support.rb` (`TestSupport`), `server_test_helpers.rb`, `test/.rubocop.yml`
+  (orçamentos de teste), `test_helper.rb` (`TestDatabase` com `with_db`/introspection,
+  `PokeApiStub.stub_singleton` genérico), `server_test.rb` em 4 classes de área,
+  motores/team_repository divididos, schema consumindo `TestDatabase`. Verificado:
+  **suíte 222 runs/778 asserts** + **lint 0** + **grep `rubocop:` nos 6 arquivos → 0**.
+- **Bônus mecânico:** os orçamentos de `test/.rubocop.yml` tornaram redundantes disables
+  de `poke_api_test.rb`/`move_test.rb`/`poke_api_move_test.rb` (fora dos 6 arquivos);
+  removidos por autocorrect para manter lint 0 — `poke_api_test.rb` ainda tem um
+  `Layout/LineLength` (linha legitimanente longa, não coberta por orçamento).
+- **Preservação do baseline:** a suíte manteve **222/778** exatamente; nenhum teste
+  removido nem assert alterado. Nota: `testincremental_play_reaches_same_result_as_battle`
+  (typo no nome, não casa com `/^test_/`) foi preservado **com o nome original** durante
+  a divisão — renomeá-lo ativaria um teste que hoje não roda e quebraria o baseline.
+
 ## 7. Observações
 
 - Sessão de **respiro** entre fases grandes (decisão do usuário em 2026-08-10), via
@@ -164,3 +184,12 @@ classes. A refatoração é **verificada** por lint 0 + suíte verde.
   de "1 fase ou mais" (recomendado 1 fase, com critério de suíte+lint+validação;
   separar só se surgir mudança de contrato público). Esta sessão 0019 **não** toca
   `lib/`/`server.rb` (garantia RNF: sem mudança de comportamento).
+- **Estratégia híbrida para `ClassLength` (decisão do usuário, ajuste de escopo em
+  2026-08-10):** dividir `server_test.rb` em **classes por área** (Team/Lista/
+  Detail/Battle/Erro) — como no plano original — e complementar com **`test/.rubocop.yml`**
+  definindo **orçamentos específicos de teste** (`Metrics/MethodLength`/`AbcSize`/
+  `ParameterLists`/`ClassLength`) para os casos em que dividir/fatiar seria churn
+  desproporcional (testes longos que são uma sequência legível de asserts). A métrica
+  continua ativa (sem disable no código), só o **limite muda para `test/`**;
+  `lib/**`/`server.rb` seguem nas métricas estritas do root. As divisões de
+  `TeamRepositoryTest` (por operação) e dos motores permanecem no plano.
