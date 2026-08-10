@@ -3,6 +3,10 @@
 require_relative "test_helper"
 
 class SchemaTest < Minitest::Test
+  def setup
+    TestDatabase.setup!
+  end
+
   def test_team_pokemons_has_slot_column_not_null
     column = TestDatabase.column_info("slot")
     refute_nil column, "expected column slot to exist"
@@ -18,5 +22,35 @@ class SchemaTest < Minitest::Test
     TestDatabase.setup!
     TestDatabase.setup!
     assert TestDatabase.index_exists("team_pokemons", "user_id", "slot")
+  end
+
+  def test_progress_table_exists_with_level_and_xp_columns_not_null
+    assert TestDatabase.table_exists?("team_pokemon_progress"),
+           "expected table team_pokemon_progress to exist"
+    assert_equal "NO", TestDatabase.table_column_info("team_pokemon_progress", "level")["is_nullable"]
+    assert_equal "NO", TestDatabase.table_column_info("team_pokemon_progress", "xp")["is_nullable"]
+  end
+
+  def test_clear_team_truncates_supporting_progress_table
+    TestDatabase.clear_team!
+    with_progress_row do
+      TestDatabase.clear_team!
+    end
+    assert_empty TestDatabase.distinct_user_ids
+  end
+
+  private
+
+  def with_progress_row
+    TestDatabase.with_db do |connection|
+      row = connection.exec_params(
+        "INSERT INTO team_pokemons (user_id, name, sprite, number, slot) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+        ["user-a", "pikachu", "", 25, 1]
+      ).first
+      connection.exec_params(
+        "INSERT INTO team_pokemon_progress (team_pokemon_id) VALUES ($1)", [row["id"]]
+      )
+    end
+    yield
   end
 end

@@ -25,7 +25,7 @@ module TestDatabase
   end
 
   def self.clear_team!
-    with_db { |connection| connection.exec("TRUNCATE team_pokemons") }
+    with_db { |connection| connection.exec("TRUNCATE team_pokemons, team_pokemon_progress") }
   end
 
   def self.with_db
@@ -57,10 +57,23 @@ module TestDatabase
   end
 
   def self.column_info(column)
+    table_column_info("team_pokemons", column)
+  end
+
+  def self.table_exists?(table)
+    with_db do |connection|
+      connection.exec_params(
+        "SELECT 1 FROM information_schema.tables WHERE table_name = $1",
+        [table]
+      ).ntuples.positive?
+    end
+  end
+
+  def self.table_column_info(table, column)
     with_db do |connection|
       connection.exec_params(
         "SELECT is_nullable FROM information_schema.columns WHERE table_name = $1 AND column_name = $2",
-        %w[team_pokemons] + [column]
+        [table, column]
       ).first
     end
   end
