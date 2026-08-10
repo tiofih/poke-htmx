@@ -19,11 +19,11 @@ class PokeApiCache
   end
 
   def find(name)
-    fetch([:find, name]) { @api.find(name) }
+    fetch([:find, name], accept: ->(value) { !value.nil? }) { @api.find(name) }
   end
 
   def detail(poke_id)
-    fetch([:detail, poke_id]) { @api.detail(poke_id) }
+    fetch([:detail, poke_id], accept: ->(value) { !value.nil? }) { @api.detail(poke_id) }
   end
 
   def available_move_names(number)
@@ -31,7 +31,7 @@ class PokeApiCache
   end
 
   def move(name)
-    fetch([:move, name]) { @api.move(name) }
+    fetch([:move, name], accept: ->(value) { !value.nil? }) { @api.move(name) }
   end
 
   def moves_for(number)
@@ -43,12 +43,12 @@ class PokeApiCache
   end
 
   def fetch_all_names
-    fetch([:fetch_all_names]) { @api.fetch_all_names }
+    fetch([:fetch_all_names], accept: ->(value) { !value.empty? }) { @api.fetch_all_names }
   end
 
   private
 
-  def fetch(key)
+  def fetch(key, accept: nil)
     entry = @entries[key]
     if entry && fresh?(entry)
       touch(key)
@@ -56,7 +56,7 @@ class PokeApiCache
     end
 
     value = yield
-    store(key, value)
+    store(key, value) if accept.nil? || accept.call(value)
     value
   end
 
