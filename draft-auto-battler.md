@@ -224,6 +224,30 @@
 - **Sugestões:** teste de schema (`index_exists`) encapsular em `TestDatabase`
   (helper de introspection, aproveitável nas próximas migrações); `team_repository_test`
   ganhar factories simples (`build_pokemon(name, number)`).
+- **Status:** **sessão 0019 (respiro, em implementação)** — escopo ampliado pelo
+  usuário para **todos os arquivos de teste** (6 arquivos; `grep` 69 ocorrências no
+  total, 2 já resolvidas na 0017). Estratégia: extrair helpers/factories
+  (`TestSupport`), `with_db`/introspection em `TestDatabase`, `PokeApiStub` genérico
+  e dividir classes de teste por área (abaixo do `Metrics/ClassLength` default 100).
+
+### Refatoração dos arquivos de produção (lib/ + server.rb) — anotada 2026-08-10
+
+> **Sessão futura**, após a 0019 e fora desta: aplicar o mesmo tratamento aos
+> arquivos **não-teste**. Levantamento real (2026-08-10): 5 arquivos, 7 disables —
+> `server.rb` (1: `ClassLength`), `lib/battle_engine.rb` (1 região:
+> `ClassLength`+`AbcSize`+`MethodLength`+`ParameterLists`), `lib/battle_pokemon.rb`
+> (1: `MethodLength`), `lib/poke_api.rb` (2 regiões: `ClassLength`+`AbcSize`+
+> `MethodLength`), `lib/team_repository.rb` (2: `ClassLength`+`MethodLength`).
+- **Avaliação (1 fase ou mais):** recomendo **uma única fase** — volume pequeno
+  (7 disables em 5 arquivos, região localizada cada), sem dependência entre arquivos,
+  mesma mecânica da 0019 (remoção de `aggregate`/extração de métodos/módulos sob a
+  rede de segurança da suíte). **Porém com critério próprio**: ao contrário da 0019
+  (respiro, só testes), isso é refactor de **produção** — a suíte completa + lint 0
+  + atenção do usuário na validação como critérios, sem abrir outra sessão no meio.
+  **Separar em mais fases** apenas se, durante a fase, algum arquivo exigir mudança
+  de contrato público (rotas/lib) ou refactor estrutural grosso (ex.: implodir
+  `PokeApi`/`BattleEngine` em módulos) — aí a parte afetada vira sessão própria.
+  Decisão final na validação da 0019.
 
 ---
 
