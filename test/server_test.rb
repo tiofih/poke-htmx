@@ -49,6 +49,24 @@ class ServerTeamTest < Minitest::Test
     assert_empty @repository.all("user-b")
   end
 
+  def test_post_team_starts_with_level_one_moves
+    PokeApiStub.with_find(pikachu_pokemon) do
+      PokeApiStub.with_learnable_moves(
+        [{ level: 1, name: "growl" },
+         { level: 1, name: "thunder-shock" },
+         { level: 5, name: "quick-attack" }]
+      ) do
+        post "/team", { pokeName: "pikachu" }, user_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    moves = @repository.all("user-a").first.moves
+    assert_includes moves, "growl"
+    assert_includes moves, "thunder-shock"
+    refute_includes moves, "quick-attack", "move de nível 5 não deveria vir na montagem"
+  end
+
   def test_delete_team_removes_pokemon_from_own_session
     @repository.add("user-a", pikachu_pokemon)
     id = @repository.all("user-a").first.id

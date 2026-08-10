@@ -90,6 +90,7 @@ module ServerTeamActions
 
   def add_team_member
     pokemon = settings.api.find(params[:pokeName])
+    pokemon = pokemon_with_level_one_moves(pokemon) if pokemon
     @notice = add_team_notice(pokemon)
     @team = settings.team.all(current_user)
     erb :team, layout: false
@@ -104,6 +105,14 @@ module ServerTeamActions
     rescue TeamRepository::TeamFullError, TeamRepository::DuplicateError => e
       e.message
     end
+  end
+
+  def pokemon_with_level_one_moves(pokemon)
+    learnable = settings.api.learnable_moves(pokemon.number).to_a
+    names = learnable.select { |m| m[:level] <= 1 }
+                     .map { |m| m[:name] }
+                     .first(TeamRepository::MAX_MOVES_PER_POKEMON)
+    pokemon.new(moves: names)
   end
 
   def remove_team_member
