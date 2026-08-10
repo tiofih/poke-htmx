@@ -96,6 +96,12 @@ contrato público".
 > /battle/play` concede XP **uma única vez** na transição para `:finished`, `battle.erb`
 > com "Nível N" + aviso de XP). Suíte **292/941**, lint 0. **Validada pelo usuário em
 > 2026-08-10 (fase 3) — sessão 0023 concluída.** **Próxima: D2-B — sessão 0024.**
+>
+> **Sessão 0024 (D2-B) concluída e validada em 2026-08-10** (suíte 328/1025, lint 0):
+> `TeamRepository#evolve` + `#learn_move`, `EvolutionRule` puro, gateway
+> `next_evolutions`/`learnable_moves`, cache/fake/stubs, hook `:finished` no server.rb,
+> `battle.erb` com avisos de evolução/aprendizado, golpes de nível 1 na montagem.
+> **D2 (A+B) encerrada. Próxima: D3 — Histórico/rank.**
 | **3** | **D2 — XP/evolução** | **D2-A (sessão 0023):** tabela `team_pokemon_progress` (3); nível 1 na montagem (4); `ExperienceCurve` linear (5); stats escalam; `RewardRule` no `:finished` + `BattleEngine#result` (half-FSM); oponente escala. **D2-B (sessão 0024):** evolução + aprendizado por nível, dados oficiais da species (15). | 1, 2 (volume de requests) |
 | **4** | **D3 — Histórico/rank** | Tabela `battles`; vitórias/derrotas por usuário + oponente serializado + data (6); rank **local e global** (7). Resolve o `BattleRegistry` no ponto mais atômico (8). | 3 (`:finished` já concede recompensa) |
 | **5** | **Eco-1 — Moeda pós-batalha** | Tabela `wallet`; `RewardRule` passa a conceder **XP + dinheiro** no `:finished` (decisão 10 — moeda ao final da batalha como um todo). | 3 (mesmo hook), 4 (resultado persistido) |

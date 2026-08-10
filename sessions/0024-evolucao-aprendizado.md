@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluído — decisões do usuário em 2026-08-10 (fonte species oficial — dec. 15 do draft-arquitetura, fechada na 0023; unicidade `UNIQUE (user_id, number)` mantida) |
 | Implementação | Concluída — passos 1–7, suíte 327/1018, lint 0 (2026-08-10) |
-| Validação | Pendente — aguardando feedback do usuário |
+| Validação | Concluída — validado pelo usuário em 2026-08-10 (suíte 328/1025 pós-hotfix, lint 0; seeds serão construídas em refinamento futuro) |
 
 ---
 

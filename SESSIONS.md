@@ -40,15 +40,14 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0024 (D2-B) implementada em 2026-08-10** (suíte **327/1018**, lint 0) —
-**aguardando validação do usuário** (fase 3).
+**Sessão 0024 (D2-B) concluída e validada em 2026-08-10** (suíte **328/1025**, lint 0).
 
-Após validação da D2 (A+B), sequência fechada em 2026-08-10 (decisões 2/9–13 do
-`draft-arquitetura-design-patterns.md`):
+Próxima sessão conforme roadmap (decisões 2/9–13 do `draft-arquitetura-design-patterns.md`):
 
-> **D3 (histórico/rank)** → **Fase Eco (Eco-1 moeda pós-batalha, Eco-2 Poke Center, Eco-3
-> Poke Mart, Eco-4 itens em batalha)** → candidatos futuros (D4 draft temático, D1 nível
-> de aprendizado, J1 seleção inicial, J2 personalização, J3 ranking S–F).
+> **D3 — Histórico/rank de batalhas:** tabela `battles`; vitórias/derrotas por usuário
+> + oponente serializado + data; rank local e global; resolve o `BattleRegistry` no
+> ponto mais atômico. Após D3 → **Fase Eco (Eco-1 moeda pós-batalha, Eco-2 Poke Center,
+> Eco-3 Poke Mart, Eco-4 itens em batalha)** → candidatos futuros (D4, D1, J1, J2, J3).
 
 ## Progresso das sessões
 
@@ -77,7 +76,7 @@ Após validação da D2 (A+B), sequência fechada em 2026-08-10 (decisões 2/9�
 | 0021 | E1-A: gateway da PokéAPI — interface `PokeApi` + adapter real `PokeApiHttp` + adapter fake `PokeApiFake` + injeção (`settings.api`/`PokeApi.instance`); static `lib/poke_api.rb` e `PokeApiStub.stub_singleton` removidos | Concluída | Done (passos 1–6, suíte 239/821, lint 0, grep `PokeApi\.[a-z]` em lib+server → só `PokeApi.instance`, validado em 2026-08-10) |
 | 0022 | E1-B: decorator de cache TTL/LRU fixos — `PokeApiCache` (TTL 600s / máx 1000) sobre a interface `PokeApi`, remove a memoização interna do `PokeApiHttp`, `PokeApi.instance` decorado no boot | Concluída | Done (passos 1–6, suíte 256/849, lint 0, validado em 2026-08-10) |
 | 0023 | D2-A: progressão persistida — `team_pokemon_progress` + `ExperienceCurve` linear + `RewardRule` no `:finished` + `BattleEngine#result` + stats escalam + oponente escala | Concluída | Done (passos 1–10, suíte 292/941, lint 0, validado em 2026-08-10) |
-| 0024 | D2-B: evolução por nível + aprendizado de golpes por nível (dados oficiais da species) | Implementação | Aguardando validação (passos 1–7, suíte 327/1018, lint 0) |
+| 0024 | D2-B: evolução por nível + aprendizado de golpes por nível (dados oficiais da species) | Concluída | Done (passos 1–7 + hotfix, suíte 328/1025, lint 0, validado em 2026-08-10) |
 
 ## Estrutura do arquivo de sessão
 
