@@ -6,8 +6,10 @@ class PokeApiCache
   DEFAULT_TTL = 600
   DEFAULT_MAX_ENTRIES = 1000
 
+  attr_reader :inner, :ttl, :max_entries
+
   def initialize(api, ttl: DEFAULT_TTL, max_entries: DEFAULT_MAX_ENTRIES, clock: nil)
-    @api = api
+    @inner = api
     @ttl = ttl
     @max_entries = max_entries
     @clock = clock || -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
@@ -15,35 +17,35 @@ class PokeApiCache
   end
 
   def paginate(offset: 0, limit: 100, query: nil)
-    @api.paginate(offset: offset, limit: limit, query: query)
+    @inner.paginate(offset: offset, limit: limit, query: query)
   end
 
   def find(name)
-    fetch([:find, name], accept: ->(value) { !value.nil? }) { @api.find(name) }
+    fetch([:find, name], accept: ->(value) { !value.nil? }) { @inner.find(name) }
   end
 
   def detail(poke_id)
-    fetch([:detail, poke_id], accept: ->(value) { !value.nil? }) { @api.detail(poke_id) }
+    fetch([:detail, poke_id], accept: ->(value) { !value.nil? }) { @inner.detail(poke_id) }
   end
 
   def available_move_names(number)
-    fetch([:available_move_names, number]) { @api.available_move_names(number) }
+    fetch([:available_move_names, number]) { @inner.available_move_names(number) }
   end
 
   def move(name)
-    fetch([:move, name], accept: ->(value) { !value.nil? }) { @api.move(name) }
+    fetch([:move, name], accept: ->(value) { !value.nil? }) { @inner.move(name) }
   end
 
   def moves_for(number)
-    fetch([:moves_for, number]) { @api.moves_for(number) }
+    fetch([:moves_for, number]) { @inner.moves_for(number) }
   end
 
   def type_relations
-    fetch([:type_relations]) { @api.type_relations }
+    fetch([:type_relations]) { @inner.type_relations }
   end
 
   def fetch_all_names
-    fetch([:fetch_all_names], accept: ->(value) { !value.empty? }) { @api.fetch_all_names }
+    fetch([:fetch_all_names], accept: ->(value) { !value.empty? }) { @inner.fetch_all_names }
   end
 
   private
