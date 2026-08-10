@@ -145,14 +145,19 @@ de cache" → **usuário decidiu 2 sessões em 2026-08-10** (E1-A esta, E1-B cac
 
 ## 6. Validação (executada pelo usuário)
 
-**Status: pendente.** Ao concluir a fase de implementação (passos 1–6 verdes), o agente **para**
-e aguarda o feedback do usuário. Itens a verificar na validação:
+**Status: validado pelo usuário em 2026-08-10.**
 
-- [ ] Suíte completa verde (baseline **222 runs/778 asserts** preservado).
-- [ ] Lint RuboCop 0; sem `rubocop:disable` novo em produção.
-- [ ] `grep 'PokeApi\.[a-z]' lib server.rb` → somente `PokeApi.instance` (sem integração estática).
-- [ ] `lib/poke_api.rb` (static) removido; `PokeApiStub.stub_singleton` (monkey-patch) removido.
-- [ ] `./scripts/run`: Lista/Detalhe/Time/Time-Manage/Batalha funcionando (injeção ok em dev).
+- [x] Suíte completa verde (baseline **222 runs/778 asserts** preservado → **239 runs/821 asserts**).
+- [x] Lint RuboCop 0; sem `rubocop:disable` novo em produção.
+- [x] `grep 'PokeApi\.[a-z]' lib server.rb` → somente `PokeApi.instance` (sem integração estática).
+- [x] `lib/poke_api.rb` (static) removido; `PokeApiStub.stub_singleton` (monkey-patch) removido.
+- [x] `./scripts/run`: Lista/Detalhe/Time/Time-Manage/Batalha funcionando (injeção ok em dev).
+
+> Nota dev (lição da sessão): ao remover um arquivo que define constante carregada
+> (`lib/poke_api.rb` → `class PokeApi`), o container `web` precisa ser **reiniciado** — o
+> Sinatra::Reloader não desfaz a definição em memória e `module PokeApi` colidiu com o
+> `class PokeApi` antigo (`TypeError: PokeApi is not a module` em `/`). `docker compose
+> restart web` resolveu; nenhuma mudança de código.
 
 ## 6b. Progresso da implementação (passos 1–6)
 
@@ -179,9 +184,9 @@ e aguarda o feedback do usuário. Itens a verificar na validação:
   (static) **removido**; requires atualizados; `grep 'PokeApi\.[a-z]' lib server.rb` → só
   `PokeApi.instance`; `draft-arquitetura-design-patterns.md` (seção 2) com E1-A feita + E1-B pendente.
   Suíte **239/821**, lint 0.
-- **Fase 2 concluída** — todos os passos red→green→commit feitos, suíte/lint verdes. **Aguardando
-  validação do usuário (fase 3).** Não marcar `Done` nem atualizar `REQUIREMENTS.md`/`SESSIONS.md`
-  com status de validação até o usuário validar explicitamente.
+- **Fase 2 concluída** — todos os passos red→green→commit feitos, suíte/lint verdes.
+  **Validado pelo usuário em 2026-08-10** (seção 6) — sessão 0021 fechada; próxima: sessão
+  0022 (E1-B, decorator de cache TTL/LRU).
 
 ## 7. Observações
 

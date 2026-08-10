@@ -25,7 +25,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | --- | --- |
 | Linguagem | Ruby 3.3.6 (`/.tool-versions`) |
 | Framework web | Sinatra (`server.rb`) |
-| HTTP client | Faraday (`lib/poke_api.rb`) |
+| HTTP client | Faraday (`lib/gateways/poke_api_http.rb`, gateway via interface `PokeApi`) |
 | Modelo | `Dry::Struct` (`lib/pokemon.rb`) |
 | Persistência | PostgreSQL (gem `pg`, sem ORM) |
 | Testes | Minitest |
@@ -563,7 +563,8 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 17 | Página de gerenciamento de time (A3) | Done (sessão 0017, validado em 2026-08-09) |
 | 18 | Tratamento de erros (E2) | Done (sessão 0018, validado em 2026-08-09) |
 | 19 | Refactor de produção (respiro) — 7 `rubocop:disable` de `lib/**`+`server.rb` | Done (sessão 0020, validado em 2026-08-10) |
-| 20 | E1 — Cache de detalhes da PokéAPI (gateway/cache) | Planejada (após 0020) |
+| 20 | E1 — Cache de detalhes da PokéAPI (gateway/cache): **E1-A (interface `PokeApi` + adapter real `PokeApiHttp` + adapter fake + injeção via `settings.api`/`PokeApi.instance`)** | Done (sessão 0021, validado em 2026-08-10) |
+| 20b | E1-B — decorator de cache TTL/LRU fixos (remove a memoização do `PokeApiHttp`) | Planejada (próxima sessão 0022) |
 | 21 | D2 — XP/evolução (progressão entre batalhas) | Planejada (E1 → D2) |
 | 22 | D3 — Histórico/rank de batalhas | Planejada (após D2) |
 | 23 | Fase Eco — moeda (Eco-1), Poke Center (Eco-2), Poke Mart (Eco-3), itens em batalha (Eco-4) | Planejada (após D3) |
@@ -605,6 +606,12 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 > **Refactor de produção (respiro) virou sessão 0020, `Done` (validado em 2026-08-10)** —
 > os 7 `rubocop:disable` de `lib/**` + `server.rb` removidos via módulos por área
 > (suíte 222/778 + lint 0 preservados, sem mudança de comportamento).
+> **E1 (gateway/cache) virou sessão 0021 — E1-A, `Done` (validado em 2026-08-10):** interface
+> `PokeApi` (`lib/gateways/poke_api.rb`) + adapter real `PokeApiHttp` + adapter fake nos testes
+> (`PokeApiFake`) + injeção (`set :api, PokeApi.instance` em `server.rb`, domínio por default
+> `PokeApi.instance`); static `lib/poke_api.rb` e `PokeApiStub.stub_singleton` removidos
+> (suíte 239/821 + lint 0; `grep 'PokeApi\.[a-z]' lib server.rb` → só `PokeApi.instance`).
+> **E1-B (decorator de cache TTL/LRU fixos sobre o gateway) fica para a sessão 0022.**
 > **Roadmap fechado em 2026-08-10 (decisão do usuário):** o respiro de produção
 > (sessão 0020) foi executado e validado em 2026-08-10 com suíte 222/778 + lint 0
 > preservados, sem mudança de comportamento. Em sequência depois: **E1 (cache de
