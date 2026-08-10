@@ -260,3 +260,43 @@ class BattleEngineRoundTest < Minitest::Test
     assert_includes [0, 1], engine.winner
   end
 end
+
+class BattleEngineResultTest < Minitest::Test
+  include BattleEngineTestHelpers
+
+  def test_result_is_nil_while_in_progress
+    engine = battle_engine(team_a: [fire_pokemon], team_b: [grass_pokemon])
+
+    refute_predicate engine, :finished?
+    assert_nil engine.result
+  end
+
+  def test_result_is_win_when_player_team_wins
+    engine = battle_engine(team_a: [fire_pokemon], team_b: [grass_pokemon])
+    engine.play_round until engine.finished?
+
+    assert_equal 0, engine.winner
+    assert_equal :win, engine.result
+  end
+
+  def test_result_is_lose_when_opponent_team_wins
+    strong = build_pokemon(
+      number: 9, name: "strong", types: ["electric"],
+      hp: 200, speed: 100, attack: 100, defense: 10
+    )
+    weak = build_pokemon(number: 1, name: "weak", types: [], hp: 40, speed: 5, attack: 1, defense: 40)
+    engine = battle_engine(team_a: [weak], team_b: [strong])
+    engine.play_round until engine.finished?
+
+    assert_equal 1, engine.winner
+    assert_equal :lose, engine.result
+  end
+
+  def test_result_is_draw_when_both_teams_are_gone
+    engine = battle_engine(team_a: [], team_b: [])
+
+    assert_predicate engine, :finished?
+    assert_nil engine.winner
+    assert_equal :draw, engine.result
+  end
+end

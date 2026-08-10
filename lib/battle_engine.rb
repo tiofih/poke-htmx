@@ -123,6 +123,14 @@ class BattleEngine
     0
   end
 
+  def result
+    return unless finished?
+
+    return :draw unless winner
+
+    winner.zero? ? :win : :lose
+  end
+
   private
 
   def play_round!(round)
