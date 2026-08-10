@@ -1200,6 +1200,24 @@ class ServerTest < Minitest::Test
     assert_empty @repository.all("user-a")
   end
 
+  # rubocop:disable Metrics/AbcSize
+  def test_unexpected_error_renders_friendly_fragment_without_stack
+    @repository.add("user-a", pikachu_pokemon)
+
+    original = PokeApi.method(:available_move_names)
+    PokeApi.define_singleton_method(:available_move_names) { |_number| raise "boom inesperado" }
+
+    get "/team/manage", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Algo deu errado. Tente novamente."
+    refute_includes last_response.body, "<html"
+    refute_includes last_response.body, "boom inesperado"
+  ensure
+    PokeApi.define_singleton_method(:available_move_names, original)
+  end
+  # rubocop:enable Metrics/AbcSize
+
   private
 
   def add_four_pokemon_team(user_id)

@@ -48,6 +48,13 @@ class Server < Sinatra::Base
     end
   end
 
+  error 500 do
+    logger.error "#{env['sinatra.error'].class}: #{env['sinatra.error'].message}" if env["sinatra.error"]
+    @message = "Algo deu errado. Tente novamente."
+    status 200
+    erb :error, layout: false
+  end
+
   get "/" do
     @offset = 0
     @q = ""
