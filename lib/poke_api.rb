@@ -15,12 +15,21 @@ class PokeApi
   }.freeze
 
   def self.all
-    response = Faraday.get("https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0").body
-    JSON.parse(response)["results"]
+    response = Faraday.get("https://pokeapi.co/api/v2/pokemon?limit=100000&offset=0")
+    return [] unless response.respond_to?(:status) && response.status == 200
+
+    JSON.parse(response.body)["results"]
+  rescue Faraday::Error, JSON::ParserError
+    []
   end
 
   def self.fetch_all_names
-    @fetch_all_names ||= all.map { |pokemon| pokemon["name"] }
+    cached = @fetch_all_names
+    return cached if cached
+
+    names = all.map { |pokemon| pokemon["name"] }
+    @fetch_all_names = names unless names.empty?
+    names
   end
 
   def self.paginate(offset: 0, limit: 100, query: nil)

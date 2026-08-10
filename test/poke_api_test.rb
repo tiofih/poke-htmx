@@ -235,6 +235,77 @@ class PokeApiTest < Minitest::Test
   end
   # rubocop:enable Metrics/MethodLength
 
+  def test_all_returns_empty_when_status_not_ok
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |_url|
+      Struct.new(:status, :body).new(404, "Not Found")
+    end
+
+    assert_empty PokeApi.all
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
+  def test_all_returns_empty_when_body_is_not_json
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |_url|
+      Struct.new(:status, :body).new(200, "<html>rate limit</html>")
+    end
+
+    assert_empty PokeApi.all
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
+  def test_all_returns_empty_on_network_error
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "network down" }
+
+    assert_empty PokeApi.all
+  ensure
+    Faraday.define_singleton_method(:get, original)
+  end
+
+  # rubocop:disable Metrics/MethodLength
+  def test_fetch_all_names_memoizes_non_empty_list
+    PokeApi.instance_variable_set(:@fetch_all_names, nil)
+    calls = 0
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |_url|
+      calls += 1
+      Struct.new(:status, :body).new(200, JSON.generate("results" => [{ "name" => "pikachu" }]))
+    end
+
+    2.times { assert_equal %w[pikachu], PokeApi.fetch_all_names }
+
+    assert_equal 1, calls
+  ensure
+    Faraday.define_singleton_method(:get, original)
+    PokeApi.instance_variable_set(:@fetch_all_names, nil)
+  end
+  # rubocop:enable Metrics/MethodLength
+
+  # rubocop:disable Metrics/MethodLength
+  def test_fetch_all_names_does_not_memoize_failure
+    PokeApi.instance_variable_set(:@fetch_all_names, nil)
+    calls = 0
+    original = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) do |_url|
+      calls += 1
+      raise Faraday::ConnectionFailed, "rate limited" if calls == 1
+
+      Struct.new(:status, :body).new(200, JSON.generate("results" => [{ "name" => "pikachu" }]))
+    end
+
+    assert_empty PokeApi.fetch_all_names
+    assert_equal %w[pikachu], PokeApi.fetch_all_names
+    assert_equal 2, calls
+  ensure
+    Faraday.define_singleton_method(:get, original)
+    PokeApi.instance_variable_set(:@fetch_all_names, nil)
+  end
+  # rubocop:enable Metrics/MethodLength
+
   private
 
   # rubocop:disable Layout/LineLength, Metrics/MethodLength
