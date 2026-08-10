@@ -40,18 +40,18 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0022 (E1-B — decorator de cache da PokéAPI, TTL 600s / LRU máx 1000 fixos)
-concluída e validada em 2026-08-10** (`PokeApiCache` decorando a interface `PokeApi`,
-memoização interna do `PokeApiHttp` removida, `PokeApi.instance` default decorado no boot;
-suíte **256/849**, lint 0). **E1 encerrada.** Próxima sessão (**decisão do usuário em
-2026-08-10**, decisões 2/3–5 do `draft-arquitetura-design-patterns.md`):
+**Sessão 0023 (D2-A) em Implementação (fase 2 TDD concluída em 2026-08-10, passos 1–9
+verdes, suíte 292/941, lint 0) — aguardando a validação do usuário (fase 3).** Após a
+0023 validada:
 
-> **Sessão 0023 — D2: XP/evolução** (progressão persistida em `team_pokemon_progress`,
-> 1ª evolução/nível 1 na montagem, `ExperienceCurve` linear, aprendizado de golpes por
-> nível, oponente escalando com o nível do jogador, `RewardRule` no hook `:finished`(XP).
-> Depende da 0021/0022 (volume de requests aliviado pelo cache E1-B).
+> **Sessão 0024 — D2-B: evolução por nível + aprendizado de golpes por nível** com
+> **dados oficiais da species** (`evolution_chain` + `level_learned_at`, decisão do
+> usuário em 2026-08-10 — `draft-arquitetura-design-patterns.md` seção 8, decisão 15).
+> Evolução muda o `number` do membro sem quebrar a chave `team_pokemon_id`
+> (id estável); aprendizado cruza com D1 (golpes). Depende da 0023 (progressão
+> persistida, XP/nível prontos).
 
-Após a D2, sequência fechada em 2026-08-10 (decisões 2/9–13 do
+Após a D2 (A+B), sequência fechada em 2026-08-10 (decisões 2/9–13 do
 `draft-arquitetura-design-patterns.md`):
 
 > **D3 (histórico/rank)** → **Fase Eco (Eco-1 moeda pós-batalha, Eco-2 Poke Center, Eco-3
@@ -84,6 +84,7 @@ Após a D2, sequência fechada em 2026-08-10 (decisões 2/9–13 do
 | 0020 | Respiro: refatoração de produção — remoção dos 7 `rubocop:disable` de `lib/**` + `server.rb` (5 arquivos, módulos por área, suíte 222/778 + lint 0 preservados) | Concluída | Done (passos 1–6, suíte 222/778, lint 0, grep `rubocop:` em lib+server → 0, validado em 2026-08-10) |
 | 0021 | E1-A: gateway da PokéAPI — interface `PokeApi` + adapter real `PokeApiHttp` + adapter fake `PokeApiFake` + injeção (`settings.api`/`PokeApi.instance`); static `lib/poke_api.rb` e `PokeApiStub.stub_singleton` removidos | Concluída | Done (passos 1–6, suíte 239/821, lint 0, grep `PokeApi\.[a-z]` em lib+server → só `PokeApi.instance`, validado em 2026-08-10) |
 | 0022 | E1-B: decorator de cache TTL/LRU fixos — `PokeApiCache` (TTL 600s / máx 1000) sobre a interface `PokeApi`, remove a memoização interna do `PokeApiHttp`, `PokeApi.instance` decorado no boot | Concluída | Done (passos 1–6, suíte 256/849, lint 0, validado em 2026-08-10) |
+| 0023 | D2-A: progressão persistida — `team_pokemon_progress` + `ExperienceCurve` linear + `RewardRule` no `:finished` + `BattleEngine#result` + stats escalam + oponente escala | Implementação | TDD fase 2 (passos 1–9 verdes, suíte 292/941, lint 0 — aguardando validação do usuário, fase 3) |
 
 ## Estrutura do arquivo de sessão
 

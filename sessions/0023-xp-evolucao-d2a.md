@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluído — decisões do usuário em 2026-08-10 (D2 dividida em A/B; tabela nova; curva linear; recompensa simples) |
-| Implementação | Pendente |
-| Validação | Pendente |
+| Implementação | Concluído — fase 2 TDD (passos 1–10, suíte 292/941, lint 0) |
+| Validação | Pendente (aguardando o usuário) |
 
 ---
 
@@ -163,7 +163,55 @@ evolução nem mexe na lista de moves.
 
 ## 6b. Progresso da implementação (passos 1–10)
 
-> Preenchido durante a fase 2 (TDD). Não marcar como validado até o usuário validar. Ainda **não iniciado** (fase 2 pendente).
+> Preenchido durante a fase 2 (TDD). Não marcar como validado até o usuário validar.
+
+**2026-08-10 — fase 2 TDD concluída (passos 1–10).** Suíte base conservada e ampliada:
+256/849 → **292/941**, lint 0, commit a cada green.
+
+- **Passo 1 — migração + `clear_team!`:** `db/migrations/0023_add_team_pokemon_progress.sql`
+  (tabela `team_pokemon_progress` por `team_pokemon_id` PK, `level`/`xp` com default,
+  FK `ON DELETE CASCADE`, idempotente, sem truncate); `TestDatabase.clear_team!` passa a
+  truncar `team_pokemons, team_pokemon_progress`; helpers `table_exists?`/
+  `table_column_info`/`progress_row`/`progress_count`. Reaplicação de `db:setup` exigiu
+  `TRUNCATE ... CASCADE` nos migrations **0003** e **0007** (a FK nova quebrava o truncate
+  simples no segundo `setup!`). schema_test cobre existência/colunas e truncate da tabela nova.
+- **Passo 2 — `ExperienceCurve`:** `lib/experience_curve.rb` (puro, molde `TypeEffectiveness`):
+  `xp_needed(level) = level * 100`; `level_for_xp` inverso por acumulado (0–99→1, 100–299→2,
+  300–599→3, 600+→4, …). Testes `test/experience_curve_test.rb`.
+- **Passo 3 — `add` cria progresso:** `TeamRepository#add` insere o membro e a linha de
+  progresso (nível 1/xp 0) **na mesma transação** (guarda por `slot`/duplicado antes);
+  `remove` limpa via `ON DELETE CASCADE`. `team_repository_test` verifica criação, cascata e
+  rollback (duplicado não gera órfão).
+- **Passo 4 — `ProgressionRepository`:** `lib/progression_repository.rb` (espelha
+  `TeamRepository`, PG por usuário): `get(user_id, team_pokemon_id)` → `{level:, xp:}` ou
+  `nil` (dono validado via join com `team_pokemons.user_id`); `grant` soma XP, recalcula
+  nível via `ExperienceCurve` e persiste; membro de outro usuário/id inexistente → no-op.
+- **Passo 5 — `BattlePokemon` com nível:** attribute `level` (default 1); `from(pokemon,
+  moves:, level: 1)` escala stats `base + (level−1)*0.5` arredondado; `hp_max`/`hp_current`
+  do HP escalado; sem nível/`level: 1` → stats idênticos (0 regressão — suíte 0009/0011 verde
+  sem edição).
+- **Passo 6 — `RewardRule`:** `lib/reward_rule.rb` (puro) — `xp_for(:win/:draw/:lose)` →
+  50/25/20 (constantes `DEFAULT_*`, injetáveis); estrutura o hook `:finished` (Eco-1
+  reaproveita para moeda).
+- **Passo 7 — `BattleEngine#result`:** half-FSM **terminal** — `nil` em progresso;
+  `finished?` → `:win` (time A)/`:lose` (time B)/`:draw` (winner nil); `finished?`/`winner`/
+  `battle` intactos (0 regressão B3/C1). `:preparing` não se aplica (motor nasce pronto).
+- **Passo 8 — `OpponentGenerator(level:)`:** default 1; `team` monta
+  `BattlePokemon.from(fetcher.call(name), level: @level)` — oponente escala sem novas
+  chamadas à API.
+- **Passo 9 — `server.rb`:** `settings.progression = ProgressionRepository.new`;
+  `GET /battle` monta o time com o **nível de cada membro** (`progression.get`) e o oponente
+  com `level` = **nível médio (arredondado)** do time do jogador; `POST /battle/play`
+  concede XP **uma única vez** ao **transicionar** para `finished?` (guard de transição):
+  `RewardRule.xp_for(@engine.result)` × cada membro via `grant`; `battle.erb` exibe
+  "Nível N" por lutador e "Seu Time ganhou X XP por Pokémon" ao fim. Rotas existentes sem
+  regressão.
+- **Passo 10 — docs:** `draft-arquitetura` (D2-A feita, D2-B próxima), `REQUIREMENTS.md`
+  (roadmap 21 D2-A executado — aguardando validação; 21b D2-B Planejada), `SESSIONS.md`
+  (tabela 0023 + próxima 0024), `draft-auto-battler.md` (visão D2 parcial).
+
+**PARADA (regra RNF-04 / AGENTS.md):** fase 3 (validação) é executada pelo **usuário**.
+Nada de marcar `Done`/commitar conclusão até o feedback.
 
 ## 7. Observações
 

@@ -79,6 +79,21 @@ contrato público".
 > aprendizado de golpes por nível — cruz com D1) usando **dados oficiais da species**
 > (`evolution_chain` + `level_learned_at`, decisão do usuário em 2026-08-10 — ver seção 8,
 > decisão 15).
+
+> **D2-A concluída — fase 2 TDD (sessão 0023, 2026-08-10, passos 1–9):**
+> migração `0023_add_team_pokemon_progress` (tabela por `team_pokemon_id`, FK `ON DELETE
+> CASCADE`; `clear_team!`/truncates 0003/0007 em `CASCADE`); `ExperienceCurve` linear
+> (`xp_needed = level*100`, `level_for_xp` por acumulado); `TeamRepository#add` cria
+> progresso (nível 1/xp 0) na mesma transação; `ProgressionRepository` (`get`/`grant`
+> por usuário via join de dono, no-op para estranho/id inexistente); `BattlePokemon` com
+> `level` (stats escalam `base + (level−1)*0.5`, redondo — sem nível = idêntico);
+> `RewardRule` (`DEFAULT_WIN_XP 50 / DRAW 25 / LOSE 20`, injetáveis — hook `:finished`
+> pronto p/ Eco-1); `BattleEngine#result` (half-FSM terminal `nil`/`:win`/`:lose`/`:draw`,
+> perspectiva do time A); `OpponentGenerator(level:)`; `server.rb` (`settings.progression`,
+> `GET /battle` com nível por membro + oponente no **nível médio** do jogador, `POST
+> /battle/play` concede XP **uma única vez** na transição para `:finished`, `battle.erb`
+> com "Nível N" + aviso de XP). Suíte **292/941**, lint 0. **Aguardando validação do
+> usuário (fase 3). Próxima: D2-B — sessão 0024.**
 | **3** | **D2 — XP/evolução** | **D2-A (sessão 0023):** tabela `team_pokemon_progress` (3); nível 1 na montagem (4); `ExperienceCurve` linear (5); stats escalam; `RewardRule` no `:finished` + `BattleEngine#result` (half-FSM); oponente escala. **D2-B (sessão 0024):** evolução + aprendizado por nível, dados oficiais da species (15). | 1, 2 (volume de requests) |
 | **4** | **D3 — Histórico/rank** | Tabela `battles`; vitórias/derrotas por usuário + oponente serializado + data (6); rank **local e global** (7). Resolve o `BattleRegistry` no ponto mais atômico (8). | 3 (`:finished` já concede recompensa) |
 | **5** | **Eco-1 — Moeda pós-batalha** | Tabela `wallet`; `RewardRule` passa a conceder **XP + dinheiro** no `:finished` (decisão 10 — moeda ao final da batalha como um todo). | 3 (mesmo hook), 4 (resultado persistido) |
