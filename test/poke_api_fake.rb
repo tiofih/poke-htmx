@@ -1,0 +1,52 @@
+# frozen_string_literal: true
+
+require_relative "../lib/gateways/poke_api_http"
+
+class PokeApiFake
+  def initialize(find: nil, detail: nil, fetch_all_names: nil,
+                 moves_for: nil, move: nil, available_move_names: nil, type_relations: nil)
+    @find = find
+    @detail = detail
+    @fetch_all_names = fetch_all_names
+    @moves_for = moves_for
+    @move = move
+    @available_move_names = available_move_names
+    @type_relations = type_relations
+  end
+
+  attr_reader :fetch_all_names, :type_relations
+
+  def find(name)
+    resolve(@find, name)
+  end
+
+  def detail(poke_id)
+    resolve(@detail, poke_id)
+  end
+
+  def paginate(offset: 0, limit: 100, query: nil)
+    names = fetch_all_names.to_a
+    names = names.select { |name| name.downcase.include?(query.downcase) } if query && !query.empty?
+    { names: names[offset, limit].to_a, total: names.size }
+  end
+
+  def move(name)
+    resolve(@move, name)
+  end
+
+  def moves_for(_number)
+    @moves_for
+  end
+
+  def available_move_names(_number)
+    @available_move_names
+  end
+
+  private
+
+  def resolve(config, key)
+    return nil if config.nil?
+
+    config.is_a?(Hash) ? config[key] : config
+  end
+end
