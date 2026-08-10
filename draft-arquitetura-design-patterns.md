@@ -78,7 +78,8 @@ contrato público".
 > oponente escala com o nível do jogador. **D2-B — sessão 0024** (evolução por nível +
 > aprendizado de golpes por nível — cruz com D1) usando **dados oficiais da species**
 > (`evolution_chain` + `level_learned_at`, decisão do usuário em 2026-08-10 — ver seção 8,
-> decisão 15).
+> decisão 15). **Implementada em 2026-08-10 (passos 1–7 TDD, suíte 327/1018, lint 0 —**
+> **aguardando validação do usuário).**
 
 > **D2-A concluída e validada (sessão 0023, 2026-08-10, passos 1–9 TDD + fase 3 do
 > usuário):**

@@ -566,7 +566,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 20 | E1 — Cache de detalhes da PokéAPI (gateway/cache): **E1-A (interface `PokeApi` + adapter real `PokeApiHttp` + adapter fake + injeção via `settings.api`/`PokeApi.instance`)** | Done (sessão 0021, validado em 2026-08-10) |
 | 20b | E1-B — decorator de cache TTL/LRU fixos (remove a memoização do `PokeApiHttp`) | Done (sessão 0022, validado em 2026-08-10) |
 | 21 | D2 — XP/evolução | **D2-A (sessão 0023)** Done — validado em 2026-08-10 (suíte 292/941, lint 0): `team_pokemon_progress` + `ExperienceCurve` linear + `RewardRule` no `:finished` + `BattleEngine#result` + stats escalam + oponente escala + XP concedido na transição |
-| 21b | D2-B — evolução por nível + aprendizado de golpes (species oficial) | Planejada (sessão 0024, após D2-A) |
+| 21b | D2-B — evolução por nível + aprendizado de golpes (species oficial) | Implementado (sessão 0024, aguardando validação do usuário — suíte 327/1018, lint 0): `TeamRepository#evolve` + `#learn_move` + `EvolutionRule` puro + `next_evolutions`/`learnable_moves` no gateway + evolução/aprendizado no hook `:finished` da batalha |
 | 22 | D3 — Histórico/rank de batalhas | Planejada (após D2) |
 | 23 | Fase Eco — moeda (Eco-1), Poke Center (Eco-2), Poke Mart (Eco-3), itens em batalha (Eco-4) | Planejada (após D3) |
 | 24 | Candidatos futuros — D4 (draft temático), D1 (nível de aprendizado), J1 (seleção inicial), J2 (personalização), J3 (ranking S–F) | Backlog |
