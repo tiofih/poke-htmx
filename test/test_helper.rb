@@ -8,7 +8,7 @@ require "rack/test"
 require "pg"
 
 require_relative "../lib/pokemon"
-require_relative "../lib/poke_api"
+require_relative "../lib/gateways/poke_api"
 require_relative "../lib/team_repository"
 require_relative "test_support"
 require_relative "poke_api_fake"

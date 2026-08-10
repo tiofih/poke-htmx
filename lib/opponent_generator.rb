@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "poke_api"
+require_relative "gateways/poke_api"
 require_relative "battle_pokemon"
 
 class OpponentGenerator

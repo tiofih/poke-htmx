@@ -819,7 +819,7 @@ class ServerBattleTest < Minitest::Test
   end
 
   def neutral_type_json_table
-    PokeApi::TYPE_NAMES.to_h { |type| [type, type_json_for(type)] }
+    PokeApiTypes::TYPE_NAMES.to_h { |type| [type, type_json_for(type)] }
   end
 
   def type_json_for(type)

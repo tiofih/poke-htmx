@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "poke_api"
+require_relative "gateways/poke_api"
 
 class TypeEffectiveness
   FACTORS = { "double" => 2.0, "half" => 0.5, "no" => 0.0 }.freeze
