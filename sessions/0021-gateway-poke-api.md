@@ -158,6 +158,31 @@ e aguarda o feedback do usuário. Itens a verificar na validação:
 
 > Preenchido durante a fase 2 (TDD). Não marcar como validado até o usuário validar.
 
+- **Passo 1 — `PokeApiHttp` (adapter real)** ✅ commit `3149245`: `lib/gateways/poke_api_http.rb`
+  por instância + módulos Parsing/Moves/Types; `test/poke_api_http_test.rb`; suíte **226/788**, lint 0.
+- **Passo 2 — Interface `PokeApi` (instance/instance=)** ✅ commit `d5a9819`: accessor no
+  `lib/poke_api.rb`; `test/gateway_interface_test.rb`; suíte **229/791**, lint 0.
+- **Passo 3 — Adapter fake** ✅ commit `d544724`: `test/poke_api_fake.rb` + `test/poke_api_fake_test.rb`; suíte **238/817**, lint 0.
+- **Passo 4 — Composition root + migração prod** ✅ commit `58ac3b8`: `server.rb` com
+  `set :api, PokeApi.instance`, handlers via `settings.api`; `playable_engine` com
+  `TypeEffectiveness.load(settings.api)`; `opponent_team` com `fetcher: settings.api.method(:detail)`;
+  `TypeEffectiveness.load(api = PokeApi.instance)`; default do `OpponentGenerator` via
+  `PokeApi.instance`. `PokeApiStub.with_gateway` ganhou semântica de **merge** (aninhamentos de
+  `with_*` compõem um único `PokeApiFake` em vez de substituir); teste de erro 500 passou a
+  injetar gateway que lança. Suíte **239/821**, lint 0.
+- **Passo 5 — Migração dos testes** ✅ commit `35126dc`: `poke_api_test.rb`/`poke_api_move_test.rb`
+  usam `PokeApiHttp.new` (patches de singleton viraram `define_singleton_method` no próprio
+  adapter); `PokeApiStub.stub_singleton` **removido** — `with_*` vira construtor de fake + swap
+  de `Server.api`/`PokeApi.instance`. Suíte **239/821**, lint 0.
+- **Passo 6 — Remover static + docs** ✅ commit `998319e`: `lib/gateways/poke_api.rb` (module
+  `PokeApi` = interface com contrato documentado + `instance`/`instance=` lazy); `lib/poke_api.rb`
+  (static) **removido**; requires atualizados; `grep 'PokeApi\.[a-z]' lib server.rb` → só
+  `PokeApi.instance`; `draft-arquitetura-design-patterns.md` (seção 2) com E1-A feita + E1-B pendente.
+  Suíte **239/821**, lint 0.
+- **Fase 2 concluída** — todos os passos red→green→commit feitos, suíte/lint verdes. **Aguardando
+  validação do usuário (fase 3).** Não marcar `Done` nem atualizar `REQUIREMENTS.md`/`SESSIONS.md`
+  com status de validação até o usuário validar explicitamente.
+
 ## 7. Observações
 
 - **E1-B (próxima sessão, pendente):** decorator `PokeApiCache` (TTL/LRU **fixos**, decisão 9

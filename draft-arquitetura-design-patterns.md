@@ -55,7 +55,9 @@ contrato público".
 
 > **E1 dividida em 2 sessões (decisão do usuário, 2026-08-10):** **E1-A — sessão 0021**
 > (interface `PokeApi` + adapter real `PokeApiHttp` + adapter fake nos testes + injeção via
-> `settings.api`/`PokeApi.instance`; memoização atual permanece por instância) → **E1-B —
+> `settings.api`/`PokeApi.instance`; memoização atual permanece por instância) — **implementada**
+> em 2026-08-10 (sessão 0021, passos 1–6 commitados, `lib/poke_api.rb` static removido;
+> `PokeApiStub` virou construtor de `PokeApiFake` + swap de `Server.api`) → **E1-B —
 > sessão 0022** (decorator `PokeApiCache` TTL/LRU **fixos**, remove a memoização do adapter
 > real). Sequência: E1-A → E1-B → D2 → D3 → Eco.
 | **3** | **D2 — XP/evolução** | Tabela nova `team_pokemon_progress` (decisão 3); 1ª evolução/nível 1 na montagem (4); `ExperienceCurve` **linear** por ora (5); aprendizado de golpes por nível cruza com D1; oponente escala com o nível do jogador; **`RewardRule`** já estrutura o gancho `:finished` (XP). | 1, 2 (volume de requests) |
