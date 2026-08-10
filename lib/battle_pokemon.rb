@@ -15,23 +15,32 @@ class BattlePokemon < Dry::Struct
   attribute :hp_max, BC_HP
   attribute :hp_current, BC_HP
   attribute :moves, Types::Strict::Array.of(Move).default([].freeze)
+  attribute :level, Types::Coercible::Integer.default(1)
 
-  def self.from(pokemon, moves: [])
-    new(**attributes_for(pokemon, moves: moves))
+  def self.from(pokemon, moves: [], level: 1)
+    new(**attributes_for(pokemon, moves: moves, level: level))
   end
 
   class << self
     private
 
-    def attributes_for(pokemon, moves:)
-      hp = base_hp(pokemon)
+    def attributes_for(pokemon, moves:, level:)
+      stats = scale_stats(pokemon.stats, level)
+      hp = base_hp(stats)
       { number: pokemon.number, name: pokemon.name, sprite: pokemon.sprite.to_s,
-        types: pokemon.types, stats: pokemon.stats, hp_max: hp, hp_current: hp,
-        moves: moves }
+        types: pokemon.types, stats: stats, hp_max: hp, hp_current: hp,
+        moves: moves, level: level }
     end
 
-    def base_hp(pokemon)
-      pokemon.stats.find { |stat| stat[:name] == "HP" }&.fetch(:value) || 1
+    def scale_stats(stats, level)
+      factor = level.to_i - 1
+      return stats if factor <= 0
+
+      stats.map { |stat| stat.merge(value: (stat[:value].to_i + (factor * 0.5)).round) }
+    end
+
+    def base_hp(stats)
+      stats.find { |stat| stat[:name] == "HP" }&.fetch(:value) || 1
     end
   end
 

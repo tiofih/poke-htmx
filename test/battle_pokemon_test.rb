@@ -104,4 +104,47 @@ class BattlePokemonTest < Minitest::Test
     assert_equal 1, fighter.stat("Attack")
     assert_equal 1, fighter.stat("Defense")
   end
+
+  def test_from_defaults_to_level_one_and_preserves_stats
+    fighter = BattlePokemon.from(pikachu)
+
+    assert_equal 1, fighter.level
+    assert_equal 45, fighter.hp_max
+    assert_equal 45, fighter.hp_current
+    assert_equal 90, fighter.stat("Speed")
+  end
+
+  def test_from_scales_stats_with_level_and_rounds_half_up
+    fighter = BattlePokemon.from(pikachu, level: 3)
+
+    assert_equal 3, fighter.level
+    assert_equal 46, fighter.hp_max, "HP 45 + (3-1)*0.5 = 46"
+    assert_equal 91, fighter.stat("Speed"), "Speed 90 + 1 = 91"
+  end
+
+  def test_from_rounds_half_away_from_zero_when_required
+    fighter = BattlePokemon.from(pikachu, level: 4)
+
+    assert_equal 47, fighter.hp_max, "HP 45 + 1.5 = 46.5 -> 47"
+    assert_equal 92, fighter.stat("Speed"), "Speed 90 + 1.5 = 91.5 -> 92"
+  end
+
+  def test_from_uses_minimum_hp_when_stat_missing_even_scaled
+    without_hp = Pokemon.new(
+      name: "pikachu",
+      sprite: "https://example.com/pikachu.png",
+      number: 25,
+      types: ["electric"],
+      stats: [{ name: "Speed", value: 90 }]
+    )
+
+    assert_equal 1, BattlePokemon.from(without_hp, level: 8).hp_max
+  end
+
+  def test_scaled_stats_do_not_mutate_original_pokemon
+    fighter = BattlePokemon.from(pikachu, level: 5)
+
+    assert_equal 45, pikachu.stats.find { |stat| stat[:name] == "HP" }[:value]
+    assert_equal 47, fighter.hp_max, "HP 45 + 2 = 47"
+  end
 end
