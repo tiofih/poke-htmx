@@ -562,7 +562,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 16 | Logs de batalha detalhados (C1) | Done (sessão 0016, validado em 2026-08-09) |
 | 17 | Página de gerenciamento de time (A3) | Done (sessão 0017, validado em 2026-08-09) |
 | 18 | Tratamento de erros (E2) | Done (sessão 0018, validado em 2026-08-09) |
-| 19 | Refactor de produção (respiro) — 7 `rubocop:disable` de `lib/**`+`server.rb` | **Próxima (sessão 0020)** — decidida em 2026-08-10 |
+| 19 | Refactor de produção (respiro) — 7 `rubocop:disable` de `lib/**`+`server.rb` | Implementado como sessão 0020 — aguardando validação do usuário (2026-08-10) |
 | 20 | E1 — Cache de detalhes da PokéAPI (gateway/cache) | Planejada (após 0020) |
 | 21 | D2 — XP/evolução (progressão entre batalhas) | Planejada (E1 → D2) |
 | 22 | D3 — Histórico/rank de batalhas | Planejada (após D2) |

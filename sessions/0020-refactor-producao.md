@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — critérios e plano fechados com o usuário em 2026-08-10 (respiro) |
-| Implementação | Pendente |
+| Implementação | Executada (passos 1–6 verdes: suíte 222/778, lint 0, grep 0) |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -170,6 +170,25 @@ o agente para e não marca fases como concluídas nem commita a conclusão).
 - [ ] `server.rb` funcionando em dev (`./scripts/run` + navegação Lista/Time/Batalha).
 
 **Resultado:** a preencher após validação do usuário.
+
+## 6b. Progresso da implementação (passos 1–6 verdes)
+
+> Executado em 2026-08-10, **aguardando validação do usuário** (fase 6 acima).
+
+- **Passos 1–5** (battle_pokemon + team_repository + poke_api + battle_engine +
+  server): commits `fc16fc1`, `8f779ea`, `aba3ae4`, `8312e87`, `22dd142` —
+  `BattlePokemon.from`/`attributes_for`/`base_hp` privados; `TeamRepository` com
+  `row_to_pokemon` + módulo `SlotOperations`; `PokeApi` com `PokeApiParsing`/
+  `PokeApiMoves`/`PokeApiTypes` (e `TYPE_NAMES` delegada na classe, contrato mantido);
+  `BattleEngine` com `BattleActions` (dano/golpe) e `act`/`log_entry` fatiados
+  (ordem de chaves da entry preservada); `server.rb` com rotas em módulos
+  `registered` (Pokemon/Team/Battle/Error) e ações em `ServerCommon`/
+  `ServerListActions`/`ServerTeamActions`/`ServerBattleActions`.
+- **Verificação:** suíte **222 runs/778 asserts** + **lint 0** + **grep
+  `rubocop:` em lib/**/server.rb → 0** (5 arquivos, 7 disables removidos). Nenhuma
+  mudança em `test/**`; comportamento/schema/rotas intactos (suíte é a rede de
+  segurança); fora de escopo os arquivos sem disable
+  (`battle_registry`/`opponent_generator`/`move`/`pokemon`/`type_effectiveness`).
 
 ## 7. Observações
 

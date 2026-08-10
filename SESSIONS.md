@@ -40,14 +40,12 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0019 (respiro — refatoração de testes) concluída e validada em 2026-08-10**
-(222 runs/778 asserts, lint 0). Próxima sessão (**decisão do usuário em 2026-08-10**):
-
-> **Sessão 0020 — refactor de produção (respiro):** remover os 7 `rubocop:disable` de
-> `lib/**` + `server.rb` (5 arquivos) — mesmo molde/respiro da 0019, sem mudança de
-> comportamento (critério: suíte 222/778 + lint 0 preservados). Detalhamento em
-> `draft-auto-battler.md` ("Refatoração dos arquivos de produção") e
-> `draft-arquitetura-design-patterns.md` (seções 2 e 8).
+**Sessão 0020 (respiro — refatoração de produção) em implementação** — removidos os
+7 `rubocop:disable` de `lib/**` + `server.rb` (5 arquivos), passos 1–5 verdes
+(suíte 222/778 + lint 0 preservados), passo 6 docs feito. **Aguardando validação do
+usuário (fase 3)** antes de marcar `Done`. Detalhamento em
+`sessions/0020-refactor-producao.md` e `draft-auto-battler.md` ("Refatoração dos
+arquivos de produção").
 
 Após a 0020, sequência fechada em 2026-08-10 (decisões 2/9–13 do
 `draft-arquitetura-design-patterns.md`):
@@ -81,6 +79,7 @@ Após a 0020, sequência fechada em 2026-08-10 (decisões 2/9–13 do
 | 0017 | Página de gerenciamento de time (RF-17, A3) — slot + golpes persistidos + team_manage.erb | Concluída | Done (passos 0–6 + ajustes de validação, 199 runs/708 asserts, validado em 2026-08-09) |
 | 0018 | Tratamento de erros (RF-18, E2) — robustez da fonte + fragmentos amigáveis 200 + handler global | Concluída | Done (passos 0–5, 222 runs/778 asserts, lint 0, validado em 2026-08-09) |
 | 0019 | Respiro: refatoração de testes — remoção dos `rubocop:disable` (6 arquivos, orçamentos em `test/.rubocop.yml`, `TestSupport`/`TestDatabase`/`PokeApiStub` genérico) | Concluída | Done (passos 1–6, 222 runs/778 asserts preservados, lint 0, validado em 2026-08-10) |
+| 0020 | Respiro: refatoração de produção — remoção dos 7 `rubocop:disable` de `lib/**` + `server.rb` (5 arquivos, módulos por área, suíte 222/778 + lint 0 preservados) | Implementação | Feita (passos 1–6: suíte 222/778, lint 0, grep `rubocop:` em lib+server → 0) — **aguardando validação do usuário** |
 
 ## Estrutura do arquivo de sessão
 
