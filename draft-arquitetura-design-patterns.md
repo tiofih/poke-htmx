@@ -1,0 +1,236 @@
+# Draft — Levantamento de arquitetura & design patterns (2026-08-10)
+
+> **Fora do fluxo.** Levantamento/discovery para embasar as próximas implementações.
+> Não gera critérios de aceite nem plano TDD agora (RNF-04). Revisar ao fechar as fases.
+> Sessão de origem: refinamento alongado — apenas levantamento e anotações, **zero
+> edição de código**.
+
+---
+
+## 1. Estado atual do código (levantamento real)
+
+Camadas hoje (Sinatra + Dry::Struct + PostgreSQL + htmx):
+
+| Camada | Arquivo | Papel | Padrão atual |
+| --- | --- | --- | --- |
+| Rota/Controladora | `server.rb` | Todas as rotas + lógica de orquestração inline nos handlers | Controladora fina→gorda (God routes) |
+| Aplicação/Helpers | `server.rb` `helpers do` | `current_user`, `battle_moves_for` (domínio preso no HTTP) | Mixin de helpers |
+| Domínio puro | `lib/battle_engine.rb`, `lib/battle_pokemon.rb`, `lib/type_effectiveness.rb`, `lib/move.rb`, `lib/opponent_generator.rb`, `lib/battle_registry.rb` | Núcleo do game loop, sem rede | Value Objects + Engine |
+| Infra/Integração | `lib/poke_api.rb` | Toda a conversa com PokéAPI (HTTP + parse + caches em classe) | Facade/procedural estático |
+| Persistência | `lib/team_repository.rb` | SQL por usuário; slots; moves | Repository |
+| Apresentação | `views/*.erb` | Fragmentos htmx + `layout.erb` | ERB direto sobre os objetos |
+| Testes | `test/*` (0019) | `TestSupport` (builders/factories), `TestDatabase` (introspection), `PokeApiStub` (stub de métodos singleton) | TestSupport + stubs |
+
+Metrificação: **222 runs / 778 asserts, lint 0** (baseline da sessão 0019).
+
+### `rubocop:disable` restantes — produção (alvo do refactor futuro)
+
+Anotado no `draft-auto-battler.md` (sessão 0019 validada), **não executado**:
+
+| Arquivo | Disables | O quê |
+| --- | --- | --- |
+| `server.rb` | 1 | `Metrics/ClassLength` (classe inteira) |
+| `lib/battle_engine.rb` | 1 região | `ClassLength` + `AbcSize` + `MethodLength` + `ParameterLists` |
+| `lib/battle_pokemon.rb` | 1 | `MethodLength` (`from`) |
+| `lib/poke_api.rb` | 2 regiões | `ClassLength` + (`AbcSize`, `MethodLength` em `detail`) |
+| `lib/team_repository.rb` | 2 | `ClassLength` + `MethodLength` (`all`) |
+
+Total: **5 arquivos / 7 disables**. Plano de sessão futura única já esboçado no
+`draft-auto-battler.md` (linha 237), com critério de "uma fase, salvo mudança de
+contrato público".
+
+---
+
+## 2. Roadmap consolidado (ordem fechada em 2026-08-10)
+
+> **Ordem encaminhada (decisão 2/8 da seção 8):** refactor produção → E1 → D2 → D3 →
+> Fase Eco → (D4/D1 como candidatos futuros).
+
+### Sessões em sequência
+
+| # | Sessão (provável) | Escopo | Depende de |
+| --- | --- | --- | --- |
+| **1** | **Refactor produção** (respiro, molde da 0019) | Remover os 7 `rubocop:disable` de `lib/**` + `server.rb` (seção 1.1). Critério: suíte 222/778 + lint 0 preservados, sem mudança de comportamento. | — (agora) |
+| **2** | **E1 — Cache de detalhes** (gateway/cache) | `PokeApi` → interface + adapter real (Faraday) + decorator de cache (TTL/LRU **fixos** — decisão 9). Refactor de `PokeApiStub` para adapter fake. | 1 (adapter reaproveita extração do `PokeApi`) |
+| **3** | **D2 — XP/evolução** | Tabela nova `team_pokemon_progress` (decisão 3); 1ª evolução/nível 1 na montagem (4); `ExperienceCurve` **linear** por ora (5); aprendizado de golpes por nível cruza com D1; oponente escala com o nível do jogador; **`RewardRule`** já estrutura o gancho `:finished` (XP). | 1, 2 (volume de requests) |
+| **4** | **D3 — Histórico/rank** | Tabela `battles`; vitórias/derrotas por usuário + oponente serializado + data (6); rank **local e global** (7). Resolve o `BattleRegistry` no ponto mais atômico (8). | 3 (`:finished` já concede recompensa) |
+| **5** | **Eco-1 — Moeda pós-batalha** | Tabela `wallet`; `RewardRule` passa a conceder **XP + dinheiro** no `:finished` (decisão 10 — moeda ao final da batalha como um todo). | 3 (mesmo hook), 4 (resultado persistido) |
+| **6** | **Eco-2 — Poke Center** | `HealService` + `HealCostPolicy` **proporcional ao HP faltante** (11); rota htmx + fragmento; cobra do saldo. | 5 (saldo) |
+| **7** | **Eco-3 — Poke Mart (catálogo + inventário)** | `Item` (Value Object), catálogo estático, compra com dinheiro, `InventoryRepository`, fragmentos htmx. | 5 (saldo) |
+| **8** | **Eco-4 — Itens em batalha** | Consumíveis (poções) como **ação automática** no motor, depois aberta ao jogador (12); seguráveis escopo simples (13); estratégia do time **selecionável** (12). | 6/7 (itens), 3 (estratégia/engine) |
+| — | **D4 — Draft temático** (candidato futuro) | Regras de validação na montagem (estende RF-07) | pós-Eco ou em paralelo |
+| — | **D1 parcial / nível de aprendizado** (candidato futuro) | Golpes aprendíveis por nível (cruz com D2) | entra junto/antes do D2 |
+
+**Nota:** D2 obriga estado persistente de progressão → impacto em `TeamRepository`
+(novas colunas ou nova tabela) e multiplação de requests (reforça E1). É o item que
+mais tensiona a arquitetura atual.
+
+### Fase E — Economia & serviços entre batalhas (nova candidata, anotada 2026-08-10)
+
+> Visão do usuário: **após cada batalha ganhamos dinheiro além de XP**; entre batalhas
+> o jogador pode **passar no Poke Center** (recuperar os Pokémon, gastando dinheiro) ou
+> no **Poke Mart** (comprar itens para os Pokémon — **consumíveis**, **seguráveis**
+> (hold items) e **poções**). Proposta de divisão em fases:
+
+| Fase | Escopo | Impacto arquitetural |
+| --- | --- | --- |
+| **Eco-1 — Moeda pós-batalha** | Criar saldo por usuário (tabela `wallet`/coluna) e conceder dinheiro ao atingir `:finished(win/lose/draw)` — **mesmo hook do XP (half-FSM, seção 6.1)**. Testável sem rede. | Novo `WalletRepository`; hook de terminal ganha a concessão de moeda ao lado do XP. |
+| **Eco-2 — Poke Center** | Serviço de recuperação: custo baseado em HP faltante (e/ou reavivar?); rota htmx `POST /team/heal` + fragmento; cobra do saldo. | `HealService` (uso de caso); cálculos puros (`HealCostPolicy`); reforça persistir HP/status do time (D2 já persiste). |
+| **Eco-3 — Poke Mart (catálogo + inventário)** | Catálogo de itens (Dry::Struct `Item`), compra com dinheiro, inventário persistido por usuário (tabela `inventory`), fragmentos htmx. | `Item` como Value Object; `InventoryRepository`; catálogo estático (molde de `TYPE_NAMES`); serviços de compra. |
+| **Eco-4 — Itens em batalha** | Consumíveis (poções restauram HP **durante** a batalha — ação não-ofensiva no motor), seguráveis (hold items modulam stats/passivos via Strategy). | `BattleEngine` ganha tipos de ação além do ataque → **confirma o half-FSM** (ação = evento com transição); hold items via **Strategy/Decorator** sobre `BattlePokemon` (stats). |
+
+**Circuito fechado:** batalha → `:finished` → XP + dinheiro → gastar (Center/Mart) →
+batalhar de novo. D2 (XP) e Eco-1 compartilham exatamente o mesmo ponto de gancho
+(terminal da batalha) — fazem sentido juntos ou na sequência.
+
+---
+
+## 3. Padrões de projeto HOJE (presentes na base)
+
+| Padrão | Onde | Observação |
+| --- | --- | --- |
+| **Value Object** (Dry::Struct imutável) | `Pokemon`, `BattlePokemon`, `Move`, `BattleResult` | Sólido; base dos testes. `attack/defense/hp` etc. imutáveis ajudam o determinismo. |
+| **Strategy** (injeção via construtor) | `BattleEngine(target_strategy:)`, `OpponentGenerator(rng:, fetcher:)`, `TypeEffectiveness` em `BattleEngine` | Bom grau de injeção de dependência no domínio. |
+| **Factory Method / Builder** | `BattlePokemon.from`, `OpponentGenerator#team`, `PokeApi.extract_move`, `PokeApi.detail` | Presente, mas espalhado e acoplado ao estático `PokeApi`. |
+| **Repository** | `TeamRepository` | Único persistente; por-agregado (time). |
+| **Registry** | `BattleRegistry` | Estado de batalha em memória por usuário (efêmero). |
+| **Facade/Proxy** | `PokeApi` | Todo HTTP + parse + cache concentrado. |
+| **Memoization** | `PokeApi` (`@fetch_all_names`, `@move_cache`, `@pokemon_moves_cache`, `@available_moves_cache`, `@type_relations`) | Cache em classe estática — funcional mas global e opaco. |
+| **Helper/Mixin** | `server.rb helpers` | Orquestração útil mas mistura domínio (moves) com HTTP. |
+
+## 4. Anti-padrões / dívidas que torram capacidade de evoluir
+
+| Anti-padrão | Onde | Custo para D2/D3/D4 |
+| --- | --- | --- |
+| **God class estática** | `server.rb`, `BattleEngine`, `PokeApi` | Métricas estourando → origem dos `rubocop:disable`. Cada feature nova aumenta. |
+| **Rota-gorda (orquestração no handler)** | `GET /battle` (45 linhas inline: busca time → detalhes → oponente → engine → registry) | Lógica de regra de negócio não testável sem HTTP. D2/D3 vão dobrar esse handler. |
+| **Gateway acoplado e global** | `PokeApi` estático com caches em classe | E1 (cache) e D2 (escala) exigem trocar a implementação (TTL, LRU, decorator) e stub nos testes — hoje via monkey-patch de métodos singleton. |
+| **Domínio preso ao HTTP** | `battle_moves_for` em `server.rb` (saved × fallback × Struggle) | Decisão de golpes pertence ao domínio; D1/D2 precisam reusar. |
+| **Presentação replicada** | `battle.erb` duplica o loop "Seu Time"/"Oponente"; `team.erb`/`team_manage.erb` duplicam slots | D3 (histórico) reusaria a mesma apresentação. |
+| **Lógica SQL espalhada** | `TeamRepository` só; mas D2/D3 vão somar projeções | Repositórios novos surgem sem contrato comum. |
+| **State efêmero** | `BattleRegistry` em memória | D3 exige persistência; D2 exige progressão persistida. |
+
+---
+
+## 5. Padrões a IMPLEMENTAR (por driver do roadmap)
+
+| Padrão | Driver | Proposta |
+| --- | --- | --- |
+| **Application Service / Use Case** | D2/D3 + refactor produção | Extrair orquestração dos handlers (ex.: `BattleService#prepare(user)`, `TeamService`) em classes PORO testáveis. Encolhe `server.rb` (mata o `ClassLength`) e os handlers virando thin controllers. |
+| **Gateway interface + Adapter** (PokeApi como interface com impl real e stub) | E1 + D2 + testes | Trocar `PokeApi` estático por um gateway injetável (construtor recebe `http`). `PokeApiStub` deixa de depender de monkey-patch de singleton e vira adapter fake — simplifica os testes já estabelecidos na 0019. |
+| **Cache Decorator** | E1 | Decorator com TTL/LRU sobre o gateway (não no domínio). Remove a memoização global atual e dá controle de invalidação. |
+| **Repository por agregado** | D2/D3/Eco | `BattleRepository` (persistir `battles` p/ D3), `ProgressionRepository` ou colunas de nível em `team_pokemons` (D2), **`WalletRepository`** e **`InventoryRepository`** (saldo/itens Eco-1/3). Contrato comum (`all/add` por `user_id`), espelhando `TeamRepository`. |
+| **Strategy estendido** | D2/D1/Eco-4 | Mover seleção de golpe (hoje `choose_move`) e aprendizado por nível para estratégias injetáveis — testável e reusável. **Hold items (seguráveis) entram como strategy/decorator sobre `BattlePokemon`** (modulam stats/passivos sem tocar o núcleo do motor). |
+| **Presenter / decorator de view** | D3 + battle.erb + Eco-2/3 | Apresentar payloads prontos (ex.: `BattleLogPresenter`, fighter row, `InventoryPresenter`), eliminando a duplicação de loops nos ERB. |
+| **Composition Root / injeção simples** | Todos | Construir serviços/repositórios no boot (Sinatra `set :services`, `set :api`), sem framework DI — manter o estilo leve. |
+| **Rule/Policy objects** | D2/D4/Eco | Políticas puras: `ExperienceCurve` (XP→nível), `EvolutionRule` (nível→evolução), `DraftRule` (validação de montagem temática), **`RewardRule` (moeda/XP por resultado)** e **`HealCostPolicy`** (custo do Poke Center). Genéricas e TDD-áveis sem rede, no molde de `TypeEffectiveness`/`BattleEngine`. |
+| **Command (ação de batalha)** | Eco-4 | Consumíveis em combate (poção) são **ações não-ofensivas** no motor — modelar como comando/evento no half-FSM (seção 6.1) em vez de ramificar `BattleEngine#act` com if/else. |
+
+---
+
+## 6. Arquitetura-alvo proposta (visão)
+
+```
+views/            ← Presenters + ERB (fragmentos htmx), sem lógica de negócio
+                     (ex.: BattleLogPresenter, FighterPresenter)
+
+                                │
+server.rb         ← só routing (thin controller): parse params → chama Use Case
+  ▼
+app/services/     ← Application Services (PORO): BattleService, TeamService
+                     (orquestram domínio + infra, testáveis sem HTTP)
+  ▼
+lib/ (domínio)    ← BattleEngine, BattlePokemon, Move, Item, TypeEffectiveness,
+                     OpponentGenerator, ExperienceCurve, EvolutionRule,
+                     RewardRule, HealCostPolicy…
+                     (puro, sem rede, com dependências injetadas)
+  ▼
+lib/repositories/ ← TeamRepository, BattleRepository, ProgressionRepository,
+                     WalletRepository, InventoryRepository
+  ▼
+lib/gateways/     ← PokeApi (interface) + PokeApiHttp (real, via Faraday)
+                     + PokeApiCache (decorator TTL/LRU)   [E1]
+```
+
+**Benefícios diretos para o roadmap:**
+- D2 (XP/evolução): policies puras + ProgressionRepository entram sem engordar `BattleEngine`.
+- D3 (histórico): `BattleRepository` + Presenter; sem tocar no domínio.
+- E1 (cache): trocar o adapter real por decorator — transparente para serviços.
+- Eco (moeda/Center/Mart): `WalletRepository`/`InventoryRepository` + `Item` (Value Object)
+  + serviços `HealService`/`ShopService` seguem o mesmo molde; **o hook de `:finished`
+  agrega XP + moeda numa só política de recompensa** (seção 6.1).
+- Refactor produção (7 disables): os `ClassLength`/`AbcSize` de `server.rb`/`BattleEngine`/
+  `PokeApi`/`TeamRepository` caem naturalmente por extração (não à força).
+
+---
+
+## 6.1. Gameloop como máquina de estado — anotação (2026-08-10)
+
+**Pergunta:** fazer o gameloop virar uma máquina de estado — ajuda ou atrapalha?
+
+**Veredito:** ajuda numa camada **fina** (nível da batalha); atrapalha se virar
+re-modelagem do motor inteiro.
+
+- **NÃO fazer (YAGNI):** FSM estrita dentro do `BattleEngine` (estados por ação:
+  `player_turn`, `opponent_turn`, `apply_damage`, `check_fainted`...). O motor é puro,
+  determinístico e teste por alimentar estado→conferir saída; FSM fina perdê essa
+  testabilidade de estados parciais. Complexidade real está nas regras (efetividade,
+  dano, moves, PP), não no fluxo. Também não resolve os `rubocop:disable` de produção.
+- **FAZER (half-FSM):** estado **terminal explícito** da batalha — hoje `finished?`/
+  `winner` são computados por inspeção. Introduzir enum de status
+  `:preparing → :in_progress → :finished(win|draw|lose)` com transições/guards
+  explícitas. Drivers:
+  - **D2 (XP):** concede XP ao atingir `:finished(win|lose)` — policy consome o terminal.
+  - **Eco (moeda):** mesmo hook de recompensa agrega **XP + dinheiro por resultado**
+    (`RewardRule`) — um só ponto concede tudo, evitando duplicar a lógica de grant.
+  - **Eco-4 (items em batalha):** poção/consumível é **ação entre turnos** —
+    um `:item` command (seção 5) transpõe sob guards, sem ramificar `BattleEngine#act`.
+  - **D3 (histórico/rank):** persistir os 3 terminais sem re-computar.
+  - **UI:** `battle.erb` deixa de checar `finished?`/`winner` por inspeção.
+  - **Base futura:** pausa/serialização/recomeço, se interatividade entrar.
+- **Forma:** enum + transição leve (não o padrão GoF State com classes). Mais
+  Ruby/Sinatra-idiomático, cola com o `BattleResult` atual e mantém determinismo
+  (com `rng` já injetado via `OpponentGenerator`).
+- **Impacto em teste:** diminui (estados são valores, asserts diretos); exige só
+  cobertura das transições. Não muda `PokeApiStub` nem o baseline 222/778.
+
+---
+
+## 7. Riscos / impactos a considerar antes de decidir
+
+- **PokeApiStub (testes 0019):** hoje stuba métodos **singleton** via redefinição.
+  Mudar `PokeApi` para instância/injeção muda os helpers `with_find`, `with_detail`,
+  `with_moves_for`, etc. É a maior refatoração de testes do movimento — exige passo
+  cuidadoso para não regredir a baseline 222/778.
+- **RNF-04:** não abrir escopo novo no meio da sessão corrente. Este draft é anotação;
+  o refactor de produção viraria sessão própria com critérios + plano TDD.
+- **Ordem sugerida:** (1) refactor produção (7 disables) como "respiro" assim como a 0019;
+  (2) gateway + cache (E1) antes de D2 para aliviar o volume de requests; (3) D2 com
+  services/policies/repository já na nova arquitetura; (4) D3/D4 aproveitam a base.
+- **Escopo do gateway é o item mais invasivo** (toca todos os pontos de uso + tests).
+  Pode ser dividido em 2 sessões: interface+adapter, depois decorator de cache.
+
+---
+
+## 8. Decisões fechadas (2026-08-10, usuário)
+
+| # | Decisão | Resolução |
+| --- | --- | --- |
+| 1 | Arquitetura de camadas (seção 6) como norte | **Aceita** — norte das próximas sessões |
+| 2 | Ordem das próximas sessões | **Refactor produção (7 disables) primeiro** → depois E1 (gateway/cache) → D2 |
+| 3 | D2: onde persiste `level/xp` | **Tabela nova** `team_pokemon_progress` (isolada de `team_pokemons`) |
+| 4 | D2: estado de montagem | Confirmado: **1ª evolução, sempre nível 1 na montagem** |
+| 5 | D2: curva de experiência | **Linear por ora**; balanceamento fino fica para etapa posterior |
+| 6 | D3: dimensões do histórico | Confirmado: vitórias/derrotas por usuário, oponente serializado, data |
+| 7 | D3: rank | **Local e global** (por usuário + líder no geral) |
+| 8 | `BattleRegistry` (efêmero) | Resolver no que for **mais atômico** (persistir no D3 ou ajuste no refactor — o que implicar menor toque) |
+| 9 | E1: cache | **TTL/LRU fixos** (sem configuração por tipo por ora) |
+| 10 | Eco: quando conceder moeda | **Ao final da batalha como um todo** — XP + moeda conjugados no hook `:finished` (`RewardRule`) |
+| 11 | Poke Center: custo | **Proporcional ao HP faltante** (`HealCostPolicy`) |
+| 12 | Consumível em batalha (Eco-4) | **Automático no início** (estratégia decide); depois abrir para o jogador escolher — **o mesmo vale para a estratégia do time** (estratégias selecionáveis) |
+| 13 | Itens seguráveis | **Escopo simples**: 1 slot por Pokémon, modula só Attack/Speed por ora |
+| 14 | Commit deste draft | `Draft: levantamento de arquitetura e design patterns (2026-08-10) — base para D2/E1/refactor de produção e fase Eco (moeda, Poke Center, Poke Mart)` |
+
+**Sequência de sessões encaminhada — ver seção 2 (roadmap consolidado):** refactor
+produção → E1 → D2 → D3 → Eco-1..4. A estratégia selecionável do time (decisão 12)
+impacta o `BattleEngine`/`OpponentGenerator` — política a detalhar na fase própria.
