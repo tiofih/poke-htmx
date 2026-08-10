@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluído — decisões do usuário em 2026-08-10 (D2 dividida em A/B; tabela nova; curva linear; recompensa simples) |
 | Implementação | Concluído — fase 2 TDD (passos 1–10, suíte 292/941, lint 0) |
-| Validação | Pendente (aguardando o usuário) |
+| Validação | Concluído — validado pelo usuário em 2026-08-10 |
 
 ---
 
@@ -159,7 +159,17 @@ evolução nem mexe na lista de moves.
 
 ## 6. Validação (executada pelo usuário)
 
-**Aguardando o usuário — não preencher até o feedback.**
+**Validado pelo usuário em 2026-08-10.** Suíte completa verde (`./scripts/test` —
+**292 runs/941 asserts**), lint 0 (45 arquivos, 0 offenses). Comportamento conferido
+manualmente na batalha: "Nível N" por lutador, oponente no nível do jogador e
+"Seu Time ganhou X XP por Pokémon" ao fim; novo confronto (`GET /battle`) reflete o
+XP/nível acumulado. Critérios de aceite (seção 3) verificados — atendidos.
+
+> **Nota do usuário:** não venceu batalha alguma na validação manual. Sem defeito:
+> o balanceamento é **"simples por ora" por intenção** (decisão 5 — XP por derrota +20,
+> oponente no nível médio), adiado para iteração futura; XP/nível funcionam
+> (progressão concedida mesmo em derrota). Anotado no draft como ajuste de balanceamento
+> (candidato futuro, junto do D3/Eco).
 
 ## 6b. Progresso da implementação (passos 1–10)
 
@@ -210,8 +220,9 @@ evolução nem mexe na lista de moves.
   (roadmap 21 D2-A executado — aguardando validação; 21b D2-B Planejada), `SESSIONS.md`
   (tabela 0023 + próxima 0024), `draft-auto-battler.md` (visão D2 parcial).
 
-**PARADA (regra RNF-04 / AGENTS.md):** fase 3 (validação) é executada pelo **usuário**.
-Nada de marcar `Done`/commitar conclusão até o feedback.
+**FASE 3 — VALIDADO pelo usuário em 2026-08-10** (suíte 292/941, lint 0, comportamento
+manual conferido — ver seção 6). Sessão **0023 concluída**. Próxima: **D2-B (sessão
+0024)** — evolução/aprendizado por nível com dados oficiais da species.
 
 ## 7. Observações
 

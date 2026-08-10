@@ -198,18 +198,20 @@
   evolução por nível + aprendizado de golpes por nível com **dados oficiais da species**
   (`evolution_chain` + `level_learned_at` — ver `draft-arquitetura-design-patterns.md`
   seção 8, decisão 15).
-- **D2-A executada (sessão 0023, 2026-08-10 — fase 2 TDD, passos 1–9):** tabela nova
-  `team_pokemon_progress` (migração 0023, chave por `team_pokemon_id`, FK `ON DELETE
-  CASCADE`); `ExperienceCurve` linear (`xp_needed = level*100`); `TeamRepository#add`
-  cria progresso (nível 1/xp 0) na mesma transação; `ProgressionRepository` (`get`/
-  `grant` por usuário, no-op para estranho); `BattlePokemon` com `level` (stats escalam
-  `base + (level−1)*0.5`, redondo); `RewardRule` (`:win 50 / :draw 25 / :lose 20`,
-  hook `:finished` estruturado p/ Eco-1); `BattleEngine#result` (half-FSM terminal
-  `nil`/`:win`/`:lose`/`:draw`); `OpponentGenerator(level:)`; `GET /battle` monta o time
-  com o nível de cada membro, oponente no **nível médio** do jogador, e `POST /battle/play`
-  concede XP **uma única vez** na transição para `:finished` (guard). `battle.erb` exibe
-  "Nível N" por lutador e "Seu Time ganhou X XP por Pokémon" ao fim. **Próxima: D2-B
-  (sessão 0024)** — evolução/aprendizado com dados oficiais da species.
+- **D2-A executada e validada (sessão 0023, 2026-08-10 — TDD passos 1–9 + fase 3 do
+  usuário, suíte 292/941, lint 0):** tabela nova `team_pokemon_progress` (migração 0023,
+  chave por `team_pokemon_id`, FK `ON DELETE CASCADE`); `ExperienceCurve` linear
+  (`xp_needed = level*100`); `TeamRepository#add` cria progresso (nível 1/xp 0) na mesma
+  transação; `ProgressionRepository` (`get`/`grant` por usuário, no-op para estranho);
+  `BattlePokemon` com `level` (stats escalam `base + (level−1)*0.5`, redondo); `RewardRule`
+  (`:win 50 / :draw 25 / :lose 20`, hook `:finished` estruturado p/ Eco-1);
+  `BattleEngine#result` (half-FSM terminal `nil`/`:win`/`:lose`/`:draw`);
+  `OpponentGenerator(level:)`; `GET /battle` monta o time com o nível de cada membro,
+  oponente no **nível médio** do jogador, e `POST /battle/play` concede XP **uma única
+  vez** na transição para `:finished` (guard). `battle.erb` exibe "Nível N" por lutador e
+  "Seu Time ganhou X XP por Pokémon" ao fim. **Balanceamento adiado (decisão 5):**
+  usuário não venceu batalha na validação — sem defeito, XP/nível funcionam (derrota +20).
+  **Próxima: D2-B (sessão 0024)** — evolução/aprendizado com dados oficiais da species.
 - **Visão (anotado — decidida em 2026-08-09, fora do fluxo):** os Pokémon escolhidos
   são **sempre a primeira evolução** (ou os sem evolução), **sempre nível 1** na
   montagem. **A cada batalha** o time ganha **XP**: os Pokémon **aprendem novos
