@@ -10,6 +10,7 @@ require_relative "lib/opponent_generator"
 require_relative "lib/battle_registry"
 require_relative "lib/progression_repository"
 require_relative "lib/reward_rule"
+require_relative "lib/evolution_rule"
 
 module ServerCommon
   private
@@ -218,7 +219,10 @@ module ServerBattleActions
 
     was_in_progress = !@engine.finished?
     @engine.play_round
-    grant_finished_xp if was_in_progress && @engine.finished?
+    if was_in_progress && @engine.finished?
+      grant_finished_xp
+      apply_evolution_and_learning
+    end
     @xp_gained = RewardRule.new.xp_for(@engine.result) if @engine.finished?
     erb :battle, layout: false
   end
@@ -228,6 +232,61 @@ module ServerBattleActions
     settings.team.all(current_user).each do |member|
       settings.progression.grant(current_user, member.id, reward)
     end
+  end
+
+  def apply_evolution_and_learning
+    @evolution_news = []
+    @learned_news = []
+    settings.team.all(current_user).each do |member|
+      evolve_member(member)
+      learn_moves_for_member(member)
+    end
+  end
+
+  def evolve_member(member)
+    loop do
+      target = evolution_target(member)
+      break unless target
+      break if target[:number] == member.number
+
+      evolution_pokemon = settings.api.detail(target[:number])
+      break unless evolution_pokemon
+
+      evolved = try_evolve(member, evolution_pokemon)
+      break unless evolved
+
+      member = evolved
+    end
+  end
+
+  def evolution_target(member)
+    progress = settings.progression.get(current_user, member.id)
+    next_evos = settings.api.next_evolutions(member.number).to_a
+    EvolutionRule.next_stage(_current_number: member.number, level: progress[:level], evolutions: next_evos)
+  end
+
+  def try_evolve(member, evolution_pokemon)
+    if settings.team.evolve(current_user, member.id, evolution_pokemon)
+      @evolution_news << "#{member.name} evoluiu para #{evolution_pokemon.name}!"
+      return evolution_pokemon.new(id: member.id)
+    end
+
+    @evolution_news << "#{member.name} não evoluiu — #{evolution_pokemon.name} já está no time."
+    nil
+  end
+
+  def learn_moves_for_member(member)
+    progress = settings.progression.get(current_user, member.id)
+    settings.api.learnable_moves(member.number).to_a.each do |entry|
+      try_learn(member, entry, progress)
+    end
+  end
+
+  def try_learn(member, entry, progress)
+    return unless entry[:level] <= progress[:level]
+    return unless settings.team.learn_move(current_user, member.id, entry[:name])
+
+    @learned_news << "#{member.name} aprendeu #{entry[:name]}!"
   end
 end
 

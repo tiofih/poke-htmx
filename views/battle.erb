@@ -54,6 +54,20 @@
     <% if @xp_gained %>
       <p class="xp-gained"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon.</strong></p>
     <% end %>
+    <% if defined?(@evolution_news) && !@evolution_news&.empty? %>
+      <ul class="evolution-news">
+        <% @evolution_news.each do |news| %>
+          <li><%= news %></li>
+        <% end %>
+      </ul>
+    <% end %>
+    <% if defined?(@learned_news) && !@learned_news&.empty? %>
+      <ul class="learned-news">
+        <% @learned_news.each do |news| %>
+          <li><%= news %></li>
+        <% end %>
+      </ul>
+    <% end %>
     <button hx-get="/battle" hx-target="#battle" hx-swap="innerHTML">Novo confronto</button>
   <% else %>
     <button hx-post="/battle/play" hx-target="#battle" hx-swap="innerHTML">Jogar</button>

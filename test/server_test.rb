@@ -1147,4 +1147,93 @@ class ServerBattleTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "Nível #{TestDatabase.progress_row(pokemon_id)['level'].to_i}"
   end
+
+  def test_battle_finish_evolves_member_when_level_reaches_min_level
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.grant("user-a", pokemon_id, 99_999)
+
+    raichu_detail = Pokemon.new(name: "raichu", sprite: "https://example.com/raichu.png", number: 26)
+    detail_map = { 25 => battle_pokemon_for_test, 26 => raichu_detail, "pikachu" => battle_pokemon_for_test }
+    evolution_data = [{ number: 26, name: "raichu", min_level: 16 }]
+
+    PokeApiStub.with_all_names(%w[pikachu]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_gateway(detail: detail_map, moves_for: battle_moves_for_test,
+                                 next_evolutions: evolution_data) do
+          get "/battle", {}, user_session("user-a")
+          play_until_finish
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "evoluiu para raichu"
+  end
+
+  def test_battle_finish_does_not_evolve_when_target_already_in_team
+    @repository.add("user-a", pikachu_pokemon)
+    @repository.add("user-a", Pokemon.new(name: "raichu", sprite: "", number: 26))
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.grant("user-a", pikachu_id, 99_999)
+
+    raichu_detail = Pokemon.new(name: "raichu", sprite: "https://example.com/raichu.png", number: 26)
+    detail_map = { 25 => battle_pokemon_for_test, 26 => raichu_detail, "pikachu" => battle_pokemon_for_test }
+    evolution_data = [{ number: 26, name: "raichu", min_level: 16 }]
+
+    PokeApiStub.with_all_names(%w[pikachu]) do
+      PokeApiStub.with_type(neutral_type_json_table) do
+        PokeApiStub.with_gateway(detail: detail_map, moves_for: battle_moves_for_test,
+                                 next_evolutions: evolution_data) do
+          get "/battle", {}, user_session("user-a")
+          play_until_finish
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "não evoluiu"
+  end
+
+  def test_battle_finish_learns_moves_when_level_sufficient
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.grant("user-a", pokemon_id, 99_999)
+
+    learnable = [{ level: 5, name: "quick-attack" }, { level: 30, name: "thunderbolt" }]
+    stub_battle_start do
+      PokeApiStub.with_learnable_moves(learnable) do
+        get "/battle", {}, user_session("user-a")
+        play_until_finish
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "aprendeu quick-attack"
+    assert_includes last_response.body, "aprendeu thunderbolt"
+    assert_includes @repository.all("user-a").first.moves, "quick-attack"
+    assert_includes @repository.all("user-a").first.moves, "thunderbolt"
+  end
+
+  def test_battle_finish_does_not_learn_when_level_insufficient
+    @repository.add("user-a", pikachu_pokemon)
+
+    stub_battle_start do
+      PokeApiStub.with_learnable_moves([{ level: 50, name: "thunder" }]) do
+        get "/battle", {}, user_session("user-a")
+        play_until_finish
+      end
+    end
+
+    assert last_response.ok?
+    refute_includes last_response.body, "aprendeu"
+    assert_empty @repository.all("user-a").first.moves
+  end
+
+  def play_until_finish(fallback_plays: 20)
+    fallback_plays.times do
+      post "/battle/play", {}, user_session("user-a")
+      return if last_response.body.include?("Fim de batalha")
+    end
+  end
 end

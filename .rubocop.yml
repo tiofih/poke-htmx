@@ -13,6 +13,9 @@ AllCops:
 Layout/LineLength:
   Max: 120
 
+Metrics/ModuleLength:
+  Max: 120
+
 Style/Documentation:
   Enabled: false
 
