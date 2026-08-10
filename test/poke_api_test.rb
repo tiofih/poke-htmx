@@ -127,20 +127,6 @@ class PokeApiTest < Minitest::Test
     assert_equal %w[ground], relations["flying"]["no"]
   end
 
-  def test_type_relations_is_memoized
-    calls = 0
-    test_self = self
-    api.define_singleton_method(:fetch_type_json) do |name|
-      calls += 1
-      test_self.send(:type_json_for, name)
-    end
-
-    api.type_relations
-    api.type_relations
-
-    assert_equal 18, calls
-  end
-
   def test_type_relations_skips_types_that_fail_to_load
     test_self = self
     api.define_singleton_method(:fetch_type_json) do |name|
@@ -349,21 +335,6 @@ class PokeApiTest < Minitest::Test
     Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "network down" }
 
     assert_empty api.all
-  ensure
-    Faraday.define_singleton_method(:get, original)
-  end
-
-  def test_fetch_all_names_memoizes_non_empty_list
-    calls = 0
-    original = Faraday.method(:get)
-    Faraday.define_singleton_method(:get) do |_url|
-      calls += 1
-      Struct.new(:status, :body).new(200, JSON.generate("results" => [{ "name" => "pikachu" }]))
-    end
-
-    2.times { assert_equal %w[pikachu], api.fetch_all_names }
-
-    assert_equal 1, calls
   ensure
     Faraday.define_singleton_method(:get, original)
   end

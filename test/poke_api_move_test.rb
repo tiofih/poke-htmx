@@ -47,21 +47,15 @@ class PokeApiMoveTest < Minitest::Test
     assert_equal 40, move.pp
   end
 
-  def test_move_fetches_and_memoizes_by_name
-    count = 0
+  def test_moves_for_returns_last_four_moves_in_api_order
+    data = pokemon_data_with_moves
     move_json = poke_move_json
-    api.define_singleton_method(:fetch_move_json) do |_name|
-      count += 1
-      move_json
-    end
-    api.instance_variable_set(:@move_cache, nil)
+    api.define_singleton_method(:pokemon_data) { |_number| data }
+    api.define_singleton_method(:fetch_move_json) { |name| move_json.merge("name" => name) }
 
-    first = api.move("thunder-shock")
-    second = api.move("thunder-shock")
+    moves = api.moves_for(25)
 
-    assert_instance_of Move, first
-    assert_same first, second, "2a chamada usa cache (mesmo objeto)"
-    assert_equal 1, count
+    assert_equal %w[tail-whip thunder-shock quick-attack thunder-wave], moves.map(&:name)
   end
 
   def pokemon_data_with_moves
@@ -76,33 +70,6 @@ class PokeApiMoveTest < Minitest::Test
     }
   end
 
-  def test_moves_for_returns_last_four_moves_in_api_order
-    data = pokemon_data_with_moves
-    move_json = poke_move_json
-    api.define_singleton_method(:pokemon_data) { |_number| data }
-    api.define_singleton_method(:fetch_move_json) { |name| move_json.merge("name" => name) }
-
-    moves = api.moves_for(25)
-
-    assert_equal %w[tail-whip thunder-shock quick-attack thunder-wave], moves.map(&:name)
-  end
-
-  def test_moves_for_memoizes_per_number
-    count = 0
-    data = pokemon_data_with_moves
-    move_json = poke_move_json
-    api.define_singleton_method(:pokemon_data) do |_number|
-      count += 1
-      data
-    end
-    api.define_singleton_method(:fetch_move_json) { |name| move_json.merge("name" => name) }
-
-    api.moves_for(25)
-    api.moves_for(25)
-
-    assert_equal 1, count, "2a chamada para o mesmo número usa cache"
-  end
-
   def test_available_move_names_returns_all_move_names_sorted
     data = {
       "moves" => [
@@ -114,20 +81,6 @@ class PokeApiMoveTest < Minitest::Test
     api.define_singleton_method(:pokemon_data) { |_number| data }
 
     assert_equal %w[growl quick-attack thunder-shock], api.available_move_names(25)
-  end
-
-  def test_available_move_names_memoizes_per_number
-    count = 0
-    data = { "moves" => [{ "move" => { "name" => "growl" } }] }
-    api.define_singleton_method(:pokemon_data) do |_number|
-      count += 1
-      data
-    end
-
-    api.available_move_names(25)
-    api.available_move_names(25)
-
-    assert_equal 1, count, "2a chamada para o mesmo número usa cache"
   end
 
   def test_fetch_move_json_returns_nil_when_status_has_failure_code
@@ -152,7 +105,6 @@ class PokeApiMoveTest < Minitest::Test
 
   def test_move_returns_nil_for_unknown_move
     api.define_singleton_method(:fetch_move_json) { |_name| nil }
-    api.instance_variable_set(:@move_cache, nil)
 
     assert_nil api.move("not-a-move")
   end

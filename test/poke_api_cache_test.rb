@@ -5,7 +5,8 @@ require_relative "../lib/gateways/poke_api_cache"
 
 class CountingApi
   attr_reader :detail_calls, :find_calls, :fetch_all_names_calls,
-              :move_calls, :moves_for_calls, :type_relations_calls
+              :move_calls, :moves_for_calls, :type_relations_calls,
+              :available_move_names_calls
 
   def initialize
     @detail_calls = 0
@@ -14,6 +15,7 @@ class CountingApi
     @move_calls = 0
     @moves_for_calls = 0
     @type_relations_calls = 0
+    @available_move_names_calls = 0
   end
 
   def detail(poke_id)
@@ -48,6 +50,7 @@ class CountingApi
   end
 
   def available_move_names(_number)
+    @available_move_names_calls += 1
     %w[growl thunder-shock]
   end
 
@@ -228,5 +231,60 @@ class PokeApiCacheTest < Minitest::Test
     @cache.find("bulbasaur")
 
     assert_equal 2, @inner.find_calls
+  end
+
+  def test_fetch_all_names_is_cached_and_refetched_after_ttl
+    @cache.fetch_all_names
+    @cache.fetch_all_names
+
+    assert_equal 1, @inner.fetch_all_names_calls
+  end
+
+  def test_fetch_all_names_refetches_after_ttl_expires
+    @cache.fetch_all_names
+    @clock.tick(601)
+
+    @cache.fetch_all_names
+
+    assert_equal 2, @inner.fetch_all_names_calls
+  end
+
+  def test_move_is_cached_by_name
+    first = @cache.move("thunder-shock")
+    second = @cache.move("thunder-shock")
+
+    assert_same first, second, "2a chamada usa cache (mesmo objeto)"
+    assert_equal 1, @inner.move_calls
+  end
+
+  def test_move_cache_entries_are_isolated_by_name
+    @cache.move("thunder-shock")
+    @cache.move("growl")
+
+    assert_equal 2, @inner.move_calls
+  end
+
+  def test_available_move_names_is_cached_by_number
+    @inner.define_singleton_method(:available_move_names) do |_number|
+      @available_move_names_calls = @available_move_names_calls.to_i + 1
+      %w[growl thunder-shock]
+    end
+
+    @cache.available_move_names(25)
+    @cache.available_move_names(25)
+
+    assert_equal 1, @inner.available_move_names_calls
+  end
+
+  def test_available_move_names_entries_isolated_by_number
+    @inner.define_singleton_method(:available_move_names) do |number|
+      @available_move_names_calls = @available_move_names_calls.to_i + 1
+      number == 25 ? %w[growl] : %w[quick-attack]
+    end
+
+    @cache.available_move_names(25)
+    @cache.available_move_names(6)
+
+    assert_equal 2, @inner.available_move_names_calls
   end
 end

@@ -20,12 +20,7 @@ class PokeApiHttp
   end
 
   def fetch_all_names
-    cached = @fetch_all_names
-    return cached if cached
-
-    names = all.map { |pokemon| pokemon["name"] }
-    @fetch_all_names = names unless names.empty?
-    names
+    all.map { |pokemon| pokemon["name"] }
   end
 
   def paginate(offset: 0, limit: 100, query: nil)

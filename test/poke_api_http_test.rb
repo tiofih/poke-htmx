@@ -26,22 +26,6 @@ class PokeApiHttpTest < Minitest::Test
     Faraday.define_singleton_method(:get, original)
   end
 
-  def test_fetch_all_names_memoizes_non_empty_list
-    @api.instance_variable_set(:@fetch_all_names, nil)
-    calls = 0
-    original = Faraday.method(:get)
-    Faraday.define_singleton_method(:get) do |_url|
-      calls += 1
-      Struct.new(:status, :body).new(200, JSON.generate("results" => [{ "name" => "pikachu" }]))
-    end
-
-    2.times { assert_equal %w[pikachu], @api.fetch_all_names }
-
-    assert_equal 1, calls
-  ensure
-    Faraday.define_singleton_method(:get, original)
-  end
-
   def test_detail_tolerates_null_sprite
     @api.define_singleton_method(:pokemon_data) do |_id|
       { "name" => "offender", "sprites" => { "front_default" => nil }, "id" => 999,
