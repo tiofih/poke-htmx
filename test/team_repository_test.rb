@@ -336,3 +336,110 @@ class TeamProgressTest < Minitest::Test
     assert_equal 1, TestDatabase.progress_count
   end
 end
+
+class TeamEvolveTest < Minitest::Test
+  include TeamRepositoryTestHelpers
+
+  def test_evolve_updates_number_name_sprite_keeping_identity
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    @repository.set_moves("user-a", pikachu_id, %w[thunder-shock])
+
+    result = @repository.evolve("user-a", pikachu_id, build_pokemon_record("raichu", 26))
+
+    assert_equal true, result
+    rows = @repository.all("user-a")
+    assert_equal %w[raichu], rows.map(&:name)
+    assert_equal 26, rows.first.number
+    assert_equal "https://example.com/raichu.png", rows.first.sprite
+    assert_equal pikachu_id.to_i, rows.first.id, "id estavel"
+    assert_equal 1, rows.first.slot, "slot intacto"
+    assert_equal %w[thunder-shock], rows.first.moves, "moves intactos"
+    refute_nil TestDatabase.progress_row(pikachu_id), "progresso intacto"
+    assert_equal 1, TestDatabase.progress_row(pikachu_id)["level"].to_i
+  end
+
+  def test_evolve_returns_false_for_member_of_other_user
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+
+    assert_equal false, @repository.evolve("user-b", pikachu_id, build_pokemon_record("raichu", 26))
+    assert_equal %w[pikachu], @repository.all("user-a").map(&:name)
+  end
+
+  def test_evolve_returns_false_for_unknown_id
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+
+    assert_equal false, @repository.evolve("user-a", "999999", build_pokemon_record("raichu", 26))
+  end
+
+  def test_evolve_does_not_evolve_when_target_number_already_in_team
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    @repository.add("user-a", build_pokemon_record("raichu", 26))
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+
+    assert_equal false, @repository.evolve("user-a", pikachu_id, build_pokemon_record("raichu", 26))
+    assert_equal %w[pikachu raichu], @repository.all("user-a").map(&:name)
+    assert_equal 25, @repository.all("user-a").first.number
+  end
+
+  def test_evolve_to_same_number_is_noop_success
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+
+    assert_equal true, @repository.evolve("user-a", pikachu_id, build_pokemon_record("pikachu", 25))
+  end
+end
+
+class TeamLearnMoveTest < Minitest::Test
+  include TeamRepositoryTestHelpers
+
+  def test_learn_move_adds_move_to_saved_list
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+
+    assert_equal true, @repository.learn_move("user-a", pikachu_id, "thunderbolt")
+    assert_equal %w[thunderbolt], @repository.all("user-a").first.moves
+  end
+
+  def test_learn_move_appends_moves_up_to_max
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+
+    %w[a b c d].each { |move| @repository.learn_move("user-a", pikachu_id, move) }
+
+    assert_equal %w[a b c d], @repository.all("user-a").first.moves
+  end
+
+  def test_learn_move_is_noop_when_already_has_move
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    @repository.learn_move("user-a", pikachu_id, "thunderbolt")
+
+    assert_equal false, @repository.learn_move("user-a", pikachu_id, "thunderbolt")
+    assert_equal %w[thunderbolt], @repository.all("user-a").first.moves
+  end
+
+  def test_learn_move_is_noop_when_cap_is_full
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    @repository.set_moves("user-a", pikachu_id, %w[a b c d])
+
+    assert_equal false, @repository.learn_move("user-a", pikachu_id, "e")
+    assert_equal %w[a b c d], @repository.all("user-a").first.moves
+  end
+
+  def test_learn_move_is_noop_for_member_of_other_user
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+
+    assert_equal false, @repository.learn_move("user-b", pikachu_id, "thunderbolt")
+    assert_equal [], @repository.all("user-a").first.moves
+  end
+
+  def test_learn_move_is_noop_for_unknown_id
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+
+    assert_equal false, @repository.learn_move("user-a", "999999", "thunderbolt")
+  end
+end

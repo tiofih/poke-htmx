@@ -24,3 +24,10 @@ Style/StringLiterals:
 
 Style/OneClassPerFile:
   Enabled: false
+
+# Naming/PredicateMethod (RuboCop 1.76+, habilitado via NewCops) exige sufixo ? para
+# métodos com TODOS os retornos booleanos. `evolve`/`learn_move` são nomes de contrato
+# fixados nos critérios da sessão 0024 (D2-B) — permitidos aqui em vez de rubocop:disable.
+Naming/PredicateMethod:
+  AllowedPatterns:
+    - '\A(evolve|learn_move)\z'

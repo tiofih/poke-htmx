@@ -80,6 +80,49 @@ module SlotOperations
   end
 end
 
+module EvolutionOperations
+  def evolve(user_id, id, pokemon)
+    updated = connection.exec_params(
+      "UPDATE team_pokemons SET number = $3, name = $4, sprite = $5 " \
+      "WHERE id = $1 AND user_id = $2 RETURNING id",
+      [id, user_id, pokemon.number, pokemon.name, pokemon.sprite]
+    ).first
+    !updated.nil?
+  rescue PG::UniqueViolation
+    false
+  end
+
+  def learn_move(user_id, id, move_name)
+    moves = saved_moves(user_id, id)
+    return false unless moves
+    return false unless learnable?(moves, move_name)
+
+    persist_moves(user_id, id, moves + [move_name])
+    true
+  end
+
+  private
+
+  def saved_moves(user_id, id)
+    row = connection.exec_params(
+      "SELECT moves FROM team_pokemons WHERE id = $1 AND user_id = $2",
+      [id, user_id]
+    ).first
+    row && parse_moves(row["moves"])
+  end
+
+  def learnable?(moves, move_name)
+    !moves.include?(move_name) && moves.size < TeamRepository::MAX_MOVES_PER_POKEMON
+  end
+
+  def persist_moves(user_id, id, moves)
+    connection.exec_params(
+      "UPDATE team_pokemons SET moves = $3 WHERE id = $1 AND user_id = $2",
+      [id, user_id, array_literal(moves)]
+    )
+  end
+end
+
 class TeamRepository
   DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
   MAX_TEAM_SIZE = 6
@@ -89,6 +132,7 @@ class TeamRepository
   class DuplicateError < StandardError; end
 
   include SlotOperations
+  include EvolutionOperations
 
   def initialize(db_url: ENV["DATABASE_URL"] || DEFAULT_DATABASE_URL)
     @db_url = db_url
