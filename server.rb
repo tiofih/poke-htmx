@@ -416,6 +416,7 @@ class Server < Sinatra::Base
   end
 
   before do
+    session[:user_id] = params["as"] if params["as"]
     session[:user_id] ||= SecureRandom.uuid
   end
 
