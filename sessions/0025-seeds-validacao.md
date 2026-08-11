@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluído — decisões do usuário em 2026-08-10 (SeedTeam parametrizável + 3 cenários prontos + rake db:seed, dados hardcoded sem PokéAPI) |
 | Implementação | Concluída — passos 1–3, suíte 336/1078, lint 0 (2026-08-10) |
-| Validação | Pendente (executada pelo usuário) |
+| Validação | Concluída — validado pelo usuário em 2026-08-10 (suíte 337/1086, lint 0; sprites corrigidos para front_default; oponente fixo nível 1 determinístico por user_id; helper ?as= funcional) |
 
 ---
 
@@ -194,9 +194,18 @@ Atalho de conveniência: `docker compose exec web rake db:seed`.
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** O usuário roda `./scripts/seed`, confere que os 3 times aparecem no
-banco, acessa o app com cada `user_id` e valida os cenários (time básico, evolução
-com uma batalha, níveis mistos).
+**Concluída em 2026-08-10.** O usuário validou:
+- `./scripts/seed` popula 3 times com sprites corretos (front_default)
+- `?as=seed-evol` carrega time de evolução; batalha → evolução visível nos painéis e no `#team`
+- Oponente fixo (determinístico por user_id) e nível 1
+- Sprites carregam corretamente após `./scripts/seed`
+
+**Ajustes pós-validação:**
+- Sprites migrados de `official-artwork` para `front_default` (endpoint padrão da PokéAPI)
+- Oponente com `rng: Random.new(current_user.sum)` + `level: 1` fixo
+- `HX-Trigger: teamRefresh` para atualizar `#team` após evolução
+- `rebuild_display_team` no engine para painéis refletirem pokémon evoluído
+- Helper `?as=` no `before` filter para trocar de usuário seed
 
 ## 8. Observações
 

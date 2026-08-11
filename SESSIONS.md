@@ -40,10 +40,9 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0024 (D2-B) concluída e validada em 2026-08-10** (suíte **328/1025**, lint 0).
-**Sessão 0025 (Seeds) fase 2 concluída em 2026-08-10** (suíte **336/1078**, lint 0) — aguardando validação do usuário.
+**Sessão 0025 (Seeds) concluída e validada em 2026-08-10** (suíte **337/1086**, lint 0).
 
-Próxima sessão conforme roadmap (após validação da 0025):
+Próxima sessão conforme roadmap:
 
 > **D3 — Histórico/rank de batalhas:** tabela `battles`; vitórias/derrotas por usuário
 > + oponente serializado + data; rank local e global; resolve o `BattleRegistry` no
@@ -78,7 +77,7 @@ Próxima sessão conforme roadmap (após validação da 0025):
 | 0022 | E1-B: decorator de cache TTL/LRU fixos — `PokeApiCache` (TTL 600s / máx 1000) sobre a interface `PokeApi`, remove a memoização interna do `PokeApiHttp`, `PokeApi.instance` decorado no boot | Concluída | Done (passos 1–6, suíte 256/849, lint 0, validado em 2026-08-10) |
 | 0023 | D2-A: progressão persistida — `team_pokemon_progress` + `ExperienceCurve` linear + `RewardRule` no `:finished` + `BattleEngine#result` + stats escalam + oponente escala | Concluída | Done (passos 1–10, suíte 292/941, lint 0, validado em 2026-08-10) |
 | 0024 | D2-B: evolução por nível + aprendizado de golpes por nível (dados oficiais da species) | Concluída | Done (passos 1–7 + hotfix, suíte 328/1025, lint 0, validado em 2026-08-10) |
-| 0025 | Seeds de validação — SeedTeam parametrizável + 3 cenários prontos + rake db:seed (dados hardcoded) | Implementação | Pendente validação (fase 2 concluída, suíte 336/1078, lint 0, aguardando usuário) |
+| 0025 | Seeds de validação — SeedTeam parametrizável + 3 cenários prontos + rake db:seed (dados hardcoded) | Concluída | Done (passos 1–3 + ajustes de validação, suíte 337/1086, lint 0, validado em 2026-08-10) |
 
 ## Estrutura do arquivo de sessão
 

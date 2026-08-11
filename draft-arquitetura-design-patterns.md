@@ -309,9 +309,9 @@ impacta o `BattleEngine`/`OpponentGenerator` — política a detalhar na fase pr
 deve incluir **seeds** nos cenários de validação para acelerar a verificação manual
 (ex.: seed com níveis altos para forçar evolução em uma única vitória, em vez de
 precisar grindar batalhas).
-**→ Atendida na sessão 0025 (2026-08-10):** `SeedTeam` parametrizável + 3 cenários
-prontos (`team_basico`, `team_evolucao`, `team_niveis_mistos`) + `rake db:seed`. Fase
-2 concluída (suíte 336/1078, lint 0), aguardando validação.
+**→ Atendida na sessão 0025 (2026-08-10, validada):** `SeedTeam` parametrizável + 3 cenários
+prontos (`team_basico`, `team_evolucao`, `team_niveis_mistos`) + `rake db:seed` +
+helper `?as=` para trocar de usuário. Suíte 337/1086, lint 0.
 
 ### Perguntas em aberto — ideias J1/J2/J3 (anotadas 2026-08-10)
 
