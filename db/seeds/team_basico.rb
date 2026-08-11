@@ -18,6 +18,6 @@ class TeamBasico
   end
 
   def self.sprite_for(number)
-    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/#{number}.png"
+    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/#{number}.png"
   end
 end
