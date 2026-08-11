@@ -1224,7 +1224,7 @@ class ServerBattleTest < Minitest::Test
     stub_battle_start do
       PokeApiStub.with_learnable_moves(learnable) do
         get "/battle", {}, user_session("user-a")
-        play_until_finish
+        play_until_finish(fallback_plays: 50)
       end
     end
 
@@ -1241,7 +1241,7 @@ class ServerBattleTest < Minitest::Test
     stub_battle_start do
       PokeApiStub.with_learnable_moves([{ level: 50, name: "thunder" }]) do
         get "/battle", {}, user_session("user-a")
-        play_until_finish
+        play_until_finish(fallback_plays: 50)
       end
     end
 

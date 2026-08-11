@@ -8,20 +8,24 @@ class TeamEvolucao
     seed.clear!
 
     members = [
-      { name: "charmander", sprite: "", number: 4, moves: %w[ember scratch growl leer],
+      { name: "charmander", number: 4, moves: %w[ember scratch growl leer],
         level: 15, experience: 11_999 },
-      { name: "charmeleon", sprite: "", number: 5, moves: %w[ember scratch dragon-rage leer],
+      { name: "charmeleon", number: 5, moves: %w[ember scratch dragon-rage leer],
         level: 35, experience: 62_999 },
-      { name: "squirtle", sprite: "", number: 7,
+      { name: "squirtle", number: 7,
         moves: %w[water-gun tackle tail-whip withdraw], level: 15, experience: 11_999 },
-      { name: "bulbasaur", sprite: "", number: 1,
+      { name: "bulbasaur", number: 1,
         moves: %w[vine-whip tackle growl leech-seed], level: 15, experience: 11_999 },
-      { name: "ivysaur", sprite: "", number: 2, moves: %w[razor-leaf tackle vine-whip leech-seed],
+      { name: "ivysaur", number: 2, moves: %w[razor-leaf tackle vine-whip leech-seed],
         level: 31, experience: 49_599 },
-      { name: "pikachu", sprite: "", number: 25,
+      { name: "pikachu", number: 25,
         moves: %w[thunder-shock quick-attack thunderbolt slam], level: 30, experience: 46_499 }
     ]
 
-    members.each_with_index { |m, i| seed.add_member(**m, slot: i + 1) }
+    members.each_with_index { |m, i| seed.add_member(sprite: sprite_for(m[:number]), **m, slot: i + 1) }
+  end
+
+  def self.sprite_for(number)
+    "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/#{number}.png"
   end
 end

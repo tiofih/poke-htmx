@@ -315,6 +315,11 @@ prontos (`team_basico`, `team_evolucao`, `team_niveis_mistos`) + `rake db:seed`.
 
 ### Perguntas em aberto — ideias J1/J2/J3 (anotadas 2026-08-10)
 
+- [ ] **J4 (escolha de nome na entrada):** tela inicial com input de nome do jogador →
+      `session[:user_id]` deriva do nome (ex.: `player-<slug>`) em vez de UUID aleatório.
+      Inspirado no helper `?as=` criado para validação de seeds (sessão 0025).
+      Anotado em 2026-08-10 durante validação das seeds.
+
 - [ ] **J1 (seleção inicial):** a lista base é fixa (iniciais/famílias clássicas),
       sorteada do pool ou por gen? Quantas opções por tela? Entra **antes** de D2
       (virar porta de entrada da jornada) ou depois do refactor?

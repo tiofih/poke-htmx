@@ -196,11 +196,12 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     settings.progression.get(current_user, member.id)&.fetch(:level) || 1
   end
 
-  def opponent_team(team)
+  def opponent_team(_team)
     opponent = OpponentGenerator.new(
       names: settings.api.fetch_all_names,
       fetcher: settings.api.method(:detail),
-      level: average_player_level(team)
+      rng: Random.new(current_user.sum),
+      level: 1
     ).team
     return nil if opponent.empty?
 
