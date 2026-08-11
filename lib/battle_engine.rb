@@ -110,6 +110,10 @@ class BattleEngine
 
   attr_reader :log, :teams
 
+  def replace_team_a(new_team)
+    @teams[0] = new_team.dup
+  end
+
   def finished?
     alive_count(0).zero? || alive_count(1).zero?
   end

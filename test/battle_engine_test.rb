@@ -299,4 +299,23 @@ class BattleEngineResultTest < Minitest::Test
     assert_nil engine.winner
     assert_equal :draw, engine.result
   end
+
+  def test_replace_team_a_swaps_player_team_keeping_opponent_intact
+    original = fire_pokemon(name: "charmander", hp: 50, speed: 10, attack: 50, defense: 10)
+    opponent = grass_pokemon(name: "bulbasaur", hp: 60, speed: 5, attack: 10, defense: 40)
+    engine = battle_engine(team_a: [original], team_b: [opponent])
+
+    engine.play_round
+
+    assert_equal "charmander", engine.teams[0].first.name
+
+    evolved = build_pokemon(number: 5, name: "charmeleon", types: ["fire"],
+                            hp: 50, speed: 10, attack: 50, defense: 10)
+    engine.replace_team_a([evolved])
+
+    assert_equal "charmeleon", engine.teams[0].first.name
+    assert_equal "bulbasaur", engine.teams[1].first.name
+    assert_equal 1, engine.rounds
+    refute_empty engine.log
+  end
 end

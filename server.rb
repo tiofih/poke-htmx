@@ -156,7 +156,7 @@ module ServerTeamActions
   end
 end
 
-module ServerBattleActions
+module ServerBattleActions # rubocop:disable Metrics/ModuleLength
   private
 
   def render_battle_fragment
@@ -222,7 +222,7 @@ module ServerBattleActions
     erb :battle, layout: false
   end
 
-  def advance_battle
+  def advance_battle # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
     @engine = settings.battles.fetch(current_user)
     return erb :battle, layout: false unless @engine
 
@@ -231,8 +231,10 @@ module ServerBattleActions
     if was_in_progress && @engine.finished?
       grant_finished_xp
       apply_evolution_and_learning
+      rebuild_display_team
     end
     @xp_gained = RewardRule.new.xp_for(@engine.result) if @engine.finished?
+    response.headers["HX-Trigger"] = "teamRefresh" if @engine.finished? && @evolution_news&.any?
     erb :battle, layout: false
   end
 
@@ -250,6 +252,22 @@ module ServerBattleActions
       evolve_member(member)
       learn_moves_for_member(member)
     end
+  end
+
+  def rebuild_display_team # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    fresh_team = settings.team.all(current_user)
+    return unless fresh_team.size == @engine.teams[0].size
+
+    new_team = @engine.teams[0].each_with_index.map do |fighter, i|
+      member = fresh_team[i]
+      BattlePokemon.new(
+        number: member.number, name: member.name, sprite: member.sprite,
+        types: fighter.types, stats: fighter.stats,
+        hp_max: fighter.hp_max, hp_current: fighter.hp_current,
+        moves: fighter.moves, level: member_level(member)
+      )
+    end
+    @engine.replace_team_a(new_team)
   end
 
   def evolve_member(member)

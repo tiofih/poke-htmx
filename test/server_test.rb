@@ -1187,6 +1187,8 @@ class ServerBattleTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "evoluiu para raichu"
+    assert_includes last_response.body, 'src="https://example.com/raichu.png"',
+                    "painel da batalha deve exibir sprite do pokemon evoluido"
   end
 
   def test_battle_finish_does_not_evolve_when_target_already_in_team
