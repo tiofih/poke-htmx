@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluído — decisões do usuário em 2026-08-10 (SeedTeam parametrizável + 3 cenários prontos + rake db:seed, dados hardcoded sem PokéAPI) |
-| Implementação | Pendente |
+| Implementação | Concluída — passos 1–3, suíte 336/1078, lint 0 (2026-08-10) |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -83,7 +83,7 @@ seed = SeedTeam.new(user_id: "seed-validation", db_url: ENV["DATABASE_URL"])
 seed.add_member(
   name: "charmander", sprite: "...", number: 4, slot: 1,
   moves: ["ember", "scratch", "growl", "smokescreen"],
-  level: 15, xp: 11999
+  level: 15, experience: 11999
 )
 ```
 
