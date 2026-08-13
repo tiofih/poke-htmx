@@ -32,6 +32,15 @@ module TestDatabase
     with_db { |connection| connection.exec("TRUNCATE battles") }
   end
 
+  def self.battle_rows(user_id)
+    with_db do |connection|
+      connection.exec_params(
+        "SELECT * FROM battles WHERE user_id = $1 ORDER BY id",
+        [user_id]
+      ).to_a
+    end
+  end
+
   def self.with_db
     connection = PG.connect(ENV.fetch("DATABASE_URL"))
     yield connection
