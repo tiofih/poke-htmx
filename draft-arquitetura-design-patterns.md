@@ -292,7 +292,7 @@ re-modelagem do motor inteiro.
 | 5 | D2: curva de experiência | **Linear por ora**; balanceamento fino fica para etapa posterior |
 | 6 | D3: dimensões do histórico | Confirmado: vitórias/derrotas por usuário, oponente serializado, data |
 | 7 | D3: rank | **Local e global** (por usuário + líder no geral) |
-| 8 | `BattleRegistry` (efêmero) | Resolver no que for **mais atômico** (persistir no D3 ou ajuste no refactor — o que implicar menor toque) |
+| 8 | `BattleRegistry` (efêmero) | Resolver no que for **mais atômico** (persistir no D3 ou ajuste no refactor — o que implicar menor toque) — **aplicado na sessão 0026**: persistência no hook `:finished` do `POST /battle/play` (mesmo ponto do `RewardRule`) |
 | 9 | E1: cache | **TTL/LRU fixos** (sem configuração por tipo por ora) — **aplicado na sessão 0022**: TTL **600s**, LRU **máx 1000 entradas** |
 | 10 | Eco: quando conceder moeda | **Ao final da batalha como um todo** — XP + moeda conjugados no hook `:finished` (`RewardRule`) |
 | 11 | Poke Center: custo | **Proporcional ao HP faltante** (`HealCostPolicy`) |
@@ -312,6 +312,12 @@ precisar grindar batalhas).
 **→ Atendida na sessão 0025 (2026-08-10, validada):** `SeedTeam` parametrizável + 3 cenários
 prontos (`team_basico`, `team_evolucao`, `team_niveis_mistos`) + `rake db:seed` +
 helper `?as=` para trocar de usuário. Suíte 337/1086, lint 0.
+
+**→ Decisões 6/7/8 atendidas na sessão 0026 (2026-08-13, fase 2 TDD — validação do usuário
+em aberto):** `battles` (`user_id`, `result`, `opponent_team` serializado, `created_at`),
+`BattleRepository` (`add`/`recent`/`stats`/`ranking`/`rank_position`), persistência no
+hook `:finished`, rank local + global em `GET /history` (htmx) e seed `batalhas_historico`.
+Suíte 367/1172, lint 0.
 
 ### Perguntas em aberto — ideias J1/J2/J3 (anotadas 2026-08-10)
 

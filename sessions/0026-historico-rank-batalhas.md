@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluído — 2026-08-13 (tabela `battles` + `BattleRepository` + persistência no hook `:finished` + rank local/global + seed) |
-| Implementação | Pendente |
-| Validação | Pendente — executada pelo usuário |
+| Implementação | Fase 2 concluída em 2026-08-13 — passos 1–7 verdes (suíte 367/1172, lint 0) |
+| Validação | **Pendente — executada pelo usuário (fase 3)** |
 
 ---
 

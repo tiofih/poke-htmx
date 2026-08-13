@@ -225,6 +225,11 @@
 - **Objetivo:** registrar resultado das partidas por usuário.
 - **Pontos:** nova tabela `battles` (`user_id, result, opponent_team(serialize),
   created_at`); página/endpoint de histórico + ranking de vitórias.
+- **Status:** **sessão 0026 implementada (fase 2 TDD concluída, suíte 367/1172 + lint
+  0)** — tabela `battles` + índice, `BattleRepository` (`add`/`recent`/`stats`/
+  `ranking`/`rank_position`), persistência no hook `:finished`, `GET /history` +
+  `GET /history/close` 100% htmx + seed `batalhas_historico`. **Validação (fase 3)
+  em aberto — executada pelo usuário.**
 
 ### D4. Modos de draft temático
 - **Objetivo:** composição com restrição (ex.: 1 Pokémon por tipo, "time aquático",
