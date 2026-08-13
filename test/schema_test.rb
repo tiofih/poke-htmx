@@ -31,6 +31,18 @@ class SchemaTest < Minitest::Test
     assert_equal "NO", TestDatabase.table_column_info("team_pokemon_progress", "xp")["is_nullable"]
   end
 
+  def test_battles_table_exists_with_required_columns_not_null
+    assert TestDatabase.table_exists?("battles"), "expected table battles to exist"
+    assert_equal "NO", TestDatabase.table_column_info("battles", "user_id")["is_nullable"]
+    assert_equal "NO", TestDatabase.table_column_info("battles", "result")["is_nullable"]
+    assert_equal "NO", TestDatabase.table_column_info("battles", "opponent_team")["is_nullable"]
+  end
+
+  def test_battles_table_has_index_on_user_and_created_at
+    assert TestDatabase.index_with_columns("battles", "user_id", "created_at"),
+           "expected index (user_id, created_at DESC)"
+  end
+
   def test_clear_team_truncates_supporting_progress_table
     TestDatabase.clear_team!
     with_progress_row do

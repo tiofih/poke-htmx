@@ -25,7 +25,11 @@ module TestDatabase
   end
 
   def self.clear_team!
-    with_db { |connection| connection.exec("TRUNCATE team_pokemons, team_pokemon_progress") }
+    with_db { |connection| connection.exec("TRUNCATE team_pokemons, team_pokemon_progress, battles") }
+  end
+
+  def self.clear_battles!
+    with_db { |connection| connection.exec("TRUNCATE battles") }
   end
 
   def self.with_db
@@ -100,6 +104,20 @@ module TestDatabase
           SELECT 1 FROM pg_indexes
           WHERE tablename = $1 AND indexdef ILIKE '%UNIQUE%'
             AND indexdef ILIKE '%(#{%(#{column_a}, #{column_b})})%'
+        SQL
+        [table]
+      ).ntuples.positive?
+    end
+  end
+
+  def self.index_with_columns(table, column_a, column_b)
+    with_db do |connection|
+      connection.exec_params(
+        <<~SQL,
+          SELECT 1 FROM pg_indexes
+          WHERE tablename = $1
+            AND indexdef ILIKE '%#{column_a}%'
+            AND indexdef ILIKE '%#{column_b}%'
         SQL
         [table]
       ).ntuples.positive?
