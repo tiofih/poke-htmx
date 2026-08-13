@@ -40,13 +40,14 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ## Próxima sessão
 
-**Sessão 0026 (D3 — histórico/rank) em andamento (2026-08-13)**: fase 2 TDD concluída
-(passos 1–7 verdes, suíte 367/1172, lint 0). **Aguardando validação (fase 3) do usuário.**
+**Sessão 0026 (D3 — histórico/rank) concluída e validada em 2026-08-13**
+(suíte **367/1172**, lint 0).
 
-Após a 0026 validada, próxima sessão conforme roadmap:
+Próxima sessão conforme roadmap:
 
-> **Fase Eco**: Eco-1 (moeda pós-batalha), Eco-2 (Poke Center), Eco-3 (Poke Mart),
-> Eco-4 (itens em batalha) → candidatos futuros (D4, D1, J1, J2, J3).
+> **Fase Eco**: **Eco-1** (moeda pós-batalha — `RewardRule` concede XP + dinheiro no
+> hook `:finished`, mesmo ponto atômico persistido por D3), Eco-2 (Poke Center),
+> Eco-3 (Poke Mart), Eco-4 (itens em batalha) → candidatos futuros (D4, D1, J1, J2, J3).
 
 ## Progresso das sessões
 
@@ -77,7 +78,7 @@ Após a 0026 validada, próxima sessão conforme roadmap:
 | 0023 | D2-A: progressão persistida — `team_pokemon_progress` + `ExperienceCurve` linear + `RewardRule` no `:finished` + `BattleEngine#result` + stats escalam + oponente escala | Concluída | Done (passos 1–10, suíte 292/941, lint 0, validado em 2026-08-10) |
 | 0024 | D2-B: evolução por nível + aprendizado de golpes por nível (dados oficiais da species) | Concluída | Done (passos 1–7 + hotfix, suíte 328/1025, lint 0, validado em 2026-08-10) |
 | 0025 | Seeds de validação — SeedTeam parametrizável + 3 cenários prontos + rake db:seed (dados hardcoded) | Concluída | Done (passos 1–3 + ajustes de validação, suíte 337/1086, lint 0, validado em 2026-08-10) |
-| 0026 | D3: histórico/rank de batalhas — `battles` + `BattleRepository` + persistência no `:finished` + `GET /history` (rank local/global) + seed `batalhas_historico` | Fase 2 (TDD) concluída em 2026-08-13 | Em implementação — passos 1–7 verdes (suíte 367/1172, lint 0); **aguardando validação (fase 3) do usuário** |
+| 0026 | D3: histórico/rank de batalhas — `battles` + `BattleRepository` + persistência no `:finished` + `GET /history` (rank local/global) + seed `batalhas_historico` | Concluída | Done (passos 1–7, suíte 367/1172, lint 0, validado em 2026-08-13) |
 
 ## Estrutura do arquivo de sessão
 

@@ -313,8 +313,8 @@ precisar grindar batalhas).
 prontos (`team_basico`, `team_evolucao`, `team_niveis_mistos`) + `rake db:seed` +
 helper `?as=` para trocar de usuário. Suíte 337/1086, lint 0.
 
-**→ Decisões 6/7/8 atendidas na sessão 0026 (2026-08-13, fase 2 TDD — validação do usuário
-em aberto):** `battles` (`user_id`, `result`, `opponent_team` serializado, `created_at`),
+**→ Decisões 6/7/8 atendidas na sessão 0026 (2026-08-13, **validada pelo usuário**):**
+`battles` (`user_id`, `result`, `opponent_team` serializado, `created_at`),
 `BattleRepository` (`add`/`recent`/`stats`/`ranking`/`rank_position`), persistência no
 hook `:finished`, rank local + global em `GET /history` (htmx) e seed `batalhas_historico`.
 Suíte 367/1172, lint 0.

@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluído — 2026-08-13 (tabela `battles` + `BattleRepository` + persistência no hook `:finished` + rank local/global + seed) |
-| Implementação | Fase 2 concluída em 2026-08-13 — passos 1–7 verdes (suíte 367/1172, lint 0) |
-| Validação | **Pendente — executada pelo usuário (fase 3)** |
+| Implementação | Concluída em 2026-08-13 — passos 1–7 verdes (suíte 367/1172, lint 0) |
+| Validação | **Concluída em 2026-08-13 — validada pelo usuário** |
 
 ---
 
@@ -229,7 +229,10 @@ Espelha `TeamRepository` (PG direto, `connection` memoizada, `DEFAULT_DATABASE_U
 
 ## 7. Validação (executada pelo usuário)
 
-Pendente — a ser preenchida após a implementação (fase 2) e o feedback do usuário.
+**Validada em 2026-08-13 pelo usuário.** Fase 3 concluída — critérios de aceite (seção 4)
+verificados: tabela `battles` + índice, `BattleRepository` (`add`/`recent`/`stats`/
+`ranking`/`rank_position`), persistência no `:finished`, `GET /history` + `/history/close`
+htmx, seed `batalhas_historico` no `rake db:seed`. Suíte completa **367/1172** + lint 0.
 
 **Roteiro sugerido de validação manual (com seeds):**
 - `./scripts/seed` → abrir o app com `?as=seed-history`: `GET /history` mostra rank
