@@ -89,3 +89,71 @@ class BattleIsolationTest < Minitest::Test
     assert_equal "lose", user_b.first[:result]
   end
 end
+
+class BattleStatsTest < Minitest::Test
+  include BattleRepositoryTestHelpers
+
+  def test_stats_counts_each_result
+    @repository.add("user-a", "win", opponent([["pikachu", 25]]))
+    @repository.add("user-a", "win", opponent([["pikachu", 25]]))
+    @repository.add("user-a", "lose", opponent([["charmander", 4]]))
+    @repository.add("user-a", "draw", opponent([["squirtle", 7]]))
+
+    assert_equal({ wins: 2, losses: 1, draws: 1, total: 4 }, @repository.stats("user-a"))
+  end
+
+  def test_stats_only_counts_own_user
+    @repository.add("user-a", "win", opponent([["pikachu", 25]]))
+    @repository.add("user-b", "lose", opponent([["charmander", 4]]))
+
+    assert_equal({ wins: 1, losses: 0, draws: 0, total: 1 }, @repository.stats("user-a"))
+  end
+
+  def test_stats_zeros_without_battles
+    assert_equal({ wins: 0, losses: 0, draws: 0, total: 0 }, @repository.stats("user-a"))
+  end
+end
+
+class BattleRankingTest < Minitest::Test
+  include BattleRepositoryTestHelpers
+
+  def test_ranking_orders_by_wins_desc_with_total_tiebreak
+    @repository.add("user-a", "win", opponent([["pikachu", 25]]))
+    @repository.add("user-a", "lose", opponent([["pikachu", 25]]))
+    @repository.add("user-b", "win", opponent([["pikachu", 25]]))
+    @repository.add("user-c", "draw", opponent([["pikachu", 25]]))
+
+    ranking = @repository.ranking
+
+    ranking_user_ids = ranking.map { |row| row[:user_id] }
+    assert_equal %w[user-a user-b user-c], ranking_user_ids
+    assert_equal [{ user_id: "user-a", wins: 1, total: 2 },
+                  { user_id: "user-b", wins: 1, total: 1 },
+                  { user_id: "user-c", wins: 0, total: 1 }], ranking
+  end
+
+  def test_ranking_respects_limit
+    @repository.add("user-a", "win", opponent([["pikachu", 25]]))
+    @repository.add("user-b", "win", opponent([["pikachu", 25]]))
+
+    assert_equal 1, @repository.ranking(limit: 1).size
+  end
+
+  def test_ranking_empty_without_battles
+    assert_empty @repository.ranking
+  end
+
+  def test_rank_position_is_one_based_by_wins
+    @repository.add("user-a", "win", opponent([["pikachu", 25]]))
+    @repository.add("user-a", "win", opponent([["pikachu", 25]]))
+    @repository.add("user-b", "win", opponent([["pikachu", 25]]))
+    @repository.add("user-c", "lose", opponent([["pikachu", 25]]))
+
+    assert_equal 1, @repository.rank_position("user-a")
+    assert_equal 2, @repository.rank_position("user-b")
+  end
+
+  def test_rank_position_nil_without_battles
+    assert_nil @repository.rank_position("user-a")
+  end
+end
