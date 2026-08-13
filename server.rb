@@ -1,6 +1,7 @@
 require "sinatra/base"
 require "sinatra/reloader"
 require "securerandom"
+require "time"
 require "pry"
 require_relative "lib/gateways/poke_api"
 require_relative "lib/team_repository"
@@ -395,6 +396,28 @@ module TeamRoutes
   end
 end
 
+module ServerHistoryActions
+  private
+
+  def result_label(result)
+    { "win" => "Vitória", "draw" => "Empate", "lose" => "Derrota" }.fetch(result, result)
+  end
+
+  def opponent_names(team)
+    team.map { |member| member[:name] }.join(", ")
+  end
+
+  def render_history_fragment
+    history = settings.battle_history
+    @current_user = current_user
+    @rank = history.ranking
+    @stats = history.stats(current_user)
+    @position = history.rank_position(current_user)
+    @recent = history.recent(current_user)
+    erb :history, layout: false
+  end
+end
+
 module BattleRoutes
   def self.registered(app)
     register_open(app)
@@ -412,6 +435,21 @@ module BattleRoutes
 
   def self.register_close(app)
     app.get("/battle/close") { erb :battle_close, layout: false }
+  end
+end
+
+module HistoryRoutes
+  def self.registered(app)
+    register_history(app)
+    register_history_close(app)
+  end
+
+  def self.register_history(app)
+    app.get("/history") { render_history_fragment }
+  end
+
+  def self.register_history_close(app)
+    app.get("/history/close") { erb :history_close, layout: false }
   end
 end
 
@@ -456,10 +494,12 @@ class Server < Sinatra::Base
   include ServerListActions
   include ServerTeamActions
   include ServerBattleActions
+  include ServerHistoryActions
 
   register PokemonRoutes
   register TeamRoutes
   register BattleRoutes
+  register HistoryRoutes
   register ErrorHandling
 
   run! if $PROGRAM_NAME == app_file

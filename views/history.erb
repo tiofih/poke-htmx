@@ -1,0 +1,31 @@
+<h1>Histórico de Batalhas</h1>
+
+<% if @rank.empty? && @recent.empty? %>
+  <p class="notice">Você ainda não batalhou.</p>
+<% else %>
+  <h2>Ranking global</h2>
+  <% @rank.each_with_index do |row, index| %>
+    <p class="rank-entry <%= "current" if row[:user_id] == @current_user %>">
+      <%= index + 1 %>. <%= row[:user_id] %> — <%= row[:wins] %> vitória<%= "s" unless row[:wins] == 1 %>
+      (<%= row[:total] %> batalha<%= "s" unless row[:total] == 1 %>)
+    </p>
+  <% end %>
+
+  <h2>Sua posição</h2>
+  <% if @position %>
+    <p class="position">Posição <strong><%= @position %></strong> — Vitórias: <%= @stats[:wins] %> — Derrotas: <%= @stats[:losses] %> — Empates: <%= @stats[:draws] %></p>
+  <% else %>
+    <p class="position">Você ainda não tem vitórias.</p>
+  <% end %>
+
+  <h2>Últimas batalhas</h2>
+  <ul class="battle-history">
+    <% @recent.each do |record| %>
+      <li>
+        <strong><%= result_label(record[:result]) %></strong> contra
+        <%= opponent_names(record[:opponent_team]) %>
+        em <%= Time.parse(record[:created_at].to_s).strftime("%d/%m/%Y %H:%M") %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
