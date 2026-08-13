@@ -1250,6 +1250,41 @@ class ServerBattleTest < Minitest::Test
     assert_empty @repository.all("user-a").first.moves
   end
 
+  def test_battle_finish_persists_one_record_in_battles
+    start_battle_for("user-a")
+    20.times { post "/battle/play", {}, user_session("user-a") }
+
+    rows = TestDatabase.battle_rows("user-a")
+    assert_equal 1, rows.size, "exatamente um registro ao finar a batalha"
+    assert_includes %w[win lose draw], rows.first["result"]
+    assert_includes rows.first["opponent_team"].to_json, "pikachu"
+  end
+
+  def test_battle_play_after_finish_does_not_duplicate_battle_record
+    start_battle_for("user-a")
+    20.times { post "/battle/play", {}, user_session("user-a") }
+    after_finish = TestDatabase.battle_rows("user-a").size
+
+    5.times { post "/battle/play", {}, user_session("user-a") }
+
+    assert_equal after_finish, TestDatabase.battle_rows("user-a").size,
+                 "play após o fim não persiste novo registro (guard de transição)"
+  end
+
+  def test_battle_in_progress_does_not_persist_record
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert_empty TestDatabase.battle_rows("user-a")
+  end
+
+  def test_battle_records_are_isolated_per_user
+    start_battle_for("user-a")
+    20.times { post "/battle/play", {}, user_session("user-a") }
+
+    assert_empty TestDatabase.battle_rows("user-b")
+  end
+
   def play_until_finish(fallback_plays: 20)
     fallback_plays.times do
       post "/battle/play", {}, user_session("user-a")

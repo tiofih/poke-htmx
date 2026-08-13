@@ -8,6 +8,7 @@ require_relative "lib/battle_pokemon"
 require_relative "lib/battle_engine"
 require_relative "lib/opponent_generator"
 require_relative "lib/battle_registry"
+require_relative "lib/battle_repository"
 require_relative "lib/progression_repository"
 require_relative "lib/reward_rule"
 require_relative "lib/evolution_rule"
@@ -230,6 +231,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     was_in_progress = !@engine.finished?
     @engine.play_round
     if was_in_progress && @engine.finished?
+      record_finished_battle
       grant_finished_xp
       apply_evolution_and_learning
       rebuild_display_team
@@ -237,6 +239,16 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     @xp_gained = RewardRule.new.xp_for(@engine.result) if @engine.finished?
     response.headers["HX-Trigger"] = "teamRefresh" if @engine.finished? && @evolution_news&.any?
     erb :battle, layout: false
+  end
+
+  def record_finished_battle
+    return unless @engine.result
+
+    settings.battle_history.add(
+      current_user,
+      @engine.result.to_s,
+      @engine.teams[1].map { |bp| { number: bp.number, name: bp.name } }
+    )
   end
 
   def grant_finished_xp
@@ -430,6 +442,7 @@ class Server < Sinatra::Base
     set :team, TeamRepository.new
     set :progression, ProgressionRepository.new
     set :battles, BattleRegistry.new
+    set :battle_history, BattleRepository.new
     set :api, PokeApi.instance
     register Sinatra::Reloader
   end
