@@ -2,6 +2,7 @@
 
 require_relative "test_helper"
 require_relative "../lib/seed_team"
+require_relative "../lib/battle_repository"
 
 class SeedScriptsTest < Minitest::Test
   def setup
@@ -55,6 +56,31 @@ class SeedScriptsTest < Minitest::Test
     assert_includes levels, 35
   end
 
+  def test_batalhas_historico_seeds_varied_results_for_user
+    load_seed("batalhas_historico", "seed-history")
+
+    results = battle_results("seed-history")
+    assert results.size >= 5, "deve popular várias batalhas"
+    assert_includes results, "win"
+    assert_includes results, "lose"
+    assert_includes results, "draw"
+
+    teams = battle_opponents("seed-history")
+    assert(teams.any? { |team| team.to_s.include?("pikachu") },
+           "alguma batalha seed deve incluir pikachu")
+  end
+
+  def test_batalhas_historico_clears_previous_history_for_user
+    BattleRepository.new.add("seed-history", "win", [{ number: 25, name: "pikachu" }])
+    load_seed("batalhas_historico", "seed-history")
+
+    before = battle_results("seed-history").size
+    load_seed("batalhas_historico", "seed-history")
+
+    assert_equal before, battle_results("seed-history").size,
+                 "re-executar a seed não duplica registros do usuário"
+  end
+
   private
 
   def load_seed(name, user_id)
@@ -95,6 +121,24 @@ class SeedScriptsTest < Minitest::Test
         "WHERE t.name = $1 AND t.user_id = $2",
         [name, user_id]
       ).first
+    end
+  end
+
+  def battle_results(user_id)
+    TestDatabase.with_db do |conn|
+      conn.exec_params(
+        "SELECT result FROM battles WHERE user_id = $1",
+        [user_id]
+      ).map { |r| r["result"] }
+    end
+  end
+
+  def battle_opponents(user_id)
+    TestDatabase.with_db do |conn|
+      conn.exec_params(
+        "SELECT opponent_team FROM battles WHERE user_id = $1",
+        [user_id]
+      ).map { |r| r["opponent_team"] }
     end
   end
 end
