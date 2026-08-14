@@ -14,6 +14,7 @@ require_relative "lib/progression_repository"
 require_relative "lib/wallet_repository"
 require_relative "lib/reward_rule"
 require_relative "lib/evolution_rule"
+require_relative "lib/heal_service"
 
 module ServerCommon
   private
@@ -126,6 +127,13 @@ module ServerTeamActions
 
   def move_team_member
     settings.team.move(current_user, params[:id], params[:new_slot].to_i)
+    @team = settings.team.all(current_user)
+    erb :team, layout: false
+  end
+
+  def heal_team
+    @result = settings.heal.heal(current_user)
+    @notice = @result[:notice]
     @team = settings.team.all(current_user)
     erb :team, layout: false
   end
@@ -398,6 +406,7 @@ end
 module TeamRoutes
   def self.registered(app)
     register_team(app)
+    register_heal(app)
     register_team_manage(app)
     register_add_member(app)
     register_remove_member(app)
@@ -407,6 +416,10 @@ module TeamRoutes
 
   def self.register_team(app)
     app.get("/team") { render_team }
+  end
+
+  def self.register_heal(app)
+    app.post("/team/heal") { heal_team }
   end
 
   def self.register_team_manage(app)
@@ -517,6 +530,11 @@ class Server < Sinatra::Base
     set :battle_history, BattleRepository.new
     set :wallet, WalletRepository.new
     set :api, PokeApi.instance
+    set :heal, HealService.new(
+      team: TeamRepository.new,
+      progression: ProgressionRepository.new,
+      wallet: WalletRepository.new
+    )
     register Sinatra::Reloader
   end
 

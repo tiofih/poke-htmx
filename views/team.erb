@@ -1,6 +1,13 @@
 <% if @notice %>
   <p class="notice"><%= @notice %></p>
 <% end %>
+<% unless @team.empty? %>
+  <h2>Poke Center</h2>
+  <%= erb :team_hp, layout: false %>
+  <form hx-post="/team/heal" hx-target="#team" hx-swap="innerHTML">
+    <button type="submit" class="btn">Curar</button>
+  </form>
+<% end %>
 <% @team.each do |poke| %>
   <p class="slot">#<%= poke.slot %></p>
   <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#pokemon" hx-swap="innerHTML">

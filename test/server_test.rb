@@ -256,7 +256,7 @@ class ServerTeamTest < Minitest::Test
     get "/team", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_equal 8, last_response.body.scan("hx-post=\"/team/").size
+    assert_equal 9, last_response.body.scan("hx-post=\"/team/").size
     assert_includes last_response.body, ">▲</button>"
     assert_includes last_response.body, ">▼</button>"
     assert_includes last_response.body, 'name="new_slot"'
@@ -423,6 +423,76 @@ class ServerTeamTest < Minitest::Test
     refute_includes last_response.body, "boom inesperado"
   ensure
     Server.set :api, previous
+  end
+
+  def test_team_heal_cures_team_and_charges_wallet
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+    @wallet.grant("user-a", 200)
+
+    post "/team/heal", {}, user_session("user-a")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "<html"
+    assert_match(/curado por 50/i, last_response.body.strip)
+    assert_equal 150, @wallet.balance("user-a")
+    assert_equal 200, @progression.get("user-a", pokemon_id)[:hp_current]
+    assert_includes last_response.body, "Poke Center"
+  end
+
+  def test_team_heal_with_insufficient_balance_shows_notice_without_debiting
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+    @wallet.grant("user-a", 10)
+
+    post "/team/heal", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/insuficiente/i, last_response.body.strip)
+    assert_equal 10, @wallet.balance("user-a")
+    assert_equal 100, @progression.get("user-a", pokemon_id)[:hp_current]
+  end
+
+  def test_team_heal_already_cured_shows_notice_without_debiting
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 200)
+    @wallet.grant("user-a", 100)
+
+    post "/team/heal", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/já está curado/i, last_response.body.strip)
+    assert_equal 100, @wallet.balance("user-a")
+  end
+
+  def test_team_heal_with_empty_team_does_not_break
+    post "/team/heal", {}, user_session("user-a")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "<html"
+  end
+
+  def test_team_fragment_shows_poke_center_with_hp_and_heal_button
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+
+    get "/team", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Poke Center"
+    assert_includes last_response.body, "HP 100/200"
+    assert_includes last_response.body, %(hx-post="/team/heal")
+  end
+
+  def test_team_fragment_omits_heal_button_for_empty_team
+    get "/team", {}, user_session("user-a")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "Poke Center"
   end
 end
 
