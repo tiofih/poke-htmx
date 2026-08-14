@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluído — 2026-08-14 (persistência de HP pós-batalha + `HealCostPolicy` proporcional ao HP faltante + `WalletRepository#spend` + `HealService` + rota `POST /team/heal`) |
 | Implementação | Concluída — 2026-08-14, passos 1–8 verdes (suíte 428/1333, lint 0) |
-| Validação | Pendente (executada pelo usuário) |
+| Validação | **Concluída em 2026-08-14 — validada pelo usuário** |
 
 ---
 
@@ -276,7 +276,23 @@ ALTER TABLE team_pokemon_progress ADD COLUMN IF NOT EXISTS hp_current INTEGER NO
 
 ## 7. Validação (executada pelo usuário)
 
-_Pendente — aguardando o usuário após a fase 2._
+**Validada em 2026-08-14 pelo usuário.** Fase 3 concluída — critérios de aceite
+(seção 4) verificados: migração `0028_add_team_hp.sql` (`hp_max`/`hp_current` em
+`team_pokemon_progress`), `Pokemon` com hp default 0, `TeamRepository#all` com HP via
+JOIN, `HealCostPolicy` (missing_hp/cost, 0.5/Hp injetável), `ProgressionRepository`
+(`get` com hp + `update_hp`), `WalletRepository#spend` (nunca negativo), `HealService`
+(injeta team/progression/wallet/policy), carryover de HP p/ a próxima batalha no hook
+`:finished`, rota `POST /team/heal` + bloco Poke Center no `team.erb`
+(`team_hp.erb` + botão Curar) com `@notice`. Suíte completa **428/1333** + lint 0.
+
+**Roteiro de validação manual executado:**
+- Batalhar até `:finished` → `GET /team` mostra o HP danificado por membro
+  (`HP atual/max`) no Poke Center.
+- Novo confronto começa com o HP persistido (carryover); `db:setup` reidempotente.
+- Botão **Curar** → fragmento re-renderiza com "curado por N" e saldo debitado;
+  saldo insuficiente → aviso sem debitar; time cheio → "já está curado".
+- `DEFAULT_COST_PER_HP` (0.5) aprovado para a validação — calibrações finas
+  reavaliadas em Eco-3 junto com a seed de saldo inicial.
 
 ## 8. Observações
 
