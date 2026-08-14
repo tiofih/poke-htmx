@@ -111,10 +111,44 @@ class TeamReadTest < Minitest::Test
     assert_equal %w[thunder-shock quick-attack], with_moves.moves
   end
 
+  def test_pokemon_hp_defaults_to_zero
+    assert_equal 0, build_pokemon_record("pikachu", 25).hp_max
+    assert_equal 0, build_pokemon_record("pikachu", 25).hp_current
+    with_hp = Pokemon.new(
+      name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25,
+      hp_max: 45, hp_current: 12
+    )
+    assert_equal 45, with_hp.hp_max
+    assert_equal 12, with_hp.hp_current
+  end
+
   def test_all_returns_empty_moves_by_default
     add_pokemon("user-a", "pikachu", 25)
 
     assert_equal [], @repository.all("user-a").first.moves
+  end
+
+  def test_all_populates_hp_from_progress
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    TestDatabase.with_db do |connection|
+      connection.exec_params(
+        "UPDATE team_pokemon_progress SET hp_max = $1, hp_current = $2 WHERE team_pokemon_id = $3",
+        [45, 12, pokemon_id]
+      )
+    end
+
+    pokemon = @repository.all("user-a").first
+    assert_equal 45, pokemon.hp_max
+    assert_equal 12, pokemon.hp_current
+  end
+
+  def test_all_defaults_hp_to_zero_when_progress_has_no_hp
+    add_pokemon("user-a", "pikachu", 25)
+
+    pokemon = @repository.all("user-a").first
+    assert_equal 0, pokemon.hp_max
+    assert_equal 0, pokemon.hp_current
   end
 end
 

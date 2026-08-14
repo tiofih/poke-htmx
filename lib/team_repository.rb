@@ -140,7 +140,10 @@ class TeamRepository
 
   def all(user_id)
     connection.exec_params(
-      "SELECT * FROM team_pokemons WHERE user_id = $1 ORDER BY slot",
+      "SELECT t.*, p.hp_max, p.hp_current " \
+      "FROM team_pokemons t " \
+      "LEFT JOIN team_pokemon_progress p ON p.team_pokemon_id = t.id " \
+      "WHERE t.user_id = $1 ORDER BY t.slot",
       [user_id]
     ).map { |row| row_to_pokemon(row) }
   end
@@ -196,7 +199,9 @@ class TeamRepository
       sprite: row["sprite"],
       number: row["number"],
       slot: row["slot"],
-      moves: parse_moves(row["moves"])
+      moves: parse_moves(row["moves"]),
+      hp_max: row["hp_max"],
+      hp_current: row["hp_current"]
     )
   end
 

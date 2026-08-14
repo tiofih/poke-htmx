@@ -54,6 +54,11 @@ class SchemaTest < Minitest::Test
     assert TestDatabase.primary_key("wallet", "user_id"), "expected user_id to be PK of wallet"
   end
 
+  def test_progress_table_has_hp_columns_not_null
+    assert_equal "NO", TestDatabase.table_column_info("team_pokemon_progress", "hp_max")["is_nullable"]
+    assert_equal "NO", TestDatabase.table_column_info("team_pokemon_progress", "hp_current")["is_nullable"]
+  end
+
   def test_clear_team_truncates_wallet
     TestDatabase.clear_team!
     with_wallet_row do
