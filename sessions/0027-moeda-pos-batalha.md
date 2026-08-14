@@ -4,8 +4,8 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | **Concluído — 2026-08-14 (tabela `wallet` + `RewardRule#money_for` + `WalletRepository` + grant no hook `:finished` + aviso de moeda no `battle.erb`)** |
-| Implementação | Pendente |
+| Refinamento | Concluído — 2026-08-14 (tabela `wallet` + `RewardRule#money_for` + `WalletRepository` + grant no hook `:finished` + aviso no `battle.erb`) |
+| Implementação | Em andamento — passos 1–4 verdes (suíte 386/1216, lint 0); passo 5 (docs) concluído — **aguardando validação do usuário** |
 | Validação | Pendente — executada pelo usuário |
 
 ---
