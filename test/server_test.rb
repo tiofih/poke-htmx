@@ -958,15 +958,20 @@ class ServerBattleTest < Minitest::Test
     assert_includes last_response.body, "hx-get=\"/battle\""
   end
 
-  def test_battle_reset_starts_a_fresh_battle
+  def test_battle_reset_starts_a_fresh_battle_with_persisted_hp
     start_battle_for("user-a")
     20.times { post "/battle/play", {}, user_session("user-a") }
+    persisted_hp = @repository.all("user-a").map(&:hp_current)
 
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 
     assert last_response.ok?
-    assert_includes last_response.body, "Rodada 0"
-    refute_includes last_response.body, "Vencedor"
+    assert_includes last_response.body, "Rodada 0",
+                    "reset recria a batalha do zero"
+    persisted_hp.each do |hp|
+      assert_includes last_response.body, "HP #{hp}/",
+                      "time danificado (HP #{hp}) entra no reset"
+    end
   end
 
   def test_battle_shows_moves_with_pp_per_fighter
@@ -1325,6 +1330,64 @@ class ServerBattleTest < Minitest::Test
       post "/battle/play", {}, user_session("user-a")
       return if last_response.body.include?("Fim de batalha")
     end
+  end
+
+  def test_battle_finish_persists_hp_per_member
+    start_battle_for("user-a")
+    play_until_finish(fallback_plays: 50)
+
+    members = @repository.all("user-a")
+    assert members.all? { |member| member.hp_max.positive? },
+           "hp_max persistido após a batalha"
+    assert members.any? { |member| member.hp_current < member.hp_max },
+           "algum membro terminou a batalha com dano"
+  end
+
+  def test_battle_finish_persists_hp_only_once
+    start_battle_for("user-a")
+    play_until_finish(fallback_plays: 50)
+    first = @repository.all("user-a").map(&:hp_current)
+
+    5.times { post "/battle/play", {}, user_session("user-a") }
+
+    assert_equal first, @repository.all("user-a").map(&:hp_current),
+                 "plays após o fim não re-persistem HP (guard de transição)"
+  end
+
+  def test_battle_in_progress_does_not_persist_hp
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    members = @repository.all("user-a")
+    assert members.all? { |member| member.hp_max.zero? },
+           "batalha em andamento não persiste HP"
+  end
+
+  def test_new_battle_starts_with_persisted_hp
+    @repository.add("user-a", pikachu_pokemon)
+    @repository.add("user-a", bulbasaur_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 50)
+
+    stub_battle_start do
+      get "/battle", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "HP 50/200",
+                    "time danificado entra no próximo confronto com o HP persistido"
+  end
+
+  def test_new_battle_starts_full_for_member_who_never_battled
+    @repository.add("user-a", pikachu_pokemon)
+
+    stub_battle_start do
+      get "/battle", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "HP 200/200",
+                    "membro que nunca batalhou entra com HP cheio"
   end
 end
 

@@ -191,8 +191,19 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
   def player_team(team)
     team.filter_map do |member|
       detail = settings.api.detail(member.number)
-      detail && BattlePokemon.from(detail, moves: battle_moves_for(member), level: member_level(member))
+      next unless detail
+
+      fighter = BattlePokemon.from(detail, moves: battle_moves_for(member), level: member_level(member))
+      apply_persisted_hp(fighter, member)
     end
+  end
+
+  def apply_persisted_hp(fighter, member)
+    progress = settings.progression.get(current_user, member.id)
+    return fighter if progress.nil? || progress[:hp_max].to_i <= 0
+
+    hp_current = [progress[:hp_current].to_i, progress[:hp_max].to_i].min
+    fighter.new(hp_current: hp_current)
   end
 
   def member_level(member)
@@ -238,6 +249,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
       grant_finished_money
       apply_evolution_and_learning
       rebuild_display_team
+      persist_finished_hp
     end
     @xp_gained = RewardRule.new.xp_for(@engine.result) if @engine.finished?
     @money_gained = RewardRule.new.money_for(@engine.result) if @engine.finished?
@@ -291,6 +303,19 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
       )
     end
     @engine.replace_team_a(new_team)
+  end
+
+  def persist_finished_hp
+    list = settings.team.all(current_user)
+    return unless list.size == @engine.teams[0].size
+
+    list.zip(@engine.teams[0]).each { |member, fighter| save_fighter_hp(member, fighter) }
+  end
+
+  def save_fighter_hp(member, fighter)
+    settings.progression.update_hp(
+      current_user, member.id, fighter.hp_max, fighter.hp_current
+    )
   end
 
   def evolve_member(member)
