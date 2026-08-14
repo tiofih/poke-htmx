@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluído — 2026-08-14 (tabela `wallet` + `RewardRule#money_for` + `WalletRepository` + grant no hook `:finished` + aviso no `battle.erb`) |
-| Implementação | Em andamento — passos 1–4 verdes (suíte 386/1216, lint 0); passo 5 (docs) concluído — **aguardando validação do usuário** |
-| Validação | Pendente — executada pelo usuário |
+| Implementação | Concluída em 2026-08-14 — passos 1–5 verdes (suíte 386/1216, lint 0) |
+| Validação | **Concluída em 2026-08-14 — validada pelo usuário** |
 
 ---
 
@@ -120,44 +120,44 @@ Espelha `BattleRepository` (PG direto, `connection` memoizada, `DEFAULT_DATABASE
 
 ### Migração / schema
 
-- [ ] `0027_add_wallet.sql` idempotente cria `wallet` com `user_id TEXT PRIMARY KEY`,
+- [x] `0027_add_wallet.sql` idempotente cria `wallet` com `user_id TEXT PRIMARY KEY`,
       `balance INTEGER NOT NULL DEFAULT 0` e `updated_at` (default `now()`);
       re-executar não quebra.
-- [ ] `TestDatabase.clear_wallet!` limpa `wallet`; `clear_team!` preserva o nome mas
+- [x] `TestDatabase.clear_wallet!` limpa `wallet`; `clear_team!` preserva o nome mas
       passa a truncar `wallet` também.
 
 ### `RewardRule`
 
-- [ ] `money_for(:win)` → `DEFAULT_WIN_MONEY (100)`, `money_for(:draw)` → 50,
+- [x] `money_for(:win)` → `DEFAULT_WIN_MONEY (100)`, `money_for(:draw)` → 50,
       `money_for(:lose)` → 40; resultado desconhecido/nil → `0`.
-- [ ] Valores injetáveis no construtor (`win_money:`/`draw_money:`/`lose_money:`);
+- [x] Valores injetáveis no construtor (`win_money:`/`draw_money:`/`lose_money:`);
       `xp_for` e demais contatos atuais preservados (0 regressão XP).
 
 ### `WalletRepository`
 
-- [ ] `balance(user_id)` → saldo atual; usuário sem linha → `0` (sem criar registro).
-- [ ] `grant(user_id, amount)` soma ao saldo via upsert e **retorna o novo saldo**
+- [x] `balance(user_id)` → saldo atual; usuário sem linha → `0` (sem criar registro).
+- [x] `grant(user_id, amount)` soma ao saldo via upsert e **retorna o novo saldo**
       (ex.: `grant(u, 100)` → 100; `grant(u, 50)` → 150); `amount` nulo/`<= 0` →
       no-op (saldo inalterado).
-- [ ] Isolamento RF-05: saldo de um `user_id` não afeta o de outro.
+- [x] Isolamento RF-05: saldo de um `user_id` não afeta o de outro.
 
 ### Hook / UI
 
-- [ ] `POST /battle/play` que termina a batalha (`:finished`) concede a moeda do
+- [x] `POST /battle/play` que termina a batalha (`:finished`) concede a moeda do
       `RewardRule` para o `current_user` **uma única vez** (guard de transição);
       plays posteriores não duplicam o grant.
-- [ ] Batalha **em andamento** não concede moeda.
-- [ ] `battle.erb` no fim da batalha exibe o dinheiro ganho ao lado do XP
+- [x] Batalha **em andamento** não concede moeda.
+- [x] `battle.erb` no fim da batalha exibe o dinheiro ganho ao lado do XP
       ("... e Y de dinheiro"), fragmento sem `<html>`, sem JS custom (RNF-01).
-- [ ] Time vazio/oponente vazio mantém o comportamento amigável atual (0 regressão).
+- [x] Time vazio/oponente vazio mantém o comportamento amigável atual (0 regressão).
 
 ### Garantias (RNF)
 
-- [ ] Suíte completa verde (baseline 367/1172 preservado + novos) e lint 0; commit
+- [x] Suíte completa verde (baseline 367/1172 preservado + novos) e lint 0; commit
       por green; 0 regressão RF-01..RF-18/D2/D3/0025/0026.
-- [ ] Sem novas gems; sem dependência da PokéAPI nas rotas tocadas; sem
+- [x] Sem novas gems; sem dependência da PokéAPI nas rotas tocadas; sem
       `rubocop:disable` (padrão orçamentos).
-- [ ] `REQUIREMENTS.md` (roadmap item 23 — Eco-1 executado na 0027), `SESSIONS.md`
+- [x] `REQUIREMENTS.md` (roadmap item 23 — Eco-1 executado na 0027), `SESSIONS.md`
       (tabela 0027 em fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md`
       (decisão 10 atendida) e `draft-auto-battler.md` (Fase Eco — Eco-1 feita)
       atualizados no mesmo escopo.
@@ -201,17 +201,18 @@ Espelha `BattleRepository` (PG direto, `connection` memoizada, `DEFAULT_DATABASE
 
 ## 7. Validação (executada pelo usuário)
 
-Em aberto — será preenchida pelo usuário na fase 3 (fase 2 concluída: suíte + lint
-verdes; parada obrigatória antes da validação — regra AGENTS.md).
+**Validada em 2026-08-14 pelo usuário.** Fase 3 concluída — critérios de aceite
+(seção 4) verificados: tabela `wallet` (user_id PK) + `TestDatabase.clear_wallet!`,
+`RewardRule#money_for` (win 100/draw 50/lose 40, injetável), `WalletRepository`
+(`balance`/`grant` upsert), moeda concedida 1× no hook `:finished` + aviso no
+`battle.erb`. Suíte completa **386/1216** + lint 0.
 
-**Roteiro sugerido de validação manual:**
+**Roteiro de validação manual executado:**
 - Batalhar até `:finished` → fragmento mostra "Seu Time ganhou X XP por Pokémon
   e Y de dinheiro."
-- Repetir confronto → novo grant soma ao saldo acumulado (sem duplicação por
-  batalha já encerrada).
-- Conferir valores win/draw/lose (decisão de balanceamento — ajustar `money_for`
-  se quiser).
-- `./scripts/test` + `./scripts/lint` verdes.
+- Novo confronto soma ao saldo acumulado (sem duplicação por batalha encerrada).
+- Valores win/draw/lose (100/50/40) aprovados — balanceamento fino fica com o
+  custo do Poke Center/Mart (Eco-2/3).
 
 ## 8. Observações
 

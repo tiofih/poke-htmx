@@ -350,13 +350,13 @@
 
 ## Próximos passos (fora deste arquivo)
 
-1. **Sessão 0027 (Eco-1 — moeda pós-batalha) em fase 2** (fase TDD em curso, passos
-   1–4 verdes, suíte 386/1216, lint 0 — aguardando validação do usuário): tabela
-   `wallet` + `WalletRepository` (`balance`/`grant` upsert) + `RewardRule#money_for`
-   (win 100/draw 50/lose 40) **no mesmo hook `:finished` de XP/evolução/histórico** +
-   aviso de moeda em `battle.erb`. Próxima após validar: **Eco-2 (Poke Center)** —
-   `HealService` + `HealCostPolicy` (custo proporcional ao HP faltante, decisão 11),
-   rota htmx `POST /team/heal` + fragmento, cobrança do saldo (`spend`).
+1. **Sessão 0027 (Eco-1 — moeda pós-batalha) concluída e validada em 2026-08-14**
+   (passos 1–5, suíte 386/1216, lint 0): tabela `wallet` + `WalletRepository`
+   (`balance`/`grant` upsert) + `RewardRule#money_for` (win 100/draw 50/lose 40) **no
+   mesmo hook `:finished` de XP/evolução/histórico** + aviso de moeda em `battle.erb`.
+   Próxima após validar: **Eco-2 (Poke Center)** — `HealService` + `HealCostPolicy`
+   (custo proporcional ao HP faltante, decisão 11), rota htmx `POST /team/heal` +
+   fragmento, cobrança do saldo (`spend`).
 2. Logo após decidir: **elencar o que fica e o que sai** da lista acima,
    definir ordem e transformar os escolhidos em **documentos de sessão** com
    critérios fechados e plano TDD (como a 0007).
