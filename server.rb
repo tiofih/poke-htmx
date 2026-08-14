@@ -11,6 +11,7 @@ require_relative "lib/opponent_generator"
 require_relative "lib/battle_registry"
 require_relative "lib/battle_repository"
 require_relative "lib/progression_repository"
+require_relative "lib/wallet_repository"
 require_relative "lib/reward_rule"
 require_relative "lib/evolution_rule"
 
@@ -225,7 +226,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     erb :battle, layout: false
   end
 
-  def advance_battle # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
+  def advance_battle # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
     @engine = settings.battles.fetch(current_user)
     return erb :battle, layout: false unless @engine
 
@@ -234,10 +235,12 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     if was_in_progress && @engine.finished?
       record_finished_battle
       grant_finished_xp
+      grant_finished_money
       apply_evolution_and_learning
       rebuild_display_team
     end
     @xp_gained = RewardRule.new.xp_for(@engine.result) if @engine.finished?
+    @money_gained = RewardRule.new.money_for(@engine.result) if @engine.finished?
     response.headers["HX-Trigger"] = "teamRefresh" if @engine.finished? && @evolution_news&.any?
     erb :battle, layout: false
   end
@@ -257,6 +260,12 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     settings.team.all(current_user).each do |member|
       settings.progression.grant(current_user, member.id, reward)
     end
+  end
+
+  def grant_finished_money
+    return unless @engine.result
+
+    settings.wallet.grant(current_user, RewardRule.new.money_for(@engine.result))
   end
 
   def apply_evolution_and_learning
@@ -481,6 +490,7 @@ class Server < Sinatra::Base
     set :progression, ProgressionRepository.new
     set :battles, BattleRegistry.new
     set :battle_history, BattleRepository.new
+    set :wallet, WalletRepository.new
     set :api, PokeApi.instance
     register Sinatra::Reloader
   end

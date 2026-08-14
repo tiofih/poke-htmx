@@ -15,6 +15,7 @@ module ServerTestHelpers
     TestDatabase.clear_team!
     @repository = TeamRepository.new
     @progression = ProgressionRepository.new
+    @wallet = WalletRepository.new
   end
 
   def pikachu_pokemon

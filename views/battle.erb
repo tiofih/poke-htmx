@@ -52,7 +52,7 @@
     <% winner_name = @engine.winner.zero? ? "Seu Time" : "Oponente" %>
     <p class="winner"><strong>Vencedor: <%= winner_name %></strong></p>
     <% if @xp_gained %>
-      <p class="xp-gained"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon.</strong></p>
+      <p class="xp-gained"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e #{@money_gained} de dinheiro." : "." %></strong></p>
     <% end %>
     <% if defined?(@evolution_news) && !@evolution_news&.empty? %>
       <ul class="evolution-news">

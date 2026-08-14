@@ -1166,6 +1166,41 @@ class ServerBattleTest < Minitest::Test
     assert_includes last_response.body, "Nível #{TestDatabase.progress_row(pokemon_id)['level'].to_i}"
   end
 
+  def test_battle_play_grants_money_once_on_transition_to_finished
+    @repository.add("user-a", pikachu_pokemon)
+    start_battle_for("user-a")
+    assert_equal 0, @wallet.balance("user-a"), "moeda não concedida antes do fim"
+
+    20.times { post "/battle/play", {}, user_session("user-a") }
+
+    after_finish = @wallet.balance("user-a")
+    assert_includes [40, 50, 100], after_finish, "moeda concedida uma vez conforme o resultado"
+
+    5.times { post "/battle/play", {}, user_session("user-a") }
+
+    assert_equal after_finish, @wallet.balance("user-a"),
+                 "play após o fim não concede moeda de novo (guard de transição)"
+  end
+
+  def test_battle_play_does_not_grant_money_before_finish
+    start_battle_for("user-a")
+    assert_equal 0, @wallet.balance("user-a"), "moeda não concedida ao abrir a batalha"
+
+    post "/battle/play", {}, user_session("user-a")
+
+    refute_includes last_response.body, "Fim de batalha", "batalha de 3v6 não termina em 1 round"
+    assert_equal 0, @wallet.balance("user-a"), "moeda não concedida antes do fim"
+  end
+
+  def test_battle_finish_shows_money_gained_message
+    start_battle_for("user-a")
+    20.times { post "/battle/play", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_match(/\d+ de dinheiro/, last_response.body)
+    assert_match(/ganhou \d+ XP por Pokémon e \d+ de dinheiro/, last_response.body)
+  end
+
   def test_battle_finish_evolves_member_when_level_reaches_min_level
     @repository.add("user-a", pikachu_pokemon)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
