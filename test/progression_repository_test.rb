@@ -25,7 +25,7 @@ class ProgressionGetTest < Minitest::Test
     add_pokemon("user-a", "pikachu", 25)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
 
-    assert_equal({ level: 1, xp: 0 }, @progression.get("user-a", pokemon_id))
+    assert_equal({ level: 1, xp: 0, hp_max: 0, hp_current: 0 }, @progression.get("user-a", pokemon_id))
   end
 
   def test_get_returns_nil_for_unknown_id
@@ -45,6 +45,59 @@ class ProgressionGetTest < Minitest::Test
 
     assert_nil @progression.get(nil, pokemon_id)
   end
+
+  def test_get_includes_hp_columns_defaulting_to_zero
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+
+    assert_equal(0, @progression.get("user-a", pokemon_id)[:hp_max])
+    assert_equal(0, @progression.get("user-a", pokemon_id)[:hp_current])
+  end
+end
+
+class ProgressionHpTest < Minitest::Test
+  include ProgressionRepositoryTestHelpers
+
+  def test_update_hp_persists_values
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+
+    @progression.update_hp("user-a", pokemon_id, 45, 12)
+
+    result = @progression.get("user-a", pokemon_id)
+    assert_equal 45, result[:hp_max]
+    assert_equal 12, result[:hp_current]
+  end
+
+  def test_update_hp_overwrites_previous_values
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 45, 12)
+
+    @progression.update_hp("user-a", pokemon_id, 45, 45)
+
+    result = @progression.get("user-a", pokemon_id)
+    assert_equal 45, result[:hp_max]
+    assert_equal 45, result[:hp_current]
+  end
+
+  def test_update_hp_for_unknown_id_is_noop
+    @progression.update_hp("user-a", "999999", 45, 12)
+
+    assert_nil @progression.get("user-a", "999999")
+  end
+
+  def test_update_hp_for_another_users_member_is_noop
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 45, 12)
+
+    @progression.update_hp("user-b", pokemon_id, 99, 99)
+
+    result = @progression.get("user-a", pokemon_id)
+    assert_equal 45, result[:hp_max]
+    assert_equal 12, result[:hp_current]
+  end
 end
 
 class ProgressionGrantTest < Minitest::Test
@@ -55,7 +108,7 @@ class ProgressionGrantTest < Minitest::Test
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
 
     assert_equal({ level: 2, xp: 120 }, @progression.grant("user-a", pokemon_id, 120))
-    assert_equal({ level: 2, xp: 120 }, @progression.get("user-a", pokemon_id))
+    assert_equal({ level: 2, xp: 120, hp_max: 0, hp_current: 0 }, @progression.get("user-a", pokemon_id))
   end
 
   def test_grant_recalculates_level_when_crossing_curves
@@ -64,7 +117,7 @@ class ProgressionGrantTest < Minitest::Test
 
     @progression.grant("user-a", pokemon_id, 350)
 
-    assert_equal({ level: 3, xp: 350 }, @progression.get("user-a", pokemon_id))
+    assert_equal({ level: 3, xp: 350, hp_max: 0, hp_current: 0 }, @progression.get("user-a", pokemon_id))
   end
 
   def test_grant_accumulates_xp_across_calls
@@ -74,7 +127,7 @@ class ProgressionGrantTest < Minitest::Test
     @progression.grant("user-a", pokemon_id, 50)
     @progression.grant("user-a", pokemon_id, 50)
 
-    assert_equal({ level: 2, xp: 100 }, @progression.get("user-a", pokemon_id))
+    assert_equal({ level: 2, xp: 100, hp_max: 0, hp_current: 0 }, @progression.get("user-a", pokemon_id))
   end
 
   def test_grant_for_another_users_member_is_noop
@@ -82,7 +135,7 @@ class ProgressionGrantTest < Minitest::Test
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
 
     assert_nil @progression.grant("user-b", pokemon_id, 100)
-    assert_equal({ level: 1, xp: 0 }, @progression.get("user-a", pokemon_id))
+    assert_equal({ level: 1, xp: 0, hp_max: 0, hp_current: 0 }, @progression.get("user-a", pokemon_id))
   end
 
   def test_grant_for_unknown_id_is_noop
