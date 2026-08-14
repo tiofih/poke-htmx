@@ -26,6 +26,18 @@ class WalletRepository
     balance(user_id)
   end
 
+  def spend(user_id, amount)
+    current = balance(user_id)
+    return current if amount.nil? || amount <= 0 || current < amount
+
+    connection.exec_params(
+      "UPDATE wallet SET balance = balance - $2, updated_at = now() " \
+      "WHERE user_id = $1",
+      [user_id, amount]
+    )
+    balance(user_id)
+  end
+
   private
 
   def connection

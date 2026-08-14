@@ -75,3 +75,59 @@ class WalletIsolationTest < Minitest::Test
     assert_equal 300, @repository.balance("user-b")
   end
 end
+
+class WalletSpendTest < Minitest::Test
+  include WalletRepositoryTestHelpers
+
+  def test_spend_debits_and_returns_new_balance
+    @repository.grant("user-a", 100)
+
+    assert_equal 80, @repository.spend("user-a", 20)
+    assert_equal 80, TestDatabase.wallet_balance("user-a")
+  end
+
+  def test_spend_without_enough_balance_is_noop
+    @repository.grant("user-a", 50)
+
+    assert_equal 50, @repository.spend("user-a", 100)
+    assert_equal 50, TestDatabase.wallet_balance("user-a")
+  end
+
+  def test_spend_with_zero_is_noop
+    @repository.grant("user-a", 100)
+
+    assert_equal 100, @repository.spend("user-a", 0)
+    assert_equal 100, TestDatabase.wallet_balance("user-a")
+  end
+
+  def test_spend_with_nil_is_noop
+    @repository.grant("user-a", 100)
+
+    assert_equal 100, @repository.spend("user-a", nil)
+    assert_equal 100, TestDatabase.wallet_balance("user-a")
+  end
+
+  def test_spend_with_negative_is_noop
+    @repository.grant("user-a", 100)
+
+    assert_equal 100, @repository.spend("user-a", -30)
+    assert_equal 100, TestDatabase.wallet_balance("user-a")
+  end
+
+  def test_spend_never_makes_balance_negative
+    @repository.grant("user-a", 10)
+
+    @repository.spend("user-a", 50)
+
+    assert_equal 10, TestDatabase.wallet_balance("user-a")
+  end
+
+  def test_spend_is_isolated_per_user
+    @repository.grant("user-a", 100)
+    @repository.grant("user-b", 100)
+    @repository.spend("user-a", 40)
+
+    assert_equal 60, TestDatabase.wallet_balance("user-a")
+    assert_equal 100, TestDatabase.wallet_balance("user-b")
+  end
+end
