@@ -43,6 +43,25 @@ class SchemaTest < Minitest::Test
            "expected index (user_id, created_at DESC)"
   end
 
+  def test_wallet_table_exists_with_required_columns_not_null
+    assert TestDatabase.table_exists?("wallet"), "expected table wallet to exist"
+    assert_equal "NO", TestDatabase.table_column_info("wallet", "user_id")["is_nullable"]
+    assert_equal "NO", TestDatabase.table_column_info("wallet", "balance")["is_nullable"]
+    assert_equal "NO", TestDatabase.table_column_info("wallet", "updated_at")["is_nullable"]
+  end
+
+  def test_wallet_has_user_id_as_primary_key
+    assert TestDatabase.primary_key("wallet", "user_id"), "expected user_id to be PK of wallet"
+  end
+
+  def test_clear_team_truncates_wallet
+    TestDatabase.clear_team!
+    with_wallet_row do
+      TestDatabase.clear_team!
+    end
+    assert_equal 0, TestDatabase.wallet_balance("user-a")
+  end
+
   def test_clear_team_truncates_supporting_progress_table
     TestDatabase.clear_team!
     with_progress_row do
@@ -52,6 +71,16 @@ class SchemaTest < Minitest::Test
   end
 
   private
+
+  def with_wallet_row
+    TestDatabase.with_db do |connection|
+      connection.exec_params(
+        "INSERT INTO wallet (user_id, balance) VALUES ($1, $2)",
+        ["user-a", 150]
+      )
+    end
+    yield
+  end
 
   def with_progress_row
     TestDatabase.with_db do |connection|

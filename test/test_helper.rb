@@ -25,7 +25,18 @@ module TestDatabase
   end
 
   def self.clear_team!
-    with_db { |connection| connection.exec("TRUNCATE team_pokemons, team_pokemon_progress, battles") }
+    with_db { |connection| connection.exec("TRUNCATE team_pokemons, team_pokemon_progress, battles, wallet") }
+  end
+
+  def self.clear_wallet!
+    with_db { |connection| connection.exec("TRUNCATE wallet") }
+  end
+
+  def self.wallet_balance(user_id)
+    with_db do |connection|
+      row = connection.exec_params("SELECT balance FROM wallet WHERE user_id = $1", [user_id]).first
+      row ? row["balance"].to_i : 0
+    end
   end
 
   def self.clear_battles!
@@ -103,6 +114,19 @@ module TestDatabase
         "SELECT is_nullable FROM information_schema.columns WHERE table_name = $1 AND column_name = $2",
         [table, column]
       ).first
+    end
+  end
+
+  def self.primary_key(table, column)
+    with_db do |connection|
+      connection.exec_params(
+        <<~SQL,
+          SELECT 1 FROM information_schema.table_constraints tc
+          JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name
+          WHERE tc.table_name = $1 AND tc.constraint_type = 'PRIMARY KEY' AND kcu.column_name = $2
+        SQL
+        [table, column]
+      ).ntuples.positive?
     end
   end
 
