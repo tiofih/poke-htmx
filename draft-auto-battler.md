@@ -354,9 +354,14 @@
    (passos 1–5, suíte 386/1216, lint 0): tabela `wallet` + `WalletRepository`
    (`balance`/`grant` upsert) + `RewardRule#money_for` (win 100/draw 50/lose 40) **no
    mesmo hook `:finished` de XP/evolução/histórico** + aviso de moeda em `battle.erb`.
-   Próxima após validar: **Eco-2 (Poke Center)** — `HealService` + `HealCostPolicy`
-   (custo proporcional ao HP faltante, decisão 11), rota htmx `POST /team/heal` +
-   fragmento, cobrança do saldo (`spend`).
+
+   **Sessão 0028 (Eco-2 — Poke Center) em implementação — fase 2 concluída em
+   2026-08-14 (passos 1–8, suíte 428/1333, lint 0), aguardando validação do usuário:**
+   HP persistente por membro (`team_pokemon_progress.hp_max/hp_current`) + carryover
+   p/ a próxima batalha; `HealCostPolicy` (custos proporcional ao HP faltante, 0.5/Hp,
+   decisão 11); `WalletRepository#spend`; `HealService`; rota htmx `POST /team/heal` +
+   bloco Poke Center no `team.erb`. Próxima após validar: **Eco-3 (Poke Mart)** —
+   catálogo estático (`Item`), compra com dinheiro, `InventoryRepository`, fragmentos.
 2. Logo após decidir: **elencar o que fica e o que sai** da lista acima,
    definir ordem e transformar os escolhidos em **documentos de sessão** com
    critérios fechados e plano TDD (como a 0007).

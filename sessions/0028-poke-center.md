@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluído — 2026-08-14 (persistência de HP pós-batalha + `HealCostPolicy` proporcional ao HP faltante + `WalletRepository#spend` + `HealService` + rota `POST /team/heal`) |
-| Implementação | Pendente |
+| Implementação | Concluída — 2026-08-14, passos 1–8 verdes (suíte 428/1333, lint 0) |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
