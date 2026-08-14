@@ -20,9 +20,7 @@ module HealServiceTestHelpers
   def add_pokemon(user_id, name, number, hp_max: nil, hp_current: nil)
     @team.add(user_id, build_pokemon_record(name, number))
     pokemon_id = TestDatabase.team_id(name, user_id)
-    if hp_max
-      @progression.update_hp(user_id, pokemon_id, hp_max, hp_current || hp_max)
-    end
+    @progression.update_hp(user_id, pokemon_id, hp_max, hp_current || hp_max) if hp_max
     pokemon_id
   end
 end

@@ -19,8 +19,13 @@ class HealService
     balance = @wallet.balance(user_id)
     return insufficient_notice(cost, balance) if balance < cost
 
-    heal_members(user_id, members)
-    new_balance = @wallet.spend(user_id, cost)
+    heal_result(user_id, members, cost)
+  end
+
+  private
+
+  def heal_result(user_id, members, cost)
+    new_balance = charge_and_heal(user_id, members, cost)
     {
       healed: true,
       cost: cost,
@@ -29,7 +34,10 @@ class HealService
     }
   end
 
-  private
+  def charge_and_heal(user_id, members, cost)
+    heal_members(user_id, members)
+    @wallet.spend(user_id, cost)
+  end
 
   def full_notice
     { healed: false, cost: 0, notice: "Seu time já está curado." }
