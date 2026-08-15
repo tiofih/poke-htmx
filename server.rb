@@ -15,6 +15,9 @@ require_relative "lib/wallet_repository"
 require_relative "lib/reward_rule"
 require_relative "lib/evolution_rule"
 require_relative "lib/heal_service"
+require_relative "lib/inventory_repository"
+require_relative "lib/item_catalog"
+require_relative "lib/mart_service"
 
 module ServerCommon
   private
@@ -79,7 +82,14 @@ module ServerTeamActions
 
   def render_team
     @team = settings.team.all(current_user)
+    mart_data
     erb :team, layout: false
+  end
+
+  def mart_data
+    @catalog = ItemCatalog.all
+    @inventory = settings.inventory.all(current_user)
+    @balance = settings.wallet.balance(current_user)
   end
 
   def render_team_manage
@@ -97,6 +107,7 @@ module ServerTeamActions
     pokemon = pokemon_with_level_one_moves(pokemon) if pokemon
     @notice = add_team_notice(pokemon)
     @team = settings.team.all(current_user)
+    mart_data
     erb :team, layout: false
   end
 
@@ -122,12 +133,14 @@ module ServerTeamActions
   def remove_team_member
     settings.team.remove(current_user, params[:id]) if params[:id]
     @team = settings.team.all(current_user)
+    mart_data
     erb :team, layout: false
   end
 
   def move_team_member
     settings.team.move(current_user, params[:id], params[:new_slot].to_i)
     @team = settings.team.all(current_user)
+    mart_data
     erb :team, layout: false
   end
 
@@ -135,6 +148,16 @@ module ServerTeamActions
     @result = settings.heal.heal(current_user)
     @notice = @result[:notice]
     @team = settings.team.all(current_user)
+    mart_data
+    erb :team, layout: false
+  end
+
+  def buy_from_mart
+    quantity = params[:quantity].to_i
+    @result = settings.mart.buy(current_user, params[:item_name], quantity)
+    @notice = @result[:notice]
+    @team = settings.team.all(current_user)
+    mart_data
     erb :team, layout: false
   end
 
@@ -443,6 +466,16 @@ module TeamRoutes
   end
 end
 
+module MartRoutes
+  def self.registered(app)
+    register_buy(app)
+  end
+
+  def self.register_buy(app)
+    app.post("/mart/buy") { buy_from_mart }
+  end
+end
+
 module ServerHistoryActions
   private
 
@@ -535,6 +568,11 @@ class Server < Sinatra::Base
       progression: ProgressionRepository.new,
       wallet: WalletRepository.new
     )
+    set :inventory, InventoryRepository.new
+    set :mart, MartService.new(
+      inventory: InventoryRepository.new,
+      wallet: WalletRepository.new
+    )
     register Sinatra::Reloader
   end
 
@@ -551,6 +589,7 @@ class Server < Sinatra::Base
 
   register PokemonRoutes
   register TeamRoutes
+  register MartRoutes
   register BattleRoutes
   register HistoryRoutes
   register ErrorHandling
