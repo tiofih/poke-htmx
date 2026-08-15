@@ -81,6 +81,20 @@ class SeedScriptsTest < Minitest::Test
                  "re-executar a seed não duplica registros do usuário"
   end
 
+  def test_saldo_inicial_seeds_initial_balance
+    load_seed("saldo_inicial", "seed-shop")
+
+    assert_equal 200, TestDatabase.wallet_balance("seed-shop")
+  end
+
+  def test_saldo_inicial_is_idempotent
+    load_seed("saldo_inicial", "seed-shop")
+    load_seed("saldo_inicial", "seed-shop")
+
+    assert_equal 200, TestDatabase.wallet_balance("seed-shop"),
+                 "re-executar a seed não dobra o saldo"
+  end
+
   private
 
   def load_seed(name, user_id)

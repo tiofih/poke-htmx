@@ -29,17 +29,12 @@ namespace :db do # rubocop:disable Metrics/BlockLength
   desc "Populate database with seed data for manual validation"
   task :seed do
     $LOAD_PATH.unshift(File.expand_path("lib", __dir__))
-
     seed_name = ENV.fetch("SEED", nil)
     user_id = ENV.fetch("USER_ID", nil)
     db_url = ENV.fetch("DATABASE_URL", nil)
-
     if seed_name
       seed_file = "db/seeds/#{seed_name}.rb"
-      unless File.exist?(seed_file)
-        warn "Seed '#{seed_name}' não encontrada em #{seed_file}"
-        exit 1
-      end
+      abort "Seed '#{seed_name}' não encontrada em #{seed_file}" unless File.exist?(seed_file)
       load seed_file
       klass = Object.const_get(seed_name.split("_").map(&:capitalize).join)
       kwargs = { user_id: user_id || "seed-custom" }
@@ -53,7 +48,8 @@ namespace :db do # rubocop:disable Metrics/BlockLength
       TeamEvolucao.call(user_id: "seed-evol", **kwargs)
       TeamNiveisMistos.call(user_id: "seed-mixed", **kwargs)
       BatalhasHistorico.call(user_id: "seed-history", **kwargs)
-      puts "Seeds aplicadas: seed-basic, seed-evol, seed-mixed, seed-history."
+      SaldoInicial.call(user_id: "seed-shop", **kwargs)
+      puts "Seeds aplicadas: seed-basic, seed-evol, seed-mixed, seed-history, seed-shop."
     end
   end
 end
