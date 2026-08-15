@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluído — 2026-08-14 (`Item` + catálogo estático + `InventoryRepository` + `MartService` + rota `POST /mart/buy` + bloco Poke Mart no `team.erb` + seed de saldo inicial) |
-| Implementação | Pendente |
+| Implementação | Concluída — 2026-08-14, passos 1–5 verdes (suíte 459/1432, lint 0) |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -118,18 +118,18 @@ CREATE TABLE IF NOT EXISTS inventory (
 
 ### Rota `POST /mart/buy` + bloco no `team.erb`
 
-- `MartRoutes.register_buy` → `POST /mart/buy` → `MartService#buy(current_user,
+- **`MartRoutes.register_buy`** → `POST /mart/buy` → `MartService#buy(current_user,
   params[:item_name], params[:quantity].to_i)` → `@notice` + `@team` (e dados do
   Mart) → re-renderiza `team.erb` (`layout: false`, alvo `#team`).
 - `configure`: `set :mart, MartService.new(inventory: InventoryRepository.new,
-  wallet: settings.wallet)`.
+  wallet: settings.wallet)` e `set :inventory, InventoryRepository.new`.
 - `team.erb`: bloco **"Poke Mart"** (quando time não-vazio, ao lado do Poke
   Center) — para cada item do catálogo: `display_name` + preço + `form
-  hx-post="/mart/buy"` (hidden `item_name`, input `quantity` default 1, botão
+  hx-post="/mart/buy"` (hidden `item_name`, hidden `quantity` default 1, botão
   "Comprar", alvo `#team`); abaixo, **inventário** (nome + `N×`, quando `> 0`)
   e **saldo** ("Saldo: N"). `@notice` exibe o aviso do resultado da compra.
 - As ações que re-renderizam `team.erb` (`render_team`, `add_team_member`,
-  `remove_team_member`, `move_team_member`, `heal_team`, `buy_mart`) passam a
+  `remove_team_member`, `move_team_member`, `heal_team`, `buy_from_mart`) passam a
   popular `@catalog`, `@inventory` e `@balance` via um helper compartilhado
   (`mart_data` em `ServerTeamActions`) — **leitura local (PG), sem rede**.
 
@@ -243,13 +243,13 @@ CREATE TABLE IF NOT EXISTS inventory (
 
 | Passo | Escopo (red → green) | Verificação |
 | --- | --- | --- |
-| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `Sessao 0029: refinamento concluido — Eco-3 Poke Mart (Item + catalogo estatico, InventoryRepository, MartService, rota POST /mart/buy, bloco no team.erb, seed de saldo inicial), criterios e plano TDD fechados` |
-| 1 | **`Item` + catálogo:** `red` — `item_catalog_test.rb` novo (attributes; `ITEM_CATALOG` ≥ 3 itens consumable; `all`; `find` nil p/ desconhecido). `green` — `lib/item.rb` + `lib/item_catalog.rb` | suíte verde + lint 0, commit `Passo 1:` |
-| 2 | **Migração + `InventoryRepository`:** `red` — `schema_test.rb` (tabela `inventory` + PK `(user_id, item_name)`), `inventory_repository_test.rb` novo (`all` ordenado, `add` upsert/no-op, `count`, isolamento). `green` — `0029_add_inventory.sql` + `lib/inventory_repository.rb` + `TestDatabase` (`clear_team!` trunca `inventory`, helpers) | suíte verde + lint 0, commit `Passo 2:` |
-| 3 | **`MartService`:** `red` — `mart_service_test.rb` novo (injeção `inventory`/`wallet`/`catalog`): item inválido, quantidade inválida, compra com custo correto (add + spend), saldo insuficiente (nada). `green` — `lib/mart_service.rb` | suíte verde + lint 0, commit `Passo 3:` |
-| 4 | **Rota + UI:** `red` — `server_test.rb`: `POST /mart/buy` compra + cobra + incrementa + `@notice` + fragmento sem `<html>`; inválido/insuficiente → aviso sem compra; `team.erb` com bloco Poke Mart (catálogo/inventário/saldo) e `mart_data` nas re-renderizações. `green` — `MartRoutes.register_buy` + `set :mart` + helper `mart_data` + `team.erb` | suíte verde + lint 0, commit `Passo 4:` |
-| 5 | **Seed `saldo_inicial`:** `red` — `seed_scripts_test.rb`: `SaldoInicial.call` insere 200 (upsert, re-executar não dobra). `green` — `db/seeds/saldo_inicial.rb` + `Rakefile` (`db:seed` default + `SEED=saldo_inicial`) | suíte verde + lint 0, commit `Passo 5:` |
-| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-3 executado na 0029), `SESSIONS.md` (tabela 0029 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (item 7 / fase E seção 8 atendida), `draft-auto-battler.md` (Fase Eco — Eco-3 feita) | suíte verde + lint 0, commit `Passo 6:` |
+| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `ee55d1e` |
+| 1 | **`Item` + catálogo:** `red` — `item_catalog_test.rb` novo (attributes; `ITEM_CATALOG` ≥ 3 itens consumable; `all`; `find` nil p/ desconhecido). `green` — `lib/item.rb` + `lib/item_catalog.rb` | suíte verde + lint 0, commit `e3c9668` |
+| 2 | **Migração + `InventoryRepository`:** `red` — `schema_test.rb` (tabela `inventory` + PK `(user_id, item_name)`), `inventory_repository_test.rb` novo (`all` ordenado, `add` upsert/no-op, `count`, isolamento). `green` — `0029_add_inventory.sql` + `lib/inventory_repository.rb` + `TestDatabase` (`clear_team!` trunca `inventory`, helper `inventory_quantity`) | suíte verde + lint 0, commit `a9ee177` |
+| 3 | **`MartService`:** `red` — `mart_service_test.rb` novo (injeção `inventory`/`wallet`/`catalog`): item inválido, quantidade inválida (nulo e 0), compra com custo correto (add + spend), saldo insuficiente (nada). `green` — `lib/mart_service.rb` | suíte verde + lint 0, commit `1eff33a` |
+| 4 | **Rota + UI:** `red` — `server_test.rb` `ServerMartTest`: `POST /mart/buy` compra + cobra + incrementa + `@notice` + fragmento sem `<html>`; inválido/insuficiente → aviso sem compra; `team.erb` com bloco Poke Mart (catálogo/inventário/saldo) e `mart_data` nas re-renderizações. `green` — `MartRoutes.register_buy` + `set :mart`/`set :inventory` + helper `mart_data` + `buy_from_mart` + `team.erb` | suíte verde + lint 0, commit `cb78a39` |
+| 5 | **Seed `saldo_inicial`:** `red` — `seed_scripts_test.rb`: `SaldoInicial.call` insere 200 (upsert que sobrescreve, re-executar não dobra). `green` — `db/seeds/saldo_inicial.rb` + `Rakefile` (`db:seed` default com `seed-shop` + `SEED=saldo_inicial`) | suíte verde + lint 0, commit `ea9d3e9` |
+| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-3 implementado na 0029), `SESSIONS.md` (tabela 0029 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (item 7 / fase E seção 8 atendida), `draft-auto-battler.md` (Fase Eco — Eco-3 feita) | suíte verde + lint 0, commit `Passo 6:` |
 | — | **Fase 2 concluída** → **PARAR** e aguardar validação do usuário (fase 3). | |
 
 ## 7. Validação (executada pelo usuário)
