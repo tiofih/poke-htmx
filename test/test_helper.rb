@@ -25,7 +25,17 @@ module TestDatabase
   end
 
   def self.clear_team!
-    with_db { |connection| connection.exec("TRUNCATE team_pokemons, team_pokemon_progress, battles, wallet") }
+    tables = "team_pokemons, team_pokemon_progress, battles, wallet, inventory"
+    with_db { |connection| connection.exec("TRUNCATE #{tables}") }
+  end
+
+  def self.inventory_quantity(user_id, item_name)
+    with_db do |connection|
+      row = connection.exec_params(
+        "SELECT quantity FROM inventory WHERE user_id = $1 AND item_name = $2", [user_id, item_name]
+      ).first
+      row ? row["quantity"].to_i : 0
+    end
   end
 
   def self.clear_wallet!

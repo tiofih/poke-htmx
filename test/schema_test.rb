@@ -59,6 +59,18 @@ class SchemaTest < Minitest::Test
     assert_equal "NO", TestDatabase.table_column_info("team_pokemon_progress", "hp_current")["is_nullable"]
   end
 
+  def test_inventory_table_exists_with_required_columns_not_null
+    assert TestDatabase.table_exists?("inventory"), "expected table inventory to exist"
+    assert_equal "NO", TestDatabase.table_column_info("inventory", "user_id")["is_nullable"]
+    assert_equal "NO", TestDatabase.table_column_info("inventory", "item_name")["is_nullable"]
+    assert_equal "NO", TestDatabase.table_column_info("inventory", "quantity")["is_nullable"]
+  end
+
+  def test_inventory_has_composite_primary_key
+    assert TestDatabase.primary_key("inventory", "user_id"), "expected user_id in PK of inventory"
+    assert TestDatabase.primary_key("inventory", "item_name"), "expected item_name in PK of inventory"
+  end
+
   def test_clear_team_truncates_wallet
     TestDatabase.clear_team!
     with_wallet_row do

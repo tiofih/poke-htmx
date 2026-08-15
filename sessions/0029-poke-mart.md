@@ -147,7 +147,7 @@ CREATE TABLE IF NOT EXISTS inventory (
   (tabela `inventory` + PK `(user_id, item_name)`), `test/seed_scripts_test.rb`
   (`saldo_inicial`), `test/server_test.rb` (`POST /mart/buy` + bloco no `team.erb`).
 - `TestDatabase`: `clear_team!` trunca também `inventory`; helper
-  `inventory_rows(user_id)` / `inventory_quantity(user_id, item_name)`.
+  `inventory_quantity(user_id, item_name)` (leitura p/ asserts).
 
 ## 4. Critérios de aceite
 
