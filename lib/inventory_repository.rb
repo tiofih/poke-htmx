@@ -38,6 +38,20 @@ class InventoryRepository
     row ? row["quantity"].to_i : 0
   end
 
+  def use(user_id, item_name, quantity = 1)
+    current = count(user_id, item_name)
+    return current if invalid_quantity?(quantity) || current <= 0
+    return current unless ItemCatalog.find(item_name)
+
+    new_quantity = [current - quantity.to_i, 0].max
+    connection.exec_params(
+      "UPDATE inventory SET quantity = $3, updated_at = now() " \
+      "WHERE user_id = $1 AND item_name = $2",
+      [user_id, item_name, new_quantity]
+    )
+    new_quantity
+  end
+
   private
 
   def invalid_quantity?(quantity)

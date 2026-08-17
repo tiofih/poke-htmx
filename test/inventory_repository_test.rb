@@ -78,6 +78,59 @@ class InventoryCountTest < Minitest::Test
   end
 end
 
+class InventoryUseTest < Minitest::Test
+  include InventoryRepositoryTestHelpers
+
+  def test_use_decrements_quantity_and_returns_new_quantity
+    @repository.add("user-a", "potion", 3)
+
+    assert_equal 2, @repository.use("user-a", "potion", 1)
+    assert_equal 2, @repository.count("user-a", "potion")
+  end
+
+  def test_use_clamps_at_zero
+    @repository.add("user-a", "potion", 1)
+
+    assert_equal 0, @repository.use("user-a", "potion", 5)
+    assert_equal 0, @repository.count("user-a", "potion")
+  end
+
+  def test_use_defaults_to_one
+    @repository.add("user-a", "potion", 3)
+
+    assert_equal 2, @repository.use("user-a", "potion")
+  end
+
+  def test_use_without_row_returns_zero
+    assert_equal 0, @repository.use("user-a", "potion", 1)
+  end
+
+  def test_use_with_invalid_quantity_is_noop
+    @repository.add("user-a", "potion", 3)
+
+    assert_equal 3, @repository.use("user-a", "potion", 0)
+    assert_equal 3, @repository.use("user-a", "potion", nil)
+    assert_equal 3, @repository.use("user-a", "potion", -2)
+    assert_equal 3, @repository.count("user-a", "potion")
+  end
+
+  def test_use_item_outside_catalog_is_noop
+    @repository.add("user-a", "potion", 3)
+
+    assert_equal 0, @repository.use("user-a", "master-ball", 1)
+    assert_equal 3, @repository.count("user-a", "potion"), "estoque real intacto"
+  end
+
+  def test_use_decrements_only_own_user
+    @repository.add("user-a", "potion", 3)
+    @repository.add("user-b", "potion", 5)
+
+    assert_equal 2, @repository.use("user-a", "potion", 1)
+    assert_equal 2, @repository.count("user-a", "potion")
+    assert_equal 5, @repository.count("user-b", "potion")
+  end
+end
+
 class InventoryIsolationTest < Minitest::Test
   include InventoryRepositoryTestHelpers
 
