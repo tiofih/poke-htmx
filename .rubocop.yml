@@ -16,6 +16,11 @@ Layout/LineLength:
 Metrics/ModuleLength:
   Max: 120
 
+# Orçamento (sessão 0030, Eco-4-A): BattleEngine#initialize ganhou items:/item_policy: —
+# API fixada nos critérios (estoque do time A + estratégia injetável), sem rubocop:disable.
+Metrics/ParameterLists:
+  Max: 6
+
 Style/Documentation:
   Enabled: false
 

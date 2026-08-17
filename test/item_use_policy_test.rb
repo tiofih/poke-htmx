@@ -9,7 +9,7 @@ class ItemUsePolicyTest < Minitest::Test
 
   def member_with_hp(hp_current, hp_max = 100)
     build_pokemon(number: 1, name: "pikachu", types: ["electric"], hp: hp_max, speed: 90)
-            .new(hp_current: hp_current)
+      .new(hp_current: hp_current)
   end
 
   def policy(threshold: 0.5)

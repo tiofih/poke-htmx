@@ -17,6 +17,10 @@ class ItemUsePolicy
     pick_item(available_healing_items(stock), missing)&.name
   end
 
+  def heal_amount(item_name)
+    @catalog.find(item_name)&.heal_amount.to_i
+  end
+
   private
 
   def missing_hp(member)

@@ -2,6 +2,7 @@
 
 require_relative "battle_pokemon"
 require_relative "type_effectiveness"
+require_relative "item_use_policy"
 
 class BattleResult
   attr_reader :winner, :log, :rounds
@@ -75,16 +76,78 @@ module BattleActions
 
     type
   end
+
+  def spend_pp(attacker_team_index, attacker_index, attacker, move)
+    return unless move
+
+    used_index = attacker.moves.find_index { |m| m.name == move.name }
+    @teams[attacker_team_index][attacker_index] = attacker.use_move(used_index) if used_index
+  end
+
+  def apply_damage(target_team_index, target, damage)
+    target_index = @teams[target_team_index].index(target)
+    damaged = target.take_damage(damage)
+    @teams[target_team_index][target_index] = damaged
+    damaged
+  end
+
+  def log_entry(action, damaged, attacker, target)
+    entry = {
+      round: action[:round], attacker: action[:side],
+      move_type: action[:move_type], damage: action[:damage],
+      ko: damaged.fainted?
+    }
+    entry[:move] = action[:move].name if action[:move]
+    entry[:attacker_name] = attacker.name
+    entry[:target_name] = target.name
+    entry
+  end
+end
+
+module BattleItemActions
+  private
+
+  def item_use_for(attacker_team_index, attacker)
+    return nil unless attacker_team_index.zero?
+
+    item = @item_policy.decide(member: attacker, stock: @items)
+    item if item && @items[item].to_i.positive?
+  end
+
+  def item_action(attacker_team_index, attacker_index, attacker, item_name, round)
+    healed = [@item_policy.heal_amount(item_name), attacker.hp_max - attacker.hp_current].min
+    @teams[attacker_team_index][attacker_index] = attacker.heal(healed)
+    @items[item_name] -= 1
+    @items_used[item_name] = @items_used.fetch(item_name, 0) + 1
+    @log << {
+      round: round, attacker: attacker_team_index, action: :item,
+      item: item_name, healed: healed, attacker_name: attacker.name
+    }
+  end
+
+  def attack_action_for(attacker_team_index, attacker_index, attacker, round)
+    target_team_index = 1 - attacker_team_index
+    target = target_for(target_team_index)
+    action = attack_action(attacker, target).merge(round: round, side: attacker_team_index)
+    spend_pp(attacker_team_index, attacker_index, attacker, action[:move])
+    damaged = apply_damage(target_team_index, target, action[:damage])
+    @log << log_entry(action, damaged, attacker, target)
+  end
 end
 
 class BattleEngine
   include BattleActions
+  include BattleItemActions
 
-  def initialize(team_a:, team_b:, effectiveness: TypeEffectiveness.load, target_strategy: nil)
+  def initialize(team_a:, team_b:, effectiveness: TypeEffectiveness.load, target_strategy: nil,
+                 items: {}, item_policy: ItemUsePolicy.new)
     @teams = [team_a.dup, team_b.dup]
     @effectiveness = effectiveness
     @target_strategy = target_strategy || ->(team) { team.index(&:alive?) }
     @log = []
+    @items = items.dup
+    @items_used = {}
+    @item_policy = item_policy
   end
 
   def battle
@@ -108,7 +171,7 @@ class BattleEngine
     @rounds ||= 0
   end
 
-  attr_reader :log, :teams
+  attr_reader :log, :teams, :items, :items_used
 
   def replace_team_a(new_team)
     @teams[0] = new_team.dup
@@ -156,43 +219,17 @@ class BattleEngine
 
   def act(attacker_team_index, attacker_index, round)
     attacker = @teams[attacker_team_index][attacker_index]
-    target_team_index = 1 - attacker_team_index
-    target = target_for(target_team_index)
-    action = attack_action(attacker, target).merge(round: round, side: attacker_team_index)
-    spend_pp(attacker_team_index, attacker_index, attacker, action[:move])
-    damaged = apply_damage(target_team_index, target, action[:damage])
-    @log << log_entry(action, damaged, attacker, target)
+    item_name = item_use_for(attacker_team_index, attacker)
+    if item_name
+      item_action(attacker_team_index, attacker_index, attacker, item_name, round)
+    else
+      attack_action_for(attacker_team_index, attacker_index, attacker, round)
+    end
   end
 
   def target_for(target_team_index)
     target_index = @target_strategy.call(@teams[target_team_index])
     @teams[target_team_index][target_index]
-  end
-
-  def spend_pp(attacker_team_index, attacker_index, attacker, move)
-    return unless move
-
-    used_index = attacker.moves.find_index { |m| m.name == move.name }
-    @teams[attacker_team_index][attacker_index] = attacker.use_move(used_index) if used_index
-  end
-
-  def apply_damage(target_team_index, target, damage)
-    target_index = @teams[target_team_index].index(target)
-    damaged = target.take_damage(damage)
-    @teams[target_team_index][target_index] = damaged
-    damaged
-  end
-
-  def log_entry(action, damaged, attacker, target)
-    entry = {
-      round: action[:round], attacker: action[:side],
-      move_type: action[:move_type], damage: action[:damage],
-      ko: damaged.fainted?
-    }
-    entry[:move] = action[:move].name if action[:move]
-    entry[:attacker_name] = attacker.name
-    entry[:target_name] = target.name
-    entry
   end
 
   def alive_count(team_index)

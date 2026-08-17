@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "test_helper"
+require_relative "../lib/item_use_policy"
 
 module BattleEngineTestHelpers
   include TestSupport
@@ -317,5 +318,116 @@ class BattleEngineResultTest < Minitest::Test
     assert_equal "bulbasaur", engine.teams[1].first.name
     assert_equal 1, engine.rounds
     refute_empty engine.log
+  end
+end
+
+class BattleEngineItemTest < Minitest::Test
+  include BattleEngineTestHelpers
+
+  def potion_fighter(hp: 100, current: 30, speed: 5, attack: 50, defense: 100)
+    build_pokemon(number: 1, name: "pika", types: ["electric"], hp: hp, speed: speed, attack: attack, defense: defense)
+      .new(hp_current: current)
+  end
+
+  def weak_opponent
+    build_pokemon(number: 2, name: "opp", types: [], hp: 50, speed: 1, attack: 1, defense: 1)
+  end
+
+  def engine_with(items:, fighter: potion_fighter, opponent: weak_opponent, policy: ItemUsePolicy.new)
+    BattleEngine.new(
+      team_a: [fighter],
+      team_b: [opponent],
+      effectiveness: type_effectiveness,
+      items: items,
+      item_policy: policy
+    )
+  end
+
+  def test_uses_item_instead_of_attacking_when_low_hp
+    engine = engine_with(items: { "potion" => 2 })
+
+    engine.play_round
+
+    assert_equal({ "potion" => 1 }, engine.items, "estoque decrementa")
+    assert_equal({ "potion" => 1 }, engine.items_used, "uso registrado")
+    assert_equal 49, engine.teams[0].first.hp_current, "30 + 20 de cura, -1 do ataque do oponente"
+  end
+
+  def test_item_log_entry_has_item_action_shape
+    engine = engine_with(items: { "potion" => 2 })
+
+    engine.play_round
+
+    item_entry = engine.log.find { |entry| entry[:action] == :item }
+    refute_nil item_entry
+    assert_equal "potion", item_entry[:item]
+    assert_equal 20, item_entry[:healed]
+    assert_equal 1, item_entry[:round]
+    assert_equal 0, item_entry[:attacker]
+    assert_equal "pika", item_entry[:attacker_name]
+    refute item_entry.key?(:damage)
+    refute item_entry.key?(:target_name)
+    refute item_entry.key?(:ko)
+  end
+
+  def test_no_item_when_hp_is_full
+    engine = engine_with(items: { "potion" => 2 }, fighter: potion_fighter(current: 100))
+
+    engine.play_round
+
+    assert_empty engine.items_used
+    assert_equal({ "potion" => 2 }, engine.items)
+    refute(engine.log.any? { |entry| entry[:action] == :item })
+    assert engine.log.all? { |entry| entry.key?(:damage) }, "ataque normal"
+  end
+
+  def test_no_item_with_empty_stock
+    engine = engine_with(items: {})
+
+    engine.play_round
+
+    assert_empty engine.items_used
+    refute(engine.log.any? { |entry| entry[:action] == :item })
+  end
+
+  def test_no_pp_consumed_on_item_action
+    fighter = potion_fighter.new(moves: [build_move("thunder-shock", type: "electric", power: 40, pp: 30)])
+    engine = engine_with(items: { "potion" => 2 }, fighter: fighter)
+
+    engine.play_round
+
+    item_entry = engine.log.find { |entry| entry[:action] == :item }
+    refute_nil item_entry
+    assert_equal 30, engine.teams[0].first.moves.first.pp, "item nao consome PP"
+  end
+
+  def test_opponent_never_uses_item
+    opponent = weak_opponent.new(hp_current: 10)
+    engine = engine_with(items: { "potion" => 2 }, opponent: opponent)
+
+    engine.play_round
+
+    item_entries = engine.log.select { |entry| entry[:action] == :item }
+    assert_equal 1, item_entries.size, "so o time A usa item"
+    assert_equal 0, item_entries.first[:attacker]
+    assert_equal 1, engine.items["potion"], "so uma pocao consumida"
+  end
+
+  def test_item_heal_clamps_at_hp_max
+    fast_opponent = build_pokemon(number: 2, name: "opp", types: [], hp: 50, speed: 10, attack: 1, defense: 1)
+    relaxed = ItemUsePolicy.new(threshold: 0.95)
+    engine = engine_with(
+      items: { "potion" => 1 },
+      fighter: potion_fighter(current: 90),
+      opponent: fast_opponent,
+      policy: relaxed
+    )
+
+    engine.play_round
+
+    item_entry = engine.log.find { |entry| entry[:action] == :item }
+    assert_equal 11, item_entry[:healed], "cura o faltante (90 - 1 do oponente = 89, faltam 11)"
+    assert_equal 100, engine.teams[0].first.hp_current, "overheal clampado em hp_max"
+    assert_equal({ "potion" => 1 }, engine.items_used)
   end
 end
