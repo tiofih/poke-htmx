@@ -147,4 +147,36 @@ class BattlePokemonTest < Minitest::Test
     assert_equal 45, pikachu.stats.find { |stat| stat[:name] == "HP" }[:value]
     assert_equal 47, fighter.hp_max, "HP 45 + 2 = 47"
   end
+
+  def test_heal_returns_new_instance_with_increased_hp
+    fighter = BattlePokemon.from(pikachu).take_damage(10)
+
+    healed = fighter.heal(10)
+
+    assert_equal 45, healed.hp_current
+    assert_equal 35, fighter.hp_current, "instância original não muda"
+    refute_same healed, fighter
+  end
+
+  def test_heal_clamps_at_hp_max
+    fighter = BattlePokemon.from(pikachu).take_damage(5)
+
+    assert_equal 45, fighter.heal(100).hp_current, "overheal clampado em hp_max"
+  end
+
+  def test_heal_ignores_non_positive_values
+    fighter = BattlePokemon.from(pikachu).take_damage(10)
+
+    assert_equal 35, fighter.heal(0).hp_current
+    assert_equal 35, fighter.heal(-5).hp_current
+  end
+
+  def test_heal_can_revive_from_low_hp
+    fighter = BattlePokemon.from(pikachu).take_damage(40)
+
+    assert_predicate fighter, :alive?, "HP 5 ainda vivo"
+    healed = fighter.heal(40)
+    assert_equal 45, healed.hp_current
+    assert_predicate healed, :alive?
+  end
 end

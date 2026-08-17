@@ -58,6 +58,13 @@ class BattlePokemon < Dry::Struct
     new(hp_current: new_hp)
   end
 
+  def heal(amount)
+    return self if amount <= 0
+
+    new_hp = [hp_current + amount, hp_max].min
+    new(hp_current: new_hp)
+  end
+
   def stat(name)
     stats.find { |stat| stat[:name] == name }&.fetch(:value) || 1
   end
