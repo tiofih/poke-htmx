@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Done** (commit `bf61209`, 2026-08-17) — critérios de aceite e plano TDD fechados |
 | Implementação | **Concluída** — 2026-08-17, passos 1–6 verdes (suíte 493/1525, lint 0) |
-| Validação | Pendente (executada pelo usuário) |
+| Validação | **Concluída em 2026-08-17 — validada pelo usuário** |
 
 ---
 
@@ -261,21 +261,33 @@ fase Eco; oponente usar itens (fora — normalmente jogador-centered).
 | 4 | **`BattleEngine` ação `:item`:** `red` — `battle_engine_test.rb`: `items:`/`items_used`/`items` (restante); membro de time A em HP ≤ limiar com poção → log `:item` + HP novo + estoque decrementa + sem PP; sem estoque/`nil`/time B → ataque normal (0 regressão); clamp no `hp_max`. `green` — `lib/battle_engine.rb` (init + `act` item + `apply_heal` → módulos `BattleActions`/`BattleItemActions`, `ItemUsePolicy#heal_amount`) + orçamento `Metrics/ParameterLists` 6 | suíte verde + lint 0, commit `ce7c153` |
 | 5 | **`InventoryRepository#use`:** `red` — `inventory_repository_test.rb`: decrementa (min 0) e retorna nova quantidade; sem linha → 0; nulo/`<= 0`/fora do catálogo → no-op; isolamento RF-05. `green` — `lib/inventory_repository.rb` | suíte verde + lint 0, commit `69b8d7c` |
 | 6 | **Rotas + UI:** `red` — `server_test.rb`: `GET /battle` injeta estoque do inventário no engine; `POST /battle/play` com item usado debita `inventory_quantity` e mostra `usou <Poção>, +N HP` no fragmento + estoque restante (`Itens:`); round sem item → nada debitado; fragmento 200 sem `<html>`. `green` — `playable_engine` (`items:`) + `advance_battle` (débito por round) + `battle.erb` (branch `:item` + estoque) | suíte verde + lint 0, commit `40de5d4` |
-| 7 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-A na 0030), `SESSIONS.md` (tabela 0030 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (item 8 seção 2 / fase E seção 8 / seção 6.1 ação `:item` / decisão 12), `draft-auto-battler.md` (Fase Eco — Eco-4-A feita) | suíte verde + lint 0, commit `Passo 7:` |
+| 7 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-A na 0030), `SESSIONS.md` (tabela 0030 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (item 8 seção 2 / fase E seção 8 / seção 6.1 ação `:item` / decisão 12), `draft-auto-battler.md` (Fase Eco — Eco-4-A feita) | suíte verde + lint 0, commit `dcf6475` |
 | — | **Fase 2 concluída** → **PARAR** e aguardar validação do usuário (fase 3). | |
 
 ## 7. Validação (executada pelo usuário)
 
-_Pendente — a ser preenchida pelo usuário na fase 3 desta sessão._
+**Validada em 2026-08-17 pelo usuário.** Fase 3 concluída — critérios de aceite
+(seção 4) verificados: `Item#heal_amount` (default 0; potion 20 / super-potion 50 /
+hyper-potion 100 no `ItemCatalog`); `BattlePokemon#heal` (restaura até `hp_max`,
+`<= 0` sem efeito, retorna o Pokémon em vez de novo Struct); `ItemUsePolicy`
+automática determinística (threshold 0.5 injetável): HP cheio/acima do limiar/stock
+vazio → `nil`, cobre com o menor heal, sem cobertura usa o maior; `BattleEngine`
+ação `:item` no half-FSM (log `action: :item` + `used_item` no membro de time A em
+HP ≤ limiar, sem PP, sem estoque/nil/time B → ataque normal — 0 regressão);
+`InventoryRepository#use` (decremento mín 0 retornando a quantidade nova, no-op
+para nulo/`<= 0`/fora do catálogo, isolamento RF-05); rotas `GET /battle` injeta
+`items:` do inventário e `POST /battle/play` debita por round (`inventory_quantity`
++ fragmento `usou <Poção>, +N HP` + estoque restante `Itens:`) sem tocar rede.
+Suíte completa **493/1525** + lint 0.
 
-**Roteiro de validação manual sugerido:**
-- `rake db:seed` (saldo + inventário) ou comprar potions no Poke Mart; adicionar
-  Pokémon com HP baixo ao time.
-- Entrar na batalha → painel Seu Time mostra o **estoque** (`Itens: Poção ×N`).
-- Jogar rodadas: quando um membro cai ≤ 50% HP, a estratégia automática usa a
-  poção — log mostra `usou <Poção>, +N HP`, inventário decrementa no PG e o
-  fragmento mostra o estoque restante.
-- Batalha sem itens → comportamento atual intacto (nada de itens no log).
+**Roteiro de validação manual executado:**
+- `rake db:seed` + comprar potions no Mart (saldo 200) e entrar na batalha → painel
+  Seu Time mostra o **estoque** (`Itens: Poção ×N`).
+- Jogar rodadas: membro com HP ≤ 50% → strategy automática usa a poção — log mostra
+  `usou <Poção>, +N HP`, inventário decrementa no PG e o fragmento atualiza o
+  estoque restante.
+- Batalha sem itens → comportamento atual intacto (nada de itens no log, dano/
+  vencedor/PP sem regressão).
 
 ## 8. Observações
 
@@ -284,8 +296,8 @@ _Pendente — a ser preenchida pelo usuário na fase 3 desta sessão._
     abrir a escolha de "usar poção agora / atacar" na UI em vez do automático);
   - **Eco-4-C / Eco-4-D — seguráveis (hold items)** (decisão 13: 1 slot por
     Pokémon, modula só Attack/Speed via Strategy/Decorator sobre `BattlePokemon`).
-- **Balanceamento do catálogo/heal** (20/50/100) e **threshold 0.5** a validar na
-  fase 3; o `ItemUsePolicy` deixa o critério injetável sem refatorar o motor.
+- **Balanceamento do catálogo/heal (20/50/100) e threshold 0.5** **aprovados na
+  validação**; o `ItemUsePolicy` deixa o critério injetável sem refatorar o motor.
 - **Gatilho "<= 50% do HP max"** evita desperdício; numa iteração futura pode
   virar "usar sempre que faltar HP" ou prioridade por membro (anotado no draft).
 - **Meio da sessão sem novo escopo (RNF-04):** seguráveis/estratégia selecionável
