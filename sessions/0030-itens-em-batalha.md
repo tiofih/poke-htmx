@@ -4,8 +4,8 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | **Em andamento** — este arquivo fecha objetivo, escopo, critérios de aceite e plano TDD |
-| Implementação | Pendente |
+| Refinamento | **Done** (commit `bf61209`, 2026-08-17) — critérios de aceite e plano TDD fechados |
+| Implementação | **Em andamento** (TDD, fase 2) |
 | Validação | Pendente (executada pelo usuário) |
 
 ---

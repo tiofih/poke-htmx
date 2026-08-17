@@ -12,6 +12,13 @@ class ItemCatalogTest < Minitest::Test
     assert_equal "Pocao", item.display_name
     assert_equal "consumable", item.category
     assert_equal 20, item.price
+    assert_equal 0, item.heal_amount, "heal_amount default zero"
+  end
+
+  def test_item_accepts_heal_amount
+    item = Item.new(name: "potion", display_name: "Pocao", category: "consumable", price: 20, heal_amount: 20)
+
+    assert_equal 20, item.heal_amount
   end
 
   def test_item_catalog_has_at_least_three_consumable_items
@@ -30,6 +37,12 @@ class ItemCatalogTest < Minitest::Test
     refute_nil item
     assert_equal "potion", item.name
     assert_equal 20, item.price
+  end
+
+  def test_find_returns_item_with_heal_amount
+    assert_equal 20, ItemCatalog.find("potion").heal_amount
+    assert_equal 50, ItemCatalog.find("super-potion").heal_amount
+    assert_equal 100, ItemCatalog.find("hyper-potion").heal_amount
   end
 
   def test_find_returns_nil_for_unknown_name

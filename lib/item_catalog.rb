@@ -4,9 +4,9 @@ require_relative "item"
 
 class ItemCatalog
   ITEM_CATALOG = [
-    Item.new(name: "potion", display_name: "Pocao", category: "consumable", price: 20),
-    Item.new(name: "super-potion", display_name: "Super Pocao", category: "consumable", price: 50),
-    Item.new(name: "hyper-potion", display_name: "Hiper Pocao", category: "consumable", price: 100)
+    Item.new(name: "potion", display_name: "Pocao", category: "consumable", price: 20, heal_amount: 20),
+    Item.new(name: "super-potion", display_name: "Super Pocao", category: "consumable", price: 50, heal_amount: 50),
+    Item.new(name: "hyper-potion", display_name: "Hiper Pocao", category: "consumable", price: 100, heal_amount: 100)
   ].freeze
 
   def self.all
