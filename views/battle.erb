@@ -19,6 +19,14 @@
         </ul>
       <% end %>
     <% end %>
+    <% unless @engine.items.empty? %>
+      <p class="stock-items">Itens:
+        <% @engine.items.each do |name, quantity| %>
+          <% next unless quantity.to_i.positive? %>
+          <%= ItemCatalog.find(name)&.display_name || name %> ×<%= quantity %>
+        <% end %>
+      </p>
+    <% end %>
   </div>
 
   <div class="battle-pane">
@@ -42,8 +50,13 @@
   <% unless last_round.empty? %>
     <ul class="battle-log">
       <% last_round.each do |entry| %>
-        <% attacker_side = entry[:attacker].zero? ? "Seu Time" : "Oponente" %>
-        <li><%= attacker_side %>: <strong><%= entry[:attacker_name] %></strong> usou <%= entry[:move] || entry[:move_type] %> em <strong><%= entry[:target_name] %></strong>, <%= entry[:damage] %> de dano<%= entry[:ko] ? " — KO!" : "" %></li>
+        <% if entry[:action] == :item %>
+          <% display = ItemCatalog.find(entry[:item])&.display_name || entry[:item] %>
+          <li>Seu Time: <strong><%= entry[:attacker_name] %></strong> usou <%= display %>, +<%= entry[:healed] %> HP</li>
+        <% else %>
+          <% attacker_side = entry[:attacker].zero? ? "Seu Time" : "Oponente" %>
+          <li><%= attacker_side %>: <strong><%= entry[:attacker_name] %></strong> usou <%= entry[:move] || entry[:move_type] %> em <strong><%= entry[:target_name] %></strong>, <%= entry[:damage] %> de dano<%= entry[:ko] ? " — KO!" : "" %></li>
+        <% end %>
       <% end %>
     </ul>
   <% end %>

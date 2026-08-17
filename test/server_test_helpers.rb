@@ -16,6 +16,7 @@ module ServerTestHelpers
     @repository = TeamRepository.new
     @progression = ProgressionRepository.new
     @wallet = WalletRepository.new
+    @inventory = InventoryRepository.new
   end
 
   def pikachu_pokemon

@@ -945,6 +945,48 @@ class ServerBattleTest < Minitest::Test
     assert_empty last_response.body
   end
 
+  def test_battle_renders_remaining_stock_in_player_panel
+    @repository.add("user-a", pikachu_pokemon)
+    @inventory.add("user-a", "potion", 2)
+    @inventory.add("user-a", "super-potion", 1)
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Itens:"
+    assert_includes last_response.body, "Pocao"
+    assert_includes last_response.body, "×2"
+    assert_includes last_response.body, "×1"
+  end
+
+  def test_battle_play_debits_used_item_and_shows_heal_log
+    @repository.add("user-a", pikachu_pokemon)
+    member_id = @repository.all("user-a").first.id
+    @progression.update_hp("user-a", member_id, 200, 90)
+    @inventory.add("user-a", "potion", 2)
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "<html"
+    assert_includes last_response.body, "usou Pocao"
+    assert_match(/\+20 HP/, last_response.body)
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "uma pocao debitada"
+  end
+
+  def test_battle_play_without_item_use_does_not_debit_inventory
+    @repository.add("user-a", pikachu_pokemon)
+    @inventory.add("user-a", "potion", 2)
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "usou Pocao"
+    assert_equal 2, TestDatabase.inventory_quantity("user-a", "potion"), "nada debitado sem item usado"
+  end
+
   def test_battle_start_loads_into_panel_without_clearing_nav
     @repository.add("user-a", pikachu_pokemon)
 

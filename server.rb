@@ -215,8 +215,13 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     BattleEngine.new(
       team_a: player,
       team_b: opponent,
-      effectiveness: TypeEffectiveness.load(settings.api)
+      effectiveness: TypeEffectiveness.load(settings.api),
+      items: inventory_stock
     )
+  end
+
+  def inventory_stock
+    settings.inventory.all(current_user).to_h { |entry| [entry[:name], entry[:quantity]] }
   end
 
   def player_team(team)
@@ -274,6 +279,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
     was_in_progress = !@engine.finished?
     @engine.play_round
+    debit_used_items
     if was_in_progress && @engine.finished?
       record_finished_battle
       grant_finished_xp
@@ -286,6 +292,15 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     @money_gained = RewardRule.new.money_for(@engine.result) if @engine.finished?
     response.headers["HX-Trigger"] = "teamRefresh" if @engine.finished? && @evolution_news&.any?
     erb :battle, layout: false
+  end
+
+  def debit_used_items
+    round = @engine.rounds
+    @engine.log.each do |entry|
+      next unless entry[:round] == round && entry[:action] == :item
+
+      settings.inventory.use(current_user, entry[:item], 1)
+    end
   end
 
   def record_finished_battle
