@@ -362,12 +362,12 @@
    `WalletRepository#spend`; `HealService`; rota htmx `POST /team/heal` + bloco Poke
    Center no `team.erb`.
 
-   **Sessão 0029 (Eco-3 — Poke Mart) em implementação (2026-08-14, passos 1–5
-   verdes, suíte 459/1432, lint 0, aguardando validação):** catálogo estático
-   (`Item` + `ItemCatalog`, potion 20 / super-potion 50 / hyper-potion 100),
-   compra com dinheiro (`MartService` via `spend`), `InventoryRepository` (tabela
-   `inventory`), rota `POST /mart/buy` + bloco Poke Mart no `team.erb`, seed
-   `saldo_inicial`. Próxima após validar: **Eco-4 (itens em batalha)**.
+   **Sessão 0029 (Eco-3 — Poke Mart) concluída e validada em 2026-08-14**
+   (passos 1–5, suíte 459/1432, lint 0): catálogo estático (`Item` + `ItemCatalog`,
+   potion 20 / super-potion 50 / hyper-potion 100), compra com dinheiro
+   (`MartService` via `spend`), `InventoryRepository` (tabela `inventory`), rota
+   `POST /mart/buy` + bloco Poke Mart no `team.erb`, seed `saldo_inicial`.
+   Próxima: **Eco-4 (itens em batalha)**.
 2. Logo após decidir: **elencar o que fica e o que sai** da lista acima,
    definir ordem e transformar os escolhidos em **documentos de sessão** com
    critérios fechados e plano TDD (como a 0007).

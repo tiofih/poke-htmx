@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluído — 2026-08-14 (`Item` + catálogo estático + `InventoryRepository` + `MartService` + rota `POST /mart/buy` + bloco Poke Mart no `team.erb` + seed de saldo inicial) |
 | Implementação | Concluída — 2026-08-14, passos 1–5 verdes (suíte 459/1432, lint 0) |
-| Validação | Pendente (executada pelo usuário) |
+| Validação | **Concluída em 2026-08-14 — validada pelo usuário** |
 
 ---
 
@@ -249,12 +249,32 @@ CREATE TABLE IF NOT EXISTS inventory (
 | 3 | **`MartService`:** `red` — `mart_service_test.rb` novo (injeção `inventory`/`wallet`/`catalog`): item inválido, quantidade inválida (nulo e 0), compra com custo correto (add + spend), saldo insuficiente (nada). `green` — `lib/mart_service.rb` | suíte verde + lint 0, commit `1eff33a` |
 | 4 | **Rota + UI:** `red` — `server_test.rb` `ServerMartTest`: `POST /mart/buy` compra + cobra + incrementa + `@notice` + fragmento sem `<html>`; inválido/insuficiente → aviso sem compra; `team.erb` com bloco Poke Mart (catálogo/inventário/saldo) e `mart_data` nas re-renderizações. `green` — `MartRoutes.register_buy` + `set :mart`/`set :inventory` + helper `mart_data` + `buy_from_mart` + `team.erb` | suíte verde + lint 0, commit `cb78a39` |
 | 5 | **Seed `saldo_inicial`:** `red` — `seed_scripts_test.rb`: `SaldoInicial.call` insere 200 (upsert que sobrescreve, re-executar não dobra). `green` — `db/seeds/saldo_inicial.rb` + `Rakefile` (`db:seed` default com `seed-shop` + `SEED=saldo_inicial`) | suíte verde + lint 0, commit `ea9d3e9` |
-| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-3 implementado na 0029), `SESSIONS.md` (tabela 0029 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (item 7 / fase E seção 8 atendida), `draft-auto-battler.md` (Fase Eco — Eco-3 feita) | suíte verde + lint 0, commit `Passo 6:` |
+| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-3 implementado na 0029), `SESSIONS.md` (tabela 0029 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (item 7 / fase E seção 8 atendida), `draft-auto-battler.md` (Fase Eco — Eco-3 feita) | suíte verde + lint 0, commit `dce03dc` |
 | — | **Fase 2 concluída** → **PARAR** e aguardar validação do usuário (fase 3). | |
 
 ## 7. Validação (executada pelo usuário)
 
-Pendente — será preenchida na fase 3 após o feedback do usuário.
+**Validada em 2026-08-14 pelo usuário.** Fase 3 concluída — critérios de aceite
+(seção 4) verificados: `Item` (Dry::Struct com name/display_name/category/price) +
+catálogo estático `ItemCatalog` (potion 20 / super-potion 50 / hyper-potion 100,
+`all`/`find`); migração `0029_add_inventory.sql` (tabela `inventory`, PK
+`(user_id, item_name)`, quantity NOT NULL DEFAULT 0); `InventoryRepository`
+(`all` ordenado, `add` upsert/no-op, `count`, isolamento RF-05); `MartService`
+(compra via `WalletRepository#spend`, item inválido/qtd inválida/saldo
+insuficiente → aviso sem debitar); rota `POST /mart/buy` + bloco Poke Mart no
+`team.erb` (catálogo com Comprar, inventário `N×`, saldo) com `mart_data` nas
+re-renderizações; seed `saldo_inicial` (INITIAL_BALANCE 200, upsert que
+sobrescreve, idempotente) + `rake db:seed` aplica `seed-shop`. Suíte completa
+**459/1432** + lint 0.
+
+**Roteiro de validação manual executado:**
+- `db:setup` reidempotente; `rake db:seed` aplica `seed-shop` com saldo 200.
+- Adicionar Pokémon ao time → `GET /team` mostra o bloco **Poke Mart** (catálogo
+  com preços + botões Comprar, inventário vazio, saldo).
+- Comprar `potion ×2` → fragmento re-renderiza com aviso, saldo debitado
+  (200 → 160) e inventário mostra `potion — 2×`.
+- Compra com saldo insuficiente → aviso sem debitar (0 regressão).
+- Bloco Poke Center intacto ao lado do Mart (HP + Curar seguem funcionais).
 
 ## 8. Observações
 
@@ -262,11 +282,13 @@ Pendente — será preenchida na fase 3 após o feedback do usuário.
   como ação não-ofensiva no motor (Command/half-FSM), seguráveis escopo simples,
   estratégia selecionável (decisão 12); depois candidatos futuros (D4, D1, J1,
   J2, J3).
-- **Balanceamento do catálogo** (20/50/100) a validar com o usuário na fase 3 —
-  calibra a moeda da Eco-1 e o custo do Center (0.5/HP).
+- **Balanceamento do catálogo** (20/50/100) **aprovado na validação** — calibra a
+  moeda da Eco-1 e o custo do Center (0.5/HP); reavaliar se a Eco-4 mudar o valor
+  dos itens (poções em batalha).
 - **Valores de cura dos itens** ficam para a **Eco-4** (efeito em batalha); o
   `Item` desta sessão não carrega `heal_amount`.
-- **Seed `saldo_inicial`** atende a pendência anotada em 0027/0028; a **UI de
-  saldo permanente (navbar)** segue fora de escopo (saldo apenas no bloco do Mart).
-- **`spend`** (Eco-2/0028) é reutilizado pela compra — fecha o "gastar" do
+- **Seed `saldo_inicial`** (200) atende a pendência anotada em 0027/0028 e foi
+  aprovada na validação; a **UI de saldo permanente (navbar)** segue fora de
+  escopo (saldo apenas no bloco do Mart).
+- **`spend`** (Eco-2/0028) é reutilizado pela compra — fechou o "gastar" do
   circuito (Center + Mart).
