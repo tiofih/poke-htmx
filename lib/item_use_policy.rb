@@ -14,7 +14,7 @@ class ItemUsePolicy
     missing = missing_hp(member)
     return nil unless urgent?(member, missing)
 
-    pick_item(available_healing_items(stock), missing)&.name
+    assigned_item(member, stock) || pick_item(available_healing_items(stock), missing)&.name
   end
 
   def heal_amount(item_name)
@@ -22,6 +22,17 @@ class ItemUsePolicy
   end
 
   private
+
+  def assigned_item(member, stock)
+    name = member.assigned_item
+    return nil if name.to_s.empty?
+    return nil unless stock[name].to_i.positive?
+
+    item = @catalog.find(name)
+    return nil unless item && item.heal_amount.to_i.positive?
+
+    name
+  end
 
   def missing_hp(member)
     member.hp_max.to_i - member.hp_current.to_i

@@ -73,4 +73,59 @@ class ItemUsePolicyTest < Minitest::Test
     assert_equal "hyper-potion", policy.decide(member: member, stock: stock)
     assert_equal "hyper-potion", policy.decide(member: member, stock: stock)
   end
+
+  def test_decide_prefers_assigned_item_when_in_stock
+    member = member_with_hp(30).new(assigned_item: "potion")
+    stock = { "potion" => 1, "hyper-potion" => 1 }
+
+    assert_equal "potion", policy.decide(member: member, stock: stock)
+  end
+
+  def test_decide_prefers_assigned_item_even_when_pool_has_larger_heal
+    member = member_with_hp(10).new(assigned_item: "potion")
+    stock = { "potion" => 1, "hyper-potion" => 1 }
+
+    assert_equal "potion", policy.decide(member: member, stock: stock)
+  end
+
+  def test_decide_returns_nil_when_assigned_but_hp_full
+    member = member_with_hp(100).new(assigned_item: "potion")
+
+    assert_nil policy.decide(member: member, stock: { "potion" => 1 })
+  end
+
+  def test_decide_falls_back_to_pool_when_assigned_item_out_of_stock
+    member = member_with_hp(30).new(assigned_item: "potion")
+    stock = { "super-potion" => 1 }
+
+    assert_equal "super-potion", policy.decide(member: member, stock: stock)
+  end
+
+  def test_decide_falls_back_to_pool_when_assigned_item_out_of_catalog
+    member = member_with_hp(30).new(assigned_item: "master-ball")
+    stock = { "potion" => 1 }
+
+    assert_equal "potion", policy.decide(member: member, stock: stock)
+  end
+
+  def test_decide_ignores_assigned_item_with_no_healing_effect
+    berry = Item.new(name: "berry", display_name: "Berry", category: "consumable", price: 1, heal_amount: 0)
+    catalog = Struct.new(:extra_item) do
+      def find(name)
+        extra_item.name == name ? extra_item : ItemCatalog.find(name)
+      end
+    end.new(berry)
+    member = member_with_hp(30).new(assigned_item: "berry")
+    stock = { "berry" => 1, "potion" => 1 }
+
+    assert_equal "potion", ItemUsePolicy.new(catalog: catalog).decide(member: member, stock: stock)
+  end
+
+  def test_decide_is_deterministic_with_assigned_item
+    member = member_with_hp(30).new(assigned_item: "potion")
+    stock = { "potion" => 1, "hyper-potion" => 1 }
+
+    assert_equal "potion", policy.decide(member: member, stock: stock)
+    assert_equal "potion", policy.decide(member: member, stock: stock)
+  end
 end
