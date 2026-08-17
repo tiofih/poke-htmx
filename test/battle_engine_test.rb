@@ -430,4 +430,49 @@ class BattleEngineItemTest < Minitest::Test
     assert_equal 100, engine.teams[0].first.hp_current, "overheal clampado em hp_max"
     assert_equal({ "potion" => 1 }, engine.items_used)
   end
+
+  def test_uses_assigned_item_instead_of_pool_common
+    fighter = potion_fighter(current: 30).new(assigned_item: "potion")
+    engine = engine_with(items: { "potion" => 2, "hyper-potion" => 1 }, fighter: fighter)
+
+    engine.play_round
+
+    item_entry = engine.log.find { |entry| entry[:action] == :item }
+    refute_nil item_entry
+    assert_equal "potion", item_entry[:item], "item atribuido tem preferencia sobre o pool comum"
+    assert_equal({ "potion" => 1, "hyper-potion" => 1 }, engine.items)
+    assert_equal({ "potion" => 1 }, engine.items_used)
+  end
+
+  def test_uses_assigned_item_when_no_common_pool
+    fighter = potion_fighter(current: 30).new(assigned_item: "potion")
+    engine = engine_with(items: { "potion" => 3 }, fighter: fighter)
+
+    engine.play_round
+
+    item_entry = engine.log.find { |entry| entry[:action] == :item }
+    assert_equal "potion", item_entry[:item]
+    assert_equal 2, engine.items["potion"]
+  end
+
+  def test_falls_back_to_pool_common_when_assigned_item_out_of_stock
+    fighter = potion_fighter(current: 30).new(assigned_item: "potion")
+    engine = engine_with(items: { "hyper-potion" => 1 }, fighter: fighter)
+
+    engine.play_round
+
+    item_entry = engine.log.find { |entry| entry[:action] == :item }
+    refute_nil item_entry
+    assert_equal "hyper-potion", item_entry[:item], "sem estoque do atribuido, pool comum decide"
+  end
+
+  def test_assigned_item_is_not_burned_when_hp_full
+    fighter = potion_fighter(current: 100).new(assigned_item: "potion")
+    engine = engine_with(items: { "potion" => 2 }, fighter: fighter)
+
+    engine.play_round
+
+    assert_empty engine.items_used
+    assert_equal({ "potion" => 2 }, engine.items)
+  end
 end
