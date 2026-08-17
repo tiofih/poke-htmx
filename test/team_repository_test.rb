@@ -425,6 +425,74 @@ class TeamEvolveTest < Minitest::Test
   end
 end
 
+class TeamAssignItemTest < Minitest::Test
+  include TeamRepositoryTestHelpers
+
+  def test_pokemon_assigned_item_defaults_to_nil
+    add_pokemon("user-a", "pikachu", 25)
+
+    assert_nil @repository.all("user-a").first.assigned_item
+  end
+
+  def test_assign_item_persists_assignment_and_all_returns_it
+    add_pokemon("user-a", "pikachu", 25)
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+
+    @repository.assign_item("user-a", pikachu_id, "potion")
+
+    assert_equal "potion", @repository.all("user-a").first.assigned_item
+  end
+
+  def test_assign_item_clears_assignment_with_empty_item
+    add_pokemon("user-a", "pikachu", 25)
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    @repository.assign_item("user-a", pikachu_id, "potion")
+
+    @repository.assign_item("user-a", pikachu_id, "")
+
+    assert_nil @repository.all("user-a").first.assigned_item
+  end
+
+  def test_assign_item_clears_assignment_with_nil
+    add_pokemon("user-a", "pikachu", 25)
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    @repository.assign_item("user-a", pikachu_id, "potion")
+
+    @repository.assign_item("user-a", pikachu_id, nil)
+
+    assert_nil @repository.all("user-a").first.assigned_item
+  end
+
+  def test_assign_item_of_other_users_member_is_noop
+    add_pokemon("user-a", "pikachu", 25)
+    add_pokemon("user-b", "bulbasaur", 1)
+    bulbasaur_id = TestDatabase.team_id("bulbasaur", "user-b")
+
+    @repository.assign_item("user-a", bulbasaur_id, "potion")
+
+    assert_nil @repository.all("user-b").first.assigned_item
+  end
+
+  def test_assign_item_with_unknown_id_is_noop
+    add_pokemon("user-a", "pikachu", 25)
+
+    @repository.assign_item("user-a", "999999", "potion")
+
+    assert_equal 1, @repository.all("user-a").size
+    assert_nil @repository.all("user-a").first.assigned_item
+  end
+
+  def test_assign_item_survives_reorder
+    add_team("user-a", [["pikachu", 25], ["bulbasaur", 1]])
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    @repository.assign_item("user-a", pikachu_id, "potion")
+
+    @repository.move("user-a", pikachu_id, 2)
+
+    assert_equal "potion", @repository.all("user-a").find { |m| m.number == 25 }.assigned_item
+  end
+end
+
 class TeamLearnMoveTest < Minitest::Test
   include TeamRepositoryTestHelpers
 

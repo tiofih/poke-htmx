@@ -165,6 +165,14 @@ class TeamRepository
     )
   end
 
+  def assign_item(user_id, id, item_name)
+    item = item_name.to_s.empty? ? nil : item_name
+    connection.exec_params(
+      "UPDATE team_pokemons SET assigned_item = $3 WHERE id = $1 AND user_id = $2",
+      [id, user_id, item]
+    )
+  end
+
   def remove(user_id, id)
     removed = connection.exec_params(
       "DELETE FROM team_pokemons WHERE id = $1 AND user_id = $2 RETURNING slot",
@@ -193,16 +201,19 @@ class TeamRepository
   end
 
   def row_to_pokemon(row)
-    Pokemon.new(
+    Pokemon.new(**team_member_attributes(row), hp_max: row["hp_max"], hp_current: row["hp_current"])
+  end
+
+  def team_member_attributes(row)
+    {
       id: row["id"],
       name: row["name"],
       sprite: row["sprite"],
       number: row["number"],
       slot: row["slot"],
-      moves: parse_moves(row["moves"]),
-      hp_max: row["hp_max"],
-      hp_current: row["hp_current"]
-    )
+      assigned_item: row["assigned_item"],
+      moves: parse_moves(row["moves"])
+    }
   end
 
   def next_free_slot(user_id)

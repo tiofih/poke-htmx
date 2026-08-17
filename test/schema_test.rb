@@ -71,6 +71,12 @@ class SchemaTest < Minitest::Test
     assert TestDatabase.primary_key("inventory", "item_name"), "expected item_name in PK of inventory"
   end
 
+  def test_team_pokemons_has_assigned_item_column_nullable
+    column = TestDatabase.column_info("assigned_item")
+    refute_nil column, "expected column assigned_item to exist"
+    assert_equal "YES", column["is_nullable"]
+  end
+
   def test_clear_team_truncates_wallet
     TestDatabase.clear_team!
     with_wallet_row do
