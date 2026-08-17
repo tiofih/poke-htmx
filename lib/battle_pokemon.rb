@@ -16,20 +16,21 @@ class BattlePokemon < Dry::Struct
   attribute :hp_current, BC_HP
   attribute :moves, Types::Strict::Array.of(Move).default([].freeze)
   attribute :level, Types::Coercible::Integer.default(1)
+  attribute :assigned_item, Types::Coercible::String.optional.default(nil)
 
-  def self.from(pokemon, moves: [], level: 1)
-    new(**attributes_for(pokemon, moves: moves, level: level))
+  def self.from(pokemon, moves: [], level: 1, assigned_item: nil)
+    new(**attributes_for(pokemon, moves: moves, level: level, assigned_item: assigned_item))
   end
 
   class << self
     private
 
-    def attributes_for(pokemon, moves:, level:)
+    def attributes_for(pokemon, moves:, level:, assigned_item:)
       stats = scale_stats(pokemon.stats, level)
       hp = base_hp(stats)
       { number: pokemon.number, name: pokemon.name, sprite: pokemon.sprite.to_s,
         types: pokemon.types, stats: stats, hp_max: hp, hp_current: hp,
-        moves: moves, level: level }
+        moves: moves, level: level, assigned_item: assigned_item }
     end
 
     def scale_stats(stats, level)

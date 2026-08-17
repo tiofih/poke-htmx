@@ -141,6 +141,38 @@ class BattlePokemonTest < Minitest::Test
     assert_equal 1, BattlePokemon.from(without_hp, level: 8).hp_max
   end
 
+  def test_from_defaults_assigned_item_to_nil
+    fighter = BattlePokemon.from(pikachu)
+
+    assert_nil fighter.assigned_item
+  end
+
+  def test_from_preserves_assigned_item
+    pokemon = pikachu.new(assigned_item: "potion")
+
+    fighter = BattlePokemon.from(pokemon, assigned_item: pokemon.assigned_item)
+
+    assert_equal "potion", fighter.assigned_item
+  end
+
+  def test_from_without_assignment_keeps_default_nil
+    fighter = BattlePokemon.from(
+      pikachu, moves: [Move.new(name: "thunder-shock", type: "electric", power: 40, accuracy: 100, pp: 30)]
+    )
+
+    assert_nil fighter.assigned_item
+  end
+
+  def test_functional_updates_preserve_assigned_item
+    fighter = BattlePokemon.from(pikachu, assigned_item: "potion")
+
+    damaged = fighter.take_damage(10)
+    healed = damaged.heal(5)
+
+    assert_equal "potion", damaged.assigned_item
+    assert_equal "potion", healed.assigned_item
+  end
+
   def test_scaled_stats_do_not_mutate_original_pokemon
     fighter = BattlePokemon.from(pikachu, level: 5)
 
