@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Done** (commit `bf61209`, 2026-08-17) — critérios de aceite e plano TDD fechados |
-| Implementação | **Em andamento** (TDD, fase 2) |
+| Implementação | **Concluída** — 2026-08-17, passos 1–6 verdes (suíte 493/1525, lint 0) |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -254,14 +254,14 @@ fase Eco; oponente usar itens (fora — normalmente jogador-centered).
 
 | Passo | Escopo (red → green) | Verificação |
 | --- | --- | --- |
-| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `Sessao 0030: refinamento concluido — Eco-4-A (pocoes como acao nao-ofensiva no motor em batalha, ItemUsePolicy automatico, decisoes 12/13 escopadas), criterios e plano TDD fechados` |
-| 1 | **`Item#heal_amount` + catálogo:** `red` — `item_catalog_test.rb` ampliado: `Item.new(...)` aceita `heal_amount`; `find("potion")` tem `heal_amount 20`, `super-potion` 50, `hyper-potion` 100. `green` — `lib/item.rb` (+attribute) + `lib/item_catalog.rb` (valores) | suíte verde + lint 0, commit `Passo 1:` |
-| 2 | **`BattlePokemon#heal`:** `red` — `battle_pokemon_test.rb`: heal funcional com clamp em `hp_max`, `<= 0` sem efeito, original intacto. `green` — `lib/battle_pokemon.rb` | suíte verde + lint 0, commit `Passo 2:` |
-| 3 | **`ItemUsePolicy`:** `red` — `item_use_policy_test.rb` novo (puro): HP cheio/acima do limiar/stock vazio → `nil`; cobre com menor heal; sem cobertura usa maior heal; só itens do catálogo com heal>0 em stock>0; threshold injetável. `green` — `lib/item_use_policy.rb` | suíte verde + lint 0, commit `Passo 3:` |
-| 4 | **`BattleEngine` ação `:item`:** `red` — `battle_engine_test.rb`: `items:`/`items_used`/`items` (restante); membro de time A em HP ≤ limiar com poção → log `:item` + HP novo + estoque decrementa + sem PP; sem estoque/`nil`/time B → ataque normal (0 regressão); clamp no `hp_max`. `green` — `lib/battle_engine.rb` (init + `act` item + `apply_heal`) | suíte verde + lint 0, commit `Passo 4:` |
-| 5 | **`InventoryRepository#use`:** `red` — `inventory_repository_test.rb`: decrementa (min 0) e retorna nova quantidade; sem linha → 0; nulo/`<= 0`/fora do catálogo → no-op; isolamento RF-05. `green` — `lib/inventory_repository.rb` | suíte verde + lint 0, commit `Passo 5:` |
-| 6 | **Rotas + UI:** `red` — `server_test.rb`: `GET /battle` injeta estoque do inventário no engine; `POST /battle/play` com item usado debita `inventory_quantity` e mostra `usou <Poção>, +N HP` no fragmento + estoque restante (`Itens:`); round sem item → nada debitado; fragmento 200 sem `<html>`. `green` — `playable_engine` (`items:`) + `advance_battle` (débito por round) + `lib/battle_engine.rb` exposição `items`/`items_used` + `views/battle.erb` | suíte verde + lint 0, commit `Passo 6:` |
-| 7 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-A na 0030), `SESSIONS.md` (tabela 0030 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (item 8 seção 2 — Eco-4-A; seção 6.1 ação `:item`), `draft-auto-battler.md` (Fase Eco — Eco-4-A) | suíte verde + lint 0, commit `Passo 7:` |
+| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `bf61209` |
+| 1 | **`Item#heal_amount` + catálogo:** `red` — `item_catalog_test.rb` ampliado: `Item.new(...)` aceita `heal_amount`; `find("potion")` tem `heal_amount 20`, `super-potion` 50, `hyper-potion` 100. `green` — `lib/item.rb` (+attribute) + `lib/item_catalog.rb` (valores) | suíte verde + lint 0, commit `c2eeb48` |
+| 2 | **`BattlePokemon#heal`:** `red` — `battle_pokemon_test.rb`: heal funcional com clamp em `hp_max`, `<= 0` sem efeito, original intacto. `green` — `lib/battle_pokemon.rb` | suíte verde + lint 0, commit `5705f4c` |
+| 3 | **`ItemUsePolicy`:** `red` — `item_use_policy_test.rb` novo (puro): HP cheio/acima do limiar/stock vazio → `nil`; cobre com menor heal; sem cobertura usa maior heal; só itens do catálogo com heal>0 em stock>0; threshold injetável. `green` — `lib/item_use_policy.rb` | suíte verde + lint 0, commit `b4f7c8e` |
+| 4 | **`BattleEngine` ação `:item`:** `red` — `battle_engine_test.rb`: `items:`/`items_used`/`items` (restante); membro de time A em HP ≤ limiar com poção → log `:item` + HP novo + estoque decrementa + sem PP; sem estoque/`nil`/time B → ataque normal (0 regressão); clamp no `hp_max`. `green` — `lib/battle_engine.rb` (init + `act` item + `apply_heal` → módulos `BattleActions`/`BattleItemActions`, `ItemUsePolicy#heal_amount`) + orçamento `Metrics/ParameterLists` 6 | suíte verde + lint 0, commit `ce7c153` |
+| 5 | **`InventoryRepository#use`:** `red` — `inventory_repository_test.rb`: decrementa (min 0) e retorna nova quantidade; sem linha → 0; nulo/`<= 0`/fora do catálogo → no-op; isolamento RF-05. `green` — `lib/inventory_repository.rb` | suíte verde + lint 0, commit `69b8d7c` |
+| 6 | **Rotas + UI:** `red` — `server_test.rb`: `GET /battle` injeta estoque do inventário no engine; `POST /battle/play` com item usado debita `inventory_quantity` e mostra `usou <Poção>, +N HP` no fragmento + estoque restante (`Itens:`); round sem item → nada debitado; fragmento 200 sem `<html>`. `green` — `playable_engine` (`items:`) + `advance_battle` (débito por round) + `battle.erb` (branch `:item` + estoque) | suíte verde + lint 0, commit `40de5d4` |
+| 7 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-A na 0030), `SESSIONS.md` (tabela 0030 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (item 8 seção 2 / fase E seção 8 / seção 6.1 ação `:item` / decisão 12), `draft-auto-battler.md` (Fase Eco — Eco-4-A feita) | suíte verde + lint 0, commit `Passo 7:` |
 | — | **Fase 2 concluída** → **PARAR** e aguardar validação do usuário (fase 3). | |
 
 ## 7. Validação (executada pelo usuário)

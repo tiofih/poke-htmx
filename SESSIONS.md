@@ -43,11 +43,14 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 **Sessão 0027 (Eco-1), 0028 (Eco-2 — Poke Center) e 0029 (Eco-3 — Poke Mart)
 concluídas e validadas em 2026-08-14** (0029: suíte 459/1432, lint 0).
 
+**Sessão 0030 (Eco-4-A — itens em batalha) em implementação (fase 2, passos 1–6
+verdes — suíte 493/1525, lint 0), aguardando validação do usuário.**
+
 Próxima sessão conforme roadmap:
 
-> **Fase Eco**: **Eco-4** (itens em batalha — poções como ação não-ofensiva no
-> motor, seguráveis escopo simples, estratégia selecionável) → candidatos futuros
-> (D4, D1, J1, J2, J3).
+> **Fase Eco**: **Eco-4-B** (estratégia de itens selecionável — 2ª parte da decisão
+> 12) e **seguráveis** (decisão 13, escopo simples) → candidatos futuros (D4, D1,
+> J1, J2, J3).
 
 ## Progresso das sessões
 
@@ -82,6 +85,7 @@ Próxima sessão conforme roadmap:
 | 0027 | Eco-1: moeda pós-batalha — `wallet` + `RewardRule#money_for` + `WalletRepository` + grant no hook `:finished` + aviso no `battle.erb` | Concluída | Done (passos 1–5, suíte 386/1216, lint 0, validado em 2026-08-14) |
 | 0028 | Eco-2: Poke Center — HP persistente por membro + `HealCostPolicy` proporcional ao HP faltante + `WalletRepository#spend` + `HealService` + `POST /team/heal` + carryover de HP p/ a próxima batalha | Concluída | Done (passos 1–8, suíte 428/1333, lint 0, validado em 2026-08-14) |
 | 0029 | Eco-3: Poke Mart — `Item` + catálogo estático + `InventoryRepository` + `MartService` + `POST /mart/buy` + bloco Poke Mart no `team.erb` + seed `saldo_inicial` | Concluída | Done (passos 1–5, suíte 459/1432, lint 0, validado em 2026-08-14) |
+| 0030 | Eco-4-A: itens em batalha — `Item#heal_amount` + `BattlePokemon#heal` + `ItemUsePolicy` automática (decisão 12) + `BattleEngine` ação `:item` (half-FSM) + `InventoryRepository#use` + `POST /battle/play` debitando + `battle.erb` (branch `:item` + estoque) | Implementação | Em andamento (passos 1–6 verdes, suíte 493/1525, lint 0 — fase 2) |
 
 ## Estrutura do arquivo de sessão
 
