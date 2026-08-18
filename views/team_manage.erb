@@ -44,6 +44,25 @@
       <button type="submit">Salvar item</button>
     </form>
     <form
+        hx-post="/team/<%= poke.id %>/held-item"
+        hx-target="#team"
+        hx-swap="innerHTML">
+      <label>
+        Segurável:
+        <select name="item_name">
+          <option value=""<%= poke.held_item.to_s.empty? ? " selected" : "" %>>Nenhum</option>
+          <% @inventory.to_a.each do |entry| %>
+            <% item = ItemCatalog.find(entry[:name]) %>
+            <% next unless item && item.category == "held" %>
+            <option value="<%= item.name %>"<%= poke.held_item == item.name ? " selected" : "" %>>
+              <%= item.display_name %> ×<%= entry[:quantity] %>
+            </option>
+          <% end %>
+        </select>
+      </label>
+      <button type="submit">Salvar segurável</button>
+    </form>
+    <form
         hx-post="/team/<%= poke.id %>/move"
         hx-target="#team"
         hx-swap="innerHTML">

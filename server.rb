@@ -237,6 +237,49 @@ module ServerTeamItemActions
   end
 end
 
+module ServerTeamHeldActions
+  private
+
+  def save_team_held_item
+    team_manage_data
+    @inventory = settings.inventory.all(current_user)
+    assign_member_held_item(team_member_for_item)
+    erb :team_manage, layout: false
+  end
+
+  def team_manage_data
+    @team = settings.team.all(current_user)
+    @available_moves = moves_for_team
+  end
+
+  def team_member_for_item
+    @team.find { |poke| poke.id.to_s == params[:id].to_s }
+  end
+
+  def assign_member_held_item(member)
+    return unless member
+
+    item_name = params[:item_name].to_s
+    if item_name.empty?
+      settings.team.assign_held_item(current_user, member.id, nil)
+    else
+      assign_held_catalog_item(member, item_name)
+    end
+    @team = settings.team.all(current_user)
+  end
+
+  def assign_held_catalog_item(member, item_name)
+    item = ItemCatalog.find(item_name)
+    unless item && item.category == "held" &&
+           settings.inventory.count(current_user, item_name).positive?
+      @notice = "Item não disponível para equipar."
+      return
+    end
+
+    settings.team.assign_held_item(current_user, member.id, item_name)
+  end
+end
+
 module ServerBattleActions # rubocop:disable Metrics/ModuleLength
   private
 
@@ -283,7 +326,8 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
       detail,
       moves: battle_moves_for(member),
       level: member_level(member),
-      assigned_item: member.assigned_item
+      assigned_item: member.assigned_item,
+      held_item: member.held_item
     )
   end
 
@@ -398,7 +442,8 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
         number: member.number, name: member.name, sprite: member.sprite,
         types: fighter.types, stats: fighter.stats,
         hp_max: fighter.hp_max, hp_current: fighter.hp_current,
-        moves: fighter.moves, level: member_level(member)
+        moves: fighter.moves, level: member_level(member),
+        assigned_item: fighter.assigned_item, held_item: fighter.held_item
       )
     end
     @engine.replace_team_a(new_team)
@@ -504,6 +549,7 @@ module TeamRoutes
     register_move_member(app)
     register_save_moves(app)
     register_save_item(app)
+    register_save_held_item(app)
   end
 
   def self.register_team(app)
@@ -536,6 +582,10 @@ module TeamRoutes
 
   def self.register_save_item(app)
     app.post("/team/:id/item") { save_team_item }
+  end
+
+  def self.register_save_held_item(app)
+    app.post("/team/:id/held-item") { save_team_held_item }
   end
 end
 
@@ -658,6 +708,7 @@ class Server < Sinatra::Base
   include ServerListActions
   include ServerTeamActions
   include ServerTeamItemActions
+  include ServerTeamHeldActions
   include ServerBattleActions
   include ServerHistoryActions
 

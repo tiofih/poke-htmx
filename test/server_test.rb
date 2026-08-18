@@ -578,6 +578,116 @@ class ServerTeamItemTest < Minitest::Test
   end
 end
 
+class ServerTeamHeldItemTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def test_post_team_held_item_assigns_held_item_to_member
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "choice-band", 1)
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal "choice-band", @repository.all("user-a").first.held_item
+    refute_includes last_response.body, "<html"
+  end
+
+  def test_post_team_held_item_rerenders_manage_fragment_with_selection
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "choice-band", 1)
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Salvar segurável"
+    assert_includes last_response.body, 'value="choice-band" selected'
+  end
+
+  def test_post_team_held_item_with_empty_name_clears_assignment
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @repository.assign_held_item("user-a", pikachu_id, "choice-band")
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_nil @repository.all("user-a").first.held_item
+    assert_includes last_response.body, 'value="" selected'
+  end
+
+  def test_post_team_held_item_without_inventory_shows_notice_and_does_not_assign
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_nil @repository.all("user-a").first.held_item
+    assert_includes last_response.body, "Item não disponível para equipar."
+  end
+
+  def test_post_team_held_item_with_consumable_rejected
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 1)
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "potion" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_nil @repository.all("user-a").first.held_item
+    assert_includes last_response.body, "Item não disponível para equipar."
+  end
+
+  def test_post_team_held_item_of_other_users_member_is_noop
+    @repository.add("user-b", bulbasaur_pokemon)
+    @inventory.add("user-b", "choice-band", 1)
+    bulbasaur_id = @repository.all("user-b").first.id
+
+    post "/team/#{bulbasaur_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_nil @repository.all("user-b").first.held_item
+  end
+
+  def test_team_manage_renders_held_item_select_with_inventory_and_current_selection
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @repository.assign_held_item("user-a", pikachu_id, "choice-scarf")
+    @inventory.add("user-a", "choice-band", 2)
+    @inventory.add("user-a", "choice-scarf", 1)
+
+    PokeApiStub.with_available_move_names(%w[growl]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Segurável:"
+    assert_includes last_response.body, "Salvar segurável"
+    assert_includes last_response.body, 'value="choice-band"'
+    assert_includes last_response.body, 'value="choice-scarf" selected'
+    refute_includes last_response.body, 'name="held_item"', "select de seguravel usa item_name"
+  end
+
+  def test_team_manage_consumable_select_does_not_show_held_items
+    @repository.add("user-a", pikachu_pokemon)
+    @inventory.add("user-a", "choice-band", 1)
+    @inventory.add("user-a", "potion", 2)
+
+    PokeApiStub.with_available_move_names(%w[growl]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'name="item_name"'
+    assert_includes last_response.body, "Pocao"
+    assert_equal 1, last_response.body.scan("Choice Band").size,
+                 "held aparece apenas no select de seguravel, nao no de consumivel"
+  end
+end
+
 class ServerDetailTest < Minitest::Test
   include ServerTestHelpers
   include TestSupport
@@ -1617,6 +1727,70 @@ class ServerBattleItemTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "usou Pocao"
     assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "item atribuido debitado no round"
+  end
+end
+
+class ServerBattleHeldItemTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+  include ServerBattleTestHelpers
+
+  def shield_opponent
+    Pokemon.new(
+      name: "shuckle",
+      sprite: "https://example.com/shuckle.png",
+      number: 213,
+      types: [],
+      stats: [
+        { name: "HP", value: 200 },
+        { name: "Attack", value: 1 },
+        { name: "Defense", value: 100 },
+        { name: "Speed", value: 1 }
+      ]
+    )
+  end
+
+  def test_battle_panel_shows_held_item_on_player_member
+    @repository.add("user-a", pikachu_pokemon)
+    member_id = @repository.all("user-a").first.id
+    @repository.assign_held_item("user-a", member_id, "choice-band")
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_includes last_response.body, "segura: Choice Band"
+  end
+
+  def test_battle_play_does_not_debit_held_item_inventory
+    @repository.add("user-a", pikachu_pokemon)
+    member_id = @repository.all("user-a").first.id
+    @repository.assign_held_item("user-a", member_id, "choice-band")
+    @inventory.add("user-a", "choice-band", 3)
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 3, TestDatabase.inventory_quantity("user-a", "choice-band"),
+                 "held item nao é debitado em rodada"
+    refute_includes last_response.body, "<html"
+  end
+
+  def test_battle_play_with_held_item_does_not_consume_on_finish
+    @repository.add("user-a", pikachu_pokemon)
+    member_id = @repository.all("user-a").first.id
+    @repository.assign_held_item("user-a", member_id, "choice-band")
+    @inventory.add("user-a", "choice-band", 2)
+
+    stub_battle_start do
+      60.times do
+        post "/battle/play", {}, user_session("user-a")
+        break if last_response.body.include?("Fim de batalha")
+      end
+    end
+
+    assert_equal 2, TestDatabase.inventory_quantity("user-a", "choice-band"),
+                 "held item nao é debitado no fim da batalha"
   end
 end
 
