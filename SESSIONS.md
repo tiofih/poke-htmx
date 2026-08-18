@@ -50,12 +50,15 @@ concluídas e validadas em 2026-08-14** (0029: suíte 459/1432, lint 0).
 2026-08-18** (0031: suíte 524/1599, lint 0 — estratégia selecionável via
 atribuição de item por membro, decisão 12 — 2ª parte).
 
-**Sessão 0032 (Eco-4-C — seguráveis/hold items) em implementação (fase 2,
-passos 1–6 verdes — suíte 557/1688, lint 0), aguardando validação do usuário.**
+**Sessão 0032 (Eco-4-C — seguráveis/hold items) concluída e validada em
+2026-08-18** (0032: suíte 559/1696, lint 0 — 1 slot/membro, modula Attack/Speed,
+decisão 13; equipa se tiver, não consome).
 
-Próxima sessão conforme roadmap:
+**Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Próxima sessão conforme
+roadmap:
 
-> **Fase Eco concluída (Eco-1..4)** → candidatos futuros (D4, D1, J1, J2, J3).
+> Candidatos futuros (D4, D1, J1, J2, J3) — o J2 (personalização) ampliará a UI de
+> equipamento.
 
 ## Progresso das sessões
 
@@ -92,7 +95,7 @@ Próxima sessão conforme roadmap:
 | 0029 | Eco-3: Poke Mart — `Item` + catálogo estático + `InventoryRepository` + `MartService` + `POST /mart/buy` + bloco Poke Mart no `team.erb` + seed `saldo_inicial` | Concluída | Done (passos 1–5, suíte 459/1432, lint 0, validado em 2026-08-14) |
 | 0030 | Eco-4-A: itens em batalha — `Item#heal_amount` + `BattlePokemon#heal` + `ItemUsePolicy` automática (decisão 12) + `BattleEngine` ação `:item` (half-FSM) + `InventoryRepository#use` + `POST /battle/play` debitando + `battle.erb` (branch `:item` + estoque) | Concluída | Done (passos 0–7, suíte 493/1525, lint 0, validado em 2026-08-17) |
 | 0031 | Eco-4-B: item atribuído por membro — `assigned_item` persistido (0031_add_assigned_item) + `TeamRepository#assign_item` + `BattlePokemon#assigned_item` + `ItemUsePolicy` prefere o atribuído (decisão 12 — 2ª parte) + `BattleEngine` usa o atribuído + `POST /team/:id/item` + select no `team_manage.erb` + `battle.erb` (`carrega:`) | Concluída | Done (passos 0–6, suíte 524/1599, lint 0, validado em 2026-08-18) |
-| 0032 | Eco-4-C: seguráveis/hold items — `Item` `stat`/`multiplier` + `ItemCatalog.can_hold` (choice-band/scarf, decisão 13) + coluna `held_item` (0032_add_held_item) + `TeamRepository#assign_held_item` + `BattlePokemon#held_item` + modulação de `stat` (motor sem mudança) + `POST /team/:id/held-item` + select "Segurável:" no `team_manage.erb` + `battle.erb` (`segura:`) | Implementação | Em andamento (passos 1–6 verdes, suíte 557/1688, lint 0 — fase 2) |
+| 0032 | Eco-4-C: seguráveis/hold items — `Item` `stat`/`multiplier` + `ItemCatalog.can_hold` (choice-band/scarf, decisão 13) + coluna `held_item` (0032_add_held_item) + `TeamRepository#assign_held_item` + `BattlePokemon#held_item` + modulação de `stat` (motor sem mudança) + `POST /team/:id/held-item` + select "Segurável:" no `team_manage.erb` + `battle.erb` (`segura:`) + seed `team_duelo` | Concluída | Done (passos 0–6 + seed, suíte 559/1696, lint 0, validado em 2026-08-18) |
 
 ## Estrutura do arquivo de sessão
 

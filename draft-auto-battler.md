@@ -383,14 +383,15 @@
    #decide` prefere o item atribuído com fallback ao pool comum (decisão 12 — 2ª
    parte), `POST /team/:id/item` + select no `team_manage.erb`, `battle.erb`
    (`carrega: <display>`).
-   **Sessão 0032 (Eco-4-C — seguráveis/hold items) em fase 2 (2026-08-18, passos
-   1–6, suíte 557/1688, lint 0, aguardando validação do usuário):** `Item`
+   **Sessão 0032 (Eco-4-C — seguráveis/hold items) concluída e validada em
+   2026-08-18 (passos 0–6 + seed, suíte 559/1696, lint 0):** `Item`
    `stat`/`multiplier` + `ItemCatalog.can_hold` (choice-band Attack ×1.5 /
    choice-scarf Speed ×1.5, preço 80), coluna `held_item` (0032_add_held_item),
    `TeamRepository#assign_held_item` (posse exigida, não consome), `BattlePokemon
    #held_item` com modulação de `stat` via **Strategy/Decorator** (motor sem
    mudança), `POST /team/:id/held-item` + select "Segurável:" no `team_manage.erb`,
-   `battle.erb` (`segura: <display>`).
+   `battle.erb` (`segura: <display>`), seed `team_duelo` (forte x fraco com saldo
+   p/ comprar).
    **Fase Eco concluída (Eco-1..4)** → próximos: candidatos futuros (D4, D1, J1,
    J2, J3) — J2 (personalização) ampliará a UI de equipamento.
 2. Logo após decidir: **elencar o que fica e o que sai** da lista acima,

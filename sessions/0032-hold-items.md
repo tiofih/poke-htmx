@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Done** (commit `82b4d4e`) — critérios de aceite e plano TDD fechados |
 | Implementação | **Concluída** — 2026-08-18, passos 1–6 verdes (suíte 557/1688, lint 0) |
-| Validação | Pendente (fase 3 — executada pelo usuário) |
+| Validação | **Concluída em 2026-08-18 — validada pelo usuário** |
 
 ---
 
@@ -232,12 +232,60 @@ item, se cada um tiver posse); modulação de outros stats (Sp.Atk/Defensa/etc).
 | 3 | **`BattlePokemon#held_item` + modulação de `stat`:** `red` — `battle_pokemon_test`: attribute default `nil`, `from(held_item:)` repassa, `stat` modula Attack/Speed (round), outros stats intactos, preserva em `take_damage`/`heal`. `green` — `lib/battle_pokemon.rb` (`stat` decorator + attribute) | suíte verde + lint 0, commit `e486a5e` |
 | 4 | **Motor modulado via `stat` (sem tocar o engine):** `red` — `battle_engine_test`: membro time A com choice-band causa dano maior que sem; com choice-scarf age antes (asserts de log/ordem/dano); time B sem segurável (0 regressão). `green` — asserts + ajustes (engine já orquestra via `stat`) | suíte verde + lint 0, commit `d87119d` |
 | 5 | **Rota + UI + batalha web:** `red` — `server_test`: `POST /team/:id/held-item` (atribui/limpa/sem posse → notice), `team_manage.erb` com select "Segurável:" (item held do inventário selecionado, consumível select intacto), `GET /battle` monta com `held_item` e `battle/play` não debita; `battle.erb` `segura:`. `green` — rota nova (`ServerTeamHeldActions`) + `team_manage.erb` (select held) + `playable_engine` (`held_item:`) + `battle.erb` (`segura:` + `rebuild_display_team`) | suíte verde + lint 0, commit `b1f67a9` |
-| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-C na 0032 + decisão 13), `SESSIONS.md` (tabela 0032 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (decisão 13 atendida; escopo simples), `draft-auto-battler.md` (Fase Eco — Eco-4-C feita) | suíte verde + lint 0, commit docs |
+| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-C na 0032 + decisão 13), `SESSIONS.md` (tabela 0032 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (decisão 13 atendida; escopo simples), `draft-auto-battler.md` (Fase Eco — Eco-4-C feita) | suíte verde + lint 0, commit `529f91e` |
 | — | **Fase 2 concluída** → **PARAR** e aguardar validação do usuário (fase 3). | |
 
 ## 7. Validação (executada pelo usuário)
 
-_Pendente — preenchida na fase 3._
+**Validada em 2026-08-18 pelo usuário.** Fase 3 concluída — critérios de aceite
+(seção 4) verificados:
+
+- **Catálogo / `Item`:** attributes `stat` (opcional, default `nil`) e `multiplier`
+  (default `1.0`); consumíveis existentes preservam comportamento (0 regressão
+  0029/0030/0031); `ItemCatalog` com `choice-band` (Attack ×1.5) e `choice-scarf`
+  (Speed ×1.5), ambos `category: "held"`, price 80; `ItemCatalog.can_hold` devolve
+  apenas itens `held`; Mart lista os seguráveis automaticamente (catálogo único) e a
+  compra funciona (`MartService` inalterado).
+- **Persistência:** migração idempotente `0032_add_held_item.sql`
+  (`ADD COLUMN IF NOT EXISTS held_item TEXT`, nullable, sem `TRUNCATE`); `Pokemon`
+  com attribute `held_item` (default `nil`); `all(user_id)` devolve o segurável do
+  membro; `TeamRepository#assign_held_item` persiste/limpa (vazio/`nil` → NULL) só do
+  próprio usuário, outro usuário/id inexistente → no-op (isolamento RF-05).
+- **`BattlePokemon` (Strategy/Decorator nos stats):** attribute `held_item` (default
+  `nil`); `from(..., held_item:)` repassa; caminho sem segurável → `nil` (0 regressão);
+  `stat(name)` com `held_item` no catálogo e `item.stat == name` → `(base ×
+  multiplier).round`; sem segurável/item inexistente/outro stat → valor base;
+  funcional — `take_damage`/`heal` preservam `held_item`; `stat` de HP/Defense/Sp
+  intactos (modula só Attack/Speed por ora — decisão 13); ponto único de extensão
+  (motor não mudou).
+- **Rotas/UI:** `POST /team/:id/held-item` com `item_name` de item `held` do catálogo
+  **com posse no inventário** persiste e re-renderiza `team_manage.erb` (200, sem
+  `<html>`); vazio → limpa (sem aviso); item fora do catálogo/`category != "held"`/
+  sem posse → `@notice` e não persiste; select "Segurável:" por membro ("Nenhum" +
+  itens `held` do inventário com `×qty`, valor atual selecionado) + botão "Salvar
+  segurável" (htmx no alvo `#team`, sem JS custom — RNF-01); select de consumível
+  inalterado (0 regressão Eco-4-B); `GET /battle` monta o engine com `held_item` dos
+  membros; `battle.erb` exibe `segura: <display>` no painel "Seu Time"; equipar **não
+  consome** — `POST /battle/play` não debita o segurável (nem em rodada, nem no fim).
+- **Garantias:** suíte completa **559/1696** + lint 0 (pós-Passo 6 557/1688 + seed
+  `team_duelo`); commit por green; sem novas gems; rotas sem dependência de rede
+  nova; sem `rubocop:disable` novo (padrão orçamentos — extração
+  `ServerTeamHeldActions`/`ServerTeamHeldItemTest`/`ServerBattleHeldItemTest`).
+
+**Roteiro de validação manual executado:**
+
+- Seed **`team_duelo`** (`./scripts/seed team_duelo` ou no `rake db:seed` completo):
+  time forte (`seed-strong`, níveis 15–40) x time fraco (`seed-weak`, nível 1), ambos
+  com saldo 400 no Mart — alternar usuário via `?as=seed-strong`/`?as=seed-weak`.
+- Comprar choice-band (80) e choice-scarf (80) no Mart; equipar via `/team/manage`
+  (select "Segurável:" mostra `×N`), entrar em batalha → painel "Seu Time" mostra
+  `segura: Choice Band` / `segura: Choice Scarf`.
+- Batalhar com o time forte x oponente nível 1: dano maior com choice-band (Attack
+  ×1.5) e ordem antecipada com choice-scarf (Speed ×1.5) — vitória rápida; sem
+  segurável o dano/ordem voltam ao base (comparação no `seed-weak`).
+- Equipar sem posse no inventário → notice "Item não disponível para equipar." e não
+  persiste; limpar ("Nenhum") → membro volta ao base; inventário do segurável não
+  debita ao equipar nem em rodada/fim de batalha.
 
 ## 8. Observações
 
