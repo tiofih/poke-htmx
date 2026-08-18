@@ -376,13 +376,13 @@
    sem ramificar `#act`), `InventoryRepository#use` (débito min 0 no `POST
    /battle/play`), branch `:item` + estoque (`Itens:`) no `battle.erb`.
 
-   **Sessão 0031 (Eco-4-B — item atribuído por membro) em implementação (fase 2,
-   passos 1–6, suíte 524/1599, lint 0 — 2026-08-17, aguardando validação do
-   usuário):** estratégia selecionável via atribuição por membro — coluna
-   `assigned_item` (0031_add_assigned_item), `TeamRepository#assign_item`,
-   `BattlePokemon#assigned_item`, `ItemUsePolicy#decide` prefere o item atribuído
-   com fallback ao pool comum (decisão 12 — 2ª parte), `POST /team/:id/item` +
-   select no `team_manage.erb`, `battle.erb` (`carrega: <display>`).
+   **Sessão 0031 (Eco-4-B — item atribuído por membro) concluída e validada em
+   2026-08-18 (passos 0–6, suíte 524/1599, lint 0):** estratégia selecionável via
+   atribuição por membro — coluna `assigned_item` (0031_add_assigned_item),
+   `TeamRepository#assign_item`, `BattlePokemon#assigned_item`, `ItemUsePolicy
+   #decide` prefere o item atribuído com fallback ao pool comum (decisão 12 — 2ª
+   parte), `POST /team/:id/item` + select no `team_manage.erb`, `battle.erb`
+   (`carrega: <display>`).
    Próxima: **Eco-4-C (seguráveis — decisão 13, 1 slot/membro, modula
    Attack/Speed via Strategy/Decorator)**.
 2. Logo após decidir: **elencar o que fica e o que sai** da lista acima,

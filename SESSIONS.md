@@ -46,8 +46,9 @@ concluídas e validadas em 2026-08-14** (0029: suíte 459/1432, lint 0).
 **Sessão 0030 (Eco-4-A — itens em batalha) concluída e validada em 2026-08-17**
 (0030: suíte 493/1525, lint 0 — uso automático de poções em batalha).
 
-**Sessão 0031 (Eco-4-B — item atribuído por membro) em implementação (fase 2,
-passos 1–6 verdes — suíte 524/1599, lint 0), aguardando validação do usuário.**
+**Sessão 0031 (Eco-4-B — item atribuído por membro) concluída e validada em
+2026-08-18** (0031: suíte 524/1599, lint 0 — estratégia selecionável via
+atribuição de item por membro, decisão 12 — 2ª parte).
 
 Próxima sessão conforme roadmap:
 
@@ -88,7 +89,7 @@ Próxima sessão conforme roadmap:
 | 0028 | Eco-2: Poke Center — HP persistente por membro + `HealCostPolicy` proporcional ao HP faltante + `WalletRepository#spend` + `HealService` + `POST /team/heal` + carryover de HP p/ a próxima batalha | Concluída | Done (passos 1–8, suíte 428/1333, lint 0, validado em 2026-08-14) |
 | 0029 | Eco-3: Poke Mart — `Item` + catálogo estático + `InventoryRepository` + `MartService` + `POST /mart/buy` + bloco Poke Mart no `team.erb` + seed `saldo_inicial` | Concluída | Done (passos 1–5, suíte 459/1432, lint 0, validado em 2026-08-14) |
 | 0030 | Eco-4-A: itens em batalha — `Item#heal_amount` + `BattlePokemon#heal` + `ItemUsePolicy` automática (decisão 12) + `BattleEngine` ação `:item` (half-FSM) + `InventoryRepository#use` + `POST /battle/play` debitando + `battle.erb` (branch `:item` + estoque) | Concluída | Done (passos 0–7, suíte 493/1525, lint 0, validado em 2026-08-17) |
-| 0031 | Eco-4-B: item atribuído por membro — `assigned_item` persistido (0031_add_assigned_item) + `TeamRepository#assign_item` + `BattlePokemon#assigned_item` + `ItemUsePolicy` prefere o atribuído (decisão 12 — 2ª parte) + `BattleEngine` usa o atribuído + `POST /team/:id/item` + select no `team_manage.erb` + `battle.erb` (`carrega:`) | Implementação | Em andamento (passos 1–6 verdes, suíte 524/1599, lint 0 — fase 2) |
+| 0031 | Eco-4-B: item atribuído por membro — `assigned_item` persistido (0031_add_assigned_item) + `TeamRepository#assign_item` + `BattlePokemon#assigned_item` + `ItemUsePolicy` prefere o atribuído (decisão 12 — 2ª parte) + `BattleEngine` usa o atribuído + `POST /team/:id/item` + select no `team_manage.erb` + `battle.erb` (`carrega:`) | Concluída | Done (passos 0–6, suíte 524/1599, lint 0, validado em 2026-08-18) |
 
 ## Estrutura do arquivo de sessão
 

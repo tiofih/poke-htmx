@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Done** (commit `4cb4c3a`) — critérios de aceite e plano TDD fechados |
 | Implementação | **Concluída** — 2026-08-17, passos 1–6 verdes (suíte 524/1599, lint 0) |
-| Validação | Pendente (fase 3 — executada pelo usuário) |
+| Validação | **Concluída em 2026-08-18 — validada pelo usuário** |
 
 ---
 
@@ -226,21 +226,50 @@ futura da política.
 | 3 | **`ItemUsePolicy` prefere o atribuído:** `red` — `item_use_policy_test`: membro com `assigned_item` (no catálogo, com estoque) e HP ≤ limiar → devolve o atribuído; HP cheio → `nil`; sem estoque/sem atribuição → fallback pool comum (assert do fluxo atual preservado). `green` — `lib/item_use_policy.rb` (`decide`) | suíte verde + lint 0, commit `ec84f18` |
 | 4 | **Motor usa o atribuído:** `red` — `battle_engine_test`: membro de time A com `assigned_item` + estoque em HP ≤ limiar → log `:item` com o item **atribuído**; sem atribuição → pool comum (0 regressão 0030). `green` — (engine já orquestra via policy; só adicionar asserts/ajustes) | suíte verde + lint 0, commit `ccb74fc` |
 | 5 | **Rota + UI + batalha web:** `red` — `server_test`: `POST /team/:id/item` (atribui/limpa/inválido → notice), `team_manage.erb` com select (item do inventário selecionado), `GET /battle` monta engine com atribuição e `battle/play` usa o item atribuído (débito + `carrega:` no fragmento). `green` — rota nova + `team_manage.erb` (select) + `playable_engine` (`assigned_item:`) + `battle.erb` (`carrega:`); lint — extração `ServerTeamItemActions` (módulo) e testes de item em `ServerTeamItemTest`/`ServerBattleItemTest` (`ServerBattleTestHelpers`) p/ manter orçamentos | suíte verde + lint 0, commit `82889e1` |
-| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-B na 0031 + decisão 12), `SESSIONS.md` (tabela 0031 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (decisão 12 2ª parte; 13 pendente), `draft-auto-battler.md` (Fase Eco — Eco-4-B feita) | suíte verde + lint 0, commit docs |
+| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-B na 0031 + decisão 12), `SESSIONS.md` (tabela 0031 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (decisão 12 2ª parte; 13 pendente), `draft-auto-battler.md` (Fase Eco — Eco-4-B feita) | suíte verde + lint 0, commit `0d7dc6e` |
 | — | **Fase 2 concluída** → **PARAR** e aguardar validação do usuário (fase 3). | |
 
 ## 7. Validação (executada pelo usuário)
 
-> A ser preenchida pelo usuário (fase 3) após a implementação (fase 2):
-> suíte completa verde + critérios da seção 4 verificados + roteiro manual.
+**Validada em 2026-08-18 pelo usuário.** Fase 3 concluída — critérios de aceite
+(seção 4) verificados:
 
-**Roteiro de validação manual sugerido:**
-- `rake db:seed` + comprar potions no Mart (saldo inicial), atribuir "Potion" a um
-  membro via `team_manage` (select mostra `×N`), entrar em batalha → painel
-  "Seu Time" mostra `carrega: Poção`.
-- Jogar rodadas: membro com HP ≤ 50% usa a Poção atribuída — log mostra `usou
-  Poção, +N HP` e o inventário debita; membro sem atribuição mantém o pool
-  comum (0030).
+- **Persistência:** migração idempotente `0031_add_assigned_item.sql`
+  (`ADD COLUMN IF NOT EXISTS assigned_item TEXT`, nullable, sem `TRUNCATE`);
+  `Pokemon` com attribute `assigned_item` (default `nil`); `all(user_id)` devolve a
+  atribuição do membro; `TeamRepository#assign_item` persiste/limpa (vazio/`nil` →
+  NULL) só do próprio usuário, outro usuário/id inexistente → no-op (isolamento
+  RF-05).
+- **`BattlePokemon`:** attribute `assigned_item` (default `nil`);
+  `from(..., assigned_item:)` repassa; caminho sem atribuição → `nil` (0 regressão).
+- **`ItemUsePolicy`:** membro com `assigned_item` no catálogo (`heal_amount > 0`) e
+  com estoque e HP ≤ limiar → `decide` devolve o item **atribuído** (independente
+  do pool comum); sem atribuição / atribuído fora do estoque → fallback ao pool
+  comum (menor que cobre / maior disponível); HP cheio/acima do limiar → `nil`;
+  determinístico; ponto único de decisão (extensível por tipo de item sem tocar o
+  motor).
+- **Rotas/UI:** `POST /team/:id/item` com `item_name` válido persiste e
+  re-renderiza `team_manage.erb` (200, sem `<html>`); vazio → limpa (sem aviso);
+  inválido/fora do catálogo com `heal_amount <= 0` → `@notice` e não persiste;
+  `team_manage.erb` com select por membro ("Nenhum" + itens de cura do inventário
+  com `×qty`, valor atual selecionado) + botão "Salvar item" (htmx no alvo `#team`,
+  sem JS custom — RNF-01); `GET /battle` monta o engine com `assigned_item` dos
+  membros, membro com atribuição e HP ≤ limiar usa o item na rodada (log + débito
+  no inventário por round), sem atribuição → pool comum (0 regressão); `battle.erb`
+  exibe `carrega: <display>` no painel "Seu Time".
+- **Garantias:** suíte completa **524/1599** + lint 0; commit por green; sem novas
+  gems; rotas sem dependência de rede nova; sem `rubocop:disable` novo (padrão
+  orçamentos — extração `ServerTeamItemActions`/`ServerTeamItemTest`/
+  `ServerBattleItemTest` para manter limites).
+
+**Roteiro de validação manual executado:**
+
+- `rake db:seed` + comprar potions no Mart (saldo 200); atribuir "Poção" a um membro
+  via `/team/manage` (select mostra `×N`); entrar na batalha → painel "Seu Time"
+  mostra `carrega: Poção`.
+- Jogar rodadas: membro com HP ≤ 50% usa a Poção **atribuída** — log mostra `usou
+  Poção, +N HP` e o inventário debita; membro sem atribuição mantém o pool comum
+  (0030 sem regressão).
 - Atribuir item com estoque zerado → não usa na batalha (fallback/débito ok);
   limpar atribuição ("Nenhum") → membro volta ao pool comum.
 
