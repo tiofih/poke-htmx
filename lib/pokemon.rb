@@ -17,4 +17,5 @@ class Pokemon < Dry::Struct
   attribute :stats, Types::Strict::Array.of(Types::Hash.schema(name: Types::Coercible::String, value: Types::Coercible::Integer)).default([].freeze)
   attribute :evolutions, Types::Strict::Array.of(Pokemon).default([].freeze)
   attribute :assigned_item, Types::Coercible::String.optional.default(nil)
+  attribute :held_item, Types::Coercible::String.optional.default(nil)
 end

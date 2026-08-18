@@ -123,6 +123,24 @@ module EvolutionOperations
   end
 end
 
+module ItemAssignmentOperations
+  def assign_item(user_id, id, item_name)
+    item = item_name.to_s.empty? ? nil : item_name
+    connection.exec_params(
+      "UPDATE team_pokemons SET assigned_item = $3 WHERE id = $1 AND user_id = $2",
+      [id, user_id, item]
+    )
+  end
+
+  def assign_held_item(user_id, id, item_name)
+    item = item_name.to_s.empty? ? nil : item_name
+    connection.exec_params(
+      "UPDATE team_pokemons SET held_item = $3 WHERE id = $1 AND user_id = $2",
+      [id, user_id, item]
+    )
+  end
+end
+
 class TeamRepository
   DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
   MAX_TEAM_SIZE = 6
@@ -133,6 +151,7 @@ class TeamRepository
 
   include SlotOperations
   include EvolutionOperations
+  include ItemAssignmentOperations
 
   def initialize(db_url: ENV["DATABASE_URL"] || DEFAULT_DATABASE_URL)
     @db_url = db_url
@@ -162,14 +181,6 @@ class TeamRepository
     connection.exec_params(
       "UPDATE team_pokemons SET moves = $3 WHERE id = $1 AND user_id = $2",
       [id, user_id, array_literal(moves.first(MAX_MOVES_PER_POKEMON))]
-    )
-  end
-
-  def assign_item(user_id, id, item_name)
-    item = item_name.to_s.empty? ? nil : item_name
-    connection.exec_params(
-      "UPDATE team_pokemons SET assigned_item = $3 WHERE id = $1 AND user_id = $2",
-      [id, user_id, item]
     )
   end
 
@@ -212,6 +223,7 @@ class TeamRepository
       number: row["number"],
       slot: row["slot"],
       assigned_item: row["assigned_item"],
+      held_item: row["held_item"],
       moves: parse_moves(row["moves"])
     }
   end
