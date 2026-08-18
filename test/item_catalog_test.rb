@@ -22,9 +22,26 @@ class ItemCatalogTest < Minitest::Test
   end
 
   def test_item_catalog_has_at_least_three_consumable_items
-    assert ItemCatalog.all.size >= 3
-    categories = ItemCatalog.all.map(&:category)
-    assert(categories.all? { |category| category == "consumable" })
+    consumables = ItemCatalog.all.select { |item| item.category == "consumable" }
+    assert consumables.size >= 3
+    assert(consumables.all? { |item| item.category == "consumable" })
+  end
+
+  def test_item_accepts_stat_and_multiplier
+    item = Item.new(
+      name: "choice-band", display_name: "Choice Band", category: "held",
+      price: 80, stat: "Attack", multiplier: 1.5
+    )
+
+    assert_equal "Attack", item.stat
+    assert_equal 1.5, item.multiplier
+  end
+
+  def test_item_stat_and_multiplier_default_to_nil_and_one
+    item = Item.new(name: "potion", display_name: "Pocao", category: "consumable", price: 20)
+
+    assert_nil item.stat
+    assert_equal 1.0, item.multiplier
   end
 
   def test_all_returns_the_catalog
@@ -47,5 +64,29 @@ class ItemCatalogTest < Minitest::Test
 
   def test_find_returns_nil_for_unknown_name
     assert_nil ItemCatalog.find("master-ball")
+  end
+
+  def test_catalog_has_held_items_with_stat_multiplier_and_category
+    choice_band = ItemCatalog.find("choice-band")
+    choice_scarf = ItemCatalog.find("choice-scarf")
+
+    refute_nil choice_band
+    assert_equal "held", choice_band.category
+    assert_equal "Attack", choice_band.stat
+    assert_equal 1.5, choice_band.multiplier
+
+    refute_nil choice_scarf
+    assert_equal "held", choice_scarf.category
+    assert_equal "Speed", choice_scarf.stat
+    assert_equal 1.5, choice_scarf.multiplier
+  end
+
+  def test_can_hold_returns_only_held_category_items
+    held_names = ItemCatalog.can_hold.map(&:name)
+
+    assert_includes held_names, "choice-band"
+    assert_includes held_names, "choice-scarf"
+    refute_includes held_names, "potion"
+    assert(ItemCatalog.can_hold.all? { |item| item.category == "held" })
   end
 end

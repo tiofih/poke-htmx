@@ -77,6 +77,12 @@ class SchemaTest < Minitest::Test
     assert_equal "YES", column["is_nullable"]
   end
 
+  def test_team_pokemons_has_held_item_column_nullable
+    column = TestDatabase.column_info("held_item")
+    refute_nil column, "expected column held_item to exist"
+    assert_equal "YES", column["is_nullable"]
+  end
+
   def test_clear_team_truncates_wallet
     TestDatabase.clear_team!
     with_wallet_row do

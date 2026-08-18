@@ -9,4 +9,6 @@ class Item < Dry::Struct
   attribute :category, Types::Strict::String
   attribute :price, Types::Coercible::Integer
   attribute :heal_amount, Types::Coercible::Integer.default(0)
+  attribute :stat, Types::Coercible::String.optional.default(nil)
+  attribute :multiplier, Types::Coercible::Float.default(1.0)
 end
