@@ -476,3 +476,73 @@ class BattleEngineItemTest < Minitest::Test
     assert_equal({ "potion" => 2 }, engine.items)
   end
 end
+
+class BattleEngineHeldItemTest < Minitest::Test
+  include BattleEngineTestHelpers
+
+  def neutral_attacker(attack: 60, speed: 80, hield: nil)
+    build_pokemon(number: 1, name: "a", types: [], hp: 200, speed: speed, attack: attack, defense: 10)
+      .new(held_item: hield)
+  end
+
+  def neutral_target(defense: 40, speed: 10)
+    build_pokemon(number: 2, name: "d", types: [], hp: 200, speed: speed, attack: 1, defense: defense)
+  end
+
+  def test_choice_band_increases_damage_dealt
+    plain = neutral_attacker
+    band = neutral_attacker(hield: "choice-band")
+    target = neutral_target
+
+    plain_engine = battle_engine(team_a: [plain], team_b: [target])
+    band_engine = battle_engine(team_a: [band], team_b: [target])
+
+    plain_result = plain_engine.battle
+    band_result = band_engine.battle
+
+    assert_equal 20, plain_result.log.first[:damage], "60 - 40 = 20 sem seguravel"
+    assert_equal 50, band_result.log.first[:damage], "90 - 40 = 50 com choice-band"
+  end
+
+  def test_choice_scarf_changes_action_order_to_favor_member
+    slow = neutral_attacker(speed: 50)
+    scarfed = neutral_attacker(speed: 50, hield: "choice-scarf")
+    fast_target = neutral_target(speed: 70)
+
+    slow_engine = battle_engine(team_a: [slow], team_b: [fast_target])
+    scarf_engine = battle_engine(team_a: [scarfed], team_b: [fast_target])
+
+    slow_engine.play_round
+    scarf_engine.play_round
+
+    assert_equal 1, slow_engine.log.first[:attacker], "50 < 70 — oponente age primeiro"
+    assert_equal 0, scarf_engine.log.first[:attacker], "75 > 70 — membro com choice-scarf age primeiro"
+  end
+
+  def test_unknown_held_item_keeps_base_damage_and_order
+    unknown = neutral_attacker(hield: "master-ball")
+    target = neutral_target
+
+    engine = battle_engine(team_a: [unknown], team_b: [target])
+
+    result = engine.battle
+
+    assert_equal 20, result.log.first[:damage], "idem sem seguravel"
+  end
+
+  def test_held_item_does_not_consume_inventory_items_used
+    fighter = neutral_attacker(hield: "choice-band")
+    target = neutral_target(defense: 40)
+    engine = BattleEngine.new(
+      team_a: [fighter],
+      team_b: [target],
+      effectiveness: type_effectiveness,
+      items: { "choice-band" => 1 }
+    )
+
+    engine.play_round
+
+    assert_empty engine.items_used, "seguravel nao e consumido em rodada"
+    assert_equal({ "choice-band" => 1 }, engine.items)
+  end
+end
