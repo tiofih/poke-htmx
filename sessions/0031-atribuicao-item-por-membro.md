@@ -4,8 +4,8 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | **Done** (commit a definir) — critérios de aceite e plano TDD fechados |
-| Implementação | Pendente (fase 2 — TDD) |
+| Refinamento | **Done** (commit `4cb4c3a`) — critérios de aceite e plano TDD fechados |
+| Implementação | **Concluída** — 2026-08-17, passos 1–6 verdes (suíte 524/1599, lint 0) |
 | Validação | Pendente (fase 3 — executada pelo usuário) |
 
 ---
@@ -220,13 +220,13 @@ futura da política.
 
 | Passo | Escopo (red → green) | Verificação |
 | --- | --- | --- |
-| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `Sessao 0031` |
-| 1 | **Migração + `TeamRepository#assign_item`:** `red` — `schema_test` (coluna `assigned_item`) + `team_repository_test` (persiste/limpa, isolamento, `all` devolve). `green` — `0031_add_assigned_item.sql` + `Pokemon` (attribute) + `team_repository.rb` (`assign_item` + `row_to_pokemon`) | suíte verde + lint 0, commit |
-| 2 | **`BattlePokemon#assigned_item`:** `red` — `battle_pokemon_test`: attribute default `nil`, `from(assigned_item:)` repassa, sem atribuição → `nil`. `green` — `lib/battle_pokemon.rb` | suíte verde + lint 0, commit |
-| 3 | **`ItemUsePolicy` prefere o atribuído:** `red` — `item_use_policy_test`: membro com `assigned_item` (no catálogo, com estoque) e HP ≤ limiar → devolve o atribuído; HP cheio → `nil`; sem estoque/sem atribuição → fallback pool comum (assert do fluxo atual preservado). `green` — `lib/item_use_policy.rb` (`decide`) | suíte verde + lint 0, commit |
-| 4 | **Motor usa o atribuído:** `red` — `battle_engine_test`: membro de time A com `assigned_item` + estoque em HP ≤ limiar → log `:item` com o item **atribuído**; sem atribuição → pool comum (0 regressão 0030). `green` — (engine já orquestra via policy; só adicionar asserts/ajustes) | suíte verde + lint 0, commit |
-| 5 | **Rota + UI + batalha web:** `red` — `server_test`: `POST /team/:id/item` (atribui/limpa/inválido → notice), `team_manage.erb` com select (item do inventário selecionado), `GET /battle` monta engine com atribuição e `battle/play` usa o item atribuído (débito + `carrega:` no fragmento). `green` — rota nova + `team_manage.erb` (select) + `playable_engine` (`assigned_item:`) + `battle.erb` (`carrega:`) | suíte verde + lint 0, commit |
-| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-B na 0031 + decisão 12), `SESSIONS.md` (tabela 0031 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (decisão 12 2ª parte; 13 pendente), `draft-auto-battler.md` (Fase Eco — Eco-4-B feita) | suíte verde + lint 0, commit |
+| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `4cb4c3a` |
+| 1 | **Migração + `TeamRepository#assign_item`:** `red` — `schema_test` (coluna `assigned_item`) + `team_repository_test` (persiste/limpa, isolamento, `all` devolve). `green` — `0031_add_assigned_item.sql` + `Pokemon` (attribute) + `team_repository.rb` (`assign_item` + `row_to_pokemon`) | suíte verde + lint 0, commit `25f75ca` |
+| 2 | **`BattlePokemon#assigned_item`:** `red` — `battle_pokemon_test`: attribute default `nil`, `from(assigned_item:)` repassa, sem atribuição → `nil`. `green` — `lib/battle_pokemon.rb` | suíte verde + lint 0, commit `dd66851` |
+| 3 | **`ItemUsePolicy` prefere o atribuído:** `red` — `item_use_policy_test`: membro com `assigned_item` (no catálogo, com estoque) e HP ≤ limiar → devolve o atribuído; HP cheio → `nil`; sem estoque/sem atribuição → fallback pool comum (assert do fluxo atual preservado). `green` — `lib/item_use_policy.rb` (`decide`) | suíte verde + lint 0, commit `ec84f18` |
+| 4 | **Motor usa o atribuído:** `red` — `battle_engine_test`: membro de time A com `assigned_item` + estoque em HP ≤ limiar → log `:item` com o item **atribuído**; sem atribuição → pool comum (0 regressão 0030). `green` — (engine já orquestra via policy; só adicionar asserts/ajustes) | suíte verde + lint 0, commit `ccb74fc` |
+| 5 | **Rota + UI + batalha web:** `red` — `server_test`: `POST /team/:id/item` (atribui/limpa/inválido → notice), `team_manage.erb` com select (item do inventário selecionado), `GET /battle` monta engine com atribuição e `battle/play` usa o item atribuído (débito + `carrega:` no fragmento). `green` — rota nova + `team_manage.erb` (select) + `playable_engine` (`assigned_item:`) + `battle.erb` (`carrega:`); lint — extração `ServerTeamItemActions` (módulo) e testes de item em `ServerTeamItemTest`/`ServerBattleItemTest` (`ServerBattleTestHelpers`) p/ manter orçamentos | suíte verde + lint 0, commit `82889e1` |
+| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-B na 0031 + decisão 12), `SESSIONS.md` (tabela 0031 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (decisão 12 2ª parte; 13 pendente), `draft-auto-battler.md` (Fase Eco — Eco-4-B feita) | suíte verde + lint 0, commit docs |
 | — | **Fase 2 concluída** → **PARAR** e aguardar validação do usuário (fase 3). | |
 
 ## 7. Validação (executada pelo usuário)
@@ -256,3 +256,9 @@ futura da política.
 - **A atribuição sobrevive a evolução/reordenação** (coluna no membro, sem
   TRUNCATE); remoção do membro elimina a linha de `team_pokemons` → atribuição
   some com ela (comportamento natural).
+- **Lint no passo 5 (orçamentos mantidos, sem `rubocop:disable` novo):** lógica de
+  item da rota extraída p/ `ServerTeamItemActions` (`server.rb`); testes de item
+  de rota em `ServerTeamItemTest` e de batalha em `ServerBattleItemTest`, com as
+  helpers de stub de batalha em `ServerBattleTestHelpers` (`test/server_test.rb`)
+  — `ServerTeamActions` e `ServerBattleTest` voltam aos limites (ModuleLength 120
+  / ClassLength 500).

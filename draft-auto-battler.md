@@ -375,8 +375,16 @@
    injetável (decisão 12 — 1ª parte), `BattleEngine` ação `:item` (half-FSM 6.1,
    sem ramificar `#act`), `InventoryRepository#use` (débito min 0 no `POST
    /battle/play`), branch `:item` + estoque (`Itens:`) no `battle.erb`.
-   Próxima: **Eco-4-B (estratégia de itens selecionável — decisão 12, 2ª parte) e
-   seguráveis (decisão 13)**.
+
+   **Sessão 0031 (Eco-4-B — item atribuído por membro) em implementação (fase 2,
+   passos 1–6, suíte 524/1599, lint 0 — 2026-08-17, aguardando validação do
+   usuário):** estratégia selecionável via atribuição por membro — coluna
+   `assigned_item` (0031_add_assigned_item), `TeamRepository#assign_item`,
+   `BattlePokemon#assigned_item`, `ItemUsePolicy#decide` prefere o item atribuído
+   com fallback ao pool comum (decisão 12 — 2ª parte), `POST /team/:id/item` +
+   select no `team_manage.erb`, `battle.erb` (`carrega: <display>`).
+   Próxima: **Eco-4-C (seguráveis — decisão 13, 1 slot/membro, modula
+   Attack/Speed via Strategy/Decorator)**.
 2. Logo após decidir: **elencar o que fica e o que sai** da lista acima,
    definir ordem e transformar os escolhidos em **documentos de sessão** com
    critérios fechados e plano TDD (como a 0007).
