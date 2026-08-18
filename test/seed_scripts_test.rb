@@ -3,6 +3,7 @@
 require_relative "test_helper"
 require_relative "../lib/seed_team"
 require_relative "../lib/battle_repository"
+require_relative "../db/seeds/team_duelo"
 
 class SeedScriptsTest < Minitest::Test
   def setup
@@ -93,6 +94,35 @@ class SeedScriptsTest < Minitest::Test
 
     assert_equal 200, TestDatabase.wallet_balance("seed-shop"),
                  "re-executar a seed não dobra o saldo"
+  end
+
+  def test_team_duelo_seeds_strong_vs_weak_with_balance
+    TeamDuelo.call
+
+    strong = team_pokemon_names("seed-strong")
+    weak = team_pokemon_names("seed-weak")
+    assert_equal 6, strong.size, "time forte com 6 membros"
+    assert_equal 6, weak.size, "time fraco com 6 membros"
+
+    strong_levels = strong.map { |n| member_progress(n, "seed-strong")["level"].to_i }
+    weak_levels = weak.map { |n| member_progress(n, "seed-weak")["level"].to_i }
+    assert strong_levels.max >= 40, "time forte com level maximo 40"
+    assert weak_levels.all? { |l| l <= 1 }, "time fraco todo no nivel 1"
+
+    assert_equal TeamDuelo::BALANCE, TestDatabase.wallet_balance("seed-strong"),
+                 "time forte com saldo para comprar os seguraveis"
+    assert_equal TeamDuelo::BALANCE, TestDatabase.wallet_balance("seed-weak"),
+                 "time fraco com saldo para comprar os seguraveis"
+  end
+
+  def test_team_duelo_is_idempotent
+    TeamDuelo.call
+    first_count = team_pokemon_names("seed-strong").size
+    TeamDuelo.call
+
+    assert_equal first_count, team_pokemon_names("seed-strong").size,
+                 "re-executar a seed não duplica membros do time forte"
+    assert_equal TeamDuelo::BALANCE, TestDatabase.wallet_balance("seed-strong")
   end
 
   private

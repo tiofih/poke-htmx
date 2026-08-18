@@ -49,7 +49,8 @@ namespace :db do # rubocop:disable Metrics/BlockLength
       TeamNiveisMistos.call(user_id: "seed-mixed", **kwargs)
       BatalhasHistorico.call(user_id: "seed-history", **kwargs)
       SaldoInicial.call(user_id: "seed-shop", **kwargs)
-      puts "Seeds aplicadas: seed-basic, seed-evol, seed-mixed, seed-history, seed-shop."
+      TeamDuelo.call(**kwargs)
+      puts "Seeds aplicadas: seed-basic, seed-evol, seed-mixed, seed-history, seed-shop, seed-strong, seed-weak."
     end
   end
 end
