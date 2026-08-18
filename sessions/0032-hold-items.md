@@ -4,9 +4,9 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | **Done** — critérios de aceite e plano TDD fechados (fase 1) |
-| Implementação | Pendente |
-| Validação | Pendente (executada pelo usuário) |
+| Refinamento | **Done** (commit `82b4d4e`) — critérios de aceite e plano TDD fechados |
+| Implementação | **Concluída** — 2026-08-18, passos 1–6 verdes (suíte 557/1688, lint 0) |
+| Validação | Pendente (fase 3 — executada pelo usuário) |
 
 ---
 
@@ -226,13 +226,13 @@ item, se cada um tiver posse); modulação de outros stats (Sp.Atk/Defensa/etc).
 
 | Passo | Escopo (red → green) | Verificação |
 | --- | --- | --- |
-| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `refinamento-0032` |
-| 1 | **Migração + `Item``held` + catálogo:** `red` — `schema_test` (coluna `held_item`) + `item_catalog_test` (items held com `stat`/`multiplier`, `can_hold`, `find`). `green` — `0032_add_held_item.sql` + `Item` (`stat`/`multiplier`) + `ItemCatalog` (choice-band/choice-scarf + `can_hold`) | suíte verde + lint 0, commit `Passo 1:` |
-| 2 | **`TeamRepository#assign_held_item` + `Pokemon.held_item`:** `red` — `team_repository_test` (persiste/limpa, isolamento, `all` devolve) + `Pokemon` attribute. `green` — `team_repository.rb` (`assign_held_item` + `row_to_pokemon`) + `pokemon.rb` | suíte verde + lint 0, commit `Passo 2:` |
-| 3 | **`BattlePokemon#held_item` + modulação de `stat`:** `red` — `battle_pokemon_test`: attribute default `nil`, `from(held_item:)` repassa, `stat` modula Attack/Speed (round), outros stats intactos, preserva em `take_damage`/`heal`. `green` — `lib/battle_pokemon.rb` (`stat` decorator + attribute) | suíte verde + lint 0, commit `Passo 3:` |
-| 4 | **Motor modulado via `stat` (sem tocar o engine):** `red` — `battle_engine_test`: membro time A com choice-band causa dano maior que sem; com choice-scarf age antes (asserts de log/ordem/dano); time B sem segurável (0 regressão). `green` — asserts + ajustes (engine já orquestra via `stat`) | suíte verde + lint 0, commit `Passo 4:` |
-| 5 | **Rota + UI + batalha web:** `red` — `server_test`: `POST /team/:id/held-item` (atribui/limpa/sem posse → notice), `team_manage.erb` com select "Segurável:" (item held do inventário selecionado, consumível select intacto), `GET /battle` monta com `held_item` e `battle/play` não debita; `battle.erb` `segura:`. `green` — rota nova (`ServerTeamItemActions`/extensão) + `team_manage.erb` (select held) + `playable_engine` (`held_item:`) + `battle.erb` (`segura:` + `rebuild_display_team`) | suíte verde + lint 0, commit `Passo 5:` |
-| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-C na 0032 + decisão 13), `SESSIONS.md` (tabela 0032 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (decisão 13 atendida; escopo simples), `draft-auto-battler.md` (Fase Eco — Eco-4-C feita) | suíte verde + lint 0, commit `Passo 6:` |
+| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `82b4d4e` |
+| 1 | **Migração + `Item``held` + catálogo:** `red` — `schema_test` (coluna `held_item`) + `item_catalog_test` (items held com `stat`/`multiplier`, `can_hold`, `find`). `green` — `0032_add_held_item.sql` + `Item` (`stat`/`multiplier`) + `ItemCatalog` (choice-band/choice-scarf + `can_hold`) | suíte verde + lint 0, commit `3f1692c` |
+| 2 | **`TeamRepository#assign_held_item` + `Pokemon.held_item`:** `red` — `team_repository_test` (persiste/limpa, isolamento, `all` devolve) + `Pokemon` attribute. `green` — `team_repository.rb` (`assign_held_item` + `row_to_pokemon`) + `pokemon.rb` | suíte verde + lint 0, commit `5c5b684` |
+| 3 | **`BattlePokemon#held_item` + modulação de `stat`:** `red` — `battle_pokemon_test`: attribute default `nil`, `from(held_item:)` repassa, `stat` modula Attack/Speed (round), outros stats intactos, preserva em `take_damage`/`heal`. `green` — `lib/battle_pokemon.rb` (`stat` decorator + attribute) | suíte verde + lint 0, commit `e486a5e` |
+| 4 | **Motor modulado via `stat` (sem tocar o engine):** `red` — `battle_engine_test`: membro time A com choice-band causa dano maior que sem; com choice-scarf age antes (asserts de log/ordem/dano); time B sem segurável (0 regressão). `green` — asserts + ajustes (engine já orquestra via `stat`) | suíte verde + lint 0, commit `d87119d` |
+| 5 | **Rota + UI + batalha web:** `red` — `server_test`: `POST /team/:id/held-item` (atribui/limpa/sem posse → notice), `team_manage.erb` com select "Segurável:" (item held do inventário selecionado, consumível select intacto), `GET /battle` monta com `held_item` e `battle/play` não debita; `battle.erb` `segura:`. `green` — rota nova (`ServerTeamHeldActions`) + `team_manage.erb` (select held) + `playable_engine` (`held_item:`) + `battle.erb` (`segura:` + `rebuild_display_team`) | suíte verde + lint 0, commit `b1f67a9` |
+| 6 | **Docs:** `REQUIREMENTS.md` (roadmap 23 — Eco-4-C na 0032 + decisão 13), `SESSIONS.md` (tabela 0032 fase 2 + próxima sessão), `draft-arquitetura-design-patterns.md` (decisão 13 atendida; escopo simples), `draft-auto-battler.md` (Fase Eco — Eco-4-C feita) | suíte verde + lint 0, commit docs |
 | — | **Fase 2 concluída** → **PARAR** e aguardar validação do usuário (fase 3). | |
 
 ## 7. Validação (executada pelo usuário)
@@ -254,3 +254,8 @@ _Pendente — preenchida na fase 3._
   `ServerTeamHeldActions` (mesmo padrão da 0031) e testes em `ServerTeamHeldTest`.
 - **Anotado para candidatos futuros:** J2 (personalização entre batalhas) vai
   ampliar a UI de equipamento; D1 parcial (nível de aprendizado) segue em backlog.
+- **Lint no passo 5 (orçamentos mantidos, sem `rubocop:disable` novo):** lógica de
+  segurável da rota extraída p/ `ServerTeamHeldActions` (`server.rb`, módulo dedicado)
+  — `ServerTeamActions`/`ServerTeamItemActions` permanecem dentro dos limites; testes
+  de rota em `ServerTeamHeldItemTest` e de batalha em `ServerBattleHeldItemTest`
+  (`test/server_test.rb`, alvos `ServerTeamTest`/`ServerBattleTest` intactos).
