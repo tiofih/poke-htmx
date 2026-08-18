@@ -25,6 +25,25 @@
       <button type="submit">Salvar golpes</button>
     </form>
     <form
+        hx-post="/team/<%= poke.id %>/item"
+        hx-target="#team"
+        hx-swap="innerHTML">
+      <label>
+        Item:
+        <select name="item_name">
+          <option value=""<%= poke.assigned_item.to_s.empty? ? " selected" : "" %>>Nenhum</option>
+          <% @inventory.to_a.each do |entry| %>
+            <% item = ItemCatalog.find(entry[:name]) %>
+            <% next unless item && item.heal_amount.to_i.positive? %>
+            <option value="<%= item.name %>"<%= poke.assigned_item == item.name ? " selected" : "" %>>
+              <%= item.display_name %> ×<%= entry[:quantity] %>
+            </option>
+          <% end %>
+        </select>
+      </label>
+      <button type="submit">Salvar item</button>
+    </form>
+    <form
         hx-post="/team/<%= poke.id %>/move"
         hx-target="#team"
         hx-swap="innerHTML">

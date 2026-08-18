@@ -9,7 +9,7 @@
     <% @engine.teams[0].each do |poke| %>
       <p class="fighter">
         <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
-        <%= poke.name %> — Nível <%= poke.level %> — HP <%= poke.hp_current %>/<%= poke.hp_max %>
+        <%= poke.name %> — Nível <%= poke.level %> — HP <%= poke.hp_current %>/<%= poke.hp_max %><% unless poke.assigned_item.to_s.empty? %> — carrega: <%= ItemCatalog.find(poke.assigned_item)&.display_name || poke.assigned_item %><% end %>
       </p>
       <% unless poke.moves.empty? %>
         <ul class="moves">

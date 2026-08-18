@@ -496,6 +496,88 @@ class ServerTeamTest < Minitest::Test
   end
 end
 
+class ServerTeamItemTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def test_post_team_item_assigns_item_to_member
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal "potion", @repository.all("user-a").first.assigned_item
+    refute_includes last_response.body, "<html"
+  end
+
+  def test_post_team_item_rerenders_manage_fragment
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 2)
+
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'name="item_name"'
+    assert_includes last_response.body, 'value="potion" selected'
+  end
+
+  def test_post_team_item_with_empty_name_clears_assignment
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @repository.assign_item("user-a", pikachu_id, "potion")
+
+    post "/team/#{pikachu_id}/item", { item_name: "" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_nil @repository.all("user-a").first.assigned_item
+    assert_includes last_response.body, 'value="" selected', '"Nenhum" volta a ser o selecionado'
+  end
+
+  def test_post_team_item_with_unknown_item_shows_notice_and_does_not_assign
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+
+    post "/team/#{pikachu_id}/item", { item_name: "master-ball" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_nil @repository.all("user-a").first.assigned_item
+    assert_includes last_response.body, "Item não disponível"
+  end
+
+  def test_post_team_item_of_other_users_member_is_noop
+    @repository.add("user-a", pikachu_pokemon)
+    @repository.add("user-b", bulbasaur_pokemon)
+    bulbasaur_id = @repository.all("user-b").first.id
+
+    post "/team/#{bulbasaur_id}/item", { item_name: "potion" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_nil @repository.all("user-b").first.assigned_item
+    assert_nil @repository.all("user-a").first.assigned_item, "membro do proprio usuario nao muda"
+  end
+
+  def test_team_manage_renders_item_select_with_inventory_and_current_selection
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @repository.assign_item("user-a", pikachu_id, "potion")
+    @inventory.add("user-a", "potion", 2)
+
+    PokeApiStub.with_available_move_names(%w[growl]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'name="item_name"'
+    assert_includes last_response.body, "Salvar item"
+    assert_includes last_response.body, "Nenhum"
+    assert_includes last_response.body, 'value="potion"'
+    assert_includes last_response.body, "×2"
+    assert_includes last_response.body, 'value="potion" selected'
+  end
+end
+
 class ServerDetailTest < Minitest::Test
   include ServerTestHelpers
   include TestSupport
@@ -883,10 +965,7 @@ class ServerListTest < Minitest::Test
   end
 end
 
-class ServerBattleTest < Minitest::Test
-  include ServerTestHelpers
-  include TestSupport
-
+module ServerBattleTestHelpers
   def battle_pokemon_for_test
     Pokemon.new(
       name: "pikachu",
@@ -937,6 +1016,12 @@ class ServerBattleTest < Minitest::Test
     add_team(user_id, [["pikachu", 25], ["bulbasaur", 26], ["charmander", 27]]) if @repository.all(user_id).empty?
     stub_battle_start { get "/battle", {}, user_session(user_id) }
   end
+end
+
+class ServerBattleTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+  include ServerBattleTestHelpers
 
   def test_battle_close_route_returns_empty_fragment
     get "/battle/close"
@@ -1500,6 +1585,38 @@ class ServerBattleTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "HP 200/200",
                     "membro que nunca batalhou entra com HP cheio"
+  end
+end
+
+class ServerBattleItemTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+  include ServerBattleTestHelpers
+
+  def test_battle_panel_shows_assigned_item_on_player_member
+    @repository.add("user-a", pikachu_pokemon)
+    member_id = @repository.all("user-a").first.id
+    @repository.assign_item("user-a", member_id, "potion")
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_includes last_response.body, "carrega: Pocao"
+  end
+
+  def test_battle_uses_assigned_item_and_debits_inventory
+    @repository.add("user-a", pikachu_pokemon)
+    member_id = @repository.all("user-a").first.id
+    @repository.assign_item("user-a", member_id, "potion")
+    @progression.update_hp("user-a", member_id, 200, 90)
+    @inventory.add("user-a", "potion", 2)
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "usou Pocao"
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "item atribuido debitado no round"
   end
 end
 

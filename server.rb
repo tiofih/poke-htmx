@@ -95,6 +95,7 @@ module ServerTeamActions
   def render_team_manage
     @team = settings.team.all(current_user)
     @available_moves = moves_for_team
+    @inventory = settings.inventory.all(current_user)
     erb :team_manage, layout: false
   end
 
@@ -190,6 +191,52 @@ module ServerTeamActions
   end
 end
 
+module ServerTeamItemActions
+  private
+
+  def save_team_item
+    team_manage_data
+    @inventory = settings.inventory.all(current_user)
+    assign_member_item(team_member_for_item)
+    erb :team_manage, layout: false
+  end
+
+  def team_manage_data
+    @team = settings.team.all(current_user)
+    @available_moves = moves_for_team
+  end
+
+  def team_member_for_item
+    @team.find { |poke| poke.id.to_s == params[:id].to_s }
+  end
+
+  def assign_member_item(member)
+    return unless member
+
+    item_name = params[:item_name].to_s
+    if item_name.empty?
+      clear_member_item(member)
+    else
+      assign_catalog_item(member, item_name)
+    end
+    @team = settings.team.all(current_user)
+  end
+
+  def clear_member_item(member)
+    settings.team.assign_item(current_user, member.id, nil)
+  end
+
+  def assign_catalog_item(member, item_name)
+    item = ItemCatalog.find(item_name)
+    unless item && item.heal_amount.to_i.positive?
+      @notice = "Item não disponível para atribuição."
+      return
+    end
+
+    settings.team.assign_item(current_user, member.id, item_name)
+  end
+end
+
 module ServerBattleActions # rubocop:disable Metrics/ModuleLength
   private
 
@@ -227,11 +274,17 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
   def player_team(team)
     team.filter_map do |member|
       detail = settings.api.detail(member.number)
-      next unless detail
-
-      fighter = BattlePokemon.from(detail, moves: battle_moves_for(member), level: member_level(member))
-      apply_persisted_hp(fighter, member)
+      detail && apply_persisted_hp(battle_fighter_from(member, detail), member)
     end
+  end
+
+  def battle_fighter_from(member, detail)
+    BattlePokemon.from(
+      detail,
+      moves: battle_moves_for(member),
+      level: member_level(member),
+      assigned_item: member.assigned_item
+    )
   end
 
   def apply_persisted_hp(fighter, member)
@@ -450,6 +503,7 @@ module TeamRoutes
     register_remove_member(app)
     register_move_member(app)
     register_save_moves(app)
+    register_save_item(app)
   end
 
   def self.register_team(app)
@@ -478,6 +532,10 @@ module TeamRoutes
 
   def self.register_save_moves(app)
     app.post("/team/:id/moves") { save_team_moves }
+  end
+
+  def self.register_save_item(app)
+    app.post("/team/:id/item") { save_team_item }
   end
 end
 
@@ -599,6 +657,7 @@ class Server < Sinatra::Base
   include ServerCommon
   include ServerListActions
   include ServerTeamActions
+  include ServerTeamItemActions
   include ServerBattleActions
   include ServerHistoryActions
 
