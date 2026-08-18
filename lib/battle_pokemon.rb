@@ -3,6 +3,7 @@
 require "dry-struct"
 require_relative "pokemon"
 require_relative "move"
+require_relative "item_catalog"
 
 class BattlePokemon < Dry::Struct
   BC_HP = Types::Coercible::Integer
@@ -17,20 +18,22 @@ class BattlePokemon < Dry::Struct
   attribute :moves, Types::Strict::Array.of(Move).default([].freeze)
   attribute :level, Types::Coercible::Integer.default(1)
   attribute :assigned_item, Types::Coercible::String.optional.default(nil)
+  attribute :held_item, Types::Coercible::String.optional.default(nil)
 
-  def self.from(pokemon, moves: [], level: 1, assigned_item: nil)
-    new(**attributes_for(pokemon, moves: moves, level: level, assigned_item: assigned_item))
+  def self.from(pokemon, moves: [], level: 1, assigned_item: nil, held_item: nil)
+    new(**attributes_for(pokemon, moves: moves, level: level, assigned_item: assigned_item,
+                                  held_item: held_item))
   end
 
   class << self
     private
 
-    def attributes_for(pokemon, moves:, level:, assigned_item:)
+    def attributes_for(pokemon, moves:, level:, assigned_item:, held_item:)
       stats = scale_stats(pokemon.stats, level)
       hp = base_hp(stats)
       { number: pokemon.number, name: pokemon.name, sprite: pokemon.sprite.to_s,
         types: pokemon.types, stats: stats, hp_max: hp, hp_current: hp,
-        moves: moves, level: level, assigned_item: assigned_item }
+        moves: moves, level: level, assigned_item: assigned_item, held_item: held_item }
     end
 
     def scale_stats(stats, level)
@@ -67,7 +70,15 @@ class BattlePokemon < Dry::Struct
   end
 
   def stat(name)
-    stats.find { |stat| stat[:name] == name }&.fetch(:value) || 1
+    base = stats.find { |stat| stat[:name] == name }&.fetch(:value) || 1
+    (base * held_multiplier_for(name)).round
+  end
+
+  def held_multiplier_for(name)
+    item = ItemCatalog.find(held_item)
+    return 1.0 unless item && item.stat.to_s == name && item.multiplier.to_f.positive?
+
+    item.multiplier.to_f
   end
 
   def alive?

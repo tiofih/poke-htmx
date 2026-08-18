@@ -173,6 +173,101 @@ class BattlePokemonTest < Minitest::Test
     assert_equal "potion", healed.assigned_item
   end
 
+  def test_from_defaults_held_item_to_nil
+    fighter = BattlePokemon.from(pikachu)
+
+    assert_nil fighter.held_item
+  end
+
+  def test_from_preserves_held_item
+    pokemon = pikachu.new(held_item: "choice-band")
+
+    fighter = BattlePokemon.from(pokemon, held_item: pokemon.held_item)
+
+    assert_equal "choice-band", fighter.held_item
+  end
+
+  def test_from_without_held_item_keeps_default_nil
+    fighter = BattlePokemon.from(
+      pikachu, moves: [Move.new(name: "thunder-shock", type: "electric", power: 40, accuracy: 100, pp: 30)]
+    )
+
+    assert_nil fighter.held_item
+  end
+
+  def test_functional_updates_preserve_held_item
+    fighter = BattlePokemon.from(pikachu, held_item: "choice-band")
+
+    damaged = fighter.take_damage(10)
+    healed = damaged.heal(5)
+
+    assert_equal "choice-band", damaged.held_item
+    assert_equal "choice-band", healed.held_item
+  end
+
+  def test_choice_band_multiplies_attack_stat
+    with_attack = pokemon_with_attack
+
+    fighter = BattlePokemon.from(with_attack, held_item: "choice-band")
+
+    assert_equal 83, fighter.stat("Attack"), "55 x 1.5 = 82.5 -> 83"
+  end
+
+  def test_choice_scarf_multiplies_speed_stat
+    fighter = BattlePokemon.from(pikachu, held_item: "choice-scarf")
+
+    assert_equal 135, fighter.stat("Speed"), "90 x 1.5 = 135"
+  end
+
+  def test_held_item_does_not_affect_other_stats
+    with_attack = pokemon_with_attack
+
+    fighter = BattlePokemon.from(with_attack, held_item: "choice-band")
+
+    assert_equal 45, fighter.stat("HP")
+    assert_equal 90, fighter.stat("Speed"), "choice-band nao modula Speed"
+    assert_equal 40, fighter.stat("Defense")
+  end
+
+  def test_unknown_held_item_keeps_base_stats
+    fighter = BattlePokemon.from(pikachu, held_item: "master-ball")
+
+    assert_equal 90, fighter.stat("Speed")
+    assert_nil ItemCatalog.find("master-ball")
+  end
+
+  def test_without_held_item_keeps_base_stats
+    fighter = BattlePokemon.from(pikachu)
+
+    assert_equal 90, fighter.stat("Speed")
+    assert_equal 45, fighter.stat("HP")
+  end
+
+  def test_scaled_stats_then_held_multiplier_applies_on_top
+    with_attack = pokemon_with_attack
+
+    fighter = BattlePokemon.from(with_attack, level: 3, held_item: "choice-band")
+
+    assert_equal 84, fighter.stat("Attack"), "(55 + 1) x 1.5 = 84"
+  end
+
+  private
+
+  def pokemon_with_attack
+    Pokemon.new(
+      name: "pikachu",
+      sprite: "https://example.com/pikachu.png",
+      number: 25,
+      types: ["electric"],
+      stats: [
+        { name: "HP", value: 45 },
+        { name: "Attack", value: 55 },
+        { name: "Defense", value: 40 },
+        { name: "Speed", value: 90 }
+      ]
+    )
+  end
+
   def test_scaled_stats_do_not_mutate_original_pokemon
     fighter = BattlePokemon.from(pikachu, level: 5)
 
