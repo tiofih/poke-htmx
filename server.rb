@@ -18,22 +18,13 @@ require_relative "lib/heal_service"
 require_relative "lib/inventory_repository"
 require_relative "lib/item_catalog"
 require_relative "lib/mart_service"
+require_relative "lib/battle_service"
 
 module ServerCommon
   private
 
   def current_user
     session[:user_id]
-  end
-
-  def battle_moves_for(pokemon)
-    saved = pokemon.moves.filter_map { |name| settings.api.move(name) }
-    return saved unless saved.empty?
-
-    moves = settings.api.moves_for(pokemon.number)
-    return moves unless moves.empty?
-
-    [Move.new(name: "Struggle", type: pokemon.types.first || "normal", power: 10, accuracy: nil, pp: 100)]
   end
 end
 
@@ -280,84 +271,16 @@ module ServerTeamHeldActions
   end
 end
 
-module ServerBattleActions # rubocop:disable Metrics/ModuleLength
+module ServerBattleActions
   private
 
   def render_battle_fragment
-    team = settings.team.all(current_user)
-    return empty_team_fragment if team.empty?
+    result = settings.battle.prepare(current_user)
+    return empty_team_fragment if result[:reason] == :empty_team
+    return battle_error_fragment unless result[:engine]
 
-    play = playable_engine(team)
-    return battle_error_fragment unless play
-
-    @engine = play
-    settings.battles.set(current_user, @engine)
+    @engine = result[:engine]
     erb :battle, layout: false
-  end
-
-  def playable_engine(team)
-    player = player_team(team)
-    return nil if player.size < team.size
-
-    opponent = opponent_team(team)
-    return nil unless opponent
-
-    BattleEngine.new(
-      team_a: player,
-      team_b: opponent,
-      effectiveness: TypeEffectiveness.load(settings.api),
-      items: inventory_stock
-    )
-  end
-
-  def inventory_stock
-    settings.inventory.all(current_user).to_h { |entry| [entry[:name], entry[:quantity]] }
-  end
-
-  def player_team(team)
-    team.filter_map do |member|
-      detail = settings.api.detail(member.number)
-      detail && apply_persisted_hp(battle_fighter_from(member, detail), member)
-    end
-  end
-
-  def battle_fighter_from(member, detail)
-    BattlePokemon.from(
-      detail,
-      moves: battle_moves_for(member),
-      level: member_level(member),
-      assigned_item: member.assigned_item,
-      held_item: member.held_item
-    )
-  end
-
-  def apply_persisted_hp(fighter, member)
-    progress = settings.progression.get(current_user, member.id)
-    return fighter if progress.nil? || progress[:hp_max].to_i <= 0
-
-    hp_current = [progress[:hp_current].to_i, progress[:hp_max].to_i].min
-    fighter.new(hp_current: hp_current)
-  end
-
-  def member_level(member)
-    settings.progression.get(current_user, member.id)&.fetch(:level) || 1
-  end
-
-  def opponent_team(_team)
-    opponent = OpponentGenerator.new(
-      names: settings.api.fetch_all_names,
-      fetcher: settings.api.method(:detail),
-      rng: Random.new(current_user.sum),
-      level: 1
-    ).team
-    return nil if opponent.empty?
-
-    opponent.map { |battle_pokemon| battle_pokemon.new(moves: battle_moves_for(battle_pokemon)) }
-  end
-
-  def average_player_level(team)
-    levels = team.map { |member| member_level(member) }
-    (levels.sum / levels.size.to_f).round
   end
 
   def empty_team_fragment
@@ -370,142 +293,21 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     erb :battle, layout: false
   end
 
-  def advance_battle # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
-    @engine = settings.battles.fetch(current_user)
-    return erb :battle, layout: false unless @engine
+  def advance_battle
+    result = settings.battle.advance(current_user)
+    return erb :battle, layout: false unless result
 
-    was_in_progress = !@engine.finished?
-    @engine.play_round
-    debit_used_items
-    if was_in_progress && @engine.finished?
-      record_finished_battle
-      grant_finished_xp
-      grant_finished_money
-      apply_evolution_and_learning
-      rebuild_display_team
-      persist_finished_hp
-    end
-    @xp_gained = RewardRule.new.xp_for(@engine.result) if @engine.finished?
-    @money_gained = RewardRule.new.money_for(@engine.result) if @engine.finished?
+    expose_battle_result(result)
     response.headers["HX-Trigger"] = "teamRefresh" if @engine.finished? && @evolution_news&.any?
     erb :battle, layout: false
   end
 
-  def debit_used_items
-    round = @engine.rounds
-    @engine.log.each do |entry|
-      next unless entry[:round] == round && entry[:action] == :item
-
-      settings.inventory.use(current_user, entry[:item], 1)
-    end
-  end
-
-  def record_finished_battle
-    return unless @engine.result
-
-    settings.battle_history.add(
-      current_user,
-      @engine.result.to_s,
-      @engine.teams[1].map { |bp| { number: bp.number, name: bp.name } }
-    )
-  end
-
-  def grant_finished_xp
-    reward = RewardRule.new.xp_for(@engine.result)
-    settings.team.all(current_user).each do |member|
-      settings.progression.grant(current_user, member.id, reward)
-    end
-  end
-
-  def grant_finished_money
-    return unless @engine.result
-
-    settings.wallet.grant(current_user, RewardRule.new.money_for(@engine.result))
-  end
-
-  def apply_evolution_and_learning
-    @evolution_news = []
-    @learned_news = []
-    settings.team.all(current_user).each do |member|
-      evolve_member(member)
-      learn_moves_for_member(member)
-    end
-  end
-
-  def rebuild_display_team # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-    fresh_team = settings.team.all(current_user)
-    return unless fresh_team.size == @engine.teams[0].size
-
-    new_team = @engine.teams[0].each_with_index.map do |fighter, i|
-      member = fresh_team[i]
-      BattlePokemon.new(
-        number: member.number, name: member.name, sprite: member.sprite,
-        types: fighter.types, stats: fighter.stats,
-        hp_max: fighter.hp_max, hp_current: fighter.hp_current,
-        moves: fighter.moves, level: member_level(member),
-        assigned_item: fighter.assigned_item, held_item: fighter.held_item
-      )
-    end
-    @engine.replace_team_a(new_team)
-  end
-
-  def persist_finished_hp
-    list = settings.team.all(current_user)
-    return unless list.size == @engine.teams[0].size
-
-    list.zip(@engine.teams[0]).each { |member, fighter| save_fighter_hp(member, fighter) }
-  end
-
-  def save_fighter_hp(member, fighter)
-    settings.progression.update_hp(
-      current_user, member.id, fighter.hp_max, fighter.hp_current
-    )
-  end
-
-  def evolve_member(member)
-    loop do
-      target = evolution_target(member)
-      break unless target
-      break if target[:number] == member.number
-
-      evolution_pokemon = settings.api.detail(target[:number])
-      break unless evolution_pokemon
-
-      evolved = try_evolve(member, evolution_pokemon)
-      break unless evolved
-
-      member = evolved
-    end
-  end
-
-  def evolution_target(member)
-    progress = settings.progression.get(current_user, member.id)
-    next_evos = settings.api.next_evolutions(member.number).to_a
-    EvolutionRule.next_stage(_current_number: member.number, level: progress[:level], evolutions: next_evos)
-  end
-
-  def try_evolve(member, evolution_pokemon)
-    if settings.team.evolve(current_user, member.id, evolution_pokemon)
-      @evolution_news << "#{member.name} evoluiu para #{evolution_pokemon.name}!"
-      return evolution_pokemon.new(id: member.id)
-    end
-
-    @evolution_news << "#{member.name} não evoluiu — #{evolution_pokemon.name} já está no time."
-    nil
-  end
-
-  def learn_moves_for_member(member)
-    progress = settings.progression.get(current_user, member.id)
-    settings.api.learnable_moves(member.number).to_a.each do |entry|
-      try_learn(member, entry, progress)
-    end
-  end
-
-  def try_learn(member, entry, progress)
-    return unless entry[:level] <= progress[:level]
-    return unless settings.team.learn_move(current_user, member.id, entry[:name])
-
-    @learned_news << "#{member.name} aprendeu #{entry[:name]}!"
+  def expose_battle_result(result)
+    @engine = result[:engine]
+    @xp_gained = result[:xp_gained]
+    @money_gained = result[:money_gained]
+    @evolution_news = result[:evolution_news]
+    @learned_news = result[:learned_news]
   end
 end
 
@@ -673,8 +475,7 @@ class Server < Sinatra::Base
   end
 
   configure do
-    enable :logging
-    enable :sessions
+    enable :logging, :sessions
     set :session_secret, ENV["SESSION_SECRET"] ||
                          "706f6b656465782d6465762d7365637265742d30313233343536373839616263646566"
     set :bind, "0.0.0.0"
@@ -687,16 +488,18 @@ class Server < Sinatra::Base
     set :wallet, WalletRepository.new
     set :api, PokeApi.instance
     set :heal, HealService.new(
-      team: TeamRepository.new,
-      progression: ProgressionRepository.new,
+      team: TeamRepository.new, progression: ProgressionRepository.new,
       wallet: WalletRepository.new
     )
     set :inventory, InventoryRepository.new
-    set :mart, MartService.new(
-      inventory: InventoryRepository.new,
-      wallet: WalletRepository.new
+    set :mart, MartService.new(inventory: InventoryRepository.new, wallet: WalletRepository.new)
+    set :battle, BattleService.new(
+      dependencies: {
+        api: -> { settings.api }, battles: settings.battles, team: settings.team,
+        progression: settings.progression, battle_history: settings.battle_history,
+        wallet: settings.wallet, inventory: settings.inventory
+      }
     )
-    register Sinatra::Reloader
   end
 
   before do
