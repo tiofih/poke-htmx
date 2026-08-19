@@ -406,3 +406,58 @@
    critérios fechados e plano TDD (como a 0007).
 3. **Nota:** B3 (motor) destrav não depende de B1/B2 sequenciais A/B — ordem sugerida:
    B1 → B2 → B3 → B4 → C1. A1/A2 podem entrar em paralelo ao game loop se desejado.
+
+---
+
+## Anotações de jornada/experiência — 2026-08-18 (após respiro de arquitetura)
+
+> **Fora do fluxo (RNF-04).** Anotações do usuário para das próximas fases, no padrão
+> do cadastro de ideias acima. Não geram critérios de aceite nem plano TDD agora.
+> Revisar ao fechar as fases correntes.
+
+### JN-1. Telas próprias de Time, Batalha e Histórico (fim do empilhamento)
+
+- **Problema:** `index.erb` mantém 5 `<div>` empilhados na página única (`#pokemon-list`,
+  `#pokemon`, `#team`, `#battle`, `#history`); cada aba do nav preenche o seu próprio
+  alvo e os painéis **acumulam um embaixo do outro** ao navegar (Time + Batalha +
+  Histórico visíveis simultaneamente).
+- **Ideia:** cada área vira **tela própria** (rota + fragmento/layout dedicado) e a
+  navegação **troca a área exibida** em vez de somar. Revisita RF-14 (nav único) e as
+  rotas `GET /team|/battle|/history` (hoje fragmentos parciais em alvos fixos).
+- **Impacto:** UI/UX + rotas/views; sem mudança de regra de negócio (domínio intacto).
+
+### JN-2. Gerenciamento de golpes: lista no lugar de checkboxes
+
+- **Problema:** `team_manage.erb` usa **vários checkboxes** por Pokémon para escolher
+  os golpes (RF-17) — ruim para explorar a lista completa da PokéAPI (pode ter dezenas).
+- **Ideia:** seletor de golpes vira **lista de uma seleção** (ex.: `select multiple`
+  amigável, ou lista clicável com marcação simples) mantendo limite de 4 (RF-17).
+- **Impacto:** só `views/team_manage.erb` + rota `POST /team/:id/moves` (validação
+  idêntica). Baixo risco.
+
+### JN-3. Itens de uso único por Pokémon (quantidade usada × comprada)
+
+- **Problema:** hoje poções são consumíveis automáticos (`ItemUsePolicy`) e o
+  `InventoryRepository#use` debita do estoque, mas não há trava de **"usar apenas 1 vez
+  por Pokémon"** — a batalha pode drenar o estoque repetidamente no mesmo lutador.
+- **Ideia:** regra de consumo **1 uso por Pokémon por batalha** (ou por limite de
+  estoque), alinhada à quantidade **comprada** — usar o item consome a qtd comprada até
+  zerar; sem refill infinito no mesmo confronto.
+- **Impacto:** `ItemUsePolicy`/motor (registrar uso por membro) + `battle.erb` (exibir
+  qtd restante). Cruza com Eco-4-A/B.
+
+### JN-4. Componentes de Poke Mart e Poke Center
+
+- **Ideia:** as seções de Poke Mart (Eco-3) e Poke Center (Eco-2) hoje vivem como
+  blocos dentro de `team.erb` — virar **componentes próprios** (telas/fragmentos
+  reutilizáveis), completando visualmente compra (stock × saldo) e cura (HP × custo).
+- **Impacto:** views + rotas; cruza com JN-1 (telas próprias) e JN-3 (itens).
+
+### JN-5. Gameloop: montagem → batalha → loja/cura → repete
+
+- **Ideia:** o fluxo de navegação deve seguir a ordem do circuito fechado:
+  **montagem de time → batalha → opções (Poke Mart/Poke Center) → repete** — em vez de
+  abas livres. Torna a jornada (J1) e o circuito Eco (batalha → XP+dinheiro → gastar)
+  explícitos na UI.
+- **Impacto:** define o fluxo navegacional (JN-1) e pode dar destino ao `OpponentGenerator`
+  (novo confronto respeitando a ordem). Alto valor, cruza com J1/J2/Eco.
