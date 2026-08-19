@@ -360,6 +360,23 @@ class ServerTeamTest < Minitest::Test
     refute_includes last_response.body, "tackle — Nível", "golpe sem aprendizado por nível não ganha rótulo"
   end
 
+  def test_team_manage_keeps_saved_move_above_level_visible_with_level_and_checked
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @repository.set_moves("user-a", pikachu_id, %w[quick-attack])
+
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" }, { level: 5, name: "quick-attack" }]
+    ) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'value="quick-attack" checked',
+                    "golpe salvo acima do nível permanece visível/marcado para permitir remoção"
+    assert_includes last_response.body, "quick-attack — Nível 5"
+  end
+
   def test_team_manage_is_isolated_per_session
     @repository.add("user-a", pikachu_pokemon)
 

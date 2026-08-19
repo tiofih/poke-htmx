@@ -69,7 +69,7 @@ class ServerTeamItemTest < Minitest::Test
     @repository.assign_item("user-a", pikachu_id, "potion")
     @inventory.add("user-a", "potion", 2)
 
-    PokeApiStub.with_available_move_names(%w[growl]) do
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
       get "/team/manage", {}, user_session("user-a")
     end
 
@@ -164,7 +164,7 @@ class ServerTeamHeldItemTest < Minitest::Test
     @inventory.add("user-a", "choice-band", 2)
     @inventory.add("user-a", "choice-scarf", 1)
 
-    PokeApiStub.with_available_move_names(%w[growl]) do
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
       get "/team/manage", {}, user_session("user-a")
     end
 
@@ -181,7 +181,7 @@ class ServerTeamHeldItemTest < Minitest::Test
     @inventory.add("user-a", "choice-band", 1)
     @inventory.add("user-a", "potion", 2)
 
-    PokeApiStub.with_available_move_names(%w[growl]) do
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
       get "/team/manage", {}, user_session("user-a")
     end
 
