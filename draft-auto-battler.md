@@ -472,3 +472,39 @@
   explícitos na UI.
 - **Impacto:** define o fluxo navegacional (JN-1) e pode dar destino ao `OpponentGenerator`
   (novo confronto respeitando a ordem). Alto valor, cruza com J1/J2/Eco.
+
+---
+
+## Anotações de performance — 2026-08-19 (durante validação da sessão 0034)
+
+> **Fora do fluxo (RNF-04).** Anotado durante a validação da sessão 0034. Não gera
+> critérios de aceite nem plano TDD agora; revisar ao fechar a 0034.
+
+### P1. Paralelismo ou cache mais agressivo no gateway da PokéAPI
+
+- **Problema observado (validação da 0034):** `GET /battle` (prepare) demorou ~1.6min e a
+  2ª rodada de `POST /battle/play` (finalize: evolução + aprendizado) ~1.2min.
+- **Causa raiz (medida):** fan-out **serial** de ~133 requisições HTTP à PokéAPI por
+  prepare — 6 `detail` do jogador (cada = `/pokemon` + species + chain + `find` por
+  estágio ≈ 5) ≈ 30, 6 `detail` do oponente ≈ 24, 6 `moves_for` do jogador (pokemon +
+  últimos 4 moves) ≈ 30, 6 do oponente ≈ 30, 18 `type_relations` seriais, 1
+  `fetch_all_names` — ≈ 93s a 0.7s/RTT. O finalize soma ~36 seriais
+  (`next_evolutions` = species + chain + find, `learnable_moves` + `detail` de evolução).
+- **Agravante:** `PokeApiCache` é **em memória** (TTL 600s) e o `scripts/reboot` faz
+  `docker compose down` → **cache zerado a cada iteração** de validação; toda batalha
+  reaquece do zero.
+- **Caminhos candidatos (decisão do usuário ao refinar):**
+  1. **Paralelismo:** disparar os fetches independentes em threads (details dos 6 membros,
+     6 do oponente, 18 tipos, moves) — reduzir o walk-time de ~133 RTTs para a profundidade
+     do grafo (~10–20). Impacto em `PokeApiHttp`/`BattleService` (+ cache thread-safe).
+  2. **Cache mais agressivo:** persistir o cache (arquivo/Redis/Postgres em vez de
+     memória) e/ou aumentar o TTL — dados da PokéAPI são praticamente imutáveis
+     (`type_relations`, `move`, species/evo). Sobrevive ao `scripts/reboot`.
+  3. **Combinar ambos:** paralelizar o warm-up + cache persistente longo (TTL alto).
+- **Garantias desejáveis (esboço):** testes seguem sem rede (stubs existentes —
+  `PokeApiStub`/`PokeApiCache` com clock fake); suíte/lint verdes; zero mudança de
+  contrato da interface `PokeApi`.
+- **Impacto estimado:** prepare de ~93s → poucos segundos (paralelo) e o cache
+  persistente elimina o re-warm a cada reboot.
+- **Candidate order suggestion:** após J1/J2/J3 (impacto de UX alto; não depende delas —
+  pode entrar antes se o usuário preferir).

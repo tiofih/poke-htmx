@@ -214,3 +214,12 @@ feedback.
   seletor de golpes uma lista (JN-2) — hoje o gating/`level_learned_at` fica só no manage.
 - **`available_move_names` órfão:** manter no gateway sem chamador de UI; remoção em
   respiro futuro se desejado.
+- **DESEMPENHO — anotado 2026-08-19 durante a validação:** `GET /battle` (prepare) leva
+  ~1.6min e a 2ª rodada de `POST /battle/play` (finalize/evolução) ~1.2min. Causa raiz:
+  fan-out **serial** de ~133 requisições HTTP à PokéAPI por prepare (6 details do jogador
+  = pokemon+species+chain+find por estágio ~30; 6 details do oponente ~24; 6 `moves_for`
+  do jogador ~30; 6 do oponente ~30; 18 `type_relations` seriais; 1 `fetch_all_names`)
+  ≈ 93s @0.7s/RTT — e o finalize adiciona ~36 seriais (next_evolutions + learnable_moves
+  + detail). O `PokeApiCache` (TTL 600s, memória) é **zerado a cada `docker compose down`
+  do `scripts/reboot`** → toda iteração de validação reaquece o cache do zero. Ver
+  `draft-auto-battler.md` (anotação de performance). Virar sessão após a validação da 0034.
