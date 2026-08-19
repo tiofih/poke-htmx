@@ -415,6 +415,14 @@
 > do cadastro de ideias acima. Não geram critérios de aceite nem plano TDD agora.
 > Revisar ao fechar as fases correntes.
 
+### Ordem decidida das próximas sessões (2026-08-18, usuário)
+
+> **Sequência fechada pelo usuário:** **1. Respiro 2** → **2. D1 parcial (nível de
+> aprendizado)** → **3. J1 (seleção inicial)** → **4. JN-2 (golpes em lista)** →
+> **5. J3 (ranking S–F)** → **6. JN-1 (telas próprias, fim do empilhamento)** → depois
+> **organizar o resto** (JN-3, JN-4, JN-5, J2, J4, D4 e demais).
+> Ao concluir cada sessão, atualizar esta ordem no roadmap (`REQUIREMENTS.md`).
+
 ### JN-1. Telas próprias de Time, Batalha e Histórico (fim do empilhamento)
 
 - **Problema:** `index.erb` mantém 5 `<div>` empilhados na página única (`#pokemon-list`,
