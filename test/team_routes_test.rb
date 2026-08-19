@@ -426,6 +426,36 @@ class ServerTeamTest < Minitest::Test
     assert_includes last_response.body, "dispon"
   end
 
+  def test_post_team_moves_with_move_above_member_level_shows_notice_and_does_not_save
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" }, { level: 5, name: "quick-attack" }]
+    ) do
+      post "/team/#{pikachu_id}/moves", { moves: %w[quick-attack] }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_empty @repository.all("user-a").first.moves
+    assert_includes last_response.body, "dispon", "golpe acima do nível não pode ser salvo"
+  end
+
+  def test_post_team_moves_at_member_level_saves
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @progression.grant("user-a", pikachu_id, 1200)
+
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" }, { level: 5, name: "quick-attack" }]
+    ) do
+      post "/team/#{pikachu_id}/moves", { moves: %w[growl quick-attack] }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_equal %w[growl quick-attack], @repository.all("user-a").first.moves
+  end
+
   def test_post_team_moves_of_other_users_member_is_noop
     @repository.add("user-a", pikachu_pokemon)
     @repository.add("user-b", bulbasaur_pokemon)
