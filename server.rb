@@ -19,12 +19,27 @@ require_relative "lib/inventory_repository"
 require_relative "lib/item_catalog"
 require_relative "lib/mart_service"
 require_relative "lib/battle_service"
+require_relative "lib/team_service"
 
 module ServerCommon
   private
 
   def current_user
     session[:user_id]
+  end
+
+  def team_manage_context(member_id = nil)
+    data = settings.team_strategy.manage_data(current_user)
+    expose_manage_data(data)
+    return nil unless member_id
+
+    data[:members].find { |poke| poke.id.to_s == member_id.to_s }
+  end
+
+  def expose_manage_data(data)
+    @team = data[:members]
+    @available_moves = data[:available_moves]
+    @inventory = data[:inventory]
   end
 end
 
@@ -84,14 +99,8 @@ module ServerTeamActions
   end
 
   def render_team_manage
-    @team = settings.team.all(current_user)
-    @available_moves = moves_for_team
-    @inventory = settings.inventory.all(current_user)
+    team_manage_context
     erb :team_manage, layout: false
-  end
-
-  def moves_for_team
-    @team.to_h { |member| [member.id, settings.api.available_move_names(member.number)] }
   end
 
   def add_team_member
@@ -154,31 +163,12 @@ module ServerTeamActions
   end
 
   def save_team_moves
+    member = team_manage_context(params[:id])
+    @notice = settings.team_strategy.save_moves(
+      current_user, member, Array(params[:moves]), @available_moves
+    )
     @team = settings.team.all(current_user)
-    @available_moves = moves_for_team
-    member = @team.find { |poke| poke.id.to_s == params[:id].to_s }
-    apply_move_selection(member)
     erb :team_manage, layout: false
-  end
-
-  def apply_move_selection(member)
-    selected = Array(params[:moves])
-    error = move_choice_error(member, selected)
-    @notice = error
-    return unless error.nil? && member
-
-    settings.team.set_moves(current_user, member.id, selected)
-    @team = settings.team.all(current_user)
-  end
-
-  def move_choice_error(member, selected)
-    limit = TeamRepository::MAX_MOVES_PER_POKEMON
-    return "Selecione no máximo #{limit} golpes." if selected.size > limit
-
-    available = member ? @available_moves[member.id] : []
-    return "Golpe não disponível para este Pokémon." if selected.any? { |move| !available.include?(move) }
-
-    nil
   end
 end
 
@@ -186,45 +176,10 @@ module ServerTeamItemActions
   private
 
   def save_team_item
-    team_manage_data
-    @inventory = settings.inventory.all(current_user)
-    assign_member_item(team_member_for_item)
+    member = team_manage_context(params[:id])
+    @notice = settings.team_strategy.assign_item(current_user, member, params[:item_name].to_s)
+    @team = settings.team.all(current_user)
     erb :team_manage, layout: false
-  end
-
-  def team_manage_data
-    @team = settings.team.all(current_user)
-    @available_moves = moves_for_team
-  end
-
-  def team_member_for_item
-    @team.find { |poke| poke.id.to_s == params[:id].to_s }
-  end
-
-  def assign_member_item(member)
-    return unless member
-
-    item_name = params[:item_name].to_s
-    if item_name.empty?
-      clear_member_item(member)
-    else
-      assign_catalog_item(member, item_name)
-    end
-    @team = settings.team.all(current_user)
-  end
-
-  def clear_member_item(member)
-    settings.team.assign_item(current_user, member.id, nil)
-  end
-
-  def assign_catalog_item(member, item_name)
-    item = ItemCatalog.find(item_name)
-    unless item && item.heal_amount.to_i.positive?
-      @notice = "Item não disponível para atribuição."
-      return
-    end
-
-    settings.team.assign_item(current_user, member.id, item_name)
   end
 end
 
@@ -232,42 +187,10 @@ module ServerTeamHeldActions
   private
 
   def save_team_held_item
-    team_manage_data
-    @inventory = settings.inventory.all(current_user)
-    assign_member_held_item(team_member_for_item)
+    member = team_manage_context(params[:id])
+    @notice = settings.team_strategy.assign_held_item(current_user, member, params[:item_name].to_s)
+    @team = settings.team.all(current_user)
     erb :team_manage, layout: false
-  end
-
-  def team_manage_data
-    @team = settings.team.all(current_user)
-    @available_moves = moves_for_team
-  end
-
-  def team_member_for_item
-    @team.find { |poke| poke.id.to_s == params[:id].to_s }
-  end
-
-  def assign_member_held_item(member)
-    return unless member
-
-    item_name = params[:item_name].to_s
-    if item_name.empty?
-      settings.team.assign_held_item(current_user, member.id, nil)
-    else
-      assign_held_catalog_item(member, item_name)
-    end
-    @team = settings.team.all(current_user)
-  end
-
-  def assign_held_catalog_item(member, item_name)
-    item = ItemCatalog.find(item_name)
-    unless item && item.category == "held" &&
-           settings.inventory.count(current_user, item_name).positive?
-      @notice = "Item não disponível para equipar."
-      return
-    end
-
-    settings.team.assign_held_item(current_user, member.id, item_name)
   end
 end
 
@@ -487,18 +410,17 @@ class Server < Sinatra::Base
     set :battle_history, BattleRepository.new
     set :wallet, WalletRepository.new
     set :api, PokeApi.instance
-    set :heal, HealService.new(
-      team: TeamRepository.new, progression: ProgressionRepository.new,
-      wallet: WalletRepository.new
-    )
     set :inventory, InventoryRepository.new
-    set :mart, MartService.new(inventory: InventoryRepository.new, wallet: WalletRepository.new)
-    set :battle, BattleService.new(
-      dependencies: {
-        api: -> { settings.api }, battles: settings.battles, team: settings.team,
-        progression: settings.progression, battle_history: settings.battle_history,
-        wallet: settings.wallet, inventory: settings.inventory
-      }
+    deps = {
+      api: -> { settings.api }, battles: settings.battles, team: settings.team,
+      progression: settings.progression, battle_history: settings.battle_history,
+      wallet: settings.wallet, inventory: settings.inventory
+    }
+    set :heal, HealService.new(team: deps[:team], progression: deps[:progression], wallet: deps[:wallet])
+    set :mart, MartService.new(inventory: deps[:inventory], wallet: deps[:wallet])
+    set :battle, BattleService.new(dependencies: deps)
+    set :team_strategy, TeamService.new(
+      api: deps[:api], team: deps[:team], inventory: deps[:inventory], wallet: deps[:wallet]
     )
   end
 
