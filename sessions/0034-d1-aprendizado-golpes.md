@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões do usuário em 2026-08-19 (confirmado iniciar o refinamento) |
-| Implementação | Pendente |
+| Implementação | Em andamento — passos 1–5 verdes (TDD, 2026-08-19): suíte 566/1734, lint 0. Aguardando validação do usuário para fechar (fase 3) |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -185,6 +185,25 @@ golpes é manual** (tela de times) — sem substituição automática quando o c
 golpes liberados/noção de nível; trocar golpes com cap cheio; aprender via batalha) e
 verifica os critérios de aceite (seção 4). Resultado e status preenchidos aqui após o
 feedback.
+
+### Progresso da implementação (fase 2 — TDD, 2026-08-19)
+
+- **Passo 1** verde (`db7dd07`): `TeamService` ganhou a dep `progression`;
+  `manage_data` devolve `available_moves` gated por nível (`learnable_moves` filtrado por
+  `level <= nível` do membro; nível via `ProgressionRepository#get`, default 1);
+  migração dos stubs de manage para `with_learnable_moves`.
+- **Passo 2** verde (`cca8f93`): validação gated — `move_choice_error` contra os nomes da
+  lista gated; golpe acima do nível → aviso, não salva.
+- **Passo 3** verde (`983fd50`): `team_manage.erb` exibe `"<nome> — Nível N"` (rotulo
+  quando `level` presente) e união com moves salvos (legados fora do `learnable_moves`
+  visíveis sem nível, removíveis); refactor de `gated_moves` (ABC) sem `rubocop:disable`.
+- **Passo 4** verde (`bff6273`): stubs restantes migrados (`with_available_move_names` →
+  `with_learnable_moves`, team_strategy_routes) + regressão (golpe salvo acima do nível
+  visível e marcado; item/segurável/slots intactos com a lista gated).
+- **Passo 5** verde (docs): `REQUIREMENTS.md`, `SESSIONS.md`, `draft-auto-battler.md`
+  atualizados; suíte completa 566 runs/1734 asserts, lint 0.
+- **Fase 2 concluída → PARADA obrigatória.** Aguardando a validação do usuário (fase 3).
+  Não marcar status de validação como `Done` nem commitar conclusão antes do feedback.
 
 ## 8. Observações
 
