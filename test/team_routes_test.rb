@@ -332,6 +332,34 @@ class ServerTeamTest < Minitest::Test
     refute_includes last_response.body, 'value="thunder"', "move de nível 10 bloqueado p/ nível 5"
   end
 
+  def test_team_manage_renders_learn_level_label_in_move_checkbox
+    @repository.add("user-a", pikachu_pokemon)
+
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "growl — Nível 1"
+    refute_includes last_response.body, "<html"
+  end
+
+  def test_team_manage_keeps_saved_move_outside_learnable_visible_and_checked
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @repository.set_moves("user-a", pikachu_id, %w[tackle])
+
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'value="growl"'
+    assert_includes last_response.body, 'value="tackle" checked',
+                    "golpe salvo fora do learnable permanece visível/marcado"
+    refute_includes last_response.body, "tackle — Nível", "golpe sem aprendizado por nível não ganha rótulo"
+  end
+
   def test_team_manage_is_isolated_per_session
     @repository.add("user-a", pikachu_pokemon)
 

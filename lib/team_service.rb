@@ -55,13 +55,21 @@ class TeamService
   end
 
   def moves_for(user_id, members)
-    members.to_h { |member| [member.id, gated_move_names(user_id, member)] }
+    members.to_h { |member| [member.id, gated_moves(user_id, member)] }
   end
 
-  def gated_move_names(user_id, member)
+  def gated_moves(user_id, member)
     learnable = api.learnable_moves(member.number).to_a
-    level = member_level(user_id, member)
-    learnable.select { |move| move[:level] <= level }.map { |move| move[:name] }
+    gated = learnable.select { |move| move[:level] <= member_level(user_id, member) }
+    gated + saved_moves_outside_gated(member, learnable, gated)
+  end
+
+  def saved_moves_outside_gated(member, learnable, gated)
+    by_name = learnable.to_h { |move| [move[:name], move] }
+    member.moves.to_a.reject { |name| gated.any? { |move| move[:name] == name } }.map do |name|
+      known = by_name[name]
+      known ? { level: known[:level], name: name } : { name: name }
+    end
   end
 
   def member_level(user_id, member)
@@ -72,7 +80,7 @@ class TeamService
     limit = TeamRepository::MAX_MOVES_PER_POKEMON
     return "Selecione no máximo #{limit} golpes." if selected.size > limit
 
-    available = member ? available_moves[member.id] : []
+    available = member ? available_moves[member.id].to_a.map { |move| move[:name] } : []
     return "Golpe não disponível para este Pokémon." if selected.any? { |move| !available.include?(move) }
 
     nil

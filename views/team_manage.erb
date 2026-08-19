@@ -13,13 +13,13 @@
         hx-post="/team/<%= poke.id %>/moves"
         hx-target="#team"
         hx-swap="innerHTML">
-      <% @available_moves[poke.id].to_a.each do |move_name| %>
+      <% @available_moves[poke.id].to_a.each do |move| %>
         <label>
           <input
             type="checkbox"
             name="moves"
-            value="<%= move_name %>"<%= poke.moves.include?(move_name) ? " checked" : "" %>>
-          <%= move_name %>
+            value="<%= move[:name] %>"<%= poke.moves.include?(move[:name]) ? " checked" : "" %>>
+          <%= move[:name] %><%= " — Nível #{move[:level]}" if move[:level] %>
         </label><br>
       <% end %>
       <button type="submit">Salvar golpes</button>
