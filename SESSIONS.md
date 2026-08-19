@@ -54,16 +54,16 @@ atribuição de item por membro, decisão 12 — 2ª parte).
 2026-08-18** (0032: suíte 559/1696, lint 0 — 1 slot/membro, modula Attack/Speed,
 decisão 13; equipa se tiver, não consome).
 
-**Sessão 0033 (Respiro 2 — BattleService/TeamService + split de testes) em
-implementação** (TDD concluído em 2026-08-19: suíte 559/1696, lint 0, grep
-`rubocop:` em `server.rb` → 0 — **aguardando validação do usuário**).
+**Sessão 0033 (Respiro 2 — BattleService/TeamService + split de testes) concluída e
+validada em 2026-08-19** (0033: suíte 559/1696, lint 0, grep `rubocop:` em `server.rb`
+→ 0 — services de produção extraídos, handlers thin, `server_test.rb` fatiado).
 
 **Próxima sessão:** **D1 parcial — nível de aprendizado de golpes** (conforme
 ordem fechada em 2026-08-18): ao subir de nível, o Pokémon **aprende** o golpe da
 `learnable_moves` da species em vez de ganhar os 4 primeiros de uma vez (parcial;
 critérios a fechar no refinamento da sessão).
 
-> **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 executado
+> **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). Próximas: **D1 parcial** → **J1 (seleção inicial)** → **JN-2** → **J3**
 > → **JN-1** → organizar o resto (JN-3, JN-4, JN-5, J2, J4, D4).
 
@@ -103,7 +103,7 @@ critérios a fechar no refinamento da sessão).
 | 0030 | Eco-4-A: itens em batalha — `Item#heal_amount` + `BattlePokemon#heal` + `ItemUsePolicy` automática (decisão 12) + `BattleEngine` ação `:item` (half-FSM) + `InventoryRepository#use` + `POST /battle/play` debitando + `battle.erb` (branch `:item` + estoque) | Concluída | Done (passos 0–7, suíte 493/1525, lint 0, validado em 2026-08-17) |
 | 0031 | Eco-4-B: item atribuído por membro — `assigned_item` persistido (0031_add_assigned_item) + `TeamRepository#assign_item` + `BattlePokemon#assigned_item` + `ItemUsePolicy` prefere o atribuído (decisão 12 — 2ª parte) + `BattleEngine` usa o atribuído + `POST /team/:id/item` + select no `team_manage.erb` + `battle.erb` (`carrega:`) | Concluída | Done (passos 0–6, suíte 524/1599, lint 0, validado em 2026-08-18) |
 | 0032 | Eco-4-C: seguráveis/hold items — `Item` `stat`/`multiplier` + `ItemCatalog.can_hold` (choice-band/scarf, decisão 13) + coluna `held_item` (0032_add_held_item) + `TeamRepository#assign_held_item` + `BattlePokemon#held_item` + modulação de `stat` (motor sem mudança) + `POST /team/:id/held-item` + select "Segurável:" no `team_manage.erb` + `battle.erb` (`segura:`) + seed `team_duelo` | Concluída | Done (passos 0–6 + seed, suíte 559/1696, lint 0, validado em 2026-08-18) |
-| 0033 | Respiro 2 — services de produção: `BattleService` (prepare/advance) e `TeamService` (manage_data/save_moves/assign), providers lambda p/ gateway, 3 `rubocop:disable` de `server.rb` removidos, `server_test.rb` (1925 linhas) fatiado em 7 arquivos por área + `battle_test_helpers.rb` | Em implementação | TDD concluído (passos 1–4, suíte 559/1696, lint 0, grep `rubocop:` em `server.rb` → 0) — **aguardando validação do usuário** (2026-08-19) |
+| 0033 | Respiro 2 — services de produção: `BattleService` (prepare/advance) e `TeamService` (manage_data/save_moves/assign), providers lambda p/ gateway, 3 `rubocop:disable` de `server.rb` removidos, `server_test.rb` (1925 linhas) fatiado em 7 arquivos por área + `battle_test_helpers.rb` | Concluída | Done (passos 1–4, suíte 559/1696, lint 0, grep `rubocop:` em `server.rb` → 0, validado em 2026-08-19) |
 
 ## Estrutura do arquivo de sessão
 

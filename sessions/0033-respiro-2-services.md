@@ -4,9 +4,9 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | Em andamento — este arquivo fecha objetivo, escopo, critérios e plano TDD (aguardando usuário) |
-| Implementação | Pendente |
-| Validação | Pendente — executada pelo usuário (fase 3) |
+| Refinamento | Concluída (commit `dba4dbd`, 2026-08-19) |
+| Implementação | Concluída (passos 1–4, suíte 559/1696, lint 0, commits `ef4341a`/`e0d1ca6`/`c2c4a5e`) |
+| Validação | Concluída — **executada pelo usuário em 2026-08-19** (fase 3) |
 
 ---
 
@@ -112,41 +112,41 @@ hash de resultado com `notice`) fiados via `set :heal, ...`/`set :mart, ...` no 
 
 ### Resultado
 
-- [ ] **Nenhum `# rubocop:disable`/`enable` restante** em `server.rb`
+- [x] **Nenhum `# rubocop:disable`/`enable` restante** em `server.rb`
       (`grep 'rubocop:' server.rb` → 0 ocorrências).
-- [ ] `./scripts/lint` → **0 offenses** com as **métricas padrão do root** (`.rubocop.yml`);
+- [x] `./scripts/lint` → **0 offenses** com as **métricas padrão do root** (`.rubocop.yml`);
       **nenhum orçamento novo** de produção.
-- [ ] `./scripts/test` → **suíte completa verde com o mesmo tamanho de cobertura**
+- [x] `./scripts/test` → **suíte completa verde com o mesmo tamanho de cobertura**
       (baseline **559 runs/1696 asserts**): nenhum teste removido, renomeado ou adicionado; o split
       apenas **move classes de arquivo**.
-- [ ] 0 regressão de comportamento — rotas/domínio/schema intactos (a suíte existente é a rede de
+- [x] 0 regressão de comportamento — rotas/domínio/schema intactos (a suíte existente é a rede de
       segurança; nada de novo a escrever nesta sessão).
 
 ### Estrutura — produção
 
-- [ ] `lib/battle_service.rb` — `BattleService` PORO com `prepare(user_id)` e `advance(user_id)`
+- [x] `lib/battle_service.rb` — `BattleService` PORO com `prepare(user_id)` e `advance(user_id)`
       (molde HealService/MartService); concentra toda a orquestração hoje em `ServerBattleActions`
       (prepare + play + efeitos de `:finished` + rebuild do display); os 3 `rubocop:disable` de
       `server.rb` deixam de existir.
-- [ ] `lib/team_service.rb` — `TeamService` PORO com `manage_data`/`save_moves`/`assign_item`/
+- [x] `lib/team_service.rb` — `TeamService` PORO com `manage_data`/`save_moves`/`assign_item`/
       `assign_held_item`; elimina as duplicações `team_manage_data`/`team_member_for_item`/
       `moves_for_team`; handlers de time/estratégia thin.
-- [ ] `server.rb` — `configure` ganha `set :battle, BattleService.new(...)` e
+- [x] `server.rb` — `configure` ganha `set :battle, BattleService.new(...)` e
       `set :team_strategy, TeamService.new(...)` com as **mesmas instâncias de `settings`**;
       `battle_moves_for` deixa o `ServerCommon`; contrato de rotas **idêntico** (mesmos paths,
       `layout: false`, fragmentos, alvos htmx, `@notice`/`@message`, `HX-Trigger`).
 
 ### Estrutura — testes
 
-- [ ] `test/server_test.rb` fatiado por área nos 7 arquivos da tabela do escopo;
+- [x] `test/server_test.rb` fatiado por área nos 7 arquivos da tabela do escopo;
       `ServerBattleTestHelpers` em `test/battle_test_helpers.rb`; `server_test.rb` removido;
       cada arquivo com os `require_relative` corretos.
-- [ ] `test/.rubocop.yml` inalterado (orçamentos continuam somente para `test/`).
+- [x] `test/.rubocop.yml` inalterado (orçamentos continuam somente para `test/`).
 
 ### Garantias (RNF)
 
-- [ ] Commit obrigatório a cada passo verde (lint 0 + suíte completa verde).
-- [ ] Sem novas gems, sem mudança de schema/rotas/contrato público.
+- [x] Commit obrigatório a cada passo verde (lint 0 + suíte completa verde).
+- [x] Sem novas gems, sem mudança de schema/rotas/contrato público.
 - [ ] `draft-auto-battler.md` (anotação "Respiro 2" → marcada como feita), `SESSIONS.md` (0033
       registrada + próxima sessão **D1 parcial — nível de aprendizado**) e `REQUIREMENTS.md`
       (roadmap item 25 — Respiro 2 marcado como 1º da ordem) atualizados no mesmo escopo; sessão
@@ -197,14 +197,14 @@ hash de resultado com `notice`) fiados via `set :heal, ...`/`set :mart, ...` no 
 
 ## 7. Validação (executada pelo usuário)
 
-> **A ser preenchido pelo usuário** — fase 3 do ciclo (após implementação TDD com suíte/lint verdes).
+> **Validado pelo usuário em 2026-08-19** (fase 3).
 
-- [ ] Suíte completa verde (**559 runs/1696 asserts**, 0 failures/errors — baseline preservado).
-- [ ] Lint RuboCop: **0 offenses** (métricas padrão do root).
-- [ ] `grep 'rubocop:' server.rb` → **0 ocorrências** (nenhum disable de produção).
-- [ ] Nenhum comportamento alterado: rotas/domínio/schema intactos; `test/server_test.rb` fatiado
+- [x] Suíte completa verde (**559 runs/1696 asserts**, 0 failures/errors — baseline preservado).
+- [x] Lint RuboCop: **0 offenses** (métricas padrão do root).
+- [x] `grep 'rubocop:' server.rb` → **0 ocorrências** (nenhum disable de produção).
+- [x] Nenhum comportamento alterado: rotas/domínio/schema intactos; `test/server_test.rb` fatiado
       sem perda de testes (mesmos IDs de teste em novos arquivos).
-- [ ] `server.rb` funcionando em dev (`./scripts/run` + navegação Lista/Time/Batalha/Mart/Histórico).
+- [x] `server.rb` funcionando em dev (`./scripts/run` + navegação Lista/Time/Batalha/Mart/Histórico).
 
 ## 8. Observações
 
