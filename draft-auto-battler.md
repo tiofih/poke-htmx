@@ -394,6 +394,13 @@
    p/ comprar).
    **Fase Eco concluída (Eco-1..4)** → próximos: candidatos futuros (D4, D1, J1,
    J2, J3) — J2 (personalização) ampliará a UI de equipamento.
+
+   **Respiro 2 anotado em 2026-08-18 (avaliação de arquitetura pós-Eco):** candidato
+   de sessão — `server.rb` retomou crescimento (723 linhas, 3 `rubocop:disable`:
+   `advance_battle`/`rebuild_display_team`/`ServerBattleActions`) e `server_test.rb`
+   chegou a 1925 linhas. Extrair `BattleService`/`TeamService` (use cases, molde da
+   sessão 0020) e fatiar `server_test.rb` por área. Ver `draft-arquitetura-design-
+   patterns.md` (seção "Respiro 2026-08-18").
 2. Logo após decidir: **elencar o que fica e o que sai** da lista acima,
    definir ordem e transformar os escolhidos em **documentos de sessão** com
    critérios fechados e plano TDD (como a 0007).

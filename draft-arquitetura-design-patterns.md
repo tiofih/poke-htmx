@@ -7,6 +7,64 @@
 
 ---
 
+## Respiro 2026-08-18 — Estado atualizado (pós session 0032 / Eco-4-C)
+
+> **Fora do fluxo.** Respiração/milestone — análise de arquitetura + anotação de ideias.
+> Zero edição de código. Baseline: suíte **559 runs / 1696 asserts, lint 0** (sessão 0032
+> validada em 2026-08-18; git log clean).
+
+### Camadas em produção hoje
+
+| Camada | Arquivos | Padrão |
+| --- | --- | --- |
+| Rota/Orquestração | `server.rb` (723 linhas) — 6 módulos de ações (`ServerCommon`/`ServerListActions`/`ServerTeamActions`/`ServerTeamItemActions`/`ServerTeamHeldActions`/`ServerBattleActions`/`ServerHistoryActions`) + registradores de rotas (`PokemonRoutes`/`TeamRoutes`/`MartRoutes`/`BattleRoutes`/`HistoryRoutes`/`ErrorHandling`) + bloco `helpers` (~55 defs) | Sinatra::Base modular |
+| Services | `lib/heal_service.rb` (63), `lib/mart_service.rb` (62) | Application Service |
+| Policies puras | `reward_rule.rb`, `heal_cost_policy.rb`, `item_use_policy.rb`, `evolution_rule.rb`, `experience_curve.rb`, `type_effectiveness.rb` | Rule/Policy |
+| Domínio puro | `battle_engine.rb` (239), `battle_pokemon.rb`, `move.rb`, `item.rb`, `item_catalog.rb`, `opponent_generator.rb`, `battle_registry.rb`, `pokemon.rb` | Value Object + Engine |
+| Repositories | `team_repository.rb` (260), `battle_repository.rb`, `progression_repository.rb`, `wallet_repository.rb`, `inventory_repository.rb` | Repository por agregado |
+| Gateway | `gateways/poke_api*.rb` (interface + `PokeApiHttp` + `PokeApiCache` + módulos parsing/moves/types) | Gateway/Adapter/Decorator |
+| Presentação | `views/` 14 arquivos/385 linhas (fragmentos htmx + layout) | ERB direto |
+
+### O que o draft de 2026-08-10 previu e foi entregue
+
+- Gateway + Adapter + Cache decorator (`PokeApi`/`PokeApiHttp`/`PokeApiCache` TTL/LRU) — E1-A/E1-B ✅
+- Repositories por agregado — Battle/Progression/Wallet/Inventory ✅ (D3/Eco)
+- Policies puras — `RewardRule`, `HealCostPolicy`, `ItemUsePolicy`, `EvolutionRule`, `ExperienceCurve` ✅ (D2/Eco)
+- Application Services — `HealService`/`MartService` ✅ (Eco-2/3)
+- Hold items via Strategy/Decorator sobre `BattlePokemon` (motor inalterado) ✅ (Eco-4-C)
+- half-FSM terminal + ação `:item` no `BattleEngine` ✅ (Eco-4-A)
+
+### Tensões restantes (candidatas ao próximo respiro)
+
+1. **`server.rb` retomou crescimento** — 723 linhas + 3 `rubocop:disable`
+   (`ServerBattleActions` ModuleLength; `advance_battle` com AbcSize+
+   CyclomaticComplexity+MethodLength+PerceivedComplexity; `rebuild_display_team` com
+   AbcSize+MethodLength). O handler mais gordo (`advance_battle`) orquestra: engine →
+   advance → XP → dinheiro → histórico → evolução → HP persistido → débito do
+   inventário. **Candidato: extrair `BattleService`/`TeamService` (use cases) — mesmo
+   molde da sessão 0020; p.ex. `BattleService#advance`, orquestração de `team_manage`.**
+2. **`server_test.rb` com 1925 linhas** (orçamento ClassLength 500 em `test/.rubocop.yml`)
+   — candidato a split por área (`team_routes_test.rb`/`battle_routes_test.rb`/...),
+   já existe `server_test_helpers.rb`.
+3. **UI duplicada** — `battle.erb` (88) repete loop Seu Time/Oponente; `team_manage.erb`
+   (81) acumula 3 selects (moves+item+held). Presenter/view-object candidato (o draft
+   2026-08-10 previu `BattleLogPresenter`).
+4. **Determinismo total** — escolha de golpe e `ItemUsePolicy` determinísticas; **RNG
+   injetável** segue anotado p/ variar partidas (em aberto desde 0011/0015).
+
+### Ideias anotadas no respiro (2026-08-18)
+
+- **Respiro 2 (refactor server.rb + split de testes):** sessão candidata — remover os 3
+  disables via extração de services (use cases) e dividir `server_test.rb` por área.
+  Critério: suíte/lint preservados, sem mudança de comportamento (molde da 0020).
+- **J2 (personalização) é o próximo natural** — `team_manage.erb` já concentra
+  moves+item+held; amadurecer para tela própria de equipamento/estratégia.
+- Candidatos do backlog mantidos: **D4** (draft temático), **D1-nível de aprendizado**
+  (info extra dos golpes — `level_learned_at`), **J1** (seleção inicial), **J3** (ranking
+  S–F — `PokemonRating` no molde de `TypeEffectiveness`).
+
+---
+
 ## 1. Estado atual do código (levantamento real)
 
 Camadas hoje (Sinatra + Dry::Struct + PostgreSQL + htmx):
