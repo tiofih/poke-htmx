@@ -1,6 +1,10 @@
 # Ruby / Bundler
 .bundle/
 vendor/bundle/
+gems/
+cache/
+specifications/
+bin/
 tmp/
 log/
 coverage/
