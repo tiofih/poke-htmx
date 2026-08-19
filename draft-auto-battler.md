@@ -417,7 +417,8 @@
 
 ### Ordem decidida das próximas sessões (2026-08-18, usuário)
 
-> **Sequência fechada pelo usuário:** **1. Respiro 2** → **2. D1 parcial (nível de
+> **Sequência fechada pelo usuário:** ~~**1. Respiro 2**~~ (feito — sessão 0033,
+> TDD concluído em 2026-08-19, aguardando validação) → **1. D1 parcial (nível de
 > aprendizado)** → **3. J1 (seleção inicial)** → **4. JN-2 (golpes em lista)** →
 > **5. J3 (ranking S–F)** → **6. JN-1 (telas próprias, fim do empilhamento)** → depois
 > **organizar o resto** (JN-3, JN-4, JN-5, J2, J4, D4 e demais).
