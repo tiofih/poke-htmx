@@ -6,9 +6,10 @@ require_relative "inventory_repository"
 require_relative "wallet_repository"
 
 class TeamService
-  def initialize(api:, team:, inventory:, wallet:, catalog: ItemCatalog)
+  def initialize(api:, team:, progression:, inventory:, wallet:, catalog: ItemCatalog)
     @api_provider = api
     @team = team
+    @progression = progression
     @inventory = inventory
     @wallet = wallet
     @catalog = catalog
@@ -18,7 +19,7 @@ class TeamService
     members = @team.all(user_id)
     {
       members: members,
-      available_moves: moves_for(members),
+      available_moves: moves_for(user_id, members),
       inventory: @inventory.all(user_id),
       balance: @wallet.balance(user_id)
     }
@@ -53,8 +54,18 @@ class TeamService
     @api_provider.call
   end
 
-  def moves_for(members)
-    members.to_h { |member| [member.id, api.available_move_names(member.number)] }
+  def moves_for(user_id, members)
+    members.to_h { |member| [member.id, gated_move_names(user_id, member)] }
+  end
+
+  def gated_move_names(user_id, member)
+    learnable = api.learnable_moves(member.number).to_a
+    level = member_level(user_id, member)
+    learnable.select { |move| move[:level] <= level }.map { |move| move[:name] }
+  end
+
+  def member_level(user_id, member)
+    @progression.get(user_id, member.id)&.fetch(:level) || 1
   end
 
   def move_choice_error(member, selected, available_moves)

@@ -420,7 +420,8 @@ class Server < Sinatra::Base
     set :mart, MartService.new(inventory: deps[:inventory], wallet: deps[:wallet])
     set :battle, BattleService.new(dependencies: deps)
     set :team_strategy, TeamService.new(
-      api: deps[:api], team: deps[:team], inventory: deps[:inventory], wallet: deps[:wallet]
+      api: deps[:api], team: deps[:team], progression: deps[:progression],
+      inventory: deps[:inventory], wallet: deps[:wallet]
     )
   end
 

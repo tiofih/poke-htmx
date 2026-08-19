@@ -264,7 +264,9 @@ class ServerTeamTest < Minitest::Test
 
   def test_team_manage_renders_move_checkboxes_for_each_member
     @repository.add("user-a", pikachu_pokemon)
-    PokeApiStub.with_available_move_names(%w[growl quick-attack thunder-shock]) do
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" }, { level: 1, name: "quick-attack" }, { level: 1, name: "thunder-shock" }]
+    ) do
       get "/team/manage", {}, user_session("user-a")
     end
 
@@ -283,13 +285,51 @@ class ServerTeamTest < Minitest::Test
     pikachu_id = @repository.all("user-a").first.id
     @repository.set_moves("user-a", pikachu_id, %w[thunder-shock])
 
-    PokeApiStub.with_available_move_names(%w[growl thunder-shock]) do
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" }, { level: 1, name: "thunder-shock" }]
+    ) do
       get "/team/manage", {}, user_session("user-a")
     end
 
     assert last_response.ok?
     assert_includes last_response.body, 'value="thunder-shock" checked'
     refute_includes last_response.body, 'value="growl" checked'
+  end
+
+  def test_team_manage_gates_available_moves_by_member_level
+    @repository.add("user-a", pikachu_pokemon)
+
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" },
+       { level: 5, name: "quick-attack" },
+       { level: 10, name: "thunder" }]
+    ) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'value="growl"'
+    refute_includes last_response.body, 'value="quick-attack"', "move de nível 5 não liberado p/ nível 1"
+    refute_includes last_response.body, 'value="thunder"', "move de nível 10 não liberado p/ nível 1"
+  end
+
+  def test_team_manage_higher_level_member_sees_more_learnable_moves
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @progression.grant("user-a", pikachu_id, 1200)
+
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" },
+       { level: 5, name: "quick-attack" },
+       { level: 10, name: "thunder" }]
+    ) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'value="growl"'
+    assert_includes last_response.body, 'value="quick-attack"', "nível 5 deve liberar o move de nível 5"
+    refute_includes last_response.body, 'value="thunder"', "move de nível 10 bloqueado p/ nível 5"
   end
 
   def test_team_manage_is_isolated_per_session
@@ -304,7 +344,7 @@ class ServerTeamTest < Minitest::Test
   def test_team_manage_renders_slot_controls_and_back_link
     add_team("user-a", [["pikachu", 25], ["bulbasaur", 1], ["charmander", 4], ["squirtle", 7]])
 
-    PokeApiStub.with_available_move_names(%w[growl]) do
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
       get "/team/manage", {}, user_session("user-a")
     end
 
@@ -319,7 +359,7 @@ class ServerTeamTest < Minitest::Test
   def test_team_manage_fragment_has_no_html_wrapper
     @repository.add("user-a", pikachu_pokemon)
 
-    PokeApiStub.with_available_move_names(%w[growl]) do
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
       get "/team/manage", {}, user_session("user-a")
     end
 
@@ -332,7 +372,9 @@ class ServerTeamTest < Minitest::Test
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
 
-    PokeApiStub.with_available_move_names(%w[growl quick-attack thunder-shock]) do
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" }, { level: 1, name: "quick-attack" }, { level: 1, name: "thunder-shock" }]
+    ) do
       post "/team/#{pikachu_id}/moves", { moves: %w[growl thunder-shock] }, user_session("user-a")
     end
 
@@ -344,7 +386,9 @@ class ServerTeamTest < Minitest::Test
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
 
-    PokeApiStub.with_available_move_names(%w[growl thunder-shock]) do
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" }, { level: 1, name: "thunder-shock" }]
+    ) do
       post "/team/#{pikachu_id}/moves", { moves: ["thunder-shock"] }, user_session("user-a")
     end
 
@@ -357,7 +401,10 @@ class ServerTeamTest < Minitest::Test
   def test_post_team_moves_with_more_than_four_shows_notice_and_does_not_save
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
-    PokeApiStub.with_available_move_names(%w[a b c d e f]) do
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "a" }, { level: 1, name: "b" }, { level: 1, name: "c" },
+       { level: 1, name: "d" }, { level: 1, name: "e" }, { level: 1, name: "f" }]
+    ) do
       post "/team/#{pikachu_id}/moves", { moves: %w[a b c d e f] }, user_session("user-a")
     end
 
@@ -370,7 +417,7 @@ class ServerTeamTest < Minitest::Test
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
 
-    PokeApiStub.with_available_move_names(%w[growl]) do
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
       post "/team/#{pikachu_id}/moves", { moves: %w[not-a-real-move] }, user_session("user-a")
     end
 
@@ -384,7 +431,7 @@ class ServerTeamTest < Minitest::Test
     @repository.add("user-b", bulbasaur_pokemon)
     bulbasaur_id = @repository.all("user-b").first.id
 
-    PokeApiStub.with_available_move_names(%w[growl]) do
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
       post "/team/#{bulbasaur_id}/moves", { moves: ["growl"] }, user_session("user-a")
     end
 
@@ -407,7 +454,7 @@ class ServerTeamTest < Minitest::Test
     @repository.add("user-a", pikachu_pokemon)
 
     raising_api = Class.new do
-      def available_move_names(_number)
+      def learnable_moves(_number)
         raise "boom inesperado"
       end
     end.new
