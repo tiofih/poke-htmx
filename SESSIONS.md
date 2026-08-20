@@ -58,18 +58,17 @@ decisão 13; equipa se tiver, não consome).
 validada em 2026-08-19** (0033: suíte 559/1696, lint 0, grep `rubocop:` em `server.rb`
 → 0 — services de produção extraídos, handlers thin, `server_test.rb` fatiado).
 
-**Sessão 0034 (D1 parcial — nível de aprendizado de golpes) em implementação (fase 2,
-TDD) em 2026-08-19:** gating do manage por nível (`TeamService` com `progression`,
-`manage_data` via `learnable_moves` filtrado por `level <= membro`), validação gated
-(golpe acima do nível não salva), nível exibido na UI (`"<nome> — Nível N"`), união com
-moves salvos (legados visíveis/removíveis), troca manual preservada, `:finished`
-inalterado — suíte 566/1734, lint 0; **aguardando validação do usuário (fase 3)**.
+**Sessão 0034 (D1 parcial — nível de aprendizado de golpes) concluída e validada em
+2026-08-19:** gating do manage por nível (`TeamService` com `progression`, `manage_data`
+via `learnable_moves` filtrado por `level <= membro`), validação gated (golpe acima do
+nível não salva), nível exibido na UI (`"<nome> — Nível N"`), união com moves salvos
+(legados visíveis/removíveis), troca manual preservada, `:finished` inalterado — suíte
+566/1734, lint 0, critérios conferidos pelo usuário.
 
-**Próxima sessão (após validação da 0034):** **J1 — seleção inicial** (conforme
-ordem fechada em 2026-08-18).
+**Próxima sessão:** **J1 — seleção inicial** (conforme ordem fechada em 2026-08-18).
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
-> (0033). D1 parcial implementado (0034, em validação). Próximas: **J1 (seleção
+> (0033). D1 parcial concluído e validado (0034). Próximas: **J1 (seleção
 > inicial)** → **JN-2** → **J3** → **JN-1** → organizar o resto (JN-3, JN-4, JN-5, J2,
 > J4, D4).
 
@@ -110,7 +109,7 @@ ordem fechada em 2026-08-18).
 | 0031 | Eco-4-B: item atribuído por membro — `assigned_item` persistido (0031_add_assigned_item) + `TeamRepository#assign_item` + `BattlePokemon#assigned_item` + `ItemUsePolicy` prefere o atribuído (decisão 12 — 2ª parte) + `BattleEngine` usa o atribuído + `POST /team/:id/item` + select no `team_manage.erb` + `battle.erb` (`carrega:`) | Concluída | Done (passos 0–6, suíte 524/1599, lint 0, validado em 2026-08-18) |
 | 0032 | Eco-4-C: seguráveis/hold items — `Item` `stat`/`multiplier` + `ItemCatalog.can_hold` (choice-band/scarf, decisão 13) + coluna `held_item` (0032_add_held_item) + `TeamRepository#assign_held_item` + `BattlePokemon#held_item` + modulação de `stat` (motor sem mudança) + `POST /team/:id/held-item` + select "Segurável:" no `team_manage.erb` + `battle.erb` (`segura:`) + seed `team_duelo` | Concluída | Done (passos 0–6 + seed, suíte 559/1696, lint 0, validado em 2026-08-18) |
 | 0033 | Respiro 2 — services de produção: `BattleService` (prepare/advance) e `TeamService` (manage_data/save_moves/assign), providers lambda p/ gateway, 3 `rubocop:disable` de `server.rb` removidos, `server_test.rb` (1925 linhas) fatiado em 7 arquivos por área + `battle_test_helpers.rb` | Concluída | Done (passos 1–4, suíte 559/1696, lint 0, grep `rubocop:` em `server.rb` → 0, validado em 2026-08-19) |
-| 0034 | D1 parcial — nível de aprendizado de golpes: gating do manage por nível (`TeamService` + `progression`, `manage_data` via `learnable_moves` filter `level <= membro`), validação gated, nível na UI (`"<nome> — Nível N"`) + união com moves salvos, troca manual preservada, `:finished` inalterado | Implementação | Em TDD (passos 1–4 verdes, suíte 566/1734, lint 0, 2026-08-19) — **aguardando validação do usuário (fase 3); próximo passo: J1 (seleção inicial)** |
+| 0034 | D1 parcial — nível de aprendizado de golpes: gating do manage por nível (`TeamService` + `progression`, `manage_data` via `learnable_moves` filter `level <= membro`), validação gated, nível na UI (`"<nome> — Nível N"`) + união com moves salvos, troca manual preservada, `:finished` inalterado | Concluída | Done (passos 1–5, suíte 566/1734, lint 0, validado em 2026-08-19) |
 
 ## Estrutura do arquivo de sessão
 

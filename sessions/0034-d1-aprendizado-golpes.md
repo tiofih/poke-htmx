@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões do usuário em 2026-08-19 (confirmado iniciar o refinamento) |
-| Implementação | Em andamento — passos 1–5 verdes (TDD, 2026-08-19): suíte 566/1734, lint 0. Aguardando validação do usuário para fechar (fase 3) |
-| Validação | Pendente (executada pelo usuário) |
+| Implementação | Concluída — passos 1–5 verdes (TDD, 2026-08-19): suíte 566/1734, lint 0 |
+| Validação | Concluída — validada pelo usuário em 2026-08-19 (suíte 566/1734, lint 0; critérios da seção 4 conferidos) |
 
 ---
 
@@ -180,11 +180,14 @@ golpes é manual** (tela de times) — sem substituição automática quando o c
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** Ao final da fase 2, o usuário roda `./scripts/test` (suíte completa) e
-`./scripts/lint`, confere o comportamento manualmente (manage: subir de nível e ver novos
-golpes liberados/noção de nível; trocar golpes com cap cheio; aprender via batalha) e
-verifica os critérios de aceite (seção 4). Resultado e status preenchidos aqui após o
-feedback.
+**Concluída — 0034 validada pelo usuário em 2026-08-19.** Suíte completa
+`./scripts/test` verde (566 runs/1734 asserts, 0 falhas/erros), `./scripts/lint` 0
+offenses. Verificação manual pelo usuário: gating no manage por nível (membros de níveis
+diferentes veem listas diferentes), nível exibido (`"<nome> — Nível N"`), troca manual
+com cap cheio preservada, aprendizado automático `:finished` inalterado. Critérios de
+aceite (seção 4) conferidos — todos atendidos. Sessão concluída; próxima: **J1 (seleção
+inicial)**. Durante a validação foi anotada a melhoria de performance do gateway
+(P1 — ver `draft-auto-battler.md` e seção 8).
 
 ### Progresso da implementação (fase 2 — TDD, 2026-08-19)
 

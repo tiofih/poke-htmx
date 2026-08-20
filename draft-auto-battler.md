@@ -419,8 +419,8 @@
 
 > **Sequência fechada pelo usuário:** ~~**1. Respiro 2**~~ (feito — sessão 0033
 > concluída e validada em 2026-08-19) → ~~**2. D1 parcial (nível de
-> aprendizado)**~~ (feito — sessão 0034, implementação TDD concluída em
-> 2026-08-19, **aguardando validação do usuário**) → **3. J1 (seleção inicial)** →
+> aprendizado)**~~ (feito — sessão 0034, **concluída e validada em 2026-08-19**) →
+> **3. J1 (seleção inicial)** →
 > **4. JN-2 (golpes em lista)** → **5. J3 (ranking S–F)** → **6. JN-1 (telas próprias,
 > fim do empilhamento)** → depois
 > **organizar o resto** (JN-3, JN-4, JN-5, J2, J4, D4 e demais).
@@ -477,8 +477,9 @@
 
 ## Anotações de performance — 2026-08-19 (durante validação da sessão 0034)
 
-> **Fora do fluxo (RNF-04).** Anotado durante a validação da sessão 0034. Não gera
-> critérios de aceite nem plano TDD agora; revisar ao fechar a 0034.
+> **Fora do fluxo (RNF-04).** Anotado durante a validação da sessão 0034. A 0034 foi
+> **concluída e validada em 2026-08-19**; a P1 passa a ser **candidata a sessão** (entrar
+> antes na ordem J1/J2/J3 fica a critério do usuário — ver seção 8 da 0034 e roadmap).
 
 ### P1. Paralelismo ou cache mais agressivo no gateway da PokéAPI
 
