@@ -539,6 +539,30 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] **Robustez na batalha (dados da PokéAPI)** — resolvido na validação da sessão 0014:
       espécies sem `/pokemon` (urshifu/dudunsparce) e sprite `front_default` nulo não
       derrubam mais `GET /battle` (`PokeApi.find`/`evolution_chain` tolerantes).
+- [ ] **Escritas não atômicas e sem idempotência (anotado 2026-08-20 — fora de
+      sessão, RNF-04):** a finalização de batalha (`BattleService#finish_effects`) e a
+      compra (`MartService#purchase_result`) fazem **múltiplas escritas sem transação** em
+      conexões PG independentes (uma por repositório) — falha no meio deixa recompensa
+      parcial/duplicada; `POST /battle/play` e `POST /mart/buy` aceitam re-submit
+      (double-submit avança 2 rounds / repete o débito). Candidato a sessão: transação +
+      idempotência por round.
+- [ ] **Identidade/segurança (anotado 2026-08-20 — fora de sessão, RNF-04):** `?as=` em
+      `server.rb` permite assumir qualquer `user_id` (sequestro de conta fora de dev);
+      `SESSION_SECRET` usa fallback hardcoded no código (cookie de sessão forjável em prod);
+      POSTs sem CSRF (Sinatra modular não habilita `protect_from_csrf` por padrão).
+      Restringir `?as` a dev + `fail` no boot quando o secret de prod não existir.
+- [ ] **Erros sem status real (anotado 2026-08-20):** handler global de erro devolve
+      `status 200` — esconde falhas de monitoria/healthcheck; devolver o status correto +
+      fragmento htmx de erro dedicado.
+- [ ] **Race no `add` do time (anotado 2026-08-20):** `next_free_slot` é check-then-insert;
+      adds concorrentes lançam `PG::UniqueViolation` não tratado (500).
+- [ ] **Estado transiente e migrações destrutivas (anotado 2026-08-20):** batalha ativa
+      (`BattleRegistry`, memória) e cache PokeAPI (P1) não sobrevivem a `docker compose
+      down`; migrações 0003/0007 usam `TRUNCATE` (apagam dados fora de dev).
+- [ ] **`pry` carregado no boot de produção (anotado 2026-08-20):** `require "pry"` em
+      `server.rb` — mover para o grupo de dev.
+- [ ] **Sem CI (anotado 2026-08-20):** teste+lint rodam só local; sem validação
+      automatizada no push e sem healthcheck do app/banco.
 
 ## Roadmap (executado em `SESSIONS.md`)
 
