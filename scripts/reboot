@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+echo ""
+echo "== reboot: docker compose down =="
+docker compose down
+
+echo ""
+echo "== reboot: start app (up -d --build) =="
+./scripts/run
+
+echo ""
+echo "== reboot: seed database =="
+./scripts/seed "$@"
+
+echo ""
+docker compose ps
