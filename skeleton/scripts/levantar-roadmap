@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+# Digest do roadmap/backlog para abertura de sessão (executa no host, só grep/awk).
+# Substitui a leitura integral de REQUIREMENTS.md/SESSIONS.md no kickoff —
+# consultar seções específicas por busca quando necessário.
+
+cd "$(dirname "$0")/.."
+
+REQ="${REQUIREMENTS_FILE:-REQUIREMENTS.md}"
+SES="${SESSIONS_FILE:-SESSIONS.md}"
+: "${ROADMAP_TAIL:=6}" "${LIMIT_OPEN:=10}" "${IDEA_LIMIT:=12}"
+
+short() { sed -E 's/(.{120}).*/\1…/'; }
+strip_spaces() { sed -E 's/[[:space:]]+/ /g'; }
+
+printf '# Roadmap — %s\n\n' "$(date +%Y-%m-%d)"
+
+if [ -f "$SES" ]; then
+  printf '## Próxima sessão (%s)\n' "$SES"
+  awk '/^## Próxima sessão/{f=1; next} f && /^## /{f=0} f && NF' "$SES" | sed '/^$/d' | head -12
+  printf '\n## Últimas sessões (tabela de progresso)\n'
+  grep -E '^\| [0-9]{4} \|' "$SES" | short | tail -4
+  printf '\n'
+fi
+
+if [ -f "$REQ" ]; then
+  printf '## Roadmap — linhas mais recentes (itens 20+)\n'
+  grep -E '^\| [0-9]+ \|' "$REQ" | short | tail -n "$ROADMAP_TAIL"
+  printf '\n## Pontos de refinamento em aberto (seção "Limitações" de %s)\n' "$REQ"
+  awk '/^#+ Limita/{f=1; next} f && /^#+ /{exit} f && /^- \[ \]/{print}' "$REQ" | short | head -n "$LIMIT_OPEN"
+  printf '\n## Ideias anotadas (seção "Ideias", fora da fila de %s)\n' "$REQ"
+  awk '/^## Ideias/{f=1; next} f && /^## /{exit} f && /^### /{print "· " $0; next} f && /^- |^\* /{print}' "$REQ" | short | head -n "$IDEA_LIMIT"
+  printf '\n'
+fi

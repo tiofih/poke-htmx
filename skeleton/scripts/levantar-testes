@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+# Índice dos testes de servidor/repositório + busca por nome/keyword.
+# Ajuda a fechar o critério→teste (S1): achar o arquivo/nome do Minitest certo
+# sem abrir vários arquivos.
+
+cd "$(dirname "$0")/.."
+
+TEST_DIR="${TEST_DIR:-test}"
+SEARCH="${1:-}"
+
+if [ -n "$SEARCH" ]; then
+  echo "== testes com '$SEARCH' (arquivo:linha: nome) =="
+  rg -in "^\s*(def test_|test \"[^\"]+\"|describe |test ')" "$TEST_DIR" --glob '*_test.rb' \
+    | rg -i "$SEARCH" | head -40
+  echo
+  echo "== arquivos que mencionam '$SEARCH' =="
+  rg -il "$SEARCH" "$TEST_DIR" --glob '*_test.rb' | head -15
+else
+  echo "== arquivos de teste ($TEST_DIR) =="
+  for f in "$TEST_DIR"/*_test.rb; do
+    [ -e "$f" ] || continue
+    n="$(rg -c '^\s*def test_|^.*test "[^"]+"' "$f" 2>/dev/null | awk -F: '{s+=$NF} END{print s+0}')"
+    printf '%4s testes  %5s linhas  %s\n' "$n" "$(wc -l < "$f")" "$f"
+  done | sort -rn
+  echo
+  echo "uso: ./scripts/levantar-testes [keyword] — filtra testes por nome/texto"
+fi

@@ -23,7 +23,9 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
 
 ### 1. Refinamento (preparação)
 
-- Ler `REQUIREMENTS.md`, o arquivo da sessão atual e `SESSIONS.md`.
+- Abertura: rodar `./scripts/iniciar-sessao` (digest do estado) + `./scripts/levantar-roadmap`
+  (backlog/limitações abertas) e ler **na íntegra apenas o arquivo da sessão corrente**;
+  consultar `REQUIREMENTS.md`/`SESSIONS.md` por **busca** (grep/índice), não ler inteiros.
 - Fechar: **objetivo**, **escopo** ("fora de escopo" explícito), **critérios de
   aceite** e **plano TDD**.
 - **Cada critério de aceite referencia o teste que o prova** (S1) — critério sem

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+# Extrai só a seção de um requisito de REQUIREMENTS.md (RF-04, RNF-02, D1, E2...)
+# — sem ler o arquivo inteiro quando a sessão referencia um requisito específico.
+
+cd "$(dirname "$0")/.."
+
+REF="$(printf '%s' "${1:-}" | tr '[:lower:]' '[:upper:]')"
+if [ -z "$REF" ]; then
+  echo "uso: ./scripts/levantar-requisito RF-04 (ou RNF-02, D1, E2, ...)" >&2
+  exit 2
+fi
+REQ="${REQUIREMENTS_FILE:-REQUIREMENTS.md}"
+
+awk -v ref="$REF" '
+  $0 ~ "^#{2,5} " ref "([ —]|$)" {f=1; print; next}
+  f && /^#{2,5} / {exit}
+  f {print}
+' "$REQ" | sed '/^$/d' | head -60
+
+if ! grep -qE "^#{2,5} $REF([ —]|\$)" "$REQ"; then
+  echo "levantar-requisito> '$REF' não encontrado como seção em $REQ (veja também o roadmap via ./scripts/levantar-roadmap)." >&2
+  exit 1
+fi
