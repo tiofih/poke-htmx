@@ -75,12 +75,24 @@
 
 ---
 
-# Projeto — índice rápido (leia na abertura de cada sessão)
+# Projeto — índice rápido (consulte na abertura de cada sessão)
+
+## Abertura de sessão (economia de contexto)
+
+Na fase 1 rode `./scripts/iniciar-sessao` (kickoff: histórico + próxima sessão + checklist
+do refinamento) e `./scripts/levantar-roadmap` (digest do backlog/limitações abertas) —
+**não** leia `REQUIREMENTS.md`/`SESSIONS.md` inteiros (juntos ~60KB). Leia na íntegra
+**apenas** o arquivo da sessão corrente em `sessions/` (crie a partir de
+`sessions/template.md` se for nova). Para o resto, use digest/busca:
+`./scripts/levantar-sessao NNNN` (resumo da sessão), `./scripts/levantar-requisito RF-04`
+(seção de um requisito), `./scripts/levantar-testes [kw]` (índice de testes) ou
+grep/ctx_search.
 
 ## Comandos
 
 Tudo roda **via `./scripts/*`** (uso do container `web` / sobe o `db` quando necessário;
-`./scripts/check_docs` é apenas grep e roda **no host**) — **não** rodar `rake`/`rubocop` no host.
+`./scripts/check_docs`, `./scripts/iniciar-sessao` e `./scripts/levantar-roadmap` são
+apenas grep/awk e rodam **no host**) — **não** rodar `rake`/`rubocop` no host.
 
 | Comando | O que faz |
 | --- | --- |
@@ -88,6 +100,13 @@ Tudo roda **via `./scripts/*`** (uso do container `web` / sobe o `db` quando nec
 | `./scripts/rake` | Rake genérico no container: sem args roda `test` (suíte total); com args passa adiante (`db:setup`, `lint`, `test TEST=...`). |
 | `./scripts/lint` | RuboCop (mesmo fluxo docker). Objetivo: 0 offenses. |
 | `./scripts/check_docs` | Consistência do SDD (S5): `sessions/` ↔ tabela de progresso do `SESSIONS.md` ↔ "Próxima sessão". Rodar ao fechar refinamento/validação. |
+| `./scripts/levantar-roadmap` | Digest do backlog (próxima sessão, roadmap recente, limitações abertas, ideias) — ~3.5KB no lugar de ler dos docs. Roda no host. |
+| `./scripts/iniciar-sessao` | Kickoff de sessão: histórico + próxima sessão + checklist do refinamento (chama `levantar-roadmap`). Roda no host. |
+| `./scripts/levantar-sessao NNNN` | Digest de uma sessão: status, objetivo, escopo, critérios→teste (S1), passos do plano e fim do progresso — ~4KB no lugar de ~15-20KB do arquivo. Roda no host. |
+| `./scripts/levantar-requisito RF-04` | Extrai só a seção do requisito (RF/RNF) de `REQUIREMENTS.md` — ~1KB no lugar de ~48KB. Aceita minúsculas. Roda no host. |
+| `./scripts/levantar-testes [keyword]` | Índice dos testes (arquivo/l nº testes/linhas) ou busca por nome/texto — fecha o critério→teste (S1) sem abrir arquivos. Roda no host. |
+| `./scripts/checar-sessao NNNN` | Linter estrutural da sessão vs. template (seções obrigatórias, critério→teste sem célula vazia, aviso "parar na fase 2") — rodar antes do commit do refinamento. Roda no host. |
+| `./scripts/resumo-commit` | Estado do git (status/diff/últimos commits) + sugestão da linha `Contexto:` no formato do projeto. Roda no host. |
 | `./scripts/run` | `docker compose up --build` — sobe o app (porta 3000) para validação manual. |
 | `rake db:setup` | Aplica `db/schema.sql` + `db/migrations/*.sql` em ordem (idempotente) — via `./scripts/rake db:setup`. |
 

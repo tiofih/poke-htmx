@@ -11,7 +11,10 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 ### 1. Refinamento (preparação)
 
-- Ler `REQUIREMENTS.md`, o arquivo da sessão atual e `SESSIONS.md`.
+- Abertura: rodar `./scripts/iniciar-sessao` (digest do estado) + `./scripts/levantar-roadmap`
+  (backlog/limitações abertas) e ler **na íntegra apenas** o arquivo da sessão corrente
+  em `sessions/`; consultar `REQUIREMENTS.md`/`SESSIONS.md` por **busca** (grep/ctx_search),
+  não ler inteiros.
 - Esclarecer objetivo, escopo e **critérios de aceite** do passo.
 - **Cada critério de aceite referencia o teste (arquivo/nome Minitest) que o prova**
   (S1); critério sem teste automatizado registra `manual` explícito.

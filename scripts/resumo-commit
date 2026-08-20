@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+# Ajuda a escrever o commit no formato do projeto (Contexto: descrição).
+# Mostra as mudanças pendentes + os últimos commits e sugere o contexto adequado.
+
+cd "$(dirname "$0")/.."
+
+echo "== mudanças (staged + unstaged) =="
+git status --short | head -30
+[ -n "$(git status --short)" ] || echo "(árvore limpa)"
+
+echo
+echo "== diff --stat =="
+git diff --cached --stat | tail -6
+git diff --stat | tail -6
+
+echo
+echo "== últimos commits (formato do projeto) =="
+git log --oneline -8 | sed 's/^/  /'
+
+echo
+echo "== sugestão de contexto =="
+if git status --short | grep -q 'sessions/'; then
+  NUM="$(ls sessions/[0-9][0-9][0-9][0-9]-*.md 2>/dev/null | sort | tail -1 | xargs -n1 basename | cut -d- -f1)"
+  echo "  Contexto: Sessao $NUM: refinamento concluido — <resultado> (ou Validacao sessao $NUM: ... se fase 3)"
+elif git status --short | grep -qE '^[^ ]+ (lib/|test/|server\.rb)'; then
+  echo "  Contexto: Passo N: <descrição do resultado>  (ou Passos N-M: ... agrupado)"
+elif git status --short | grep -q 'draft-'; then
+  echo "  Contexto: Draft: <resumo do que foi anotado>"
+else
+  echo "  Contexto: <descrição concisa do que mudou e por quê> (sem feat:/fix:/chore:)"
+fi
+echo
+echo "  Contextos: Passo N: / Passos N-M: | Sessao NNNN: refinamento | Validacao sessao NNNN: | Sessao NNNN concluida: | Regra: | Draft:"

@@ -14,7 +14,9 @@ atual estiver concluída (marcada no arquivo da sessão):
 
 ### 1. Refinamento (preparação)
 
-- Ler `REQUIREMENTS.md`, o arquivo da sessão atual e `SESSIONS.md`.
+- Abertura: rodar `./scripts/iniciar-sessao` (digest) + `./scripts/levantar-roadmap`
+  (backlog/limitações abertas) e ler **na íntegra apenas** o arquivo da sessão corrente;
+  consultar `REQUIREMENTS.md`/`SESSIONS.md` por **busca**, não ler inteiros.
 - Esclarecer objetivo, escopo e **critérios de aceite** do passo.
 - **Cada critério de aceite referencia o teste (arquivo/nome) que o prova** (S1);
   critério sem teste automatizado registra `manual` explícito.

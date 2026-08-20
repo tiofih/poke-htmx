@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+# Kickoff de sessão (executa no host). Emite um digest pequeno (< ~5KB) com o
+# estado corrente (última validação, próxima sessão, roadmap) + checklist da fase 1.
+# Objetivo: não ler REQUIREMENTS.md/SESSIONS.md inteiros na abertura — ler na
+# íntegra apenas o arquivo da sessão corrente e consultar o resto por busca.
+
+cd "$(dirname "$0")/.."
+
+printf '# Kickoff — abertura de sessão (%s)\n\n' "$(date +%Y-%m-%d)"
+
+printf '## Histórico recente (tabela de progresso)\n'
+grep -E '^\| 00[0-9]{2} \|' SESSIONS.md | tail -6
+printf '\n## Próxima sessão (SESSIONS.md)\n'
+awk '/^## Próxima sessão/{f=1; next} f && /^## /{f=0} f && NF' SESSIONS.md | sed '/^$/d' | head -14
+
+printf '\n## Fase 1 (refinamento) — checklist\n'
+printf -- '- [ ] consultar **./scripts/levantar-roadmap** para o digest do backlog/limitações abertas\n'
+printf -- '- [ ] ler na íntegra **apenas** o arquivo da sessão corrente em sessions/ (criar a partir de sessions/template.md se for nova)\n'
+printf -- '- [ ] consultar REQUIREMENTS.md por busca (grep/ctx_idx), NÃO ler o arquivo inteiro\n'
+printf -- '- [ ] fechar objetivo/escopo/critérios e plano TDD; cada critério aponta o teste que o prova (S1); sem teste → `manual`\n'
+printf -- '- [ ] no commit do refinamento: atualizar SESSIONS.md (tabela + "Próxima sessão" — S4) e rodar ./scripts/check_docs (S5)\n'
+
+printf '\n--- digest do roadmap ---\n'
+"$(dirname "$0")/levantar-roadmap"

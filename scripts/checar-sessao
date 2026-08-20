@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+# Linter estrutural de um arquivo de sessão vs. o template SDD. Rode antes do
+# commit do refinamento (fase 1): seções obrigatórias presentes, critério→teste
+# sem célula vazia (S1) e aviso da regra "parar na fase 2" (validação pendente).
+
+cd "$(dirname "$0")/.."
+
+NUM="${1:-}"
+if [ -z "$NUM" ]; then
+  echo "uso: ./scripts/checar-sessao NNNN" >&2
+  exit 2
+fi
+F="$(ls sessions/"$NUM"-*.md 2>/dev/null | head -1)"
+if [ -z "$F" ]; then
+  echo "checar-sessao> sessão $NUM não encontrada em sessions/" >&2
+  exit 1
+fi
+
+FAIL=0
+ok() { printf 'ok> %s\n' "$*"; }
+warn() { printf 'checar-sessao> AVISO: %s\n' "$*" >&2; }
+fail() { printf 'checar-sessao> FALHA: %s\n' "$*" >&2; FAIL=1; }
+
+for sec in "Objetivo" "Escopo" "Critérios de aceite" "Plano TDD"; do
+  grep -qE "^## [0-9]+\. .*$sec" "$F" || fail "seção '$sec' ausente em $F"
+done
+
+# S1 — tabela critério→teste sem célula vazia (exceto header/separador)
+awk '/^#{3,5} .*(teste|Teste|prova)/{f=1; next} f && /^#{1,3} /{exit} f && /^\|/ {
+  n=split($0, c, "|");
+  if ($0 ~ /^\| *:?-+:? *\|/) next;
+  for (i=2; i<n; i++) { gsub(/^ +| +$/, "", c[i]); if (c[i]=="") { bad=1; print NR": "$0 } }
+}' "$F" | { while IFS= read -r l; do fail "critério→teste com célula vazia na linha $l"; done; }
+
+# Regra do AGENTS: fase 2 concluída sem validação registrada = aguardar usuário
+IMPL="$(awk '/^\| Implementação/{print}' "$F" | grep -c 'Concluída\|Done')"
+VALID="$(awk '/^\| Validação/{print}' "$F" | grep -c 'Concluída\|Done\|Pendente')"
+if [ "$IMPL" -ge 1 ] && [ "$VALID" -eq 0 ]; then
+  warn "implementação concluída sem linha de Validação — validação é do usuário (fase 3), não marcar Done nem commitar a conclusão"
+fi
+
+if [ "$FAIL" -eq 1 ]; then
+  exit 1
+fi
+ok "sessão $NUM estruturalmente consistente ($F)"
+exit 0

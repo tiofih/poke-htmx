@@ -15,8 +15,10 @@ usage() {
 Uso: sdd/install.sh [DIR_ALVO] [opções]
 
 Instala o framework SDD no projeto em DIR_ALVO (default: diretório atual).
-Cria/atualiza: REQUIREMENTS.md, SESSIONS.md, sessions/ (template.md + sessão 0001),
-scripts/check_docs e anexa as regras em AGENTS.md.
+Cria/atualiza: REQUIREMENTS.md, SESSIONS.md, sessions/ (template.md + sessão 0001) e
+os scripts de apoio em scripts/ (check_docs, levantar-roadmap, iniciar-sessao,
+levantar-sessao, levantar-requisito, levantar-testes, checar-sessao, resumo-commit),
+e anexa as regras em AGENTS.md.
 
 Opções:
   --projeto "Nome"    nome do projeto ({PROJETO}; default: basename do DIR_ALVO)
@@ -130,8 +132,11 @@ install_file "$SKELETON_DIR/sessions/template.md" \
   "NNNN=0001" "NOME=$PRIMEIRA" "DATA=$TODAY" "slug=primeiro-incremento"
 
 mkdir -p "$TARGET/scripts"
-install_file "$SKELETON_DIR/scripts/check_docs" "$TARGET/scripts/check_docs"
-chmod +x "$TARGET/scripts/check_docs" 2>/dev/null || true
+for s in check_docs levantar-roadmap iniciar-sessao levantar-sessao \
+         levantar-requisito levantar-testes checar-sessao resumo-commit; do
+  install_file "$SKELETON_DIR/scripts/$s" "$TARGET/scripts/$s"
+  chmod +x "$TARGET/scripts/$s" 2>/dev/null || true
+done
 
 # --- AGENTS.md: anexa as regras de workflow (idempotente) ---
 if [ "$DO_AGENTS" -eq 1 ]; then
