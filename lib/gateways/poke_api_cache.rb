@@ -14,6 +14,9 @@ class PokeApiCache
     @max_entries = max_entries
     @clock = clock || -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }
     @entries = {}
+    @keys = {}
+    @keys_mutex = Mutex.new
+    @store_mutex = Mutex.new
   end
 
   def paginate(offset: 0, limit: 100, query: nil)
@@ -59,15 +62,17 @@ class PokeApiCache
   private
 
   def fetch(key, accept: nil)
-    entry = @entries[key]
-    if entry && fresh?(entry)
-      touch(key)
-      return entry[:value]
-    end
+    lock_for(key).synchronize do
+      cached = peek(key)
+      if cached && fresh?(cached)
+        bump(key)
+        return cached[:value]
+      end
 
-    value = yield
-    store(key, value) if accept.nil? || accept.call(value)
-    value
+      value = yield
+      store(key, value) if accept.nil? || accept.call(value)
+      value
+    end
   end
 
   def fresh?(entry)
@@ -75,18 +80,25 @@ class PokeApiCache
   end
 
   def store(key, value)
-    entry = { fetched_at: @clock.call, value: value }
-    @entries.delete(key)
-    @entries[key] = entry
-    evict_overflow
+    @store_mutex.synchronize do
+      @entries.delete(key)
+      @entries[key] = { fetched_at: @clock.call, value: value }
+      @entries.shift while @entries.size > @max_entries
+    end
   end
 
-  def touch(key)
-    entry = @entries.delete(key)
-    @entries[key] = entry if entry
+  def peek(key)
+    @store_mutex.synchronize { @entries[key] }
   end
 
-  def evict_overflow
-    @entries.shift while @entries.size > @max_entries
+  def bump(key)
+    @store_mutex.synchronize do
+      entry = @entries.delete(key)
+      @entries[key] = entry if entry
+    end
+  end
+
+  def lock_for(key)
+    @keys_mutex.synchronize { @keys[key] ||= Mutex.new }
   end
 end

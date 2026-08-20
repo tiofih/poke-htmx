@@ -327,4 +327,42 @@ class PokeApiCacheTest < Minitest::Test
     assert_same first, second
     assert_equal 1, @inner.learnable_moves_calls
   end
+
+  def test_concurrent_same_key_fetches_inner_once
+    @inner.define_singleton_method(:detail) do |poke_id|
+      @detail_calls += 1
+      sleep 0.05
+      Pokemon.new(name: "pikachu", sprite: "s", number: poke_id)
+    end
+
+    threads = 4.times.map { Thread.new { @cache.detail(25) } }
+    threads.each(&:join)
+
+    assert_equal 1, @inner.detail_calls
+  end
+
+  def test_concurrent_distinct_keys_return_their_own_values
+    @inner.define_singleton_method(:detail) do |poke_id|
+      @detail_calls += 1
+      sleep 0.01
+      Pokemon.new(name: "pikachu", sprite: "s", number: poke_id)
+    end
+
+    values = (1..20).map { |id| Thread.new { @cache.detail(id) } }.map(&:value)
+
+    values.each_with_index { |pokemon, index| assert_equal index + 1, pokemon.number }
+  end
+
+  def test_concurrent_eviction_does_not_corrupt
+    cache = PokeApiCache.new(@inner, ttl: 600, max_entries: 4, clock: @clock)
+    @inner.define_singleton_method(:detail) do |poke_id|
+      @detail_calls += 1
+      sleep 0.005
+      Pokemon.new(name: "pikachu", sprite: "s", number: poke_id)
+    end
+
+    results = (1..30).map { |id| Thread.new { cache.detail(id) } }.map(&:value)
+
+    assert(results.all? { |pokemon| pokemon.number.between?(1, 30) })
+  end
 end
