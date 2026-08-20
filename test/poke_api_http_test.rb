@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "tmpdir"
 require_relative "test_helper"
 require_relative "../lib/gateways/poke_api_http"
 
@@ -228,5 +229,27 @@ class PokeApiHttpTest < Minitest::Test
     result = @api.learnable_moves(7)
 
     assert_equal [], result
+  end
+
+  def test_with_cache_path_serves_find_without_network
+    Dir.mktmpdir do |dir|
+      path = File.join(dir, "cache.json")
+      api = PokeApiHttp.new(cache_path: path)
+      Faraday.define_singleton_method(:get) do |_url|
+        Struct.new(:status, :body).new(
+          200,
+          JSON.generate("name" => "pikachu", "sprites" => { "front_default" => "s" }, "id" => 25)
+        )
+      end
+
+      assert_equal 25, api.find("pikachu").number
+
+      Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed }
+      reloaded = PokeApiHttp.new(cache_path: path)
+
+      assert_equal 25, reloaded.find("pikachu").number
+    end
+  ensure
+    Faraday.define_singleton_method(:get, @original_faraday) if defined?(@original_faraday) && @original_faraday
   end
 end

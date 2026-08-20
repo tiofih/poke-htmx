@@ -19,10 +19,15 @@ module PokeApi
   #   fetch_all_names                             -> [String]
   #
   # Ponto de injeção: `PokeApi.instance` resolve o adapter usado por padrão —
-  # decorado com `PokeApiCache` (TTL/LRU fixos, E1-B); testes/consumidores podem
-  # sobrescrever com `PokeApi.instance = adapter`.
+  # decorado com `PokeApiCache` (TTL/LRU fixos, E1-B) sobre `PokeApiHttp` com cache
+  # persistente em arquivo (P1, tmp/pokeapi_cache.json por default); testes/
+  # consumidores podem sobrescrever com `PokeApi.instance = adapter`.
   def self.instance
-    @instance ||= PokeApiCache.new(PokeApiHttp.new, ttl: PokeApiCache::DEFAULT_TTL, max_entries: PokeApiCache::DEFAULT_MAX_ENTRIES)
+    @instance ||= PokeApiCache.new(
+      PokeApiHttp.new(cache_path: ENV["POKEAPI_CACHE_PATH"] || "tmp/pokeapi_cache.json"),
+      ttl: PokeApiCache::DEFAULT_TTL,
+      max_entries: PokeApiCache::DEFAULT_MAX_ENTRIES
+    )
   end
 
   def self.instance=(adapter)

@@ -43,12 +43,7 @@ module PokeApiMoves
   end
 
   def fetch_move_json(name)
-    response = Faraday.get("https://pokeapi.co/api/v2/move/#{name}")
-    return nil unless response.respond_to?(:status) && response.status == 200
-
-    JSON.parse(response.body)
-  rescue Faraday::Error, JSON::ParserError
-    nil
+    http_get("https://pokeapi.co/api/v2/move/#{name}")
   end
 
   private

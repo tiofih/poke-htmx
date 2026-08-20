@@ -21,26 +21,20 @@ module PokeApiParsing
   end
 
   def pokemon_data(poke_id)
-    response = Faraday.get("https://pokeapi.co/api/v2/pokemon/#{poke_id}")
-    return nil unless response.respond_to?(:status) && response.status == 200
-
-    JSON.parse(response.body)
-  rescue Faraday::Error, JSON::ParserError
-    nil
+    http_get("https://pokeapi.co/api/v2/pokemon/#{poke_id}")
   end
 
   def evolution_chain(species_url)
-    species_response = Faraday.get(species_url)
-    return [] unless ok?(species_response)
+    species = http_get(species_url)
+    return [] unless species
 
-    chain_url = JSON.parse(species_response.body).dig("evolution_chain", "url")
+    chain_url = species.dig("evolution_chain", "url")
     return [] unless chain_url
 
-    chain_response = Faraday.get(chain_url)
-    return [] unless ok?(chain_response)
+    chain = http_get(chain_url)
+    return [] unless chain
 
-    chain = JSON.parse(chain_response.body)["chain"]
-    flatten_chain(chain).filter_map { |name| find(name) }
+    flatten_chain(chain["chain"]).filter_map { |name| find(name) }
   rescue Faraday::Error, JSON::ParserError
     []
   end
@@ -86,16 +80,16 @@ module PokeApiParsing
   end
 
   def fetch_chain_data(species_url)
-    species_response = Faraday.get(species_url)
-    return nil unless ok?(species_response)
+    species = http_get(species_url)
+    return nil unless species
 
-    chain_url = JSON.parse(species_response.body).dig("evolution_chain", "url")
+    chain_url = species.dig("evolution_chain", "url")
     return nil unless chain_url
 
-    chain_response = Faraday.get(chain_url)
-    return nil unless ok?(chain_response)
+    chain = http_get(chain_url)
+    return nil unless chain
 
-    JSON.parse(chain_response.body)["chain"]
+    chain["chain"]
   end
 
   def resolve_evolution_entries(stages)
