@@ -4,9 +4,9 @@ Kit de **Spec-Driven Development em sessões**: especificação antes do código
 (refinamento), TDD estrito e validação pelo dono do produto — com critérios de
 aceite **verificáveis por teste** e documentação viva.
 
-Este diretório é **auto-contido**: não referencia o projeto que o hospeda. Para
-adotá-lo em outra base, copie o `PROTOCOL.md` + a pasta `skeleton/`; quando quiser
-distribuir, este diretório pode virar um repo Git próprio sem ajustes.
+Este diretório é **auto-contido**: não referencia o projeto que o hospeda, e é
+também um **repo Git próprio** (`git@github.com:tiofih/sdd.git`, branch `main`).
+Projetos adotam o kit por `git subtree` (veja "Adicionar via git" abaixo).
 
 ## Conteúdo
 
@@ -34,6 +34,50 @@ rodando o `check_docs` (instalação só é "sucesso" com docs consistentes).
 
 Opções: `--proxima "texto"` (seção "Próxima sessão"), `--primeira "nome"` (nome da 1ª
 sessão), `--no-agents`, `--force`. _Um diretório posicional primeiro (o alvo)._
+
+## Adicionar o SDD a outro projeto via git (subtree)
+
+O kit tem um repo canônico próprio: `git@github.com:tiofih/sdd.git` (branch `main`).
+Para adotá-lo num projeto, importe como **subtree** — traz o kit com histórico para
+dentro do projeto e permite atualizá-lo depois com `pull`:
+
+```bash
+cd /caminho/do/projeto                     # precisa ser um repo git
+git remote add sdd git@github.com:tiofih/sdd.git
+git subtree add --prefix=sdd sdd main --squash
+./sdd/install.sh . --projeto "Meu App"
+```
+
+Alternativa sem histórico (só copiar os arquivos atuais):
+
+```bash
+git clone git@github.com:tiofih/sdd.git /tmp/sdd
+mkdir -p <projeto>/sdd
+cp -r /tmp/sdd/PROTOCOL.md /tmp/sdd/install.sh /tmp/sdd/skeleton <projeto>/sdd/
+cd <projeto> && ./sdd/install.sh . --projeto "Meu App"
+```
+
+### Sync: projeto ↔ kit (`subtree pull`/`push`)
+
+Projetos com o kit importado por subtree (caso deste repo) sincronizam assim:
+
+- **Puxar** atualizações do kit para o projeto:
+  `git subtree pull --prefix=sdd sdd main`
+- **Empurrar** mudanças feitas no projeto para o kit:
+  `git subtree push --prefix=sdd sdd main`
+
+Regras de sync:
+
+- `--squash` no `add`/`pull` achatam o histórico do kit dentro do projeto (1 commit por
+  versão importada) — mais limpo; sem `--squash`, o histórico completo do kit entra no
+  projeto.
+- O `push` envia **apenas o subconjunto do caminho `sdd/`** para o remote do kit; os
+  SHAs resultantes no kit diferem dos do projeto (esperado — é um split).
+- Não edite o kit no projeto e no repo canônico ao mesmo tempo: escolha um lado e
+  propague com `pull`/`push` (o `merge` de dois lados divergentes exige resolver).
+- O `install.sh` roda **depois** de trazer o kit, para instanciar o skeleton nos
+  artefatos do projeto (`REQUIREMENTS.md`, `SESSIONS.md`, `sessions/`, `scripts/`,
+  `AGENTS.md`).
 
 ## Instalação (manual, ~5 min)
 
