@@ -77,6 +77,7 @@ Tudo roda via `./scripts/*` (usa o container `web` / sobe o `db`) — não rode 
 | `./scripts/test` | Suíte Minitest completa, sem rede. Filtros: `./scripts/test test/server_test.rb` (arquivos) e `./scripts/test -n /regex/` (por nome). |
 | `./scripts/rake` | Rake no container (sem args = `test`). Ex.: `rake db:setup`, `rake lint`. |
 | `./scripts/lint` | RuboCop (objetivo: 0 offenses). |
+| `./scripts/check_docs` | Consistência do SDD (roda no host): `sessions/` ↔ tabela de progresso do `SESSIONS.md` ↔ "Próxima sessão". Rodar ao fechar refinamento/validação. |
 | `./scripts/run` | `docker compose up --build` — app na porta 3000. |
 | `./scripts/seed` | Atalho para `rake db:seed`. |
 

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+cd "$(dirname "$0")/.."
+
+SESSIONS_DIR="sessions"
+SESSIONS_MD="SESSIONS.md"
+FAIL=0
+
+ok() { printf 'ok> %s\n' "$*"; }
+fail() { printf 'check_docs> FALHA: %s\n' "$*" >&2; FAIL=1; }
+
+session_files=("$SESSIONS_DIR"/[0-9][0-9][0-9][0-9]-*.md)
+
+# S1/S5a — toda sessão em sessions/ tem linha na tabela de progresso do SESSIONS.md
+for file in "${session_files[@]}"; do
+  [ -e "$file" ] || continue
+  num="$(basename "$file" | cut -d- -f1)"
+  if ! grep -Eq "\| $num \|" "$SESSIONS_MD"; then
+    fail "sessão $num ($file) sem linha na tabela de progresso de $SESSIONS_MD"
+  fi
+done
+
+# S5b — toda linha da tabela de progresso tem seu arquivo em sessions/
+while read -r num; do
+  if [ -z "$num" ]; then
+    continue
+  fi
+  if ! ls "$SESSIONS_DIR"/"$num"-*.md >/dev/null 2>&1; then
+    fail "linha $num na tabela de progresso sem arquivo em $SESSIONS_DIR/"
+  fi
+done < <(grep -Eo '^\| [0-9]{4} \|' "$SESSIONS_MD" | grep -Eo '[0-9]{4}' | sort -u)
+
+# S5c — a seção "Próxima sessão" cita a sessão de maior número (a aberta no topo da fila)
+max="$(printf '%s\n' "${session_files[@]}" | grep -Eo '[0-9]{4}-' | tr -d '-' | sort -n | tail -1)"
+if [ -n "$max" ]; then
+  next_block="$(awk '/^## Próxima sessão/{f=1; next} f && /^## /{f=0} f' "$SESSIONS_MD")"
+  if ! grep -q "$max" <<<"$next_block"; then
+    fail "seção 'Próxima sessão' não cita a sessão mais recente ($max)"
+  fi
+fi
+
+if [ "$FAIL" -eq 1 ]; then
+  exit 1
+fi
+
+ok "docs consistentes ($SESSIONS_MD <-> $SESSIONS_DIR/ <-> 'Próxima sessão')"

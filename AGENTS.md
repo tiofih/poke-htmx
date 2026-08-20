@@ -11,6 +11,24 @@
 - Ao receber o feedback, registrar a validação no arquivo da sessão e só então
   atualizar `REQUIREMENTS.md`/`SESSIONS.md` e commitar a validação.
 
+## SDD — robustez do fluxo (regras do processo)
+
+- **S1 — Critérios apontam os testes que os provam.** Cada critério de aceite (seções
+  "Resultado"/"Garantias" do arquivo da sessão) referencia o **teste (arquivo/nome
+  Minitest)** que o prova; critério sem teste automatizado registra `manual` explícito.
+  Fecha-se isso no **refinamento (fase 1)**, antes de codar.
+- **S2 — Validação é tabela por critério.** A fase 3 registra
+  `critério | evidência automatizada | evidência manual | resultado (ok/nok)` — um
+  resultado **por critério**, nunca um bloco único ("todos atendidos").
+- **S3 — Ajuste de validação é uma alteração formal de critério.** Falha de critério na
+  validação **reabre o critério**, registra a alteração com data e o usuário **reaprova**;
+  nunca aplicar "ajuste" de validação sem registrar essa alteração.
+- **S4 — `SESSIONS.md` acompanha todo refinamento.** A seção "Próxima sessão" e a
+  tabela de progresso são atualizadas **no commit do refinamento (fase 1)** de **toda**
+  sessão — inclusive sessões fora da fila (ex.: a 0035 P1 entrou antes de J1).
+- **S5 — `./scripts/check_docs` valida a consistência.** Confere `sessions/` ↔ tabela de
+  progresso do `SESSIONS.md` ↔ "Próxima sessão". Rodar ao fechar refinamento e validação.
+
 ## Ideias, melhorias e escopos grandes — anotar, refinar depois
 
 - Ideias, melhorias e escopos **grandes** identificados durante uma sessão (em qualquer
@@ -61,13 +79,15 @@
 
 ## Comandos
 
-Tudo roda **via `./scripts/*`** (usa o container `web` / sobe o `db`) — **não** rodar `rake`/`rubocop` no host.
+Tudo roda **via `./scripts/*`** (uso do container `web` / sobe o `db` quando necessário;
+`./scripts/check_docs` é apenas grep e roda **no host**) — **não** rodar `rake`/`rubocop` no host.
 
 | Comando | O que faz |
 | --- | --- |
 | `./scripts/test` | Suíte Minitest completa sem rede. Filtro por arquivo: `./scripts/test test/server_test.rb` (aceita vários). Por nome (regex): `./scripts/test -n /regex/` (ou `--name=`). |
 | `./scripts/rake` | Rake genérico no container: sem args roda `test` (suíte total); com args passa adiante (`db:setup`, `lint`, `test TEST=...`). |
 | `./scripts/lint` | RuboCop (mesmo fluxo docker). Objetivo: 0 offenses. |
+| `./scripts/check_docs` | Consistência do SDD (S5): `sessions/` ↔ tabela de progresso do `SESSIONS.md` ↔ "Próxima sessão". Rodar ao fechar refinamento/validação. |
 | `./scripts/run` | `docker compose up --build` — sobe o app (porta 3000) para validação manual. |
 | `rake db:setup` | Aplica `db/schema.sql` + `db/migrations/*.sql` em ordem (idempotente) — via `./scripts/rake db:setup`. |
 
