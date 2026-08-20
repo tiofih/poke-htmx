@@ -6,6 +6,7 @@ require_relative "battle_repository"
 require_relative "evolution_rule"
 require_relative "move"
 require_relative "opponent_generator"
+require_relative "parallelizer"
 require_relative "progression_repository"
 require_relative "reward_rule"
 require_relative "team_repository"
@@ -17,27 +18,32 @@ module BattleServicePreparation
   private
 
   def player_team(user_id, members)
-    members.filter_map do |member|
+    progress = progress_for(user_id, members)
+    Parallelizer.map(members, concurrency: Parallelizer::DEFAULT_CONCURRENCY) do |member|
       detail = api.detail(member.number)
-      detail && apply_persisted_hp(battle_fighter_from(user_id, member, detail), user_id, member)
-    end
+      detail && apply_persisted_hp(battle_fighter_from(progress, member, detail), progress, member)
+    end.compact
   end
 
-  def battle_fighter_from(user_id, member, detail)
+  def progress_for(user_id, members)
+    members.to_h { |member| [member.id, @progression.get(user_id, member.id)] }
+  end
+
+  def battle_fighter_from(progress, member, detail)
     BattlePokemon.from(
       detail,
       moves: moves_for(member),
-      level: member_level(user_id, member),
+      level: progress.fetch(member.id).to_h.fetch(:level, 1),
       assigned_item: member.assigned_item,
       held_item: member.held_item
     )
   end
 
-  def apply_persisted_hp(fighter, user_id, member)
-    progress = @progression.get(user_id, member.id)
-    return fighter if progress.nil? || progress[:hp_max].to_i <= 0
+  def apply_persisted_hp(fighter, progress, member)
+    entry = progress[member.id]
+    return fighter if entry.nil? || entry[:hp_max].to_i <= 0
 
-    hp_current = [progress[:hp_current].to_i, progress[:hp_max].to_i].min
+    hp_current = [entry[:hp_current].to_i, entry[:hp_max].to_i].min
     fighter.new(hp_current: hp_current)
   end
 
@@ -46,15 +52,22 @@ module BattleServicePreparation
   end
 
   def opponent_team(user_id)
-    opponent = OpponentGenerator.new(
+    opponent = build_opponent(user_id)
+    return nil if opponent.empty?
+
+    Parallelizer.map(opponent, concurrency: Parallelizer::DEFAULT_CONCURRENCY) do |battle_pokemon|
+      battle_pokemon.new(moves: moves_for(battle_pokemon))
+    end
+  end
+
+  def build_opponent(user_id)
+    OpponentGenerator.new(
       names: api.fetch_all_names,
       fetcher: api.method(:detail),
       rng: Random.new(user_id.sum),
-      level: 1
+      level: 1,
+      parallelizer: Parallelizer
     ).team
-    return nil if opponent.empty?
-
-    opponent.map { |battle_pokemon| battle_pokemon.new(moves: moves_for(battle_pokemon)) }
   end
 
   def average_player_level(user_id, team)
@@ -113,13 +126,26 @@ module BattleServiceFinalization
   end
 
   def apply_evolution_and_learning(user_id)
-    evolution_news = []
-    learned_news = []
-    @team.all(user_id).each do |member|
-      evolve_member(user_id, member, evolution_news)
-      learn_moves_for_member(user_id, member, learned_news)
+    news = { evolution_news: [], learned_news: [] }
+    prefetched_evolution_data(user_id).each do |lookup|
+      apply_member_evolution(user_id, lookup, news)
     end
-    { evolution_news: evolution_news, learned_news: learned_news }
+    news
+  end
+
+  def prefetched_evolution_data(user_id)
+    Parallelizer.map(@team.all(user_id), concurrency: Parallelizer::DEFAULT_CONCURRENCY) do |member|
+      {
+        member: member,
+        evolutions: api.next_evolutions(member.number).to_a,
+        learnable: api.learnable_moves(member.number).to_a
+      }
+    end
+  end
+
+  def apply_member_evolution(user_id, lookup, news)
+    evolve_member(user_id, lookup[:member], lookup[:evolutions], news[:evolution_news])
+    learn_moves_for_member(user_id, lookup[:member], lookup[:learnable], news[:learned_news])
   end
 
   def rebuild_display_team(user_id, engine)
@@ -156,9 +182,9 @@ module BattleServiceFinalization
     @progression.update_hp(user_id, member.id, fighter.hp_max, fighter.hp_current)
   end
 
-  def evolve_member(user_id, member, evolution_news)
+  def evolve_member(user_id, member, next_evolutions, evolution_news)
     loop do
-      target = evolution_target(user_id, member)
+      target = evolution_target(user_id, member, next_evolutions)
       break unless target
       break if target[:number] == member.number
 
@@ -172,10 +198,9 @@ module BattleServiceFinalization
     end
   end
 
-  def evolution_target(user_id, member)
+  def evolution_target(user_id, member, next_evolutions)
     progress = @progression.get(user_id, member.id)
-    next_evos = api.next_evolutions(member.number).to_a
-    EvolutionRule.next_stage(_current_number: member.number, level: progress[:level], evolutions: next_evos)
+    EvolutionRule.next_stage(_current_number: member.number, level: progress[:level], evolutions: next_evolutions)
   end
 
   def try_evolve(user_id, member, evolution_pokemon, evolution_news)
@@ -188,9 +213,9 @@ module BattleServiceFinalization
     nil
   end
 
-  def learn_moves_for_member(user_id, member, learned_news)
+  def learn_moves_for_member(user_id, member, learnable_moves, learned_news)
     progress = @progression.get(user_id, member.id)
-    api.learnable_moves(member.number).to_a.each do |entry|
+    learnable_moves.each do |entry|
       try_learn(user_id, member, entry, progress, learned_news)
     end
   end

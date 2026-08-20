@@ -7,7 +7,9 @@ require_relative "parallelizer"
 class OpponentGenerator
   DEFAULT_TEAM_SIZE = 6
 
-  def initialize(names:, size: DEFAULT_TEAM_SIZE, rng: Random.new, fetcher: PokeApi.instance.method(:detail), level: 1, parallelizer: Parallelizer)
+  def initialize(names:, size: DEFAULT_TEAM_SIZE, rng: Random.new,
+                 fetcher: PokeApi.instance.method(:detail), level: 1,
+                 parallelizer: Parallelizer)
     @names = names
     @size = size
     @rng = rng

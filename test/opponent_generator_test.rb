@@ -6,9 +6,9 @@ require_relative "../lib/opponent_generator"
 class PlumbingParallelizer
   attr_reader :items
 
-  def map(items, &block)
+  def map(items, &)
     @items = items.dup
-    items.map(&block)
+    items.map(&)
   end
 end
 
