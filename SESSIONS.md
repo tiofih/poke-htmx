@@ -13,8 +13,12 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 
 - Ler `REQUIREMENTS.md`, o arquivo da sessão atual e `SESSIONS.md`.
 - Esclarecer objetivo, escopo e **critérios de aceite** do passo.
+- **Cada critério de aceite referencia o teste (arquivo/nome Minitest) que o prova**
+  (S1); critério sem teste automatizado registra `manual` explícito.
 - Registrar decisões de design (schema, gems, nomes de rotas) no arquivo da sessão.
 - **Entrega:** arquivo da sessão com critérios de aceite fechados e plano TDD.
+- **No commit do refinamento:** atualizar **também** `SESSIONS.md` — tabela de
+  progresso + "Próxima sessão" (S4), inclusive para sessões fora de fila.
 - Dúvidas em aberto → resolver antes de codar.
 
 ### 2. Implementação (TDD)
@@ -32,6 +36,11 @@ Cada sessão percorre **três fases** nesta ordem. A próxima fase só começa q
 - Com o feedback em mãos, o usuário roda a **suíte completa** (Minitest) e confirma
   tudo verde.
 - Verificar os **critérios de aceite** da sessão contra a implementação.
+- **Registrar a validação como tabela por critério** (S2):
+  `critério | evidência automatizada | evidência manual | resultado (ok/nok)` — um
+  resultado por critério, nunca um bloco único.
+- **Ajuste identificado na validação = reabrir o critério** (S3): registrar a alteração
+  com data e recomeçar a aprovação do usuário; nunca aplicar "ajuste" sem esse registro.
 - Registrar resultados e problemas no arquivo da sessão (feito junto ao usuário).
 - Atualizar `REQUIREMENTS.md` (status dos requisitos) e `SESSIONS.md` (progresso +
   próxima sessão) apenas após a validação do usuário.
@@ -65,12 +74,14 @@ nível não salva), nível exibido na UI (`"<nome> — Nível N"`), união com m
 (legados visíveis/removíveis), troca manual preservada, `:finished` inalterado — suíte
 566/1734, lint 0, critérios conferidos pelo usuário.
 
-**Próxima sessão:** **J1 — seleção inicial** (conforme ordem fechada em 2026-08-18).
+**Próxima sessão:** **0035 — P1: performance do gateway** (paralelismo + cache
+persistente; aberta em 2026-08-19 **no lugar de J1** — refinamento concluído, fase 2
+pendente).
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
-> (0033). D1 parcial concluído e validado (0034). Próximas: **J1 (seleção
-> inicial)** → **JN-2** → **J3** → **JN-1** → organizar o resto (JN-3, JN-4, JN-5, J2,
-> J4, D4).
+> (0033). D1 parcial concluído e validado (0034). P1 (0035) em refinamento. Após a 0035
+> validada: **J1 (seleção inicial)** → **JN-2** → **J3** → **JN-1** → organizar o resto
+> (JN-3, JN-4, JN-5, J2, J4, D4).
 
 ## Progresso das sessões
 
@@ -110,14 +121,22 @@ nível não salva), nível exibido na UI (`"<nome> — Nível N"`), união com m
 | 0032 | Eco-4-C: seguráveis/hold items — `Item` `stat`/`multiplier` + `ItemCatalog.can_hold` (choice-band/scarf, decisão 13) + coluna `held_item` (0032_add_held_item) + `TeamRepository#assign_held_item` + `BattlePokemon#held_item` + modulação de `stat` (motor sem mudança) + `POST /team/:id/held-item` + select "Segurável:" no `team_manage.erb` + `battle.erb` (`segura:`) + seed `team_duelo` | Concluída | Done (passos 0–6 + seed, suíte 559/1696, lint 0, validado em 2026-08-18) |
 | 0033 | Respiro 2 — services de produção: `BattleService` (prepare/advance) e `TeamService` (manage_data/save_moves/assign), providers lambda p/ gateway, 3 `rubocop:disable` de `server.rb` removidos, `server_test.rb` (1925 linhas) fatiado em 7 arquivos por área + `battle_test_helpers.rb` | Concluída | Done (passos 1–4, suíte 559/1696, lint 0, grep `rubocop:` em `server.rb` → 0, validado em 2026-08-19) |
 | 0034 | D1 parcial — nível de aprendizado de golpes: gating do manage por nível (`TeamService` + `progression`, `manage_data` via `learnable_moves` filter `level <= membro`), validação gated, nível na UI (`"<nome> — Nível N"`) + união com moves salvos, troca manual preservada, `:finished` inalterado | Concluída | Done (passos 1–5, suíte 566/1734, lint 0, validado em 2026-08-19) |
+| 0035 | P1 — performance do gateway: `Parallelizer` (pool threads) + `PokeApiCache` thread-safe + `PersistentJsonStore` (`tmp/`) + choke point `http_get` + fonte paralela (`type_relations`/`OpponentGenerator`/`BattleService`) | Refinamento | Concluída (fase 1, 2026-08-19) — implementação pendente |
 
 ## Estrutura do arquivo de sessão
 
 Todo arquivo em `sessions/` contém as seções:
 
 1. **Objetivo**
-2. **Critérios de aceite**
+2. **Critérios de aceite** — cada critério aponta o **teste que o prova**
+   (arquivo/nome Minitest); verificação só manual = `manual` explícito (S1).
 3. **Plano TDD** (passos + testes)
 4. **Decisões de refinamento**
-5. **Validação** (resultados da fase, suíte executada, checagem dos critérios)
+5. **Validação** — **tabela por critério** (S2): `critério | evidência automatizada |
+   evidência manual | resultado (ok/nok)`; suíte executada; ajuste de validação
+   registrado como **alteração formal de critério** (S3).
 6. **Observações** (impedimentos, dúvidas, próximo passo sugerido)
+
+> **Consistência (S4/S5):** `SESSIONS.md` (tabela + "Próxima sessão") é atualizado no
+> **commit do refinamento** de toda sessão; `./scripts/check_docs` confere
+> `sessions/` ↔ tabela de progresso ↔ "Próxima sessão".

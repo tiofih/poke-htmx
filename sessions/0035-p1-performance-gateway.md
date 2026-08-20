@@ -120,6 +120,20 @@ em arquivo JSON na pasta `tmp/`** (sobrevive ao `docker compose down` via volume
       — P1 executada) atualizados no mesmo escopo do passo docs; *status de
       validação* só após o usuário validar.
 
+### Critério → teste que o prova (S1)
+
+| Critério | Teste (arquivo/nome) |
+| --- | --- |
+| `Parallelizer` puro | `test/parallelizer_test.rb` — ordem de entrada, paralelismo, `concurrency: 1`, exceção propaga |
+| `PokeApiCache` thread-safe | `test/poke_api_cache_test.rb` — chaves distintas em paralelo, dedup same-key, evicção |
+| `PersistentJsonStore` em `tmp/` | `test/persistent_json_store_test.rb` — 2ª boot sem rede, TTL, nil/corrompido sem raise |
+| Choke point `http_get` | `test/poke_api_http_test.rb` — com/sem `cache_path:` (0 regressão) |
+| Boot persistente | `test/poke_api_fake_test.rb` / `test/gateway_injection_test.rb` — `PokeApi.instance` com default `tmp/` |
+| `type_relations` paralelo | `test/poke_api_http_test.rb` — 18 tipos em paralelo, mesmo `{tipo => {double,half,no}}` |
+| `OpponentGenerator#team` paralelo | `test/opponent_generator_test.rb` — ordem/seed e fetcher por candidato |
+| `BattleService` paralelo | `test/battle_service_test.rb` — corrente ≥ 2 no prepare; resultado idêntico ao serial |
+| Garantias (baseline, lint, sem gem/schema/rede) | suíte completa `./scripts/test` + `./scripts/lint` |
+
 ## 5. Decisões de refinamento (fechadas com o usuário)
 
 - **D1 — Estratégia "ambos":** paralelismo (threads) **e** cache persistente.
