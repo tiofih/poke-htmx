@@ -3,6 +3,15 @@
 require "minitest/autorun"
 require_relative "../lib/opponent_generator"
 
+class PlumbingParallelizer
+  attr_reader :items
+
+  def map(items, &block)
+    @items = items.dup
+    items.map(&block)
+  end
+end
+
 class OpponentGeneratorTest < Minitest::Test
   NAMES = %w[pikachu bulbasaur squirtle charmander eevee snorlax meowth psyduck].freeze
 
@@ -16,9 +25,11 @@ class OpponentGeneratorTest < Minitest::Test
     )
   end
 
-  def generator(names: NAMES, size: 6, seed: 42, fetcher: nil, level: 1)
+  def generator(names: NAMES, size: 6, seed: 42, fetcher: nil, level: 1, parallelizer: nil)
     fetcher ||= ->(name) { build_pokemon(name) }
-    OpponentGenerator.new(names: names, size: size, rng: Random.new(seed), fetcher: fetcher, level: level)
+    options = { names: names, size: size, rng: Random.new(seed), fetcher: fetcher, level: level }
+    options[:parallelizer] = parallelizer if parallelizer
+    OpponentGenerator.new(**options)
   end
 
   def test_team_returns_battle_pokemon_built_from_fetched_details
@@ -85,5 +96,23 @@ class OpponentGeneratorTest < Minitest::Test
 
     assert_equal [5], team.map(&:level).uniq
     assert_equal 52, team.first.hp_max, "HP 50 + (5-1)*0.5 = 52"
+  end
+
+  def test_team_delegates_fetching_to_injected_parallelizer
+    parallelizer = PlumbingParallelizer.new
+    gen = generator(seed: 42, parallelizer: parallelizer)
+    expected = generator(seed: 42).team_names
+
+    team = gen.team
+
+    assert_equal 6, team.size
+    assert_equal expected, parallelizer.items
+    assert_equal expected, team.map(&:name)
+  end
+
+  def test_team_keeps_team_names_order_by_default
+    team = generator(seed: 42).team
+
+    assert_equal generator(seed: 42).team_names, team.map(&:name)
   end
 end

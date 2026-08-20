@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require "faraday"
+require_relative "../parallelizer"
 
 module PokeApiTypes
   TYPE_NAMES = %w[normal fire water electric grass ice fighting poison ground flying
                   psychic bug rock ghost dark dragon steel fairy].freeze
 
   def type_relations
-    TYPE_NAMES.each_with_object({}) do |name, acc|
-      json = fetch_type_json(name)
+    Parallelizer.map(TYPE_NAMES, concurrency: Parallelizer::DEFAULT_CONCURRENCY) { |name| fetch_type_json(name) }
+                .each_with_object({}) do |json, acc|
       acc.merge!(extract_type_relations(json)) if json
     end
   end

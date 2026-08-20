@@ -2,16 +2,18 @@
 
 require_relative "gateways/poke_api"
 require_relative "battle_pokemon"
+require_relative "parallelizer"
 
 class OpponentGenerator
   DEFAULT_TEAM_SIZE = 6
 
-  def initialize(names:, size: DEFAULT_TEAM_SIZE, rng: Random.new, fetcher: PokeApi.instance.method(:detail), level: 1)
+  def initialize(names:, size: DEFAULT_TEAM_SIZE, rng: Random.new, fetcher: PokeApi.instance.method(:detail), level: 1, parallelizer: Parallelizer)
     @names = names
     @size = size
     @rng = rng
     @fetcher = fetcher
     @level = level
+    @parallelizer = parallelizer
   end
 
   def team_names
@@ -21,6 +23,6 @@ class OpponentGenerator
   end
 
   def team
-    team_names.map { |name| BattlePokemon.from(@fetcher.call(name), level: @level) }
+    @parallelizer.map(team_names) { |name| BattlePokemon.from(@fetcher.call(name), level: @level) }
   end
 end

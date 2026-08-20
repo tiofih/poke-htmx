@@ -252,4 +252,32 @@ class PokeApiHttpTest < Minitest::Test
   ensure
     Faraday.define_singleton_method(:get, @original_faraday) if defined?(@original_faraday) && @original_faraday
   end
+
+  def test_type_relations_fetches_types_in_parallel
+    @original_faraday = Faraday.method(:get)
+    mutex = Mutex.new
+    active = 0
+    max_active = 0
+    Faraday.define_singleton_method(:get) do |_url|
+      mutex.synchronize do
+        active += 1
+        max_active = active if active > max_active
+      end
+      sleep 0.02
+      mutex.synchronize { active -= 1 }
+      Struct.new(:status, :body).new(
+        200,
+        JSON.generate("name" => "normal", "damage_relations" => {
+                        "double_damage_to" => [], "half_damage_to" => [], "no_damage_to" => []
+                      })
+      )
+    end
+
+    relations = @api.type_relations
+
+    assert relations.key?("normal")
+    assert_operator max_active, :>, 1, "18 tipos deveriam ser buscados em paralelo"
+  ensure
+    Faraday.define_singleton_method(:get, @original_faraday)
+  end
 end
