@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | Concluída — decisões do usuário em 2026-08-19 (abrir P1 no lugar de J1; estratégia "ambos"; cache em arquivo `tmp/`) |
-| Implementação | Pendente |
+| Implementação | Concluída — passos 1-5 verdes (TDD, 2026-08-19): suíte 586/1787, lint 0 |
 | Validação | Pendente (executada pelo usuário) |
 
 ---
@@ -184,7 +184,14 @@ em arquivo JSON na pasta `tmp/`** (sobrevive ao `docker compose down` via volume
 
 ### Progresso da implementação (fase 2 — TDD)
 
-- *Aguardando início.*
+- **Passo 1:** `Parallelizer` verde (ordem, paralelismo, concurrency 1, exceção) — commit `9d8c850`.
+- **Passo 2:** `PokeApiCache` thread-safe verde (dedup + evicção concorrente) — commit `08f25c8`.
+- **Passo 3:** `PersistentJsonStore` + choke point `http_get` + boot verde — commit `8a0d8a2`.
+- **Passo 4:** `type_relations` paralelo (18 tipos) + `OpponentGenerator` com `parallelizer:` verde — commit `2b52304`.
+- **Passo 5:** `BattleService` paralelo verde (prepare com detail/moves em threads + finalize prefetch) — commit `4c0915c`.
+- **Passo 6:** docs atualizadas — commit pendente nesta validação.
+- Suíte completa **586 runs / 1787 assertions, 0 failures/errors**; lint **0 offenses**.
+- **PARADA (regra do AGENTS.md):** fase 2 concluída — aguardando a validação do usuário (fase 3) antes de marcar `Done`/commitar conclusão.
 
 ## 8. Observações
 

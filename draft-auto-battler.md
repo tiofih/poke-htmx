@@ -483,6 +483,15 @@
 
 ### P1. Paralelismo ou cache mais agressivo no gateway da PokéAPI
 
+> **Executada na sessão 0035 (2026-08-19).** Estratégia escolhida: **combinar ambos**
+> (paralelismo + cache persistente). Implementada: `Parallelizer` (pool de threads,
+> resultados na ordem, exceção propagada — stdlib) + `PokeApiCache` thread-safe (lock
+> por chave, dedup in-flight) + `PersistentJsonStore` em `tmp/` (TTL 7d, write-through,
+> tolera arquivo corrompido) + choke point `http_get` (boot com `POKEAPI_CACHE_PATH`)
+> + fonte paralela (`type_relations` 18 tipos, `OpponentGenerator`, `BattleService`
+> prepare/finalize com prefetch). Passos 1-5 verdes (suíte 586/1787, lint 0) —
+> **aguardando validação do usuário**; ao validar, remover esta anotação da fila.
+
 - **Problema observado (validação da 0034):** `GET /battle` (prepare) demorou ~1.6min e a
   2ª rodada de `POST /battle/play` (finalize: evolução + aprendizado) ~1.2min.
 - **Causa raiz (medida):** fan-out **serial** de ~133 requisições HTTP à PokéAPI por
