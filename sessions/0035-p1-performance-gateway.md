@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | Concluída — decisões do usuário em 2026-08-19 (abrir P1 no lugar de J1; estratégia "ambos"; cache em arquivo `tmp/`) |
 | Implementação | Concluída — passos 1-5 verdes (TDD, 2026-08-19): suíte 586/1787, lint 0 |
-| Validação | Pendente (executada pelo usuário) |
+| Validação | Concluída — usuário validou em 2026-08-19 (GET /battle ~38s, 2º play ~4s; tabela por critério na seção 7) |
 
 ---
 
@@ -76,32 +76,32 @@ em arquivo JSON na pasta `tmp/`** (sobrevive ao `docker compose down` via volume
 
 ### Resultado
 
-- [ ] **`Parallelizer` puro:** `Parallelizer.map` devolve resultados **na ordem de
+- [x] **`Parallelizer` puro:** `Parallelizer.map` devolve resultados **na ordem de
       entrada**, executa tarefas independentes **em paralelo** (wall-time < soma
       serial, medido em teste com `sleep`), exceções **propagam** ao chamador e
       `concurrency: 1` = serial. Sem gem nova (stdlib).
-- [ ] **`PokeApiCache` thread-safe:** requisições concorrentes a **chaves
+- [x] **`PokeApiCache` thread-safe:** requisições concorrentes a **chaves
       distintas** rodam em paralelo sem corromper o LRU/evicção; **mesma chave**
       concorrente → **fetch único** (dedup in-flight); testes antigos
       (sequenciais) verdes **sem edição**.
-- [ ] **`PersistentJsonStore` em `tmp/`:** grava o arquivo JSON; **2ª instância**
+- [x] **`PersistentJsonStore` em `tmp/`:** grava o arquivo JSON; **2ª instância**
       (mesmo path) carrega do disco e responde **sem rede** (Faraday stubado a
       falhar após o 1º boot); TTL 7 dias com clock injetável; **`nil`/erro não
       persiste**; arquivo ausente/corrompido → cache vazio **sem raise**;
       thread-safe (escape do `tmp` não persiste — `.gitignore` já cobre).
-- [ ] **Choke point `http_get`:** com `cache_path:` o `PokeApiHttp` resolve todos
+- [x] **Choke point `http_get`:** com `cache_path:` o `PokeApiHttp` resolve todos
       os GETs internos (pokemon, species, chain, move, type, listagem) pelo store
       (URL = chave); **sem** `cache_path:` → comportamento atual (0 regressão em
       `poke_api_http_test.rb`).
-- [ ] **Boot persistente:** `PokeApi.instance` aponta o cache persistente
+- [x] **Boot persistente:** `PokeApi.instance` aponta o cache persistente
       (`ENV["POKEAPI_CACHE_PATH"]` ou `tmp/pokeapi_cache.json`) — sobrevive a
       `docker compose down` (volume `./`); contrato e ponto de injeção intactos.
-- [ ] **`type_relations` paralelo:** busca os 18 tipos em paralelo e devolve a
+- [x] **`type_relations` paralelo:** busca os 18 tipos em paralelo e devolve a
       mesma `{tipo => {double,half,no}}`; `TypeEffectiveness.load` intacto.
-- [ ] **`OpponentGenerator#team` paralelo:** mesmo `team_names`/ordem/semente
+- [x] **`OpponentGenerator#team` paralelo:** mesmo `team_names`/ordem/semente
       (mesmo time oponente); `fetcher` invocado por candidato; `parallelizer:`
       injetável com default preservado.
-- [ ] **`BattleService` paralelo:** prepare com fan-out **paralelo** (detail +
+- [x] **`BattleService` paralelo:** prepare com fan-out **paralelo** (detail +
       moves dos 6 jogadores e do oponente) com **progresso DB pré-carregado
       serial** (sem acessar `PG::Connection` compartilhada em threads) e finalize
       com prefetch paralelo + mutações DB seriais; **resultados idênticos ao
@@ -109,13 +109,13 @@ em arquivo JSON na pasta `tmp/`** (sobrevive ao `docker compose down` via volume
 
 ### Garantias (RNF)
 
-- [ ] Suíte completa verde com **baseline preservado (566 runs/1734 asserts)** +
+- [x] Suíte completa verde com **baseline preservado (566 runs/1734 asserts)** +
       novos testes e lint 0 em **todo** green; commit obrigatório por passo;
       0 regressão RF-01..RF-18/Eco (rotas de batalha com fakes atuais verdes).
-- [ ] Sem novas gems (stdlib `Thread`/`Mutex`/`Queue`/`JSON`/`File`); sem mudança
+- [x] Sem novas gems (stdlib `Thread`/`Mutex`/`Queue`/`JSON`/`File`); sem mudança
       de schema; **testes sem rede** (stubs Faraday `poke_api_http_test.rb` +
       fakes + `Dir.mktmpdir`); sem `rubocop:disable`.
-- [ ] `REQUIREMENTS.md` (roadmap — P1 executada), `SESSIONS.md` (0035 em fase 2 +
+- [x] `REQUIREMENTS.md` (roadmap — P1 executada), `SESSIONS.md` (0035 em fase 2 +
       próximas J1→JN-2→J3→JN-1) e `draft-auto-battler.md` (anotação de performance
       — P1 executada) atualizados no mesmo escopo do passo docs; *status de
       validação* só após o usuário validar.
@@ -180,7 +180,20 @@ em arquivo JSON na pasta `tmp/`** (sobrevive ao `docker compose down` via volume
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.**
+**Concluída em 2026-08-19 pelo usuário.**
+
+| Critério | Evidência automatizada | Evidência manual | Resultado |
+| --- | --- | --- | --- |
+| `Parallelizer` puro | `parallelizer_test.rb` (ordem, paralelismo, `concurrency: 1`, exceção) | suíte 586/1787 verde | ok |
+| `PokeApiCache` thread-safe | `poke_api_cache_test.rb` (dedup same-key, chaves distintas, evicção) | suíte verde | ok |
+| `PersistentJsonStore` em `tmp/` | `persistent_json_store_test.rb` (2º boot sem rede, TTL, corrompido) | `tmp/pokeapi_cache.json` criado; 2º play ~4s (cache em uso) | ok |
+| Choke point `http_get` | `poke_api_http_test.rb` (com/sem `cache_path:`) | 0 regressão rotas de batalha (fakes atuais verdes) | ok |
+| Boot persistente | `poke_api_fake_test.rb` / `gateway_injection_test.rb` (default `tmp/`) | 2º play ~4s (sem refetch do fan-out) | ok |
+| `type_relations` paralelo | `poke_api_http_test.rb` (18 tipos, mesmo `{tipo => {double,half,no}}`) | suíte verde | ok |
+| `OpponentGenerator#team` paralelo | `opponent_generator_test.rb` (ordem/seed, fetcher por candidato, `parallelizer:`) | mesmo time oponente (batalhas OK) | ok |
+| `BattleService` paralelo | `battle_service_test.rb` (corrente ≥ 2 no prepare; resultado idêntico ao serial) | **`GET /battle` ~38s** (era ~93s) — fan-out paralelo | ok |
+| Garantias RNF (baseline, lint 0, sem gem/schema/rede) | suíte completa `./scripts/test` (586/1787, 0 failures) + `./scripts/lint` (0 offenses) | rotas com fakes verdes | ok |
+| Docs + status de validação | `check_docs` (S5) ok | roadmap REQUISITOS/SESSIONS/draft atualizados | ok |
 
 ### Progresso da implementação (fase 2 — TDD)
 

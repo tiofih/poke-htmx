@@ -74,14 +74,13 @@ nível não salva), nível exibido na UI (`"<nome> — Nível N"`), união com m
 (legados visíveis/removíveis), troca manual preservada, `:finished` inalterado — suíte
 566/1734, lint 0, critérios conferidos pelo usuário.
 
-**Próxima sessão:** **0035 — P1: performance do gateway** (paralelismo + cache
-persistente; aberta em 2026-08-19 **no lugar de J1** — refinamento e implementação
-concluídos, **aguardando validação do usuário**).
+**Próxima sessão:** **J1 — seleção inicial** (fim do dropdown: busca paginada +
+seleção por URL/teclado), seguida de JN-2 → J3 → JN-1.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
-> (0033). D1 parcial concluído e validado (0034). P1 (0035) implementado
-> (passos 1-5 verdes) e em **validação**. Após a 0035
-> validada: **J1 (seleção inicial)** → **JN-2** → **J3** → **JN-1** → organizar o resto
+> (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
+> 2026-08-19 — GET /battle ~38s, 2º play ~4s)**. Próximas: **J1 (seleção inicial)** → 
+> **JN-2** → **J3** → **JN-1** → organizar o resto
 > (JN-3, JN-4, JN-5, J2, J4, D4).
 
 ## Progresso das sessões
@@ -122,7 +121,7 @@ concluídos, **aguardando validação do usuário**).
 | 0032 | Eco-4-C: seguráveis/hold items — `Item` `stat`/`multiplier` + `ItemCatalog.can_hold` (choice-band/scarf, decisão 13) + coluna `held_item` (0032_add_held_item) + `TeamRepository#assign_held_item` + `BattlePokemon#held_item` + modulação de `stat` (motor sem mudança) + `POST /team/:id/held-item` + select "Segurável:" no `team_manage.erb` + `battle.erb` (`segura:`) + seed `team_duelo` | Concluída | Done (passos 0–6 + seed, suíte 559/1696, lint 0, validado em 2026-08-18) |
 | 0033 | Respiro 2 — services de produção: `BattleService` (prepare/advance) e `TeamService` (manage_data/save_moves/assign), providers lambda p/ gateway, 3 `rubocop:disable` de `server.rb` removidos, `server_test.rb` (1925 linhas) fatiado em 7 arquivos por área + `battle_test_helpers.rb` | Concluída | Done (passos 1–4, suíte 559/1696, lint 0, grep `rubocop:` em `server.rb` → 0, validado em 2026-08-19) |
 | 0034 | D1 parcial — nível de aprendizado de golpes: gating do manage por nível (`TeamService` + `progression`, `manage_data` via `learnable_moves` filter `level <= membro`), validação gated, nível na UI (`"<nome> — Nível N"`) + união com moves salvos, troca manual preservada, `:finished` inalterado | Concluída | Done (passos 1–5, suíte 566/1734, lint 0, validado em 2026-08-19) |
-| 0035 | P1 — performance do gateway: `Parallelizer` (pool threads) + `PokeApiCache` thread-safe + `PersistentJsonStore` (`tmp/`) + choke point `http_get` + fonte paralela (`type_relations`/`OpponentGenerator`/`BattleService`) | Refinamento/Implementação | Concluídas (passos 1-5 verdes, 2026-08-19, suíte 586/1787, lint 0) — **aguarda validação** |
+| 0035 | P1 — performance do gateway: `Parallelizer` (pool threads) + `PokeApiCache` thread-safe + `PersistentJsonStore` (`tmp/`) + choke point `http_get` + fonte paralela (`type_relations`/`OpponentGenerator`/`BattleService`) | Todas | Concluída — **validada pelo usuário em 2026-08-19** (GET /battle ~38s, 2º play ~4s; suíte 586/1787, lint 0) |
 
 ## Estrutura do arquivo de sessão
 
