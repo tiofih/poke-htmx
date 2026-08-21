@@ -520,3 +520,24 @@
   persistente elimina o re-warm a cada reboot.
 - **Candidate order suggestion:** após J1/J2/J3 (impacto de UX alto; não depende delas —
   pode entrar antes se o usuário preferir).
+
+---
+
+## Anotações de integração com IA — 2026-08-20
+
+> **Fora do fluxo (RNF-04).** Anotação do usuário para fases futuras. Não gera critérios
+> de aceite nem plano TDD agora. Revisar ao fechar as fases correntes.
+
+### IA-1. API ou WebSocket para uma IA jogar o jogo
+
+- **Ideia:** expor o jogo por **API (REST/JSON) ou WebSocket** para que uma **IA
+  (agente externo)** consiga **jogar** — montar time, batalhar (escolher golpes/ações),
+  usar Poke Mart/Poke Center etc., sem depender da UI htmx.
+- **Pontos em aberto:** REST vs WebSocket (turnos request/response ou eventos
+  assíncronos?); autenticação da IA (token por agente?); escopo exposto (só batalha vs
+  game loop completo — JN-5); reuso dos services existentes (`BattleService`/
+  `TeamService` da 0033 como camada de aplicação); observabilidade das partidas da IA
+  (histórico/log separados?).
+- **Impacto:** nova fronteira de transporte além do htmx; cruza com JN-5 (gameloop) e
+  Eco (loja/cura). O motor determinístico (B3/D1) facilita replay/teste de agentes.
+- **Aguarda sessão (RNF-04).**
