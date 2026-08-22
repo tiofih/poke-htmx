@@ -1,22 +1,17 @@
 <% if @notice %>
   <p class="notice"><%= @notice %></p>
 <% end %>
+<% unless @starters.empty? %>
+  <h2 class="starters-title">Iniciais</h2>
+  <ul class="pokemon-list starters">
+    <% @starters.each do |name, pokemon| %>
+      <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon, css_class: "starter-item" } %>
+    <% end %>
+  </ul>
+<% end %>
 <ul class="pokemon-list">
   <% @items.each do |name, pokemon| %>
-    <li class="list-item">
-      <% if pokemon %>
-        <a href="#" hx-get="/pokemon/<%= pokemon.number %>" hx-target="#pokemon" hx-swap="innerHTML">
-          <img src="<%= pokemon.sprite %>" alt="<%= name %>">
-          <%= name %>
-        </a>
-      <% else %>
-        <span><%= name %></span>
-      <% end %>
-      <form hx-post="/team" hx-target="#team" hx-swap="innerHTML">
-        <input type="hidden" name="pokeName" value="<%= name %>">
-        <button type="submit" class="btn">Add to Team</button>
-      </form>
-    </li>
+    <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon, css_class: "list-item" } %>
   <% end %>
 </ul>
 <div class="pagination">

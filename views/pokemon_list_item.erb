@@ -1,0 +1,14 @@
+<li class="<%= css_class %>">
+  <% if pokemon %>
+    <a href="#" hx-get="/pokemon/<%= pokemon.number %>" hx-target="#pokemon" hx-swap="innerHTML">
+      <img src="<%= pokemon.sprite %>" alt="<%= name %>">
+      <%= name %>
+    </a>
+  <% else %>
+    <span><%= name %></span>
+  <% end %>
+  <form hx-post="/team" hx-target="#team" hx-swap="innerHTML">
+    <input type="hidden" name="pokeName" value="<%= name %>">
+    <button type="submit" class="btn">Add to Team</button>
+  </form>
+</li>

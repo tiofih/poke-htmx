@@ -48,6 +48,7 @@ end
 
 module ServerListActions
   PAGE_SIZE = 20
+  STARTER_SLUGS = %w[bulbasaur charmander squirtle chikorita cyndaquil totodile treecko torchic mudkip].freeze
 
   private
 
@@ -69,7 +70,12 @@ module ServerListActions
     @limit = PAGE_SIZE
     @page = settings.api.paginate(offset: @offset, query: @q, limit: PAGE_SIZE)
     @items = Parallelizer.map(@page[:names]) { |name| [name, settings.api.find(name)] }
+    @starters = @q.empty? ? load_starters : []
     @notice = "Não foi possível carregar a lista de Pokémon." if @page[:names].empty? && @q.empty?
+  end
+
+  def load_starters
+    Parallelizer.map(STARTER_SLUGS) { |name| [name, settings.api.find(name)] }
   end
 
   def render_pokemon_fragment

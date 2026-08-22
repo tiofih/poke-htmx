@@ -193,7 +193,8 @@ class ServerListTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, 'id="pokemon-list"'
-    assert_equal 20, last_response.body.scan('class="list-item"').size
+    assert_equal 9, last_response.body.scan('<li class="starter-item">').size
+    assert_equal 20, last_response.body.scan('<li class="list-item">').size
     assert_includes last_response.body, 'name="q"'
     assert_includes last_response.body, "Página 1 de 13"
     refute_dropdown_markup(last_response.body)
@@ -288,10 +289,12 @@ class ServerListTest < Minitest::Test
   end
 
   def test_pokemons_renders_clickable_list
-    stub_list(two_hundred_fifty_names) { get "/pokemons" }
+    stub_list(two_hundred_fifty_names) do
+      get "/pokemons", q: "pokemon"
+    end
 
     assert last_response.ok?
-    assert_equal 20, last_response.body.scan('class="list-item"').size
+    assert_equal 20, last_response.body.scan('<li class="list-item">').size
     assert_equal 20, last_response.body.scan("hx-get=\"/pokemon/").size
     assert_equal 20, last_response.body.scan("<img src=").size
     assert_equal 20, last_response.body.scan('name="pokeName"').size
@@ -299,6 +302,27 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, "Página 1 de 13"
     refute_dropdown_markup(last_response.body)
     refute_includes last_response.body, "<html"
+  end
+
+  def test_pokemons_highlights_starters_block_when_q_empty
+    stub_list(filtered_names) { get "/pokemons" }
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Iniciais"
+    assert_equal 9, last_response.body.scan('<li class="starter-item">').size
+    %w[bulbasaur charmander squirtle chikorita cyndaquil totodile treecko torchic mudkip].each do |slug|
+      assert_includes last_response.body, "value=\"#{slug}\""
+    end
+  end
+
+  def test_starters_block_hidden_when_filtering
+    stub_list(filtered_names) do
+      get "/pokemons", q: "pik"
+    end
+
+    assert last_response.ok?
+    refute_includes last_response.body, "Iniciais"
+    refute_includes last_response.body, '<li class="starter-item">'
   end
 
   def test_pokemons_first_page_has_no_previous_link
@@ -338,7 +362,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_equal 2, last_response.body.scan('class="list-item"').size
+    assert_equal 2, last_response.body.scan('<li class="list-item">').size
     refute_includes last_response.body, 'value="bulbasaur"'
     assert_includes last_response.body, "Página 1 de 1"
     refute_includes last_response.body, ">Próxima<"
@@ -350,7 +374,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_empty last_response.body.scan('class="list-item"')
+    assert_empty last_response.body.scan('<li class="list-item">')
     refute_includes last_response.body, "<select"
     refute_includes last_response.body, 'value="pikachu"'
   end
@@ -372,7 +396,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_equal 4, last_response.body.scan('class="list-item"').size
+    assert_equal 4, last_response.body.scan('<li class="list-item">').size
   end
 
   def test_pokemons_with_empty_source_and_no_filter_shows_notice
