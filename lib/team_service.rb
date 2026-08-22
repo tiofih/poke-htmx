@@ -34,6 +34,15 @@ class TeamService
     nil
   end
 
+  def preview_move(member, selected, toggle, available_moves)
+    current = Array(selected)
+    return [current, nil] unless member && available_name?(member, toggle, available_moves)
+
+    return [current - [toggle], nil] if current.include?(toggle)
+
+    [current + [toggle], nil]
+  end
+
   def assign_item(user_id, member, item_name)
     return nil unless member
     return clear_item(user_id, member) if item_name.empty?
@@ -49,6 +58,10 @@ class TeamService
   end
 
   private
+
+  def available_name?(member, name, available_moves)
+    available_moves[member.id].to_a.any? { |move| move[:name] == name }
+  end
 
   def api
     @api_provider.call

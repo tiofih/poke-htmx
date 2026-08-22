@@ -195,11 +195,23 @@ module ServerTeamActions
 
   def save_team_moves
     member = team_manage_context(params[:id])
-    @notice = settings.team_strategy.save_moves(
-      current_user, member, Array(params[:moves]), @available_moves
-    )
+    @notice = params[:draft] ? preview_member_moves(member) : persist_member_moves(member)
     @team = settings.team.all(current_user)
     erb :team_manage, layout: false
+  end
+
+  def persist_member_moves(member)
+    settings.team_strategy.save_moves(
+      current_user, member, Array(params[:moves]), @available_moves
+    )
+  end
+
+  def preview_member_moves(member)
+    selection, notice = settings.team_strategy.preview_move(
+      member, Array(params[:moves]), params[:toggle].to_s, @available_moves
+    )
+    (@draft_moves ||= {})[member.id] = selection if member
+    notice
   end
 end
 
