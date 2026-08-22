@@ -168,10 +168,18 @@ Matriz de gates (estado hoje + decisão pendente anotada):
 | Time (fragmento) | livre, com aviso n/6 | livre |
 | Batalha / Mart / Center | **bloqueado** (fragmento amigável) | livre |
 | Histórico | livre (decisão 0036) | livre |
-| Gerenciar time | **livre hoje — pendente decidir** se entra no gate | livre |
+| Gerenciar time | **livre (decisão 2026-08-22 — preparação)** | livre |
 
 Recompensas do fim de batalha alimentam o loop: XP (nível/evolução/aprendizado),
 dinheiro (Center/Mart) e HP persistido — os três consomem/voltam pela batalha.
 
-**Pendências de decisão do usuário anotadas:** (1) gerenciar pré-jornada deve
-bloquear? (2) onde mora o contador n/6 permanente — nav, listagem ou ambos?
+**Pendências resolvidas (decisão do usuário em 2026-08-22):**
+1. **Gerenciar pré-jornada: mantém-se LIVRE** — montar/ajustar o time inicial é
+   preparação; itens já dependem do Mart (bloqueado). Gate permanece só para
+   Batalha/Mart/Center.
+2. **Contador n/6 mora em nav + listagem/team** — badge compacto no nav sempre
+   visível + barra com CTA "Montar time" na listagem e no fragmento `#team`
+   (desenhos alvo já refletem isso em `nav-shell.md`, `pokemon-list.md` e
+   `team.md`).
+3. **Ondas de UI (0–3) entram DEPOIS da fila fechada** (JN-2 → J3 → JN-1), na
+   ordem proposta em `draft-ui-ux.md` §5.

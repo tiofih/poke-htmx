@@ -138,5 +138,8 @@ sessão única** quando o usuário decidir encaixá-la (fora da ordem JN-2 → J
 Regras: cada onda = refinamento (fase 1) próprio quando virar sessão; wireframes
 alvo em `docs/screens/` já servem de base para os critérios. Tokens visuais
 necessários às ondas 0–2 estão anotados em `draft-design-system.md`.
+**Decisão do usuário (2026-08-22):** ondas 0–3 entram **depois da fila fechada**
+(JN-2 → J3 → JN-1), na ordem da tabela; contador n/6 em nav + listagem/team;
+gerenciar time permanece livre pré-jornada (detalhes no `draft-wireframes.md` §8).
 
 ---
