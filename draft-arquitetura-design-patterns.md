@@ -84,6 +84,26 @@ fixo com os **27 iniciais gen 1–9** excluídos da listagem.
   com dados, não estimativa.
 - Remover `pry` do runtime de produção (barato, pode ir num respiro técnico).
 
+### Identidade legível (J4) — levantamento de dados (2026-08-22)
+
+> Anotação para embasar o refinamento futuro do J4 (nome na entrada); ranking hoje
+> exibe UUID cru (`history.erb`), ilegível (ver `draft-ui-ux.md` §2.7).
+
+| Opção | Modelagem | Prós | Contras |
+| --- | --- | --- | --- |
+| **A. `nickname` em `user_state`** (recomendação leve) | `ALTER TABLE user_state ADD COLUMN IF NOT EXISTS nickname TEXT` — reusa PK `user_id` e o upsert já existente | migração barata e idempotente; 1 linha por usuário já garantida; sem join novo | mistura "estado da jornada" com identidade na mesma tabela |
+| B. tabela `users` própria | `(user_id PK, nickname, created_at)` | separa identidade de estado; espaço p/ preferências futuras | +1 tabela/repositório agora, sem demanda além do apelido |
+
+Pontos transversais anotados:
+- Exibição no ranking: apelido próprio → "Você" (destaque `.current`); demais
+  usuários → apelido ou UUID truncado como fallback (wireframe alvo em
+  `docs/screens/history.md`).
+- Entrada do nome: tela/form próprio (desenho pendente — pode reaproveitar o gate
+  da jornada como momento natural de pedir o apelido).
+- Privacidade: apelido é público no ranking global; UUID continua fora da UI.
+- `?as=` segue como mecanismo de validação — sem relação com o apelido.
+- Unicidade amigável: não exigir apelido único nesta fase (ranking local).
+
 ---
 
 ## Respiro 2026-08-18 — Estado atualizado (pós session 0032 / Eco-4-C)

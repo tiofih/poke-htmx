@@ -121,6 +121,57 @@ blocks:
 
 ## 7. Candidatos de próximo passo (RNF-04)
 
-- [ ] Aplicar o formato nas telas atuais (inventário de fragmentos: `#pokemon-list`,
-      `#pokemon`, `#team`, `#battle`, `#team/manage`) como forma de "ler" o layout existente.
+- [x] Aplicar o formato nas telas atuais — feito em `docs/screens/*.md`, com
+      **desenhos alvo** por tela (2026-08-22, análise `draft-ui-ux.md`).
 - [ ] Se o formato provar valor, vira método padrão das próximas sessões de UI (refinamento).
+
+---
+
+## 8. Fluxo do gameloop (anotação 2026-08-22 — JN-5; desenha a navegação ponta a ponta)
+
+> **Fora do fluxo.** Complementa os desenhos alvo: como as telas se encadeiam no
+> circuito montagem → batalha → loja/cura → repetir (ideia anotada no
+> `draft-auto-battler.md` como JN-5). Nada implementado.
+
+```
+                    ┌────────────────────────────┐
+                    │ Listagem (+ iniciais 27)   │◄───────────────┐
+                    │ busca · grid · Add         │                │
+                    └──────────┬─────────────────┘                │
+                     add até 6 │                                  │
+                               ▼                                  │
+                    ┌────────────────────────────┐                │
+        ┌──────────►│ Time completo → gate aberto│                │
+        │           │ (user_state OU time ≥ 6)   │                │
+        │           └──────────┬─────────────────┘                │
+        │                      ▼                                  │
+        │           ┌────────────────────────────┐     recompensas│
+        │           │ Batalha (rodadas/Jogar)    │────────────────┤
+        │           └──────────┬─────────────────┘                │
+        │                      ▼                                  │
+        │           ┌────────────────────────────┐                │
+        │           │ Poke Center / Poke Mart    │────────────────┘
+        │           │ curar · comprar itens      │
+        │           └────────────────────────────┘
+        │
+        │   sempre acessíveis (transversais):
+        ├── Detalhe do Pokémon (qualquer sprite → #pokemon)
+        ├── Histórico (#history)
+        └── Gerenciar time (#team manage)
+```
+
+Matriz de gates (estado hoje + decisão pendente anotada):
+
+| Área | Pré-jornada (<6) | Pós-jornada |
+| --- | --- | --- |
+| Listagem / Detalhe | livre | livre |
+| Time (fragmento) | livre, com aviso n/6 | livre |
+| Batalha / Mart / Center | **bloqueado** (fragmento amigável) | livre |
+| Histórico | livre (decisão 0036) | livre |
+| Gerenciar time | **livre hoje — pendente decidir** se entra no gate | livre |
+
+Recompensas do fim de batalha alimentam o loop: XP (nível/evolução/aprendizado),
+dinheiro (Center/Mart) e HP persistido — os três consomem/voltam pela batalha.
+
+**Pendências de decisão do usuário anotadas:** (1) gerenciar pré-jornada deve
+bloquear? (2) onde mora o contador n/6 permanente — nav, listagem ou ambos?

@@ -120,3 +120,23 @@ até time de 6) já coerente entre rotas e fragmentos.
   legível no ranking).
 
 ---
+
+## 5. Priorização sugerida (2026-08-22 — execução a critério do usuário)
+
+Ordem proposta por valor × esforço × dependência. Nenhuma onda abre escopo novo de
+produto — são o desenho alvo virando implementação; cada onda pode virar **uma
+sessão única** quando o usuário decidir encaixá-la (fora da ordem JN-2 → J3 → JN-1).
+
+| Onda | Itens | Por quê nessa ordem |
+| --- | --- | --- |
+| **0 — quick wins** | `alt`/`aria-label`, `loading="lazy"`, indicador global (`hx-indicator`), hierarquia de notices + copy pt-BR, evoluções linkadas no detalhe | só view/CSS, baixo risco; base visual para tudo abaixo |
+| **1 — jornada visível** | contador/barra "Time n/6" (listagem + nav + team), estados do botão Add (default / "No time ✓" / cheio) | conecta o gate à descoberta; reusa `JourneyService`; precisa expor `@team_names`/`@journey_started` nos renders |
+| **2 — leitura da batalha** | partial única dos painéis (+presenter), barras HP/PP, log das últimas N rodadas | mata duplicação antes de qualquer feature nova de batalha |
+| **3 — estrutura** | estado ativo no nav + limpeza sistemática de painéis, grid responsivo da listagem | polimento estrutural; depende só de CSS/markup |
+| Dependentes da fila | JN-2 (golpes em lista), JN-1 (telas próprias), JN-4 (componentes Mart/Center), J3 (ranking S–F), J4 (nome/apelido) | ordem fechada em 2026-08-18 mantida |
+
+Regras: cada onda = refinamento (fase 1) próprio quando virar sessão; wireframes
+alvo em `docs/screens/` já servem de base para os critérios. Tokens visuais
+necessários às ondas 0–2 estão anotados em `draft-design-system.md`.
+
+---
