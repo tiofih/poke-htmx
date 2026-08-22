@@ -420,7 +420,8 @@
 > **Sequência fechada pelo usuário:** ~~**1. Respiro 2**~~ (feito — sessão 0033
 > concluída e validada em 2026-08-19) → ~~**2. D1 parcial (nível de
 > aprendizado)**~~ (feito — sessão 0034, **concluída e validada em 2026-08-19**) →
-> **3. J1 (seleção inicial)** →
+> ~~**3. J1 (seleção inicial)**~~ (implementado — sessão 0036, aguardando validação
+> do usuário) →
 > **4. JN-2 (golpes em lista)** → **5. J3 (ranking S–F)** → **6. JN-1 (telas próprias,
 > fim do empilhamento)** → depois
 > **organizar o resto** (JN-3, JN-4, JN-5, J2, J4, D4 e demais).

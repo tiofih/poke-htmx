@@ -77,19 +77,20 @@ nível não salva), nível exibido na UI (`"<nome> — Nível N"`), união com m
 (legados visíveis/removíveis), troca manual preservada, `:finished` inalterado — suíte
 566/1734, lint 0, critérios conferidos pelo usuário.
 
-**Sessão 0036 (J1 — seleção inicial de time) em implementação:** refinamento concluído
-em 2026-08-19 — fim do dropdown (lista clicável sprite+nome+Add, pool total
+**Sessão 0036 (J1 — seleção inicial de time) implementada (fase 2 concluída,
+aguardando validação):** fim do dropdown (lista clicável sprite+nome+Add, pool total
 20/página, destaques "Iniciais") e tela de entrada da jornada (gate battle/mart/center
-até o time inicial de 6; marcador `user_state` + derivado do time). Implementação
-(fase 2) pendente.
+até o time inicial de 6; marcador `user_state` + derivado do time) — migração
+`0036_add_user_state`, `UserStateRepository`, `JourneyService`, gates nas rotas e
+`team.erb` gated. Suíte 609/1890, lint 0.
 
-**Próxima sessão:** **JN-2 — golpes em lista** (após a 0036 concluída e validada),
+**Próxima sessão:** **JN-2 — golpes em lista** (após a 0036 validada pelo usuário),
 seguida de J3 → JN-1 → organizar o resto.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
-> 2026-08-19 — GET /battle ~38s, 2º play ~4s)**. **J1 em implementação (0036,
-> refinamento concluído 2026-08-19)**. Próximas após a 0036: **JN-2** → **J3** → 
+> 2026-08-19 — GET /battle ~38s, 2º play ~4s)**. **J1 implementado (0036 — aguardando
+> validação do usuário)**. Próximas após a 0036: **JN-2** → **J3** → 
 > **JN-1** → organizar o resto
 > (JN-3, JN-4, JN-5, J2, J4, D4).
 
@@ -132,7 +133,7 @@ seguida de J3 → JN-1 → organizar o resto.
 | 0033 | Respiro 2 — services de produção: `BattleService` (prepare/advance) e `TeamService` (manage_data/save_moves/assign), providers lambda p/ gateway, 3 `rubocop:disable` de `server.rb` removidos, `server_test.rb` (1925 linhas) fatiado em 7 arquivos por área + `battle_test_helpers.rb` | Concluída | Done (passos 1–4, suíte 559/1696, lint 0, grep `rubocop:` em `server.rb` → 0, validado em 2026-08-19) |
 | 0034 | D1 parcial — nível de aprendizado de golpes: gating do manage por nível (`TeamService` + `progression`, `manage_data` via `learnable_moves` filter `level <= membro`), validação gated, nível na UI (`"<nome> — Nível N"`) + união com moves salvos, troca manual preservada, `:finished` inalterado | Concluída | Done (passos 1–5, suíte 566/1734, lint 0, validado em 2026-08-19) |
 | 0035 | P1 — performance do gateway: `Parallelizer` (pool threads) + `PokeApiCache` thread-safe + `PersistentJsonStore` (`tmp/`) + choke point `http_get` + fonte paralela (`type_relations`/`OpponentGenerator`/`BattleService`) | Todas | Concluída — **validada pelo usuário em 2026-08-19** (GET /battle ~38s, 2º play ~4s; suíte 586/1787, lint 0) |
-| 0036 | J1 — seleção inicial de time: fim do dropdown (lista clicável sprite+nome+Add, pool total 20/página + destaques "Iniciais") + tela de entrada da jornada (gate battle/mart/center até time de 6, marcador `user_state` + derivado do time) | Refinamento | Concluída — refinamento fechado em 2026-08-19, implementação (fase 2) pendente |
+| 0036 | J1 — seleção inicial de time: fim do dropdown (lista clicável sprite+nome+Add, pool total 20/página + destaques "Iniciais") + tela de entrada da jornada (gate battle/mart/center até time de 6, marcador `user_state` + derivado do time) | Implementação | Concluída — passos 1–6 (suíte 609/1890, lint 0), aguardando validação do usuário |
 
 ## Estrutura do arquivo de sessão
 
