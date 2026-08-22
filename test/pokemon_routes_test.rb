@@ -168,17 +168,35 @@ class ServerListTest < Minitest::Test
   include ServerTestHelpers
   include TestSupport
 
-  def test_index_renders_first_page_with_filter_input
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/"
+  def records_for(names)
+    names.to_h { |name| [name, build_pokemon_record(name, number_for(name))] }
+  end
+
+  def number_for(name)
+    digits = name.scan(/\d+/).first
+    digits ? digits.to_i : 25
+  end
+
+  def stub_list(names, &)
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_find(records_for(names), &)
     end
+  end
+
+  def refute_dropdown_markup(body)
+    refute_includes body, "<select"
+    refute_includes body, "<option"
+  end
+
+  def test_index_renders_clickable_list
+    stub_list(two_hundred_fifty_names) { get "/" }
 
     assert last_response.ok?
     assert_includes last_response.body, 'id="pokemon-list"'
-    assert_equal 100, last_response.body.scan("<option value=\"pokemon").size
+    assert_equal 20, last_response.body.scan('class="list-item"').size
     assert_includes last_response.body, 'name="q"'
-    assert_includes last_response.body, "Página 1 de 3"
-    assert_includes last_response.body, 'id="pokemons"'
+    assert_includes last_response.body, "Página 1 de 13"
+    refute_dropdown_markup(last_response.body)
   end
 
   def test_index_has_battle_entry_fragment
@@ -242,12 +260,11 @@ class ServerListTest < Minitest::Test
   end
 
   def test_fragments_remain_partial_without_html_wrapper
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/pokemons"
-    end
+    stub_list(two_hundred_fifty_names) { get "/pokemons" }
+
     refute_includes last_response.body, "<html"
     refute_includes last_response.body, "<head>"
-    assert_includes last_response.body, 'id="pokemons"'
+    assert_includes last_response.body, 'class="pokemon-list"'
 
     @repository.add("user-a", pikachu_pokemon)
     get "/team", {}, user_session("user-a")
@@ -270,77 +287,76 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, ".type"
   end
 
-  def test_pokemons_fragment_renders_first_page
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/pokemons"
-    end
+  def test_pokemons_renders_clickable_list
+    stub_list(two_hundred_fifty_names) { get "/pokemons" }
 
     assert last_response.ok?
-    assert_equal 100, last_response.body.scan("<option value=\"pokemon").size
-    assert_includes last_response.body, "id=\"pokemons\""
-    assert_includes last_response.body, "hx-get=\"/pokemon\""
-    assert_includes last_response.body, "Página 1 de 3"
-    assert_includes last_response.body, "Próxima"
+    assert_equal 20, last_response.body.scan('class="list-item"').size
+    assert_equal 20, last_response.body.scan("hx-get=\"/pokemon/").size
+    assert_equal 20, last_response.body.scan("<img src=").size
+    assert_equal 20, last_response.body.scan('name="pokeName"').size
+    assert_includes last_response.body, 'hx-post="/team"'
+    assert_includes last_response.body, "Página 1 de 13"
+    refute_dropdown_markup(last_response.body)
+    refute_includes last_response.body, "<html"
   end
 
   def test_pokemons_first_page_has_no_previous_link
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/pokemons"
-    end
+    stub_list(two_hundred_fifty_names) { get "/pokemons" }
 
     assert last_response.ok?
     refute_includes last_response.body, ">Anterior<"
   end
 
   def test_pokemons_middle_page_has_previous_and_next_links
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/pokemons", offset: 100
+    stub_list(two_hundred_fifty_names) do
+      get "/pokemons", offset: 20
     end
 
     assert last_response.ok?
     assert_includes last_response.body, "offset=0"
-    assert_includes last_response.body, "offset=200"
-    assert_includes last_response.body, "Página 2 de 3"
+    assert_includes last_response.body, "offset=40"
+    assert_includes last_response.body, "Página 2 de 13"
     assert_includes last_response.body, ">Anterior<"
     assert_includes last_response.body, ">Próxima<"
   end
 
   def test_pokemons_last_page_has_no_next_link
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/pokemons", offset: 200
+    stub_list(two_hundred_fifty_names) do
+      get "/pokemons", offset: 240
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, "Página 3 de 3"
+    assert_includes last_response.body, "Página 13 de 13"
     refute_includes last_response.body, ">Próxima<"
     assert_includes last_response.body, ">Anterior<"
   end
 
   def test_pokemons_filters_by_substring_case_insensitive
-    PokeApiStub.with_all_names(filtered_names) do
+    stub_list(filtered_names) do
       get "/pokemons", q: "PIK"
     end
 
     assert last_response.ok?
-    assert_equal 2, last_response.body.scan("<option value=\"pikachu").size
-    refute_includes last_response.body, "value=\"bulbasaur\""
+    assert_equal 2, last_response.body.scan('class="list-item"').size
+    refute_includes last_response.body, 'value="bulbasaur"'
     assert_includes last_response.body, "Página 1 de 1"
     refute_includes last_response.body, ">Próxima<"
   end
 
-  def test_pokemons_filter_without_matches_renders_empty_select
-    PokeApiStub.with_all_names(filtered_names) do
+  def test_pokemons_filter_without_matches_renders_empty_list
+    stub_list(filtered_names) do
       get "/pokemons", q: "zzzz"
     end
 
     assert last_response.ok?
-    assert_equal 1, last_response.body.scan("<option ").size
-    assert_includes last_response.body, 'id="pokemons"'
+    assert_empty last_response.body.scan('class="list-item"')
+    refute_includes last_response.body, "<select"
     refute_includes last_response.body, 'value="pikachu"'
   end
 
   def test_pokemons_empty_q_returns_full_list
-    PokeApiStub.with_all_names(filtered_names) do
+    stub_list(filtered_names) do
       get "/pokemons", q: ""
     end
 
@@ -351,12 +367,12 @@ class ServerListTest < Minitest::Test
   end
 
   def test_pokemons_paginates_filtered_results
-    PokeApiStub.with_all_names(filtered_names) do
+    stub_list(filtered_names) do
       get "/pokemons", q: "i"
     end
 
     assert last_response.ok?
-    assert_equal 5, last_response.body.scan("<option value=").size
+    assert_equal 4, last_response.body.scan('class="list-item"').size
   end
 
   def test_pokemons_with_empty_source_and_no_filter_shows_notice

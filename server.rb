@@ -22,6 +22,7 @@ require_relative "lib/battle_service"
 require_relative "lib/team_service"
 require_relative "lib/user_state_repository"
 require_relative "lib/journey_service"
+require_relative "lib/parallelizer"
 
 module ServerCommon
   private
@@ -46,22 +47,29 @@ module ServerCommon
 end
 
 module ServerListActions
+  PAGE_SIZE = 20
+
   private
 
   def render_index
     @offset = 0
     @q = ""
-    @page = settings.api.paginate(offset: @offset, query: @q)
-    @notice = "Não foi possível carregar a lista de Pokémon." if @page[:names].empty? && @q.empty?
+    load_pokemon_page
     erb :index
   end
 
   def render_pokemons_list
     @offset = params[:offset].to_i
     @q = params[:q].to_s
-    @page = settings.api.paginate(offset: @offset, query: @q)
-    @notice = "Não foi possível carregar a lista de Pokémon." if @page[:names].empty? && @q.empty?
+    load_pokemon_page
     erb :pokemon_list, layout: false
+  end
+
+  def load_pokemon_page
+    @limit = PAGE_SIZE
+    @page = settings.api.paginate(offset: @offset, query: @q, limit: PAGE_SIZE)
+    @items = Parallelizer.map(@page[:names]) { |name| [name, settings.api.find(name)] }
+    @notice = "Não foi possível carregar a lista de Pokémon." if @page[:names].empty? && @q.empty?
   end
 
   def render_pokemon_fragment
