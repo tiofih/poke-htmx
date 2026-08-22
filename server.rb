@@ -20,6 +20,8 @@ require_relative "lib/item_catalog"
 require_relative "lib/mart_service"
 require_relative "lib/battle_service"
 require_relative "lib/team_service"
+require_relative "lib/user_state_repository"
+require_relative "lib/journey_service"
 
 module ServerCommon
   private
@@ -104,12 +106,16 @@ module ServerTeamActions
   end
 
   def add_team_member
+    @notice = add_team_notice(new_member_from_api)
+    settings.journey.mark_started_when_full(current_user)
+    render_team_fragment_with_notice
+  end
+
+  def new_member_from_api
     pokemon = settings.api.find(params[:pokeName])
-    pokemon = pokemon_with_level_one_moves(pokemon) if pokemon
-    @notice = add_team_notice(pokemon)
-    @team = settings.team.all(current_user)
-    mart_data
-    erb :team, layout: false
+    return unless pokemon
+
+    pokemon_with_level_one_moves(pokemon)
   end
 
   def add_team_notice(pokemon)
@@ -146,6 +152,8 @@ module ServerTeamActions
   end
 
   def heal_team
+    return journey_gate_notice unless settings.journey.started?(current_user)
+
     @result = settings.heal.heal(current_user)
     @notice = @result[:notice]
     @team = settings.team.all(current_user)
@@ -154,12 +162,12 @@ module ServerTeamActions
   end
 
   def buy_from_mart
-    quantity = params[:quantity].to_i
-    @result = settings.mart.buy(current_user, params[:item_name], quantity)
-    @notice = @result[:notice]
-    @team = settings.team.all(current_user)
-    mart_data
-    erb :team, layout: false
+    return journey_gate_notice unless settings.journey.started?(current_user)
+
+    purchase = settings.mart.buy(current_user, params[:item_name], params[:quantity].to_i)
+    @result = purchase
+    @notice = purchase[:notice]
+    render_team_fragment_with_notice
   end
 
   def save_team_moves
@@ -198,12 +206,30 @@ module ServerBattleActions
   private
 
   def render_battle_fragment
+    return journey_gate_fragment unless settings.journey.started?(current_user)
+
     result = settings.battle.prepare(current_user)
     return empty_team_fragment if result[:reason] == :empty_team
     return battle_error_fragment unless result[:engine]
 
     @engine = result[:engine]
     erb :battle, layout: false
+  end
+
+  def journey_gate_notice
+    @notice = "Monte seu time inicial de 6 Pokémon para iniciar a jornada."
+    render_team_fragment_with_notice
+  end
+
+  def journey_gate_fragment
+    @message = "Monte seu time inicial de 6 Pokémon para iniciar a jornada."
+    erb :battle, layout: false
+  end
+
+  def render_team_fragment_with_notice
+    @team = settings.team.all(current_user)
+    mart_data
+    erb :team, layout: false
   end
 
   def empty_team_fragment
@@ -392,6 +418,24 @@ module ErrorHandling
   end
 end
 
+module ServerServices
+  module_function
+
+  def wire(app, deps)
+    app.set :heal, HealService.new(team: deps[:team], progression: deps[:progression], wallet: deps[:wallet])
+    app.set :mart, MartService.new(inventory: deps[:inventory], wallet: deps[:wallet])
+    app.set :battle, BattleService.new(dependencies: deps)
+    app.set :team_strategy, TeamService.new(**strategy_dependencies(deps))
+  end
+
+  def strategy_dependencies(deps)
+    {
+      api: deps[:api], team: deps[:team], progression: deps[:progression],
+      inventory: deps[:inventory], wallet: deps[:wallet]
+    }
+  end
+end
+
 class Server < Sinatra::Base
   configure :development do
     register Sinatra::Reloader
@@ -411,18 +455,14 @@ class Server < Sinatra::Base
     set :wallet, WalletRepository.new
     set :api, PokeApi.instance
     set :inventory, InventoryRepository.new
+    set :user_state, UserStateRepository.new
+    set :journey, JourneyService.new(user_state: settings.user_state, team: settings.team)
     deps = {
       api: -> { settings.api }, battles: settings.battles, team: settings.team,
       progression: settings.progression, battle_history: settings.battle_history,
       wallet: settings.wallet, inventory: settings.inventory
     }
-    set :heal, HealService.new(team: deps[:team], progression: deps[:progression], wallet: deps[:wallet])
-    set :mart, MartService.new(inventory: deps[:inventory], wallet: deps[:wallet])
-    set :battle, BattleService.new(dependencies: deps)
-    set :team_strategy, TeamService.new(
-      api: deps[:api], team: deps[:team], progression: deps[:progression],
-      inventory: deps[:inventory], wallet: deps[:wallet]
-    )
+    ServerServices.wire(self, deps)
   end
 
   before do

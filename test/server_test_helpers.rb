@@ -13,10 +13,15 @@ module ServerTestHelpers
   def setup
     TestDatabase.setup!
     TestDatabase.clear_team!
+    TestDatabase.clear_user_state!
     @repository = TeamRepository.new
     @progression = ProgressionRepository.new
     @wallet = WalletRepository.new
     @inventory = InventoryRepository.new
+  end
+
+  def start_journey(user_id)
+    UserStateRepository.new.mark_started(user_id)
   end
 
   def pikachu_pokemon

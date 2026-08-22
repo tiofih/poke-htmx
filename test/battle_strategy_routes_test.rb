@@ -7,6 +7,11 @@ class ServerBattleItemTest < Minitest::Test
   include TestSupport
   include ServerBattleTestHelpers
 
+  def setup
+    super
+    start_journey("user-a")
+  end
+
   def test_battle_panel_shows_assigned_item_on_player_member
     @repository.add("user-a", pikachu_pokemon)
     member_id = @repository.all("user-a").first.id
@@ -38,6 +43,11 @@ class ServerBattleHeldItemTest < Minitest::Test
   include ServerTestHelpers
   include TestSupport
   include ServerBattleTestHelpers
+
+  def setup
+    super
+    start_journey("user-a")
+  end
 
   def shield_opponent
     Pokemon.new(

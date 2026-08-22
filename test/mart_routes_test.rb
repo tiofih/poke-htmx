@@ -5,6 +5,11 @@ class ServerMartTest < Minitest::Test
   include ServerTestHelpers
   include TestSupport
 
+  def setup
+    super
+    start_journey("user-a")
+  end
+
   def test_mart_buy_debits_wallet_and_adds_to_inventory
     @repository.add("user-a", pikachu_pokemon)
     @wallet.grant("user-a", 100)
@@ -62,5 +67,34 @@ class ServerMartTest < Minitest::Test
     post "/mart/buy", { item_name: "potion", quantity: "1" }, user_session("user-a")
 
     assert_includes last_response.body, "potion"
+  end
+end
+
+class ServerMartJourneyGateTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def test_mart_buy_blocked_before_journey
+    @repository.add("user-novo", pikachu_pokemon)
+    @wallet.grant("user-novo", 100)
+
+    post "/mart/buy", { item_name: "potion", quantity: "2" }, user_session("user-novo")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "<html"
+    assert_match(/jornada/i, last_response.body)
+    assert_equal 0, TestDatabase.inventory_quantity("user-novo", "potion")
+    assert_equal 100, @wallet.balance("user-novo")
+  end
+
+  def test_mart_buy_released_after_journey_started
+    start_journey("user-a")
+    @repository.add("user-a", pikachu_pokemon)
+    @wallet.grant("user-a", 100)
+
+    post "/mart/buy", { item_name: "potion", quantity: "1" }, user_session("user-a")
+
+    assert_match(/comprado/i, last_response.body.strip)
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion")
   end
 end

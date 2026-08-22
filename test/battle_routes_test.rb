@@ -7,6 +7,11 @@ class ServerBattleTest < Minitest::Test
   include TestSupport
   include ServerBattleTestHelpers
 
+  def setup
+    super
+    start_journey("user-a")
+  end
+
   def test_battle_close_route_returns_empty_fragment
     get "/battle/close"
 
@@ -569,5 +574,32 @@ class ServerBattleTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "HP 200/200",
                     "membro que nunca batalhou entra com HP cheio"
+  end
+end
+
+class ServerJourneyGateBattleTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+  include ServerBattleTestHelpers
+
+  def test_battle_blocked_before_journey_with_partial_team
+    3.times { |n| @repository.add("user-novo", build_pokemon_record("pokemon#{n}", n + 1)) }
+
+    get "/battle", {}, user_session("user-novo")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "<html"
+    assert_match(/jornada/i, last_response.body)
+    refute_includes last_response.body, %(hx-post="/battle/play")
+  end
+
+  def test_battle_opens_after_journey_started
+    start_journey("user-a")
+    @repository.add("user-a", pikachu_pokemon)
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Batalha"
   end
 end

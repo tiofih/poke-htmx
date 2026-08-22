@@ -547,6 +547,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_heal_cures_team_and_charges_wallet
+    start_journey("user-a")
     @repository.add("user-a", pikachu_pokemon)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
@@ -563,6 +564,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_heal_with_insufficient_balance_shows_notice_without_debiting
+    start_journey("user-a")
     @repository.add("user-a", pikachu_pokemon)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
@@ -577,6 +579,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_heal_already_cured_shows_notice_without_debiting
+    start_journey("user-a")
     @repository.add("user-a", pikachu_pokemon)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 200)
@@ -590,6 +593,8 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_heal_with_empty_team_does_not_break
+    start_journey("user-a")
+
     post "/team/heal", {}, user_session("user-a")
 
     assert last_response.ok?
@@ -614,5 +619,71 @@ class ServerTeamTest < Minitest::Test
 
     assert last_response.ok?
     refute_includes last_response.body, "Poke Center"
+  end
+end
+
+class ServerHealJourneyGateTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def test_heal_blocked_before_journey
+    @repository.add("user-novo", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-novo")
+    @progression.update_hp("user-novo", pokemon_id, 200, 100)
+    @wallet.grant("user-novo", 200)
+
+    post "/team/heal", {}, user_session("user-novo")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "<html"
+    assert_match(/jornada/i, last_response.body)
+    assert_equal 100, @progression.get("user-novo", pokemon_id)[:hp_current]
+    assert_equal 200, @wallet.balance("user-novo")
+  end
+
+  def test_heal_released_after_journey_started
+    start_journey("user-a")
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+    @wallet.grant("user-a", 200)
+
+    post "/team/heal", {}, user_session("user-a")
+
+    assert_match(/curado por 50/i, last_response.body.strip)
+    assert_equal 150, @wallet.balance("user-a")
+  end
+end
+
+class ServerTeamJourneyMarkTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def test_post_team_marks_journey_on_sixth_member
+    5.times { |n| @repository.add("user-a", build_pokemon_record("pokemon#{n}", n + 1)) }
+    state = UserStateRepository.new
+
+    refute state.started?("user-a")
+
+    PokeApiStub.with_find(pikachu_pokemon) do
+      PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
+        post "/team", { pokeName: "pikachu" }, user_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    assert_equal 6, @repository.all("user-a").size
+    assert_equal true, state.started?("user-a")
+  end
+
+  def test_post_team_below_six_does_not_mark_journey
+    PokeApiStub.with_find(pikachu_pokemon) do
+      PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
+        post "/team", { pokeName: "pikachu" }, user_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    assert_equal false, UserStateRepository.new.started?("user-a")
   end
 end
