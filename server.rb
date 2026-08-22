@@ -48,7 +48,17 @@ end
 
 module ServerListActions
   PAGE_SIZE = 20
-  STARTER_SLUGS = %w[bulbasaur charmander squirtle chikorita cyndaquil totodile treecko torchic mudkip].freeze
+  STARTER_SLUGS = %w[
+    bulbasaur charmander squirtle
+    chikorita cyndaquil totodile
+    treecko torchic mudkip
+    turtwig chimchar piplup
+    snivy tepig oshawott
+    chespin fennekin froakie
+    rowlet litten popplio
+    grookey scorbunny sobble
+    sprigatito fuecoco quaxly
+  ].freeze
 
   private
 
@@ -75,6 +85,7 @@ module ServerListActions
   end
 
   def list_entry(name)
+    return if STARTER_SLUGS.include?(name)
     return unless settings.api.base_form?(name)
 
     [name, settings.api.find(name)]

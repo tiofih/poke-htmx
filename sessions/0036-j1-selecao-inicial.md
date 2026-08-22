@@ -108,10 +108,10 @@ Poke Center** até o time inicial de 6 estar montado.
       ex. 250 nomes → "Página 1 de 13"), controles Anterior/Próxima mantendo `offset`
       e `q`, filtro por substring preservado — e exibe **apenas formas base**
       (1º estágio de cada linha evolutiva; evoluções ocultas).
-- [ ] **Destaque "Iniciais":** com `q` vazio, o topo mostra o bloco "Iniciais" com as 9
-      iniciais de gen 1–3 (bulbasaur, charmander, squirtle, chikorita, cyndaquil,
-      totodile, treecko, torchic, mudkip) — cada uma com sprite + nome → detalhe + Add;
-      com `q` não-vazio, o bloco some (0 regressão do filtro).
+- [ ] **Destaque "Iniciais":** com `q` vazio, o topo mostra o bloco "Iniciais" com os
+      **27 iniciais de gen 1–9** *(alterado em 2026-08-22 — S3 5-A)* — cada uma com
+      sprite + nome → detalhe + Add; **iniciais não reaparecem na listagem do pool**
+      (sem duplicação); com `q` não-vazio, o bloco some (0 regressão do filtro).
 - [ ] **Tela de entrada da jornada — gate:** `GET /battle`, `POST /mart/buy` e
       `POST /team/heal` devolvem fragmento amigável (200, sem ação) enquanto a jornada
       não iniciou; `POST /team` que completa o 6º membro **marca a jornada** (`user_state`
@@ -142,7 +142,7 @@ Poke Center** até o time inicial de 6 estar montado.
 | --- | --- |
 | Fim do dropdown (lista clicável) | `test/pokemon_routes_test.rb` — itens com sprite+nome→detalhe+Add, sem `<select>` (novos `test_index_renders_clickable_list`/`test_pokemons_renders_clickable_list`) |
 | Pool total 20/página, só formas base | `test/pokemon_routes_test.rb` — 20 itens, "Página 1 de 13", Anterior/Próxima, filtro (reescritos) + `test_pokemons_omits_evolved_forms_from_list` |
-| Destaque "Iniciais" | `test/pokemon_routes_test.rb` — bloco com 9 iniciais quando `q` vazio; some com filtro |
+| Destaque "Iniciais" | `test/pokemon_routes_test.rb` — bloco com 27 iniciais gen 1–9 quando `q` vazio; some com filtro; `test_pokemons_excludes_starters_from_pool_list` |
 | Gate da jornada (battle/mart/heal) | `test/battle_routes_test.rb`/`test/mart_routes_test.rb`/`test/team_routes_test.rb` — fragmento 200 sem ação antes da jornada; liberado após iniciar |
 | `POST /team` ao 6º marca jornada | `test/team_routes_test.rb` — `user_state.journey_started = true` ao completar 6 |
 | Marcador tabela + derivado do time | `test/journey_service_test.rb` — time 6 sem flag libera; flag persiste após encolher; `test/user_state_repository_test.rb` — isolamento |
@@ -196,6 +196,15 @@ Poke Center** até o time inicial de 6 estar montado.
   falha de rede no predicado esconde o item (**fail-closed**, só base confirmada
   aparece). Custo extra aceito: chamadas de espécie+cadeia por nome, cacheadas
   (E1-B/P1). Revalidação pelo usuário ao fim do ciclo.
+- **Ajustes complementares do mesmo feedback (2026-08-22):**
+  1. **Iniciais = todas as gerações (27, gen 1–9)** — o bloco fixo passa de 9
+     (gen 1–3) para os 27 iniciais base: bulbasaur/charmander/squirtle,
+     chikorita/cyndaquil/totodile, treecko/torchic/mudkip, turtwig/chimchar/piplup,
+     snivy/tepig/oshawott, chespin/fennekin/froakie, rowlet/litten/popplio,
+     grookey/scorbunny/sobble, sprigatito/fuecoco/quaxly.
+  2. **Iniciais não reaparecem na listagem do pool** — como são fixos no topo,
+     `STARTER_SLUGS.include?(name)` exclui o nome antes do enriquecimento
+     (sem duplicação entre bloco e lista).
 
 ## 6. Plano TDD (passos)
 

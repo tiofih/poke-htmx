@@ -7,7 +7,7 @@
 │ Iniciais            (só com busca vazia) │
 │ [sprite] bulbasaur   [Add to Team]       │
 │ [sprite] charmander  [Add to Team]       │
-│ ... (9 iniciais gen 1–3)                 │
+│ ... (27 iniciais gen 1–9)                │
 │                                          │
 │ [sprite] pokemon1    [Add to Team]       │
 │ [sprite] pokemon2    [Add to Team]       │
@@ -57,15 +57,17 @@ blocks:
 ```
 
 **Fontes de dados:** `@items` (pares nome→`Pokemon` da página), `@starters`
-(9 iniciais quando `@q` vazio), `@page[:total]`, `@limit` (20), `@offset`, `@q`,
-`@notice`. Sprite/nome linkam o detalhe (`GET /pokemon/:number`, alvo `#pokemon`);
-o botão **Add to Team** faz `POST /team` com `pokeName` (alvo `#team`). O
-enriquecimento sprite/número acontece na rota (`find` + `Parallelizer`) — o
-contrato do gateway (`paginate` → nomes) não muda. Navegação por teclado nativa
-(Tab/Enter nos links) — sem JS custom.
+(27 iniciais gen 1–9 quando `@q` vazio), `@page[:total]`, `@limit` (20),
+`@offset`, `@q`, `@notice`. Sprite/nome linkam o detalhe (`GET /pokemon/:number`,
+alvo `#pokemon`); o botão **Add to Team** faz `POST /team` com `pokeName`
+(alvo `#team`). O enriquecimento sprite/número acontece na rota (`find` +
+`Parallelizer`) — o contrato do gateway (`paginate` → nomes) não muda.
+Navegação por teclado nativa (Tab/Enter nos links) — sem JS custom.
 
-**Só formas base (ajuste S3 — 2026-08-22):** a listagem exibe apenas o 1º estágio
-de cada linha evolutiva (`base_form?(name)` no gateway; evoluções como raichu,
-ivysaur, charmeleon não aparecem). A paginação continua paginando nomes do pool
-(`offset` por 20) — uma página pode listar menos itens quando contém evoluções.
-Falha de rede no predicado esconde o item (fail-closed).
+**Só formas base + iniciais fixos no topo (ajuste S3 — 2026-08-22):** a listagem
+exibe apenas o 1º estágio de cada linha evolutiva (`base_form?(name)` no gateway;
+evoluções como raichu, ivysaur, charmeleon não aparecem) e **exclui os 27
+iniciais** (já fixos no bloco "Iniciais" — sem duplicação). A paginação continua
+paginando nomes do pool (`offset` por 20) — uma página pode listar menos itens
+quando contém evoluções/iniciais. Falha de rede no predicado esconde o item
+(fail-closed).

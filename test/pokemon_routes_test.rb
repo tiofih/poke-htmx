@@ -191,12 +191,24 @@ class ServerListTest < Minitest::Test
     refute_includes body, "<option"
   end
 
+  ALL_STARTERS = %w[
+    bulbasaur charmander squirtle
+    chikorita cyndaquil totodile
+    treecko torchic mudkip
+    turtwig chimchar piplup
+    snivy tepig oshawott
+    chespin fennekin froakie
+    rowlet litten popplio
+    grookey scorbunny sobble
+    sprigatito fuecoco quaxly
+  ].freeze
+
   def test_index_renders_clickable_list
     stub_list(two_hundred_fifty_names) { get "/" }
 
     assert last_response.ok?
     assert_includes last_response.body, 'id="pokemon-list"'
-    assert_equal 9, last_response.body.scan('<li class="starter-item">').size
+    assert_equal 27, last_response.body.scan('<li class="starter-item">').size
     assert_equal 20, last_response.body.scan('<li class="list-item">').size
     assert_includes last_response.body, 'name="q"'
     assert_includes last_response.body, "Página 1 de 13"
@@ -315,7 +327,16 @@ class ServerListTest < Minitest::Test
     assert last_response.ok?
     refute_includes last_response.body, 'value="raichu"'
     assert_includes last_response.body, 'value="pikachu"'
+    assert_equal 3, last_response.body.scan('<li class="list-item">').size
+  end
+
+  def test_pokemons_excludes_starters_from_pool_list
+    stub_list(filtered_names) { get "/pokemons" }
+
+    assert last_response.ok?
+    assert_equal 27, last_response.body.scan('<li class="starter-item">').size
     assert_equal 4, last_response.body.scan('<li class="list-item">').size
+    assert_equal 1, last_response.body.scan('value="bulbasaur"').size
   end
 
   def test_pokemons_highlights_starters_block_when_q_empty
@@ -323,8 +344,8 @@ class ServerListTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "Iniciais"
-    assert_equal 9, last_response.body.scan('<li class="starter-item">').size
-    %w[bulbasaur charmander squirtle chikorita cyndaquil totodile treecko torchic mudkip].each do |slug|
+    assert_equal 27, last_response.body.scan('<li class="starter-item">').size
+    ALL_STARTERS.each do |slug|
       assert_includes last_response.body, "value=\"#{slug}\""
     end
   end
