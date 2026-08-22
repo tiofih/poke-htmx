@@ -201,6 +201,10 @@ module PokeApiStub
     with_gateway(fetch_all_names: names, &)
   end
 
+  def self.with_base_forms(map, &)
+    with_gateway(base_form: map, &)
+  end
+
   def self.with_moves_for(moves, &)
     with_gateway(moves_for: moves, &)
   end

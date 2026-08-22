@@ -5,12 +5,13 @@ require_relative "../lib/gateways/poke_api_http"
 class PokeApiFake
   def initialize(find: nil, detail: nil, fetch_all_names: nil,
                  moves_for: nil, move: nil, available_move_names: nil, type_relations: nil,
-                 next_evolutions: nil, learnable_moves: nil)
+                 next_evolutions: nil, learnable_moves: nil, base_form: nil)
     @config = {
       find: find, detail: detail, fetch_all_names: fetch_all_names,
       moves_for: moves_for, move: move,
       available_move_names: available_move_names, type_relations: type_relations,
-      next_evolutions: next_evolutions, learnable_moves: learnable_moves
+      next_evolutions: next_evolutions, learnable_moves: learnable_moves,
+      base_form: base_form
     }.freeze
     @find = find
     @detail = detail
@@ -21,6 +22,7 @@ class PokeApiFake
     @type_relations = type_relations
     @next_evolutions = next_evolutions
     @learnable_moves = learnable_moves
+    @base_form = base_form
   end
 
   attr_reader :config, :fetch_all_names, :type_relations
@@ -57,6 +59,10 @@ class PokeApiFake
 
   def learnable_moves(_number)
     @learnable_moves
+  end
+
+  def base_form?(name)
+    resolve(@base_form, name) == true
   end
 
   private

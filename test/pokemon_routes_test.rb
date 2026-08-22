@@ -177,9 +177,12 @@ class ServerListTest < Minitest::Test
     digits ? digits.to_i : 25
   end
 
-  def stub_list(names, &)
+  def stub_list(names, evolved: [], &)
+    forms = names.to_h { |name| [name, !evolved.include?(name)] }
     PokeApiStub.with_all_names(names) do
-      PokeApiStub.with_find(records_for(names), &)
+      PokeApiStub.with_find(records_for(names)) do
+        PokeApiStub.with_base_forms(forms, &)
+      end
     end
   end
 
@@ -302,6 +305,17 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, "Página 1 de 13"
     refute_dropdown_markup(last_response.body)
     refute_includes last_response.body, "<html"
+  end
+
+  def test_pokemons_omits_evolved_forms_from_list
+    stub_list(filtered_names, evolved: ["raichu"]) do
+      get "/pokemons"
+    end
+
+    assert last_response.ok?
+    refute_includes last_response.body, 'value="raichu"'
+    assert_includes last_response.body, 'value="pikachu"'
+    assert_equal 4, last_response.body.scan('<li class="list-item">').size
   end
 
   def test_pokemons_highlights_starters_block_when_q_empty

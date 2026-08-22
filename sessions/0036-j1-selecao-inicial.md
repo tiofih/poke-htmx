@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-19 (confirmado J1 como próxima sessão; escopo, lista base, seleção, marcador da jornada, sprite e bloqueio) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** (passos 0–6 em 2026-08-21 — suíte/lint verdes) |
+| Validação | **Em ajuste (S3)** — feedback do usuário em 2026-08-22 reabriu o critério da listagem (ver seção 5-A); revalidação pendente |
 
 ---
 
@@ -103,9 +103,11 @@ Poke Center** até o time inicial de 6 estar montado.
       sprite + nome como links `hx-get="/pokemon/:number"` no alvo `#pokemon` (RF-06) e
       um form `hx-post="/team"` com `pokeName` (Add); **sem `<select>`/`<option>`**;
       sem `<html>` no fragmento.
-- [ ] **Pool total paginado 20/página:** a lista cobre o pool completo com `limit: 20`
-      ("Página X de Y" correto, ex. 250 nomes → "Página 1 de 13"), controles
-      Anterior/Próxima mantendo `offset` e `q`, e filtro por substring preservado.
+- [ ] **Pool total paginado 20/página, só formas base** *(alterado em 2026-08-22 — S3
+      5-A)*: a lista cobre o pool completo com `limit: 20` ("Página X de Y" correto,
+      ex. 250 nomes → "Página 1 de 13"), controles Anterior/Próxima mantendo `offset`
+      e `q`, filtro por substring preservado — e exibe **apenas formas base**
+      (1º estágio de cada linha evolutiva; evoluções ocultas).
 - [ ] **Destaque "Iniciais":** com `q` vazio, o topo mostra o bloco "Iniciais" com as 9
       iniciais de gen 1–3 (bulbasaur, charmander, squirtle, chikorita, cyndaquil,
       totodile, treecko, torchic, mudkip) — cada uma com sprite + nome → detalhe + Add;
@@ -139,7 +141,7 @@ Poke Center** até o time inicial de 6 estar montado.
 | Critério | Teste (arquivo/nome) |
 | --- | --- |
 | Fim do dropdown (lista clicável) | `test/pokemon_routes_test.rb` — itens com sprite+nome→detalhe+Add, sem `<select>` (novos `test_index_renders_clickable_list`/`test_pokemons_renders_clickable_list`) |
-| Pool total 20/página | `test/pokemon_routes_test.rb` — 20 itens, "Página 1 de 13", Anterior/Próxima, filtro (reescritos) |
+| Pool total 20/página, só formas base | `test/pokemon_routes_test.rb` — 20 itens, "Página 1 de 13", Anterior/Próxima, filtro (reescritos) + `test_pokemons_omits_evolved_forms_from_list` |
 | Destaque "Iniciais" | `test/pokemon_routes_test.rb` — bloco com 9 iniciais quando `q` vazio; some com filtro |
 | Gate da jornada (battle/mart/heal) | `test/battle_routes_test.rb`/`test/mart_routes_test.rb`/`test/team_routes_test.rb` — fragmento 200 sem ação antes da jornada; liberado após iniciar |
 | `POST /team` ao 6º marca jornada | `test/team_routes_test.rb` — `user_state.journey_started = true` ao completar 6 |
@@ -173,6 +175,27 @@ Poke Center** até o time inicial de 6 estar montado.
 - **Ordem sugerida:** `user_state` + `JourneyService` → gates de rota (battle/mart/heal)
   + marcação no add → `team.erb` (Center/Mart gated) → lista clicável 20/página →
   destaques "Iniciais" → migração/regressão → docs.
+
+## 5-A. Alteração de critério em validação (S3 — 2026-08-22)
+
+- **Feedback do usuário (fase 3, 2026-08-22):** "a listagem deve incluir apenas
+  pokémon iniciais, sem evoluções".
+- **Interpretação aprovada pelo usuário:** **formas base de todo o pool** — a listagem
+  mantém o pool paginado, mas mostra apenas o **1º estágio de cada linha evolutiva**
+  (pikachu sim, raichu não; bulbasaur sim, ivysaur/venusaur não).
+- **Reabertos/alterados:** critério "Pool total paginado 20/página" passa a exigir o
+  filtro de formas base na listagem; critério→teste correspondente atualizado.
+  Bloco "Iniciais" permanece inalterado (os 9 são formas base). Demais critérios
+  mantidos.
+- **Escopo técnico adicional:** predicado **`base_form?(name)`** no gateway (espécie é
+  a raiz da própria cadeia evolutiva — `pokemon-species` + `evolution-chain`),
+  implementado em `PokeApiParsing`, delegado em `PokeApiCache`, suportado no
+  `PokeApiFake`; a rota filtra os itens da página antes de renderizar.
+- **Comportamento acordado:** paginação continua paginando **nomes do pool**
+  (`offset` por 20) — uma página pode listar menos itens quando contém evoluções;
+  falha de rede no predicado esconde o item (**fail-closed**, só base confirmada
+  aparece). Custo extra aceito: chamadas de espécie+cadeia por nome, cacheadas
+  (E1-B/P1). Revalidação pelo usuário ao fim do ciclo.
 
 ## 6. Plano TDD (passos)
 

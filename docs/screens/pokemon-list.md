@@ -63,3 +63,9 @@ o botão **Add to Team** faz `POST /team` com `pokeName` (alvo `#team`). O
 enriquecimento sprite/número acontece na rota (`find` + `Parallelizer`) — o
 contrato do gateway (`paginate` → nomes) não muda. Navegação por teclado nativa
 (Tab/Enter nos links) — sem JS custom.
+
+**Só formas base (ajuste S3 — 2026-08-22):** a listagem exibe apenas o 1º estágio
+de cada linha evolutiva (`base_form?(name)` no gateway; evoluções como raichu,
+ivysaur, charmeleon não aparecem). A paginação continua paginando nomes do pool
+(`offset` por 20) — uma página pode listar menos itens quando contém evoluções.
+Falha de rede no predicado esconde o item (fail-closed).

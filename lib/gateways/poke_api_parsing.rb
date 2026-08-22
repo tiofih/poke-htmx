@@ -54,6 +54,18 @@ module PokeApiParsing
     []
   end
 
+  def base_form?(name)
+    data = pokemon_data(name)
+    return false unless data
+
+    chain = fetch_chain_data(data.dig("species", "url"))
+    return false unless chain
+
+    chain.dig("species", "name") == data["name"]
+  rescue Faraday::Error, JSON::ParserError
+    false
+  end
+
   def flatten_chain(chain)
     names = [chain["species"]["name"]]
     chain["evolves_to"].each { |stage| names.concat(flatten_chain(stage)) }

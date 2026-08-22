@@ -55,6 +55,10 @@ class PokeApiCache
     fetch([:next_evolutions, number]) { @inner.next_evolutions(number) }
   end
 
+  def base_form?(name)
+    fetch([:base_form, name], accept: ->(value) { value == true }) { @inner.base_form?(name) }
+  end
+
   def learnable_moves(number)
     fetch([:learnable_moves, number]) { @inner.learnable_moves(number) }
   end

@@ -69,9 +69,15 @@ module ServerListActions
   def load_pokemon_page
     @limit = PAGE_SIZE
     @page = settings.api.paginate(offset: @offset, query: @q, limit: PAGE_SIZE)
-    @items = Parallelizer.map(@page[:names]) { |name| [name, settings.api.find(name)] }
+    @items = Parallelizer.map(@page[:names]) { |name| list_entry(name) }.compact
     @starters = @q.empty? ? load_starters : []
     @notice = "Não foi possível carregar a lista de Pokémon." if @page[:names].empty? && @q.empty?
+  end
+
+  def list_entry(name)
+    return unless settings.api.base_form?(name)
+
+    [name, settings.api.find(name)]
   end
 
   def load_starters
