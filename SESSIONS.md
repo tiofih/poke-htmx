@@ -84,22 +84,23 @@ fora da listagem) e tela de entrada da jornada (gate battle/mart/center até o t
 inicial de 6; marcador `user_state` + derivado do time). Ajustes S3 de validação
 registrados na seção 5-A da sessão. Suíte 611/1936, lint 0.
 
-**Sessão 0037 (JN-2 — golpes em lista) aberta — refinamento concluído em
-2026-08-22:** checkboxes de golpes do `team_manage.erb` saem em favor de **lista
-clicável com marcação via htmx** (cada linha alterna via round-trip; rascunho na
-própria rota `POST /team/:id/moves` com `draft=1`, sem persistir; cap 4 aplicado no
-preview; rascunho inicial = golpes salvos, legados e rótulo "— Nível N"
-preservados). Validação/persistência do save intactas. Critérios e plano TDD em
-`sessions/0037-jn2-golpes-em-lista.md`.
+**Sessão 0037 (JN-2 — golpes em lista) implementada (fase 2 concluída,
+aguardando validação):** checkboxes do `team_manage.erb` fora — **lista clicável
+com marcação via htmx** (linha por golpe com `data-move`, `marked` nos
+selecionados), toggle como rascunho na própria rota `POST /team/:id/moves`
+(`draft=1` + `toggle`, re-renderiza sem persistir), cap de 4 aplicado no preview
+com aviso (`TeamService#preview_move`), rascunho inicial = golpes salvos
+(legados e rótulo "— Nível N" preservados); save/validação intactos. Testes de
+manage/golpes em `test/team_manage_test.rb`. Suíte 614/1952, lint 0.
 
-**Próxima sessão:** **0037 — JN-2**, implementação (fase 2, TDD) pendente;
+**Próxima sessão:** **0037 — JN-2**, aguardando validação do usuário (fase 3);
 seguida de J3 → JN-1 → organizar o resto.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
 > 2026-08-19 — GET /battle ~38s, 2º play ~4s)**. **J1 concluído e validado (0036,
 > 2026-08-22 — dropdown fora, jornada com gate e formas base/iniciais 27)**.
-> Próximas: **JN-2** → **J3** → 
+> **JN-2 implementado (0037 — aguardando validação do usuário)**. Próximas: **J3** → 
 > **JN-1** → organizar o resto
 > (JN-3, JN-4, JN-5, J2, J4, D4).
 
@@ -143,7 +144,7 @@ seguida de J3 → JN-1 → organizar o resto.
 | 0034 | D1 parcial — nível de aprendizado de golpes: gating do manage por nível (`TeamService` + `progression`, `manage_data` via `learnable_moves` filter `level <= membro`), validação gated, nível na UI (`"<nome> — Nível N"`) + união com moves salvos, troca manual preservada, `:finished` inalterado | Concluída | Done (passos 1–5, suíte 566/1734, lint 0, validado em 2026-08-19) |
 | 0035 | P1 — performance do gateway: `Parallelizer` (pool threads) + `PokeApiCache` thread-safe + `PersistentJsonStore` (`tmp/`) + choke point `http_get` + fonte paralela (`type_relations`/`OpponentGenerator`/`BattleService`) | Todas | Concluída — **validada pelo usuário em 2026-08-19** (GET /battle ~38s, 2º play ~4s; suíte 586/1787, lint 0) |
 | 0036 | J1 — seleção inicial de time: fim do dropdown (lista clicável sprite+nome+Add, pool total 20/página + destaques "Iniciais") + tela de entrada da jornada (gate battle/mart/center até time de 6, marcador `user_state` + derivado do time) | Concluída | Done (passos 0–6 + ajustes S3 — só formas base, 27 iniciais gen 1–9; suíte 611/1936, lint 0, validado em 2026-08-22) |
-| 0037 | JN-2 — gerenciamento de golpes em lista: fim dos checkboxes do manage (lista clicável com marcação via htmx, toggle como rascunho na própria rota sem persistir, cap 4 no preview) + save/validação de `POST /team/:id/moves` intactos | Refinamento | Concluída — decisões do usuário em 2026-08-22 (padrão lista clicável htmx; toggle na rota existente com rascunho; rascunho inicial = golpes salvos) |
+| 0037 | JN-2 — gerenciamento de golpes em lista: fim dos checkboxes do manage (lista clicável com marcação via htmx, toggle como rascunho na própria rota sem persistir, cap 4 no preview) + save/validação de `POST /team/:id/moves` intactos | Implementação | Concluída — passos 1–4 (suíte 614/1952, lint 0), aguardando validação do usuário |
 
 ## Estrutura do arquivo de sessão
 
