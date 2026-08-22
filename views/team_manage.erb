@@ -9,18 +9,27 @@
       <img src="<%= poke.sprite %>">
     </a><br>
     <strong><%= poke.name %></strong><br>
-    <form
-        hx-post="/team/<%= poke.id %>/moves"
-        hx-target="#team"
-        hx-swap="innerHTML">
-      <% @available_moves[poke.id].to_a.each do |move| %>
-        <label>
-          <input
-            type="checkbox"
-            name="moves"
-            value="<%= move[:name] %>"<%= poke.moves.include?(move[:name]) ? " checked" : "" %>>
-          <%= move[:name] %><%= " — Nível #{move[:level]}" if move[:level] %>
-        </label><br>
+    <% current_moves = @draft_moves&.[](poke.id) || poke.moves.to_a %>
+    <% @available_moves[poke.id].to_a.each do |move| %>
+      <form class="move-row<%= " marked" if current_moves.include?(move[:name]) %>"
+            data-move="<%= move[:name] %>"
+            hx-post="/team/<%= poke.id %>/moves"
+            hx-target="#team"
+            hx-swap="innerHTML">
+        <input type="hidden" name="draft" value="1">
+        <input type="hidden" name="toggle" value="<%= move[:name] %>">
+        <% current_moves.each do |name| %>
+          <input type="hidden" name="moves[]" value="<%= name %>">
+        <% end %>
+        <button type="submit"><%= move[:name] %><%= " — Nível #{move[:level]}" if move[:level] %></button>
+      </form>
+    <% end %>
+    <form class="save-moves"
+          hx-post="/team/<%= poke.id %>/moves"
+          hx-target="#team"
+          hx-swap="innerHTML">
+      <% current_moves.each do |name| %>
+        <input type="hidden" name="moves[]" value="<%= name %>">
       <% end %>
       <button type="submit">Salvar golpes</button>
     </form>

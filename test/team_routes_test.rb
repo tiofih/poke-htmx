@@ -263,7 +263,7 @@ class ServerTeamTest < Minitest::Test
     assert_includes last_response.body, 'hx-target="#team"'
   end
 
-  def test_team_manage_renders_move_checkboxes_for_each_member
+  def test_team_manage_renders_clickable_move_list_without_checkboxes
     @repository.add("user-a", pikachu_pokemon)
     PokeApiStub.with_learnable_moves(
       [{ level: 1, name: "growl" }, { level: 1, name: "quick-attack" }, { level: 1, name: "thunder-shock" }]
@@ -273,15 +273,15 @@ class ServerTeamTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "pikachu"
-    assert_includes last_response.body, 'name="moves"'
-    assert_includes last_response.body, 'value="growl"'
-    assert_includes last_response.body, 'value="quick-attack"'
-    assert_includes last_response.body, 'value="thunder-shock"'
+    refute_includes last_response.body, 'type="checkbox"'
+    assert_includes last_response.body, 'data-move="growl"'
+    assert_includes last_response.body, 'data-move="quick-attack"'
+    assert_includes last_response.body, 'data-move="thunder-shock"'
     assert_includes last_response.body, 'hx-post="/team/'
     assert_includes last_response.body, 'hx-get="/team"'
   end
 
-  def test_team_manage_checks_currently_selected_moves
+  def test_team_manage_marks_current_moves_in_clickable_list
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
     @repository.set_moves("user-a", pikachu_id, %w[thunder-shock])
@@ -293,8 +293,8 @@ class ServerTeamTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, 'value="thunder-shock" checked'
-    refute_includes last_response.body, 'value="growl" checked'
+    assert_match(/class="move-row marked"\s+data-move="thunder-shock"/, last_response.body)
+    refute_match(/class="move-row marked"\s+data-move="growl"/, last_response.body)
   end
 
   def test_team_manage_gates_available_moves_by_member_level
@@ -333,7 +333,7 @@ class ServerTeamTest < Minitest::Test
     refute_includes last_response.body, 'value="thunder"', "move de nível 10 bloqueado p/ nível 5"
   end
 
-  def test_team_manage_renders_learn_level_label_in_move_checkbox
+  def test_team_manage_renders_learn_level_label_in_move_list
     @repository.add("user-a", pikachu_pokemon)
 
     PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
@@ -345,7 +345,7 @@ class ServerTeamTest < Minitest::Test
     refute_includes last_response.body, "<html"
   end
 
-  def test_team_manage_keeps_saved_move_outside_learnable_visible_and_checked
+  def test_team_manage_keeps_saved_move_outside_learnable_visible_and_marked
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
     @repository.set_moves("user-a", pikachu_id, %w[tackle])
@@ -355,13 +355,13 @@ class ServerTeamTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, 'value="growl"'
-    assert_includes last_response.body, 'value="tackle" checked',
-                    "golpe salvo fora do learnable permanece visível/marcado"
+    assert_includes last_response.body, 'data-move="growl"'
+    assert_match(/class="move-row marked"\s+data-move="tackle"/, last_response.body,
+                 "golpe salvo fora do learnable permanece visível/marcado")
     refute_includes last_response.body, "tackle — Nível", "golpe sem aprendizado por nível não ganha rótulo"
   end
 
-  def test_team_manage_keeps_saved_move_above_level_visible_with_level_and_checked
+  def test_team_manage_keeps_saved_move_above_level_visible_with_level_and_marked
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
     @repository.set_moves("user-a", pikachu_id, %w[quick-attack])
@@ -373,8 +373,8 @@ class ServerTeamTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, 'value="quick-attack" checked',
-                    "golpe salvo acima do nível permanece visível/marcado para permitir remoção"
+    assert_match(/class="move-row marked"\s+data-move="quick-attack"/, last_response.body,
+                 "golpe salvo acima do nível permanece visível/marcado para permitir remoção")
     assert_includes last_response.body, "quick-attack — Nível 5"
   end
 
@@ -439,8 +439,8 @@ class ServerTeamTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, 'name="moves"'
-    assert_includes last_response.body, 'value="thunder-shock" checked'
+    assert_includes last_response.body, 'name="toggle"'
+    assert_match(/class="move-row marked"\s+data-move="thunder-shock"/, last_response.body)
     refute_includes last_response.body, "<html"
   end
 
