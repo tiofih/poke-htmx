@@ -7,6 +7,85 @@
 
 ---
 
+## Respiro 2026-08-22 — Arquitetura & Desempenho (pós 0036 / J1)
+
+> **Fora do fluxo.** Análise + anotação, **zero edição de código** (RNF-04).
+> Baseline: suíte **611 runs / 1936 asserts, lint 0**, sessão 0036 validada em
+> 2026-08-22; árvore limpa.
+
+### Estado da arquitetura hoje
+
+| Camada | Arquivos | Observação |
+| --- | --- | --- |
+| Rota/Orquestração | `server.rb` (513 linhas, era 723) — módulos de ação + registradores + `ServerServices.wire` | Respiro 2 entregue: handlers thin, **0 `rubocop:disable` em produção** |
+| Services (use cases) | `battle_service.rb` (314), `team_service.rb` (116), `heal_service.rb`, `mart_service.rb`, `journey_service.rb` | providers lambda p/ gateway (injeção em runtime p/ testes) |
+| Políticas puras | `reward_rule`, `heal_cost_policy`, `item_use_policy`, `evolution_rule`, `experience_curve`, `type_effectiveness` | determinísticas e testáveis |
+| Domínio | `battle_engine.rb` (238), `battle_pokemon.rb`, `move.rb`, `item.rb`, `opponent_generator.rb`, `pokemon.rb` | half-FSM terminal |
+| Repositories | `team_repository.rb` (259), `progression_`, `battle_`, `wallet_`, `inventory_`, `user_state_` | 1 conexão PG própria/lazy por repositório |
+| Gateway | `gateways/` — contrato (`poke_api.rb`) + `PokeApiCache` (TTL 600s/LRU 1000, memória) sobre `PokeApiHttp` (+`PersistentJsonStore` TTL 7d, disco) | dupla camada de cache |
+| Apresentação | `views/` — fragmentos htmx; J1 trocou dropdown por lista clicável (+partial `pokemon_list_item`) | sem JS custom |
+
+J1 acrescentou: tabela `user_state` + `JourneyService` (flag OU time ≥ 6), gates de
+rota (battle/mart/heal), `team.erb` gated, listagem com enriquecimento
+(`find`+`Parallelizer`), filtro **formas base** (`base_form?`: species+chain) e bloco
+fixo com os **27 iniciais gen 1–9** excluídos da listagem.
+
+### Pontos fortes
+
+- Camadas consistentes (rota → service → domínio/policy → repository → PG);
+  gateway com contrato explícito documentado no código.
+- DB enxuto e bem indexado: `team_pokemons(user_id)` idx, `battles(user_id,
+  created_at DESC)` idx, PKs naturais cobrem wallet/inventory/user_state/progress.
+- Migrações idempotentes, sem truncate; testes por área, sem rede (fakes/stubs).
+
+### Riscos / tensões de arquitetura (anotados — não refinar agora)
+
+1. **Conexões PG: 1 por repositório, sem pool** (7 classes × `PG.connect` lazy). Sob
+   Puma multi-thread o mesmo handle é compartilhado por threads concorrentes
+   (ruby-pg não garante segurança p/ uso simultâneo no mesmo conexão) → risco sob
+   carga. Candidato: pool pequeno compartilhado (`connection_pool`) ou conexão por
+   thread; decisão futura do usuário.
+2. **Escritas multi-tabela fora de transação única** (já nas limitações de
+   REQUIREMENTS) — ex.: compra = `wallet.spend` + `inventory.add`; batalha orquestra
+   XP+dinheiro+histórico+HP+inventário em passos separados. Ligar ao candidato de
+   idempotência já anotado.
+3. **`pry` carregado em produção** (`server.rb` require + Gemfile grupo principal) —
+   já anotado nas limitações; barato de resolver num respiro técnico.
+4. **TTLs divergentes entre as duas camadas de cache** (memória 600s vs disco 7d):
+   após expirar na memória, objeto é reconstruído a partir do JSON em disco — pode
+   servir dados até 7d antigos. Comportamento aceitável para PokéAPI estática, mas
+   vale documento/decisão explícita se algum dado virar mutável.
+5. **Gate da jornada lê demais:** `journey.started?` faz `user_state` +
+   `team.all` (com JOIN de progresso) e o render do fragmento carrega `team.all`
+   de novo — 2× team + 2× user_state por request gated. Micro-custo hoje; anotado
+   memoização request-scoped como candidato.
+
+### Desempenho — caminho dos requests
+
+- **Listagem fria (`GET /pokemons`):** `paginate` (1 URL all-names) + até
+  20 × [`find` (1 URL) + `base_form?` (até 2 URLs: species+chain)] ≈ **~61 URLs**
+  na 1ª carga, paralelizadas (pool de 8 threads) e persistidas em disco (TTL 7d).
+  Quente: tudo in-memory (~ms). Iniciais (27) seguem o mesmo caminho quando busca vazia.
+- **Write amplification no cache persistente:** cada miss grava o arquivo JSON
+  **inteiro** de novo, dentro de mutex (serializa threads); com milhares de entries o
+  custo por miss cresce linearmente e o arquivo nunca encolhe (sem prune de TTL
+  expirado no load). Candidatos: gravação assíncrona/debounced, journal/append-only
+  ou compactação periódica.
+- **Batalha:** pós-P1 validado (~38s → ~4s no 2º play); gargalo restante dominado
+  por espécie/cadeia evolutiva (cacheadas desde P1).
+- **Suíte:** 611 runs / ~29s local — saudável para o tamanho.
+
+### Candidatos anotados (decisão do usuário; nenhum entra na fila agora)
+
+- Pool de conexões PG compartilhado (infra, cruz com limitação de escritas atômicas).
+- `PersistentJsonStore`: escrita assíncrona/batched + prune de expirados.
+- Memoização request-scoped de journey/team nos renders gated.
+- Instrumentação mínima (tempo por rota/log) para orientar próximas otimizações
+  com dados, não estimativa.
+- Remover `pry` do runtime de produção (barato, pode ir num respiro técnico).
+
+---
+
 ## Respiro 2026-08-18 — Estado atualizado (pós session 0032 / Eco-4-C)
 
 > **Fora do fluxo.** Respiração/milestone — análise de arquitetura + anotação de ideias.
