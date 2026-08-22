@@ -40,6 +40,9 @@ class TeamService
 
     return [current - [toggle], nil] if current.include?(toggle)
 
+    limit = TeamRepository::MAX_MOVES_PER_POKEMON
+    return [current, "Selecione no máximo #{limit} golpes."] if current.size >= limit
+
     [current + [toggle], nil]
   end
 

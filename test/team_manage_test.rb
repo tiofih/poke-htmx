@@ -185,6 +185,24 @@ class ServerTeamManageTest < Minitest::Test
     assert_equal %w[growl], @repository.all("user-a").first.moves, "rascunho não persiste"
   end
 
+  def test_move_toggle_respects_cap_of_four
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    full = %w[a b c d]
+
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "a" }, { level: 1, name: "b" }, { level: 1, name: "c" },
+       { level: 1, name: "d" }, { level: 1, name: "e" }]
+    ) do
+      post "/team/#{pikachu_id}/moves", { draft: "1", toggle: "e", moves: full }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "máximo"
+    refute_match(/class="move-row marked"\s+data-move="e"/, last_response.body)
+    assert_empty @repository.all("user-a").first.moves, "rascunho não persiste"
+  end
+
   def test_post_team_moves_saves_selected_moves
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
