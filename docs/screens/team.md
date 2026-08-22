@@ -38,3 +38,49 @@ blocks:
 
 **Notas:** as setas ✓/▼ só aparecem para slots com vizinho movível na UI (rota valida);
 `POST /:id/move` re-renderiza a lista reordenada.
+
+---
+
+## Desenho alvo — time (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.4)
+
+Pré-jornada:
+
+```
+┌──────────────────────────────────────────┐
+│ Time inicial: ▮▮▮▮▯▯ 4/6                │ ← progresso + CTA (novo)
+│ Faltam 2 Pokémon — [Montar time]        │
+└──────────────────────────────────────────┘
+```
+
+Pós-jornada:
+
+```
+┌──────────────────────────────────────────────┐
+│ [aviso]                                      │
+│ #1 [sp alt] bulbasaur   HP ▮▮▮▯▯ 150/200    │ ← barra de HP (novo)
+│    [↑][↓]  [Remover] (com confirmação)     │ ← aria-label + confirm (novo)
+│ ── Poke Center ──  ── Poke Mart ──          │ (gated, como hoje)
+└──────────────────────────────────────────────┘
+```
+
+```yaml
+fragment: "#team" (alvo)
+deltas:
+  - id: journey-block (novo)
+    visible: jornada não iniciada
+    children:
+      - type: progress, source: "Time <n>/6" (barra + contagem)
+      - type: link, text: "Montar time", action: âncora #pokemon-list
+      - copy: "Faltam <6-n> Pokémon para iniciar a jornada"
+  - id: members (alvo)
+    children:
+      - hp-bar: barra visual <hp_current>/<hp_max> (percent)             (novo)
+      - move-buttons: "↑"/"↓" com aria-label="Subir/Descer <nome>"       (novo)
+      - remove-button:
+          text: "Remover do time"
+          hx-confirm: "Remover <nome> do time?"                          (novo)
+```
+
+**Notas do alvo:** progresso n/6 e barras de HP usam dados já presentes nos renders
+(`@team` com progresso); `hx-confirm` é atributo htmx nativo (sem JS custom).
+Poke Center/Mart continuam gated pela jornada.

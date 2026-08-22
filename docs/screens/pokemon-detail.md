@@ -54,3 +54,35 @@ blocks:
 
 **Notas:** `@pokemon.evolutions` é `[]` quando não há evolução (bloco oculto).
 `Fechar` renderiza `pokemon_close.erb` (fragmento vazio) — limpa o alvo.
+
+---
+
+## Desenho alvo — detalhe (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.3)
+
+```
+┌──────────────────────────────────────────┐
+│ [sprite alt="pikachu"]                   │ ← alt + lazy (novo)
+│ pikachu                                  │
+│ [eletric]                                │ ← chip com cor por tipo (novo)
+│ HP 35 · Attack 55 · ...                  │
+│ Evoluções:                               │
+│   [sp] raichu  → link p/ detalhe        │ ← evoluções clicáveis (novo)
+│        [ Adicionar ao time ]            │ ← copy pt-BR + estados
+│ [ Fechar ]  (devolve foco ao item)      │ ← foco de volta (novo)
+└──────────────────────────────────────────┘
+```
+
+```yaml
+fragment: "#pokemon" (alvo, detail)
+deltas:
+  - sprite: alt="<@pokemon.name>", loading=lazy                          (novo)
+  - type-chips: cor temática por tipo (paleta fixa em style.css)         (novo)
+  - evolutions:
+      cada item vira link action: get /pokemon/<evolution.number>,
+      target: "#pokemon"                                                 (novo)
+  - add-submit / close: copy "Adicionar ao time"/"Fechar"; mesmos estados
+      de botão da listagem; Fechar devolve foco/scroll ao item de origem  (novo)
+```
+
+**Notas do alvo:** evoluções já chegam como `Pokemon` (`find` no parsing) — os links
+usam `number`; sem mudança de contrato. Paleta de tipos é CSS estático.

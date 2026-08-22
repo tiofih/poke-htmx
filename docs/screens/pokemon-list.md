@@ -71,3 +71,55 @@ iniciais** (já fixos no bloco "Iniciais" — sem duplicação). A paginação c
 paginando nomes do pool (`offset` por 20) — uma página pode listar menos itens
 quando contém evoluções/iniciais. Falha de rede no predicado esconde o item
 (fail-closed).
+
+---
+
+## Desenho alvo — listagem (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.2)
+
+```
+┌──────────────────────────────────────────────────┐
+│ Time inicial: ▮▮▮▮▯▯ 4/6   ← progresso (novo)   │
+│ [ Buscar Pokémon ............ ]  12 resultados   │ ← contagem (novo)
+│                                                  │
+│ Iniciais — escolha entre os 27 (gen 1–9)        │ ← microcopy (novo)
+│ ┌──────────┐ ┌──────────┐ ┌──────────┐          │
+│ │[sp] bub. │ │[sp] cha. │ │[sp] squ. │           │ ← grid 3 colunas (novo)
+│ │[Adicionar]│           │          │            │
+│ └──────────┘ └──────────┘ └──────────┘          │
+│ ┌──────────┐ ┌──────────┐ ┌──────────┐          │
+│ │[sp] pok1 │ │[sp] pok2 │ │ ...      │           │ ← pool (formas base)
+│ │[No time ✓]│           │ [Adicionar]│          │ ← estado do botão (novo)
+│ └──────────┘ └──────────┘ └──────────┘          │
+│                                                  │
+│ Nenhum Pokémon encontrado para "zzz"           │ ← estado vazio (novo)
+│  ← Anterior    Página 1 de N    Próxima →      │
+└──────────────────────────────────────────────────┘
+```
+
+```yaml
+fragment: "#pokemon-list" (alvo)
+deltas:
+  - id: journey-progress (novo)
+    type: badge/bar, source: "Time <n>/6", visible: jornada não iniciada
+    cta: link "Montar time" → âncora da lista (quando <6)
+  - id: search-meta (novo)
+    children:
+      - type: text, source: "<total> resultado(s)" quando q não vazio
+      - type: empty-state, text: "Nenhum Pokémon encontrado para '<q>'"
+          visible: itens vazio && q não vazio   (substitui lista silenciosa)
+  - id: starters (alvo)
+    title: "Iniciais — 27 disponíveis (gen 1–9)"
+  - id: items (alvo)
+    layout: grid responsivo (2–3 colunas) de cartões
+    item:
+      - sprite com loading=lazy + alt="<nome>"
+      - add-button states:
+          default: "Adicionar ao time"
+          in-team: "No time ✓", disabled (requer @team na rota — nota impl)
+          full: desabilitado + aviso quando time = 6
+  - copy: pt-BR ("Anterior"/"Próxima" mantidos; botões "Adicionar")
+```
+
+**Notas do alvo:** estados do botão Add exigem expor a composição atual do time no
+render da listagem (ex.: `@team_names`); progresso n/6 reutiliza `JourneyService`.
+Nada disso altera contratos do gateway.

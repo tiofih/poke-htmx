@@ -47,3 +47,42 @@ blocks:
 
 **Notas:** `@available_moves` é um mapa `{ member.id => [nomes] }`; checado conforme
 `member.moves`. A rota valida máx. 4 golpes (`MAX_MOVES_PER_POKEMON`) e nomes disponíveis.
+
+---
+
+## Desenho alvo — gerenciar time (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.5)
+
+> Alvo alinhado ao JN-2 (golpes em lista) — a troca de checkboxes por lista é
+> sessão própria (0037, refinamento pendente); o restante é cosmético.
+
+```
+┌──────────────────────────────────────────────────────┐
+│ Gerenciar time                                       │
+│ ┌─ Cartão do membro (#1 bulbasaur) ───────────────┐ │
+│ │ [sp alt] bulbasaur   Nível 5        [↑] [↓]    │ │ ← card + aria (novo)
+│ │ Golpes (máx. 4):                                │ │
+│ │  ┌──────────────────────────────────────────┐  │ │
+│ │  │ ✓ tackle      ✓ growl       ☐ vinewhip  │  │ │ ← lista clicável (JN-2)
+│ │  └──────────────────────────────────────────┘  │ │
+│ │  [Salvar golpes]                                │ │
+│ │ Item: [ select ]  Segurável: [ select ]         │ │ (como hoje)
+│ └─────────────────────────────────────────────────┘ │
+│ ... (um cartão por membro; grid quando couber)      │
+│ [← Voltar]                                          │
+└──────────────────────────────────────────────────────┘
+```
+
+```yaml
+fragment: "#team" (alvo)
+deltas:
+  - id: member-card (novo)
+    layout: um cartão por membro; sprite com alt; ↑/↓ com aria-label
+  - id: moves-list (alvo JN-2)
+    type: lista de seleção (item clicável com marcação), no lugar de checkboxes
+    constraints: máx. 4 selecionados; golpes acima do nível bloqueados (D1)
+    action: post /team/<member.id>/moves (validação idêntica à atual)
+  - copy: "Salvar golpes" mantido; rótulos pt-BR nos selects de item
+```
+
+**Notas do alvo:** validação/rota não mudam (limite 4 + gating por nível da 0034);
+o desenho antecipa o formato acordado para o JN-2 sem abri-lo agora (RNF-04).

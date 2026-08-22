@@ -33,3 +33,27 @@ blocks:
 
 **Notas:** mesmo fragmento vira o "cartão" de adicionar; sem aviso/erro próprio aqui
 (o retorno do `POST /team` re-renderiza `#team` com `@notice`).
+
+---
+
+## Desenho alvo — card de adicionar (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.2)
+
+```
+┌──────────────────────────────────────────┐
+│ ┌──────────────────────────────────────┐ │
+│ │ [sprite alt="bulbasaur"]  bulbasaur │ │ ← alt + lazy (novo)
+│ │        [ Adicionar ao time ]        │ │ ← copy pt-BR + estados (novo)
+│ └──────────────────────────────────────┘ │
+└──────────────────────────────────────────┘
+```
+
+```yaml
+fragment: "#pokemon" (alvo)
+deltas:
+  - sprite: loading=lazy, alt="<@pokemon.name>"                          (novo)
+  - add-submit: copy "Adicionar ao time"; estados como na listagem       (novo)
+      in-team: "No time ✓" disabled; full: desabilitado com aviso
+```
+
+**Notas do alvo:** mesmos dados/estados definidos para a listagem — um só contrato
+de estados do botão entre lista, card e detalhe.

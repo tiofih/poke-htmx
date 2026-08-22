@@ -71,3 +71,46 @@ blocks:
 
 **Notas:** lado do atacante = `entry[:attacker]` (0 ⇒ "Seu Time", 1 ⇒ "Oponente").
 `get /battle/close` re-renderiza `battle_close.erb` (vazio) — limpa o alvo.
+
+---
+
+## Desenho alvo — batalha (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.6)
+
+```
+┌──────────────────────────────────────────────────┐
+│ Batalha — Rodada N                               │
+│ ┌─ Seu Time ─────────┐  ┌─ Oponente ────────┐   │
+│ │ [sp alt] pikachu   │  │ [sp alt] squirtle │   │ ← partial única p/ os 2 (novo)
+│ │ HP ▮▮▮▮▯ 150/200   │  │ HP ▮▮▯▯▯  80/200  │   │ ← barra de HP (novo)
+│ │ tackle PP 25 · ... │  │                   │   │
+│ └────────────────────┘  └───────────────────┘   │
+│ Log da rodada:                                   │
+│   Seu Time: pikachu usou thunderbolt em...      │
+│   (últimas N rodadas, mais recente no topo)     │ ← histórico visível (novo)
+│ Itens: Poção ×2 · Super Poção ×1                │
+│        [ Jogar ⏳ ]                              │ ← estado carregando (novo)
+│ Vencedor: Seu Time — +120 XP, +100 dinheiro     │ ← recompensas agrupadas
+│ Evoluções/Aprendizados: <listas>                │
+└──────────────────────────────────────────────────┘
+```
+
+```yaml
+fragment: "#battle" (alvo)
+deltas:
+  - id: fighter-partial (novo)
+    partial: um único partial de painel para player/opponent (fim da duplicação);
+             presenter formata linhas (ref: draft-arquitetura-design-patterns)
+  - id: hp-bars (novo)
+    type: barra visual por membro (<hp_current>/<hp_max> como percent)
+  - id: battle-log (alvo)
+    scope: últimas N rodadas (ex.: 3), mais recente no topo — dados já existem
+           em @engine.log; hoje a UI filtra só a rodada corrente
+  - id: play-button (novo)
+    state: "Jogar" com indicador de loading (hx-indicator) enquanto avança
+  - id: rewards (alvo)
+    group: XP + dinheiro numa linha; evoluções/aprendizados como listas próprias
+```
+
+**Notas do alvo:** nenhum contrato novo — log completo e níveis/HP já estão no
+engine; mudanças são view/presenter + CSS. Gate pré-jornada permanece (fragmento
+amigável); o progresso n/6 do shell reduz a chegada tardia ao gate.
