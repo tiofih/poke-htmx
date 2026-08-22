@@ -250,6 +250,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_fragment_renders_move_buttons
+    start_journey("user-a")
     add_team("user-a", [["pikachu", 25], ["bulbasaur", 1], ["charmander", 4], ["squirtle", 7]])
 
     get "/team", {}, user_session("user-a")
@@ -602,6 +603,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_fragment_shows_poke_center_with_hp_and_heal_button
+    start_journey("user-a")
     @repository.add("user-a", pikachu_pokemon)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
@@ -685,5 +687,35 @@ class ServerTeamJourneyMarkTest < Minitest::Test
 
     assert last_response.ok?
     assert_equal false, UserStateRepository.new.started?("user-a")
+  end
+end
+
+class ServerTeamJourneyFragmentTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def test_team_fragment_hides_center_and_mart_before_journey
+    @repository.add("user-novo", pikachu_pokemon)
+
+    get "/team", {}, user_session("user-novo")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "Poke Center"
+    refute_includes last_response.body, "Poke Mart"
+    refute_includes last_response.body, %(hx-post="/team/heal")
+    assert_match(/jornada/i, last_response.body)
+  end
+
+  def test_team_fragment_shows_center_and_mart_after_journey_started
+    start_journey("user-a")
+    @repository.add("user-a", pikachu_pokemon)
+    @wallet.grant("user-a", 100)
+
+    get "/team", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Poke Center"
+    assert_includes last_response.body, "Poke Mart"
+    refute_match(/Monte seu time inicial/, last_response.body)
   end
 end

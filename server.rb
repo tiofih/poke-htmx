@@ -89,9 +89,7 @@ module ServerTeamActions
   private
 
   def render_team
-    @team = settings.team.all(current_user)
-    mart_data
-    erb :team, layout: false
+    render_team_fragment_with_notice
   end
 
   def mart_data
@@ -139,16 +137,12 @@ module ServerTeamActions
 
   def remove_team_member
     settings.team.remove(current_user, params[:id]) if params[:id]
-    @team = settings.team.all(current_user)
-    mart_data
-    erb :team, layout: false
+    render_team_fragment_with_notice
   end
 
   def move_team_member
     settings.team.move(current_user, params[:id], params[:new_slot].to_i)
-    @team = settings.team.all(current_user)
-    mart_data
-    erb :team, layout: false
+    render_team_fragment_with_notice
   end
 
   def heal_team
@@ -156,9 +150,7 @@ module ServerTeamActions
 
     @result = settings.heal.heal(current_user)
     @notice = @result[:notice]
-    @team = settings.team.all(current_user)
-    mart_data
-    erb :team, layout: false
+    render_team_fragment_with_notice
   end
 
   def buy_from_mart
@@ -227,6 +219,7 @@ module ServerBattleActions
   end
 
   def render_team_fragment_with_notice
+    @journey_started = settings.journey.started?(current_user)
     @team = settings.team.all(current_user)
     mart_data
     erb :team, layout: false
