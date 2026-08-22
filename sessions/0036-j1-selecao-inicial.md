@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-19 (confirmado J1 como próxima sessão; escopo, lista base, seleção, marcador da jornada, sprite e bloqueio) |
-| Implementação | **Concluída** (passos 0–6 em 2026-08-21 — suíte/lint verdes) |
-| Validação | **Em ajuste (S3)** — feedback do usuário em 2026-08-22 reabriu o critério da listagem (ver seção 5-A); revalidação pendente |
+| Implementação | **Concluída** (passos 0–6 em 2026-08-21 + ajustes S3 de 2026-08-22 — suíte/lint verdes) |
+| Validação | **Done** — executada pelo usuário em 2026-08-22 (tabela da seção 7; ajustes S3 incluídos na revalidação) |
 
 ---
 
@@ -99,39 +99,39 @@ Poke Center** até o time inicial de 6 estar montado.
 
 ### Resultado
 
-- [ ] **Fim do dropdown:** `GET /pokemons` (e `GET /`) devolve lista clicável — por item:
+- [x] **Fim do dropdown:** `GET /pokemons` (e `GET /`) devolve lista clicável — por item:
       sprite + nome como links `hx-get="/pokemon/:number"` no alvo `#pokemon` (RF-06) e
       um form `hx-post="/team"` com `pokeName` (Add); **sem `<select>`/`<option>`**;
       sem `<html>` no fragmento.
-- [ ] **Pool total paginado 20/página, só formas base** *(alterado em 2026-08-22 — S3
+- [x] **Pool total paginado 20/página, só formas base** *(alterado em 2026-08-22 — S3
       5-A)*: a lista cobre o pool completo com `limit: 20` ("Página X de Y" correto,
       ex. 250 nomes → "Página 1 de 13"), controles Anterior/Próxima mantendo `offset`
       e `q`, filtro por substring preservado — e exibe **apenas formas base**
       (1º estágio de cada linha evolutiva; evoluções ocultas).
-- [ ] **Destaque "Iniciais":** com `q` vazio, o topo mostra o bloco "Iniciais" com os
+- [x] **Destaque "Iniciais":** com `q` vazio, o topo mostra o bloco "Iniciais" com os
       **27 iniciais de gen 1–9** *(alterado em 2026-08-22 — S3 5-A)* — cada uma com
       sprite + nome → detalhe + Add; **iniciais não reaparecem na listagem do pool**
       (sem duplicação); com `q` não-vazio, o bloco some (0 regressão do filtro).
-- [ ] **Tela de entrada da jornada — gate:** `GET /battle`, `POST /mart/buy` e
+- [x] **Tela de entrada da jornada — gate:** `GET /battle`, `POST /mart/buy` e
       `POST /team/heal` devolvem fragmento amigável (200, sem ação) enquanto a jornada
       não iniciou; `POST /team` que completa o 6º membro **marca a jornada** (`user_state`
       persistido) e libera Batalha/Mart/Center a partir daí.
-- [ ] **Marcador = tabela + derivado do time:** usuário com time de **6 membros mas sem
+- [x] **Marcador = tabela + derivado do time:** usuário com time de **6 membros mas sem
       flag** (legado/seed) já é considerado com jornada iniciada; flag persistida libera
       mesmo se o time encolher depois; isolamento por usuário (jornada de um não afeta
       outro).
-- [ ] **`team.erb` coerente com a jornada:** antes de iniciar, os blocos Poke Center e
+- [x] **`team.erb` coerente com a jornada:** antes de iniciar, os blocos Poke Center e
       Poke Mart não aparecem no fragmento `#team` (aviso de jornada no lugar); após
       iniciar, aparecem (0 regressão Eco-2/Eco-3).
 
 ### Garantias (RNF)
 
-- [ ] Suíte completa verde com **baseline preservado (586 runs/1787 asserts)** + novos
+- [x] Suíte completa verde com **baseline preservado (586 runs/1787 asserts)** + novos
       testes e lint 0 em **todo** green; commit obrigatório por passo; 0 regressão
       RF-01..RF-18/Eco (rotas migradas pela trava da jornada).
-- [ ] Sem novas gems; testes sem rede (`PokeApiStub.with_find`/`with_all_names`);
+- [x] Sem novas gems; testes sem rede (`PokeApiStub.with_find`/`with_all_names`);
       `Parallelizer` reusado (P1) para o enriquecimento dos itens; sem `rubocop:disable`.
-- [ ] `REQUIREMENTS.md` (roadmap item 24/25 — J1 executado; status `Planejada` até
+- [x] `REQUIREMENTS.md` (roadmap item 24/25 — J1 executado; status `Planejada` até
       validação), `SESSIONS.md` (0036 em fase 2 + próximas JN-2→J3→JN-1) e
       `draft-auto-battler.md` (J1 executado) atualizados no mesmo escopo do passo docs;
       *status de validação* só após o usuário validar.
@@ -223,18 +223,23 @@ Poke Center** até o time inicial de 6 estar montado.
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Validada em 2026-08-22** — usuário aprovou os critérios após os ajustes S3
+(seção 5-A). *(S2: uma linha por critério, nunca bloco único.)*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| Fim do dropdown (lista clicável) | `./scripts/test -n /clickable_list/` | `GET /` sem `<select>`; clique no nome abre detalhe; botão Add monta o time | |
-| Pool total 20/página | `./scripts/test -n /Página 1 de 13/` | listagem mostra 20 itens com sprite + paginação 20 | |
-| Destaque "Iniciais" | `./scripts/test -n /iniciais/` | bloco "Iniciais" com 9 slugs no topo (busca vazia) | |
-| Gate da jornada (battle/mart/heal) | `./scripts/test -n /journey/` | antes de 6: Batalha/Mart/Center mostram aviso e não executam | |
-| `POST /team` ao 6º marca jornada | `./scripts/test -n /journey/` | ao adicionar o 6º, Batalha/Mart/Center liberam | |
-| Marcador tabela + derivado do time | `./scripts/test -n /journey_service/` | seed com time de 6 já batalha sem flag | |
-| `team.erb` sem Center/Mart antes da jornada | `./scripts/test -n /journey/` | fragmento `#team` sem Poke Center/Mart até iniciar | |
-| Garantias RNF | suíte completa + `./scripts/lint` | rotas com fakes verdes; docs consistentes | |
+| Fim do dropdown (lista clicável) | `./scripts/test -n /renders_clickable_list/` | `GET /` sem `<select>`; clique no nome/sprite abre detalhe; Add monta o time | ok |
+| Pool total 20/página, só formas base | `./scripts/test -n /omits_evolved_forms_from_list|paginates_filtered_results|middle_page|last_page/` | listagem 20 itens com sprite + paginação; evoluções (raichu etc.) fora | ok |
+| Destaque "Iniciais" (27, gen 1–9) + sem duplicação | `./scripts/test -n /starters_block_when_q_empty|excludes_starters_from_pool_list|starters_block_hidden/` | bloco com os 27 iniciais no topo (busca vazia), some com filtro e não reaparece na lista | ok |
+| Gate da jornada (battle/mart/heal) | `./scripts/test -n /JourneyGateBattleTest|MartJourneyGateTest|HealJourneyGateTest/` | antes do time de 6: Batalha/Mart/Center mostram aviso e não executam | ok |
+| `POST /team` ao 6º marca jornada | `./scripts/test -n /TeamJourneyMarkTest/` | ao adicionar o 6º, Batalha/Mart/Center liberam | ok |
+| Marcador tabela + derivado do time | `./scripts/test test/journey_service_test.rb test/user_state_repository_test.rb` | seed com time de 6 já batalha sem flag; isolamento por usuário | ok |
+| `team.erb` sem Center/Mart antes da jornada | `./scripts/test -n /TeamJourneyFragmentTest/` | fragmento `#team` sem Poke Center/Mart até iniciar | ok |
+| Garantias RNF | suíte completa **611 runs / 1936 asserts, 0 falhas** + `./scripts/lint` (0 offenses) | rotas com fakes verdes; docs consistentes (`check_docs`) | ok |
+
+> **S3:** ajustes apontados na validação (formas base; 27 iniciais gen 1–9;
+> exclusão dos iniciais da listagem) registrados na seção 5-A com data de
+> 2026-08-22 e revalidados pelo usuário.
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.
