@@ -55,6 +55,18 @@ header nav a {
 }
 
 .notice {
+  color: #5b6770;
+}
+
+.notice--info {
+  color: #1f6feb;
+}
+
+.notice--success {
+  color: #1a7f37;
+}
+
+.notice--error {
   color: #b00;
 }
 

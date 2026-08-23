@@ -28,25 +28,24 @@ class MartService
     new_balance = @wallet.spend(user_id, cost)
     {
       bought: true,
-      item: item,
-      quantity: quantity.to_i,
-      cost: cost,
-      balance: new_balance,
-      notice: "Comprado #{quantity.to_i} × #{item.display_name} por #{cost} de dinheiro. Saldo: #{new_balance}."
+      kind: :success,
+      **purchase_fields(item, quantity.to_i, cost, new_balance),
+      notice: purchase_notice(item, quantity.to_i, cost, new_balance)
     }
   end
 
   def invalid_notice
-    { bought: false, notice: "Item não disponível." }
+    { bought: false, kind: :error, notice: "Item não disponível." }
   end
 
   def quantity_invalid_notice
-    { bought: false, notice: "Quantidade inválida." }
+    { bought: false, kind: :error, notice: "Quantidade inválida." }
   end
 
   def insufficient_notice(item, quantity, cost, balance)
     {
       bought: false,
+      kind: :error,
       item: item,
       quantity: quantity.to_i,
       cost: cost,
@@ -57,5 +56,13 @@ class MartService
 
   def invalid_quantity?(quantity)
     quantity.nil? || quantity.to_i <= 0
+  end
+
+  def purchase_fields(item, qty, cost, balance)
+    { item: item, quantity: qty, cost: cost, balance: balance }
+  end
+
+  def purchase_notice(item, qty, cost, balance)
+    "Comprado #{qty} × #{item.display_name} por #{cost} de dinheiro. Saldo: #{balance}."
   end
 end

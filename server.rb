@@ -180,22 +180,26 @@ module ServerTeamActions
     return journey_gate_notice unless settings.journey.started?(current_user)
 
     @result = settings.heal.heal(current_user)
-    @notice = @result[:notice]
-    render_team_fragment_with_notice
+    render_result_notice(@result)
   end
 
   def buy_from_mart
     return journey_gate_notice unless settings.journey.started?(current_user)
 
-    purchase = settings.mart.buy(current_user, params[:item_name], params[:quantity].to_i)
-    @result = purchase
-    @notice = purchase[:notice]
+    @result = settings.mart.buy(current_user, params[:item_name], params[:quantity].to_i)
+    render_result_notice(@result)
+  end
+
+  def render_result_notice(result)
+    @notice = result[:notice]
+    @notice_kind = result[:kind]
     render_team_fragment_with_notice
   end
 
   def save_team_moves
     member = team_manage_context(params[:id])
     @notice = params[:draft] ? preview_member_moves(member) : persist_member_moves(member)
+    @notice_kind = :error if @notice
     @team = settings.team.all(current_user)
     erb :team_manage, layout: false
   end

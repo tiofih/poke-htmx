@@ -1,7 +1,7 @@
 <h1>Histórico de Batalhas</h1>
 
 <% if @rank.empty? && @recent.empty? %>
-  <p class="notice">Você ainda não batalhou.</p>
+  <p class="notice notice--info">Você ainda não batalhou.</p>
 <% else %>
   <h2>Ranking global</h2>
   <% @rank.each_with_index do |row, index| %>

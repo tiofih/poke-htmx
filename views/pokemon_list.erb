@@ -1,5 +1,5 @@
 <% if @notice %>
-  <p class="notice"><%= @notice %></p>
+  <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
 <% end %>
 <% unless @starters.empty? %>
   <h2 class="starters-title">Iniciais</h2>

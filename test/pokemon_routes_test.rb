@@ -147,6 +147,7 @@ class ServerDetailTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "hx-post=\"/team\""
     assert_includes last_response.body, "pokeName"
+    assert_includes last_response.body, "Adicionar ao time"
   end
 
   def test_pokemon_name_fragment_links_to_detail
@@ -333,7 +334,7 @@ class ServerListTest < Minitest::Test
 
     refute_includes last_response.body, "<html"
     refute_includes last_response.body, "<head>"
-    assert_includes last_response.body, "Remove from Team"
+    assert_includes last_response.body, "Remover do time"
   end
 
   def test_pokemons_list_images_are_lazy
@@ -372,6 +373,15 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, "Página 1 de 13"
     refute_dropdown_markup(last_response.body)
     refute_includes last_response.body, "<html"
+  end
+
+  def test_pokemons_add_buttons_use_pt_br_copy
+    stub_list(two_hundred_fifty_names) do
+      get "/pokemons", q: "pokemon"
+    end
+
+    assert last_response.ok?
+    assert_equal 20, last_response.body.scan("Adicionar ao time").size
   end
 
   def test_pokemons_omits_evolved_forms_from_list

@@ -222,6 +222,7 @@ class ServerTeamManageTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "máximo"
+    assert_includes last_response.body, "notice--error"
     refute_match(/class="move-row marked"\s+data-move="e"/, last_response.body)
     assert_empty @repository.all("user-a").first.moves, "rascunho não persiste"
   end

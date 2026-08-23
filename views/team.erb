@@ -1,5 +1,5 @@
 <% if @notice %>
-  <p class="notice"><%= @notice %></p>
+  <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
 <% end %>
 <% if @journey_started %>
   <% unless @team.empty? %>
@@ -27,7 +27,7 @@
     <% end %>
   <% end %>
 <% else %>
-  <p class="notice">Monte seu time inicial de 6 Pokémon para iniciar a jornada.</p>
+  <p class="notice notice--info">Monte seu time inicial de 6 Pokémon para iniciar a jornada.</p>
 <% end %>
 <% @team.each do |poke| %>
   <p class="slot">#<%= poke.slot %></p>
@@ -58,6 +58,6 @@
       hx-swap="innerHTML"
       hx-params="*">
     <input type="hidden" name="id" value="<%= poke.id %>">
-    <button type="submit" class="btn">Remove from Team</button>
+    <button type="submit" class="btn">Remover do time</button>
   </form>
 <% end %>

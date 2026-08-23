@@ -1,5 +1,5 @@
 <% if @notice %>
-  <p class="notice"><%= @notice %></p>
+  <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
 <% end %>
 <h1>Gerenciar time</h1>
 <% @team.each do |poke| %>

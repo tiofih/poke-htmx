@@ -165,7 +165,7 @@ class ServerTeamTest < Minitest::Test
     assert_equal 1, @repository.all("user-a").size
     refute_includes @repository.all("user-a").map(&:name), "pikachu"
     assert_includes @repository.all("user-a").map(&:name), "bulbasaur"
-    assert_includes last_response.body, "Remove from Team"
+    assert_includes last_response.body, "Remover do time"
     assert_includes last_response.body, "bulbasaur"
   end
 
@@ -246,7 +246,7 @@ class ServerTeamTest < Minitest::Test
 
     assert last_response.ok?
     refute_includes @repository.all("user-a").map(&:name), "pikachu"
-    assert_includes last_response.body, "Remove from Team"
+    assert_includes last_response.body, "Remover do time"
   end
 
   def test_team_fragment_renders_move_buttons
@@ -473,6 +473,7 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
     refute_includes last_response.body, "Poke Mart"
     refute_includes last_response.body, %(hx-post="/team/heal")
     assert_match(/jornada/i, last_response.body)
+    assert_includes last_response.body, "notice--info"
   end
 
   def test_team_fragment_shows_center_and_mart_after_journey_started

@@ -28,6 +28,7 @@ class HealService
     new_balance = charge_and_heal(user_id, members, cost)
     {
       healed: true,
+      kind: :success,
       cost: cost,
       balance: new_balance,
       notice: "Time curado por #{cost} de dinheiro. Saldo: #{new_balance}."
@@ -40,12 +41,13 @@ class HealService
   end
 
   def full_notice
-    { healed: false, cost: 0, notice: "Seu time já está curado." }
+    { healed: false, kind: :info, cost: 0, notice: "Seu time já está curado." }
   end
 
   def insufficient_notice(cost, balance)
     {
       healed: false,
+      kind: :error,
       cost: cost,
       balance: balance,
       notice: "Dinheiro insuficiente para curar (custo #{cost}, saldo #{balance})."

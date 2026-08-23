@@ -19,6 +19,7 @@ class ServerMartTest < Minitest::Test
     assert last_response.ok?
     refute_includes last_response.body, "<html"
     assert_match(/comprado/i, last_response.body.strip)
+    assert_includes last_response.body, "notice--success"
     assert_equal 2, TestDatabase.inventory_quantity("user-a", "potion")
     assert_equal 60, @wallet.balance("user-a")
   end

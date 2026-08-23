@@ -33,6 +33,7 @@ class ServerHistoryTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "Você ainda não batalhou"
+    assert_includes last_response.body, "notice--info"
   end
 
   def test_history_close_route_returns_empty_fragment
