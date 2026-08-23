@@ -25,11 +25,16 @@ class OpponentGeneratorTest < Minitest::Test
     )
   end
 
-  def generator(names: NAMES, size: 6, seed: 42, fetcher: nil, level: 1, parallelizer: nil)
+  def generator(names: NAMES, size: 6, seed: 42, fetcher: nil, level: 1,
+                parallelizer: nil, rater: nil, moves_fetcher: nil, band: nil)
     fetcher ||= ->(name) { build_pokemon(name) }
-    options = { names: names, size: size, rng: Random.new(seed), fetcher: fetcher, level: level }
-    options[:parallelizer] = parallelizer if parallelizer
-    OpponentGenerator.new(**options)
+    moves_fetcher ||= ->(_number) { [] }
+    OpponentGenerator.new(
+      names: names, size: size, rng: Random.new(seed), fetcher: fetcher, level: level,
+      options: {
+        parallelizer: parallelizer, rater: rater, moves_fetcher: moves_fetcher, band: band
+      }.compact
+    )
   end
 
   def test_team_returns_battle_pokemon_built_from_fetched_details
@@ -114,5 +119,72 @@ class OpponentGeneratorTest < Minitest::Test
     team = generator(seed: 42).team
 
     assert_equal generator(seed: 42).team_names, team.map(&:name)
+  end
+
+  def tiers_by_name
+    { "pikachu" => :S, "bulbasaur" => :A, "squirtle" => :A, "charmander" => :B,
+      "eevee" => :B, "snorlax" => :B, "meowth" => :D, "psyduck" => :F }
+  end
+
+  def rater
+    ->(pokemon, _moves) { tiers_by_name.fetch(pokemon.name, :C) }
+  end
+
+  def test_team_names_filters_to_band
+    gen = generator(size: 3, rater: rater, band: [:B])
+
+    names = gen.team_names
+
+    assert_equal 3, names.size
+    assert_equal %w[charmander eevee snorlax].sort, names.sort
+  end
+
+  def test_team_names_falls_back_to_random_when_band_exhausted
+    gen = generator(size: 6, rater: rater, band: [:S])
+
+    names = gen.team_names
+
+    assert_equal 6, names.size
+    assert_includes names, "pikachu"
+    assert_equal names.uniq, names, "fallback nao repete nomes"
+  end
+
+  def test_team_with_band_builds_fighters_from_band
+    gen = generator(size: 2, rater: rater, band: [:A])
+
+    team = gen.team
+
+    assert_equal 2, team.size
+    assert_equal %w[bulbasaur squirtle].sort, team.map(&:name).sort
+  end
+
+  def test_team_names_with_band_is_deterministic_for_seed
+    first = generator(size: 3, seed: 42, rater: rater, band: [:B]).team_names
+    second = generator(size: 3, seed: 42, rater: rater, band: [:B]).team_names
+
+    assert_equal first, second
+  end
+
+  def test_team_names_without_rater_uses_pure_random
+    names = generator(seed: 42).team_names
+
+    assert_equal 6, names.size
+    assert_equal names.uniq, names
+  end
+
+  def test_rater_receives_moves_for_pokemon_number
+    fetched_numbers = []
+    moves_fetcher = lambda do |number|
+      fetched_numbers << number
+      []
+    end
+    gen = generator(
+      size: 1, rater: ->(_pokemon, _moves) { :B },
+      moves_fetcher: moves_fetcher, band: [:B]
+    )
+
+    gen.team_names
+
+    refute_empty fetched_numbers, "moves_fetcher consultado para classificar candidatos"
   end
 end

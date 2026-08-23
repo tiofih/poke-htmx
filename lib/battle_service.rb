@@ -66,7 +66,7 @@ module BattleServicePreparation
       fetcher: api.method(:detail),
       rng: Random.new(user_id.sum),
       level: 1,
-      parallelizer: Parallelizer
+      options: { parallelizer: Parallelizer }
     ).team
   end
 
