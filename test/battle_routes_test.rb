@@ -22,11 +22,10 @@ class ServerBattleTest < Minitest::Test
     assert_includes last_response.body, 'id="battle-view"'
   end
 
-  def test_battle_close_route_returns_empty_fragment
+  def test_battle_close_route_is_removed
     get "/battle/close"
 
-    assert last_response.ok?
-    assert_empty last_response.body
+    assert_equal 404, last_response.status
   end
 
   def test_battle_renders_remaining_stock_in_player_panel

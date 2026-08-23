@@ -4,7 +4,7 @@ require_relative "server_test_helpers"
 class ServerHistoryTest < Minitest::Test
   include ServerTestHelpers
 
-  def test_history_renders_fragment_with_rank_and_metrics
+  def test_history_page_renders_full_page_with_history_view
     history = BattleRepository.new
     history.add("user-a", "win", [{ number: 25, name: "pikachu" }])
     history.add("user-a", "lose", [{ number: 4, name: "charmander" }])
@@ -12,7 +12,9 @@ class ServerHistoryTest < Minitest::Test
     get "/history", {}, user_session("user-a")
 
     assert last_response.ok?
-    refute_includes last_response.body, "<html"
+    assert_includes last_response.body, "<html"
+    assert_includes last_response.body, 'href="/history" class="active"'
+    assert_includes last_response.body, 'id="history-view"'
     assert_match(/Ranking global/, last_response.body)
     assert_match(/Vitórias: 1/, last_response.body)
     assert_match(/Derrotas: 1/, last_response.body)
@@ -36,11 +38,10 @@ class ServerHistoryTest < Minitest::Test
     assert_includes last_response.body, "notice--info"
   end
 
-  def test_history_close_route_returns_empty_fragment
+  def test_history_close_route_is_removed
     get "/history/close"
 
-    assert last_response.ok?
-    assert_empty last_response.body
+    assert_equal 404, last_response.status
   end
 
   def test_index_has_history_target_and_link
