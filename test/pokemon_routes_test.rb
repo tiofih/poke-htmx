@@ -113,6 +113,24 @@ class ServerDetailTest < Minitest::Test
     assert_includes last_response.body, "charizard"
   end
 
+  def test_pokemon_detail_evolutions_are_links_to_detail
+    chain = charizard_evolution_pokemons
+    charizard = Pokemon.new(
+      name: "charizard",
+      sprite: chain[:charizard].sprite,
+      number: 6,
+      evolutions: [chain[:charmander], chain[:charmeleon]]
+    )
+
+    PokeApiStub.with_detail(charizard) do
+      get "/pokemon/6"
+    end
+
+    assert last_response.ok?
+    assert_match(/hx-get="\/pokemon\/4"[^>]*hx-target="#pokemon"/, last_response.body)
+    assert_match(/hx-get="\/pokemon\/5"[^>]*hx-target="#pokemon"/, last_response.body)
+  end
+
   def test_pokemon_detail_without_evolutions_does_not_break
     PokeApiStub.with_detail(pikachu_pokemon) do
       get "/pokemon/25"

@@ -12,8 +12,10 @@
   <ul class="evolutions">
     <% @pokemon.evolutions.each do |evolution| %>
       <li class="evolution">
-        <img src="<%= evolution.sprite %>" alt="<%= evolution.name %>" loading="lazy">
-        <%= evolution.name %>
+        <a href="#" hx-get="/pokemon/<%= evolution.number %>" hx-target="#pokemon" hx-swap="innerHTML">
+          <img src="<%= evolution.sprite %>" alt="<%= evolution.name %>" loading="lazy"><br>
+          <%= evolution.name %>
+        </a>
       </li>
     <% end %>
   </ul>
