@@ -318,13 +318,14 @@
 
 ### J3. Ranking S–F para balanceamento (pokémon + times adversários)
 
-> **Implementado na sessão 0040 (2026-08-23, suíte 649/2063, lint 0 — aguardando
-> validação do usuário):** `PokemonRating#rate(pokemon, moves:) → {score:, tier:}`
+> **Implementado na sessão 0040 (2026-08-23, suíte 649/2063, lint 0 — **concluída e
+> validada pelo usuário em 2026-08-23**):** `PokemonRating#rate(pokemon, moves:) → {score:, tier:}`
 > (stats ponderados HP×0.5/demais ×1.0 + bônus da média do power efetivo top-4
 > STAB ×1.5; thresholds S≥600/A≥500/B≥420/C≥350/D≥280/F<280) + `band_for_level`
 > (≤2→F–D; 3–5→D–C; 6–9→C–B; 10–14→B–A; ≥15→A–S); `OpponentGenerator` com
 > `rater`/`moves_fetcher`/`band` (em `options:`) e fallback puro; `build_opponent`
-> deriva a banda do nível médio. Rank **não** exposto na UI (decisão 0040).
+> deriva a banda do nível médio. Rank **não** exposto na UI (decisão 0040). Perf da
+> 1ª batalha ~2min anotada (varredura serial da banda — ver P2 nas anotações).
 
 - **Ideia:** **classificar cada Pokémon em um rank de S a F** considerando **stats e
   moves**, para **balancear os times de adversários** que aparecem ao longo do caminho.
@@ -534,6 +535,29 @@
   persistente elimina o re-warm a cada reboot.
 - **Candidate order suggestion:** após J1/J2/J3 (impacto de UX alto; não depende delas —
   pode entrar antes se o usuário preferir).
+
+### P2. Varredura da banda do oponente (J3) sem paralelismo (anotado 2026-08-23)
+
+> **Fora do fluxo (RNF-04).** Observado na **validação da sessão 0040 (J3)**: o
+> `GET /battle` passou de ~38s (P1) para **~2min** na 1ª chamada.
+
+- **Problema:** com o J3, `OpponentGenerator#rated_names` percorre o pool em ordem
+  aleatória chamando `detail` + `moves_for` por candidato até preencher a banda —
+  **serial** (um RTT por candidato), **sem cap de varredura**, e depois a montagem
+  do time re-faz `moves_for` de cada oponente escolhido. Bandas estreitas (ex.:
+  A–S em nível alto) podem varrer centenas de nomes antes de completar 6.
+- **Caminhos candidatos (decisão do usuário ao refinar):**
+  1. **Paralelizar a varredura** com o `Parallelizer` existente (fan-out dos
+     `detail` + `moves_for` por candidato em lotes) mantendo ordem determinística.
+  2. **Cap de varredura:** limitar o nº de candidatos avaliados; se não completar a
+     banda dentro do cap, completar com sorteio puro (fallback já existe).
+  3. **Pré-computar/cachear o rating** por número (ex.: cache persistente do
+     `PokemonRating` — `PokeApiCache`/`PersistentJsonStore`), evitando re-ratear a
+     cada batalha; ou **pré-cachear a banda** offline (pré-warm por tier).
+  4. Reduzir o custo por candidato: o `moves_for` do oponente já é buscado na
+     montagem — evitar o duplo fetch (rating + time).
+- **Garantias desejáveis (esboço):** determinismo por seed preservado; testes sem
+  rede; suíte/lint verdes; comportamento da banda inalterado (critérios C4/C5 da 0040).
 
 ---
 

@@ -109,16 +109,17 @@ Batalha `GET /battle`, Histórico `GET /history`) com modo fragmento via
 mini-status local; rotas `_close` de batalha/histórico removidas (404),
 `teamRefresh` eliminado. Suíte 626/2017, lint 0.
 
-**Sessão 0040 (J3 — ranking S–F) implementada (fase 2 concluída, aguardando
-validação):** `PokemonRating` (domínio puro) classifica Pokémon em S–F por stats
-ponderados + bônus dos moves (top-4, STAB-aware), com `band_for_level` (nível →
-banda de tiers); `OpponentGenerator` ganhou `rater`/`moves_fetcher`/`band`
-(`options:`) filtrando oponentes pela banda com fallback puro; `build_opponent`
-deriva a banda do nível médio do jogador (fim do sorteio puro). Retorno `score` +
-`tier`, sem UI. Suíte 649/2063, lint 0.
+**Sessão 0040 (J3 — ranking S–F) concluída e validada em 2026-08-23:**
+`PokemonRating` (domínio puro) classifica Pokémon em S–F por stats ponderados +
+bônus dos moves (top-4, STAB-aware), com `band_for_level` (nível → banda de
+tiers); `OpponentGenerator` ganhou `rater`/`moves_fetcher`/`band` (`options:`)
+filtrando oponentes pela banda com fallback puro; `build_opponent` deriva a banda
+do nível médio do jogador (fim do sorteio puro). Retorno `score` + `tier`, sem UI.
+Suíte 649/2063, lint 0. Validação ok; observado `GET /battle` ~2min na 1ª chamada
+(varredura serial da banda) — anotado como limitação/perf (fora de sessão, RNF-04).
 
-**Próxima sessão:** **0040 — J3**, aguardando validação do usuário (fase 3);
-depois ondas 1–3 de UX a critério → organizar o resto.
+**Próxima sessão:** ondas 1–3 de UX a critério → organizar o resto
+(JN-3, JN-4, JN-5, J2, J4, D4).
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -129,8 +130,9 @@ depois ondas 1–3 de UX a critério → organizar o resto.
 > concluída e validada (0038, 2026-08-22 — acessibilidade, copy pt-BR, notices,
 > indicador; UX priorizada antes da fila por decisão do usuário)**. **JN-1 concluído e validado
 > (0039, 2026-08-22 — telas próprias, nav real com estado ativo, htmx intra-tela)**.
-> **J3 implementado (0040 — aguardando validação do usuário; refinamento 2026-08-23)**
-> → ondas 1–3 de UX a critério → organizar o resto (JN-3, JN-4, JN-5, J2, J4, D4).
+> **J3 concluído e validado (0040, 2026-08-23 — ranking S–F, banda por nível no
+> `OpponentGenerator`; suíte 649/2063, lint 0; perf da 1ª batalha ~2min anotada)**.
+> Próximas: ondas 1–3 de UX a critério → organizar o resto (JN-3, JN-4, JN-5, J2, J4, D4).
 
 ## Progresso das sessões
 
@@ -175,7 +177,7 @@ depois ondas 1–3 de UX a critério → organizar o resto.
 | 0037 | JN-2 — gerenciamento de golpes em lista: fim dos checkboxes do manage (lista clicável com marcação via htmx, toggle como rascunho na própria rota sem persistir, cap 4 no preview) + save/validação de `POST /team/:id/moves` intactos | Concluída | Done (passos 1–4, suíte 614/1952, lint 0, validado em 2026-08-22) |
 | 0038 | Onda 0 UX — quick wins: alt/aria-label nos sprites e ▲▼ + `loading="lazy"`, evoluções do detalhe viram links, copy pt-BR ("Adicionar ao time", "Remover do time", "Filtrar por nome") + hierarquia de notices (`notice--info/success/error`), indicador global de carregamento htmx | Concluída | Done (passos 1–5, suíte 624/2006, lint 0, validado em 2026-08-22) |
 | 0039 | JN-1 — telas próprias (fim do empilhamento): páginas próprias por rota com layout (Lista/Time/Batalha/Histórico), nav real com estado ativo, htmx intra-tela (`#team-view`/`#battle-view`/`#pokemon-detail`/`#add-status`), add → mini-status, remoção do span hack/_close/teamRefresh | Concluída | Done (passos 1–6, suíte 626/2017, lint 0, validado em 2026-08-22) |
-| 0040 | J3 — ranking S–F (balanceamento de oponentes): `PokemonRating` (domínio puro) classifica Pokémon em S–F por stats ponderados + bônus dos moves (top-4, STAB-aware), consumido pelo `OpponentGenerator` via banda de tier derivada do nível médio do jogador (fim do sorteio puro), retorno score + tier sem UI | Implementação | Concluída — passos 1–4 (suíte 649/2063, lint 0), aguardando validação do usuário |
+| 0040 | J3 — ranking S–F (balanceamento de oponentes): `PokemonRating` (domínio puro) classifica Pokémon em S–F por stats ponderados + bônus dos moves (top-4, STAB-aware), consumido pelo `OpponentGenerator` via banda de tier derivada do nível médio do jogador (fim do sorteio puro), retorno score + tier sem UI | Concluída | Done (passos 1–5, suíte 649/2063, lint 0, validado em 2026-08-23; `GET /battle` ~2min na 1ª chamada — perf anotada) |
 
 ## Estrutura do arquivo de sessão
 

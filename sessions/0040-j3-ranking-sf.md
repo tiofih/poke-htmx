@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-23 |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — passos 1–5 em 2026-08-23 (suíte 649/2063, lint 0) |
+| Validação | **Done** — executada pelo usuário em 2026-08-23 (tabela da seção 7) |
 
 ---
 
@@ -149,15 +149,24 @@ do nível médio do time) — em vez do sorteio puro do pool.
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Concluída em 2026-08-23 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 rate stats → tier | `./scripts/test test/pokemon_rating_test.rb` | — (domínio puro) | |
-| C2 bônus de moves | `./scripts/test test/pokemon_rating_test.rb` | — (domínio puro) | |
-| C3 band_for_level | `./scripts/test test/pokemon_rating_test.rb` | — (domínio puro) | |
-| C4 oponentes na banda | `./scripts/test test/opponent_generator_test.rb` | jogar batalha: oponentes coerentes com o nível do time (não só o pool aleatório) | |
-| C5 banda por nível no service | `./scripts/test test/battle_service_test.rb` | `GET /battle` gera oponentes da banda esperada para o nível médio | |
+| C1 rate stats → tier | `./scripts/test test/pokemon_rating_test.rb` | — (domínio puro) | ok |
+| C2 bônus de moves | `./scripts/test test/pokemon_rating_test.rb` | — (domínio puro) | ok |
+| C3 band_for_level | `./scripts/test test/pokemon_rating_test.rb` | — (domínio puro) | ok |
+| C4 oponentes na banda | `./scripts/test test/opponent_generator_test.rb` | jogar batalha: oponentes coerentes com o nível do time (não só o pool aleatório) | ok |
+| C5 banda por nível no service | `./scripts/test test/battle_service_test.rb` | `GET /battle` gera oponentes da banda esperada para o nível médio | ok |
+
+> **Nota de validação:** comportamento validado, mas o **`GET /battle` demorou ~2min**
+> (1ª chamada). Causa provável: a **varredura serial da banda** no `OpponentGenerator`
+> (percorre o pool chamando `detail` + `moves_for` por candidato até preencher a banda)
+> + re-fetch de `moves_for` por oponente escolhido — soma-se ao warm-up existente da
+> PokéAPI. Anotado como limitação (RNF-04, fora de sessão) — candidato a sessão própria
+> de performance (paralelizar a varredura, cap de varredura, pré-computar/cachear o
+> rating ou pré-cachear a banda offline). **Não reabre critério (S3):** todos ok no
+> comportamento; a lentidão é melhoria de performance anotada.
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.
@@ -172,3 +181,9 @@ do nível médio do time) — em vez do sorteio puro do pool.
 - `average_player_level` já existe em `BattleServicePreparation` (linha 73) — reusar.
 - O `moves_for` da banda usa o mesmo `api` do `fetcher` (cache P1) — sem custo novo
   de rede além do que a batalha já faz.
+- **Performance observada na validação (2026-08-23):** `GET /battle` ~2min na 1ª
+  chamada — varredura serial da banda (`OpponentGenerator#rated_names` percorre o
+  pool com `detail` + `moves_for` por candidato até preencher a banda, sem
+  paralelismo e sem cap de varredura). Anotado em `REQUIREMENTS.md` (limitações) e
+  `draft-auto-battler.md` (anotações de performance) como candidato a sessão própria
+  — não abre escopo nesta sessão (RNF-04).
