@@ -347,7 +347,7 @@ com os wireframes de `docs/screens/`).
 | **Presenter / decorator de view** | D3 + battle.erb + Eco-2/3 | Apresentar payloads prontos (ex.: `BattleLogPresenter`, fighter row, `InventoryPresenter`), eliminando a duplicação de loops nos ERB. |
 | **Composition Root / injeção simples** | Todos | Construir serviços/repositórios no boot (Sinatra `set :services`, `set :api`), sem framework DI — manter o estilo leve. |
 | **Rule/Policy objects** | D2/D4/Eco | Políticas puras: `ExperienceCurve` (XP→nível), `EvolutionRule` (nível→evolução), `DraftRule` (validação de montagem temática), **`RewardRule` (moeda/XP por resultado)** e **`HealCostPolicy`** (custo do Poke Center). Genéricas e TDD-áveis sem rede, no molde de `TypeEffectiveness`/`BattleEngine`. |
-| **Rating (classificador de balanceamento)** | **J3** | **`PokemonRating`** — domínio puro que classifica um Pokémon em **S–F** por stats + moves (fórmula a definir). Consumido pelo `OpponentGenerator` e pelo balanceamento por progressão. Sem rede; mesma família das policies. |
+| **Rating (classificador de balanceamento)** | **J3** | **`PokemonRating`** — domínio puro que classifica um Pokémon em **S–F** por stats + moves. **Implementado na sessão 0040 (2026-08-23):** `rate(pokemon, moves:) → {score:, tier:}` (stats ponderados + bônus do power top-4 STAB-aware) + `band_for_level`; consumido pelo `OpponentGenerator` (`rater`/`moves_fetcher`/`band`) e pelo `BattleService#build_opponent` (banda por nível médio). Sem rede; mesma família das policies. |
 | **Command (ação de batalha)** | Eco-4 | Consumíveis em combate (poção) são **ações não-ofensivas** no motor — modelar como comando/evento no half-FSM (seção 6.1) em vez de ramificar `BattleEngine#act` com if/else. |
 
 ---
@@ -495,8 +495,10 @@ Suíte 367/1172, lint 0.
 - [ ] **J2 (personalização):** tela própria ou extensão de `/team/manage`?
       Estratégia de ataque é **por time ou por Pokémon**? Trocar skills tem custo
       (Eco) ou é livre?
-- [ ] **J3 (rating S–F):** fórmula dos pontos (peso por stats + moves aprendíveis)?
-      Classificação computada **offline/via cache** ou na montagem do oponente?
-      Rank é exibido na UI?
+- [x] **J3 (rating S–F):** fechado na sessão 0040 (2026-08-23) — fórmula stats
+      ponderados (HP×0.5/demais ×1.0) + média do power efetivo top-4 (STAB ×1.5);
+      retorno `score` + `tier` com thresholds S≥600/A≥500/B≥420/C≥350/D≥280/F<280;
+      classificação computada **na montagem do oponente** (banda por nível médio via
+      `band_for_level`); rank **não** exibido na UI nesta sessão.
 - [ ] **J1 + D4 (draft temático):** seleção inicial e draft temático se sobrepõem —
       unificar ou manter separados?

@@ -318,6 +318,14 @@
 
 ### J3. Ranking S–F para balanceamento (pokémon + times adversários)
 
+> **Implementado na sessão 0040 (2026-08-23, suíte 649/2063, lint 0 — aguardando
+> validação do usuário):** `PokemonRating#rate(pokemon, moves:) → {score:, tier:}`
+> (stats ponderados HP×0.5/demais ×1.0 + bônus da média do power efetivo top-4
+> STAB ×1.5; thresholds S≥600/A≥500/B≥420/C≥350/D≥280/F<280) + `band_for_level`
+> (≤2→F–D; 3–5→D–C; 6–9→C–B; 10–14→B–A; ≥15→A–S); `OpponentGenerator` com
+> `rater`/`moves_fetcher`/`band` (em `options:`) e fallback puro; `build_opponent`
+> deriva a banda do nível médio. Rank **não** exposto na UI (decisão 0040).
+
 - **Ideia:** **classificar cada Pokémon em um rank de S a F** considerando **stats e
   moves**, para **balancear os times de adversários** que aparecem ao longo do caminho.
 - **Impacto:** vira fonte de verdade para o `OpponentGenerator` (B4) e para o balanceamento
@@ -423,7 +431,10 @@
 > ~~**3. J1 (seleção inicial)**~~ (feito — sessão 0036, **concluída e validada
 > em 2026-08-22**, com ajustes S3: só formas base + 27 iniciais gen 1–9) →
 > ~~**4. JN-2 (golpes em lista)**~~ (feito — sessão 0037, **concluída e validada
-> em 2026-08-22**) → **5. J3 (ranking S–F)** → ~~**6. JN-1 (telas próprias,
+> em 2026-08-22**) → ~~**5. J3 (ranking S–F)**~~ (implementado — sessão 0040,
+> **implementada em 2026-08-23 — suíte 649/2063, lint 0, aguardando validação do
+> usuário**; `PokemonRating` stats+moves STAB, banda por nível no
+> `OpponentGenerator`) → ~~**6. JN-1 (telas próprias,
 > fim do empilhamento)**~~ (feito — sessão 0039, **concluída e validada
 > em 2026-08-22**) → depois
 > **organizar o resto** (JN-3, JN-4, JN-5, J2, J4, D4 e demais).
