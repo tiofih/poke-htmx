@@ -12,6 +12,16 @@ class ServerBattleTest < Minitest::Test
     start_journey("user-a")
   end
 
+  def test_battle_page_renders_full_page_with_battle_view
+    @repository.add("user-a", pikachu_pokemon)
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_includes last_response.body, "<html"
+    assert_includes last_response.body, 'href="/battle" class="active"'
+    assert_includes last_response.body, 'id="battle-view"'
+  end
+
   def test_battle_close_route_returns_empty_fragment
     get "/battle/close"
 
@@ -43,7 +53,6 @@ class ServerBattleTest < Minitest::Test
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
-    refute_includes last_response.body, "<html"
     assert_includes last_response.body, "usou Pocao"
     assert_match(/\+20 HP/, last_response.body)
     assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "uma pocao debitada"
@@ -84,7 +93,7 @@ class ServerBattleTest < Minitest::Test
     assert_includes last_response.body, "Oponente"
     assert_includes last_response.body, "pikachu"
     assert_includes last_response.body, "200/200"
-    assert_includes last_response.body, "hx-target=\"#battle\""
+    assert_includes last_response.body, 'hx-target="#battle-view"'
   end
 
   def test_battle_fragment_has_play_button
@@ -275,7 +284,7 @@ class ServerBattleTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "Não foi possível preparar a batalha."
-    refute_includes last_response.body, "<html"
+    assert_includes last_response.body, "<html"
   end
 
   def test_battle_with_empty_opponent_shows_friendly_message
@@ -588,7 +597,7 @@ class ServerJourneyGateBattleTest < Minitest::Test
     get "/battle", {}, user_session("user-novo")
 
     assert last_response.ok?
-    refute_includes last_response.body, "<html"
+    assert_includes last_response.body, "<html"
     assert_match(/jornada/i, last_response.body)
     refute_includes last_response.body, %(hx-post="/battle/play")
   end

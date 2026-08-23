@@ -81,8 +81,8 @@
         <% end %>
       </ul>
     <% end %>
-    <button hx-get="/battle" hx-target="#battle" hx-swap="innerHTML">Novo confronto</button>
+    <button hx-get="/battle" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
   <% else %>
-    <button hx-post="/battle/play" hx-target="#battle" hx-swap="innerHTML">Jogar</button>
+    <button hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML">Jogar</button>
   <% end %>
 <% end %>

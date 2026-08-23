@@ -249,7 +249,15 @@ end
 module ServerBattleActions
   private
 
-  def render_battle_fragment
+  def render_battle
+    content = prepare_battle_fragment
+    return content if htmx_request?
+
+    @battle_content = content
+    erb :battle_page
+  end
+
+  def prepare_battle_fragment
     return journey_gate_fragment unless settings.journey.started?(current_user)
 
     result = settings.battle.prepare(current_user)
@@ -300,7 +308,6 @@ module ServerBattleActions
     return erb :battle, layout: false unless result
 
     expose_battle_result(result)
-    response.headers["HX-Trigger"] = "teamRefresh" if @engine.finished? && @evolution_news&.any?
     erb :battle, layout: false
   end
 
@@ -433,7 +440,7 @@ module BattleRoutes
   end
 
   def self.register_open(app)
-    app.get("/battle") { render_battle_fragment }
+    app.get("/battle") { render_battle }
   end
 
   def self.register_play(app)
