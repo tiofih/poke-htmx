@@ -93,15 +93,16 @@ rascunho inicial = golpes salvos (legados e rótulo "— Nível N" preservados);
 save/validação intactos. Testes de manage/golpes em `test/team_manage_test.rb`.
 Suíte 614/1952, lint 0.
 
-**Sessão 0038 (Onda 0 UX — quick wins) aberta — refinamento concluído em
-2026-08-22:** usuário priorizou UX antes da fila (J3/JN-1 voltam depois). Escopo do
-`draft-ui-ux.md` §5 onda 0: alt/aria-label + `loading="lazy"`, evoluções linkadas,
-copy pt-BR ("Adicionar ao time", "Remover do time", "Filtrar por nome"), hierarquia
-de notices (`notice--info|success|error` com `@notice_kind` nos handlers onde
-inequívoca) e indicador global de carregamento (eventos htmx + barra fixa).
-Critérios e plano TDD em `sessions/0038-onda0-quick-wins.md`.
+**Sessão 0038 (Onda 0 UX — quick wins) implementada (fase 2 concluída,
+aguardando validação):** `alt` nos sprites e `aria-label` nos ▲▼,
+`loading="lazy"` nas listagens, evoluções do detalhe viram links para o detalhe
+(mesmo alvo `#pokemon`), copy pt-BR ("Adicionar ao time", "Remover do time",
+"Filtrar por nome"), hierarquia de notices (`notice--info/success/error`;
+`kind:` nos resultados de HealService/MartService, `@notice_kind` nos handlers)
+e indicador global de carregamento (barra fixa + eventos htmx). Suíte 624/2006,
+lint 0.
 
-**Próxima sessão:** **0038 — Onda 0**, implementação (fase 2, TDD) pendente;
+**Próxima sessão:** **0038 — Onda 0**, aguardando validação do usuário (fase 3);
 depois a fila retoma em **J3** → **JN-1** → organizar o resto (ondas 1–3 de UX
 podem ser encaixadas a critério).
 
@@ -111,8 +112,8 @@ podem ser encaixadas a critério).
 > 2026-08-22 — dropdown fora, jornada com gate e formas base/iniciais 27)**.
 > **JN-2 concluído e validado (0037,
 > 2026-08-22 — golpes em lista clicável, rascunho sem persistir)**. **Onda 0 UX
-> aberta (0038 — refinamento concluído 2026-08-22, decisão do usuário: UX antes da
-> fila)**. Próximas: onda 0 → **J3** → 
+> implementada (0038 — aguardando validação do usuário; UX priorizada antes da
+> fila por decisão do usuário)**. Próximas: **J3** → 
 > **JN-1** → organizar o resto
 > (JN-3, JN-4, JN-5, J2, J4, D4).
 
@@ -157,7 +158,7 @@ podem ser encaixadas a critério).
 | 0035 | P1 — performance do gateway: `Parallelizer` (pool threads) + `PokeApiCache` thread-safe + `PersistentJsonStore` (`tmp/`) + choke point `http_get` + fonte paralela (`type_relations`/`OpponentGenerator`/`BattleService`) | Todas | Concluída — **validada pelo usuário em 2026-08-19** (GET /battle ~38s, 2º play ~4s; suíte 586/1787, lint 0) |
 | 0036 | J1 — seleção inicial de time: fim do dropdown (lista clicável sprite+nome+Add, pool total 20/página + destaques "Iniciais") + tela de entrada da jornada (gate battle/mart/center até time de 6, marcador `user_state` + derivado do time) | Concluída | Done (passos 0–6 + ajustes S3 — só formas base, 27 iniciais gen 1–9; suíte 611/1936, lint 0, validado em 2026-08-22) |
 | 0037 | JN-2 — gerenciamento de golpes em lista: fim dos checkboxes do manage (lista clicável com marcação via htmx, toggle como rascunho na própria rota sem persistir, cap 4 no preview) + save/validação de `POST /team/:id/moves` intactos | Concluída | Done (passos 1–4, suíte 614/1952, lint 0, validado em 2026-08-22) |
-| 0038 | Onda 0 UX — quick wins: alt/aria-label nos sprites e ▲▼ + `loading="lazy"`, evoluções do detalhe viram links, copy pt-BR ("Adicionar ao time", "Remover do time", "Filtrar por nome") + hierarquia de notices (`notice--info/success/error`), indicador global de carregamento htmx | Refinamento | Concluída — decisão do usuário em 2026-08-22 (priorizar UX antes da fila; Onda 0 do `draft-ui-ux.md`) |
+| 0038 | Onda 0 UX — quick wins: alt/aria-label nos sprites e ▲▼ + `loading="lazy"`, evoluções do detalhe viram links, copy pt-BR ("Adicionar ao time", "Remover do time", "Filtrar por nome") + hierarquia de notices (`notice--info/success/error`), indicador global de carregamento htmx | Implementação | Concluída — passos 1–5 (suíte 624/2006, lint 0), aguardando validação do usuário |
 
 ## Estrutura do arquivo de sessão
 
