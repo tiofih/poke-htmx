@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-22 (padrão lista clicável htmx; toggle na própria rota com rascunho; rascunho inicia nos golpes salvos) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — passos 1–4 em 2026-08-22 (suíte 614/1952, lint 0) |
+| Validação | **Done** — executada pelo usuário em 2026-08-22 (tabela da seção 7) |
 
 ---
 
@@ -128,15 +128,15 @@ validação/persistência da rota `POST /team/:id/moves` intocadas.
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Concluída em 2026-08-22 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 lista clicável sem checkbox | `./scripts/test -n /clickable_move_list/` | linhas clicáveis estilizadas em `GET /team/manage` | |
-| C2 salvos marcados (+legado/nível) | `./scripts/test -n /marks_current_moves|outside_learnable_marked|learn_level_label_in_move_list/` | golpes já salvos aparecem marcados ao abrir o manage | |
-| C3 toggle sem persistir | `./scripts/test -n /toggle_updates_marking_without_persisting/` | clicar alterna marcação; recarregar sem Salvar mantém os salvos | |
-| C4 cap 4 no toggle | `./scripts/test -n /toggle_respects_cap_of_four/` | 5º clique não marca e mostra aviso | |
-| C5 salvar inalterado | `./scripts/test -n /moves/` (testes de save atuais) | "Salvar golpes" grava; >4 ou golpe inválido mostra aviso | |
+| C1 lista clicável sem checkbox | `./scripts/test -n /clickable_move_list/` | linhas clicáveis estilizadas em `GET /team/manage` | ok |
+| C2 salvos marcados (+legado/nível) | `./scripts/test -n /marks_current_moves|outside_learnable_marked|learn_level_label_in_move_list/` | golpes já salvos aparecem marcados ao abrir o manage | ok |
+| C3 toggle sem persistir | `./scripts/test -n /toggle_updates_marking_without_persisting/` | clicar alterna marcação; recarregar sem Salvar mantém os salvos | ok |
+| C4 cap 4 no toggle | `./scripts/test -n /toggle_respects_cap_of_four/` | 5º clique não marca e mostra aviso | ok |
+| C5 salvar inalterado | `./scripts/test -n /moves/` (testes de save atuais) | "Salvar golpes" grava; >4 ou golpe inválido mostra aviso | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.

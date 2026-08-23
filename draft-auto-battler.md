@@ -422,8 +422,8 @@
 > aprendizado)**~~ (feito — sessão 0034, **concluída e validada em 2026-08-19**) →
 > ~~**3. J1 (seleção inicial)**~~ (feito — sessão 0036, **concluída e validada
 > em 2026-08-22**, com ajustes S3: só formas base + 27 iniciais gen 1–9) →
-> ~~**4. JN-2 (golpes em lista)**~~ (implementado — sessão 0037, aguardando
-> validação do usuário) → **5. J3 (ranking S–F)** → **6. JN-1 (telas próprias,
+> ~~**4. JN-2 (golpes em lista)**~~ (feito — sessão 0037, **concluída e validada
+> em 2026-08-22**) → **5. J3 (ranking S–F)** → **6. JN-1 (telas próprias,
 > fim do empilhamento)** → depois
 > **organizar o resto** (JN-3, JN-4, JN-5, J2, J4, D4 e demais).
 > Ao concluir cada sessão, atualizar esta ordem no roadmap (`REQUIREMENTS.md`).
