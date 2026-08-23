@@ -49,20 +49,7 @@ class ServerHistoryTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, 'id="history"'
-    assert_includes last_response.body, 'hx-get="/history"'
+    assert_includes last_response.body, 'href="/history"'
     assert_includes last_response.body, "Histórico"
-  end
-
-  def test_nav_links_clear_history_when_leaving_history
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/"
-    end
-
-    assert last_response.ok?
-    assert_includes last_response.body, 'hx-get="/battle/close"'
-    assert_includes last_response.body, 'href="#history"'
-    assert_includes last_response.body, 'hx-get="/history/close"'
-    assert_includes last_response.body, 'hx-target="#history"'
   end
 end

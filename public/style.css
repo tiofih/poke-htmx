@@ -113,3 +113,8 @@ header nav a {
   width: 100%;
   opacity: 1;
 }
+
+nav a.active {
+  font-weight: bold;
+  text-decoration: underline;
+}

@@ -12,11 +12,10 @@
     <header>
       <nav>
         <strong>Poké-HTMX</strong>
-        <a id="nav-lista" href="#pokemon-list" hx-get="/battle/close" hx-target="#battle" hx-swap="innerHTML">Lista</a>
-        <a href="#team" hx-get="/team/manage" hx-target="#team" hx-swap="innerHTML">Time</a>
-        <a href="#battle" hx-get="/battle" hx-target="#battle" hx-swap="innerHTML">Batalha</a>
-        <a href="#history" hx-get="/history" hx-target="#history" hx-swap="innerHTML">Histórico</a>
-        <span hx-get="/history/close" hx-target="#history" hx-swap="innerHTML" hx-trigger="click from:#nav-lista"> </span>
+        <a href="/" class="<%= "active" if request.path == "/" %>">Lista</a>
+        <a href="/team" class="<%= "active" if request.path.start_with?("/team") %>">Time</a>
+        <a href="/battle" class="<%= "active" if request.path == "/battle" %>">Batalha</a>
+        <a href="/history" class="<%= "active" if request.path == "/history" %>">Histórico</a>
       </nav>
     </header>
 

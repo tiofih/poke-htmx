@@ -268,8 +268,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, "hx-get=\"/battle\""
-    assert_includes last_response.body, 'id="battle"'
+    assert_includes last_response.body, 'href="/battle"'
   end
 
   def test_index_has_header_navigation_links
@@ -282,10 +281,11 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, "Lista"
     assert_includes last_response.body, "Time"
     assert_includes last_response.body, "Batalha"
-    assert_includes last_response.body, 'href="#pokemon-list"'
-    assert_includes last_response.body, 'href="#team"'
-    assert_includes last_response.body, 'hx-get="/battle"'
-    assert_includes last_response.body, 'hx-target="#battle"'
+    assert_includes last_response.body, 'href="/"'
+    assert_includes last_response.body, 'href="/team"'
+    assert_includes last_response.body, 'href="/battle"'
+    assert_includes last_response.body, 'href="/history"'
+    refute_includes last_response.body, "hx-trigger=\"click from:#nav-lista\""
   end
 
   def test_index_uses_single_layout_with_external_css
@@ -301,25 +301,26 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, 'id="battle"'
   end
 
-  def test_index_nav_time_link_points_to_manage_fragment
+  def test_nav_time_link_points_to_team_page
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/"
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, 'hx-get="/team/manage"'
-    assert_includes last_response.body, 'hx-target="#team"'
-    assert_includes last_response.body, 'href="#team"'
+    assert_includes last_response.body, 'href="/team"'
+    refute_includes last_response.body, 'hx-get="/team/manage"'
   end
 
-  def test_nav_links_clear_battle_fragment_when_leaving_battle
+  def test_layout_marks_active_nav_link_on_list_page
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/"
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, 'hx-get="/battle/close"'
-    assert_includes last_response.body, 'hx-target="#battle"'
+    assert_includes last_response.body, 'href="/" class="active"'
+    refute_includes last_response.body, 'href="/team" class="active"'
+    refute_includes last_response.body, 'href="/battle" class="active"'
+    refute_includes last_response.body, 'href="/history" class="active"'
   end
 
   def test_fragments_remain_partial_without_html_wrapper
