@@ -118,8 +118,11 @@ do nível médio do jogador (fim do sorteio puro). Retorno `score` + `tier`, sem
 Suíte 649/2063, lint 0. Validação ok; observado `GET /battle` ~2min na 1ª chamada
 (varredura serial da banda) — anotado como limitação/perf (fora de sessão, RNF-04).
 
-**Próxima sessão:** ondas 1–3 de UX a critério → organizar o resto
-(JN-3, JN-4, JN-5, J2, J4, D4).
+**Próxima sessão:** 0041 — **Onda 2 UX (leitura da batalha)** — refinamento
+concluído em 2026-08-23: partial único dos painéis + presenters puros
+(`FighterPresenter`/`BattleLogPresenter`), barras HP/PP, log das últimas 3 rodadas
+e `hx-indicator` no botão Jogar. Depois: ondas 1–3 de UX restantes → organizar o
+resto (JN-3, JN-4, JN-5, J2, J4, D4).
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -132,7 +135,10 @@ Suíte 649/2063, lint 0. Validação ok; observado `GET /battle` ~2min na 1ª ch
 > (0039, 2026-08-22 — telas próprias, nav real com estado ativo, htmx intra-tela)**.
 > **J3 concluído e validado (0040, 2026-08-23 — ranking S–F, banda por nível no
 > `OpponentGenerator`; suíte 649/2063, lint 0; perf da 1ª batalha ~2min anotada)**.
-> Próximas: ondas 1–3 de UX a critério → organizar o resto (JN-3, JN-4, JN-5, J2, J4, D4).
+> **0041 (Onda 2 UX — leitura da batalha) em refinamento (2026-08-23)** — partial único
+> dos painéis + `FighterPresenter`/`BattleLogPresenter` puros, barras HP/PP, log das
+> últimas 3 rodadas e `hx-indicator` no botão Jogar. Próximas: ondas 1–3 de UX
+> restantes → organizar o resto (JN-3, JN-4, JN-5, J2, J4, D4).
 
 ## Progresso das sessões
 
@@ -178,6 +184,7 @@ Suíte 649/2063, lint 0. Validação ok; observado `GET /battle` ~2min na 1ª ch
 | 0038 | Onda 0 UX — quick wins: alt/aria-label nos sprites e ▲▼ + `loading="lazy"`, evoluções do detalhe viram links, copy pt-BR ("Adicionar ao time", "Remover do time", "Filtrar por nome") + hierarquia de notices (`notice--info/success/error`), indicador global de carregamento htmx | Concluída | Done (passos 1–5, suíte 624/2006, lint 0, validado em 2026-08-22) |
 | 0039 | JN-1 — telas próprias (fim do empilhamento): páginas próprias por rota com layout (Lista/Time/Batalha/Histórico), nav real com estado ativo, htmx intra-tela (`#team-view`/`#battle-view`/`#pokemon-detail`/`#add-status`), add → mini-status, remoção do span hack/_close/teamRefresh | Concluída | Done (passos 1–6, suíte 626/2017, lint 0, validado em 2026-08-22) |
 | 0040 | J3 — ranking S–F (balanceamento de oponentes): `PokemonRating` (domínio puro) classifica Pokémon em S–F por stats ponderados + bônus dos moves (top-4, STAB-aware), consumido pelo `OpponentGenerator` via banda de tier derivada do nível médio do jogador (fim do sorteio puro), retorno score + tier sem UI | Concluída | Done (passos 1–5, suíte 649/2063, lint 0, validado em 2026-08-23; `GET /battle` ~2min na 1ª chamada — perf anotada) |
+| 0041 | Onda 2 UX — leitura da batalha: fim da duplicação dos painéis (partial único `_fighter_panel.erb` + `FighterPresenter`/`BattleLogPresenter` puros em `lib/`), barras visuais de HP/PP (tokens do draft-design-system §3), log das últimas 3 rodadas (mais recente no topo) e `hx-indicator` local no botão Jogar; `Move#pp_max` (default = pp) | Refinamento | Refinamento concluído em 2026-08-23 (critérios S1 + plano TDD fechados; baseline 649/2063, lint 0) |
 
 ## Estrutura do arquivo de sessão
 
