@@ -424,8 +424,8 @@
 > em 2026-08-22**, com ajustes S3: só formas base + 27 iniciais gen 1–9) →
 > ~~**4. JN-2 (golpes em lista)**~~ (feito — sessão 0037, **concluída e validada
 > em 2026-08-22**) → **5. J3 (ranking S–F)** → ~~**6. JN-1 (telas próprias,
-> fim do empilhamento)**~~ (implementado — sessão 0039, aguardando validação do
-> usuário; prioridade urgente decretada pelo usuário em 2026-08-22) → depois
+> fim do empilhamento)**~~ (feito — sessão 0039, **concluída e validada
+> em 2026-08-22**) → depois
 > **organizar o resto** (JN-3, JN-4, JN-5, J2, J4, D4 e demais).
 > Ao concluir cada sessão, atualizar esta ordem no roadmap (`REQUIREMENTS.md`).
 

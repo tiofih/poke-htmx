@@ -132,7 +132,7 @@ sessão única** quando o usuário decidir encaixá-la (fora da ordem JN-2 → J
 | **0 — quick wins** *(feita — sessão 0038, **concluída e validada em 2026-08-22**)* | `alt`/`aria-label`, `loading="lazy"`, indicador global (`hx-indicator`), hierarquia de notices + copy pt-BR, evoluções linkadas no detalhe | só view/CSS, baixo risco; base visual para tudo abaixo |
 | **1 — jornada visível** | contador/barra "Time n/6" (listagem + nav + team), estados do botão Add (default / "No time ✓" / cheio) | conecta o gate à descoberta; reusa `JourneyService`; precisa expor `@team_names`/`@journey_started` nos renders |
 | **2 — leitura da batalha** | partial única dos painéis (+presenter), barras HP/PP, log das últimas N rodadas | mata duplicação antes de qualquer feature nova de batalha |
-| **3 — estrutura** *(parcial — nav ativo + fim do hack de limpeza feitos via JN-1/sessão 0039, aguardando validação; grid responsivo pendente)* | estado ativo no nav + limpeza sistemática de painéis, grid responsivo da listagem | polimento estrutural; depende só de CSS/markup |
+| **3 — estrutura** *(parcial — nav ativo + fim do hack de limpeza feitos via JN-1/sessão 0039, **validados em 2026-08-22**; grid responsivo pendente)* | estado ativo no nav + limpeza sistemática de painéis, grid responsivo da listagem | polimento estrutural; depende só de CSS/markup |
 | Dependentes da fila | JN-2 (golpes em lista), JN-1 (telas próprias), JN-4 (componentes Mart/Center), J3 (ranking S–F), J4 (nome/apelido) | ordem fechada em 2026-08-18 mantida |
 
 Regras: cada onda = refinamento (fase 1) próprio quando virar sessão; wireframes

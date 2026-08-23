@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisão do usuário em 2026-08-22 (prioridade urgente; modelo A — páginas próprias por tela) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — passos 1–6 em 2026-08-22 (suíte 626/2017, lint 0) |
+| Validação | **Done** — executada pelo usuário em 2026-08-22 (tabela da seção 7) |
 
 ---
 
@@ -124,15 +124,15 @@ regra de negócio/domínio.
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério.)*
+**Concluída em 2026-08-22 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 nav ativo | `./scripts/test -n /nav|active/` | link da tela corrente destacado ao navegar | |
-| C2 páginas próprias | `./scripts/test -n /page/` | cada âncora do nav abre sua tela, sem acúmulo | |
-| C3 lista pura | `./scripts/test -n /index/` | `GET /` não mostra time/batalha/histórico | |
-| C4 interações locais | `./scripts/test -n /heal|buy|play|moves|add/` | fluxos funcionam dentro de cada tela | |
-| C5 limpezas removidas | `./scripts/test -n /404|not_found/` | navegar não deixa painéis residuais | |
+| C1 nav ativo | `./scripts/test -n /nav|active/` | link da tela corrente destacado ao navegar | ok |
+| C2 páginas próprias | `./scripts/test -n /page/` | cada âncora do nav abre sua tela, sem acúmulo | ok |
+| C3 lista pura | `./scripts/test -n /index/` | `GET /` não mostra time/batalha/histórico | ok |
+| C4 interações locais | `./scripts/test -n /heal|buy|play|moves|add/` | fluxos funcionam dentro de cada tela | ok |
+| C5 limpezas removidas | `./scripts/test -n /404|not_found/` | navegar não deixa painéis residuais | ok |
 
 > **S3:** ajuste = reabrir o critério, registrar alteração e obter nova aprovação.
 
