@@ -2,6 +2,12 @@
 
 require_relative "../../lib/seed_team"
 
+# Seed: time pronto para evoluir em 1 vitória (validação de evolução/aprendizado).
+# Uso: `./scripts/seed team_evolucao`.
+#
+# Níveis 15/35/15/15/31/30 (média 24 → **banda A–S** do J3): batalha gera oponentes
+# da **banda A–S** (espécies fortes, nível 1).
+
 class TeamEvolucao
   def self.call(user_id: "seed-evol", db_url: ENV.fetch("DATABASE_URL", nil)) # rubocop:disable Metrics/MethodLength
     seed = SeedTeam.new(user_id: user_id, db_url: db_url)

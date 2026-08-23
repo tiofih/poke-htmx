@@ -2,6 +2,12 @@
 
 require_relative "../../lib/seed_team"
 
+# Seed: time com níveis variados (validação de progressão/mistura).
+# Uso: `./scripts/seed team_niveis_mistos`.
+#
+# Níveis 1/5/10/20/35/50 (média 20 → **banda A–S** do J3): batalha gera oponentes
+# da **banda A–S** (espécies fortes, nível 1).
+
 class TeamNiveisMistos
   def self.call(user_id: "seed-mixed", db_url: ENV.fetch("DATABASE_URL", nil)) # rubocop:disable Metrics/MethodLength
     seed = SeedTeam.new(user_id: user_id, db_url: db_url)

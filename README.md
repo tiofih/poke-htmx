@@ -57,14 +57,18 @@ Primeira vez: `./scripts/run` e, em outro terminal, `./scripts/rake db:seed`.
 
 `rake db:seed` aplica todas; `SEED=<nome> USER_ID=<id> rake db:seed` aplica uma só:
 
-| Seed | user_id | O que cria |
-| --- | --- | --- |
-| `team_basico` | `seed-basic` | Time inicial simples nível 1 |
-| `team_evolucao` | `seed-evol` | Time pronto para evoluir em 1 vitória |
-| `team_niveis_mistos` | `seed-mixed` | Time com níveis variados |
-| `batalhas_historico` | `seed-history` | Batalhas para o rank do histórico |
-| `saldo_inicial` | `seed-shop` | Saldo inicial 200 no Poke Mart |
-| `team_duelo` | `seed-strong` / `seed-weak` | Time forte × fraco com saldo p/ comprar |
+| Seed | user_id | O que cria | Oponentes (banda J3) |
+| --- | --- | --- | --- |
+| `team_basico` | `seed-basic` | Time inicial simples nível 1 | banda **F–D** |
+| `team_evolucao` | `seed-evol` | Time pronto para evoluir em 1 vitória | banda **A–S** |
+| `team_niveis_mistos` | `seed-mixed` | Time com níveis variados (média 20) | banda **A–S** |
+| `batalhas_historico` | `seed-history` | Batalhas para o rank do histórico | — |
+| `saldo_inicial` | `seed-shop` | Saldo inicial 200 no Poke Mart | — |
+| `team_duelo` | `seed-strong` / `seed-weak` | Time forte (média 28) × fraco (média 1), saldo p/ comprar | **A–S** / **F–D** |
+
+A coluna "Oponentes" reflete o resultado da sessão 0040 (J3 — ranking S–F): a banda é
+derivada do **nível médio do time** (`PokemonRating.band_for_level`); oponentes são
+sempre nível 1, mas a **espécie** é filtrada pela banda (fim do sorteio puro).
 
 Troque de usuário na validação anexando `?as=<user_id>` (ex.: `http://localhost:3000/?as=seed-strong`).
 

@@ -2,6 +2,12 @@
 
 require_relative "../../lib/seed_team"
 
+# Seed: time inicial simples nível 1 (validação de montagem/lista).
+# Uso: `./scripts/seed team_basico`.
+#
+# Seis iniciais nível 1 (média 1 → **banda F–D** do J3): batalha gera oponentes
+# da **banda F–D** (espécies fracas, nível 1).
+
 class TeamBasico
   def self.call(user_id: "seed-basic", db_url: ENV.fetch("DATABASE_URL", nil))
     seed = SeedTeam.new(user_id: user_id, db_url: db_url)

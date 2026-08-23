@@ -8,11 +8,13 @@ require_relative "../../lib/wallet_repository"
 # Uso: `./scripts/seed team_duelo` (ou `rake db:seed` completo).
 #
 # Cria dois usuários:
-#   - `seed-strong` — time forte (níveis 15/20/25/30/35/40): batalha contra o
-#     oponente nível 1 ceifa em poucas jogadas, deixando uso de choice-band/scarf
-#     visível (vitória rápida).
-#   - `seed-weak`  — time fraco (nível 1): equilibra contra o oponente nível 1 e
-#     deixa ver o efeito dos seguráveis sem superar o oponente por muito.
+#   - `seed-strong` — time forte (níveis 15/20/25/30/35/40, média 28 → **banda
+#     A–S** do J3): o `OpponentGenerator` sorteia oponentes da **banda A–S**
+#     (espécies fortes, nível 1), ceifados em poucas jogadas — deixa o uso de
+#     choice-band/scarf visível (vitória rápida).
+#   - `seed-weak`  — time fraco (nível 1, média 1 → **banda F–D** do J3): equilibra
+#     contra oponentes da **banda F–D** (espécies fracas, nível 1) e deixa ver o
+#     efeito dos seguráveis sem superar o oponente por muito.
 # Ambos ganham saldo suficiente no Mart (400) para comprar os seguráveis
 # (choice-band 80 + choice-scarf 80 = 160) e sobrar para poções de validação.
 #
