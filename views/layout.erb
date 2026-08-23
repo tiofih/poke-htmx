@@ -8,6 +8,7 @@
   </head>
 
   <body>
+    <div id="global-loading" aria-hidden="true"></div>
     <header>
       <nav>
         <strong>Poké-HTMX</strong>
@@ -22,5 +23,13 @@
     <main>
       <%= yield %>
     </main>
+    <script>
+      document.addEventListener("htmx:beforeRequest", function () {
+        document.getElementById("global-loading").classList.add("active");
+      });
+      document.addEventListener("htmx:afterRequest", function () {
+        document.getElementById("global-loading").classList.remove("active");
+      });
+    </script>
   </body>
 </html>

@@ -96,3 +96,20 @@ header nav a {
 .winner {
   font-size: 1.1em;
 }
+/* Indicador global de carregamento (htmx) */
+#global-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: #1f6feb;
+  opacity: 0;
+  transition: width .2s ease, opacity .3s ease;
+  z-index: 999;
+}
+
+#global-loading.active {
+  width: 100%;
+  opacity: 1;
+}

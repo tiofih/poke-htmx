@@ -346,6 +346,15 @@ class ServerListTest < Minitest::Test
     assert_equal 20, last_response.body.scan('loading="lazy"').size
   end
 
+  def test_index_has_global_loading_indicator
+    stub_list(two_hundred_fifty_names) { get "/" }
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="global-loading"'
+    assert_includes last_response.body, "htmx:beforeRequest"
+    assert_includes last_response.body, "htmx:afterRequest"
+  end
+
   def test_stylesheet_served_and_styles_fragment_classes
     get "/style.css"
 
@@ -355,6 +364,7 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, ".battle-log"
     assert_includes last_response.body, ".pagination"
     assert_includes last_response.body, ".notice"
+    assert_includes last_response.body, "#global-loading"
     assert_includes last_response.body, ".slot"
     assert_includes last_response.body, ".type"
   end
