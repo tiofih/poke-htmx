@@ -7,6 +7,7 @@ require_relative "evolution_rule"
 require_relative "move"
 require_relative "opponent_generator"
 require_relative "parallelizer"
+require_relative "pokemon_rating"
 require_relative "progression_repository"
 require_relative "reward_rule"
 require_relative "team_repository"
@@ -61,13 +62,23 @@ module BattleServicePreparation
   end
 
   def build_opponent(user_id)
+    band = PokemonRating.band_for_level(average_player_level(user_id, @team.all(user_id)))
     OpponentGenerator.new(
       names: api.fetch_all_names,
       fetcher: api.method(:detail),
       rng: Random.new(user_id.sum),
       level: 1,
-      options: { parallelizer: Parallelizer }
+      options: opponent_options(band)
     ).team
+  end
+
+  def opponent_options(band)
+    {
+      parallelizer: Parallelizer,
+      rater: ->(pokemon, moves) { PokemonRating.rate(pokemon, moves: moves)[:tier] },
+      moves_fetcher: api.method(:moves_for),
+      band: band
+    }
   end
 
   def average_player_level(user_id, team)

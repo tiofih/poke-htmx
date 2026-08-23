@@ -80,6 +80,52 @@ class SlowCountingApi
   end
 end
 
+class TieredApi
+  BASE = { s: 120, a: 100, c: 70, f: 40 }.freeze
+  POOL = {
+    "mewtwo" => :s, "mew" => :s, "rayquaza" => :s, "lugia" => :s,
+    "groudon" => :s, "kyogre" => :s, "pikachu" => :f, "magikarp" => :f,
+    "rattata" => :f, "caterpie" => :f
+  }.freeze
+  STRONG = %w[mewtwo mew rayquaza lugia groudon kyogre].freeze
+  WEAK = %w[pikachu magikarp rattata caterpie].freeze
+  PLAYER_NUMBERS = { 25 => "pikachu", 1 => "bulbasaur", 7 => "squirtle",
+                     4 => "charmander", 133 => "eevee", 143 => "snorlax" }.freeze
+
+  def fetch_all_names
+    POOL.keys
+  end
+
+  def detail(poke_id)
+    name = POOL.key?(poke_id.to_s) ? poke_id.to_s : PLAYER_NUMBERS.fetch(poke_id.to_i, "monster")
+    value = BASE.fetch(POOL.fetch(name, :f))
+    Pokemon.new(
+      name: name, sprite: "s", number: poke_id.to_i, types: ["normal"],
+      stats: %w[HP Attack Defense Sp.Atk Sp.Def Speed].map { |s| { name: s, value: value } }
+    )
+  end
+
+  def move(_name)
+    Move.new(name: "tackle", type: "normal", power: 40, accuracy: 100, pp: 35)
+  end
+
+  def moves_for(_number)
+    []
+  end
+
+  def type_relations
+    { "normal" => { "double" => [], "half" => %w[rock steel], "no" => %w[ghost] } }
+  end
+
+  def next_evolutions(_number)
+    []
+  end
+
+  def learnable_moves(_number)
+    []
+  end
+end
+
 class BattleServiceTest < Minitest::Test
   include TestSupport
 
@@ -137,5 +183,35 @@ class BattleServiceTest < Minitest::Test
     second = service.prepare("user-1")[:engine]
 
     assert_equal first.teams[1].map(&:name), second.teams[1].map(&:name)
+  end
+
+  def grant_xp_to(user_id, amount)
+    @team.all(user_id).each { |member| @progression.grant(user_id, member.id, amount) }
+  end
+
+  def test_build_opponent_uses_high_band_for_high_level_player
+    service = build_service(TieredApi.new)
+    add_team_for("user-1")
+    grant_xp_to("user-1", 12_000)
+
+    result = service.prepare("user-1")
+
+    opponent_names = result[:engine].teams[1].map(&:name)
+    assert_equal TieredApi::STRONG.sort, opponent_names.sort,
+                 "nivel alto (banda A-S) so gera oponentes fortes"
+  end
+
+  def test_build_opponent_prioritizes_weak_band_for_low_level_player
+    service = build_service(TieredApi.new)
+    add_team_for("user-1")
+
+    result = service.prepare("user-1")
+
+    opponent_names = result[:engine].teams[1].map(&:name)
+    assert_equal 6, opponent_names.size
+    assert_equal TieredApi::WEAK.sort, (TieredApi::WEAK & opponent_names).sort,
+                 "nivel 1 (banda F-D) prioriza oponentes fracos"
+    assert_equal 2, (TieredApi::STRONG & opponent_names).size,
+                 "fallback completa o time com o restante do pool"
   end
 end
