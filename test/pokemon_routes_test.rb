@@ -127,8 +127,8 @@ class ServerDetailTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_match(/hx-get="\/pokemon\/4"[^>]*hx-target="#pokemon"/, last_response.body)
-    assert_match(/hx-get="\/pokemon\/5"[^>]*hx-target="#pokemon"/, last_response.body)
+    assert_match(%r{hx-get="/pokemon/4"[^>]*hx-target="#pokemon"}, last_response.body)
+    assert_match(%r{hx-get="/pokemon/5"[^>]*hx-target="#pokemon"}, last_response.body)
   end
 
   def test_pokemon_detail_without_evolutions_does_not_break
