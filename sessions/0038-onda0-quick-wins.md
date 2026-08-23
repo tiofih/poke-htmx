@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisão do usuário em 2026-08-22 (priorizar UX; Onda 0 do `draft-ui-ux.md` §5 no lugar de J3) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — passos 1–5 em 2026-08-22 (suíte 624/2006, lint 0) |
+| Validação | **Done** — executada pelo usuário em 2026-08-22 (tabela da seção 7) |
 
 ---
 
@@ -132,15 +132,15 @@ só view/CSS/handlers leves, sem regra de negócio nova.
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Concluída em 2026-08-22 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 alt/aria/lazy | `./scripts/test -n /alt|aria_label|lazy/` | sprites com texto alternativo; ▲▼ anunciados por leitor de tela; lista carrega sob demanda | |
-| C2 evoluções linkadas | `./scripts/test -n /evolution.*link|evolutions_linked/` | clicar numa evolução abre o detalhe dela | |
-| C3 copy pt-BR | `./scripts/test -n /remover_do_time|adicionar_ao_time|filtrar/` | nenhum botão/placeholders em EN | |
-| C4 notices hierárquicos | `./scripts/test -n /notice--(error|info|success)/` | aviso neutro não aparece mais como vermelho de erro | |
-| C5 indicador global | `./scripts/test -n /loading|indicator/` | barra de progresso aparece durante requests htmx | |
+| C1 alt/aria/lazy | `./scripts/test -n /alt|aria_label|lazy/` | sprites com texto alternativo; ▲▼ anunciados por leitor de tela; lista carrega sob demanda | ok |
+| C2 evoluções linkadas | `./scripts/test -n /evolution.*link|evolutions_linked/` | clicar numa evolução abre o detalhe dela | ok |
+| C3 copy pt-BR | `./scripts/test -n /remover_do_time|adicionar_ao_time|filtrar/` | nenhum botão/placeholders em EN | ok |
+| C4 notices hierárquicos | `./scripts/test -n /notice--(error|info|success)/` | aviso neutro não aparece mais como vermelho de erro | ok |
+| C5 indicador global | `./scripts/test -n /loading|indicator/` | barra de progresso aparece durante requests htmx | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.

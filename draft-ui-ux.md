@@ -129,7 +129,7 @@ sessão única** quando o usuário decidir encaixá-la (fora da ordem JN-2 → J
 
 | Onda | Itens | Por quê nessa ordem |
 | --- | --- | --- |
-| **0 — quick wins** *(executada — sessão 0038, aguardando validação do usuário)* | `alt`/`aria-label`, `loading="lazy"`, indicador global (`hx-indicator`), hierarquia de notices + copy pt-BR, evoluções linkadas no detalhe | só view/CSS, baixo risco; base visual para tudo abaixo |
+| **0 — quick wins** *(feita — sessão 0038, **concluída e validada em 2026-08-22**)* | `alt`/`aria-label`, `loading="lazy"`, indicador global (`hx-indicator`), hierarquia de notices + copy pt-BR, evoluções linkadas no detalhe | só view/CSS, baixo risco; base visual para tudo abaixo |
 | **1 — jornada visível** | contador/barra "Time n/6" (listagem + nav + team), estados do botão Add (default / "No time ✓" / cheio) | conecta o gate à descoberta; reusa `JourneyService`; precisa expor `@team_names`/`@journey_started` nos renders |
 | **2 — leitura da batalha** | partial única dos painéis (+presenter), barras HP/PP, log das últimas N rodadas | mata duplicação antes de qualquer feature nova de batalha |
 | **3 — estrutura** | estado ativo no nav + limpeza sistemática de painéis, grid responsivo da listagem | polimento estrutural; depende só de CSS/markup |
