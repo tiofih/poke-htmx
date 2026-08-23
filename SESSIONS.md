@@ -101,8 +101,17 @@ notices (`notice--info/success/error`; `kind:` em HealService/MartService,
 `@notice_kind` nos handlers) e indicador global de carregamento (barra fixa +
 eventos htmx). Suíte 624/2006, lint 0.
 
-**Próxima sessão:** **0039 — J3 (ranking S–F)**, refinamento (fase 1) pendente;
-seguida de JN-1 → organizar o resto (ondas 1–3 de UX podem ser encaixadas a critério).
+**Sessão 0039 (JN-1 — telas próprias) aberta — refinamento concluído em
+2026-08-22:** usuário elevou JN-1 a prioridade urgente (no lugar de J3/ondas).
+Modelo A: cada área vira página própria com layout (`GET /` Lista, `GET /team`,
+`GET /battle`, `GET /history`), nav com links reais + estado ativo, htmx só
+intra-tela (`#team-view`, `#battle-view`, `#pokemon-detail`, `#add-status`);
+add na lista retorna mini-status; span hack, `_close` de batalha/histórico e
+`teamRefresh` removidos. Critérios e plano TDD em
+`sessions/0039-jn1-telas-proprias.md`.
+
+**Próxima sessão:** **0039 — JN-1**, implementação (fase 2, TDD) pendente;
+depois fila retoma em **J3** → ondas 1–3 de UX a critério → organizar o resto.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -111,8 +120,9 @@ seguida de JN-1 → organizar o resto (ondas 1–3 de UX podem ser encaixadas a 
 > **JN-2 concluído e validado (0037,
 > 2026-08-22 — golpes em lista clicável, rascunho sem persistir)**. **Onda 0 UX
 > concluída e validada (0038, 2026-08-22 — acessibilidade, copy pt-BR, notices,
-> indicador; UX priorizada antes da fila por decisão do usuário)**. Próximas:
-> **J3** → **JN-1** → organizar o resto
+> indicador; UX priorizada antes da fila por decisão do usuário)**. **JN-1 aberto
+> (0039 — refinamento concluído 2026-08-22, urgência do usuário)**. Próximas:
+> **J3** → ondas 1–3 de UX → organizar o resto
 > (JN-3, JN-4, JN-5, J2, J4, D4).
 
 ## Progresso das sessões
@@ -157,6 +167,7 @@ seguida de JN-1 → organizar o resto (ondas 1–3 de UX podem ser encaixadas a 
 | 0036 | J1 — seleção inicial de time: fim do dropdown (lista clicável sprite+nome+Add, pool total 20/página + destaques "Iniciais") + tela de entrada da jornada (gate battle/mart/center até time de 6, marcador `user_state` + derivado do time) | Concluída | Done (passos 0–6 + ajustes S3 — só formas base, 27 iniciais gen 1–9; suíte 611/1936, lint 0, validado em 2026-08-22) |
 | 0037 | JN-2 — gerenciamento de golpes em lista: fim dos checkboxes do manage (lista clicável com marcação via htmx, toggle como rascunho na própria rota sem persistir, cap 4 no preview) + save/validação de `POST /team/:id/moves` intactos | Concluída | Done (passos 1–4, suíte 614/1952, lint 0, validado em 2026-08-22) |
 | 0038 | Onda 0 UX — quick wins: alt/aria-label nos sprites e ▲▼ + `loading="lazy"`, evoluções do detalhe viram links, copy pt-BR ("Adicionar ao time", "Remover do time", "Filtrar por nome") + hierarquia de notices (`notice--info/success/error`), indicador global de carregamento htmx | Concluída | Done (passos 1–5, suíte 624/2006, lint 0, validado em 2026-08-22) |
+| 0039 | JN-1 — telas próprias (fim do empilhamento): páginas próprias por rota com layout (Lista/Time/Batalha/Histórico), nav real com estado ativo, htmx intra-tela (`#team-view`/`#battle-view`/`#pokemon-detail`/`#add-status`), add → mini-status, remoção do span hack/_close/teamRefresh | Refinamento | Concluída — decisão do usuário em 2026-08-22 (urgente, modelo A — páginas próprias) |
 
 ## Estrutura do arquivo de sessão
 
