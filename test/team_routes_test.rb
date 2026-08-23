@@ -169,6 +169,19 @@ class ServerTeamTest < Minitest::Test
     assert_includes last_response.body, "bulbasaur"
   end
 
+  def test_team_page_renders_full_page_with_team_view
+    start_journey("user-a")
+    add_team("user-a", [["pikachu", 25]])
+
+    get "/team", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "<html"
+    assert_includes last_response.body, 'href="/team" class="active"'
+    assert_includes last_response.body, 'id="team-view"'
+    assert_includes last_response.body, "pikachu"
+  end
+
   def test_team_fragment_renders_slot_badge_and_ordered_by_slot
     @repository.add("user-a", bulbasaur_pokemon)
     @repository.add("user-a", pikachu_pokemon)
@@ -182,23 +195,23 @@ class ServerTeamTest < Minitest::Test
     assert order, "expected bulbasaur (slot 1) before pikachu (slot 2)"
   end
 
-  def test_team_member_links_to_detail
+  def test_team_member_sprite_and_name_are_plain_on_team_screen
     @repository.add("user-a", pikachu_pokemon)
 
     get "/team", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, "hx-get=\"/pokemon/25\""
-    assert_includes last_response.body, "hx-target=\"#pokemon\""
+    refute_includes last_response.body, 'hx-get="/pokemon/25"'
+    assert_includes last_response.body, 'alt="pikachu"'
   end
 
-  def test_team_member_sprite_is_link_not_submit
+  def test_team_member_sprite_is_plain_image_not_link
     @repository.add("user-a", pikachu_pokemon)
 
     get "/team", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_equal 2, last_response.body.scan(%r{hx-get="/pokemon/25"}).size
+    refute_includes last_response.body, 'hx-get="/pokemon/25"'
     refute_includes last_response.body, 'input type="image"'
     assert_includes last_response.body, 'hx-delete="/team"'
   end
@@ -260,7 +273,7 @@ class ServerTeamTest < Minitest::Test
     assert_includes last_response.body, ">▲</button>"
     assert_includes last_response.body, ">▼</button>"
     assert_includes last_response.body, 'name="new_slot"'
-    assert_includes last_response.body, 'hx-target="#team"'
+    assert_includes last_response.body, 'hx-target="#team-view"'
   end
 
   def test_team_member_sprite_has_alt_text

@@ -1,18 +1,19 @@
 <% if @notice %>
   <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
 <% end %>
+<a href="#" hx-get="/team/manage" hx-target="#team-view" hx-swap="innerHTML">Gerenciar time</a>
 <% if @journey_started %>
   <% unless @team.empty? %>
     <h2>Poke Center</h2>
     <%= erb :team_hp, layout: false %>
-    <form hx-post="/team/heal" hx-target="#team" hx-swap="innerHTML">
+    <form hx-post="/team/heal" hx-target="#team-view" hx-swap="innerHTML">
       <button type="submit" class="btn">Curar</button>
     </form>
 
     <h2>Poke Mart</h2>
     <p class="balance">Saldo: <%= @balance %></p>
     <% @catalog.each do |item| %>
-      <form hx-post="/mart/buy" hx-target="#team" hx-swap="innerHTML">
+      <form hx-post="/mart/buy" hx-target="#team-view" hx-swap="innerHTML">
         <input type="hidden" name="item_name" value="<%= item.name %>">
         <input type="hidden" name="quantity" value="1">
         <button type="submit" class="btn"><%= item.display_name %> — <%= item.price %></button>
@@ -31,22 +32,18 @@
 <% end %>
 <% @team.each do |poke| %>
   <p class="slot">#<%= poke.slot %></p>
-  <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#pokemon" hx-swap="innerHTML">
-    <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
-  </a><br>
-  <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#pokemon" hx-swap="innerHTML">
-    <%= poke.name %>
-  </a><br>
+  <img src="<%= poke.sprite %>" alt="<%= poke.name %>"><br>
+  <strong><%= poke.name %></strong><br>
   <form
       hx-post="/team/<%= poke.id %>/move"
-      hx-target="#team"
+      hx-target="#team-view"
       hx-swap="innerHTML">
     <input type="hidden" name="new_slot" value="<%= poke.slot - 1 %>">
     <button type="submit" aria-label="Mover para cima">▲</button>
   </form>
   <form
       hx-post="/team/<%= poke.id %>/move"
-      hx-target="#team"
+      hx-target="#team-view"
       hx-swap="innerHTML">
     <input type="hidden" name="new_slot" value="<%= poke.slot + 1 %>">
     <button type="submit" aria-label="Mover para baixo">▼</button>
@@ -54,7 +51,7 @@
   <form
       id='team-pokemon-<%= poke.id %>'
       hx-delete="/team"
-      hx-target="#team"
+      hx-target="#team-view"
       hx-swap="innerHTML"
       hx-params="*">
     <input type="hidden" name="id" value="<%= poke.id %>">

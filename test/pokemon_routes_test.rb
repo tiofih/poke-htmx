@@ -323,19 +323,12 @@ class ServerListTest < Minitest::Test
     refute_includes last_response.body, 'href="/history" class="active"'
   end
 
-  def test_fragments_remain_partial_without_html_wrapper
+  def test_pokemons_fragment_has_no_html_wrapper
     stub_list(two_hundred_fifty_names) { get "/pokemons" }
 
     refute_includes last_response.body, "<html"
     refute_includes last_response.body, "<head>"
     assert_includes last_response.body, 'class="pokemon-list"'
-
-    @repository.add("user-a", pikachu_pokemon)
-    get "/team", {}, user_session("user-a")
-
-    refute_includes last_response.body, "<html"
-    refute_includes last_response.body, "<head>"
-    assert_includes last_response.body, "Remover do time"
   end
 
   def test_pokemons_list_images_are_lazy

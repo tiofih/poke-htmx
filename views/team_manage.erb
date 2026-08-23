@@ -5,16 +5,14 @@
 <% @team.each do |poke| %>
   <div class="manage-member">
     <p class="slot">#<%= poke.slot %></p>
-    <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#team" hx-swap="innerHTML">
-      <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
-    </a><br>
+    <img src="<%= poke.sprite %>" alt="<%= poke.name %>"><br>
     <strong><%= poke.name %></strong><br>
     <% current_moves = @draft_moves&.[](poke.id) || poke.moves.to_a %>
     <% @available_moves[poke.id].to_a.each do |move| %>
       <form class="move-row<%= " marked" if current_moves.include?(move[:name]) %>"
             data-move="<%= move[:name] %>"
             hx-post="/team/<%= poke.id %>/moves"
-            hx-target="#team"
+            hx-target="#team-view"
             hx-swap="innerHTML">
         <input type="hidden" name="draft" value="1">
         <input type="hidden" name="toggle" value="<%= move[:name] %>">
@@ -26,7 +24,7 @@
     <% end %>
     <form class="save-moves"
           hx-post="/team/<%= poke.id %>/moves"
-          hx-target="#team"
+          hx-target="#team-view"
           hx-swap="innerHTML">
       <% current_moves.each do |name| %>
         <input type="hidden" name="moves[]" value="<%= name %>">
@@ -35,7 +33,7 @@
     </form>
     <form
         hx-post="/team/<%= poke.id %>/item"
-        hx-target="#team"
+        hx-target="#team-view"
         hx-swap="innerHTML">
       <label>
         Item:
@@ -54,7 +52,7 @@
     </form>
     <form
         hx-post="/team/<%= poke.id %>/held-item"
-        hx-target="#team"
+        hx-target="#team-view"
         hx-swap="innerHTML">
       <label>
         Segurável:
@@ -73,18 +71,18 @@
     </form>
     <form
         hx-post="/team/<%= poke.id %>/move"
-        hx-target="#team"
+        hx-target="#team-view"
         hx-swap="innerHTML">
       <input type="hidden" name="new_slot" value="<%= poke.slot - 1 %>">
       <button type="submit" aria-label="Mover para cima">▲</button>
     </form>
     <form
         hx-post="/team/<%= poke.id %>/move"
-        hx-target="#team"
+        hx-target="#team-view"
         hx-swap="innerHTML">
       <input type="hidden" name="new_slot" value="<%= poke.slot + 1 %>">
       <button type="submit" aria-label="Mover para baixo">▼</button>
     </form>
   </div>
 <% end %>
-<a href="#" hx-get="/team" hx-target="#team" hx-swap="innerHTML">Voltar</a>
+<a href="#" hx-get="/team" hx-target="#team-view" hx-swap="innerHTML">Voltar</a>

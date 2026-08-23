@@ -120,7 +120,10 @@ module ServerTeamActions
   private
 
   def render_team
-    render_team_fragment_with_notice
+    prepare_team_fragment_data
+    return erb :team, layout: false if htmx_request?
+
+    erb :team_page
   end
 
   def mart_data
@@ -265,11 +268,19 @@ module ServerBattleActions
     erb :battle, layout: false
   end
 
-  def render_team_fragment_with_notice
+  def prepare_team_fragment_data
     @journey_started = settings.journey.started?(current_user)
     @team = settings.team.all(current_user)
     mart_data
+  end
+
+  def render_team_fragment_with_notice
+    prepare_team_fragment_data
     erb :team, layout: false
+  end
+
+  def htmx_request?
+    request.env["HTTP_HX_REQUEST"] == "true"
   end
 
   def empty_team_fragment
