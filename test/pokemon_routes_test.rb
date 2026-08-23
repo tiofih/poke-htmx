@@ -173,24 +173,24 @@ class ServerDetailTest < Minitest::Test
   end
 end
 
-  def test_pokemon_detail_evolution_sprites_have_alt_text
-    chain = charizard_evolution_pokemons
-    charizard = Pokemon.new(
-      name: "charizard",
-      sprite: chain[:charizard].sprite,
-      number: 6,
-      evolutions: [chain[:charmander], chain[:charmeleon], chain[:charizard]]
-    )
+def test_pokemon_detail_evolution_sprites_have_alt_text
+  chain = charizard_evolution_pokemons
+  charizard = Pokemon.new(
+    name: "charizard",
+    sprite: chain[:charizard].sprite,
+    number: 6,
+    evolutions: [chain[:charmander], chain[:charmeleon], chain[:charizard]]
+  )
 
-    PokeApiStub.with_detail(charizard) do
-      get "/pokemon/6"
-    end
-
-    assert last_response.ok?
-    assert_match(/alt="charmander"/, last_response.body)
-    assert_match(/alt="charmeleon"/, last_response.body)
-    assert_match(/alt="charizard"/, last_response.body)
+  PokeApiStub.with_detail(charizard) do
+    get "/pokemon/6"
   end
+
+  assert last_response.ok?
+  assert_match(/alt="charmander"/, last_response.body)
+  assert_match(/alt="charmeleon"/, last_response.body)
+  assert_match(/alt="charizard"/, last_response.body)
+end
 
 class ServerListTest < Minitest::Test
   include ServerTestHelpers
