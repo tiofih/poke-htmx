@@ -25,9 +25,9 @@ class ServerTeamTest < Minitest::Test
       session_b.post "/team", pokeName: "bulbasaur"
     end
 
-    assert_includes session_a.last_response.body, "pikachu"
+    assert_includes session_a.last_response.body, "Adicionado ao time."
     refute_includes session_a.last_response.body, "bulbasaur"
-    assert_includes session_b.last_response.body, "bulbasaur"
+    assert_includes session_b.last_response.body, "Adicionado ao time."
     refute_includes session_b.last_response.body, "pikachu"
 
     assert_equal 2, TestDatabase.distinct_user_ids.size
@@ -39,12 +39,11 @@ class ServerTeamTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, "pikachu"
+    assert_includes last_response.body, "Adicionado ao time."
+    refute_includes last_response.body, "hx-delete=\"/team\""
     team = @repository.all("user-a")
     assert_equal 1, team.size
     assert_equal "pikachu", team.first.name
-    assert_includes last_response.body, %(name="id" value="#{team.first.id}")
-    assert_includes last_response.body, "hx-delete=\"/team\""
     assert_empty @repository.all("user-b")
   end
 

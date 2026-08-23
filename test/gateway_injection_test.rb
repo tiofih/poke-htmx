@@ -14,7 +14,7 @@ class GatewayInjectionTest < Minitest::Test
     post "/team", { pokeName: "pikachu" }, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, "pikachu"
+    assert_includes last_response.body, "Adicionado ao time."
     assert_equal 1, @repository.all("user-a").size
   ensure
     Server.set :api, original

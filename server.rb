@@ -138,9 +138,11 @@ module ServerTeamActions
   end
 
   def add_team_member
-    @notice = add_team_notice(new_member_from_api)
+    notice = add_team_notice(new_member_from_api)
     settings.journey.mark_started_when_full(current_user)
-    render_team_fragment_with_notice
+    @notice = notice || "Adicionado ao time."
+    @notice_kind = notice ? :error : :success
+    erb :team_add_result, layout: false
   end
 
   def new_member_from_api

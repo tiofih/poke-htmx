@@ -81,7 +81,7 @@ class ServerDetailTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "hx-get=\"/pokemon/close\""
-    assert_includes last_response.body, "hx-target=\"#pokemon\""
+    assert_includes last_response.body, "hx-target=\"#pokemon-detail\""
   end
 
   def charizard_evolution_pokemons
@@ -127,8 +127,8 @@ class ServerDetailTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_match(%r{hx-get="/pokemon/4"[^>]*hx-target="#pokemon"}, last_response.body)
-    assert_match(%r{hx-get="/pokemon/5"[^>]*hx-target="#pokemon"}, last_response.body)
+    assert_match(%r{hx-get="/pokemon/4"[^>]*hx-target="#pokemon-detail"}, last_response.body)
+    assert_match(%r{hx-get="/pokemon/5"[^>]*hx-target="#pokemon-detail"}, last_response.body)
   end
 
   def test_pokemon_detail_without_evolutions_does_not_break
@@ -157,7 +157,7 @@ class ServerDetailTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "hx-get=\"/pokemon/25\""
-    assert_includes last_response.body, "hx-target=\"#pokemon\""
+    assert_includes last_response.body, "hx-target=\"#pokemon-detail\""
   end
 
   def test_pokemon_name_fragment_sprite_is_link_not_submit
@@ -262,6 +262,18 @@ class ServerListTest < Minitest::Test
     refute_dropdown_markup(last_response.body)
   end
 
+  def test_index_is_list_only_screen
+    stub_list(two_hundred_fifty_names) { get "/" }
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="pokemon-list"'
+    assert_includes last_response.body, 'id="pokemon-detail"'
+    assert_includes last_response.body, 'id="add-status"'
+    refute_includes last_response.body, 'id="team"'
+    refute_includes last_response.body, 'id="battle"'
+    refute_includes last_response.body, 'id="history"'
+  end
+
   def test_index_has_battle_entry_fragment
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/"
@@ -298,7 +310,7 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, "<title>"
     assert_includes last_response.body, 'href="/style.css"'
     assert_includes last_response.body, 'id="pokemon-list"'
-    assert_includes last_response.body, 'id="battle"'
+    assert_includes last_response.body, 'id="pokemon-detail"'
   end
 
   def test_nav_time_link_points_to_team_page
