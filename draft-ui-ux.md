@@ -41,6 +41,15 @@ até time de 6) já coerente entre rotas e fragmentos.
   (por que esses 27?).
 - Sprites sem `loading="lazy"` (27+20 imagens por carga); sem grid — itens
   empilham 1 por linha, lista longa.
+- **BUG visual (anotado 2026-08-22, pós JN-1):** o item da lista mostra o ícone,
+  um **grande espaço em branco** e depois o nome — alinhamento do sprite dentro do
+  `<a>` de `pokemon_list_item.erb` (img inline + whitespace) sem estilos de
+  item/grid; agrava a leitura da listagem. Corrigir junto do grid/onda 1.
+- **Visibilidade do time na Lista (decisão do usuário 2026-08-22):** "não tenho
+  como saber quantos Pokémon tenho no time ou quais são sem ir para outra aba".
+  Caminho A — **adicionar informações visuais na própria Lista** (contador n/6 +
+  **strip com os sprites do time** + estado do botão Add); Caminho B — **juntar a
+  Lista com o Time** na mesma tela. Escolha do usuário; baliza a Onda 1.
 - Paginação textual ok ("Página X de Y"); Anterior/Próxima pequenos, sem salto
   direto de página.
 
@@ -114,6 +123,15 @@ até time de 6) já coerente entre rotas e fragmentos.
 - Extrair partial/presenter dos painéis de batalha (remove duplicação).
 - Estado ativo no nav + limpeza sistemática dos painéis (mata o hack do span).
 
+**Juice / micro-interações (anotado 2026-08-22, pós JN-1 — usuário pediu "mais juice")**
+- **Notificação ao incluir Pokémon:** hoje o add só troca o `#add-status` (texto);
+  candidato a **toast** (sprite + nome, animação de entrada/saída) reutilizando os
+  kinds de notice; explorar `HX-Trigger` para notificações de outros eventos.
+- **Efeitos visuais nos botões** (hover/active/transição) em todas as telas —
+  tokens em `draft-design-system.md`; preferência: CSS puro, sem lib JS.
+- Animar trocas de painel/tela (fade/deslize) e estados de item (marcado no
+  manage, selecionado na lista).
+
 **Grandes (já mapeados na fila/rascunho — referência)**
 - JN-1 telas próprias (fim do empilhamento), JN-2 golpes em lista, JN-4
   componentes Mart/Center, J3 ranking legível, J4 nome na entrada (identidade
@@ -130,7 +148,7 @@ sessão única** quando o usuário decidir encaixá-la (fora da ordem JN-2 → J
 | Onda | Itens | Por quê nessa ordem |
 | --- | --- | --- |
 | **0 — quick wins** *(feita — sessão 0038, **concluída e validada em 2026-08-22**)* | `alt`/`aria-label`, `loading="lazy"`, indicador global (`hx-indicator`), hierarquia de notices + copy pt-BR, evoluções linkadas no detalhe | só view/CSS, baixo risco; base visual para tudo abaixo |
-| **1 — jornada visível** | contador/barra "Time n/6" (listagem + nav + team), estados do botão Add (default / "No time ✓" / cheio) | conecta o gate à descoberta; reusa `JourneyService`; precisa expor `@team_names`/`@journey_started` nos renders |
+| **1 — jornada visível** | contador/barra "Time n/6" + **strip de sprites do time** (listagem + nav + team), estados do botão Add (default / "No time ✓" / cheio) — **ou unificar Lista+Time** (decisão do usuário 2026-08-22; ver §2.2) | conecta o gate à descoberta; reusa `JourneyService`; precisa expor `@team_names`/`@journey_started` nos renders |
 | **2 — leitura da batalha** | partial única dos painéis (+presenter), barras HP/PP, log das últimas N rodadas | mata duplicação antes de qualquer feature nova de batalha |
 | **3 — estrutura** *(parcial — nav ativo + fim do hack de limpeza feitos via JN-1/sessão 0039, **validados em 2026-08-22**; grid responsivo pendente)* | estado ativo no nav + limpeza sistemática de painéis, grid responsivo da listagem | polimento estrutural; depende só de CSS/markup |
 | Dependentes da fila | JN-2 (golpes em lista), JN-1 (telas próprias), JN-4 (componentes Mart/Center), J3 (ranking S–F), J4 (nome/apelido) | ordem fechada em 2026-08-18 mantida |
