@@ -6,7 +6,7 @@
   <div class="manage-member">
     <p class="slot">#<%= poke.slot %></p>
     <a href="#" hx-get="/pokemon/<%= poke.number %>" hx-target="#team" hx-swap="innerHTML">
-      <img src="<%= poke.sprite %>">
+      <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
     </a><br>
     <strong><%= poke.name %></strong><br>
     <% current_moves = @draft_moves&.[](poke.id) || poke.moves.to_a %>
@@ -76,14 +76,14 @@
         hx-target="#team"
         hx-swap="innerHTML">
       <input type="hidden" name="new_slot" value="<%= poke.slot - 1 %>">
-      <button type="submit">▲</button>
+      <button type="submit" aria-label="Mover para cima">▲</button>
     </form>
     <form
         hx-post="/team/<%= poke.id %>/move"
         hx-target="#team"
         hx-swap="innerHTML">
       <input type="hidden" name="new_slot" value="<%= poke.slot + 1 %>">
-      <button type="submit">▼</button>
+      <button type="submit" aria-label="Mover para baixo">▼</button>
     </form>
   </div>
 <% end %>

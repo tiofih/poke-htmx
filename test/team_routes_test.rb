@@ -263,6 +263,27 @@ class ServerTeamTest < Minitest::Test
     assert_includes last_response.body, 'hx-target="#team"'
   end
 
+  def test_team_member_sprite_has_alt_text
+    start_journey("user-a")
+    add_team("user-a", [["pikachu", 25]])
+
+    get "/team", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/<img[^>]+alt="pikachu"/, last_response.body)
+  end
+
+  def test_team_slot_controls_have_aria_labels
+    start_journey("user-a")
+    add_team("user-a", [["pikachu", 25]])
+
+    get "/team", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'aria-label="Mover para cima"'
+    assert_includes last_response.body, 'aria-label="Mover para baixo"'
+  end
+
   def test_post_team_with_unknown_name_shows_notice_and_does_not_insert
     PokeApiStub.with_find(nil) do
       post "/team", { pokeName: "xyz" }, user_session("user-a")

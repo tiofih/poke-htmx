@@ -1,7 +1,7 @@
 <li class="<%= css_class %>">
   <% if pokemon %>
     <a href="#" hx-get="/pokemon/<%= pokemon.number %>" hx-target="#pokemon" hx-swap="innerHTML">
-      <img src="<%= pokemon.sprite %>" alt="<%= name %>">
+      <img src="<%= pokemon.sprite %>" alt="<%= name %>" loading="lazy">
       <%= name %>
     </a>
   <% else %>

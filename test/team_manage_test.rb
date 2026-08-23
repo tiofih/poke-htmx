@@ -144,6 +144,29 @@ class ServerTeamManageTest < Minitest::Test
     assert_includes last_response.body, "Voltar"
   end
 
+  def test_team_manage_member_sprite_has_alt_text
+    add_team("user-a", [["pikachu", 25]])
+
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_match(/<img[^>]+alt="pikachu"/, last_response.body)
+  end
+
+  def test_team_manage_slot_controls_have_aria_labels
+    add_team("user-a", [["pikachu", 25]])
+
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'aria-label="Mover para cima"'
+    assert_includes last_response.body, 'aria-label="Mover para baixo"'
+  end
+
   def test_team_manage_fragment_has_no_html_wrapper
     @repository.add("user-a", pikachu_pokemon)
 

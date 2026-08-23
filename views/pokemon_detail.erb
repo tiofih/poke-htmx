@@ -1,4 +1,4 @@
-<img src="<%= @pokemon.sprite %>">
+<img src="<%= @pokemon.sprite %>" alt="<%= @pokemon.name %>">
 <%= @pokemon.name %><br>
 <% @pokemon.types.each do |type| %>
   <span class="type"><%= type %></span>
@@ -12,7 +12,7 @@
   <ul class="evolutions">
     <% @pokemon.evolutions.each do |evolution| %>
       <li class="evolution">
-        <img src="<%= evolution.sprite %>">
+        <img src="<%= evolution.sprite %>" alt="<%= evolution.name %>" loading="lazy">
         <%= evolution.name %>
       </li>
     <% end %>

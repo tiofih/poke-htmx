@@ -15,6 +15,15 @@ class ServerDetailTest < Minitest::Test
     assert_includes last_response.body, "https://example.com/pikachu.png"
   end
 
+  def test_pokemon_detail_sprite_has_alt_text
+    PokeApiStub.with_detail(pikachu_pokemon) do
+      get "/pokemon/25"
+    end
+
+    assert last_response.ok?
+    assert_match(/<img[^>]+alt="pikachu"/, last_response.body)
+  end
+
   def test_pokemon_detail_renders_types
     pikachu = Pokemon.new(
       name: "pikachu",
@@ -164,6 +173,25 @@ class ServerDetailTest < Minitest::Test
   end
 end
 
+  def test_pokemon_detail_evolution_sprites_have_alt_text
+    chain = charizard_evolution_pokemons
+    charizard = Pokemon.new(
+      name: "charizard",
+      sprite: chain[:charizard].sprite,
+      number: 6,
+      evolutions: [chain[:charmander], chain[:charmeleon], chain[:charizard]]
+    )
+
+    PokeApiStub.with_detail(charizard) do
+      get "/pokemon/6"
+    end
+
+    assert last_response.ok?
+    assert_match(/alt="charmander"/, last_response.body)
+    assert_match(/alt="charmeleon"/, last_response.body)
+    assert_match(/alt="charizard"/, last_response.body)
+  end
+
 class ServerListTest < Minitest::Test
   include ServerTestHelpers
   include TestSupport
@@ -288,6 +316,15 @@ class ServerListTest < Minitest::Test
     refute_includes last_response.body, "<html"
     refute_includes last_response.body, "<head>"
     assert_includes last_response.body, "Remove from Team"
+  end
+
+  def test_pokemons_list_images_are_lazy
+    stub_list(two_hundred_fifty_names) do
+      get "/pokemons", q: "pokemon"
+    end
+
+    assert last_response.ok?
+    assert_equal 20, last_response.body.scan('loading="lazy"').size
   end
 
   def test_stylesheet_served_and_styles_fragment_classes
