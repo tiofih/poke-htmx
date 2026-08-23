@@ -15,6 +15,36 @@ class MoveTest < Minitest::Test
     assert_equal 35, move.pp
   end
 
+  def test_pp_max_defaults_to_pp_when_absent
+    move = Move.new(name: "tacle", type: "normal", power: 40, accuracy: 100, pp: 35)
+
+    assert_equal 35, move.pp_max, "sem pp_max informado, usa o pp como máximo"
+  end
+
+  def test_pp_max_accepts_explicit_value
+    move = Move.new(name: "tacle", type: "normal", power: 40, accuracy: 100, pp: 35, pp_max: 40)
+
+    assert_equal 40, move.pp_max
+  end
+
+  def test_use_move_preserves_pp_max
+    move = Move.new(name: "tacle", type: "normal", power: 40, accuracy: 100, pp: 35)
+    pokemon = BattlePokemon.new(
+      number: 25,
+      name: "pikachu",
+      types: ["electric"],
+      stats: [{ name: "HP", value: 100 }],
+      hp_max: 100,
+      hp_current: 100,
+      moves: [move]
+    )
+
+    used = pokemon.use_move(0)
+
+    assert_equal 34, used.moves.first.pp
+    assert_equal 35, used.moves.first.pp_max, "máximo preservado após o uso"
+  end
+
   def test_move_allows_nil_power_and_accuracy_for_status_moves
     move = Move.new(name: "growl", type: "normal", power: nil, accuracy: nil, pp: 40)
 
