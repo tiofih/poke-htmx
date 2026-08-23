@@ -128,4 +128,25 @@ class PokemonRatingTest < Minitest::Test
     assert_equal PokemonRating.rate(pokemon, moves: moves),
                  PokemonRating.rate(pokemon, moves: moves)
   end
+
+  def test_band_for_level_lowest_band_up_to_two
+    assert_equal %i[F D], PokemonRating.band_for_level(1)
+    assert_equal %i[F D], PokemonRating.band_for_level(2)
+  end
+
+  def test_band_for_level_grows_with_level
+    assert_equal %i[D C], PokemonRating.band_for_level(3)
+    assert_equal %i[D C], PokemonRating.band_for_level(5)
+    assert_equal %i[C B], PokemonRating.band_for_level(6)
+    assert_equal %i[C B], PokemonRating.band_for_level(9)
+    assert_equal %i[B A], PokemonRating.band_for_level(10)
+    assert_equal %i[B A], PokemonRating.band_for_level(14)
+    assert_equal %i[A S], PokemonRating.band_for_level(15)
+    assert_equal %i[A S], PokemonRating.band_for_level(30)
+  end
+
+  def test_band_for_level_non_positive_falls_to_lowest_band
+    assert_equal %i[F D], PokemonRating.band_for_level(0)
+    assert_equal %i[F D], PokemonRating.band_for_level(-3)
+  end
 end

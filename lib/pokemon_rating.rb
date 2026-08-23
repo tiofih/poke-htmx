@@ -30,6 +30,16 @@ class PokemonRating
     { score: score, tier: tier_for(score) }
   end
 
+  def self.band_for_level(level)
+    case level.to_i
+    when ..2 then %i[F D]
+    when 3..5 then %i[D C]
+    when 6..9 then %i[C B]
+    when 10..14 then %i[B A]
+    else %i[A S]
+    end
+  end
+
   class << self
     private
 
