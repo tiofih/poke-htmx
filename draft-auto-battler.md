@@ -500,7 +500,12 @@
   usados em batalha são consumidos** (débito já existente no `debit_used_items`) e o
   poke **fica sem item atribuído após o consumo** (limpar `assigned_item` ao usar em
   batalha); **seguráveis continuam equipados e ativos em batalha até serem
-  desequipados** (o desequipar devolve a unidade ao estoque).
+  desequipados** (o desequipar devolve a unidade ao estoque). **UI:** no select do
+  `team_manage.erb`, o option de item/segurável já equipado em outro poke fica
+  **desabilitado**, e a quantidade exibida é a **livre** (total comprado − já
+  equipados em outros pokes) — ex.: com "Choice Band ×2", equipar no 1º poke mantém
+  "Choice Band ×2" (o próprio), no 2º poke mostra "Choice Band ×1" e nos demais a
+  opção some/desabilita.
 - **Impacto:** `TeamService` (no `assign_item`/`assign_held_item`: validar
   disponibilidade do estoque e **debita** na atribuição; no clear, **reponha** a
   unidade no estoque) + `BattleService`/`debit_used_items` (limpar `assigned_item` do
@@ -508,9 +513,8 @@
   indicar **em uso por outro poke** e/ou **quantidade livre** = estoque − já equipados)
   + `InventoryRepository` (débito/repõe reutilizando `use`/`add`) + testes de
   service/rotas do manage. Cruza com Eco-3/Eco-4.
-- **Aberto:** nada em aberto de regra — resta fechar no refinamento a granularidade
-  (item/segurável já equipado por outro poke fica desabilitado no select? aviso?) e a
-  nomenclatura da "quantidade livre" na UI.
+- **Aberto:** nada em aberto de regra — resta fechar no refinamento apenas a
+  nomenclatura exata da "quantidade livre" na UI.
 - **Aguarda sessão (RNF-04).**
 
 ### JN-4. Componentes de Poke Mart e Poke Center

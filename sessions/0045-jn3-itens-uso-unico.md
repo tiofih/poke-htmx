@@ -184,5 +184,8 @@ gems novas, domínio puro + motor + view.
   equipa 1 de cada), os pokes só equipam **conforme a quantidade disponível no time**
   (estoque), **equipar debita do estoque**, itens usados em batalha são **consumidos**
   (poke fica **sem item atribuído** após o consumo) e seguráveis **continuam
-  equipados/ativos até serem desequipados** (desequipar repõe a unidade). Candidata a
-  sessão própria (JN-3-B); **não** implementada nesta sessão.
+  equipados/ativos até serem desequipados** (desequipar repõe a unidade). **UI:** no
+  select do manage, item/segurável já equipado em outro poke fica **desabilitado** e a
+  quantidade exibida é a **livre** (total − já equipados em outros; ex.: Choice Band
+  ×2 no 1º poke, ×1 no 2º). Candidata a sessão própria (JN-3-B); **não** implementada
+  nesta sessão.
