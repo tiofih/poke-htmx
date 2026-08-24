@@ -7,7 +7,6 @@
 <% end %>
 <div class="pokemon-grid">
   <% unless @starters.empty? %>
-    <h2 class="starters-title">Iniciais</h2>
     <ul class="pokemon-list starters">
       <% @starters.each do |name, pokemon| %>
         <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon, css_class: "starter-item" } %>

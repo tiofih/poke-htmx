@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-24 |
-| Implementação | **Concluída** — passos 1–3 em 2026-08-24 + ajustes S3 (suíte 694/2204, lint 0) |
+| Implementação | **Concluída** — passos 1–3 em 2026-08-24 + ajustes S3 (suíte 694/2200, lint 0) |
 | Validação | **Pendente** (executada pelo usuário) |
 
 ---
@@ -185,7 +185,13 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
   página**; **"Página X" sem total** (`@current_page`/`@prev_offset`/`@next_offset`,
   `more` indica se há próxima); página 1 = 27 iniciais + 9 comuns. Testes de
   paginação atualizados (sem "de 8"; suíte 694/2204, lint 0). **Revalidação do
-  usuário pendente.**
+usuário pendente.**
+- **2026-08-24 — Ajuste S3 (validação — amenda C1):** o título **"Iniciais"** foi
+  **removido** da página 1 — o bloco de iniciais permanece (27 cards), só sem o
+  `<h2 class="starters-title">`; CSS `.starters-title` removido (morto) e testes
+  que asseravam o título ajustados (`test_pokemons_highlights_starters_block_when_q_empty`,
+  `test_starters_block_hidden_when_filtering`). Suíte 694/2200, lint 0 (com `web`
+  ativo). **Revalidação do usuário pendente.**
 
 ## 6. Plano TDD (passos)
 

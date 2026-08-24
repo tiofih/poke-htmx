@@ -39,10 +39,6 @@ header nav a {
   display: contents;
 }
 
-.starters-title {
-  grid-column: 1 / -1;
-}
-
 .list-item,
 .starter-item {
   border: 1px solid #ddd;

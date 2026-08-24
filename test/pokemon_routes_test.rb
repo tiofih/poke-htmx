@@ -485,7 +485,6 @@ class ServerListTest < Minitest::Test
     stub_list(filtered_names) { get "/pokemons" }
 
     assert last_response.ok?
-    assert_includes last_response.body, "Iniciais"
     assert_equal 27, last_response.body.scan('<li class="starter-item">').size
     ALL_STARTERS.each do |slug|
       assert_includes last_response.body, "value=\"#{slug}\""
@@ -498,7 +497,6 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    refute_includes last_response.body, "Iniciais"
     refute_includes last_response.body, '<li class="starter-item">'
   end
 
