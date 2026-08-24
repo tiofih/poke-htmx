@@ -178,7 +178,9 @@ gems novas, domínio puro + motor + view.
 - P2 (perf da 1ª batalha ~2min) permanece anotado como limitação/fora da fila.
 - **Anotado durante a validação (fora de escopo, RNF-04 — draft-auto-battler.md
   "JN-3-B"):** o usuário equipou o **mesmo `choice-band` em 2 pokes diferentes** e foi
-  permitido — hoje `assign_item`/`assign_held_item` não têm trava de unicidade por
-  time, e o select do `team_manage.erb` não indica item/segurável já em uso (nem
-  quantidade livre). Candidata a sessão própria (equipamento único por time, valendo
-  para Itens e Seguráveis); **não** implementada nesta sessão.
+  permitido — hoje `assign_item`/`assign_held_item` não respeitam a quantidade do
+  estoque, e o select do `team_manage.erb` não indica item/segurável já em uso (nem
+  quantidade livre). Regra do usuário: itens/seguráveis são **por poke** (cada poke
+  equipa 1 de cada), e os pokes só equipam **conforme a quantidade disponível no
+  time** (estoque). Candidata a sessão própria (JN-3-B); **não** implementada nesta
+  sessão.
