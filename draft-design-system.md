@@ -33,6 +33,11 @@ contraste AA.
 
 ## 3. Barras de HP/PP e progresso
 
+> **Usado na Onda 2 (sessão 0041, implementada em 2026-08-23 — suíte 680/2132,
+> lint 0; aguardando validação).** Barras implementadas em `public/style.css`
+> (`.bar hp-bar`/`.pp-bar` com fill e tiers) e renderizadas pelo
+> `_fighter_panel.erb` via `FighterPresenter` (HP por membro, PP por golpe).
+
 | Token | Regra | Cor |
 | --- | --- | --- |
 | `bar-hp` alta | ≥ 50% | verde `#2e7d32` |
