@@ -4,9 +4,9 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | **Em andamento** — decisões do usuário em 2026-08-24 |
-| Implementação | Pendente |
-| Validação | Pendente — **executada pelo usuário** |
+| Refinamento | **Concluída** — decisões do usuário em 2026-08-24 |
+| Implementação | **Concluída** — passos 1–3 em 2026-08-24 (suíte 701/2222, lint 0) |
+| Validação | **Done** — executada pelo usuário em 2026-08-24 (tabela da seção 7) |
 
 ---
 
@@ -156,12 +156,12 @@ gems novas, domínio puro + motor + view.
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente** *(S2: uma linha por critério; S3: ajuste aqui reabre o critério).*
+**Concluída em 2026-08-24 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 — 1 uso por membro por batalha (pool + atribuído, por membro) | `test/battle_engine_test.rb` (3 novos testes) | — | pendente |
-| C2 — badge "já usou item" por membro | `test/fighter_presenter_test.rb` (2 novos) + `test/battle_routes_test.rb` (1 novo) | `/battle` após 2 rodadas com uso: badge visível no membro usado, ausente nos demais/oponente | pendente |
+| C1 — 1 uso por membro por batalha (pool + atribuído, por membro) | `test/battle_engine_test.rb` (`test_member_uses_item_at_most_once_per_battle`, `test_other_members_can_still_use_their_one_item`, `test_assigned_item_counts_as_single_use`) | `/battle`: poke usa item na 1ª rodada e não usa de novo nas seguintes mesmo com HP ≤50% e estoque; outro poke ainda usa o item dele | **ok** |
+| C2 — badge "já usou item" por membro | `test/fighter_presenter_test.rb` (`test_item_used_defaults_false`, `test_item_used_badge_when_flagged`) + `test/battle_routes_test.rb` (`test_battle_panel_shows_item_used_badge_after_member_uses_item`) | `/battle`: badge "já usou item" visível no membro usado, ausente nos demais/oponente | **ok** |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.

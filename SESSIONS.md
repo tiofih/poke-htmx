@@ -169,13 +169,18 @@ concorrente), timeout de 15s na gateway e **banco de teste separado**
 (`pokedex_test`) — suíte roda verde com o `web` ativo (fim do hang/flakiness).
 Ver `sessions/0044-onda3-grid-responsivo.md`.
 
-**Sessão 0045 (JN-3 — itens de uso único por Pokémon) refinada em 2026-08-24**
-(fase 1 concluída): regra estrita de **1 uso de item curativo por Pokémon por
-batalha** — o `BattleEngine` rastreia quem já usou (`@items_used_by_member`) e
-bloqueia novos usos do mesmo membro na mesma batalha, valendo para o pool comum **e
-o item atribuído**; badge "já usou item" por membro no painel do lutador. Preterido:
-limite configurável, ou só limite por estoque (comportamento atual). Próximo: JN-4,
-JN-5, J2, J4, D4 e P2 (perf da 1ª batalha ~2min) — a critério do usuário.
+**Sessão 0045 (JN-3 — itens de uso único por Pokémon) concluída e validada em
+2026-08-24** (fase 1 em 2026-08-24; implementação passos 1–3, suíte 701/2222, lint 0;
+validação ok): regra estrita de **1 uso de item curativo por Pokémon por batalha** —
+o `BattleEngine` rastreia quem já usou (`@items_used_by_member`) e bloqueia novos usos
+do mesmo membro na mesma batalha, valendo para o pool comum **e** o item atribuído
+(cada membro 1 item por batalha, independente de estoque/threshold); badge "já usou
+item" por membro no painel do lutador (`FighterPresenter#item_used?`).
+**Anotado (fora da fila, JN-3-B):** equipamento não respeita a quantidade do estoque
+(choice-band em 2 pokes) — regra fechada: equipar debita, itens consumidos na batalha
+(poke fica sem), seguráveis permanecem até desequipar, option desabilitado + qtd
+livre. Próximo: JN-3-B, JN-4, JN-5, J2, J4, D4 e P2 (perf da 1ª batalha ~2min) — a
+critério do usuário.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -243,7 +248,7 @@ JN-5, J2, J4, D4 e P2 (perf da 1ª batalha ~2min) — a critério do usuário.
 | 0042 | Onda 1 UX — jornada visível (Caminho B): página única `/` de 2 colunas (busca + lista à esquerda, painel do time com contador n/6 + membros à direita), página `/team` removida (404 direto, fragmento htmx interno preservado), nav sem link "Time", estados do botão Add (default / "No time ✓" / cheio via `@team_names`) | Concluída | Done (passos 1–6 + ajustes S3 — add/remove re-renderizam `#pokemon-list` via `hx-swap-oob`, link "Gerenciar time" em `<p>` próprio; suíte 689/2184, lint 0, validado em 2026-08-24) |
 | 0043 | Estabilidade do banco (correção direta, fora da fila): fim do "too many clients" na suíte — `ConnectionRegistry` registra as conexões dos repositórios e o `after_teardown` fecha todas após cada teste (pico 74 → 9), 7 repositórios/seed registrando conexão; warnings de constante nos seeds eliminados (`unless defined?` em `saldo_inicial.rb`) | Concluída | Done (passos 1–2, suíte 692/2193, lint 0, validado em 2026-08-24) |
 | 0044 | Onda 3 UX — estrutura: grade uniforme de 6 colunas com páginas cheias e paginação on-demand (`PAGE_SIZE` 36 = grid 6×6; página 1 = 27 iniciais + 9 comuns; cada página carrega só o próprio lote) corrigindo o bug visual do item e os slots vazios + largura cheia do Histórico (`body.page-history`); corrigidos também conexão PG por thread e banco de teste separado (fim do flakiness) | Concluída | Done (passos 1–3 + ajustes S3, suíte 694/2200, lint 0, validado em 2026-08-24) |
-| 0045 | JN-3 — itens de uso único por Pokémon: regra de **1 uso de item curativo por Pokémon por batalha** (`@items_used_by_member` no `BattleEngine`, bloqueio de novo uso do mesmo membro — pool comum e item atribuído) + badge "já usou item" por membro no painel do lutador | **Implementação** | Concluída — passos 1–3 em 2026-08-24 (suíte 701/2222, lint 0); **aguardando validação do usuário** |
+| 0045 | JN-3 — itens de uso único por Pokémon: regra de **1 uso de item curativo por Pokémon por batalha** (`@items_used_by_member` no `BattleEngine`, bloqueio de novo uso do mesmo membro — pool comum e item atribuído) + badge "já usou item" por membro no painel do lutador | Concluída | Done (passos 1–3, suíte 701/2222, lint 0, validado em 2026-08-24; JN-3-B anotado — equipamento por quantidade do estoque) |
 
 ## Estrutura do arquivo de sessão
 
