@@ -38,6 +38,13 @@ class ServerHistoryTest < Minitest::Test
     assert_includes last_response.body, "notice--info"
   end
 
+  def test_history_page_uses_full_width_body_class
+    get "/history", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'class=" page-history"'
+  end
+
   def test_history_close_route_is_removed
     get "/history/close"
 
