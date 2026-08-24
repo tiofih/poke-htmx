@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
 ENV["RACK_ENV"] = "test"
-ENV["DATABASE_URL"] ||= "postgres://pokedex:pokedex@localhost:5432/pokedex"
+
+# Suíte roda num banco SEPARADO do app (pokedex_test), para não disputar locks/
+# dados com o Puma ativo (flakiness/hang). Deriva do DATABASE_URL do ambiente
+# (container `web`, host `db`) trocando só o nome do banco.
+ENV["DATABASE_URL"] = (ENV["DATABASE_URL"] || "postgres://pokedex:pokedex@db:5432/pokedex")
+                      .sub(%r{/[^/]*$}, "/pokedex_test")
 
 require "minitest/autorun"
 require "rack/test"
@@ -23,8 +28,9 @@ module Minitest
   end
 end
 
-module TestDatabase
+module TestDatabase # rubocop:disable Metrics/ModuleLength
   def self.setup!
+    ensure_database!
     with_db do |connection|
       connection.exec("SET client_min_messages TO warning")
       connection.exec(File.read(File.expand_path("../db/schema.sql", __dir__)))
@@ -32,6 +38,24 @@ module TestDatabase
         connection.exec(File.read(migration))
       end
     end
+  end
+
+  def self.ensure_database!
+    connection = PG.connect(maintenance_url)
+    exists = connection.exec_params(
+      "SELECT 1 FROM pg_database WHERE datname = $1", [test_database_name]
+    ).ntuples.positive?
+    connection.exec("CREATE DATABASE #{test_database_name}") unless exists
+  ensure
+    connection&.close
+  end
+
+  def self.test_database_name
+    ENV.fetch("DATABASE_URL").split("/").last
+  end
+
+  def self.maintenance_url
+    ENV.fetch("DATABASE_URL").sub(%r{/[^/]*$}, "/postgres")
   end
 
   def self.clear_team!
