@@ -479,6 +479,30 @@
 - **Impacto:** `ItemUsePolicy`/motor (registrar uso por membro) + `battle.erb` (exibir
   qtd restante). Cruza com Eco-4-A/B.
 
+### JN-3-B. Equipamento único de itens por time (anotado 2026-08-24, pós JN-3)
+
+> **Fora do fluxo (RNF-04).** Anotado durante a validação da sessão 0045: o usuário
+> equipou o **mesmo `choice-band` em 2 pokes diferentes** do time e isso foi
+> permitido. Não é critério da 0045 (a 0045 trata de *uso* em batalha, não de
+> *equipamento*); registrado como candidata a sessão própria.
+
+- **Problema:** `TeamService#assign_item`/`assign_held_item` só fazem `SET` no membro
+  (`team_pokemons.assigned_item`/`held_item`) — **sem trava de unicidade**: o mesmo
+  item (poção, super-potion...) e o mesmo segurável (choice-band/choice-scarf) podem
+  ser equipados em vários membros simultaneamente, mesmo com estoque para 1.
+- **Ideia:** regra de **1 equipamento por item/segurável por time** — equipar em um
+  membro impede equipar o mesmo item em outro (o slot do outro pode ser limpo, mas não
+  recebe o mesmo nome); na listagem (`team_manage.erb`, selects de Item e Segurável),
+  mostrar no option que **já está em uso por outro membro** (ou quantos do estoque
+  ainda estão livres para equipar).
+- **Impacto:** `TeamService` (validação de unicidade no `assign_item`/`assign_held_item`,
+  com aviso amigável e sem gravar) + `team_manage.erb` (opção marcada/usada +
+  quantidade livre) + testes de service/rotas do manage. Cruza com Eco-3/Eco-4.
+- **Aberto:** vale para **Itens (consumíveis) e Seguráveis (hold)**; se o estoque tiver
+  mais de 1 unidade, pode equipar o mesmo item em mais de um membro (até o limite do
+  estoque) ou continua 1 por time? Unicidade é por **nome** ou por **exemplar**?
+- **Aguarda sessão (RNF-04).**
+
 ### JN-4. Componentes de Poke Mart e Poke Center
 
 - **Ideia:** as seções de Poke Mart (Eco-3) e Poke Center (Eco-2) hoje vivem como

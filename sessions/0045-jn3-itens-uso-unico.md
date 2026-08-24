@@ -176,3 +176,9 @@ gems novas, domínio puro + motor + view.
 - O oponente (time B) nunca usa item (`item_use_for` retorna `nil` para
   `attacker_team_index != 0`) — badge só se aplica ao time A.
 - P2 (perf da 1ª batalha ~2min) permanece anotado como limitação/fora da fila.
+- **Anotado durante a validação (fora de escopo, RNF-04 — draft-auto-battler.md
+  "JN-3-B"):** o usuário equipou o **mesmo `choice-band` em 2 pokes diferentes** e foi
+  permitido — hoje `assign_item`/`assign_held_item` não têm trava de unicidade por
+  time, e o select do `team_manage.erb` não indica item/segurável já em uso (nem
+  quantidade livre). Candidata a sessão própria (equipamento único por time, valendo
+  para Itens e Seguráveis); **não** implementada nesta sessão.
