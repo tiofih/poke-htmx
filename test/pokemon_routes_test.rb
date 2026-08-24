@@ -258,7 +258,7 @@ class ServerListTest < Minitest::Test
     assert_equal 27, last_response.body.scan('<li class="starter-item">').size
     assert_equal 9, last_response.body.scan('<li class="list-item">').size
     assert_includes last_response.body, 'name="q"'
-    assert_includes last_response.body, "Página 1 de 8"
+    assert_includes last_response.body, "Página 1"
     refute_dropdown_markup(last_response.body)
   end
 
@@ -420,7 +420,7 @@ class ServerListTest < Minitest::Test
     assert_equal 36, last_response.body.scan("<img src=").size
     assert_equal 36, last_response.body.scan('name="pokeName"').size
     assert_includes last_response.body, 'hx-post="/team"'
-    assert_includes last_response.body, "Página 1 de 7"
+    assert_includes last_response.body, "Página 1"
     refute_dropdown_markup(last_response.body)
     refute_includes last_response.body, "<html"
   end
@@ -518,7 +518,7 @@ class ServerListTest < Minitest::Test
     refute_includes last_response.body, "Iniciais"
     assert_empty last_response.body.scan('<li class="starter-item">')
     assert_equal 36, last_response.body.scan('<li class="list-item">').size
-    assert_includes last_response.body, "Página 2 de 8"
+    assert_includes last_response.body, "Página 2"
   end
 
   def test_pokemons_middle_page_has_previous_and_next_links
@@ -529,7 +529,7 @@ class ServerListTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "offset=0"
     assert_includes last_response.body, "offset=45"
-    assert_includes last_response.body, "Página 2 de 8"
+    assert_includes last_response.body, "Página 2"
     assert_includes last_response.body, ">Anterior<"
     assert_includes last_response.body, ">Próxima<"
   end
@@ -540,7 +540,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, "Página 8 de 8"
+    assert_includes last_response.body, "Página 8"
     refute_includes last_response.body, ">Próxima<"
     assert_includes last_response.body, ">Anterior<"
   end
@@ -553,7 +553,7 @@ class ServerListTest < Minitest::Test
     assert last_response.ok?
     assert_equal 2, last_response.body.scan('<li class="list-item">').size
     refute_includes last_response.body, 'value="bulbasaur"'
-    assert_includes last_response.body, "Página 1 de 1"
+    assert_includes last_response.body, "Página 1"
     refute_includes last_response.body, ">Próxima<"
   end
 

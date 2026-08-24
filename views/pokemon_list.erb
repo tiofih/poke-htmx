@@ -24,7 +24,7 @@
   <% if @prev_offset %>
     <a href="#" hx-get="/pokemons?offset=<%= @prev_offset %>&q=<%= @q %>" hx-target="#pokemon-list" hx-swap="innerHTML">Anterior</a>
   <% end %>
-  Página <%= @current_page %> de <%= @total_pages %>
+  Página <%= @current_page %>
   <% if @next_offset %>
     <a href="#" hx-get="/pokemons?offset=<%= @next_offset %>&q=<%= @q %>" hx-target="#pokemon-list" hx-swap="innerHTML">Próxima</a>
   <% end %>

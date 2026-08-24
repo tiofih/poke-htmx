@@ -62,6 +62,7 @@ module ServerListActions
     sprigatito fuecoco quaxly
   ].freeze
   FIRST_PAGE_COMMONS = PAGE_SIZE - STARTER_SLUGS.size
+  SCAN_BATCH = 24
 
   private
 
@@ -82,17 +83,44 @@ module ServerListActions
 
   def load_pokemon_page
     @limit = PAGE_SIZE
-    @commons = filtered_commons
-    build_page_window
-    @items = Parallelizer.map(@page_names) { |name| [name, settings.api.find(name)] }.compact
     @starters = @q.empty? && @offset.zero? ? load_starters : []
-    @notice = "Não foi possível carregar a lista de Pokémon." if @commons.empty? && @q.empty?
+    build_page
+    @items = Parallelizer.map(@page_names) { |name| [name, settings.api.find(name)] }
+    @notice = "Não foi possível carregar a lista de Pokémon." if @page_names.empty? && @q.empty?
     load_team_names
   end
 
-  def filtered_commons
-    candidates = common_candidates
-    forms = Parallelizer.map(candidates) { |name| [name, settings.api.base_form?(name)] }
+  def build_page
+    @page_names, more = commons_window
+    @current_page = current_page_number
+    @prev_offset = previous_offset
+    @next_offset = more ? next_page_offset : nil
+  end
+
+  def commons_window
+    if @q.empty? && @offset.zero?
+      fetch_commons(0, FIRST_PAGE_COMMONS)
+    else
+      fetch_commons(@offset, PAGE_SIZE)
+    end
+  end
+
+  def fetch_commons(offset, count)
+    base_forms = []
+    collect_base_forms(base_forms, offset + count)
+    more = base_forms.size >= offset + count
+    [base_forms[offset, count].to_a, more]
+  end
+
+  def collect_base_forms(base_forms, target)
+    common_candidates.each_slice(SCAN_BATCH) do |batch|
+      base_forms.concat(base_form_names(batch))
+      break if base_forms.size >= target
+    end
+  end
+
+  def base_form_names(batch)
+    forms = Parallelizer.map(batch) { |name| [name, settings.api.base_form?(name)] }
     forms.select { |_name, is_base| is_base }.map(&:first)
   end
 
@@ -102,53 +130,25 @@ module ServerListActions
     names.reject { |name| STARTER_SLUGS.include?(name) }
   end
 
-  def build_page_window
-    if @q.empty?
-      build_window_with_starters
+  def current_page_number
+    if @q.empty? && !@offset.zero?
+      ((@offset - FIRST_PAGE_COMMONS) / PAGE_SIZE) + 2
     else
-      build_window_filtered
+      (@offset / PAGE_SIZE) + 1
     end
   end
 
-  def build_window_with_starters
-    if @offset.zero?
-      build_first_page_with_starters
-    else
-      build_common_page_with_starters
-    end
-    @total_pages = total_pages_with_starters
+  def previous_offset
+    return nil if @offset.zero?
+    return 0 if @q.empty? && @current_page == 2
+
+    @offset - PAGE_SIZE
   end
 
-  def build_first_page_with_starters
-    @page_names = @commons[0, FIRST_PAGE_COMMONS].to_a
-    @current_page = 1
-    @prev_offset = nil
-    @next_offset = @commons.size > FIRST_PAGE_COMMONS ? FIRST_PAGE_COMMONS : nil
-  end
+  def next_page_offset
+    return FIRST_PAGE_COMMONS if @q.empty? && @offset.zero?
 
-  def build_common_page_with_starters
-    @page_names = @commons[@offset, PAGE_SIZE].to_a
-    @current_page = ((@offset - FIRST_PAGE_COMMONS) / PAGE_SIZE) + 2
-    @prev_offset = @current_page == 2 ? 0 : @offset - PAGE_SIZE
-    @next_offset = next_offset_present? ? @offset + PAGE_SIZE : nil
-  end
-
-  def build_window_filtered
-    @page_names = @commons[@offset, PAGE_SIZE].to_a
-    @current_page = (@offset / PAGE_SIZE) + 1
-    @prev_offset = @offset.positive? ? @offset - PAGE_SIZE : nil
-    @next_offset = next_offset_present? ? @offset + PAGE_SIZE : nil
-    @total_pages = [(@commons.size.to_f / PAGE_SIZE).ceil, 1].max
-  end
-
-  def next_offset_present?
-    (@offset + @page_names.size) < @commons.size
-  end
-
-  def total_pages_with_starters
-    return 1 if @commons.size <= FIRST_PAGE_COMMONS
-
-    1 + ((@commons.size - FIRST_PAGE_COMMONS).to_f / PAGE_SIZE).ceil
+    @offset + PAGE_SIZE
   end
 
   def load_team_names
