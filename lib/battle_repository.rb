@@ -2,6 +2,7 @@
 
 require "json"
 require "pg"
+require_relative "connection_registry"
 
 class BattleRepository
   DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
@@ -94,6 +95,6 @@ class BattleRepository
   end
 
   def connection
-    @connection ||= PG.connect(@db_url)
+    @connection ||= ConnectionRegistry.register(self, PG.connect(@db_url))
   end
 end

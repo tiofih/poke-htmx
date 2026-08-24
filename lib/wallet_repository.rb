@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "pg"
+require_relative "connection_registry"
 
 class WalletRepository
   DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
@@ -41,6 +42,6 @@ class WalletRepository
   private
 
   def connection
-    @connection ||= PG.connect(@db_url)
+    @connection ||= ConnectionRegistry.register(self, PG.connect(@db_url))
   end
 end

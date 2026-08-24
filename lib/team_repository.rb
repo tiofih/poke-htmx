@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "pg"
+require_relative "connection_registry"
 require_relative "pokemon"
 
 module SlotOperations
@@ -244,7 +245,7 @@ class TeamRepository
   end
 
   def connection
-    @connection ||= PG.connect(@db_url)
+    @connection ||= ConnectionRegistry.register(self, PG.connect(@db_url))
   end
 
   def parse_moves(value)

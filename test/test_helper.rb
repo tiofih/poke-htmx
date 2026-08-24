@@ -7,11 +7,21 @@ require "minitest/autorun"
 require "rack/test"
 require "pg"
 
+require_relative "../lib/connection_registry"
 require_relative "../lib/pokemon"
 require_relative "../lib/gateways/poke_api"
 require_relative "../lib/team_repository"
 require_relative "test_support"
 require_relative "poke_api_fake"
+
+module Minitest
+  class Test
+    def after_teardown
+      super
+      ConnectionRegistry.close_all!
+    end
+  end
+end
 
 module TestDatabase
   def self.setup!

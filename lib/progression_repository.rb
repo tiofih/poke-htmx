@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "pg"
+require_relative "connection_registry"
 require_relative "experience_curve"
 
 class ProgressionRepository
@@ -56,6 +57,6 @@ class ProgressionRepository
   end
 
   def connection
-    @connection ||= PG.connect(@db_url)
+    @connection ||= ConnectionRegistry.register(self, PG.connect(@db_url))
   end
 end

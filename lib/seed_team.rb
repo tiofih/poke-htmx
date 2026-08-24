@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "pg"
+require_relative "connection_registry"
 
 class SeedTeam
   DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
@@ -39,7 +40,7 @@ class SeedTeam
   private
 
   def connection
-    @connection ||= PG.connect(@db_url)
+    @connection ||= ConnectionRegistry.register(self, PG.connect(@db_url))
   end
 
   def array_literal(names)
