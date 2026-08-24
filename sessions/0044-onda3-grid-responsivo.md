@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-24 |
-| Implementação | **Pendente** |
+| Implementação | **Concluída** — passos 1–3 em 2026-08-24 (suíte 693/2196, lint 0) |
 | Validação | **Pendente** (executada pelo usuário) |
 
 ---
@@ -87,14 +87,14 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
 
 ### Resultado
 
-- [ ] **C1 — Grid responsivo da listagem em cards**: `#pokemon-list`/`.pokemon-list`
+- [x] **C1 — Grid responsivo da listagem em cards**: `#pokemon-list`/`.pokemon-list`
       (comum e starters) em grid de cards (auto-fill, mín. 180px, gap 12px), itens
       `list-item`/`starter-item` com sprite+nome+botão alinhados — fim do grande
       espaço em branco do bug visual. Estrutura preservada (`<ul class="pokemon-list">`,
       `<li class="list-item">`) — prova: `manual` (visual; CSS puro — conferir em
       desktop ~2–3 colunas e em ~720px colapsando para 1 coluna) +
       `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list`).
-- [ ] **C2 — Largura cheia do Histórico**: `GET /history` (não-htmx) renderiza
+- [x] **C2 — Largura cheia do Histórico**: `GET /history` (não-htmx) renderiza
       `<body class="page-history">` → `body.page-history { max-width: none }` —
       prova: `test/history_routes_test.rb` (`test_history_page_uses_full_width_body_class`).
 

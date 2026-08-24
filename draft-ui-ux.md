@@ -41,10 +41,10 @@ até time de 6) já coerente entre rotas e fragmentos.
   (por que esses 27?).
 - Sprites sem `loading="lazy"` (27+20 imagens por carga); sem grid — itens
   empilham 1 por linha, lista longa.
-- **BUG visual (anotado 2026-08-22, pós JN-1):** o item da lista mostra o ícone,
-  um **grande espaço em branco** e depois o nome — alinhamento do sprite dentro do
+- **BUG visual (anotado 2026-08-22, pós JN-1; **corrigido na sessão 0044, 2026-08-24**):** o item da lista mostra o ícone, um **grande espaço em branco** e depois o nome — alinhamento do sprite dentro do
   `<a>` de `pokemon_list_item.erb` (img inline + whitespace) sem estilos de
-  item/grid; agrava a leitura da listagem. Corrigir junto do grid/onda 1.
+  item/grid; agrava a leitura da listagem. Corrigido junto do grid (cards
+  `.list-item`/`.starter-item` com sprite `block`).
 - **Visibilidade do time na Lista (decisão do usuário 2026-08-22):** "não tenho
   como saber quantos Pokémon tenho no time ou quais são sem ir para outra aba".
   Caminho A — **adicionar informações visuais na própria Lista** (contador n/6 +
@@ -118,7 +118,7 @@ até time de 6) já coerente entre rotas e fragmentos.
 - Barra/contador "Time n/6" visível na listagem (conecta jornada ao bloco Iniciais).
 
 **Médios**
-- Grid responsivo na listagem (2–3 colunas).
+- Grid responsivo na listagem (2–3 colunas) — **feito (sessão 0044, 2026-08-24)**: `.pokemon-list` em grid de cards (`auto-fill minmax(180px, 1fr)`/gap 12px) + cards `.list-item`/`.starter-item` corrigindo o bug visual do item.
 - Barras visuais de HP/PP (battle + Center).
 - Extrair partial/presenter dos painéis de batalha (remove duplicação).
 - Estado ativo no nav + limpeza sistemática dos painéis (mata o hack do span).
@@ -126,7 +126,9 @@ até time de 6) já coerente entre rotas e fragmentos.
   a sakura limita `body` a `max-width: 38em`; a 0041 resolveu só na batalha
   (`body.page-battle { max-width: none }` + grid 3 colunas). **Aplicar o mesmo
   espaçamento/largura cheia em Lista, Time, Histórico, Detalhe e Manage** numa onda
-  futura (fora de sessão — RNF-04).
+  futura (fora de sessão — RNF-04). **Feito (sessão 0044, 2026-08-24):** Lista/`/`
+  (0042) e Histórico (`body.page-history`, 0044) em largura cheia; Detalhe e Manage
+  são fragmentos dentro da `/` já em largura cheia desde 0042.
 
 **Juice / micro-interações (anotado 2026-08-22, pós JN-1 — usuário pediu "mais juice")**
 - **Notificação ao incluir Pokémon:** hoje o add só troca o `#add-status` (texto);
@@ -155,7 +157,7 @@ sessão única** quando o usuário decidir encaixá-la (fora da ordem JN-2 → J
 | **0 — quick wins** *(feita — sessão 0038, **concluída e validada em 2026-08-22**)* | `alt`/`aria-label`, `loading="lazy"`, indicador global (`hx-indicator`), hierarquia de notices + copy pt-BR, evoluções linkadas no detalhe | só view/CSS, baixo risco; base visual para tudo abaixo |
 | **1 — jornada visível** *(feita — sessão 0042, **Caminho B: Lista+Time unificados**, **concluída e validada em 2026-08-24 — suíte 689/2184, lint 0**)* | contador/barra "Time n/6" + painel do time na própria Lista, **ou unificar Lista+Time** (decisão do usuário 2026-08-22; ver §2.2) | conecta o gate à descoberta; reusa `JourneyService`; precisa expor `@team_names`/`@journey_started` nos renders |
 | **2 — leitura da batalha** *(feita — sessão 0041, **implementada em 2026-08-23, suíte 680/2132, lint 0; aguardando validação**)* | partial única dos painéis (+presenter), barras HP/PP, log das últimas N rodadas | mata duplicação antes de qualquer feature nova de batalha |
-| **3 — estrutura** *(parcial — nav ativo + fim do hack de limpeza feitos via JN-1/sessão 0039, **validados em 2026-08-22**; grid responsivo pendente)* | estado ativo no nav + limpeza sistemática de painéis, grid responsivo da listagem | polimento estrutural; depende só de CSS/markup |
+| **3 — estrutura** *(feita — sessão 0044, **implementada em 2026-08-24, suíte 693/2196, lint 0; aguardando validação**)* | estado ativo no nav + limpeza sistemática de painéis, grid responsivo da listagem | polimento estrutural; depende só de CSS/markup |
 | Dependentes da fila | JN-2 (golpes em lista), JN-1 (telas próprias), JN-4 (componentes Mart/Center), J3 (ranking S–F), J4 (nome/apelido) | ordem fechada em 2026-08-18 mantida |
 
 Regras: cada onda = refinamento (fase 1) próprio quando virar sessão; wireframes
