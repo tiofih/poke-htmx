@@ -26,9 +26,14 @@ class ServerTeamTest < Minitest::Test
     end
 
     assert_includes session_a.last_response.body, "Adicionado ao time."
-    refute_includes session_a.last_response.body, "bulbasaur"
+    team_a = session_a.last_response.body[%r{<div id="team-view".*?</div>}m]
+    assert_includes team_a, "pikachu"
+    refute_includes team_a, "bulbasaur"
+
     assert_includes session_b.last_response.body, "Adicionado ao time."
-    refute_includes session_b.last_response.body, "pikachu"
+    team_b = session_b.last_response.body[%r{<div id="team-view".*?</div>}m]
+    assert_includes team_b, "bulbasaur"
+    refute_includes team_b, "pikachu"
 
     assert_equal 2, TestDatabase.distinct_user_ids.size
   end
@@ -57,6 +62,43 @@ class ServerTeamTest < Minitest::Test
     assert_includes last_response.body, "hx-swap-oob"
     assert_includes last_response.body, 'hx-delete="/team"'
     assert_includes last_response.body, "pikachu"
+  end
+
+  def test_remove_from_full_team_returns_active_add_buttons_oob
+    six = (1..6).map { |n| build_pokemon_record("pokemon#{n}", n) }
+    six.each { |poke| @repository.add("user-a", poke) }
+    pikachu_id = @repository.all("user-a").find { |poke| poke.name == "pokemon1" }.id
+
+    delete "/team", { id: pikachu_id }, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="pokemon-list"'
+    assert_includes last_response.body, "hx-swap-oob"
+    refute_includes last_response.body, 'disabled="disabled"'
+  end
+
+  def test_add_sixth_member_disables_add_buttons_oob
+    five = (1..5).map { |n| build_pokemon_record("pokemon#{n}", n) }
+    five.each { |poke| @repository.add("user-a", poke) }
+    sixth = build_pokemon_record("meowth", 52)
+
+    PokeApiStub.with_find(sixth) do
+      post "/team", { pokeName: "meowth" }, htmx_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="pokemon-list"'
+    assert_includes last_response.body, "hx-swap-oob"
+    assert_includes last_response.body, 'disabled="disabled"'
+  end
+
+  def test_team_fragment_manage_link_is_on_its_own_line
+    @repository.add("user-a", pikachu_pokemon)
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_match(%r{<p class="team-tools">\s*<a href="#" hx-get="/team/manage"}, last_response.body)
   end
 
   def test_post_team_starts_with_level_one_moves

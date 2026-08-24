@@ -1,3 +1,7 @@
+<div class="list-state" hidden>
+  <input type="hidden" name="offset" value="<%= @offset %>">
+  <input type="hidden" name="q" value="<%= @q %>">
+</div>
 <% if @notice %>
   <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
 <% end %>

@@ -154,11 +154,18 @@ module ServerTeamActions
     @notice_kind = notice ? :error : :success
     mini_status = erb :team_add_result, layout: false
     prepare_team_fragment_data
-    "#{mini_status}#{oob_team_view}"
+    "#{mini_status}#{oob_team_view}#{oob_pokemon_list}"
   end
 
   def oob_team_view
     erb :team_view_oob, layout: false
+  end
+
+  def oob_pokemon_list
+    @offset = params[:offset].to_i
+    @q = params[:q].to_s
+    load_pokemon_page
+    %(<div id="pokemon-list" hx-swap-oob="innerHTML">#{erb :pokemon_list, layout: false}</div>)
   end
 
   def new_member_from_api
@@ -189,7 +196,7 @@ module ServerTeamActions
 
   def remove_team_member
     settings.team.remove(current_user, params[:id]) if params[:id]
-    render_team_fragment_with_notice
+    "#{render_team_fragment_with_notice}#{oob_pokemon_list}"
   end
 
   def move_team_member

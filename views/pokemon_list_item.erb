@@ -7,7 +7,7 @@
   <% else %>
     <span><%= name %></span>
   <% end %>
-  <form hx-post="/team" hx-target="#add-status" hx-swap="innerHTML">
+  <form hx-post="/team" hx-target="#add-status" hx-swap="innerHTML" hx-include=".list-state">
     <input type="hidden" name="pokeName" value="<%= name %>">
     <%
       in_team = Array(@team_names).include?(name)

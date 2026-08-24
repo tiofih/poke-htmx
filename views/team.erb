@@ -5,7 +5,9 @@
   <p class="journey-progress">Time: <%= @team.size %>/6</p>
   <p class="notice notice--info">Monte seu time inicial de 6 Pokémon para iniciar a jornada.</p>
 <% end %>
-<a href="#" hx-get="/team/manage" hx-target="#team-view" hx-swap="innerHTML">Gerenciar time</a>
+<p class="team-tools">
+  <a href="#" hx-get="/team/manage" hx-target="#team-view" hx-swap="innerHTML">Gerenciar time</a>
+</p>
 <% if @journey_started %>
   <% unless @team.empty? %>
     <h2>Poke Center</h2>
@@ -55,6 +57,7 @@
       hx-delete="/team"
       hx-target="#team-view"
       hx-swap="innerHTML"
+      hx-include=".list-state"
       hx-params="*">
     <input type="hidden" name="id" value="<%= poke.id %>">
     <button type="submit" class="btn">Remover do time</button>
