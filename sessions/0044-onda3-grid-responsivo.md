@@ -124,6 +124,17 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
 - **2026-08-24 — Largura cheia aplicada só ao Histórico** (página própria restante;
   Lista/Detalhe/Manage já cobertos pela `/` em largura cheia desde 0042; Batalha
   3 colunas desde 0041) — preterido: aplicar `max-width: none` em todas as rotas.
+- **2026-08-24 — Ajuste S3 (falha de critério na validação — reabre C1):** na
+  validação, o usuário reportou que a listagem mostrava **células vazias** entre os
+  iniciais e os comuns — na tela: 27 iniciais, 3 slots de espaço, 4 comuns e 2 slots
+  vagos. Causa: cada `<ul class="pokemon-list">` era um **grid independente**
+  (`repeat(auto-fill…)`), então a última linha dos iniciais ficava incompleta (3
+  vagos) e a dos comuns começava nova (2 vagos na 1ª linha). **Correção:** as duas
+  `<ul>` passam a `display: contents` dentro de um wrapper único `.pokemon-grid` —
+  os `<li>` de iniciais e comuns fluem no **mesmo grid contínuo**; o
+  `<h2 class="starters-title">` vira linha de largura total (`grid-column: 1 / -1`).
+  Markup dos `<li>` e classes preservado (testes intactos, suíte 693/2196, lint 0).
+  **Revalidação do usuário pendente.**
 
 ## 6. Plano TDD (passos)
 
@@ -143,7 +154,7 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 — grid responsivo da listagem em cards | `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list` — estrutura) | `/` em desktop: cards 2–3 colunas com sprite+nome+botão alinhados (sem espaço em branco); em ~720px colapsa para 1 coluna | |
+| C1 — grid responsivo da listagem em cards | `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list` — estrutura) | `/` em desktop: cards 2–3 colunas com sprite+nome+botão alinhados (sem espaço em branco); em ~720px colapsa para 1 coluna | **nok → ajuste S3 (2026-08-24):** iniciais e comuns agora fluem no **mesmo grid** (`.pokemon-grid` + `display: contents`), sem células vazias entre as listagens — aguardando revalidação |
 | C2 — largura cheia do Histórico | `test/history_routes_test.rb` (`test_history_page_uses_full_width_body_class`) | `/history` em tela cheia (não mais 38em centralizado) | |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data

@@ -24,13 +24,23 @@ header nav a {
   margin: 0 0.5em;
 }
 
-/* Grid responsivo da listagem (Onda 3) */
-.pokemon-list {
+/* Grid responsivo da listagem (Onda 3) — fluxo único contínuo:
+   iniciais e comuns dividem o MESMO grid (ul com display: contents),
+   sem células vazias entre as duas listagens. */
+.pokemon-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 12px;
   list-style: none;
   padding-left: 0;
+}
+
+.pokemon-list {
+  display: contents;
+}
+
+.starters-title {
+  grid-column: 1 / -1;
 }
 
 .list-item,
