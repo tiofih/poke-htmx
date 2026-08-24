@@ -155,8 +155,16 @@ seeds eliminados (guard `unless defined?` em `saldo_inicial.rb`). Sem mudança n
 app (repositórios singleton seguem com conexão persistida). Ver
 `sessions/0043-estabilidade-banco-conexoes.md`.
 
-**Próxima sessão:** ondas 1–3 de UX restantes → organizar o resto
-(JN-3, JN-4, JN-5, J2, J4, D4).
+**Sessão 0044 (Onda 3 UX — estrutura) refinada em 2026-08-24** (fase 1
+concluída, implementação pendente): grid responsivo da listagem em cards
+(auto-fill min 180px/gap 12px, tokens `draft-design-system.md` §4) corrigindo o
+bug visual do item (sprite+nome+botão alinhados, fim do espaço em branco) +
+largura cheia do Histórico (`body.page-history`, `max-width: none`) — CSS puro,
+sem mudança de markup/rotas. Ver `sessions/0044-onda3-grid-responsivo.md`.
+
+**Próxima sessão:** **0044 (Onda 3 UX — grid responsivo + largura cheia do
+Histórico) em refinamento concluído, implementação pendente.** Depois: organizar
+o resto (JN-3, JN-4, JN-5, J2, J4, D4) e P2 (perf da 1ª batalha ~2min).
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -223,6 +231,7 @@ app (repositórios singleton seguem com conexão persistida). Ver
 | 0041 | Onda 2 UX — leitura da batalha: fim da duplicação dos painéis (partial único `_fighter_panel.erb` + `FighterPresenter`/`BattleLogPresenter` puros em `lib/`), barras visuais de HP/PP (tokens do draft-design-system §3), log das últimas 3 rodadas (mais recente no topo) e `hx-indicator` local no botão Jogar; `Move#pp_max` (default = pp) | Concluída | Done (passos 1–5 + ajuste S3 de layout em 3 colunas — Seu Time esq, controles centralizados + log centro, Oponente dir, tela cheia; suíte 680/2132, lint 0, validado em 2026-08-23) |
 | 0042 | Onda 1 UX — jornada visível (Caminho B): página única `/` de 2 colunas (busca + lista à esquerda, painel do time com contador n/6 + membros à direita), página `/team` removida (404 direto, fragmento htmx interno preservado), nav sem link "Time", estados do botão Add (default / "No time ✓" / cheio via `@team_names`) | Concluída | Done (passos 1–6 + ajustes S3 — add/remove re-renderizam `#pokemon-list` via `hx-swap-oob`, link "Gerenciar time" em `<p>` próprio; suíte 689/2184, lint 0, validado em 2026-08-24) |
 | 0043 | Estabilidade do banco (correção direta, fora da fila): fim do "too many clients" na suíte — `ConnectionRegistry` registra as conexões dos repositórios e o `after_teardown` fecha todas após cada teste (pico 74 → 9), 7 repositórios/seed registrando conexão; warnings de constante nos seeds eliminados (`unless defined?` em `saldo_inicial.rb`) | Concluída | Done (passos 1–2, suíte 692/2193, lint 0, validado em 2026-08-24) |
+| 0044 | Onda 3 UX — estrutura: grid responsivo da listagem em cards (auto-fill min 180px/gap 12px, tokens draft-design-system §4) corrigindo o bug visual do item (sprite+nome+botão alinhados) + largura cheia do Histórico (`body.page-history`); CSS puro | Refinamento | **Concluída** — refinamento em 2026-08-24 (implementação pendente) |
 
 ## Estrutura do arquivo de sessão
 
