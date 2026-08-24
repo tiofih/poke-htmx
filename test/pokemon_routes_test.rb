@@ -312,6 +312,17 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, 'id="pokemon-detail"'
   end
 
+  def test_index_page_uses_full_width_list_body_class
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/"
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'class=" page-list"'
+    assert_includes last_response.body, 'class="list-team-grid"'
+    assert_includes last_response.body, 'class="team-column"'
+  end
+
   def test_index_renders_team_panel_with_counter_when_not_started
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/"

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/style.css" type="text/css">
   </head>
 
-  <body class="<%= "page-battle" if request.path == "/battle" %>">
+  <body class="<%= "page-battle" if request.path == "/battle" %><%= " page-list" if request.path == "/" %>">
     <div id="global-loading" aria-hidden="true"></div>
     <header>
       <nav>

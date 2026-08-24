@@ -158,6 +158,41 @@ body.page-battle {
   font-size: 1.1em;
 }
 
+/* Página unificada Lista + Time (Onda 1, Caminho B) */
+body.page-list {
+  max-width: none;
+}
+
+.list-team-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22em);
+  gap: 1.5em;
+  align-items: start;
+}
+
+@media (max-width: 720px) {
+  .list-team-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.team-column {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.8em 1em;
+}
+
+.journey-progress {
+  font-weight: bold;
+  color: #1f6feb;
+}
+
+/* Estados do botão Add */
+button[disabled="disabled"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .log-round {
   font-weight: bold;
 }
