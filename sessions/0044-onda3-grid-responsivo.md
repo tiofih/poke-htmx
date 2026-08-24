@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-24 |
-| Implementação | **Concluída** — passos 1–3 em 2026-08-24 (suíte 693/2196, lint 0) |
+| Implementação | **Concluída** — passos 1–3 em 2026-08-24 + ajustes S3 (suíte 694/2202, lint 0) |
 | Validação | **Pendente** (executada pelo usuário) |
 
 ---
@@ -87,13 +87,15 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
 
 ### Resultado
 
-- [x] **C1 — Grid responsivo da listagem em cards**: `#pokemon-list`/`.pokemon-list`
-      (comum e starters) em grid de cards (auto-fill, mín. 180px, gap 12px), itens
-      `list-item`/`starter-item` com sprite+nome+botão alinhados — fim do grande
-      espaço em branco do bug visual. Estrutura preservada (`<ul class="pokemon-list">`,
-      `<li class="list-item">`) — prova: `manual` (visual; CSS puro — conferir em
-      desktop ~2–3 colunas e em ~720px colapsando para 1 coluna) +
-      `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list`).
+- [x] **C1 — Grid responsivo da listagem em cards com linhas sempre completas**:
+      `.pokemon-list` em grid de cards com contagens que fecham linhas por faixa de
+      largura — iniciais 27 ÷ 3 colunas (9 linhas) e comuns 20/página ÷ {4, 5, 2, 1}
+      colunas; itens `list-item`/`starter-item` com sprite+nome+botão alinhados (fim
+      do bug visual). **Iniciais aparecem apenas na 1ª página** (`offset == 0`).
+      Estrutura preservada (`<ul class="pokemon-list">`, `<li class="list-item">`) —
+      prova: `manual` (visual; linhas cheias em desktop/tablet/mobile) +
+      `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list`,
+      `test_pokemons_starters_only_on_first_page`).
 - [x] **C2 — Largura cheia do Histórico**: `GET /history` (não-htmx) renderiza
       `<body class="page-history">` → `body.page-history { max-width: none }` —
       prova: `test/history_routes_test.rb` (`test_history_page_uses_full_width_body_class`).
@@ -135,6 +137,17 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
   `<h2 class="starters-title">` vira linha de largura total (`grid-column: 1 / -1`).
   Markup dos `<li>` e classes preservado (testes intactos, suíte 693/2196, lint 0).
   **Revalidação do usuário pendente.**
+- **2026-08-24 — Ajuste S3 (validação — reabre/amenda C1):** o usuário reportou
+  (1) **5 slots vazios no fim da página** e (2) os iniciais aparecendo em **todas**
+  as páginas. Causas: 27 iniciais + 20 comuns na página 1 totalizam **47 (primo)** —
+  um grid unificado nunca fecha linhas; e `@starters` era carregado em qualquer
+  página com `q` vazio. **Correção:** `@starters` passa a carregar **só na 1ª
+  página** (`@q.empty? && @offset.zero?`); seções separadas com colunas que fecham
+  linhas por faixa de largura — iniciais **3 colunas** (27 = 9 linhas), comuns
+  **4/5/2/1 colunas** (20/página = 5/4/10/20 linhas), sem capitar largura absurdas
+  em telas largas; `.pokemon-grid`/`display: contents` **revertidos**. Novo teste
+  `test_pokemons_starters_only_on_first_page` (suíte 694/2202, lint 0).
+  **Revalidação do usuário pendente.**
 
 ## 6. Plano TDD (passos)
 
@@ -154,7 +167,7 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 — grid responsivo da listagem em cards | `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list` — estrutura) | `/` em desktop: cards 2–3 colunas com sprite+nome+botão alinhados (sem espaço em branco); em ~720px colapsa para 1 coluna | **nok → ajuste S3 (2026-08-24):** iniciais e comuns agora fluem no **mesmo grid** (`.pokemon-grid` + `display: contents`), sem células vazias entre as listagens — aguardando revalidação |
+| C1 — grid responsivo da listagem em cards com linhas sempre completas | `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list`, `test_pokemons_starters_only_on_first_page`) | `/` em desktop: linhas completas em todas as páginas (iniciais 3 col na 1ª, comuns 4/5/2/1 col fechando); iniciais só na página 1; sem slots vazios | **nok → ajuste S3 (2026-08-24):** iniciais só na 1ª página + seções com colunas que fecham linhas — aguardando revalidação |
 | C2 — largura cheia do Histórico | `test/history_routes_test.rb` (`test_history_page_uses_full_width_body_class`) | `/history` em tela cheia (não mais 38em centralizado) | |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data

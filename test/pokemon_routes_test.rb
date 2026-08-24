@@ -509,6 +509,17 @@ class ServerListTest < Minitest::Test
     refute_includes last_response.body, ">Anterior<"
   end
 
+  def test_pokemons_starters_only_on_first_page
+    stub_list(two_hundred_fifty_names) do
+      get "/pokemons", offset: 20
+    end
+
+    assert last_response.ok?
+    refute_includes last_response.body, "Iniciais"
+    assert_empty last_response.body.scan('<li class="starter-item">')
+    assert_equal 20, last_response.body.scan('<li class="list-item">').size
+  end
+
   def test_pokemons_middle_page_has_previous_and_next_links
     stub_list(two_hundred_fifty_names) do
       get "/pokemons", offset: 20

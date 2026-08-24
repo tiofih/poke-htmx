@@ -24,27 +24,27 @@ header nav a {
   margin: 0 0.5em;
 }
 
-/* Grid responsivo da listagem (Onda 3) — fluxo único contínuo:
-   iniciais e comuns dividem o MESMO grid (ul com display: contents),
-   sem células vazias entre as duas listagens. */
-.pokemon-grid {
+/* Grid responsivo da listagem (Onda 3) — linhas sempre completas.
+   Contagens que fecham linhas por faixa de largura: comuns 20/página ÷
+   {4, 5, 2, 1} e iniciais 27 ÷ {3, 1}. Seções separadas (Iniciais | comuns). */
+.pokemon-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 12px;
   list-style: none;
   padding-left: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.pokemon-list {
-  display: contents;
-}
-
-.starters-title {
-  grid-column: 1 / -1;
+.pokemon-list.starters {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 24px;
 }
 
 .list-item,
 .starter-item {
+  max-width: 320px;
+  width: 100%;
+  justify-self: center;
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 12px;
@@ -57,6 +57,25 @@ header nav a {
 .list-item img,
 .starter-item img {
   display: block;
+}
+
+@media (min-width: 2000px) {
+  .pokemon-list {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .pokemon-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .pokemon-list,
+  .pokemon-list.starters {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Detalhe */
