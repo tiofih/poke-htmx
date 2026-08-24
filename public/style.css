@@ -138,6 +138,20 @@ header nav a {
 .winner {
   font-size: 1.1em;
 }
+
+.log-round {
+  font-weight: bold;
+}
+
+.battle-loading {
+  display: none;
+  margin-left: 0.6em;
+  color: #1f6feb;
+}
+
+.htmx-request .battle-loading {
+  display: inline;
+}
 /* Indicador global de carregamento (htmx) */
 #global-loading {
   position: fixed;

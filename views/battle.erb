@@ -17,17 +17,11 @@
 
   <%= erb :_fighter_panel, layout: false, locals: { title: "Oponente", presenters: @engine.teams[1].map { |poke| FighterPresenter.new(poke) } } %>
 
-  <% last_round = @engine.log.select { |entry| entry[:round] == @engine.rounds } %>
-  <% unless last_round.empty? %>
+  <% log_entries = BattleLogPresenter.new(@engine.log).entries %>
+  <% unless log_entries.empty? %>
     <ul class="battle-log">
-      <% last_round.each do |entry| %>
-        <% if entry[:action] == :item %>
-          <% display = ItemCatalog.find(entry[:item])&.display_name || entry[:item] %>
-          <li>Seu Time: <strong><%= entry[:attacker_name] %></strong> usou <%= display %>, +<%= entry[:healed] %> HP</li>
-        <% else %>
-          <% attacker_side = entry[:attacker].zero? ? "Seu Time" : "Oponente" %>
-          <li><%= attacker_side %>: <strong><%= entry[:attacker_name] %></strong> usou <%= entry[:move] || entry[:move_type] %> em <strong><%= entry[:target_name] %></strong>, <%= entry[:damage] %> de dano<%= entry[:ko] ? " — KO!" : "" %></li>
-        <% end %>
+      <% log_entries.each do |entry| %>
+        <li><span class="log-round">Rodada <%= entry[:round] %>:</span> <%= entry[:side] %>: <strong><%= entry[:text] %></strong></li>
       <% end %>
     </ul>
   <% end %>
@@ -54,6 +48,8 @@
     <% end %>
     <button hx-get="/battle" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
   <% else %>
-    <button hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML">Jogar</button>
+    <button hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML"
+      hx-indicator="#battle-loading">Jogar</button>
+    <span id="battle-loading" class="battle-loading" aria-hidden="true">Carregando…</span>
   <% end %>
 <% end %>

@@ -2,7 +2,7 @@
 
 require_relative "server_test_helpers"
 require_relative "battle_test_helpers"
-class ServerBattleTest < Minitest::Test
+class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   include ServerTestHelpers
   include TestSupport
   include ServerBattleTestHelpers
@@ -151,6 +151,19 @@ class ServerBattleTest < Minitest::Test
     refute_includes last_response.body, "Vencedor"
   end
 
+  def test_battle_play_button_has_local_hx_indicator
+    @repository.add("user-a", pikachu_pokemon)
+
+    stub_battle_start do
+      get "/battle", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "hx-indicator",
+                    "botão Jogar com indicador de carregamento local"
+    assert_includes last_response.body, "hx-post=\"/battle/play\""
+  end
+
   def test_battle_with_empty_team_shows_friendly_message
     get "/battle", {}, user_session("user-a")
 
@@ -232,6 +245,29 @@ class ServerBattleTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "thunder-shock"
     assert_includes last_response.body, "usou thunder-shock em"
+  end
+
+  def test_battle_log_shows_previous_rounds_after_multiple_plays
+    start_battle_for("user-a")
+
+    post "/battle/play", {}, user_session("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Rodada 2"
+    assert_includes last_response.body, "Rodada 1",
+                    "log mantém entradas da rodada anterior (últimas 3 rodadas)"
+  end
+
+  def test_battle_log_drops_rounds_older_than_three
+    start_battle_for("user-a")
+
+    6.times { post "/battle/play", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    refute_includes last_response.body, "Rodada 1",
+                    "rodada mais antiga que as últimas 3 sai do log"
+    assert_includes last_response.body, "Rodada 6"
   end
 
   def test_battle_with_struggle_fallback_does_not_break
