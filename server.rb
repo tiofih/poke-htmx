@@ -67,6 +67,7 @@ module ServerListActions
   def render_index
     @offset = 0
     @q = ""
+    prepare_team_fragment_data
     load_pokemon_page
     erb :index
   end

@@ -1,4 +1,6 @@
-<input
+<div class="list-team-grid">
+  <div class="list-column">
+    <input
       type="text"
       name="q"
       placeholder="Filtrar por nome"
@@ -13,3 +15,11 @@
 
     <div id="add-status"></div>
     <div id="pokemon-detail"> </div>
+  </div>
+
+  <div class="team-column">
+    <div id="team-view">
+      <%= erb :team, layout: false %>
+    </div>
+  </div>
+</div>

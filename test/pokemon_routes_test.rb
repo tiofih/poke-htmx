@@ -291,10 +291,9 @@ class ServerListTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "<nav"
     assert_includes last_response.body, "Lista"
-    assert_includes last_response.body, "Time"
     assert_includes last_response.body, "Batalha"
     assert_includes last_response.body, 'href="/"'
-    assert_includes last_response.body, 'href="/team"'
+    refute_includes last_response.body, 'href="/team"'
     assert_includes last_response.body, 'href="/battle"'
     assert_includes last_response.body, 'href="/history"'
     refute_includes last_response.body, "hx-trigger=\"click from:#nav-lista\""
@@ -313,14 +312,38 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, 'id="pokemon-detail"'
   end
 
-  def test_nav_time_link_points_to_team_page
+  def test_index_renders_team_panel_with_counter_when_not_started
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/"
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, 'href="/team"'
-    refute_includes last_response.body, 'hx-get="/team/manage"'
+    assert_includes last_response.body, 'id="team-view"'
+    assert_includes last_response.body, "0/6"
+    assert_includes last_response.body, "jornada"
+  end
+
+  def test_index_team_panel_shows_members
+    add_team("user-a", [["pikachu", 25], ["bulbasaur", 1]])
+
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "pikachu"
+    assert_includes last_response.body, "bulbasaur"
+    assert_includes last_response.body, 'id="team-view"'
+  end
+
+  def test_nav_has_no_time_link_after_unification
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/"
+    end
+
+    assert last_response.ok?
+    refute_includes last_response.body, 'href="/team"'
+    assert_includes last_response.body, 'href="/" class="active"'
   end
 
   def test_layout_marks_active_nav_link_on_list_page
