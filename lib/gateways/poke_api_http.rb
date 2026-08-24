@@ -1,12 +1,15 @@
 # frozen_string_literal: true
 
 require "faraday"
+require "timeout"
 require_relative "persistent_json_store"
 require_relative "poke_api_parsing"
 require_relative "poke_api_moves"
 require_relative "poke_api_types"
 
 class PokeApiHttp
+  HTTP_TIMEOUT = 15
+
   include PokeApiParsing
   include PokeApiMoves
   include PokeApiTypes
@@ -48,11 +51,11 @@ class PokeApiHttp
   private
 
   def transport_get(url)
-    response = Faraday.get(url)
+    response = Timeout.timeout(HTTP_TIMEOUT) { Faraday.get(url) }
     return nil unless ok?(response)
 
     JSON.parse(response.body)
-  rescue Faraday::Error, JSON::ParserError
+  rescue Faraday::Error, JSON::ParserError, Timeout::Error
     nil
   end
 
