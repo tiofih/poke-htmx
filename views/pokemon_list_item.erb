@@ -9,6 +9,12 @@
   <% end %>
   <form hx-post="/team" hx-target="#add-status" hx-swap="innerHTML">
     <input type="hidden" name="pokeName" value="<%= name %>">
-    <button type="submit" class="btn">Adicionar ao time</button>
+    <%
+      in_team = Array(@team_names).include?(name)
+      disabled = in_team || @team_full
+    %>
+    <button type="submit" class="btn" <%= 'disabled="disabled"' if disabled %>>
+      <%= in_team ? "No time ✓" : "Adicionar ao time" %>
+    </button>
   </form>
 </li>

@@ -423,6 +423,33 @@ class ServerListTest < Minitest::Test
     assert_equal 20, last_response.body.scan("Adicionar ao time").size
   end
 
+  def test_pokemons_add_button_shows_in_team_when_pokemon_in_team
+    add_team("user-a", [["pikachu", 25]])
+
+    stub_list(filtered_names) do
+      get "/pokemons", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "No time ✓"
+    assert_match(/disabled="disabled"[^>]*>\s*No time ✓/, last_response.body)
+    assert_includes last_response.body, "Adicionar ao time"
+  end
+
+  def test_pokemons_add_buttons_disabled_when_team_full
+    add_team("user-a", [["pikachu", 25], ["bulbasaur", 1], ["charmander", 4],
+                        ["squirtle", 7], ["caterpie", 10], ["weedle", 13]])
+
+    stub_list(two_hundred_fifty_names) do
+      get "/pokemons", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    total_buttons = last_response.body.scan("<button").size
+    disabled_buttons = last_response.body.scan('disabled="disabled"').size
+    assert_equal total_buttons, disabled_buttons
+  end
+
   def test_pokemons_omits_evolved_forms_from_list
     stub_list(filtered_names, evolved: ["raichu"]) do
       get "/pokemons"

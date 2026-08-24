@@ -85,6 +85,13 @@ module ServerListActions
     @items = Parallelizer.map(@page[:names]) { |name| list_entry(name) }.compact
     @starters = @q.empty? ? load_starters : []
     @notice = "Não foi possível carregar a lista de Pokémon." if @page[:names].empty? && @q.empty?
+    load_team_names
+  end
+
+  def load_team_names
+    team = settings.team.all(current_user)
+    @team_names = team.map(&:name)
+    @team_full = team.size >= TeamRepository::MAX_TEAM_SIZE
   end
 
   def list_entry(name)
