@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-24 |
 | Implementação | **Concluída** — passos 1–3 em 2026-08-24 + ajustes S3 (suíte 694/2200, lint 0) |
-| Validação | **Pendente** (executada pelo usuário) |
+| Validação | **Done** — executada pelo usuário em 2026-08-24 (tabela da seção 7; ajustes S3 reaprovados) |
 
 ---
 
@@ -207,12 +207,12 @@ usuário pendente.**
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Concluída em 2026-08-24 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 — grade uniforme de 6 colunas, páginas cheias (36) | `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list`, `test_pokemons_starters_only_on_first_page`, `test_pokemons_middle_page_has_previous_and_next_links`, `test_pokemons_last_page_has_no_next_link`) | `/` em desktop: página 1 = 36 (27 iniciais + 9 comuns, grid 6×6 fechado); páginas 2+ = 36 comuns; iniciais só na 1ª página; sem slots vazios | **nok → ajuste S3 (2026-08-24):** paginação sobre lista filtrada + PAGE_SIZE 36 — aguardando revalidação |
-| C2 — largura cheia do Histórico | `test/history_routes_test.rb` (`test_history_page_uses_full_width_body_class`) | `/history` em tela cheia (não mais 38em centralizado) | |
+| C1 — grade uniforme de 6 colunas, páginas cheias (36), on-demand | `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list`, `test_pokemons_starters_only_on_first_page`, `test_pokemons_middle_page_has_previous_and_next_links`, `test_pokemons_last_page_has_no_next_link`) | `/` em desktop: página 1 = 36 (27 iniciais + 9 comuns, grid 6×6 fechado, sem título "Iniciais"); páginas 2+ = 36 comuns; iniciais só na 1ª página; sem slots vazios; cargas rápidas | **ok** (após ajustes S3 reaprovados: grade uniforme, 36/página on-demand, título removido) |
+| C2 — largura cheia do Histórico | `test/history_routes_test.rb` (`test_history_page_uses_full_width_body_class`) | `/history` em tela cheia (não mais 38em centralizado) | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.
