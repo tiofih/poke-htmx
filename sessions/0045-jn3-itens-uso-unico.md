@@ -183,6 +183,6 @@ gems novas, domínio puro + motor + view.
   quantidade livre). Regra do usuário: itens/seguráveis são **por poke** (cada poke
   equipa 1 de cada), os pokes só equipam **conforme a quantidade disponível no time**
   (estoque), **equipar debita do estoque**, itens usados em batalha são **consumidos**
-  e seguráveis **continuam equipados/ativos até serem desequipados** (desequipar
-  repõe a unidade). Candidata a sessão própria (JN-3-B); **não** implementada nesta
-  sessão.
+  (poke fica **sem item atribuído** após o consumo) e seguráveis **continuam
+  equipados/ativos até serem desequipados** (desequipar repõe a unidade). Candidata a
+  sessão própria (JN-3-B); **não** implementada nesta sessão.

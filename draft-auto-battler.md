@@ -497,19 +497,20 @@
   time** (estoque): o nº de pokes equipados com o mesmo item/segurável não pode
   ultrapassar a quantidade comprada.
 - **Decisões de regra (usuário, 2026-08-24):** **equipar debita do estoque**; **itens
-  usados em batalha são consumidos** (débito já existente no `debit_used_items`);
-  **seguráveis continuam equipados e ativos em batalha até serem desequipados** (o
-  desequipar devolve a unidade ao estoque).
+  usados em batalha são consumidos** (débito já existente no `debit_used_items`) e o
+  poke **fica sem item atribuído após o consumo** (limpar `assigned_item` ao usar em
+  batalha); **seguráveis continuam equipados e ativos em batalha até serem
+  desequipados** (o desequipar devolve a unidade ao estoque).
 - **Impacto:** `TeamService` (no `assign_item`/`assign_held_item`: validar
   disponibilidade do estoque e **debita** na atribuição; no clear, **reponha** a
-  unidade no estoque) + `team_manage.erb` (no option, indicar **em uso por outro
-  poke** e/ou **quantidade livre** = estoque − já equipados) + `InventoryRepository`
-  (débito/repõe reutilizando `use`/`add`) + testes de service/rotas do manage. Cruza
-  com Eco-3/Eco-4.
+  unidade no estoque) + `BattleService`/`debit_used_items` (limpar `assigned_item` do
+  poke quando o item atribuído é consumido na batalha) + `team_manage.erb` (no option,
+  indicar **em uso por outro poke** e/ou **quantidade livre** = estoque − já equipados)
+  + `InventoryRepository` (débito/repõe reutilizando `use`/`add`) + testes de
+  service/rotas do manage. Cruza com Eco-3/Eco-4.
 - **Aberto:** nada em aberto de regra — resta fechar no refinamento a granularidade
-  (item/segurável já equipado por outro poke fica desabilitado no select? aviso?),
-  a nomenclatura da "quantidade livre" na UI e a interação com o `debit_used_items`
-  (item atribuído consumido na batalha → o poke fica sem item atribuído?).
+  (item/segurável já equipado por outro poke fica desabilitado no select? aviso?) e a
+  nomenclatura da "quantidade livre" na UI.
 - **Aguarda sessão (RNF-04).**
 
 ### JN-4. Componentes de Poke Mart e Poke Center
