@@ -463,6 +463,13 @@
 
 ### JN-3. Itens de uso único por Pokémon (quantidade usada × comprada)
 
+> **Executada na sessão 0045 (2026-08-24) e VALIDADA pelo usuário em 2026-08-24.**
+> Regra estrita de **1 uso de item curativo por Pokémon por batalha**: o
+> `BattleEngine` rastreia quem já usou (`@items_used_by_member`) e bloqueia novo uso
+> do mesmo membro na mesma batalha, valendo para o pool comum **e** o item atribuído;
+> badge "já usou item" por membro no painel do lutador (`FighterPresenter#item_used?`).
+> Suíte 701/2222, lint 0. Anotação **resolvida — removida da fila**.
+
 - **Problema:** hoje poções são consumíveis automáticos (`ItemUsePolicy`) e o
   `InventoryRepository#use` debita do estoque, mas não há trava de **"usar apenas 1 vez
   por Pokémon"** — a batalha pode drenar o estoque repetidamente no mesmo lutador.
