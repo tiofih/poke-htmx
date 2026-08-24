@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-23 |
 | Implementação | **Concluída** — passos 1–5 em 2026-08-23 (suíte 680/2132, lint 0) |
-| Validação | **Pendente** (executada pelo usuário) |
+| Validação | **Done** — executada pelo usuário em 2026-08-23 (tabela da seção 7) |
 
 ---
 
@@ -96,25 +96,25 @@ regra de negócio nova, nenhum contrato de rota alterado.
 
 ### Resultado
 
-- [ ] **C1 — `FighterPresenter` (lib/, puro) formata a linha do lutador**: nome,
+- [x] **C1 — `FighterPresenter` (lib/, puro) formata a linha do lutador**: nome,
       nível, sprite com `alt`, HP (`hp_current`/`hp_max` + `hp_percent` +
       `hp_tier` alta/média/baixa), moves (`name`, PP corrente/máx + `pp_percent` +
       `pp_tier`), itens atribuído/segurável com display name — prova:
       `test/fighter_presenter_test.rb`.
-- [ ] **C2 — `Move#pp_max`** com default = `pp` quando ausente, preservado em
+- [x] **C2 — `Move#pp_max`** com default = `pp` quando ausente, preservado em
       `use_move` — prova: `test/move_test.rb`.
-- [ ] **C3 — Painéis Seu Time/Oponente usam o partial único `_fighter_panel.erb`**:
+- [x] **C3 — Painéis Seu Time/Oponente usam o partial único `_fighter_panel.erb`**:
       ambos renderizam a linha de lutador compartilhada com barras visuais
       `hp-bar`/`pp-bar` (width percentual + tier class) — prova:
       `test/battle_routes_test.rb` (barras com `style="width: N%"` e tier nos dois
       painéis; textos de contrato preservados). *Ajuste S3 (2026-08-23): layout em
       3 colunas em tela cheia — Seu Time à esquerda, controles centralizados + log
       ao centro, Oponente à direita.*
-- [ ] **C4 — Log exibe as últimas 3 rodadas, mais recente no topo** — prova:
+- [x] **C4 — Log exibe as últimas 3 rodadas, mais recente no topo** — prova:
       `test/battle_log_presenter_test.rb` (ordem/limite/formatação) +
       `test/battle_routes_test.rb` (após vários plays, o fragmento contém entradas
       de rodadas anteriores à corrente).
-- [ ] **C5 — Botão Jogar com `hx-indicator` local** (indicador de carregamento
+- [x] **C5 — Botão Jogar com `hx-indicator` local** (indicador de carregamento
       próprio, além da barra global) — prova: `test/battle_routes_test.rb`.
 
 ### Garantias (RNF)
@@ -169,18 +169,22 @@ regra de negócio nova, nenhum contrato de rota alterado.
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Concluída em 2026-08-23 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 FighterPresenter | `./scripts/test test/fighter_presenter_test.rb` | — (domínio puro) | |
-| C2 Move#pp_max | `./scripts/test -n /pp_max/` | — (domínio puro) | |
-| C3 partial único + barras | `./scripts/test test/battle_routes_test.rb` | abrir `/battle`: Seu Time e Oponente com barras de HP/PP; código sem loop duplicado | |
-| C4 log últimas 3 rodadas | `./scripts/test test/battle_log_presenter_test.rb` | jogar 3+ rodadas: log mostra as 3 mais recentes, atual no topo | |
-| C5 hx-indicator no Jogar | `./scripts/test -n /hx_indicator/` | botão Jogar mostra carregamento próprio durante o round | |
+| C1 FighterPresenter | `./scripts/test test/fighter_presenter_test.rb` | — (domínio puro) | ok |
+| C2 Move#pp_max | `./scripts/test -n /pp_max/` | — (domínio puro) | ok |
+| C3 partial único + barras + layout 3 colunas | `./scripts/test test/battle_routes_test.rb` | `/battle` em tela cheia: Seu Time à esquerda, controles centralizados + log ao centro, Oponente à direita; barras HP/PP nos dois painéis | ok |
+| C4 log últimas 3 rodadas | `./scripts/test test/battle_log_presenter_test.rb` | jogar 3+ rodadas: log mostra as 3 mais recentes, atual no topo | ok |
+| C5 hx-indicator no Jogar | `./scripts/test -n /hx_indicator/` | botão Jogar mostra carregamento próprio durante o round | ok |
 
-> **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
-> e obter nova aprovação do usuário.
+> **S3 — ajustes de validação (registrados na seção 5):** o layout empilhado dos
+> painéis (Seu Time acima/Oponente abaixo/botão embaixo) foi reaberto e ajustado em
+> 2026-08-23 para **3 colunas em tela cheia** (Seu Time à esquerda, controles
+> centralizados + log ao centro, Oponente à direita) e **reaprovado** pelo usuário
+> na validação. Anotação p/ próximas tasks: aplicar o mesmo espaçamento/largura
+> cheia nas demais telas (ver seção 8 e `draft-ui-ux.md` §4).
 
 ## 8. Observações
 

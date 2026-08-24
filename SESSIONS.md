@@ -118,11 +118,18 @@ do nível médio do jogador (fim do sorteio puro). Retorno `score` + `tier`, sem
 Suíte 649/2063, lint 0. Validação ok; observado `GET /battle` ~2min na 1ª chamada
 (varredura serial da banda) — anotado como limitação/perf (fora de sessão, RNF-04).
 
-**Próxima sessão:** 0041 — **Onda 2 UX (leitura da batalha)** — passos 1–5
-verdes em 2026-08-23 (suíte 680/2132, lint 0): partial único dos painéis +
-presenters puros (`FighterPresenter`/`BattleLogPresenter`), barras HP/PP, log das
-últimas 3 rodadas e `hx-indicator` no botão Jogar. **Aguardando validação do
-usuário (fase 3).** Depois: ondas 1–3 de UX restantes → organizar o resto
+**Sessão 0041 (Onda 2 UX — leitura da batalha) concluída e validada em 2026-08-23:**
+`Move#pp_max` (default = pp, preservado no `use_move`) + `FighterPresenter`
+(linha do lutador: HP/PP percent+tier, itens) + `BattleLogPresenter` (últimas 3
+rodadas, mais recente no topo) + partial único `_fighter_panel.erb` (fim da
+duplicação dos painéis) com barras `hp-bar`/`pp-bar` + log com rótulo por rodada +
+`hx-indicator` local no botão Jogar. Ajuste S3 de validação: layout em **3 colunas
+em tela cheia** (Seu Time à esquerda, controles centralizados + log ao centro,
+Oponente à direita). Suíte 680/2132, lint 0. Anotado p/ próximas tasks: aplicar o
+mesmo espaçamento/largura cheia nas demais telas (Lista/Time/Histórico/Detalhe/
+Manage — ver `draft-ui-ux.md` §4).
+
+**Próxima sessão:** ondas 1–3 de UX restantes → organizar o resto
 (JN-3, JN-4, JN-5, J2, J4, D4).
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
@@ -136,11 +143,12 @@ usuário (fase 3).** Depois: ondas 1–3 de UX restantes → organizar o resto
 > (0039, 2026-08-22 — telas próprias, nav real com estado ativo, htmx intra-tela)**.
 > **J3 concluído e validado (0040, 2026-08-23 — ranking S–F, banda por nível no
 > `OpponentGenerator`; suíte 649/2063, lint 0; perf da 1ª batalha ~2min anotada)**.
-> **0041 (Onda 2 UX — leitura da batalha) em implementação (2026-08-23, suíte
-> 680/2132, lint 0 — passos 1–5 verdes, aguardando validação)** — partial único dos
-> painéis + `FighterPresenter`/`BattleLogPresenter` puros, barras HP/PP, log das
-> últimas 3 rodadas e `hx-indicator` no botão Jogar. Próximas: ondas 1–3 de UX
-> restantes → organizar o resto (JN-3, JN-4, JN-5, J2, J4, D4).
+> **0041 (Onda 2 UX — leitura da batalha) concluída e validada (2026-08-23 — suíte
+> 680/2132, lint 0)**: `Move#pp_max` + `FighterPresenter`/`BattleLogPresenter` puros,
+> partial único dos painéis com barras HP/PP, log das últimas 3 rodadas e
+> `hx-indicator` no botão Jogar; ajuste S3 de layout em 3 colunas (Seu Time esq,
+> controles centralizados + log centro, Oponente dir, tela cheia). Próximas: ondas
+> 1–3 de UX restantes → organizar o resto (JN-3, JN-4, JN-5, J2, J4, D4).
 
 ## Progresso das sessões
 
@@ -186,7 +194,7 @@ usuário (fase 3).** Depois: ondas 1–3 de UX restantes → organizar o resto
 | 0038 | Onda 0 UX — quick wins: alt/aria-label nos sprites e ▲▼ + `loading="lazy"`, evoluções do detalhe viram links, copy pt-BR ("Adicionar ao time", "Remover do time", "Filtrar por nome") + hierarquia de notices (`notice--info/success/error`), indicador global de carregamento htmx | Concluída | Done (passos 1–5, suíte 624/2006, lint 0, validado em 2026-08-22) |
 | 0039 | JN-1 — telas próprias (fim do empilhamento): páginas próprias por rota com layout (Lista/Time/Batalha/Histórico), nav real com estado ativo, htmx intra-tela (`#team-view`/`#battle-view`/`#pokemon-detail`/`#add-status`), add → mini-status, remoção do span hack/_close/teamRefresh | Concluída | Done (passos 1–6, suíte 626/2017, lint 0, validado em 2026-08-22) |
 | 0040 | J3 — ranking S–F (balanceamento de oponentes): `PokemonRating` (domínio puro) classifica Pokémon em S–F por stats ponderados + bônus dos moves (top-4, STAB-aware), consumido pelo `OpponentGenerator` via banda de tier derivada do nível médio do jogador (fim do sorteio puro), retorno score + tier sem UI | Concluída | Done (passos 1–5, suíte 649/2063, lint 0, validado em 2026-08-23; `GET /battle` ~2min na 1ª chamada — perf anotada) |
-| 0041 | Onda 2 UX — leitura da batalha: fim da duplicação dos painéis (partial único `_fighter_panel.erb` + `FighterPresenter`/`BattleLogPresenter` puros em `lib/`), barras visuais de HP/PP (tokens do draft-design-system §3), log das últimas 3 rodadas (mais recente no topo) e `hx-indicator` local no botão Jogar; `Move#pp_max` (default = pp) | Implementação | Passos 1–5 verdes em 2026-08-23 (suíte 680/2132, lint 0) — **aguardando validação do usuário** |
+| 0041 | Onda 2 UX — leitura da batalha: fim da duplicação dos painéis (partial único `_fighter_panel.erb` + `FighterPresenter`/`BattleLogPresenter` puros em `lib/`), barras visuais de HP/PP (tokens do draft-design-system §3), log das últimas 3 rodadas (mais recente no topo) e `hx-indicator` local no botão Jogar; `Move#pp_max` (default = pp) | Concluída | Done (passos 1–5 + ajuste S3 de layout em 3 colunas — Seu Time esq, controles centralizados + log centro, Oponente dir, tela cheia; suíte 680/2132, lint 0, validado em 2026-08-23) |
 
 ## Estrutura do arquivo de sessão
 
