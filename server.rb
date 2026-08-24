@@ -91,10 +91,15 @@ module ServerListActions
   end
 
   def filtered_commons
+    candidates = common_candidates
+    forms = Parallelizer.map(candidates) { |name| [name, settings.api.base_form?(name)] }
+    forms.select { |_name, is_base| is_base }.map(&:first)
+  end
+
+  def common_candidates
     names = settings.api.fetch_all_names.to_a
     names = names.select { |name| name.downcase.include?(@q.downcase) } unless @q.empty?
     names.reject { |name| STARTER_SLUGS.include?(name) }
-         .select { |name| settings.api.base_form?(name) }
   end
 
   def build_page_window
