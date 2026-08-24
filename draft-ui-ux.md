@@ -119,10 +119,11 @@ até time de 6) já coerente entre rotas e fragmentos.
 
 **Médios**
 - Grid responsivo na listagem (2–3 colunas) — **feito (sessão 0044, 2026-08-24,
-  ajustado na validação)**: grade **uniforme de 6 colunas com páginas cheias** —
-  paginação sobre a **lista filtrada** (base forms, não-iniciais), `PAGE_SIZE` 36 =
-  grid 6×6, página 1 = 27 iniciais + 9 comuns, páginas 2+ = 36 comuns; iniciais só
-  na 1ª página; cards `.list-item`/`.starter-item` corrigindo o bug visual do item.
+  ajustado na validação)**: grade **uniforme de 6 colunas com páginas cheias e
+  paginação on-demand** — `PAGE_SIZE` 36 = grid 6×6, página 1 = 27 iniciais + 9
+  comuns, cada página carrega só o próprio lote (scan `base_form?` em batchs;
+  "Página X" sem total), iniciais só na 1ª página; cards `.list-item`/
+  `.starter-item` corrigindo o bug visual do item.
 - Barras visuais de HP/PP (battle + Center).
 - Extrair partial/presenter dos painéis de batalha (remove duplicação).
 - Estado ativo no nav + limpeza sistemática dos painéis (mata o hack do span).

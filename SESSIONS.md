@@ -158,13 +158,15 @@ app (repositórios singleton seguem com conexão persistida). Ver
 **Sessão 0044 (Onda 3 UX — estrutura) refinada em 2026-08-24** (fase 1
 concluída) e **implementada em 2026-08-24** (passos 1–3 + ajustes S3, suíte
 694/2204, lint 0, **aguardando validação do usuário**): grade **uniforme de 6
-colunas com páginas cheias** — paginação sobre a **lista filtrada** (base forms,
-não-iniciais), `PAGE_SIZE` 36 = grid 6×6, página 1 = 27 iniciais + 9 comuns,
-páginas 2+ = 36 comuns; iniciais só na 1ª página; corrigido o bug visual do item
-e os slots vazios — + largura cheia do Histórico (`body.page-history`,
-`max-width: none`). Custo de performance aceito pelo usuário (filtro de toda a
-lista; `base_form?`/nomes cacheados). Ver
-`sessions/0044-onda3-grid-responsivo.md`.
+colunas com páginas cheias e paginação on-demand** — `PAGE_SIZE` 36 = grid 6×6,
+página 1 = 27 iniciais + 9 comuns, páginas 2+ = 36 comuns; **cada página carrega
+só o próprio lote** (scan `base_form?` em batchs; "Página X" sem total, próximo
+lote sob demanda); iniciais só na 1ª página; corrigido o bug visual do item e os
+slots vazios — + largura cheia do Histórico (`body.page-history`). **Estabilidade
+corrigida durante a validação:** conexão PG **por thread** (fim do "message type
+while idle"/NoMethodError sob Puma concorrente), timeout de 15s na gateway e
+**banco de teste separado** (`pokedex_test`) — suíte roda verde com o `web`
+ativo (fim do hang/flakiness). Ver `sessions/0044-onda3-grid-responsivo.md`.
 
 **Próxima sessão:** **0044 (Onda 3 UX — grid responsivo + largura cheia do
 Histórico) implementada, aguardando a validação do usuário (fase 3).** Depois:
@@ -235,7 +237,7 @@ organizar o resto (JN-3, JN-4, JN-5, J2, J4, D4) e P2 (perf da 1ª batalha ~2min
 | 0041 | Onda 2 UX — leitura da batalha: fim da duplicação dos painéis (partial único `_fighter_panel.erb` + `FighterPresenter`/`BattleLogPresenter` puros em `lib/`), barras visuais de HP/PP (tokens do draft-design-system §3), log das últimas 3 rodadas (mais recente no topo) e `hx-indicator` local no botão Jogar; `Move#pp_max` (default = pp) | Concluída | Done (passos 1–5 + ajuste S3 de layout em 3 colunas — Seu Time esq, controles centralizados + log centro, Oponente dir, tela cheia; suíte 680/2132, lint 0, validado em 2026-08-23) |
 | 0042 | Onda 1 UX — jornada visível (Caminho B): página única `/` de 2 colunas (busca + lista à esquerda, painel do time com contador n/6 + membros à direita), página `/team` removida (404 direto, fragmento htmx interno preservado), nav sem link "Time", estados do botão Add (default / "No time ✓" / cheio via `@team_names`) | Concluída | Done (passos 1–6 + ajustes S3 — add/remove re-renderizam `#pokemon-list` via `hx-swap-oob`, link "Gerenciar time" em `<p>` próprio; suíte 689/2184, lint 0, validado em 2026-08-24) |
 | 0043 | Estabilidade do banco (correção direta, fora da fila): fim do "too many clients" na suíte — `ConnectionRegistry` registra as conexões dos repositórios e o `after_teardown` fecha todas após cada teste (pico 74 → 9), 7 repositórios/seed registrando conexão; warnings de constante nos seeds eliminados (`unless defined?` em `saldo_inicial.rb`) | Concluída | Done (passos 1–2, suíte 692/2193, lint 0, validado em 2026-08-24) |
-| 0044 | Onda 3 UX — estrutura: grade uniforme de 6 colunas com páginas cheias (paginação sobre a lista filtrada, `PAGE_SIZE` 36 = grid 6×6; página 1 = 27 iniciais + 9 comuns) corrigindo o bug visual do item e os slots vazios + largura cheia do Histórico (`body.page-history`) | Implementação | **Concluída** — passos 1–3 + ajustes S3 em 2026-08-24 (suíte 694/2204, lint 0); aguardando validação do usuário |
+| 0044 | Onda 3 UX — estrutura: grade uniforme de 6 colunas com páginas cheias e paginação on-demand (`PAGE_SIZE` 36 = grid 6×6; página 1 = 27 iniciais + 9 comuns; cada página carrega só o próprio lote) corrigindo o bug visual do item e os slots vazios + largura cheia do Histórico (`body.page-history`); corrigidos também conexão PG por thread e banco de teste separado (fim do flakiness) | Implementação | **Concluída** — passos 1–3 + ajustes S3 em 2026-08-24 (suíte 694/2204, lint 0); aguardando validação do usuário |
 
 ## Estrutura do arquivo de sessão
 

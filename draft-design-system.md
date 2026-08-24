@@ -56,8 +56,9 @@ Trilha das barras: `#eee`; raio 4px; altura 8px (HP) / 6px (PP).
   > **Decisão da Onda 3 (sessão 0044, 2026-08-24):** implementado como **grade
   > uniforme de 6 colunas com páginas cheias** (`repeat(6, minmax(0, 1fr))`,
   > responsivo 6/3/1) e `PAGE_SIZE` 36 (grid 6×6; página 1 = 27 iniciais + 9
-  > comuns) — paginação sobre a **lista filtrada** (base forms, não-iniciais) em vez
-  > do auto-fill, que deixava a última linha parcial.
+  > comuns) com **paginação on-demand** — cada página escaneia `base_form?` em
+  > batchs até a própria janela ("Página X" sem total), em vez de filtrar toda a
+  > lista ou usar auto-fill (que deixava a última linha parcial).
 - Espaçamento: escala base 4px (usar 8/12/16/24 nos blocos; hoje há `1.5em`
   soltos que padronizam para 24px).
 - Botão desabilitado ("No time ✓"/time cheio): opacidade 0.6 + `cursor: not-allowed`.

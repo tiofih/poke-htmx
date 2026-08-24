@@ -87,14 +87,16 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
 
 ### Resultado
 
-- [x] **C1 — Grade uniforme de 6 colunas, páginas sempre cheias (36 = grid 6×6)**:
-      paginação sobre a **lista filtrada** (base forms, não-iniciais) — página 1 =
-      27 iniciais + 9 comuns = **36** (grid fechado), páginas seguintes = **36
-      comuns** (`PAGE_SIZE = 36`, `FIRST_PAGE_COMMONS = 9`); busca com filtro = 36/
-      página sem iniciais; **iniciais só na 1ª página** (`@q.empty? && @offset.zero?`);
-      responsivo 6/3/1 colunas também divide 36. Itens `list-item`/`starter-item` com
-      sprite+nome+botão alinhados (fim do bug visual). Estrutura preservada — prova:
-      `manual` (visual; páginas cheias) + `test/pokemon_routes_test.rb`
+- [x] **C1 — Grade uniforme de 6 colunas, páginas cheias, paginação on-demand**:
+      página 1 = 27 iniciais + 9 comuns = **36** (grid 6×6), páginas seguintes =
+      **36 comuns** (`PAGE_SIZE = 36`, `FIRST_PAGE_COMMONS = 9`); **cada página
+      carrega só o próprio lote** — scan de `base_form?` em batchs até a janela da
+      página (`SCAN_BATCH = 24`), próximo lote sob demanda no clique; sem total de
+      páginas ("Página X"); iniciais só na 1ª página (`@q.empty? && @offset.zero?`);
+      busca filtrada = 36 sem iniciais; responsivo 6/3/1 divide 36. Itens
+      `list-item`/`starter-item` com sprite+nome+botão alinhados (fim do bug
+      visual). Estrutura preservada — prova: `manual` (visual; páginas cheias,
+      cargas rápidas) + `test/pokemon_routes_test.rb`
       (`test_pokemons_renders_clickable_list`, `test_pokemons_starters_only_on_first_page`,
       `test_pokemons_middle_page_has_previous_and_next_links`,
       `test_pokemons_last_page_has_no_next_link`).
@@ -174,6 +176,16 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
   Testes de paginação atualizados (250 nomes → 8 páginas; página 1 = 27+9). Suíte
   694/2204, lint 0 (rodada com `web` parado — flakiness conhecida do container
   ativo). **Revalidação do usuário pendente.**
+- **2026-08-24 — Ajuste S3 (validação — reabre/amenda C1):** o usuário pediu
+  **paginação on-demand** — cada página deve carregar só o suficiente para ela
+  própria, próximo lote sob demanda (a 1ª carga que varria ~1300 nomes com
+  `base_form?` levava 2–5 min). **Correção:** fim do filtro de toda a lista;
+  `fetch_commons` escaneia `common_candidates` em batchs de `SCAN_BATCH = 24`
+  (paralelos) até coletar `offset + count` formas base e devolve **só a janela da
+  página**; **"Página X" sem total** (`@current_page`/`@prev_offset`/`@next_offset`,
+  `more` indica se há próxima); página 1 = 27 iniciais + 9 comuns. Testes de
+  paginação atualizados (sem "de 8"; suíte 694/2204, lint 0). **Revalidação do
+  usuário pendente.**
 
 ## 6. Plano TDD (passos)
 
@@ -201,6 +213,18 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
 
 ## 8. Observações
 
+- **Correções de estabilidade feitas durante a validação (fora do critério,
+  produção):** (a) **conexão PG por thread** — `ConnectionRegistry` passou a
+  registrar `[owner, thread]` (`connection_for`) e os 7 repositórios/seed usam
+  `Thread.current.object_id`; o compartilhamento de 1 conexão entre as threads do
+  Puma corrompia o protocolo ("message type 0x44... while idle" → `NoMethodError:
+  undefined method 'map' for nil` em `TeamRepository#all`); (b) **timeout de 15s**
+  no HTTP da gateway (`PokeApiHttp::HTTP_TIMEOUT`) — request pendurado não trava a
+  listagem; (c) **banco de teste separado** (`pokedex_test`, criado on-demand via
+  `TestDatabase.ensure_database!`) — a suíte não disputa locks/dados com o app
+  ativo, fim do hang/flakiness com o `web` rodando (o workaround
+  `docker compose stop web` não é mais necessário; suíte roda verde com `web`
+  ativo).
 - Grid/estilo de Detalhe e Manage ficam de fora: são fragmentos dentro da `/` (já em
   largura cheia desde 0042). Batalha não muda (3 colunas desde 0041).
 - Prova do grid é `manual` (CSS puro não é coberto por Minitest) — S1 exige `manual`
