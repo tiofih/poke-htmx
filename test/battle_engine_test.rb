@@ -475,6 +475,47 @@ class BattleEngineItemTest < Minitest::Test
     assert_empty engine.items_used
     assert_equal({ "potion" => 2 }, engine.items)
   end
+
+  def test_member_uses_item_at_most_once_per_battle
+    engine = engine_with(items: { "potion" => 2 })
+
+    engine.play_round
+    engine.play_round
+
+    assert_equal({ "potion" => 1 }, engine.items, "estoque sobrando, mas 2o uso bloqueado")
+    assert_equal({ "potion" => 1 }, engine.items_used, "so um uso por membro por batalha")
+    assert_equal(1, engine.log.count { |entry| entry[:action] == :item })
+  end
+
+  def test_other_members_can_still_use_their_one_item
+    second = build_pokemon(number: 3, name: "pika2", types: ["electric"],
+                           hp: 100, speed: 4, attack: 50, defense: 100).new(hp_current: 30)
+    engine = BattleEngine.new(
+      team_a: [potion_fighter, second],
+      team_b: [weak_opponent],
+      effectiveness: type_effectiveness,
+      items: { "potion" => 3 }
+    )
+
+    engine.play_round
+
+    assert_equal({ "potion" => 1 }, engine.items, "os dois membros usam 1 item cada")
+    assert_equal({ "potion" => 2 }, engine.items_used)
+    assert_equal(2, engine.log.count { |entry| entry[:action] == :item })
+  end
+
+  def test_assigned_item_counts_as_single_use
+    fighter = potion_fighter(current: 30).new(assigned_item: "potion")
+    engine = engine_with(items: { "potion" => 2 }, fighter: fighter)
+
+    engine.play_round
+    engine.play_round
+
+    assert_equal "potion", engine.used_item_for(0, 0)
+    assert engine.member_used_item?(0, 0)
+    assert_equal({ "potion" => 1 }, engine.items, "atribuido na 1a rodada bloqueia na 2a")
+    assert_equal({ "potion" => 1 }, engine.items_used)
+  end
 end
 
 class BattleEngineHeldItemTest < Minitest::Test

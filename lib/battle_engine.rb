@@ -107,8 +107,9 @@ end
 module BattleItemActions
   private
 
-  def item_use_for(attacker_team_index, attacker)
+  def item_use_for(attacker_team_index, attacker_index, attacker)
     return nil unless attacker_team_index.zero?
+    return nil if @items_used_by_member[[attacker_team_index, attacker_index]]
 
     item = @item_policy.decide(member: attacker, stock: @items)
     item if item && @items[item].to_i.positive?
@@ -119,6 +120,7 @@ module BattleItemActions
     @teams[attacker_team_index][attacker_index] = attacker.heal(healed)
     @items[item_name] -= 1
     @items_used[item_name] = @items_used.fetch(item_name, 0) + 1
+    @items_used_by_member[[attacker_team_index, attacker_index]] = item_name
     @log << {
       round: round, attacker: attacker_team_index, action: :item,
       item: item_name, healed: healed, attacker_name: attacker.name
@@ -147,6 +149,7 @@ class BattleEngine
     @log = []
     @items = items.dup
     @items_used = {}
+    @items_used_by_member = {}
     @item_policy = item_policy
   end
 
@@ -172,6 +175,14 @@ class BattleEngine
   end
 
   attr_reader :log, :teams, :items, :items_used
+
+  def member_used_item?(team_index, member_index)
+    !used_item_for(team_index, member_index).nil?
+  end
+
+  def used_item_for(team_index, member_index)
+    @items_used_by_member[[team_index, member_index]]
+  end
 
   def replace_team_a(new_team)
     @teams[0] = new_team.dup
@@ -219,7 +230,7 @@ class BattleEngine
 
   def act(attacker_team_index, attacker_index, round)
     attacker = @teams[attacker_team_index][attacker_index]
-    item_name = item_use_for(attacker_team_index, attacker)
+    item_name = item_use_for(attacker_team_index, attacker_index, attacker)
     if item_name
       item_action(attacker_team_index, attacker_index, attacker, item_name, round)
     else
