@@ -153,7 +153,7 @@ sessão única** quando o usuário decidir encaixá-la (fora da ordem JN-2 → J
 | Onda | Itens | Por quê nessa ordem |
 | --- | --- | --- |
 | **0 — quick wins** *(feita — sessão 0038, **concluída e validada em 2026-08-22**)* | `alt`/`aria-label`, `loading="lazy"`, indicador global (`hx-indicator`), hierarquia de notices + copy pt-BR, evoluções linkadas no detalhe | só view/CSS, baixo risco; base visual para tudo abaixo |
-| **1 — jornada visível** | contador/barra "Time n/6" + **strip de sprites do time** (listagem + nav + team), estados do botão Add (default / "No time ✓" / cheio) — **ou unificar Lista+Time** (decisão do usuário 2026-08-22; ver §2.2) | conecta o gate à descoberta; reusa `JourneyService`; precisa expor `@team_names`/`@journey_started` nos renders |
+| **1 — jornada visível** *(feita — sessão 0042, **Caminho B: Lista+Time unificados**, implementada em 2026-08-24)* | contador/barra "Time n/6" + painel do time na própria Lista, **ou unificar Lista+Time** (decisão do usuário 2026-08-22; ver §2.2) | conecta o gate à descoberta; reusa `JourneyService`; precisa expor `@team_names`/`@journey_started` nos renders |
 | **2 — leitura da batalha** *(feita — sessão 0041, **implementada em 2026-08-23, suíte 680/2132, lint 0; aguardando validação**)* | partial única dos painéis (+presenter), barras HP/PP, log das últimas N rodadas | mata duplicação antes de qualquer feature nova de batalha |
 | **3 — estrutura** *(parcial — nav ativo + fim do hack de limpeza feitos via JN-1/sessão 0039, **validados em 2026-08-22**; grid responsivo pendente)* | estado ativo no nav + limpeza sistemática de painéis, grid responsivo da listagem | polimento estrutural; depende só de CSS/markup |
 | Dependentes da fila | JN-2 (golpes em lista), JN-1 (telas próprias), JN-4 (componentes Mart/Center), J3 (ranking S–F), J4 (nome/apelido) | ordem fechada em 2026-08-18 mantida |
@@ -164,5 +164,9 @@ necessários às ondas 0–2 estão anotados em `draft-design-system.md`.
 **Decisão do usuário (2026-08-22):** ondas 0–3 entram **depois da fila fechada**
 (JN-2 → J3 → JN-1), na ordem da tabela; contador n/6 em nav + listagem/team;
 gerenciar time permanece livre pré-jornada (detalhes no `draft-wireframes.md` §8).
+**Decisão do usuário (2026-08-24 — Onda 1/Caminho B):** unificar a Lista com o Time
+na mesma tela (página única `/` de 2 colunas) em vez de contador/strip na lista
+mantendo `/team` página própria — sessão 0042. A página `/team` deixa de ser página
+(404 em navegação direta); vira fragmento htmx interno (`#team-view`).
 
 ---

@@ -123,3 +123,12 @@ deltas:
 **Notas do alvo:** estados do botão Add exigem expor a composição atual do time no
 render da listagem (ex.: `@team_names`); progresso n/6 reutiliza `JourneyService`.
 Nada disso altera contratos do gateway.
+
+**Caminho B executado (sessão 0042, 2026-08-24):** em vez do contador/strip apenas
+na listagem, a **Lista e o Time foram unificados na mesma página** (`GET /`):
+busca + lista à esquerda e **painel do time à direita** (`#team-view`, contador
+"Time n/6" + membros com reordenar/remover + Center/Mart gated). A página `/team`
+deixou de existir (404 em navegação direta; `GET /team` permanece como fragmento
+htmx interno). O nav perdeu o link "Time". Estados do botão Add implementados
+(default "Adicionar ao time" / "No time ✓" desabilitado quando no time / todos
+desabilitados quando o time está cheio). Ver `sessions/0042-onda1-jornada-visivel.md`.

@@ -39,6 +39,15 @@ blocks:
 **Notas:** as setas ✓/▼ só aparecem para slots com vizinho movível na UI (rota valida);
 `POST /:id/move` re-renderiza a lista reordenada.
 
+**Caminho B executado (sessão 0042, 2026-08-24):** `GET /team` **não é mais página
+própria** — em navegação direta devolve **404**; continua como **fragmento htmx
+interno** (requisição com `HX-Request`) renderizado dentro de `#team-view` na
+**página unificada `GET /`** (2 colunas: Lista à esquerda, Time à direita). O contador
+"Time n/6" aparece no topo do fragmento quando a jornada não começou. O add na lista
+(`POST /team`) devolve mini-status **+ `#team-view` com `hx-swap-oob`** (painel
+reflete o novo membro na mesma tela). O nav não tem mais link "Time". Ver
+`sessions/0042-onda1-jornada-visivel.md`.
+
 ---
 
 ## Desenho alvo — time (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.4)

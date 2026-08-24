@@ -4,9 +4,9 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | Em andamento |
-| Implementação | Pendente |
-| Validação | Pendente — executada pelo usuário |
+| Refinamento | **Concluída** — decisões do usuário em 2026-08-24 |
+| Implementação | **Concluída** — passos 1–6 em 2026-08-24 (suíte 686/2163, lint 0) |
+| Validação | **Pendente** — executada pelo usuário (fase 3) |
 
 ---
 
@@ -104,33 +104,36 @@ Reusa `JourneyService` e o `@team` já carregado; contrato do gateway intacto.
 
 ### Resultado
 
-- [ ] **C1 — Página `/` unificada com painel do time**: `GET /` renderiza busca +
+- [x] **C1 — Página `/` unificada com painel do time**: `GET /` renderiza busca +
       lista + `#team-view` com o time do usuário (membros, reordenar/remover,
       contador "Time n/6" quando pré-jornada) — prova: `test/pokemon_routes_test.rb`
-      (assert de `#team-view` e membros no body de `/`).
-- [ ] **C2 — Página `/team` removida (404 em navegação direta)**: `GET /team`
+      (`test_index_renders_team_panel_with_counter_when_not_started`,
+      `test_index_team_panel_shows_members`).
+- [x] **C2 — Página `/team` removida (404 em navegação direta)**: `GET /team`
       sem `HX-Request` → 404; com `HX-Request` → fragmento `team.erb` — prova:
-      `test/team_routes_test.rb` (`get "/team"` não-htmx → status 404; htmx →
-      ok + alvos `#team-view`).
-- [ ] **C3 — Nav sem link "Time"**: layout não renderiza `href="/team"`; link
+      `test/team_routes_test.rb` (`test_team_page_is_removed_and_returns_404_without_htmx`;
+      fragmentos via `htmx_session`).
+- [x] **C3 — Nav sem link "Time"**: layout não renderiza `href="/team"`; link
       "Lista" (`/`) ativo na página `/` — prova: `test/pokemon_routes_test.rb`
-      (`test_layout_marks_active_nav_link_on_list_page` atualizado).
-- [ ] **C4 — Estados do botão Add**: default "Adicionar ao time"; `in-team`
+      (`test_nav_has_no_time_link_after_unification`,
+      `test_layout_marks_active_nav_link_on_list_page`,
+      `test_index_has_header_navigation_links` atualizados).
+- [x] **C4 — Estados do botão Add**: default "Adicionar ao time"; `in-team`
       ("No time ✓", `disabled`) quando o Pokémon já está no time; `full`
-      (desabilitado) quando `@team.size >= 6` — prova: teste de listagem/Add
-      (novo `test/list_add_states_test.rb` ou extends em
-      `test/pokemon_routes_test.rb`).
-- [ ] **C5 — Ações do time atualizam `#team-view` na página unificada**: após add
+      (desabilitado) quando `@team.size >= 6` — prova:
+      `test/pokemon_routes_test.rb` (`test_pokemons_add_button_shows_in_team_when_pokemon_in_team`,
+      `test_pokemons_add_buttons_disabled_when_team_full`).
+- [x] **C5 — Ações do time atualizam `#team-view` na página unificada**: após add
       (`POST /team`), o painel do time na `/` reflete o novo membro (mini-status
-      preservado + `#team-view` atualizado) — prova: `test/pokemon_routes_test.rb`
-      (após `POST /team`, body contém o novo membro no `#team-view`).
+      preservado + `#team-view` atualizado) — prova: `test/team_routes_test.rb`
+      (`test_post_team_includes_team_view_out_of_band_swap`).
 
 ### Garantias (RNF)
 
-- [ ] Suíte completa verde com **baseline preservado (680 runs/2132 asserts)** +
+- [x] Suíte completa verde com **baseline preservado (680 runs/2132 asserts)** +
       novos testes e lint 0 em **todo** green; commit obrigatório por passo; 0 regressão.
-- [ ] Sem gems novas / sem mudança de schema / testes sem rede / sem `rubocop:disable`.
-- [ ] `REQUIREMENTS.md` + `SESSIONS.md` + `draft-ui-ux.md` (Onda 1 marcada) +
+- [x] Sem gems novas / sem mudança de schema / testes sem rede / sem `rubocop:disable`.
+- [x] `REQUIREMENTS.md` + `SESSIONS.md` + `draft-ui-ux.md` (Onda 1 marcada) +
       `docs/screens/pokemon-list.md` + `docs/screens/team.md` atualizados no passo
       docs; status de validação só após o usuário validar (S4).
 
@@ -180,7 +183,7 @@ Reusa `JourneyService` e o `@team` já carregado; contrato do gateway intacto.
 | C1 página `/` unificada com `#team-view` | `test/pokemon_routes_test.rb` | `/` em tela cheia: busca + lista à esquerda, time (n/6 + membros) à direita |  |
 | C2 `/team` 404 direto / fragmento htmx | `test/team_routes_test.rb` | abrir `/team` no browser → 404; ações do time continuam atualizando o painel |  |
 | C3 nav sem link "Time" | `test/pokemon_routes_test.rb` | nav mostra Lista/Batalha/Histórico; Lista ativa |  |
-| C4 estados do botão Add | `test/list_add_states_test.rb` | na lista, Pokémon no time mostra "No time ✓" desabilitado; time cheio desabilita todos |  |
+| C4 estados do botão Add | `test/pokemon_routes_test.rb` | na lista, Pokémon no time mostra "No time ✓" desabilitado; time cheio desabilita todos |  |
 | C5 add atualiza `#team-view` | `test/pokemon_routes_test.rb` | ao adicionar, mini-status + painel do time atualizam na mesma tela |  |
 
 ## 8. Observações
@@ -194,5 +197,6 @@ Reusa `JourneyService` e o `@team` já carregado; contrato do gateway intacto.
   (sem novo contrato de gateway).
 - Largura cheia aplicada **só** na página `/` (anotação 0041 §8: Histórico/Detalhe/
   Manage ficam para onda futura).
-- `test/team_page_renders_full_page_with_team_view` (team_routes_test.rb:171) será
-  substituído por assert de 404 — evidência automatizada de C2.
+- `test/team_page_renders_full_page_with_team_view` (team_routes_test.rb) foi
+  substituído por `test_team_page_is_removed_and_returns_404_without_htmx` —
+  evidência automatizada de C2.
