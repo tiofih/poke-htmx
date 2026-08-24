@@ -52,7 +52,7 @@ class ServerMartTest < Minitest::Test
     @repository.add("user-a", pikachu_pokemon)
     @wallet.grant("user-a", 100)
 
-    get "/team", {}, user_session("user-a")
+    get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Mart"

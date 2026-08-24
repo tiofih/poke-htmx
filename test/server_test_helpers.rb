@@ -40,6 +40,10 @@ module ServerTestHelpers
     { "rack.session" => { "user_id" => user_id } }
   end
 
+  def htmx_session(user_id)
+    user_session(user_id).merge("HTTP_HX_REQUEST" => "true")
+  end
+
   def two_hundred_fifty_names
     (1..250).map { |index| "pokemon#{index}" }
   end

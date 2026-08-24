@@ -125,7 +125,7 @@ module ServerTeamActions
     prepare_team_fragment_data
     return erb :team, layout: false if htmx_request?
 
-    erb :team_page
+    halt 404, "Página não encontrada."
   end
 
   def mart_data

@@ -137,7 +137,7 @@ class ServerTeamTest < Minitest::Test
   def test_get_team_returns_own_session_team
     @repository.add("user-a", pikachu_pokemon)
 
-    get "/team", {}, user_session("user-a")
+    get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "pikachu"
@@ -147,7 +147,7 @@ class ServerTeamTest < Minitest::Test
   def test_get_team_is_isolated_per_session
     @repository.add("user-a", pikachu_pokemon)
 
-    get "/team", {}, user_session("user-b")
+    get "/team", {}, htmx_session("user-b")
 
     assert last_response.ok?
     refute_includes last_response.body, "pikachu"
@@ -168,24 +168,22 @@ class ServerTeamTest < Minitest::Test
     assert_includes last_response.body, "bulbasaur"
   end
 
-  def test_team_page_renders_full_page_with_team_view
+  def test_team_page_is_removed_and_returns_404_without_htmx
     start_journey("user-a")
     add_team("user-a", [["pikachu", 25]])
 
-    get "/team", {}, user_session("user-a")
+    env = user_session("user-a")
+    get "/team", {}, env
 
-    assert last_response.ok?
-    assert_includes last_response.body, "<html"
-    assert_includes last_response.body, 'href="/team" class="active"'
-    assert_includes last_response.body, 'id="team-view"'
-    assert_includes last_response.body, "pikachu"
+    assert_equal 404, last_response.status
+    refute_includes last_response.body, 'id="team-view"'
   end
 
   def test_team_fragment_renders_slot_badge_and_ordered_by_slot
     @repository.add("user-a", bulbasaur_pokemon)
     @repository.add("user-a", pikachu_pokemon)
 
-    get "/team", {}, user_session("user-a")
+    get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "#1"
@@ -197,7 +195,7 @@ class ServerTeamTest < Minitest::Test
   def test_team_member_sprite_and_name_are_plain_on_team_screen
     @repository.add("user-a", pikachu_pokemon)
 
-    get "/team", {}, user_session("user-a")
+    get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
     refute_includes last_response.body, 'hx-get="/pokemon/25"'
@@ -207,7 +205,7 @@ class ServerTeamTest < Minitest::Test
   def test_team_member_sprite_is_plain_image_not_link
     @repository.add("user-a", pikachu_pokemon)
 
-    get "/team", {}, user_session("user-a")
+    get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
     refute_includes last_response.body, 'hx-get="/pokemon/25"'
@@ -265,7 +263,7 @@ class ServerTeamTest < Minitest::Test
     start_journey("user-a")
     add_team("user-a", [["pikachu", 25], ["bulbasaur", 1], ["charmander", 4], ["squirtle", 7]])
 
-    get "/team", {}, user_session("user-a")
+    get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
     assert_equal 9, last_response.body.scan("hx-post=\"/team/").size
@@ -279,7 +277,7 @@ class ServerTeamTest < Minitest::Test
     start_journey("user-a")
     add_team("user-a", [["pikachu", 25]])
 
-    get "/team", {}, user_session("user-a")
+    get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
     assert_match(/<img[^>]+alt="pikachu"/, last_response.body)
@@ -289,7 +287,7 @@ class ServerTeamTest < Minitest::Test
     start_journey("user-a")
     add_team("user-a", [["pikachu", 25]])
 
-    get "/team", {}, user_session("user-a")
+    get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, 'aria-label="Mover para cima"'
@@ -389,7 +387,7 @@ class ServerTeamTest < Minitest::Test
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
 
-    get "/team", {}, user_session("user-a")
+    get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
@@ -398,7 +396,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_fragment_omits_heal_button_for_empty_team
-    get "/team", {}, user_session("user-a")
+    get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
     refute_includes last_response.body, "Poke Center"
@@ -478,7 +476,7 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
   def test_team_fragment_hides_center_and_mart_before_journey
     @repository.add("user-novo", pikachu_pokemon)
 
-    get "/team", {}, user_session("user-novo")
+    get "/team", {}, htmx_session("user-novo")
 
     assert last_response.ok?
     refute_includes last_response.body, "Poke Center"
@@ -493,7 +491,7 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
     @repository.add("user-a", pikachu_pokemon)
     @wallet.grant("user-a", 100)
 
-    get "/team", {}, user_session("user-a")
+    get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
