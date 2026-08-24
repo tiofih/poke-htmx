@@ -181,6 +181,8 @@ gems novas, domínio puro + motor + view.
   permitido — hoje `assign_item`/`assign_held_item` não respeitam a quantidade do
   estoque, e o select do `team_manage.erb` não indica item/segurável já em uso (nem
   quantidade livre). Regra do usuário: itens/seguráveis são **por poke** (cada poke
-  equipa 1 de cada), e os pokes só equipam **conforme a quantidade disponível no
-  time** (estoque). Candidata a sessão própria (JN-3-B); **não** implementada nesta
+  equipa 1 de cada), os pokes só equipam **conforme a quantidade disponível no time**
+  (estoque), **equipar debita do estoque**, itens usados em batalha são **consumidos**
+  e seguráveis **continuam equipados/ativos até serem desequipados** (desequipar
+  repõe a unidade). Candidata a sessão própria (JN-3-B); **não** implementada nesta
   sessão.
