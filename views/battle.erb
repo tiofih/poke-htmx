@@ -6,7 +6,7 @@
 
   <div class="battle-layout">
     <div class="battle-column">
-      <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", presenters: @engine.teams[0].map { |poke| FighterPresenter.new(poke) } } %>
+      <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", presenters: @engine.teams[0].each_with_index.map { |poke, index| FighterPresenter.new(poke, item_used: @engine.member_used_item?(0, index)) } } %>
 
       <% unless @engine.items.empty? %>
         <p class="stock-items">Itens:

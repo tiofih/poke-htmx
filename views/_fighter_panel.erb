@@ -9,6 +9,7 @@
         <span class="bar-fill" style="width: <%= fighter.hp_percent %>%"></span>
       </span>
       <span class="hp-text">HP <%= fighter.hp_label %></span>
+      <% unless fighter.item_used_badge.nil? %><span class="item-used-badge"><%= fighter.item_used_badge %></span><% end %>
       <% unless fighter.assigned_item_label.nil? %> — carrega: <%= fighter.assigned_item_label %><% end %>
       <% unless fighter.held_item_label.nil? %> — segura: <%= fighter.held_item_label %><% end %>
     </p>

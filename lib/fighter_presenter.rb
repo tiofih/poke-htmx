@@ -3,8 +3,9 @@
 require_relative "item_catalog"
 
 class FighterPresenter
-  def initialize(pokemon)
+  def initialize(pokemon, item_used: false)
     @pokemon = pokemon
+    @item_used = item_used
   end
 
   def name
@@ -47,6 +48,14 @@ class FighterPresenter
 
   def held_item_label
     item_label(@pokemon.held_item)
+  end
+
+  def item_used?
+    @item_used
+  end
+
+  def item_used_badge
+    "já usou item" if item_used?
   end
 
   private

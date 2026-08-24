@@ -69,6 +69,30 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_equal 2, TestDatabase.inventory_quantity("user-a", "potion"), "nada debitado sem item usado"
   end
 
+  def test_battle_panel_shows_item_used_badge_after_member_uses_item
+    @repository.add("user-a", pikachu_pokemon)
+    member_id = @repository.all("user-a").first.id
+    @progression.update_hp("user-a", member_id, 200, 90)
+    @inventory.add("user-a", "potion", 2)
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "usou Pocao"
+    assert_includes last_response.body, "já usou item"
+  end
+
+  def test_battle_panel_has_no_item_used_badge_before_any_use
+    @repository.add("user-a", pikachu_pokemon)
+    @inventory.add("user-a", "potion", 2)
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    refute_includes last_response.body, "já usou item"
+  end
+
   def test_battle_start_loads_into_panel_without_clearing_nav
     @repository.add("user-a", pikachu_pokemon)
 

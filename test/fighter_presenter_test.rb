@@ -123,4 +123,18 @@ class FighterPresenterTest < Minitest::Test
     assert_nil presenter.assigned_item_label
     assert_nil presenter.held_item_label
   end
+
+  def test_item_used_defaults_false
+    presenter = FighterPresenter.new(build_fighter(hp_current: 200, hp_max: 200))
+
+    refute presenter.item_used?
+    assert_nil presenter.item_used_badge
+  end
+
+  def test_item_used_badge_when_flagged
+    presenter = FighterPresenter.new(build_fighter(hp_current: 200, hp_max: 200), item_used: true)
+
+    assert presenter.item_used?
+    assert_equal "já usou item", presenter.item_used_badge
+  end
 end
