@@ -256,9 +256,9 @@ class ServerListTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, 'id="pokemon-list"'
     assert_equal 27, last_response.body.scan('<li class="starter-item">').size
-    assert_equal 30, last_response.body.scan('<li class="list-item">').size
+    assert_equal 9, last_response.body.scan('<li class="list-item">').size
     assert_includes last_response.body, 'name="q"'
-    assert_includes last_response.body, "Página 1 de 9"
+    assert_includes last_response.body, "Página 1 de 8"
     refute_dropdown_markup(last_response.body)
   end
 
@@ -383,7 +383,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_equal 30, last_response.body.scan('loading="lazy"').size
+    assert_equal 36, last_response.body.scan('loading="lazy"').size
   end
 
   def test_index_has_global_loading_indicator
@@ -415,12 +415,12 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_equal 30, last_response.body.scan('<li class="list-item">').size
-    assert_equal 30, last_response.body.scan("hx-get=\"/pokemon/").size
-    assert_equal 30, last_response.body.scan("<img src=").size
-    assert_equal 30, last_response.body.scan('name="pokeName"').size
+    assert_equal 36, last_response.body.scan('<li class="list-item">').size
+    assert_equal 36, last_response.body.scan("hx-get=\"/pokemon/").size
+    assert_equal 36, last_response.body.scan("<img src=").size
+    assert_equal 36, last_response.body.scan('name="pokeName"').size
     assert_includes last_response.body, 'hx-post="/team"'
-    assert_includes last_response.body, "Página 1 de 9"
+    assert_includes last_response.body, "Página 1 de 7"
     refute_dropdown_markup(last_response.body)
     refute_includes last_response.body, "<html"
   end
@@ -431,7 +431,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_equal 30, last_response.body.scan("Adicionar ao time").size
+    assert_equal 36, last_response.body.scan("Adicionar ao time").size
   end
 
   def test_pokemons_add_button_shows_in_team_when_pokemon_in_team
@@ -511,35 +511,36 @@ class ServerListTest < Minitest::Test
 
   def test_pokemons_starters_only_on_first_page
     stub_list(two_hundred_fifty_names) do
-      get "/pokemons", offset: 30
+      get "/pokemons", offset: 9
     end
 
     assert last_response.ok?
     refute_includes last_response.body, "Iniciais"
     assert_empty last_response.body.scan('<li class="starter-item">')
-    assert_equal 30, last_response.body.scan('<li class="list-item">').size
+    assert_equal 36, last_response.body.scan('<li class="list-item">').size
+    assert_includes last_response.body, "Página 2 de 8"
   end
 
   def test_pokemons_middle_page_has_previous_and_next_links
     stub_list(two_hundred_fifty_names) do
-      get "/pokemons", offset: 30
+      get "/pokemons", offset: 9
     end
 
     assert last_response.ok?
     assert_includes last_response.body, "offset=0"
-    assert_includes last_response.body, "offset=60"
-    assert_includes last_response.body, "Página 2 de 9"
+    assert_includes last_response.body, "offset=45"
+    assert_includes last_response.body, "Página 2 de 8"
     assert_includes last_response.body, ">Anterior<"
     assert_includes last_response.body, ">Próxima<"
   end
 
   def test_pokemons_last_page_has_no_next_link
     stub_list(two_hundred_fifty_names) do
-      get "/pokemons", offset: 240
+      get "/pokemons", offset: 225
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, "Página 9 de 9"
+    assert_includes last_response.body, "Página 8 de 8"
     refute_includes last_response.body, ">Próxima<"
     assert_includes last_response.body, ">Anterior<"
   end

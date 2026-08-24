@@ -21,11 +21,11 @@
   </ul>
 </div>
 <div class="pagination">
-  <% if @offset.positive? %>
-    <a href="#" hx-get="/pokemons?offset=<%= @offset - @limit %>&q=<%= @q %>" hx-target="#pokemon-list" hx-swap="innerHTML">Anterior</a>
+  <% if @prev_offset %>
+    <a href="#" hx-get="/pokemons?offset=<%= @prev_offset %>&q=<%= @q %>" hx-target="#pokemon-list" hx-swap="innerHTML">Anterior</a>
   <% end %>
-  Página <%= (@offset / @limit) + 1 %> de <%= (@page[:total].to_f / @limit).ceil %>
-  <% if (@offset + @limit) < @page[:total] %>
-    <a href="#" hx-get="/pokemons?offset=<%= @offset + @limit %>&q=<%= @q %>" hx-target="#pokemon-list" hx-swap="innerHTML">Próxima</a>
+  Página <%= @current_page %> de <%= @total_pages %>
+  <% if @next_offset %>
+    <a href="#" hx-get="/pokemons?offset=<%= @next_offset %>&q=<%= @q %>" hx-target="#pokemon-list" hx-swap="innerHTML">Próxima</a>
   <% end %>
 </div>

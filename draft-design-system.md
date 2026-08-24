@@ -54,9 +54,10 @@ Trilha das barras: `#eee`; raio 4px; altura 8px (HP) / 6px (PP).
   `12px` — alinha com `.battle-pane` existente.
 - Grid da listagem: `repeat(auto-fill, minmax(180px, 1fr))`, gap `12px`.
   > **Decisão da Onda 3 (sessão 0044, 2026-08-24):** implementado como **grade
-  > uniforme de 6 colunas em todas as páginas** (`repeat(6, minmax(0, 1fr))`,
-  > responsivo 6/3/1), com `PAGE_SIZE` 30 (5 linhas; todos os colapsos dividem 30)
-  > — em vez do auto-fill (que deixava a última linha parcial).
+  > uniforme de 6 colunas com páginas cheias** (`repeat(6, minmax(0, 1fr))`,
+  > responsivo 6/3/1) e `PAGE_SIZE` 36 (grid 6×6; página 1 = 27 iniciais + 9
+  > comuns) — paginação sobre a **lista filtrada** (base forms, não-iniciais) em vez
+  > do auto-fill, que deixava a última linha parcial.
 - Espaçamento: escala base 4px (usar 8/12/16/24 nos blocos; hoje há `1.5em`
   soltos que padronizam para 24px).
 - Botão desabilitado ("No time ✓"/time cheio): opacidade 0.6 + `cursor: not-allowed`.

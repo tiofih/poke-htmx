@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-24 |
-| Implementação | **Concluída** — passos 1–3 em 2026-08-24 + ajustes S3 (suíte 694/2202, lint 0) |
+| Implementação | **Concluída** — passos 1–3 em 2026-08-24 + ajustes S3 (suíte 694/2204, lint 0) |
 | Validação | **Pendente** (executada pelo usuário) |
 
 ---
@@ -87,16 +87,17 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
 
 ### Resultado
 
-- [x] **C1 — Grid uniforme de 6 colunas em todas as páginas (6 pokes por linha)**:
-      iniciais e comuns na **mesma grade** (`display: contents` num `.pokemon-grid`),
-      `PAGE_SIZE = 30` (5 linhas de 6 por página; responsivo 6/3/1 colunas também
-      divide 30). **Iniciais apenas na 1ª página** (`@q.empty? && @offset.zero?`).
-      Itens `list-item`/`starter-item` com sprite+nome+botão alinhados (fim do bug
-      visual). Estrutura preservada (`<ul class="pokemon-list">`,
-      `<li class="list-item">`) — prova: `manual` (visual; 6 por linha em todas as
-      páginas) + `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list`,
-      `test_pokemons_starters_only_on_first_page`,
-      `test_pokemons_middle_page_has_previous_and_next_links`).
+- [x] **C1 — Grade uniforme de 6 colunas, páginas sempre cheias (36 = grid 6×6)**:
+      paginação sobre a **lista filtrada** (base forms, não-iniciais) — página 1 =
+      27 iniciais + 9 comuns = **36** (grid fechado), páginas seguintes = **36
+      comuns** (`PAGE_SIZE = 36`, `FIRST_PAGE_COMMONS = 9`); busca com filtro = 36/
+      página sem iniciais; **iniciais só na 1ª página** (`@q.empty? && @offset.zero?`);
+      responsivo 6/3/1 colunas também divide 36. Itens `list-item`/`starter-item` com
+      sprite+nome+botão alinhados (fim do bug visual). Estrutura preservada — prova:
+      `manual` (visual; páginas cheias) + `test/pokemon_routes_test.rb`
+      (`test_pokemons_renders_clickable_list`, `test_pokemons_starters_only_on_first_page`,
+      `test_pokemons_middle_page_has_previous_and_next_links`,
+      `test_pokemons_last_page_has_no_next_link`).
 - [x] **C2 — Largura cheia do Histórico**: `GET /history` (não-htmx) renderiza
       `<body class="page-history">` → `body.page-history { max-width: none }` —
       prova: `test/history_routes_test.rb` (`test_history_page_uses_full_width_body_class`).
@@ -159,6 +160,20 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
   cap de largura; `@starters` continua só na 1ª página. Testes de paginação
   atualizados (13 → 9 páginas para 250 nomes; 20 → 30 itens/página; suíte
   694/2202, lint 0). **Revalidação do usuário pendente.**
+- **2026-08-24 — Ajuste S3 (validação — reabre/amenda C1):** o usuário reportou
+  página 1 com **35 pokes** (não fechava o grid 6×6) e página 2 com **12 pokes** —
+  causa: a paginação contava **nomes crus** (30) e filtrava depois
+  (`base_form?`/iniciais), então as páginas não fechavam. Pedido: página 1 =
+  **36 no total** e páginas cheias, **aceitando custo de performance**. **Correção:**
+  paginação passa a operar sobre a **lista já filtrada** (`fetch_all_names` → exclui
+  iniciais → `base_form?`; custo aceito, `base_form?`/nomes cacheados TTL 600);
+  `PAGE_SIZE = 36`; página 1 = 27 iniciais + 9 comuns = 36 (grid 6×6 fechado,
+  `FIRST_PAGE_COMMONS = 9`), páginas 2+ = 36 comuns (offset parte de 9), busca
+  filtrada = 36 sem iniciais; `@prev_offset`/`@next_offset`/`@current_page`/
+  `@total_pages` calculados na rota (`build_page_window` fatiado p/ rubocop).
+  Testes de paginação atualizados (250 nomes → 8 páginas; página 1 = 27+9). Suíte
+  694/2204, lint 0 (rodada com `web` parado — flakiness conhecida do container
+  ativo). **Revalidação do usuário pendente.**
 
 ## 6. Plano TDD (passos)
 
@@ -178,7 +193,7 @@ sem lib JS, sem mudança de schema, sem mudança de markup/rotas.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 — grid uniforme de 6 colunas em todas as páginas | `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list`, `test_pokemons_starters_only_on_first_page`, `test_pokemons_middle_page_has_previous_and_next_links`) | `/` em desktop: 6 pokes por linha em todas as páginas (iniciais+comuns na mesma grade), 30/página = 5 linhas; iniciais só na página 1; sem slots vazios | **nok → ajuste S3 (2026-08-24):** grade uniforme 6 col × 30/página — aguardando revalidação |
+| C1 — grade uniforme de 6 colunas, páginas cheias (36) | `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list`, `test_pokemons_starters_only_on_first_page`, `test_pokemons_middle_page_has_previous_and_next_links`, `test_pokemons_last_page_has_no_next_link`) | `/` em desktop: página 1 = 36 (27 iniciais + 9 comuns, grid 6×6 fechado); páginas 2+ = 36 comuns; iniciais só na 1ª página; sem slots vazios | **nok → ajuste S3 (2026-08-24):** paginação sobre lista filtrada + PAGE_SIZE 36 — aguardando revalidação |
 | C2 — largura cheia do Histórico | `test/history_routes_test.rb` (`test_history_page_uses_full_width_body_class`) | `/history` em tela cheia (não mais 38em centralizado) | |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data

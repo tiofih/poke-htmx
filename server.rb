@@ -49,7 +49,7 @@ module ServerCommon
 end
 
 module ServerListActions
-  PAGE_SIZE = 30
+  PAGE_SIZE = 36
   STARTER_SLUGS = %w[
     bulbasaur charmander squirtle
     chikorita cyndaquil totodile
@@ -61,6 +61,7 @@ module ServerListActions
     grookey scorbunny sobble
     sprigatito fuecoco quaxly
   ].freeze
+  FIRST_PAGE_COMMONS = PAGE_SIZE - STARTER_SLUGS.size
 
   private
 
@@ -81,24 +82,74 @@ module ServerListActions
 
   def load_pokemon_page
     @limit = PAGE_SIZE
-    @page = settings.api.paginate(offset: @offset, query: @q, limit: PAGE_SIZE)
-    @items = Parallelizer.map(@page[:names]) { |name| list_entry(name) }.compact
+    @commons = filtered_commons
+    build_page_window
+    @items = Parallelizer.map(@page_names) { |name| [name, settings.api.find(name)] }.compact
     @starters = @q.empty? && @offset.zero? ? load_starters : []
-    @notice = "Não foi possível carregar a lista de Pokémon." if @page[:names].empty? && @q.empty?
+    @notice = "Não foi possível carregar a lista de Pokémon." if @commons.empty? && @q.empty?
     load_team_names
+  end
+
+  def filtered_commons
+    names = settings.api.fetch_all_names.to_a
+    names = names.select { |name| name.downcase.include?(@q.downcase) } unless @q.empty?
+    names.reject { |name| STARTER_SLUGS.include?(name) }
+         .select { |name| settings.api.base_form?(name) }
+  end
+
+  def build_page_window
+    if @q.empty?
+      build_window_with_starters
+    else
+      build_window_filtered
+    end
+  end
+
+  def build_window_with_starters
+    if @offset.zero?
+      build_first_page_with_starters
+    else
+      build_common_page_with_starters
+    end
+    @total_pages = total_pages_with_starters
+  end
+
+  def build_first_page_with_starters
+    @page_names = @commons[0, FIRST_PAGE_COMMONS].to_a
+    @current_page = 1
+    @prev_offset = nil
+    @next_offset = @commons.size > FIRST_PAGE_COMMONS ? FIRST_PAGE_COMMONS : nil
+  end
+
+  def build_common_page_with_starters
+    @page_names = @commons[@offset, PAGE_SIZE].to_a
+    @current_page = ((@offset - FIRST_PAGE_COMMONS) / PAGE_SIZE) + 2
+    @prev_offset = @current_page == 2 ? 0 : @offset - PAGE_SIZE
+    @next_offset = next_offset_present? ? @offset + PAGE_SIZE : nil
+  end
+
+  def build_window_filtered
+    @page_names = @commons[@offset, PAGE_SIZE].to_a
+    @current_page = (@offset / PAGE_SIZE) + 1
+    @prev_offset = @offset.positive? ? @offset - PAGE_SIZE : nil
+    @next_offset = next_offset_present? ? @offset + PAGE_SIZE : nil
+    @total_pages = [(@commons.size.to_f / PAGE_SIZE).ceil, 1].max
+  end
+
+  def next_offset_present?
+    (@offset + @page_names.size) < @commons.size
+  end
+
+  def total_pages_with_starters
+    return 1 if @commons.size <= FIRST_PAGE_COMMONS
+
+    1 + ((@commons.size - FIRST_PAGE_COMMONS).to_f / PAGE_SIZE).ceil
   end
 
   def load_team_names
     team = settings.team.all(current_user)
     @team_names = team.map(&:name)
     @team_full = team.size >= TeamRepository::MAX_TEAM_SIZE
-  end
-
-  def list_entry(name)
-    return if STARTER_SLUGS.include?(name)
-    return unless settings.api.base_form?(name)
-
-    [name, settings.api.find(name)]
   end
 
   def load_starters
