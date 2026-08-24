@@ -71,6 +71,10 @@ header nav a {
 }
 
 /* Batalha */
+body.page-battle {
+  max-width: none;
+}
+
 .battle-layout {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
