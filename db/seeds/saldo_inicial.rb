@@ -4,7 +4,7 @@ require "pg"
 require_relative "../../lib/wallet_repository"
 
 class SaldoInicial
-  INITIAL_BALANCE = 200
+  INITIAL_BALANCE = 200 unless defined?(INITIAL_BALANCE)
 
   def self.call(user_id: "seed-shop", db_url: ENV.fetch("DATABASE_URL", nil))
     database = db_url || WalletRepository::DEFAULT_DATABASE_URL
