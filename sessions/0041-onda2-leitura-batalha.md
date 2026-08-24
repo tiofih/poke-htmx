@@ -190,3 +190,9 @@ regra de negócio nova, nenhum contrato de rota alterado.
   tier (≥50 / 20–49 / <20) são heurística do draft — ajuste reabre critério via S3.
 - `Move#pp_max` é adição mínima de domínio; a gateway (`PokeApiMoves`) não muda
   (default cobre).
+- **Anotação p/ próximas tasks (2026-08-23, fora de sessão — RNF-04):** a sakura
+  limita `body` a `max-width: 38em`, deixando todas as telas estreitas/centralizadas.
+  Na 0041 isso foi resolvido só para a batalha (`body.page-battle { max-width: none }`
+  + grid de 3 colunas). **Aplicar o mesmo tratamento de espaçamento/largura cheia
+  nas demais telas** (Lista, Time, Histórico, Detalhe, Manage) numa onda futura —
+  ver anotação equivalente no `draft-ui-ux.md`.

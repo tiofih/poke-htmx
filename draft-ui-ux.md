@@ -122,6 +122,11 @@ até time de 6) já coerente entre rotas e fragmentos.
 - Barras visuais de HP/PP (battle + Center).
 - Extrair partial/presenter dos painéis de batalha (remove duplicação).
 - Estado ativo no nav + limpeza sistemática dos painéis (mata o hack do span).
+- **Largura cheia nas demais telas (anotado 2026-08-23, durante validação da 0041):**
+  a sakura limita `body` a `max-width: 38em`; a 0041 resolveu só na batalha
+  (`body.page-battle { max-width: none }` + grid 3 colunas). **Aplicar o mesmo
+  espaçamento/largura cheia em Lista, Time, Histórico, Detalhe e Manage** numa onda
+  futura (fora de sessão — RNF-04).
 
 **Juice / micro-interações (anotado 2026-08-22, pós JN-1 — usuário pediu "mais juice")**
 - **Notificação ao incluir Pokémon:** hoje o add só troca o `#add-status` (texto);
