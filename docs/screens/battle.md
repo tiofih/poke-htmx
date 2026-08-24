@@ -77,25 +77,27 @@ blocks:
 ## Desenho alvo — batalha (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.6)
 
 ```
-┌──────────────────────────────────────────────────┐
-│ Batalha — Rodada N                               │
-│ ┌─ Seu Time ─────────┐  ┌─ Oponente ────────┐   │
-│ │ [sp alt] pikachu   │  │ [sp alt] squirtle │   │ ← partial única p/ os 2 (novo)
-│ │ HP ▮▮▮▮▯ 150/200   │  │ HP ▮▮▯▯▯  80/200  │   │ ← barra de HP (novo)
-│ │ tackle PP 25 · ... │  │                   │   │
-│ └────────────────────┘  └───────────────────┘   │
-│ Log da rodada:                                   │
-│   Seu Time: pikachu usou thunderbolt em...      │
-│   (últimas N rodadas, mais recente no topo)     │ ← histórico visível (novo)
-│ Itens: Poção ×2 · Super Poção ×1                │
-│        [ Jogar ⏳ ]                              │ ← estado carregando (novo)
-│ Vencedor: Seu Time — +120 XP, +100 dinheiro     │ ← recompensas agrupadas
-│ Evoluções/Aprendizados: <listas>                │
-└──────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│ Batalha — Rodada N                                  │
+│ ┌─ Oponente ───────┐ ┌───────────────┐ ┌─ Seu Time ──┐│
+│ │ [sp alt] squirtle│ │ [ Jogar ⏳ ]  │ │ [sp] pikachu││
+│ │ HP ▮▮▯▯▯ 80/200  │ │ Log da rodada:│ │ HP ▮▮▮▮▯ 150/200│
+│ └──────────────────┘ │ (últimas 3)   │ │ tackle PP 25 ││
+│                      └───────────────┘ └─────────────┘│
+│ Oponente à esquerda · controles+log ao centro ·      │
+│ Seu Time à direita · Itens: Poção ×2 no Seu Time     │
+│ Vencedor: ... — recompensas agrupadas                │
+└─────────────────────────────────────────────────────┘
 ```
 
 ```yaml
 fragment: "#battle" (alvo)
+layout: 3 colunas (flex wrap)
+  - coluna esquerda: painel Oponente (@engine.teams[1])
+  - coluna central: controles (Jogar/Novo confronto + hx-indicator) + log das
+    últimas 3 rodadas (mais recente no topo) + fim de batalha (vencedor,
+    recompensas, evoluções/aprendizados)
+  - coluna direita: painel Seu Time (@engine.teams[0]) + estoque Itens:
 deltas:
   - id: fighter-partial (novo)
     partial: um único partial de painel para player/opponent (fim da duplicação);

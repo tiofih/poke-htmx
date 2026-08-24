@@ -4,52 +4,60 @@
   <h1>Batalha</h1>
   <p class="round">Rodada <%= @engine.rounds %><% if @engine.finished? %> — Fim de batalha<% end %></p>
 
-  <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", presenters: @engine.teams[0].map { |poke| FighterPresenter.new(poke) } } %>
+  <div class="battle-layout">
+    <div class="battle-column">
+      <%= erb :_fighter_panel, layout: false, locals: { title: "Oponente", presenters: @engine.teams[1].map { |poke| FighterPresenter.new(poke) } } %>
+    </div>
 
-  <% unless @engine.items.empty? %>
-    <p class="stock-items">Itens:
-      <% @engine.items.each do |name, quantity| %>
-        <% next unless quantity.to_i.positive? %>
-        <%= ItemCatalog.find(name)&.display_name || name %> ×<%= quantity %>
-      <% end %>
-    </p>
-  <% end %>
-
-  <%= erb :_fighter_panel, layout: false, locals: { title: "Oponente", presenters: @engine.teams[1].map { |poke| FighterPresenter.new(poke) } } %>
-
-  <% log_entries = BattleLogPresenter.new(@engine.log).entries %>
-  <% unless log_entries.empty? %>
-    <ul class="battle-log">
-      <% log_entries.each do |entry| %>
-        <li><span class="log-round">Rodada <%= entry[:round] %>:</span> <%= entry[:side] %>: <strong><%= entry[:text] %></strong></li>
-      <% end %>
-    </ul>
-  <% end %>
-
-  <% if @engine.finished? %>
-    <% winner_name = @engine.winner.zero? ? "Seu Time" : "Oponente" %>
-    <p class="winner"><strong>Vencedor: <%= winner_name %></strong></p>
-    <% if @xp_gained %>
-      <p class="xp-gained"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e #{@money_gained} de dinheiro." : "." %></strong></p>
-    <% end %>
-    <% if defined?(@evolution_news) && !@evolution_news&.empty? %>
-      <ul class="evolution-news">
-        <% @evolution_news.each do |news| %>
-          <li><%= news %></li>
+    <div class="battle-column battle-center">
+      <% if @engine.finished? %>
+        <% winner_name = @engine.winner.zero? ? "Seu Time" : "Oponente" %>
+        <p class="winner"><strong>Vencedor: <%= winner_name %></strong></p>
+        <% if @xp_gained %>
+          <p class="xp-gained"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e #{@money_gained} de dinheiro." : "." %></strong></p>
         <% end %>
-      </ul>
-    <% end %>
-    <% if defined?(@learned_news) && !@learned_news&.empty? %>
-      <ul class="learned-news">
-        <% @learned_news.each do |news| %>
-          <li><%= news %></li>
+        <% if defined?(@evolution_news) && !@evolution_news&.empty? %>
+          <ul class="evolution-news">
+            <% @evolution_news.each do |news| %>
+              <li><%= news %></li>
+            <% end %>
+          </ul>
         <% end %>
-      </ul>
-    <% end %>
-    <button hx-get="/battle" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
-  <% else %>
-    <button hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML"
-      hx-indicator="#battle-loading">Jogar</button>
-    <span id="battle-loading" class="battle-loading" aria-hidden="true">Carregando…</span>
-  <% end %>
+        <% if defined?(@learned_news) && !@learned_news&.empty? %>
+          <ul class="learned-news">
+            <% @learned_news.each do |news| %>
+              <li><%= news %></li>
+            <% end %>
+          </ul>
+        <% end %>
+        <button hx-get="/battle" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
+      <% else %>
+        <button hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML"
+          hx-indicator="#battle-loading">Jogar</button>
+        <span id="battle-loading" class="battle-loading" aria-hidden="true">Carregando…</span>
+      <% end %>
+
+      <% log_entries = BattleLogPresenter.new(@engine.log).entries %>
+      <% unless log_entries.empty? %>
+        <ul class="battle-log">
+          <% log_entries.each do |entry| %>
+            <li><span class="log-round">Rodada <%= entry[:round] %>:</span> <%= entry[:side] %>: <strong><%= entry[:text] %></strong></li>
+          <% end %>
+        </ul>
+      <% end %>
+    </div>
+
+    <div class="battle-column">
+      <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", presenters: @engine.teams[0].map { |poke| FighterPresenter.new(poke) } } %>
+
+      <% unless @engine.items.empty? %>
+        <p class="stock-items">Itens:
+          <% @engine.items.each do |name, quantity| %>
+            <% next unless quantity.to_i.positive? %>
+            <%= ItemCatalog.find(name)&.display_name || name %> ×<%= quantity %>
+          <% end %>
+        </p>
+      <% end %>
+    </div>
+  </div>
 <% end %>

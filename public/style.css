@@ -71,6 +71,22 @@ header nav a {
 }
 
 /* Batalha */
+.battle-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1em;
+  align-items: flex-start;
+}
+
+.battle-column {
+  flex: 1 1 260px;
+  min-width: 240px;
+}
+
+.battle-center {
+  flex: 1 1 300px;
+}
+
 .battle-pane {
   border: 1px solid #ddd;
   border-radius: 6px;

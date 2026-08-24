@@ -107,7 +107,8 @@ regra de negócio nova, nenhum contrato de rota alterado.
       ambos renderizam a linha de lutador compartilhada com barras visuais
       `hp-bar`/`pp-bar` (width percentual + tier class) — prova:
       `test/battle_routes_test.rb` (barras com `style="width: N%"` e tier nos dois
-      painéis; textos de contrato preservados).
+      painéis; textos de contrato preservados). *Ajuste S3 (2026-08-23): layout em
+      3 colunas — Oponente à esquerda, controles+log ao centro, Seu Time à direita.*
 - [ ] **C4 — Log exibe as últimas 3 rodadas, mais recente no topo** — prova:
       `test/battle_log_presenter_test.rb` (ordem/limite/formatação) +
       `test/battle_routes_test.rb` (após vários plays, o fragmento contém entradas
@@ -142,6 +143,11 @@ regra de negócio nova, nenhum contrato de rota alterado.
   preterido: manter só a barra global.
 - **2026-08-23 — `Move#pp_max` com default = pp** (necessário p/ a barra de PP);
   preservado no `use_move` via Dry::Struct — sem tocar `PokeApiMoves`/gateway.
+- **2026-08-23 — Ajuste S3 na validação (layout da batalha):** reabre o **C3** —
+  os painéis passam de empilhados (Seu Time acima, Oponente abaixo, botão embaixo)
+  para **3 colunas**: **Oponente à esquerda**, **controles (Jogar/Novo confronto) +
+  log no centro**, **Seu Time (+ estoque Itens:) à direita**. Alteração registrada
+  com data; reaprovação do usuário pendente após o ajuste.
 
 ## 6. Plano TDD (passos)
 
