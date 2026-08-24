@@ -129,6 +129,16 @@ Oponente à direita). Suíte 680/2132, lint 0. Anotado p/ próximas tasks: aplic
 mesmo espaçamento/largura cheia nas demais telas (Lista/Time/Histórico/Detalhe/
 Manage — ver `draft-ui-ux.md` §4).
 
+**Sessão 0042 (Onda 1 UX — jornada visível, Caminho B) em refinamento — decisões
+fechadas em 2026-08-24:** unificar a Lista com o Time na mesma tela — `GET /` vira
+página única de **2 colunas em largura cheia** (busca + lista à esquerda, painel do
+time com contador "Time n/6" + membros à direita); **página `/team` removida**
+(`GET /team` sem `HX-Request` → 404, fragmento htmx interno preservado como alvo
+`#team-view`); **nav perde o link "Time"**; **estados do botão Add** (default /
+"No time ✓" desabilitado / cheio desabilitado) via `@team_names` exposto na rota da
+listagem. Preteridos: Onda 3 (grid), JN-3/JN-4/JN-5/J2/J4/D4, P2 (perf), largura
+cheia de Histórico/Detalhe/Manage. Ver `sessions/0042-onda1-jornada-visivel.md`.
+
 **Próxima sessão:** ondas 1–3 de UX restantes → organizar o resto
 (JN-3, JN-4, JN-5, J2, J4, D4).
 
@@ -195,6 +205,7 @@ Manage — ver `draft-ui-ux.md` §4).
 | 0039 | JN-1 — telas próprias (fim do empilhamento): páginas próprias por rota com layout (Lista/Time/Batalha/Histórico), nav real com estado ativo, htmx intra-tela (`#team-view`/`#battle-view`/`#pokemon-detail`/`#add-status`), add → mini-status, remoção do span hack/_close/teamRefresh | Concluída | Done (passos 1–6, suíte 626/2017, lint 0, validado em 2026-08-22) |
 | 0040 | J3 — ranking S–F (balanceamento de oponentes): `PokemonRating` (domínio puro) classifica Pokémon em S–F por stats ponderados + bônus dos moves (top-4, STAB-aware), consumido pelo `OpponentGenerator` via banda de tier derivada do nível médio do jogador (fim do sorteio puro), retorno score + tier sem UI | Concluída | Done (passos 1–5, suíte 649/2063, lint 0, validado em 2026-08-23; `GET /battle` ~2min na 1ª chamada — perf anotada) |
 | 0041 | Onda 2 UX — leitura da batalha: fim da duplicação dos painéis (partial único `_fighter_panel.erb` + `FighterPresenter`/`BattleLogPresenter` puros em `lib/`), barras visuais de HP/PP (tokens do draft-design-system §3), log das últimas 3 rodadas (mais recente no topo) e `hx-indicator` local no botão Jogar; `Move#pp_max` (default = pp) | Concluída | Done (passos 1–5 + ajuste S3 de layout em 3 colunas — Seu Time esq, controles centralizados + log centro, Oponente dir, tela cheia; suíte 680/2132, lint 0, validado em 2026-08-23) |
+| 0042 | Onda 1 UX — jornada visível (Caminho B): página única `/` de 2 colunas (busca + lista à esquerda, painel do time com contador n/6 + membros à direita), página `/team` removida (404 direto, fragmento htmx interno preservado), nav sem link "Time", estados do botão Add (default / "No time ✓" / cheio via `@team_names`) | Em refinamento | Refinamento em andamento — decisões fechadas em 2026-08-24 |
 
 ## Estrutura do arquivo de sessão
 
