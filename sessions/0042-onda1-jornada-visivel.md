@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-24 |
 | Implementação | **Concluída** — passos 1–6 em 2026-08-24 (suíte 686/2163, lint 0) |
-| Validação | **Pendente** — executada pelo usuário (fase 3) |
+| Validação | **Done** — executada pelo usuário em 2026-08-24 (tabela da seção 7, ajustes S3 reaprovados) |
 
 ---
 
@@ -192,21 +192,22 @@ Reusa `JourneyService` e o `@team` já carregado; contrato do gateway intacto.
 
 ## 7. Validação (executada pelo usuário)
 
-*Pendente — aguardando a validação do usuário (fase 3).*
+**Concluída em 2026-08-24 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 página `/` unificada com `#team-view` | `test/pokemon_routes_test.rb` | `/` em tela cheia: busca + lista à esquerda, time (n/6 + membros) à direita |  |
-| C2 `/team` 404 direto / fragmento htmx | `test/team_routes_test.rb` | abrir `/team` no browser → 404; ações do time continuam atualizando o painel |  |
-| C3 nav sem link "Time" | `test/pokemon_routes_test.rb` | nav mostra Lista/Batalha/Histórico; Lista ativa |  |
-| C4 estados do botão Add | `test/pokemon_routes_test.rb` + `test/team_routes_test.rb` (OOB add/remove) | na lista, Pokémon no time mostra "No time ✓" desabilitado; time cheio desabilita todos; **remover de um time cheio reativa** os botões; **adicionar o 6º desabilita** todos |  |
-| C5 add atualiza `#team-view` | `test/pokemon_routes_test.rb` + `test/team_routes_test.rb` (`test_post_team_includes_team_view_out_of_band_swap`) | ao adicionar, mini-status + painel do time atualizam na mesma tela |  |
+| C1 página `/` unificada com `#team-view` | `test/pokemon_routes_test.rb` | `/` em tela cheia: busca + lista à esquerda, time (n/6 + membros) à direita | ok |
+| C2 `/team` 404 direto / fragmento htmx | `test/team_routes_test.rb` | abrir `/team` no browser → 404; ações do time continuam atualizando o painel | ok |
+| C3 nav sem link "Time" | `test/pokemon_routes_test.rb` | nav mostra Lista/Batalha/Histórico; Lista ativa | ok |
+| C4 estados do botão Add | `test/pokemon_routes_test.rb` + `test/team_routes_test.rb` (OOB add/remove) | na lista, Pokémon no time mostra "No time ✓" desabilitado; time cheio desabilita todos; **remover de um time cheio reativa** os botões; **adicionar o 6º desabilita** todos | ok |
+| C5 add atualiza `#team-view` | `test/pokemon_routes_test.rb` + `test/team_routes_test.rb` (`test_post_team_includes_team_view_out_of_band_swap`) | ao adicionar, mini-status + painel do time atualizam na mesma tela | ok |
 
 > **S3 — ajustes de validação (registrados na seção 5):** durante a validação o
 > usuário reportou 2 bugs: (1) remover de um time cheio não reativava os botões Add
 > da lista — corrigido com `#pokemon-list` em `hx-swap-oob` no add/remove (reabre
 > C4/C5); (2) o link "Gerenciar time" ficava na mesma linha do primeiro Pokémon —
-> corrigido com `<p class="team-tools">`. Reaprovação do usuário pendente.
+> corrigido com `<p class="team-tools">`. **Reaprovado** pelo usuário na validação
+> final (comportamento validado em 2026-08-24).
 
 ## 8. Observações
 
@@ -222,3 +223,11 @@ Reusa `JourneyService` e o `@team` já carregado; contrato do gateway intacto.
 - `test/team_page_renders_full_page_with_team_view` (team_routes_test.rb) foi
   substituído por `test_team_page_is_removed_and_returns_404_without_htmx` —
   evidência automatizada de C2.
+- **Anotação (2026-08-24, fora de sessão — RNF-04):** flakiness na suíte —
+  `PG::ConnectionBad: too many clients already` intermitente ao rodar `./scripts/test`
+  com o container `web` ativo. O app em execução segura conexões persistidas
+  (repositórios singleton); rodadas repetidas acumulam até estourar `max_connections`
+  (100). Workaround observado: `docker compose stop web` antes da suíte (ou
+  `restart db` + aguardar) — com `web` parado a suíte roda limpa (689 runs/2184
+  asserts). Candidata a sessão futura (ex.: pool com limite/`max_connections` maior,
+  ou desligar o app durante a suíte em CI).

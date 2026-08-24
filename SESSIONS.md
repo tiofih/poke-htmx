@@ -129,19 +129,21 @@ Oponente à direita). Suíte 680/2132, lint 0. Anotado p/ próximas tasks: aplic
 mesmo espaçamento/largura cheia nas demais telas (Lista/Time/Histórico/Detalhe/
 Manage — ver `draft-ui-ux.md` §4).
 
-**Sessão 0042 (Onda 1 UX — jornada visível, Caminho B) implementada — passos 1–6 em
-2026-08-24 (suíte 686/2163, lint 0; **aguardando validação do usuário** — fase 3):**
-unificar a Lista com o Time na mesma tela — `GET /` virou página única de **2
-colunas em largura cheia** (busca + lista à esquerda, painel do time com contador
+**Sessão 0042 (Onda 1 UX — jornada visível, Caminho B) concluída e validada em
+2026-08-24** (suíte 689/2184, lint 0): `GET /` virou página única de **2 colunas
+em largura cheia** (busca + lista à esquerda, painel do time com contador
 "Time n/6" + membros à direita); **página `/team` removida** (`GET /team` sem
 `HX-Request` → 404, fragmento htmx interno preservado como alvo `#team-view`);
 **nav perdeu o link "Time"**; `team_page.erb` removido; **estados do botão Add**
 (default / "No time ✓" desabilitado / cheio desabilitado) via `@team_names`/
 `@team_full` expostos na rota da listagem; add `POST /team` devolve mini-status +
-`#team-view` com `hx-swap-oob` (painel reflete novo membro na mesma tela);
-`body.page-list` com `max-width: none` + grid `list-team-grid`/`team-column`.
-Preteridos: Onda 3 (grid), JN-3/JN-4/JN-5/J2/J4/D4, P2 (perf), largura cheia de
-Histórico/Detalhe/Manage. Ver `sessions/0042-onda1-jornada-visivel.md`.
+`#team-view` com `hx-swap-oob`; **ajustes S3 de validação** — add/remove também
+re-renderizam `#pokemon-list` via OOB (remover de time cheio reativa os botões,
+adicionar o 6º desabilita) e link "Gerenciar time" em `<p class="team-tools">`
+(linha própria). Preteridos: Onda 3 (grid), JN-3/JN-4/JN-5/J2/J4/D4, P2 (perf),
+largura cheia de Histórico/Detalhe/Manage. Anotado (fora de sessão): flakiness
+`too many clients` na suíte com o container `web` ativo — workaround
+`docker compose stop web`. Ver `sessions/0042-onda1-jornada-visivel.md`.
 
 **Próxima sessão:** ondas 1–3 de UX restantes → organizar o resto
 (JN-3, JN-4, JN-5, J2, J4, D4).
@@ -209,7 +211,7 @@ Histórico/Detalhe/Manage. Ver `sessions/0042-onda1-jornada-visivel.md`.
 | 0039 | JN-1 — telas próprias (fim do empilhamento): páginas próprias por rota com layout (Lista/Time/Batalha/Histórico), nav real com estado ativo, htmx intra-tela (`#team-view`/`#battle-view`/`#pokemon-detail`/`#add-status`), add → mini-status, remoção do span hack/_close/teamRefresh | Concluída | Done (passos 1–6, suíte 626/2017, lint 0, validado em 2026-08-22) |
 | 0040 | J3 — ranking S–F (balanceamento de oponentes): `PokemonRating` (domínio puro) classifica Pokémon em S–F por stats ponderados + bônus dos moves (top-4, STAB-aware), consumido pelo `OpponentGenerator` via banda de tier derivada do nível médio do jogador (fim do sorteio puro), retorno score + tier sem UI | Concluída | Done (passos 1–5, suíte 649/2063, lint 0, validado em 2026-08-23; `GET /battle` ~2min na 1ª chamada — perf anotada) |
 | 0041 | Onda 2 UX — leitura da batalha: fim da duplicação dos painéis (partial único `_fighter_panel.erb` + `FighterPresenter`/`BattleLogPresenter` puros em `lib/`), barras visuais de HP/PP (tokens do draft-design-system §3), log das últimas 3 rodadas (mais recente no topo) e `hx-indicator` local no botão Jogar; `Move#pp_max` (default = pp) | Concluída | Done (passos 1–5 + ajuste S3 de layout em 3 colunas — Seu Time esq, controles centralizados + log centro, Oponente dir, tela cheia; suíte 680/2132, lint 0, validado em 2026-08-23) |
-| 0042 | Onda 1 UX — jornada visível (Caminho B): página única `/` de 2 colunas (busca + lista à esquerda, painel do time com contador n/6 + membros à direita), página `/team` removida (404 direto, fragmento htmx interno preservado), nav sem link "Time", estados do botão Add (default / "No time ✓" / cheio via `@team_names`) | Em implementação | Implementação concluída — passos 1–6 em 2026-08-24 (suíte 686/2163, lint 0; aguardando validação do usuário — fase 3) |
+| 0042 | Onda 1 UX — jornada visível (Caminho B): página única `/` de 2 colunas (busca + lista à esquerda, painel do time com contador n/6 + membros à direita), página `/team` removida (404 direto, fragmento htmx interno preservado), nav sem link "Time", estados do botão Add (default / "No time ✓" / cheio via `@team_names`) | Concluída | Done (passos 1–6 + ajustes S3 — add/remove re-renderizam `#pokemon-list` via `hx-swap-oob`, link "Gerenciar time" em `<p>` próprio; suíte 689/2184, lint 0, validado em 2026-08-24) |
 
 ## Estrutura do arquivo de sessão
 
