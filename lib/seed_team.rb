@@ -40,7 +40,7 @@ class SeedTeam
   private
 
   def connection
-    @connection ||= ConnectionRegistry.register(self, PG.connect(@db_url))
+    ConnectionRegistry.connection_for(self, Thread.current.object_id, @db_url)
   end
 
   def array_literal(names)

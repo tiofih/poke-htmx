@@ -245,7 +245,7 @@ class TeamRepository
   end
 
   def connection
-    @connection ||= ConnectionRegistry.register(self, PG.connect(@db_url))
+    ConnectionRegistry.connection_for(self, Thread.current.object_id, @db_url)
   end
 
   def parse_moves(value)

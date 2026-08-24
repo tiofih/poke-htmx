@@ -2,14 +2,19 @@
 
 require "pg"
 
+# Registra UMA conexão por (repositório, thread). Repositórios são singletons
+# compartilhados entre as threads do Puma; uma única conexão por repositório
+# corrompe o protocolo PG quando usada concorrentemente ("message type ...
+# arrived from server while idle"). O `after_teardown` dos testes fecha tudo.
 module ConnectionRegistry
-  @entries = []
+  @entries = {}
   @mutex = Mutex.new
 
   class << self
-    def register(owner, connection)
-      @mutex.synchronize { @entries << [owner, connection] }
-      connection
+    def connection_for(owner, thread_id, db_url)
+      @mutex.synchronize do
+        @entries[[owner, thread_id]] ||= PG.connect(db_url)
+      end
     end
 
     def size
@@ -18,10 +23,7 @@ module ConnectionRegistry
 
     def close_all!
       @mutex.synchronize do
-        @entries.each do |owner, connection|
-          owner.instance_variable_set(:@connection, nil)
-          connection.close unless connection.finished?
-        end
+        @entries.each_value { |connection| connection.close unless connection.finished? }
         @entries.clear
       end
     end
