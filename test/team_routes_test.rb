@@ -40,11 +40,23 @@ class ServerTeamTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "Adicionado ao time."
-    refute_includes last_response.body, "hx-delete=\"/team\""
     team = @repository.all("user-a")
     assert_equal 1, team.size
     assert_equal "pikachu", team.first.name
     assert_empty @repository.all("user-b")
+  end
+
+  def test_post_team_includes_team_view_out_of_band_swap
+    PokeApiStub.with_find(pikachu_pokemon) do
+      post "/team", { pokeName: "pikachu" }, htmx_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Adicionado ao time."
+    assert_includes last_response.body, 'id="team-view"'
+    assert_includes last_response.body, "hx-swap-oob"
+    assert_includes last_response.body, 'hx-delete="/team"'
+    assert_includes last_response.body, "pikachu"
   end
 
   def test_post_team_starts_with_level_one_moves

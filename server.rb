@@ -152,7 +152,13 @@ module ServerTeamActions
     settings.journey.mark_started_when_full(current_user)
     @notice = notice || "Adicionado ao time."
     @notice_kind = notice ? :error : :success
-    erb :team_add_result, layout: false
+    mini_status = erb :team_add_result, layout: false
+    prepare_team_fragment_data
+    "#{mini_status}#{oob_team_view}"
+  end
+
+  def oob_team_view
+    erb :team_view_oob, layout: false
   end
 
   def new_member_from_api
