@@ -79,25 +79,25 @@ blocks:
 ```
 ┌─────────────────────────────────────────────────────┐
 │ Batalha — Rodada N                                  │
-│ ┌─ Oponente ───────┐ ┌───────────────┐ ┌─ Seu Time ──┐│
-│ │ [sp alt] squirtle│ │ [ Jogar ⏳ ]  │ │ [sp] pikachu││
-│ │ HP ▮▮▯▯▯ 80/200  │ │ Log da rodada:│ │ HP ▮▮▮▮▯ 150/200│
-│ └──────────────────┘ │ (últimas 3)   │ │ tackle PP 25 ││
-│                      └───────────────┘ └─────────────┘│
-│ Oponente à esquerda · controles+log ao centro ·      │
-│ Seu Time à direita · Itens: Poção ×2 no Seu Time     │
-│ Vencedor: ... — recompensas agrupadas                │
+│ ┌─ Seu Time ────────┐ ┌───────────────┐ ┌─ Oponente ─┐│
+│ │ [sp] pikachu      │ │  [ Jogar ⏳ ] │ │ [sp] squirtle│
+│ │ HP ▮▮▮▮▯ 150/200  │ │ Log da rodada:│ │ HP ▮▮▯▯▯ 80/200│
+│ │ tackle PP 25 · ...│ │ (últimas 3)   │ └─────────────┘│
+│ └───────────────────┘ └───────────────┘               │
+│ Seu Time à esquerda · controles centralizados + log ao│
+│ centro · Oponente à direita · Itens: Poção ×2 no time │
+│ Vencedor: ... — recompensas agrupadas                 │
 └─────────────────────────────────────────────────────┘
 ```
 
 ```yaml
 fragment: "#battle" (alvo)
-layout: 3 colunas (flex wrap)
-  - coluna esquerda: painel Oponente (@engine.teams[1])
-  - coluna central: controles (Jogar/Novo confronto + hx-indicator) + log das
-    últimas 3 rodadas (mais recente no topo) + fim de batalha (vencedor,
+layout: 3 colunas (grid fixo, tela cheia)
+  - coluna esquerda: painel Seu Time (@engine.teams[0]) + estoque Itens:
+  - coluna central: controles centralizados (Jogar/Novo confronto + hx-indicator) +
+    log das últimas 3 rodadas (mais recente no topo) + fim de batalha (vencedor,
     recompensas, evoluções/aprendizados)
-  - coluna direita: painel Seu Time (@engine.teams[0]) + estoque Itens:
+  - coluna direita: painel Oponente (@engine.teams[1])
 deltas:
   - id: fighter-partial (novo)
     partial: um único partial de painel para player/opponent (fim da duplicação);

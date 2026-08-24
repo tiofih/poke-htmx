@@ -108,7 +108,8 @@ regra de negócio nova, nenhum contrato de rota alterado.
       `hp-bar`/`pp-bar` (width percentual + tier class) — prova:
       `test/battle_routes_test.rb` (barras com `style="width: N%"` e tier nos dois
       painéis; textos de contrato preservados). *Ajuste S3 (2026-08-23): layout em
-      3 colunas — Oponente à esquerda, controles+log ao centro, Seu Time à direita.*
+      3 colunas em tela cheia — Seu Time à esquerda, controles centralizados + log
+      ao centro, Oponente à direita.*
 - [ ] **C4 — Log exibe as últimas 3 rodadas, mais recente no topo** — prova:
       `test/battle_log_presenter_test.rb` (ordem/limite/formatação) +
       `test/battle_routes_test.rb` (após vários plays, o fragmento contém entradas
@@ -145,9 +146,11 @@ regra de negócio nova, nenhum contrato de rota alterado.
   preservado no `use_move` via Dry::Struct — sem tocar `PokeApiMoves`/gateway.
 - **2026-08-23 — Ajuste S3 na validação (layout da batalha):** reabre o **C3** —
   os painéis passam de empilhados (Seu Time acima, Oponente abaixo, botão embaixo)
-  para **3 colunas**: **Oponente à esquerda**, **controles (Jogar/Novo confronto) +
-  log no centro**, **Seu Time (+ estoque Itens:) à direita**. Alteração registrada
-  com data; reaprovação do usuário pendente após o ajuste.
+  para **3 colunas** em tela cheia: **Seu Time à esquerda** (+ estoque Itens:),
+  **controles centralizados (Jogar/Novo confronto) + log ao centro** e **Oponente à
+  direita**. Alteração registrada com data; reaprovação do usuário pendente após o
+  ajuste. *(2ª revisão: Seu Time na esquerda em vez da direita; botão Jogar
+  centralizado.)*
 
 ## 6. Plano TDD (passos)
 
