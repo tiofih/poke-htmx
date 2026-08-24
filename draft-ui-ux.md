@@ -118,7 +118,11 @@ até time de 6) já coerente entre rotas e fragmentos.
 - Barra/contador "Time n/6" visível na listagem (conecta jornada ao bloco Iniciais).
 
 **Médios**
-- Grid responsivo na listagem (2–3 colunas) — **feito (sessão 0044, 2026-08-24)**: `.pokemon-list` em grid de cards (`auto-fill minmax(180px, 1fr)`/gap 12px) + cards `.list-item`/`.starter-item` corrigindo o bug visual do item.
+- Grid responsivo na listagem (2–3 colunas) — **feito (sessão 0044, 2026-08-24,
+  ajustado na validação)**: grade **uniforme de 6 colunas em todas as páginas**
+  (iniciais+comuns na mesma grade via `display: contents`; `PAGE_SIZE` 30 = 5
+  linhas; responsivo 6/3/1 colunas, todos dividem 30) + cards `.list-item`/
+  `.starter-item` corrigindo o bug visual do item.
 - Barras visuais de HP/PP (battle + Center).
 - Extrair partial/presenter dos painéis de batalha (remove duplicação).
 - Estado ativo no nav + limpeza sistemática dos painéis (mata o hack do span).

@@ -49,7 +49,7 @@ module ServerCommon
 end
 
 module ServerListActions
-  PAGE_SIZE = 20
+  PAGE_SIZE = 30
   STARTER_SLUGS = %w[
     bulbasaur charmander squirtle
     chikorita cyndaquil totodile

@@ -5,19 +5,21 @@
 <% if @notice %>
   <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
 <% end %>
-<% unless @starters.empty? %>
-  <h2 class="starters-title">Iniciais</h2>
-  <ul class="pokemon-list starters">
-    <% @starters.each do |name, pokemon| %>
-      <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon, css_class: "starter-item" } %>
+<div class="pokemon-grid">
+  <% unless @starters.empty? %>
+    <h2 class="starters-title">Iniciais</h2>
+    <ul class="pokemon-list starters">
+      <% @starters.each do |name, pokemon| %>
+        <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon, css_class: "starter-item" } %>
+      <% end %>
+    </ul>
+  <% end %>
+  <ul class="pokemon-list">
+    <% @items.each do |name, pokemon| %>
+      <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon, css_class: "list-item" } %>
     <% end %>
   </ul>
-<% end %>
-<ul class="pokemon-list">
-  <% @items.each do |name, pokemon| %>
-    <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon, css_class: "list-item" } %>
-  <% end %>
-</ul>
+</div>
 <div class="pagination">
   <% if @offset.positive? %>
     <a href="#" hx-get="/pokemons?offset=<%= @offset - @limit %>&q=<%= @q %>" hx-target="#pokemon-list" hx-swap="innerHTML">Anterior</a>
