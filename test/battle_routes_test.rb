@@ -95,6 +95,50 @@ class ServerBattleTest < Minitest::Test
     assert_includes last_response.body, 'hx-target="#battle-view"'
   end
 
+  def test_battle_panels_render_hp_bars_for_player_and_opponent
+    @repository.add("user-a", pikachu_pokemon)
+
+    stub_battle_start do
+      get "/battle", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'class="bar hp-bar hp-bar--high"',
+                    "barra de HP presente no painel do jogador"
+    assert_includes last_response.body, 'class="bar hp-bar hp-bar--high"',
+                    "barra de HP presente no painel do oponente"
+  end
+
+  def test_battle_hp_bar_width_reflects_hp_share
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 50)
+
+    stub_battle_start do
+      get "/battle", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "HP 50/200",
+                    "texto de HP preservado"
+    assert_includes last_response.body, 'style="width: 25%"',
+                    "barra de HP com 25% para 50/200"
+  end
+
+  def test_battle_panels_render_pp_bars_per_move
+    @repository.add("user-a", pikachu_pokemon)
+
+    stub_battle_start do
+      get "/battle", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'class="bar pp-bar pp-bar--high"',
+                    "barra de PP por golpe"
+    assert_includes last_response.body, "PP 30",
+                    "texto de PP preservado"
+  end
+
   def test_battle_fragment_has_play_button
     @repository.add("user-a", pikachu_pokemon)
 

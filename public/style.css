@@ -87,6 +87,48 @@ header nav a {
   margin-right: 6px;
 }
 
+/* Barras de HP/PP */
+.bar {
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 4px;
+  background: #eee;
+  overflow: hidden;
+}
+
+.hp-bar {
+  width: 120px;
+  height: 8px;
+  margin: 0 6px;
+}
+
+.pp-bar {
+  width: 80px;
+  height: 6px;
+  margin-left: 6px;
+}
+
+.bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.hp-bar--high .bar-fill,
+.pp-bar--high .bar-fill {
+  background: #2e7d32;
+}
+
+.hp-bar--medium .bar-fill,
+.pp-bar--medium .bar-fill {
+  background: #b26a00;
+}
+
+.hp-bar--low .bar-fill,
+.pp-bar--low .bar-fill {
+  background: #b00;
+}
+
 .battle-log {
   list-style-position: inside;
   padding-left: 0;

@@ -1,50 +1,21 @@
 <% if @message %>
-  <p class="notice"><%= @message %></p>
+  <p class="notice notice--info"><%= @message %></p>
 <% elsif @engine %>
   <h1>Batalha</h1>
   <p class="round">Rodada <%= @engine.rounds %><% if @engine.finished? %> — Fim de batalha<% end %></p>
 
-  <div class="battle-pane">
-    <h2>Seu Time</h2>
-    <% @engine.teams[0].each do |poke| %>
-      <p class="fighter">
-        <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
-        <%= poke.name %> — Nível <%= poke.level %> — HP <%= poke.hp_current %>/<%= poke.hp_max %><% unless poke.assigned_item.to_s.empty? %> — carrega: <%= ItemCatalog.find(poke.assigned_item)&.display_name || poke.assigned_item %><% end %><% unless poke.held_item.to_s.empty? %> — segura: <%= ItemCatalog.find(poke.held_item)&.display_name || poke.held_item %><% end %>
-      </p>
-      <% unless poke.moves.empty? %>
-        <ul class="moves">
-          <% poke.moves.each do |move| %>
-            <li><%= move.name %> — <span class="pp">PP <%= move.pp %></span></li>
-          <% end %>
-        </ul>
-      <% end %>
-    <% end %>
-    <% unless @engine.items.empty? %>
-      <p class="stock-items">Itens:
-        <% @engine.items.each do |name, quantity| %>
-          <% next unless quantity.to_i.positive? %>
-          <%= ItemCatalog.find(name)&.display_name || name %> ×<%= quantity %>
-        <% end %>
-      </p>
-    <% end %>
-  </div>
+  <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", presenters: @engine.teams[0].map { |poke| FighterPresenter.new(poke) } } %>
 
-  <div class="battle-pane">
-    <h2>Oponente</h2>
-    <% @engine.teams[1].each do |poke| %>
-      <p class="fighter">
-        <img src="<%= poke.sprite %>" alt="<%= poke.name %>">
-        <%= poke.name %> — Nível <%= poke.level %> — HP <%= poke.hp_current %>/<%= poke.hp_max %>
-      </p>
-      <% unless poke.moves.empty? %>
-        <ul class="moves">
-          <% poke.moves.each do |move| %>
-            <li><%= move.name %> — <span class="pp">PP <%= move.pp %></span></li>
-          <% end %>
-        </ul>
+  <% unless @engine.items.empty? %>
+    <p class="stock-items">Itens:
+      <% @engine.items.each do |name, quantity| %>
+        <% next unless quantity.to_i.positive? %>
+        <%= ItemCatalog.find(name)&.display_name || name %> ×<%= quantity %>
       <% end %>
-    <% end %>
-  </div>
+    </p>
+  <% end %>
+
+  <%= erb :_fighter_panel, layout: false, locals: { title: "Oponente", presenters: @engine.teams[1].map { |poke| FighterPresenter.new(poke) } } %>
 
   <% last_round = @engine.log.select { |entry| entry[:round] == @engine.rounds } %>
   <% unless last_round.empty? %>

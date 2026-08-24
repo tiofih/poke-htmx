@@ -23,6 +23,8 @@ require_relative "lib/team_service"
 require_relative "lib/user_state_repository"
 require_relative "lib/journey_service"
 require_relative "lib/parallelizer"
+require_relative "lib/fighter_presenter"
+require_relative "lib/battle_log_presenter"
 
 module ServerCommon
   private

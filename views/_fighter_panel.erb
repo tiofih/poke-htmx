@@ -1,0 +1,29 @@
+<div class="battle-pane">
+  <h2><%= title %></h2>
+  <% presenters.each do |fighter| %>
+    <p class="fighter">
+      <img src="<%= fighter.sprite %>" alt="<%= fighter.alt %>">
+      <span class="fighter-name"><%= fighter.name %></span> — Nível <%= fighter.level %>
+      <span class="bar hp-bar hp-bar--<%= fighter.hp_tier %>" role="progressbar"
+            aria-valuenow="<%= fighter.hp_label %>" aria-valuemin="0">
+        <span class="bar-fill" style="width: <%= fighter.hp_percent %>%"></span>
+      </span>
+      <span class="hp-text">HP <%= fighter.hp_label %></span>
+      <% unless fighter.assigned_item_label.nil? %> — carrega: <%= fighter.assigned_item_label %><% end %>
+      <% unless fighter.held_item_label.nil? %> — segura: <%= fighter.held_item_label %><% end %>
+    </p>
+    <% unless fighter.moves.empty? %>
+      <ul class="moves">
+        <% fighter.moves.each do |move| %>
+          <li>
+            <%= move.name %> — <span class="pp">PP <%= move.pp_current %></span>
+            <span class="bar pp-bar pp-bar--<%= move.pp_tier %>" role="progressbar"
+                  aria-valuenow="<%= move.pp_current %>" aria-valuemin="0">
+              <span class="bar-fill" style="width: <%= move.pp_percent %>%"></span>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+  <% end %>
+</div>
