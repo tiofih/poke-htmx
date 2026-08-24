@@ -122,7 +122,11 @@ Reusa `JourneyService` e o `@team` já carregado; contrato do gateway intacto.
       ("No time ✓", `disabled`) quando o Pokémon já está no time; `full`
       (desabilitado) quando `@team.size >= 6` — prova:
       `test/pokemon_routes_test.rb` (`test_pokemons_add_button_shows_in_team_when_pokemon_in_team`,
-      `test_pokemons_add_buttons_disabled_when_team_full`).
+      `test_pokemons_add_buttons_disabled_when_team_full`) +
+      `test/team_routes_test.rb` (OOB: `test_remove_from_full_team_returns_active_add_buttons_oob`,
+      `test_add_sixth_member_disables_add_buttons_oob`). *Ajuste S3 (2026-08-24):
+      add/remove devolvem o `#pokemon-list` re-renderizado via `hx-swap-oob` para o
+      estado dos botões refletir a mudança na mesma tela.*
 - [x] **C5 — Ações do time atualizam `#team-view` na página unificada**: após add
       (`POST /team`), o painel do time na `/` reflete o novo membro (mini-status
       preservado + `#team-view` atualizado) — prova: `test/team_routes_test.rb`
@@ -158,6 +162,18 @@ Reusa `JourneyService` e o `@team` já carregado; contrato do gateway intacto.
 - **2026-08-24 — Estados do botão Add incluídos**: default / "No time ✓" (disabled)
   / cheio (disabled), via `@team_names` exposto na rota da listagem — preterido:
   só a unificação das telas.
+- **2026-08-24 — Ajuste S3 (bug de validação, reabre C4/C5):** ao **remover** um
+  Pokémon de um time cheio, os botões Add da lista **não reativavam** — o estado
+  `@team_full` só era recalculado ao re-renderizar a listagem, não após `DELETE
+  /team` (que re-renderizava apenas `#team-view`). **Correção:** `add_team_member`
+  e `remove_team_member` passam a devolver também o `#pokemon-list` re-renderizado
+  via `hx-swap-oob` (`oob_pokemon_list`), usando `offset`/`q` carregados do
+  formulário via `hx-include=".list-state"` (hidden inputs no fragmento da lista).
+  Isso cobre o caso **simétrico** do add (adicionar o 6º desabilita os botões).
+- **2026-08-24 — Ajuste S3 (bug de validação):** no painel do time, o link
+  "Gerenciar time" (inline) ficava **na mesma linha** do primeiro Pokémon
+  (número do slot + sprite) — `.slot` é `inline-block`. **Correção:** envolver o
+  link num `<p class="team-tools">` (elemento em bloco).
 
 ## 6. Plano TDD (passos)
 
@@ -183,8 +199,14 @@ Reusa `JourneyService` e o `@team` já carregado; contrato do gateway intacto.
 | C1 página `/` unificada com `#team-view` | `test/pokemon_routes_test.rb` | `/` em tela cheia: busca + lista à esquerda, time (n/6 + membros) à direita |  |
 | C2 `/team` 404 direto / fragmento htmx | `test/team_routes_test.rb` | abrir `/team` no browser → 404; ações do time continuam atualizando o painel |  |
 | C3 nav sem link "Time" | `test/pokemon_routes_test.rb` | nav mostra Lista/Batalha/Histórico; Lista ativa |  |
-| C4 estados do botão Add | `test/pokemon_routes_test.rb` | na lista, Pokémon no time mostra "No time ✓" desabilitado; time cheio desabilita todos |  |
-| C5 add atualiza `#team-view` | `test/pokemon_routes_test.rb` | ao adicionar, mini-status + painel do time atualizam na mesma tela |  |
+| C4 estados do botão Add | `test/pokemon_routes_test.rb` + `test/team_routes_test.rb` (OOB add/remove) | na lista, Pokémon no time mostra "No time ✓" desabilitado; time cheio desabilita todos; **remover de um time cheio reativa** os botões; **adicionar o 6º desabilita** todos |  |
+| C5 add atualiza `#team-view` | `test/pokemon_routes_test.rb` + `test/team_routes_test.rb` (`test_post_team_includes_team_view_out_of_band_swap`) | ao adicionar, mini-status + painel do time atualizam na mesma tela |  |
+
+> **S3 — ajustes de validação (registrados na seção 5):** durante a validação o
+> usuário reportou 2 bugs: (1) remover de um time cheio não reativava os botões Add
+> da lista — corrigido com `#pokemon-list` em `hx-swap-oob` no add/remove (reabre
+> C4/C5); (2) o link "Gerenciar time" ficava na mesma linha do primeiro Pokémon —
+> corrigido com `<p class="team-tools">`. Reaprovação do usuário pendente.
 
 ## 8. Observações
 
