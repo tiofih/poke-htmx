@@ -42,7 +42,7 @@
           <% @inventory.to_a.each do |entry| %>
             <% item = ItemCatalog.find(entry[:name]) %>
             <% next unless item && item.heal_amount.to_i.positive? %>
-            <option value="<%= item.name %>"<%= poke.assigned_item == item.name ? " selected" : "" %>>
+            <option value="<%= item.name %>"<%= poke.assigned_item == item.name ? " selected" : "" %><%= " disabled" if entry[:quantity].to_i <= 0 && poke.assigned_item != item.name %>>
               <%= item.display_name %> ×<%= entry[:quantity] %>
             </option>
           <% end %>
@@ -61,7 +61,7 @@
           <% @inventory.to_a.each do |entry| %>
             <% item = ItemCatalog.find(entry[:name]) %>
             <% next unless item && item.category == "held" %>
-            <option value="<%= item.name %>"<%= poke.held_item == item.name ? " selected" : "" %>>
+            <option value="<%= item.name %>"<%= poke.held_item == item.name ? " selected" : "" %><%= " disabled" if entry[:quantity].to_i <= 0 && poke.held_item != item.name %>>
               <%= item.display_name %> ×<%= entry[:quantity] %>
             </option>
           <% end %>

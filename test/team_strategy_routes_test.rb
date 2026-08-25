@@ -321,4 +321,74 @@ class ServerTeamHeldItemTest < Minitest::Test
     assert_equal 1, last_response.body.scan("Choice Band").size,
                  "held aparece apenas no select de seguravel, nao no de consumivel"
   end
+
+  def test_team_manage_disables_item_option_when_stock_empty
+    @repository.add("user-a", pikachu_pokemon)
+    @repository.add("user-a", bulbasaur_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 1)
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "potion")
+
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_match(/value="potion" disabled/, last_response.body,
+                 "item sem estoque nao equipado no poke atual fica disabled")
+  end
+
+  def test_team_manage_keeps_current_item_selected_even_with_zero_stock
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 1)
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "potion")
+
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_match(/value="potion" selected/, last_response.body,
+                 "item equipado no poke atual segue selected mesmo com estoque 0")
+    refute_match(/value="potion" disabled/, last_response.body,
+                 "item equipado no poke atual nao fica disabled")
+  end
+
+  def test_team_manage_disables_held_option_when_stock_empty
+    @repository.add("user-a", pikachu_pokemon)
+    @repository.add("user-a", bulbasaur_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "choice-band", 1)
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "choice-band")
+
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_match(/value="choice-band" disabled/, last_response.body,
+                 "seguravel sem estoque nao equipado no poke atual fica disabled")
+  end
+
+  def test_team_manage_keeps_current_held_selected_even_with_zero_stock
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "choice-band", 1)
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "choice-band")
+
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_match(/value="choice-band" selected/, last_response.body,
+                 "seguravel equipado no poke atual segue selected mesmo com estoque 0")
+    refute_match(/value="choice-band" disabled/, last_response.body,
+                 "seguravel equipado no poke atual nao fica disabled")
+  end
 end
