@@ -90,6 +90,15 @@ module BattleServicePreparation
     @inventory.all(user_id).to_h { |entry| [entry[:name], entry[:quantity]] }
   end
 
+  def battle_items(user_id)
+    stock = inventory_stock(user_id)
+    @team.all(user_id).each do |member|
+      item = member.assigned_item
+      stock[item] = stock.fetch(item, 0) + 1 if item && !item.to_s.empty?
+    end
+    stock
+  end
+
   def moves_for(pokemon)
     saved = pokemon.moves.filter_map { |name| api.move(name) }
     return saved unless saved.empty?
@@ -105,10 +114,22 @@ module BattleServiceFinalization
   private
 
   def debit_used_items(user_id, engine)
-    round = engine.rounds
-    engine.log.each do |entry|
-      next unless entry[:round] == round && entry[:action] == :item
+    members = @team.all(user_id)
+    items_used_in_round(engine).each do |entry|
+      consume_used_item(user_id, members, entry)
+    end
+  end
 
+  def items_used_in_round(engine)
+    round = engine.rounds
+    engine.log.select { |entry| entry[:round] == round && entry[:action] == :item }
+  end
+
+  def consume_used_item(user_id, members, entry)
+    member = members[entry[:attacker_index]]
+    if member && member.assigned_item.to_s == entry[:item].to_s
+      @team.assign_item(user_id, member.id, nil)
+    else
       @inventory.use(user_id, entry[:item], 1)
     end
   end
@@ -290,7 +311,7 @@ class BattleService
       team_a: player,
       team_b: opponent,
       effectiveness: TypeEffectiveness.load(api),
-      items: inventory_stock(user_id)
+      items: battle_items(user_id)
     )
   end
 

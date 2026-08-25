@@ -368,6 +368,7 @@ class BattleEngineItemTest < Minitest::Test
     refute item_entry.key?(:damage)
     refute item_entry.key?(:target_name)
     refute item_entry.key?(:ko)
+    assert_equal 0, item_entry[:attacker_index], "log identifica o membro que usou"
   end
 
   def test_no_item_when_hp_is_full

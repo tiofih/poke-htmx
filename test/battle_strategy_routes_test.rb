@@ -23,19 +23,22 @@ class ServerBattleItemTest < Minitest::Test
     assert_includes last_response.body, "carrega: Pocao"
   end
 
-  def test_battle_uses_assigned_item_and_debits_inventory
+  def test_battle_consumes_assigned_item_and_clears_member_without_debit
     @repository.add("user-a", pikachu_pokemon)
     member_id = @repository.all("user-a").first.id
-    @repository.assign_item("user-a", member_id, "potion")
-    @progression.update_hp("user-a", member_id, 200, 90)
-    @inventory.add("user-a", "potion", 2)
+    @inventory.add("user-a", "potion", 1)
+    post "/team/#{member_id}/item", { item_name: "potion" }, user_session("user-a")
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "potion"), "equipar debita"
 
+    @progression.update_hp("user-a", member_id, 200, 90)
     stub_battle_start { get "/battle", {}, user_session("user-a") }
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "usou Pocao"
-    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "item atribuido debitado no round"
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "potion"),
+                 "item atribuido consumido nao debita de novo (ja saiu na equipacao)"
+    assert_nil @repository.all("user-a").first.assigned_item, "poke fica sem item apos consumir em batalha"
   end
 end
 

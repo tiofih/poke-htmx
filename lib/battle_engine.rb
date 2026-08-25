@@ -123,7 +123,8 @@ module BattleItemActions
     @items_used_by_member[[attacker_team_index, attacker_index]] = item_name
     @log << {
       round: round, attacker: attacker_team_index, action: :item,
-      item: item_name, healed: healed, attacker_name: attacker.name
+      item: item_name, healed: healed, attacker_name: attacker.name,
+      attacker_index: attacker_index
     }
   end
 
