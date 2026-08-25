@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-24 |
-| Implementação | Pendente |
-| Validação | Pendente — **executada pelo usuário** |
+| Implementação | **Concluída** — passos 1–3 + correções de validação em 2026-08-24 (suíte 718/2294, lint 0) |
+| Validação | **Done** — executada pelo usuário em 2026-08-24 (tabela da seção 7; correções de UI revalidadas) |
 
 ---
 
@@ -176,19 +176,24 @@ gems novas.
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente** *(S2: uma linha por critério; S3: ajuste aqui reabre o critério).*
+**Concluída em 2026-08-24 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 — equipar/desequipar com débito/reposição | `test/team_strategy_routes_test.rb` (novos em `ServerTeamItemTest`/`ServerTeamHeldItemTest`) | — | pendente |
-| C2 — UI: quantidade livre + desabilitado | `test/team_strategy_routes_test.rb` (markup) | `/team/manage`: Choice Band ×2 no 1º poke, após equipar ×1 no 2º, ×0 disabled nos demais; equipado do poke atual `selected` | pendente |
-| C3 — batalha: atribuído consumido não debita + limpa | `test/battle_strategy_routes_test.rb` (ajustado) + `test/battle_routes_test.rb` (pool) | — | pendente |
+| C1 — equipar/desequipar com débito/reposição | `test/team_strategy_routes_test.rb` (`test_post_team_item_debits_stock_on_assign`, `test_post_team_item_reequip_same_item_does_not_debit_again`, `test_post_team_item_switch_restores_old_and_debits_new`, `test_post_team_item_empty_clears_and_restores_stock`, `test_equip_and_clear_five_potions_restores_full_stock` + espelhos held) | `/team/manage`: equipar desconta na hora, desequipar repõe, trocar repõe antigo + debita novo, re-equipar não debita de novo | **ok** |
+| C2 — UI: quantidade livre + desabilitado | `test/team_strategy_routes_test.rb` (`test_team_manage_disables_item_option_when_stock_empty`, `test_team_manage_keeps_current_item_selected_even_with_zero_stock`, `test_team_manage_disables_held_option_when_stock_empty`, `test_team_manage_keeps_current_held_selected_even_with_zero_stock`, `test_team_manage_shows_debited_stock_after_equip`, `test_team_manage_shows_restored_stock_after_clear`) | `/team/manage`: qtd livre visível (×4/×1), option disabled ×0, equipado do poke atual selected | **ok** |
+| C3 — batalha: atribuído consumido não debita + limpa | `test/battle_strategy_routes_test.rb` (`test_battle_consumes_assigned_item_and_clears_member_without_debit`) + `test/battle_routes_test.rb` (pool debita) + `test/battle_engine_test.rb` (`attacker_index` no log) | — | **ok** |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.
 
 ## 8. Observações
 
+- **Anotado na validação (resíduo de UI, fora de critério — RNF-04):** o usuário
+  reportou que ao salvar item/segurável o scroll **ainda pula para baixo** (após a
+  correção do pulo para cima com `overflow-anchor: none` + preservação do `scrollY`).
+  Anotado como candidato a investigação futura (comportamento de swap/scroll do htmx
+  no manage; pode exigir `hx-preserve` ou alvo mais granular no swap).
 - **Correções de UI feitas durante a validação (fora do critério, produção):**
   (a) **estoque exibido no manage** passou a refletir débito/reposição após
   equipar/desequipar — `save_team_item`/`save_team_held_item` carregavam `@inventory`
