@@ -16,6 +16,10 @@ module ServerBattleTestHelpers
     )
   end
 
+  def battle_pokemon_named(name, number)
+    battle_pokemon_for_test.new(name: name, number: number)
+  end
+
   def battle_moves_for_test
     [build_move("thunder-shock", type: "electric", power: 40, pp: 30)]
   end
@@ -50,5 +54,20 @@ module ServerBattleTestHelpers
   def start_battle_for(user_id)
     add_team(user_id, [["pikachu", 25], ["bulbasaur", 26], ["charmander", 27]]) if @repository.all(user_id).empty?
     stub_battle_start { get "/battle", {}, user_session(user_id) }
+  end
+
+  def with_seeded_battle_rng(&)
+    seed = 0
+    deps = {
+      api: -> { Server.settings.api }, battles: Server.settings.battles,
+      team: Server.settings.team, progression: Server.settings.progression,
+      battle_history: Server.settings.battle_history, wallet: Server.settings.wallet,
+      inventory: Server.settings.inventory, opponent_rng: -> { Random.new(seed += 1) }
+    }
+    original = Server.settings.battle
+    Server.set :battle, BattleService.new(dependencies: deps)
+    yield
+  ensure
+    Server.set :battle, original
   end
 end

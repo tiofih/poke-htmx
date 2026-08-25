@@ -259,6 +259,72 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     end
   end
 
+  def test_battle_revisits_keep_same_opponent
+    @repository.add("user-a", pikachu_pokemon)
+    first = nil
+    second = nil
+
+    stub_battle_start do
+      get "/battle", {}, htmx_session("user-a")
+      first = last_response.body
+      get "/battle", {}, htmx_session("user-a")
+      second = last_response.body
+    end
+
+    assert last_response.ok?
+    assert_equal first, second, "revisitar mantem a batalha preparada identica (mesmo oponente)"
+  end
+
+  def test_new_confront_generates_new_opponent
+    @repository.add("user-a", pikachu_pokemon)
+    first = nil
+    second = nil
+    names = %w[pikachu bulbasaur charmander squirtle eevee jigglypuff]
+    details = names.to_h { |name| [name, battle_pokemon_named(name, 1)] }
+                   .merge(25 => pikachu_pokemon)
+
+    with_seeded_battle_rng do
+      PokeApiStub.with_all_names(names) do
+        PokeApiStub.with_type(neutral_type_json_table) do
+          PokeApiStub.with_gateway(detail: details) do
+            PokeApiStub.with_moves_for(battle_moves_for_test) do
+              get "/battle", {}, htmx_session("user-a")
+              first = last_response.body
+              post "/battle/new", {}, htmx_session("user-a")
+              second = last_response.body
+            end
+          end
+        end
+      end
+    end
+
+    assert last_response.ok?
+    refute_equal first, second, "novo confronto gera oponente diferente"
+  end
+
+  def test_removing_member_resets_prepared_battle
+    @repository.add("user-a", pikachu_pokemon)
+    @repository.add("user-a", bulbasaur_pokemon)
+    member_id = @repository.all("user-a").first.id
+    first = nil
+    second = nil
+
+    with_seeded_battle_rng do
+      stub_battle_start do
+        get "/battle", {}, htmx_session("user-a")
+        first = last_response.body
+      end
+      delete "/team", { id: member_id }, htmx_session("user-a")
+      stub_battle_start do
+        get "/battle", {}, htmx_session("user-a")
+        second = last_response.body
+      end
+    end
+
+    assert last_response.ok?
+    refute_equal first, second, "remover membro invalida a batalha preparada (novo confronto)"
+  end
+
   def test_battle_shows_moves_with_pp_per_fighter
     @repository.add("user-a", pikachu_pokemon)
 

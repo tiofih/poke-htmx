@@ -216,6 +216,7 @@ module ServerTeamActions
   def add_team_member
     notice = add_team_notice(new_member_from_api)
     settings.journey.mark_started_when_full(current_user)
+    settings.battle.invalidate(current_user) unless notice
     @notice = notice || "Adicionado ao time."
     @notice_kind = notice ? :error : :success
     mini_status = erb :team_add_result, layout: false
@@ -262,11 +263,13 @@ module ServerTeamActions
 
   def remove_team_member
     settings.team.remove(current_user, params[:id]) if params[:id]
+    settings.battle.invalidate(current_user)
     "#{render_team_fragment_with_notice}#{oob_pokemon_list}"
   end
 
   def move_team_member
     settings.team.move(current_user, params[:id], params[:new_slot].to_i)
+    settings.battle.invalidate(current_user)
     render_team_fragment_with_notice
   end
 
