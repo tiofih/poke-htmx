@@ -101,6 +101,26 @@ class ServerTeamTest < Minitest::Test
     assert_match(%r{<p class="team-tools">\s*<a href="#" hx-get="/team/manage"}, last_response.body)
   end
 
+  def test_team_panel_shows_battle_cta_after_journey
+    @repository.add("user-a", pikachu_pokemon)
+    start_journey("user-a")
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_match(%r{<a class="gameloop-cta battle" href="/battle">Batalhar</a>}, last_response.body)
+  end
+
+  def test_team_panel_omits_battle_cta_before_journey
+    @repository.add("user-a", pikachu_pokemon)
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    refute_match(/gameloop-cta battle/, last_response.body)
+    refute_includes last_response.body, "Batalhar"
+  end
+
   def test_post_team_starts_with_level_one_moves
     PokeApiStub.with_find(pikachu_pokemon) do
       PokeApiStub.with_learnable_moves(

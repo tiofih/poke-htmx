@@ -10,6 +10,8 @@
 </p>
 <% if @journey_started %>
   <% unless @team.empty? %>
+    <a class="gameloop-cta battle" href="/battle">Batalhar</a>
+
     <%= erb :_center, layout: false %>
 
     <%= erb :_mart, layout: false %>
