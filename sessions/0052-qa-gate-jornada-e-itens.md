@@ -8,7 +8,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25 |
 | Implementação | **Concluída** — passos 1–3 + docs, suíte 768/2455, lint 0 (2026-08-25) |
-| Validação | **Pendente** (executada pelo usuário) |
+| Validação | **Concluída** — C1–C4 ok, validada pelo usuário em 2026-08-25 |
 
 ---
 
@@ -83,13 +83,13 @@ CTA "Batalhar" escondido no painel); **(Q2)** remover Pokémon com item/seguráv
 
 ### Resultado
 
-- [ ] **C1 (Q3):** a jornada é iniciada **somente** com o time de 6 membros; remover
+- [x] **C1 (Q3):** a jornada é iniciada **somente** com o time de 6 membros; remover
       abaixo de 6 re-bloqueia Batalha/Poke Center/Poke Mart (fragmento de gate) e o painel
       volta ao aviso de montagem sem Center/Mart/CTA "Batalhar". — prova:
       `test/journey_service_test.rb` (`JourneyStartedTest#test_flag_alone_does_not_liberate_below_six`),
       `test/battle_routes_test.rb` (`ServerJourneyGateBattleTest#test_battle_blocked_when_team_shrinks_below_six`),
       `test/team_routes_test.rb` (painel com time < 6 sem Center/Mart/CTA).
-- [ ] **C2 (GL-2 — gate de HP):** `GET /battle` e `POST /battle/new` com time de 6 **todo
+- [x] **C2 (GL-2 — gate de HP):** `GET /battle` e `POST /battle/new` com time de 6 **todo
       zerado** devolvem aviso "cure seu time no Poke Center" + CTA para a Lista, sem montar
       batalha; Pokémon que nunca lutou (hp_max 0) conta como cheio; time parcialmente
       zerado batalha. **Ajuste S3 (2026-08-25, feedback na validação):** com o time todo
@@ -100,10 +100,10 @@ CTA "Batalhar" escondido no painel); **(Q2)** remover Pokémon com item/seguráv
       (`JourneyBattleReadyTest#test_not_battle_ready_when_all_hp_zero`),
       `test/battle_routes_test.rb` (`ServerBattleHpGateTest#test_battle_blocked_when_all_hp_zero`,
       `ServerBattleTest#test_finish_screen_disables_new_confront_when_team_defeated`).
-- [ ] **C3 (GL-2 — painel):** com todo o time zerado, o painel **esconde o CTA "Batalhar"**
+- [x] **C3 (GL-2 — painel):** com todo o time zerado, o painel **esconde o CTA "Batalhar"**
       mas mantém Poke Center/Poke Mart visíveis. — prova: `test/team_routes_test.rb`
       (`ServerTeamHpGateTest#test_team_panel_hides_battle_cta_when_all_hp_zero`).
-- [ ] **C4 (Q2):** remover Pokémon com item/segurável equipado **devolve o item ao estoque**
+- [x] **C4 (Q2):** remover Pokémon com item/segurável equipado **devolve o item ao estoque**
       (`assigned_item` e `held_item`); item já consumido em batalha não é devolvido; remoção
       de id inexistente segue idempotente (sem erro). — prova: `test/team_routes_test.rb`
       (`test_remove_member_restores_assigned_and_held_items`).
@@ -151,14 +151,16 @@ CTA "Batalhar" escondido no painel); **(Q2)** remover Pokémon com item/seguráv
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Validada em 2026-08-25** — S2: um resultado por critério. Ajuste S3 registrado acima
+(C2 reaberto e re-aprovado): botão "Novo confronto" desabilitado com tooltip na tela de fim
+de batalha após derrota e no gate de HP.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (Q3) | `./scripts/test -n /flag_alone_does_not_liberate|team_shrinks_below_six/` | remover 1 poke de um time de 6 → painel volta ao aviso e Center/Mart/CTA somem; `/battle` bloqueado | |
-| C2 (GL-2) | `./scripts/test -n /battle_ready|battle_blocked_when_all_hp_zero|finish_screen_disables_new_confront/` | time de 6 todo zerado → `/battle` mostra "cure no Poke Center" + CTA; fim de batalha após derrota e gate mostram "Novo confronto" desabilitado com tooltip | |
-| C3 (GL-2 painel) | `./scripts/test -n /hides_battle_cta_when_all_hp_zero/` | painel com time zerado sem CTA "Batalhar", com Center/Mart | |
-| C4 (Q2) | `./scripts/test -n /restores_assigned_and_held_items/` | equipar poção + Choice Band, remover → estoque volta ao saldo anterior | |
+| C1 (Q3) | `./scripts/test -n /flag_alone_does_not_liberate|team_shrinks_below_six/` | remover 1 poke de um time de 6 → painel volta ao aviso e Center/Mart/CTA somem; `/battle` bloqueado | ok |
+| C2 (GL-2) | `./scripts/test -n /battle_ready|battle_blocked_when_all_hp_zero|finish_screen_disables_new_confront/` | time de 6 todo zerado → `/battle` mostra "cure no Poke Center" + CTA; fim de batalha após derrota e gate mostram "Novo confronto" desabilitado com tooltip | ok (re-aprovado no ajuste S3) |
+| C3 (GL-2 painel) | `./scripts/test -n /hides_battle_cta_when_all_hp_zero/` | painel com time zerado sem CTA "Batalhar", com Center/Mart | ok |
+| C4 (Q2) | `./scripts/test -n /restores_assigned_and_held_items/` | equipar poção + Choice Band, remover → estoque volta ao saldo anterior | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.
@@ -173,5 +175,5 @@ CTA "Batalhar" escondido no painel); **(Q2)** remover Pokémon com item/seguráv
 - Migração de testes (Passo 1): ~21 `start_journey` em rotas + setup da `ServerBattleTest`
   (classe inteira) → substituir por time de 6 (`fill_team`); testes que adicionam poke
   próprio removem o add (o `fill_team` já fornece pikachu no slot 1).
-- Próximo passo do fluxo: **fase 2 concluída (passos 1–3 + docs, suíte 768/2455, lint 0) —
-  PARAR e aguardar a validação do usuário (fase 3)**.
+- Próximo passo do fluxo: **0052 concluída e validada (C1–C4 ok, 2026-08-25)** — organizar o
+  resto do QA (Q4, Q5) e a fila (J2, J4, D4, M2, GL-1) — a critério do usuário.

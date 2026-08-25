@@ -292,8 +292,9 @@ zerado (Center/Mart permanecem); **Q2** — `TeamService#remove_member` devolve
 `assigned_item`/`held_item` ao estoque antes de `TeamRepository#remove` (rota passa a usar o
 service). Flag `user_state` vira vestigial para o gate (escrita preservada; remoção =
 refatoração futura anotada no draft). Migração de testes: `start_journey` (flag) → `fill_team`
-(time de 6) nas rotas. **Implementada em 2026-08-25 (passos 1–3, suíte 768/2455, lint 0 —
-AGUARDANDO validação do usuário).**
+(time de 6) nas rotas. **VALIDADA pelo usuário em 2026-08-25 (C1–C4 ok; ajuste S3 — C2
+reaberto e re-aprovado: botão "Novo confronto" desabilitado com tooltip na tela de fim de
+batalha após derrota e no gate de HP; suíte 770/2473, lint 0).**
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -368,7 +369,7 @@ AGUARDANDO validação do usuário).**
 | 0049 | BUG-1/Q1 — oponente novo a cada confronto + máquina de estado do gameloop: fim da seed fixa por usuário (`opponent_rng` injetável, default `Random.new`) + reuso da batalha ativa por estado (preparada → re-deriva o time preservando o oponente; em andamento/finalizada → preserva), "Novo confronto" via `POST /battle/new`, add/remove/move invalidam a batalha | Concluída | Done (passos 1–5, suíte 735/2358, lint 0, validado em 2026-08-25; ajuste S3 — C1 reprovado e reaberto: oponente trocava a cada acesso) |
 | 0050 | P2 — performance da varredura da banda do oponente: varredura **paralela em lotes** no `OpponentGenerator` (caminho `ratings:` nome→tier, determinística por seed) + **cap de varredura** `max_candidates:` com fallback puro + **cache de rating persistente** (`PokemonRatingCache`, keyed por nome, TTL 7d, write-through) + **C4-b (S3): escrita do cache HTTP coalescida** (`PersistentJsonStore` — store em memória + writer background + `flush!`) | Concluída | Done (passos 1–7, suíte 751/2391, lint 0, validado em 2026-08-25; ajuste S3 — C4 reaberto e resolvido no C4-b: 1ª batalha ~60s → 2.81s / frio real 1.64s; anotado GL-2 — trava para time com HP zerado) |
 | 0051 | BUG-4 — vazamento de conexões PG em produção (`ConnectionRegistry` só limpa no `after_teardown`; app acumulou 80 conexões no benchmark e derrubou a suíte): **liberação por request** (`after` no `server.rb` → `release_current_thread!`) + **teto global** `MAX_CONNECTIONS` 30 com evicção (thread morta primeiro, senão LRU), isolamento por thread (0044) preservado | Concluída | Done (passos 1–3, suíte 755/2404, lint 0, validado em 2026-08-25; `pokedex` estável em 14 conexões — antes 80 — e suíte verde com o `web` ativo) |
-| 0052 | QA Q2+Q3+GL-2 — gate da jornada por tamanho do time (Q3: `started?` = `team >= 6`, flag deixa de liberar — remover abaixo de 6 re-bloqueia), gate de HP no `/battle` (GL-2: `battle_ready?` com poke cheio se nunca lutou, aviso+CTA "cure no Poke Center", CTA "Batalhar" escondido no painel) e itens devolvidos no remove (Q2: `TeamService#remove_member` repõe `assigned_item`/`held_item` ao estoque) | Implementação | Concluída — passos 1–3, suíte 768/2455, lint 0, **aguardando validação do usuário** (2026-08-25) |
+| 0052 | QA Q2+Q3+GL-2 — gate da jornada por tamanho do time (Q3: `started?` = `team >= 6`, flag deixa de liberar — remover abaixo de 6 re-bloqueia), gate de HP no `/battle` (GL-2: `battle_ready?` com poke cheio se nunca lutou, aviso+CTA "cure no Poke Center", CTA "Batalhar" escondido no painel, botão "Novo confronto" desabilitado na tela de fim após derrota) e itens devolvidos no remove (Q2: `TeamService#remove_member` repõe `assigned_item`/`held_item` ao estoque) | Concluída | Done (passos 1–3 + ajuste S3, suíte 770/2473, lint 0, validado em 2026-08-25; flag `user_state` vira vestigial — anotado no draft) |
 
 ## Estrutura do arquivo de sessão
 
