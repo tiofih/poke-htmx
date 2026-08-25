@@ -28,6 +28,16 @@
       document.addEventListener("htmx:afterRequest", function () {
         document.getElementById("global-loading").classList.remove("active");
       });
+      var htmxSavedScrollY = null;
+      document.addEventListener("htmx:beforeRequest", function () {
+        htmxSavedScrollY = window.scrollY;
+      });
+      document.addEventListener("htmx:afterSwap", function () {
+        if (htmxSavedScrollY !== null) {
+          window.scrollTo(0, htmxSavedScrollY);
+          htmxSavedScrollY = null;
+        }
+      });
     </script>
   </body>
 </html>

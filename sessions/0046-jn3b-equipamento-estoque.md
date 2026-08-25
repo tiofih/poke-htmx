@@ -189,6 +189,16 @@ gems novas.
 
 ## 8. Observações
 
+- **Correções de UI feitas durante a validação (fora do critério, produção):**
+  (a) **estoque exibido no manage** passou a refletir débito/reposição após
+  equipar/desequipar — `save_team_item`/`save_team_held_item` carregavam `@inventory`
+  via `team_manage_context` antes do assign e não recarregavam depois (o HTML mostrava
+  o estoque anterior ao débito; "equipar 5 e desequipar todas → 4"); fix
+  `reload_manage_state` (recarrega `@team` + `@inventory` no POST) + testes de markup
+  (`×4` após equipar, `×1` após desequipar); (b) **salvar item/segurável no 4º/5º poke
+  fazia a tela pular para o topo** — swap do `#team-view` (innerHTML) derrubava a
+  âncora de scroll; fix `overflow-anchor: none` no `.team-column` + preservação do
+  `scrollY` entre `htmx:beforeRequest`/`htmx:afterSwap` no `layout.erb`.
 - O estoque (`inventory`) passa a representar itens **livres** (não equipados); itens
   equipados ficam "no poke" (`assigned_item`/`held_item`). O `battle_items` soma os
   atribuídos para a batalha enxergar o que o poke carrega.

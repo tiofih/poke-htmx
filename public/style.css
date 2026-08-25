@@ -228,6 +228,7 @@ body.page-list {
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 0.8em 1em;
+  overflow-anchor: none;
 }
 
 .journey-progress {
