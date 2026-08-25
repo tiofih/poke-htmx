@@ -36,17 +36,22 @@ class JourneyStartedTest < Minitest::Test
     assert_equal true, @journey.started?("user-a")
   end
 
-  def test_persisted_flag_alone_liberates_even_with_empty_team
+  def test_flag_alone_does_not_liberate_with_empty_team
     @journey.mark_started("user-a")
 
-    assert_equal true, @journey.started?("user-a")
+    assert_equal false, @journey.started?("user-a")
   end
 
-  def test_flag_or_team_size_both_liberate
+  def test_flag_alone_does_not_liberate_below_six
     @journey.mark_started("user-a")
+    5.times { |n| @team.add("user-a", build_pokemon_record("pokemon#{n}", n + 1)) }
+
+    assert_equal false, @journey.started?("user-a")
+  end
+
+  def test_team_size_liberates_even_without_flag
     fill_team("user-b")
 
-    assert_equal true, @journey.started?("user-a")
     assert_equal true, @journey.started?("user-b")
   end
 

@@ -7,11 +7,10 @@ class ServerMartTest < Minitest::Test
 
   def setup
     super
-    start_journey("user-a")
+    fill_team("user-a")
   end
 
   def test_mart_buy_debits_wallet_and_adds_to_inventory
-    @repository.add("user-a", pikachu_pokemon)
     @wallet.grant("user-a", 100)
 
     post "/mart/buy", { item_name: "potion", quantity: "2" }, user_session("user-a")
@@ -25,7 +24,6 @@ class ServerMartTest < Minitest::Test
   end
 
   def test_mart_buy_with_insufficient_balance_shows_notice_without_charging
-    @repository.add("user-a", pikachu_pokemon)
     @wallet.grant("user-a", 10)
 
     post "/mart/buy", { item_name: "potion", quantity: "1" }, user_session("user-a")
@@ -37,7 +35,6 @@ class ServerMartTest < Minitest::Test
   end
 
   def test_mart_buy_with_unknown_item_shows_notice_without_charging
-    @repository.add("user-a", pikachu_pokemon)
     @wallet.grant("user-a", 100)
 
     post "/mart/buy", { item_name: "master-ball", quantity: "1" }, user_session("user-a")
@@ -49,7 +46,6 @@ class ServerMartTest < Minitest::Test
   end
 
   def test_mart_fragment_shows_catalog_inventory_and_balance
-    @repository.add("user-a", pikachu_pokemon)
     @wallet.grant("user-a", 100)
 
     get "/team", {}, htmx_session("user-a")
@@ -62,7 +58,6 @@ class ServerMartTest < Minitest::Test
   end
 
   def test_mart_fragment_shows_affordable_quantity
-    @repository.add("user-a", pikachu_pokemon)
     @wallet.grant("user-a", 100)
 
     get "/team", {}, htmx_session("user-a")
@@ -77,7 +72,6 @@ class ServerMartTest < Minitest::Test
   end
 
   def test_mart_fragment_disables_buy_when_insufficient_balance
-    @repository.add("user-a", pikachu_pokemon)
     @wallet.grant("user-a", 10)
 
     get "/team", {}, htmx_session("user-a")
@@ -89,7 +83,6 @@ class ServerMartTest < Minitest::Test
   end
 
   def test_mart_buy_adds_row_visible_in_fragment_inventory
-    @repository.add("user-a", pikachu_pokemon)
     @wallet.grant("user-a", 100)
 
     post "/mart/buy", { item_name: "potion", quantity: "1" }, user_session("user-a")
@@ -116,8 +109,7 @@ class ServerMartJourneyGateTest < Minitest::Test
   end
 
   def test_mart_buy_released_after_journey_started
-    start_journey("user-a")
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
     @wallet.grant("user-a", 100)
 
     post "/mart/buy", { item_name: "potion", quantity: "1" }, user_session("user-a")

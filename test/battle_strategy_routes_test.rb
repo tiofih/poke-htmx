@@ -9,11 +9,10 @@ class ServerBattleItemTest < Minitest::Test
 
   def setup
     super
-    start_journey("user-a")
+    fill_team("user-a")
   end
 
   def test_battle_panel_shows_assigned_item_on_player_member
-    @repository.add("user-a", pikachu_pokemon)
     member_id = @repository.all("user-a").first.id
     @repository.assign_item("user-a", member_id, "potion")
 
@@ -24,7 +23,6 @@ class ServerBattleItemTest < Minitest::Test
   end
 
   def test_battle_consumes_assigned_item_and_clears_member_without_debit
-    @repository.add("user-a", pikachu_pokemon)
     member_id = @repository.all("user-a").first.id
     @inventory.add("user-a", "potion", 1)
     post "/team/#{member_id}/item", { item_name: "potion" }, user_session("user-a")
@@ -49,7 +47,7 @@ class ServerBattleHeldItemTest < Minitest::Test
 
   def setup
     super
-    start_journey("user-a")
+    fill_team("user-a")
   end
 
   def shield_opponent
@@ -68,7 +66,6 @@ class ServerBattleHeldItemTest < Minitest::Test
   end
 
   def test_battle_panel_shows_held_item_on_player_member
-    @repository.add("user-a", pikachu_pokemon)
     member_id = @repository.all("user-a").first.id
     @repository.assign_held_item("user-a", member_id, "choice-band")
 
@@ -79,7 +76,6 @@ class ServerBattleHeldItemTest < Minitest::Test
   end
 
   def test_battle_play_does_not_debit_held_item_inventory
-    @repository.add("user-a", pikachu_pokemon)
     member_id = @repository.all("user-a").first.id
     @repository.assign_held_item("user-a", member_id, "choice-band")
     @inventory.add("user-a", "choice-band", 3)
@@ -94,7 +90,6 @@ class ServerBattleHeldItemTest < Minitest::Test
   end
 
   def test_battle_play_with_held_item_does_not_consume_on_finish
-    @repository.add("user-a", pikachu_pokemon)
     member_id = @repository.all("user-a").first.id
     @repository.assign_held_item("user-a", member_id, "choice-band")
     @inventory.add("user-a", "choice-band", 2)

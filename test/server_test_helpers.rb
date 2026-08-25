@@ -25,6 +25,15 @@ module ServerTestHelpers
     UserStateRepository.new.mark_started(user_id)
   end
 
+  def fill_team(user_id, members: DEFAULT_TEAM_SPECS)
+    add_team(user_id, members)
+  end
+
+  DEFAULT_TEAM_SPECS = [
+    ["pikachu", 25], ["bulbasaur", 1], ["charmander", 4],
+    ["squirtle", 7], ["pidgey", 16], ["rattata", 19]
+  ].freeze
+
   def pikachu_pokemon
     build_pokemon_record("pikachu", 25)
   end

@@ -52,7 +52,7 @@ module ServerBattleTestHelpers
   end
 
   def start_battle_for(user_id)
-    add_team(user_id, [["pikachu", 25], ["bulbasaur", 26], ["charmander", 27]]) if @repository.all(user_id).empty?
+    fill_team(user_id) if @repository.all(user_id).empty?
     stub_battle_start { get "/battle", {}, user_session(user_id) }
   end
 

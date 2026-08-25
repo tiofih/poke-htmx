@@ -102,8 +102,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_panel_shows_battle_cta_after_journey
-    @repository.add("user-a", pikachu_pokemon)
-    start_journey("user-a")
+    fill_team("user-a")
 
     get "/team", {}, htmx_session("user-a")
 
@@ -334,13 +333,12 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_fragment_renders_move_buttons
-    start_journey("user-a")
-    add_team("user-a", [["pikachu", 25], ["bulbasaur", 1], ["charmander", 4], ["squirtle", 7]])
+    fill_team("user-a")
 
     get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
-    assert_equal 9, last_response.body.scan("hx-post=\"/team/").size
+    assert_equal 13, last_response.body.scan("hx-post=\"/team/").size
     assert_includes last_response.body, ">▲</button>"
     assert_includes last_response.body, ">▼</button>"
     assert_includes last_response.body, 'name="new_slot"'
@@ -401,8 +399,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_heal_cures_team_and_charges_wallet
-    start_journey("user-a")
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
     @wallet.grant("user-a", 200)
@@ -418,8 +415,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_heal_with_insufficient_balance_shows_notice_without_debiting
-    start_journey("user-a")
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
     @wallet.grant("user-a", 10)
@@ -433,8 +429,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_heal_already_cured_shows_notice_without_debiting
-    start_journey("user-a")
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 200)
     @wallet.grant("user-a", 100)
@@ -456,8 +451,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_team_fragment_shows_poke_center_with_hp_and_heal_button
-    start_journey("user-a")
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
 
@@ -477,8 +471,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_center_fragment_shows_heal_cost_upfront
-    start_journey("user-a")
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
     @wallet.grant("user-a", 200)
@@ -495,8 +488,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_center_fragment_disables_heal_when_cured
-    start_journey("user-a")
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 200)
     @wallet.grant("user-a", 100)
@@ -510,8 +502,7 @@ class ServerTeamTest < Minitest::Test
   end
 
   def test_center_fragment_disables_heal_when_insufficient_balance
-    start_journey("user-a")
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
     @wallet.grant("user-a", 10)
@@ -545,8 +536,7 @@ class ServerHealJourneyGateTest < Minitest::Test
   end
 
   def test_heal_released_after_journey_started
-    start_journey("user-a")
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
     @wallet.grant("user-a", 200)
@@ -609,8 +599,7 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
   end
 
   def test_team_fragment_shows_center_and_mart_after_journey_started
-    start_journey("user-a")
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
     @wallet.grant("user-a", 100)
 
     get "/team", {}, htmx_session("user-a")
@@ -619,5 +608,18 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
     assert_includes last_response.body, "Poke Center"
     assert_includes last_response.body, "Poke Mart"
     refute_match(/Monte seu time inicial/, last_response.body)
+  end
+
+  def test_team_panel_reblocks_center_and_mart_when_team_shrinks_below_six
+    fill_team("user-a")
+    delete "/team", { id: @repository.all("user-a").first.id }, user_session("user-a")
+    delete "/team", { id: @repository.all("user-a").first.id }, user_session("user-a")
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    refute_includes last_response.body, "Poke Center"
+    refute_includes last_response.body, "Poke Mart"
+    assert_match(/Monte seu time inicial/, last_response.body)
   end
 end

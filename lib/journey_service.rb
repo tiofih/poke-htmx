@@ -7,7 +7,7 @@ class JourneyService
   end
 
   def started?(user_id)
-    @user_state.started?(user_id) || @team.all(user_id).size >= TeamRepository::MAX_TEAM_SIZE
+    @team.all(user_id).size >= TeamRepository::MAX_TEAM_SIZE
   end
 
   def mark_started(user_id)

@@ -9,11 +9,10 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def setup
     super
-    start_journey("user-a")
+    fill_team("user-a")
   end
 
   def test_battle_page_renders_full_page_with_battle_view
-    @repository.add("user-a", pikachu_pokemon)
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 
     assert last_response.ok?
@@ -29,7 +28,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_request_releases_thread_connections
-    @repository.add("user-a", pikachu_pokemon)
     refute_equal 0, ConnectionRegistry.size, "sanity: conexao registrada antes do request"
 
     get "/", {}, user_session("user-a")
@@ -39,7 +37,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_renders_remaining_stock_in_player_panel
-    @repository.add("user-a", pikachu_pokemon)
     @inventory.add("user-a", "potion", 2)
     @inventory.add("user-a", "super-potion", 1)
 
@@ -53,7 +50,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_play_debits_used_item_and_shows_heal_log
-    @repository.add("user-a", pikachu_pokemon)
     member_id = @repository.all("user-a").first.id
     @progression.update_hp("user-a", member_id, 200, 90)
     @inventory.add("user-a", "potion", 2)
@@ -68,7 +64,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_play_without_item_use_does_not_debit_inventory
-    @repository.add("user-a", pikachu_pokemon)
     @inventory.add("user-a", "potion", 2)
 
     stub_battle_start { get "/battle", {}, user_session("user-a") }
@@ -80,7 +75,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_panel_shows_item_used_badge_after_member_uses_item
-    @repository.add("user-a", pikachu_pokemon)
     member_id = @repository.all("user-a").first.id
     @progression.update_hp("user-a", member_id, 200, 90)
     @inventory.add("user-a", "potion", 2)
@@ -94,7 +88,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_panel_has_no_item_used_badge_before_any_use
-    @repository.add("user-a", pikachu_pokemon)
     @inventory.add("user-a", "potion", 2)
 
     stub_battle_start { get "/battle", {}, user_session("user-a") }
@@ -104,8 +97,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_start_loads_into_panel_without_clearing_nav
-    @repository.add("user-a", pikachu_pokemon)
-
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
@@ -115,8 +106,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_renders_panels_with_team_and_opponent
-    @repository.add("user-a", pikachu_pokemon)
-
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
@@ -130,8 +119,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_panels_render_hp_bars_for_player_and_opponent
-    @repository.add("user-a", pikachu_pokemon)
-
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
@@ -144,7 +131,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_hp_bar_width_reflects_hp_share
-    @repository.add("user-a", pikachu_pokemon)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 50)
 
@@ -160,8 +146,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_panels_render_pp_bars_per_move
-    @repository.add("user-a", pikachu_pokemon)
-
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
@@ -174,8 +158,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_fragment_has_play_button
-    @repository.add("user-a", pikachu_pokemon)
-
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
@@ -186,8 +168,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_play_button_has_local_hx_indicator
-    @repository.add("user-a", pikachu_pokemon)
-
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
@@ -198,11 +178,11 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_includes last_response.body, "hx-post=\"/battle/play\""
   end
 
-  def test_battle_with_empty_team_shows_friendly_message
-    get "/battle", {}, user_session("user-a")
+  def test_battle_with_empty_team_shows_journey_gate
+    get "/battle", {}, user_session("user-novo")
 
     assert last_response.ok?
-    assert_includes last_response.body, "Forme seu time"
+    assert_match(/jornada/i, last_response.body)
   end
 
   def test_battle_play_advances_one_round_and_refreshes_fragment
@@ -236,7 +216,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_end_shows_winner_and_reset_button
     start_battle_for("user-a")
-    20.times { post "/battle/play", {}, user_session("user-a") }
+    play_until_finish(fallback_plays: 300)
 
     assert last_response.ok?
     assert_includes last_response.body, "Vencedor:"
@@ -245,7 +225,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_end_shows_gameloop_ctas
     start_battle_for("user-a")
-    20.times { post "/battle/play", {}, user_session("user-a") }
+    play_until_finish(fallback_plays: 300)
 
     assert last_response.ok?
     assert_match(%r{<a class="gameloop-cta" href="/">Poke Center</a>}, last_response.body)
@@ -255,7 +235,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_reset_starts_a_fresh_battle_with_persisted_hp
     start_battle_for("user-a")
-    20.times { post "/battle/play", {}, user_session("user-a") }
+    play_until_finish(fallback_plays: 300)
     persisted_hp = @repository.all("user-a").map(&:hp_current)
 
     stub_battle_start { post "/battle/new", {}, user_session("user-a") }
@@ -270,7 +250,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_revisits_keep_same_opponent
-    @repository.add("user-a", pikachu_pokemon)
     first = nil
     second = nil
 
@@ -286,6 +265,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_new_confront_generates_new_opponent
+    TestDatabase.clear_team!
     @repository.add("user-a", pikachu_pokemon)
     first = nil
     second = nil
@@ -313,8 +293,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_removing_member_resets_prepared_battle
-    @repository.add("user-a", pikachu_pokemon)
-    @repository.add("user-a", bulbasaur_pokemon)
     member_id = @repository.all("user-a").first.id
     first = nil
     second = nil
@@ -336,8 +314,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_shows_moves_with_pp_per_fighter
-    @repository.add("user-a", pikachu_pokemon)
-
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
@@ -381,8 +357,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_with_struggle_fallback_does_not_break
-    @repository.add("user-a", pikachu_pokemon)
-
     PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
       PokeApiStub.with_type(neutral_type_json_table) do
         PokeApiStub.with_detail(battle_pokemon_for_test) do
@@ -398,7 +372,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_uses_saved_moves_for_player
-    @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
     @repository.set_moves("user-a", pikachu_id, %w[quick-attack])
 
@@ -419,7 +392,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_play_log_uses_saved_move_name
-    @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
     @repository.set_moves("user-a", pikachu_id, %w[quick-attack])
 
@@ -442,7 +414,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_with_unresolvable_saved_moves_falls_back_to_default
-    @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
     @repository.set_moves("user-a", pikachu_id, %w[obsolete-move])
 
@@ -463,8 +434,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_with_member_detail_nil_shows_friendly_message
-    @repository.add("user-a", pikachu_pokemon)
-
     PokeApiStub.with_all_names(%w[pikachu bulbasaur charmander squirtle eevee jigglypuff]) do
       PokeApiStub.with_detail(nil) do
         get "/battle", {}, user_session("user-a")
@@ -477,8 +446,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_with_empty_opponent_shows_friendly_message
-    @repository.add("user-a", pikachu_pokemon)
-
     PokeApiStub.with_all_names([]) do
       PokeApiStub.with_type(neutral_type_json_table) do
         PokeApiStub.with_detail(battle_pokemon_for_test) do
@@ -494,8 +461,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_renders_level_one_per_fighter_by_default
-    @repository.add("user-a", pikachu_pokemon)
-
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
@@ -506,7 +471,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_uses_persisted_member_level_for_player_and_opponent
-    @repository.add("user-a", pikachu_pokemon)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.grant("user-a", pokemon_id, 600)
 
@@ -521,18 +485,17 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_play_shows_xp_gained_message_at_finish
     start_battle_for("user-a")
-    20.times { post "/battle/play", {}, user_session("user-a") }
+    play_until_finish(fallback_plays: 300)
 
     assert last_response.ok?
     assert_match(/Seu Time ganhou \d+ XP/, last_response.body)
   end
 
   def test_battle_play_grants_xp_once_on_transition_to_finished
-    @repository.add("user-a", pikachu_pokemon)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     start_battle_for("user-a")
 
-    20.times { post "/battle/play", {}, user_session("user-a") }
+    play_until_finish(fallback_plays: 300)
 
     after_finish = TestDatabase.progress_row(pokemon_id)["xp"].to_i
     assert_includes [20, 25, 50], after_finish, "XP concedido uma vez conforme o resultado"
@@ -544,10 +507,9 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_reset_reflects_persisted_xp_on_new_confront
-    @repository.add("user-a", pikachu_pokemon)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     start_battle_for("user-a")
-    20.times { post "/battle/play", {}, user_session("user-a") }
+    play_until_finish(fallback_plays: 300)
 
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 
@@ -556,11 +518,10 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_play_grants_money_once_on_transition_to_finished
-    @repository.add("user-a", pikachu_pokemon)
     start_battle_for("user-a")
     assert_equal 0, @wallet.balance("user-a"), "moeda não concedida antes do fim"
 
-    20.times { post "/battle/play", {}, user_session("user-a") }
+    play_until_finish(fallback_plays: 300)
 
     after_finish = @wallet.balance("user-a")
     assert_includes [40, 50, 100], after_finish, "moeda concedida uma vez conforme o resultado"
@@ -583,7 +544,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_finish_shows_money_gained_message
     start_battle_for("user-a")
-    20.times { post "/battle/play", {}, user_session("user-a") }
+    play_until_finish(fallback_plays: 300)
 
     assert last_response.ok?
     assert_match(/\d+ de dinheiro/, last_response.body)
@@ -591,12 +552,14 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_finish_evolves_member_when_level_reaches_min_level
-    @repository.add("user-a", pikachu_pokemon)
+    TestDatabase.clear_team!
+    fill_team("user-a")
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.grant("user-a", pokemon_id, 99_999)
 
     raichu_detail = Pokemon.new(name: "raichu", sprite: "https://example.com/raichu.png", number: 26)
     detail_map = { 25 => battle_pokemon_for_test, 26 => raichu_detail, "pikachu" => battle_pokemon_for_test }
+    [1, 4, 7, 16, 19].each { |number| detail_map[number] = battle_pokemon_for_test }
     evolution_data = [{ number: 26, name: "raichu", min_level: 16 }]
 
     PokeApiStub.with_all_names(%w[pikachu]) do
@@ -604,7 +567,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
         PokeApiStub.with_gateway(detail: detail_map, moves_for: battle_moves_for_test,
                                  next_evolutions: evolution_data) do
           get "/battle", {}, user_session("user-a")
-          play_until_finish
+          play_until_finish(fallback_plays: 300)
         end
       end
     end
@@ -616,13 +579,16 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_finish_does_not_evolve_when_target_already_in_team
-    @repository.add("user-a", pikachu_pokemon)
-    @repository.add("user-a", Pokemon.new(name: "raichu", sprite: "", number: 26))
+    TestDatabase.clear_team!
+    fill_team("user-a",
+              members: [["pikachu", 25], ["raichu", 26], ["charmander", 4], ["squirtle", 7], ["pidgey", 16],
+                        ["rattata", 19]])
     pikachu_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.grant("user-a", pikachu_id, 99_999)
 
     raichu_detail = Pokemon.new(name: "raichu", sprite: "https://example.com/raichu.png", number: 26)
     detail_map = { 25 => battle_pokemon_for_test, 26 => raichu_detail, "pikachu" => battle_pokemon_for_test }
+    [4, 7, 16, 19].each { |number| detail_map[number] = battle_pokemon_for_test }
     evolution_data = [{ number: 26, name: "raichu", min_level: 16 }]
 
     PokeApiStub.with_all_names(%w[pikachu]) do
@@ -630,7 +596,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
         PokeApiStub.with_gateway(detail: detail_map, moves_for: battle_moves_for_test,
                                  next_evolutions: evolution_data) do
           get "/battle", {}, user_session("user-a")
-          play_until_finish
+          play_until_finish(fallback_plays: 300)
         end
       end
     end
@@ -640,7 +606,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_finish_learns_moves_when_level_sufficient
-    @repository.add("user-a", pikachu_pokemon)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.grant("user-a", pokemon_id, 99_999)
 
@@ -660,8 +625,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_battle_finish_does_not_learn_when_level_insufficient
-    @repository.add("user-a", pikachu_pokemon)
-
     stub_battle_start do
       PokeApiStub.with_learnable_moves([{ level: 50, name: "thunder" }]) do
         get "/battle", {}, user_session("user-a")
@@ -676,7 +639,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_finish_persists_one_record_in_battles
     start_battle_for("user-a")
-    20.times { post "/battle/play", {}, user_session("user-a") }
+    play_until_finish(fallback_plays: 300)
 
     rows = TestDatabase.battle_rows("user-a")
     assert_equal 1, rows.size, "exatamente um registro ao finar a batalha"
@@ -686,7 +649,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_play_after_finish_does_not_duplicate_battle_record
     start_battle_for("user-a")
-    20.times { post "/battle/play", {}, user_session("user-a") }
+    play_until_finish(fallback_plays: 300)
     after_finish = TestDatabase.battle_rows("user-a").size
 
     5.times { post "/battle/play", {}, user_session("user-a") }
@@ -704,7 +667,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_records_are_isolated_per_user
     start_battle_for("user-a")
-    20.times { post "/battle/play", {}, user_session("user-a") }
+    play_until_finish(fallback_plays: 300)
 
     assert_empty TestDatabase.battle_rows("user-b")
   end
@@ -748,8 +711,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_new_battle_starts_with_persisted_hp
-    @repository.add("user-a", pikachu_pokemon)
-    @repository.add("user-a", bulbasaur_pokemon)
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 50)
 
@@ -763,8 +724,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_new_battle_starts_full_for_member_who_never_battled
-    @repository.add("user-a", pikachu_pokemon)
-
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
@@ -791,9 +750,19 @@ class ServerJourneyGateBattleTest < Minitest::Test
     refute_includes last_response.body, %(hx-post="/battle/play")
   end
 
+  def test_battle_blocked_when_team_shrinks_below_six
+    fill_team("user-a")
+    2.times { delete "/team", { id: @repository.all("user-a").first.id }, user_session("user-a") }
+
+    get "/battle", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/jornada/i, last_response.body)
+    refute_includes last_response.body, %(hx-post="/battle/play")
+  end
+
   def test_battle_opens_after_journey_started
-    start_journey("user-a")
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
 
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 
