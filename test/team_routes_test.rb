@@ -167,6 +167,38 @@ class ServerTeamTest < Minitest::Test
     assert last_response.ok?
   end
 
+  def test_remove_member_restores_assigned_and_held_items
+    fill_team("user-a")
+    member = @repository.all("user-a").first
+    @inventory.add("user-a", "potion", 1)
+    @inventory.add("user-a", "choice-band", 1)
+    post "/team/#{member.id}/item", { item_name: "potion" }, user_session("user-a")
+    post "/team/#{member.id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "potion"), "equipar debita do estoque"
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "choice-band"), "segurar debita do estoque"
+
+    delete "/team", { id: member.id }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "item equipado devolvido ao remover"
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "choice-band"), "seguravel devolvido ao remover"
+    refute_includes @repository.all("user-a").map(&:id), member.id
+  end
+
+  def test_remove_member_does_not_restore_item_already_consumed
+    fill_team("user-a")
+    member = @repository.all("user-a").first
+    @inventory.add("user-a", "potion", 1)
+    @repository.assign_item("user-a", member.id, "potion")
+    @repository.assign_item("user-a", member.id, nil)
+
+    delete "/team", { id: member.id }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"),
+                 "item consumido em batalha (assigned_item limpo) nao volta ao estoque"
+  end
+
   def test_delete_team_only_removes_own_session_member
     @repository.add("user-a", pikachu_pokemon)
     id = @repository.all("user-a").first.id

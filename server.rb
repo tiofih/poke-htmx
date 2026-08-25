@@ -262,7 +262,7 @@ module ServerTeamActions
   end
 
   def remove_team_member
-    settings.team.remove(current_user, params[:id]) if params[:id]
+    settings.team_strategy.remove_member(current_user, params[:id]) if params[:id]
     settings.battle.invalidate(current_user)
     "#{render_team_fragment_with_notice}#{oob_pokemon_list}"
   end

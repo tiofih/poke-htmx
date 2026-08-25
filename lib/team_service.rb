@@ -63,7 +63,20 @@ class TeamService
     assign_held_catalog_item(user_id, member, item_name)
   end
 
+  def remove_member(user_id, id)
+    member = @team.all(user_id).find { |poke| poke.id.to_s == id.to_s }
+    return false unless member
+
+    restore_items(user_id, member)
+    @team.remove(user_id, id)
+  end
+
   private
+
+  def restore_items(user_id, member)
+    @inventory.add(user_id, member.assigned_item, 1) unless member.assigned_item.to_s.empty?
+    @inventory.add(user_id, member.held_item, 1) unless member.held_item.to_s.empty?
+  end
 
   def available_name?(member, name, available_moves)
     available_moves[member.id].to_a.any? { |move| move[:name] == name }
