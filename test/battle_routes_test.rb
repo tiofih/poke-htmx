@@ -753,6 +753,7 @@ class ServerBattleHpGateTest < Minitest::Test
     assert last_response.ok?
     assert_match(/Poke Center/, last_response.body)
     refute_includes last_response.body, %(hx-post="/battle/play")
+    assert_match(/<button class="gameloop-cta" disabled title="Recupere seus pok[ée]mons/, last_response.body)
   end
 
   def test_new_confront_blocked_when_all_hp_zero
@@ -764,6 +765,7 @@ class ServerBattleHpGateTest < Minitest::Test
     assert last_response.ok?
     assert_match(/Poke Center/, last_response.body)
     refute_includes last_response.body, %(hx-post="/battle/play")
+    assert_match(/<button class="gameloop-cta" disabled title="Recupere seus pok[ée]mons/, last_response.body)
   end
 
   def test_battle_opens_when_partial_team_has_hp

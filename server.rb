@@ -381,6 +381,7 @@ module ServerBattleActions
   def defeated_gate_fragment
     @message = "Seu time está todo derrotado. Cure seus Pokémon no Poke Center."
     @gate_cta = { href: "/", label: "Ir para o Poke Center" }
+    @gate_disabled_cta = { label: "Novo confronto", title: "Recupere seus pokémons no Poke Center para batalhar." }
     erb :battle, layout: false
   end
 
