@@ -594,7 +594,7 @@
 
 ### P2. Varredura da banda do oponente (J3) sem paralelismo (anotado 2026-08-23)
 
-> **EXECUTADO na sessão 0050 (2026-08-25, implementado — aguardando validação).**
+> **EXECUTADO na sessão 0050 (2026-08-25) e VALIDADO pelo usuário em 2026-08-25.**
 > Estratégia fechada: A+B+cache — `OpponentGenerator` com novo caminho `ratings:`
 > (nome→tier) avaliando a banda em **lotes paralelos** via `Parallelizer`
 > (determinístico por seed) + **cap de varredura** `max_candidates:` (default 256 no
@@ -607,10 +607,11 @@
 > o gargalo real é o **write-through do `PersistentJsonStore`** (`pokeapi_cache.json`,
 > 260MB, 3788 entradas): `store` reescrevia o arquivo inteiro (~1.45s/miss: generate
 > 0.98s + write 0.47s) sob `@store_mutex` a cada miss; a 1ª batalha faz ~50-100 misses.
-> Fix implementado: **escrita coalescida** — `store` atualiza só em memória, writer em
-> background (intervalo 30s) + `flush!` síncrono (testes/exit), `PokeApiHttp#flush!`.
-> Resíduos: boot parse 260MB (~3s) e `PokemonRatingCache` com o mesmo padrão (arquivo
-> ~20KB, não é gargalo).
+> Fix implementado e validado: **escrita coalescida** — `store` atualiza só em memória,
+> writer em background (intervalo 30s) + `flush!` síncrono (testes/exit),
+> `PokeApiHttp#flush!`. **Resultado validado:** 1ª batalha ~60s → **2.81s** (frio real
+> **1.64s**), 2ª **0.01s**. Resíduos: boot parse 260MB (~3s) e `PokemonRatingCache` com o
+> mesmo padrão (arquivo ~20KB, não é gargalo).
 
 > **Fora do fluxo (RNF-04).** Observado na **validação da sessão 0040 (J3)**: o
 > `GET /battle` passou de ~38s (P1) para **~2min** na 1ª chamada.
@@ -779,9 +780,9 @@
 
 ## Anotações do usuário — 2026-08-25 (durante a validação da 0050)
 
-> **Fora do fluxo (RNF-04).** 7 pedidos novos, **não refinados** — viram sessão própria
-> após a 0050 concluir/validar, a critério do usuário. O usuário também reportou que o
-> `GET /battle` **ainda está lento** (perf da 0050) — análise diferida por ele.
+> **Fora do fluxo (RNF-04).** 8 pedidos novos, **não refinados** — viram sessão própria
+> após a 0050 concluir/validar, a critério do usuário. **0050 validada em 2026-08-25**
+> (perf da 1ª batalha resolvida — C4-b/write-through, ~60s → ~2s).
 
 ### IA-2. IA usa todos os golpes / zera todos os PP antes de usar Struggle
 
@@ -843,3 +844,14 @@
   (`ItemUsePolicy`). Implementar **outros modos de cura** ou **permitir usar poções no
   painel do time** (fora de batalha, debitando do estoque — reusar `TeamItemOperations`/
   `HealService`). Definir quais itens curam fora de batalha e as regras de consumo.
+
+### GL-2. Trava para time com HP zerado não poder ir batalhar
+
+- **Pedido (validado na 0050, 2026-08-25):** impedir que um time com **todos os pokes em
+  0 HP** entre em batalha. Hoje o gate do `GET /battle` só checa
+  `settings.journey.started?` = `user_state.started? || team.size >= 6`
+  (`lib/journey_service.rb:10`; `server.rb:353` → `journey_gate_fragment`) — **sem
+  verificar HP**. Após uma derrota (GL-1/`persist_finished_hp`, `battle_service.rb:233`),
+  o time pode ficar todo zerado e ainda disparar `GET /battle`. Definir a regra (ex.:
+  gate estende `started?` com "pelo menos 1 poke com `hp_current > 0`"; UX: aviso "cure
+  seu time no Poke Center" + CTA) e o teste.

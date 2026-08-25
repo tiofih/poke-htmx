@@ -256,8 +256,10 @@ gargalo é o **write-through do `PersistentJsonStore`** (260MB reescritos a cada
 ~1.45s/miss, sob `@store_mutex`). C4 reaberto e estendido (C4-b): **escrita coalescida**
 — `store` só em memória, writer em background (intervalo 30s) + `flush!` síncrono
 (testes/exit), `PokeApiHttp#flush!`; **passos 6–7 em 2026-08-25 (suíte 751/2391, lint 0,
-web parado para a suíte — app vazou conexões PG, ver anotação)**. Depois da 0050:
-organizar o resto do QA (Q2–Q5) e a fila (J2, J4, D4, M2) — a critério do usuário.
+web parado para a suíte — app vazou conexões PG, ver anotação)**. **VALIDADA pelo
+usuário em 2026-08-25 (C1–C3 ok, C4 nok→ok via C4-b, C4-b ok; benchmark pós-fix:
+1ª batalha 2.81s / frio real 1.64s / 2ª 0.01s — de ~60s).** Depois da 0050: organizar o
+resto do QA (Q2–Q5) e a fila (J2, J4, D4, M2) — a critério do usuário.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -330,7 +332,7 @@ organizar o resto do QA (Q2–Q5) e a fila (J2, J4, D4, M2) — a critério do u
 | 0047 | JN-4 — componentes de Poke Mart e Poke Center: blocos de `views/team.erb` viram partials reutilizáveis (`_mart.erb`/`_center.erb`) no painel do time, com cura completada (HP atual/máx + custo total antecipado, Curar desabilitado quando curado/insuficiente) e compra completada (preço × quantidade comprável, botão desabilitado quando saldo < preço); sem rotas/páginas novas | Concluída | Done (passos 1–3, suíte 724/2329, lint 0, validado em 2026-08-24; `team_hp.erb` removido) |
 | 0048 | JN-5 — gameloop: circuito explícito por CTAs (fluxo guiado) — fim de batalha mostra CTAs Poke Center/Poke Mart (levam à Lista `/`) + "Novo confronto" mantido; painel do time pós-jornada ganha CTA "Batalhar" (`/battle`); nav permanece Lista/Batalha/Histórico; sem páginas/rotas novas | Concluída | Done (passos 1–2, suíte 727/2344, lint 0, validado em 2026-08-25; anotações RNF-04 registradas) |
 | 0049 | BUG-1/Q1 — oponente novo a cada confronto + máquina de estado do gameloop: fim da seed fixa por usuário (`opponent_rng` injetável, default `Random.new`) + reuso da batalha ativa por estado (preparada → re-deriva o time preservando o oponente; em andamento/finalizada → preserva), "Novo confronto" via `POST /battle/new`, add/remove/move invalidam a batalha | Concluída | Done (passos 1–5, suíte 735/2358, lint 0, validado em 2026-08-25; ajuste S3 — C1 reprovado e reaberto: oponente trocava a cada acesso) |
-| 0050 | P2 — performance da varredura da banda do oponente: varredura **paralela em lotes** no `OpponentGenerator` (caminho `ratings:` nome→tier, determinística por seed) + **cap de varredura** `max_candidates:` com fallback puro + **cache de rating persistente** (`PokemonRatingCache`, keyed por nome, TTL 7d, write-through) + **C4-b (S3): escrita do cache HTTP coalescida** (`PersistentJsonStore` — store em memória + writer background + `flush!`) | Implementação | **Concluída** (passos 1–7 em 2026-08-25, suíte 751/2391, lint 0; validação pendente — executada pelo usuário; ajuste S3 — C4 reaberto e estendido) |
+| 0050 | P2 — performance da varredura da banda do oponente: varredura **paralela em lotes** no `OpponentGenerator` (caminho `ratings:` nome→tier, determinística por seed) + **cap de varredura** `max_candidates:` com fallback puro + **cache de rating persistente** (`PokemonRatingCache`, keyed por nome, TTL 7d, write-through) + **C4-b (S3): escrita do cache HTTP coalescida** (`PersistentJsonStore` — store em memória + writer background + `flush!`) | Concluída | Done (passos 1–7, suíte 751/2391, lint 0, validado em 2026-08-25; ajuste S3 — C4 reaberto e resolvido no C4-b: 1ª batalha ~60s → 2.81s / frio real 1.64s; anotado GL-2 — trava para time com HP zerado) |
 
 ## Estrutura do arquivo de sessão
 

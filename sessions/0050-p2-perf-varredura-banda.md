@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25 |
-| Implementação | **Concluída** — passos 1–5 em 2026-08-25 (suíte 748/2387, lint 0) |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — passos 1–7 em 2026-08-25 (suíte 751/2391, lint 0) |
+| Validação | **Done** — executada pelo usuário em 2026-08-25 (tabela da seção 7; C4 reaberto via S3 e resolvido no C4-b) |
 
 ---
 
@@ -180,26 +180,25 @@ que evita re-ratear (re-fetch de `detail` + `moves_for`) espécies já avaliadas
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *Feedback parcial em 2026-08-25: o usuário reportou que o `GET /battle`
-**ainda está lento** (evidência manual do C4 nok) e **diferiu a análise detalhada**
-("isso depois analiso com calma"). Critérios C1–C4 **sem ok/nok formal** — aguardando o
-fechamento do usuário. Não reabrir critério (S3) até a análise diferida. Enquanto isso,
-7 novos pedidos foram **anotados** em `draft-auto-battler.md` (RNF-04 — não abrem escopo
-aqui).*
-
-**Reaberta via S3 em 2026-08-25** (usuário: "vamos trabalhar nessa melhoria já agora").
-O C4 foi **reaberto e estendido** (seção 4, C4-b): o benchmark apontou o gargalo no
-**write-through do `PersistentJsonStore`** (1ª chamada ~55-63s; store de 260MB ~1.45s/
-miss). Fix em andamento (passos 6-7). *Critérios C1–C3 verdes; C4 original pendente —
-C4-b define a resolução da perf.*
+**Concluída em 2026-08-25 — validada pelo usuário** *(S2: uma linha por critério).*
+O C4 (perf) foi **reaberto via S3** (benchmark ~55-63s) e **resolvido no C4-b**:
+escrita do cache HTTP coalescida. Benchmark pós-fix: 1ª batalha (HTTP quente, rating
+frio) **2.81s**; frio real (boot novo + caches vazios) **1.64s**; 2ª chamada **0.01s**
+(antes: ~55-63s; origem: ~2min). Usuário: "agora sim! validado".
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 varredura paralela da banda | `./scripts/test test/opponent_generator_test.rb` | — (domínio puro) | pendente |
-| C2 cap + fallback puro | `./scripts/test test/opponent_generator_test.rb` | — (domínio puro) | pendente |
-| C3 cache de rating | `./scripts/test test/pokemon_rating_cache_test.rb` | — (componente puro) | pendente |
-| C4 ratings + cap no service, banda preservada | `./scripts/test test/battle_service_test.rb` | `GET /battle` 1ª chamada: usuário reportou **ainda lento** (55-63s medido) — reaberto (S3) | nok |
-| C4-b escrita do cache HTTP coalescida | `./scripts/test test/persistent_json_store_test.rb` | `GET /battle` 1ª chamada cai de ~60s para rede-bound (~10s?) | pendente |
+| C1 varredura paralela da banda | `./scripts/test test/opponent_generator_test.rb` | — (domínio puro) | ok |
+| C2 cap + fallback puro | `./scripts/test test/opponent_generator_test.rb` | — (domínio puro) | ok |
+| C3 cache de rating | `./scripts/test test/pokemon_rating_cache_test.rb` | — (componente puro) | ok |
+| C4 ratings + cap no service, banda preservada | `./scripts/test test/battle_service_test.rb` | `GET /battle` 1ª chamada **ainda lenta** (55-63s) → **reaberto (S3)** | nok → ok |
+| C4-b escrita do cache HTTP coalescida | `./scripts/test test/persistent_json_store_test.rb` | `GET /battle` 1ª chamada **2.81s** (frio real **1.64s**) — usuário validou | ok |
+
+> **Nota de validação:** usuário também pediu (anotado — RNF-04): **trava para time com
+> HP zerado não poder ir batalhar** — hoje o gate só checa `settings.journey.started?`
+> (`team.size >= 6`, `lib/journey_service.rb:10`), sem verificar HP; um time com todos os
+> pokes em 0 HP pode disparar `GET /battle`. Registrado em `draft-auto-battler.md`
+> (GL-2) para sessão própria.
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.
