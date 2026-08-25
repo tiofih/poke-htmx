@@ -710,3 +710,13 @@
   os itens ao inventário (`InventoryRepository`), e o handler `remove_team_member`
   (`server.rb:263`) não restaura. Corrigir = nova sessão (TDD): na remoção, devolver os
   itens equipados (assigned + held) ao estoque antes do delete.
+
+### BUG-3. Remover do time às vezes exige clicar 2x
+
+- **Bug (anotado 2026-08-25):** por vezes é preciso **clicar 2x no botão "Remover do
+  time"** para o membro sair. `views/team.erb:40` usa `hx-delete="/team"` (alvo
+  `#team-view`, `hx-include=".list-state"`, `hx-params="*"`); o handler
+  `remove_team_member` (`server.rb:263`) só age se `params[:id]`. **Hipótese (a
+  confirmar no QA):** o 1º clique dispara o delete mas o swap/estado não atualiza o
+  painel (ou o `id` chega vazio/duplicado no 1º request), então o jogador clica de novo
+  e só então o membro sai. Investigar no playtest de QA (evento htmx, params, OOB).

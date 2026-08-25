@@ -596,6 +596,12 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       os itens ao inventário, e o handler `remove_team_member` (`server.rb:263`) não
       restaura. Corrigir = nova sessão (TDD): na remoção, devolver os itens equipados
       (assigned + held) ao estoque antes do delete.
+- [ ] **Bug: remover do time às vezes exige clicar 2x (anotado 2026-08-25):** por vezes
+      é preciso clicar 2x no botão "Remover do time" para o membro sair. `views/team.erb:40`
+      usa `hx-delete="/team"` (alvo `#team-view`, `hx-include=".list-state"`,
+      `hx-params="*"`); handler `remove_team_member` (`server.rb:263`) só age se
+      `params[:id]`. Hipótese: 1º clique dispara mas o swap/estado não atualiza o painel
+      (ou `id` chega vazio/duplicado). Investigar no QA (evento htmx, params, OOB).
 - [ ] **Ideias novas (anotado 2026-08-25, fora do fluxo — RNF-04):** (1) **Poke
       Center/Mart como janelas flutuantes** em vez de levar à tela de lista/time;
       (2) **gerenciar golpes no Poke Center e itens no Poke Mart**, reestruturando como
