@@ -756,7 +756,7 @@
 ### BUG-4. App vaza conexões PG em produção (ConnectionRegistry sem limpeza)
 
 - **Bug (observado 2026-08-25, durante benchmark da 0050) e CORRIGIDO na sessão 0051
-  (2026-08-25, implementado — aguardando validação):** o `ConnectionRegistry`
+  (2026-08-25, validado pelo usuário):** o `ConnectionRegistry`
   (`lib/connection_registry.rb`) registra **uma conexão por (repositório, thread)** —
   a limpeza (`close_all!`) só rodava no `after_teardown` do Minitest (`test_helper.rb`).
   Em **produção o app nunca fechava**: sob o `run!` do Sinatra/Puma, cada request em

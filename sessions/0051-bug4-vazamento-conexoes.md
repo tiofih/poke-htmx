@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25 |
 | Implementação | **Concluída** — passos 1–3 em 2026-08-25 (suíte 755/2404, lint 0) |
-| Validação | **Pendente** (executada pelo usuário) |
+| Validação | **Done** — executada pelo usuário em 2026-08-25 (tabela da seção 7) |
 
 ---
 
@@ -130,13 +130,13 @@ isolamento por thread (0044).
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Concluída em 2026-08-25 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 release da thread | `./scripts/test test/connection_registry_test.rb` | — (componente puro) | |
-| C2 teto + evicção LRU | `./scripts/test test/connection_registry_test.rb` | — (componente puro) | |
-| C3 liberação por request | `./scripts/test test/battle_routes_test.rb` | rodar o app, fazer requests e conferir `pg_stat_activity` (conexões do `pokedex` não acumulam) | |
+| C1 release da thread | `./scripts/test test/connection_registry_test.rb` | — (componente puro) | ok |
+| C2 teto + evicção LRU | `./scripts/test test/connection_registry_test.rb` | — (componente puro) | ok |
+| C3 liberação por request | `./scripts/test test/battle_routes_test.rb` | app de pé: `pg_stat_activity` **estável em 14 conexões** no `pokedex` após ~18 requests (antes: 80 e subindo); suíte verde **com o `web` ativo** (755/2404) | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.
