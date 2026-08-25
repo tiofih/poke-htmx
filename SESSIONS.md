@@ -220,15 +220,17 @@ animações nos ataques; bug "novo confronto" repete oponente (seed determiníst
 user). Próximo: organizar o resto (J2, J4, D4 e P2) + as novas anotações — a critério
 do usuário.
 
-**Sessão 0049 (BUG-1/Q1 — oponente novo a cada confronto) refinada em 2026-08-25**
-(fase 1 concluída — implementação pendente): fim da seed fixa
+**Sessão 0049 (BUG-1/Q1 — oponente novo a cada confronto) refinada e implementada em
+2026-08-25** (passos 1–2, suíte 727/2344, lint 0): fim da seed fixa
 `Random.new(user_id.sum)` em `BattleService#build_opponent` (`lib/battle_service.rb:64`)
 — o service ganha a dependência injetável `opponent_rng` (default `-> { Random.new }`)
 e gera **um RNG novo por confronto**, mantendo o ajuste de dificuldade pela banda do
 nível médio do time; o teste que codificava o bug
 (`test_prepare_returns_same_opponent_for_same_user`) é substituído por
 `test_prepare_generates_new_opponent_for_each_confront` (determinístico, seeds
-sequenciais). Depois da 0049: organizar os demais itens do QA (Q2–Q5) e a fila
+sequenciais); critérios C1–C3 e plano TDD fechados
+(`sessions/0049-oponente-novo-por-confronto.md`); suíte verde, lint 0 — aguardando
+validação do usuário. Depois da 0049: organizar os demais itens do QA (Q2–Q5) e a fila
 (J2, J4, D4, P2, M2) — a critério do usuário.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
@@ -301,7 +303,7 @@ sequenciais). Depois da 0049: organizar os demais itens do QA (Q2–Q5) e a fila
 | 0046 | JN-3-B — equipamento por quantidade do estoque: equipar **debita**, desequipar **repõe**, trocar **repõe o antigo e debita o novo**, re-equipar o mesmo item **não debita de novo**; item atribuído consumido em batalha **não debita de novo** e limpa o `assigned_item`; UI com quantidade livre + option `disabled` ×0 | Concluída | Done (passos 1–3 + correções de UI na validação, suíte 718/2294, lint 0, validado em 2026-08-24; resíduo anotado — scroll ainda pula p/ baixo) |
 | 0047 | JN-4 — componentes de Poke Mart e Poke Center: blocos de `views/team.erb` viram partials reutilizáveis (`_mart.erb`/`_center.erb`) no painel do time, com cura completada (HP atual/máx + custo total antecipado, Curar desabilitado quando curado/insuficiente) e compra completada (preço × quantidade comprável, botão desabilitado quando saldo < preço); sem rotas/páginas novas | Concluída | Done (passos 1–3, suíte 724/2329, lint 0, validado em 2026-08-24; `team_hp.erb` removido) |
 | 0048 | JN-5 — gameloop: circuito explícito por CTAs (fluxo guiado) — fim de batalha mostra CTAs Poke Center/Poke Mart (levam à Lista `/`) + "Novo confronto" mantido; painel do time pós-jornada ganha CTA "Batalhar" (`/battle`); nav permanece Lista/Batalha/Histórico; sem páginas/rotas novas | Concluída | Done (passos 1–2, suíte 727/2344, lint 0, validado em 2026-08-25; anotações RNF-04 registradas) |
-| 0049 | BUG-1/Q1 — oponente novo a cada confronto: fim da seed fixa por usuário (`Random.new(user_id.sum)` em `BattleService#build_opponent`) — dependência injetável `opponent_rng` (default `-> { Random.new }`), RNG novo por confronto, banda/dificuldade pelo nível médio preservada | Refinamento | Refinamento concluído (2026-08-25) |
+| 0049 | BUG-1/Q1 — oponente novo a cada confronto: fim da seed fixa por usuário (`Random.new(user_id.sum)` em `BattleService#build_opponent`) — dependência injetável `opponent_rng` (default `-> { Random.new }`), RNG novo por confronto, banda/dificuldade pelo nível médio preservada | Implementação | Passos 1–2 verdes (suíte 727/2344, lint 0); aguardando validação do usuário |
 
 ## Estrutura do arquivo de sessão
 
