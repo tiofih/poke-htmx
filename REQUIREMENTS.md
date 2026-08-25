@@ -579,7 +579,11 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       **EXECUTADA na sessão 0050 (2026-08-25, implementada — aguardando validação):**
       varredura da banda em **lotes paralelos** (`ratings:` no `OpponentGenerator`) +
       **cap de varredura** (`max_candidates:` 256) com fallback puro +
-      **`PokemonRatingCache`** persistente (keyed por nome) no `BattleService`. Ver
+      **`PokemonRatingCache`** persistente (keyed por nome) no `BattleService`.
+      **Ajuste S3 (C4-b, 2026-08-25):** benchmark revelou o gargalo real no
+      **write-through do `PersistentJsonStore`** (arquivo 260MB reescrito a cada miss,
+      ~1.45s/miss) → fix de **escrita coalescida** (store em memória + writer em
+      background 30s + `flush!`/`PokeApiHttp#flush!`). Ver
       `draft-auto-battler.md` (anotações de performance).
 - [x] **Bug: oponente SEMPRE o mesmo por usuário (anotado 2026-08-25, confirmado no
       playtest 2; **corrigido na sessão 0049 em 2026-08-25**):** toda batalha de um

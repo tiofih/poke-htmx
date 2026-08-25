@@ -602,6 +602,15 @@
 > nome, TTL 7d, write-through) injetado no `BattleService#opponent_options`. Caminho
 > `rater`/`moves_fetcher` preservado. Caminho **4 (evitar o duplo fetch de `moves_for`
 > na montagem)** ficou de fora — ganho marginal, rever se desejado.
+>
+> **Ajuste S3 (C4-b, 2026-08-25):** benchmark mostrou a 1ª batalha ainda em ~55-63s —
+> o gargalo real é o **write-through do `PersistentJsonStore`** (`pokeapi_cache.json`,
+> 260MB, 3788 entradas): `store` reescrevia o arquivo inteiro (~1.45s/miss: generate
+> 0.98s + write 0.47s) sob `@store_mutex` a cada miss; a 1ª batalha faz ~50-100 misses.
+> Fix implementado: **escrita coalescida** — `store` atualiza só em memória, writer em
+> background (intervalo 30s) + `flush!` síncrono (testes/exit), `PokeApiHttp#flush!`.
+> Resíduos: boot parse 260MB (~3s) e `PokemonRatingCache` com o mesmo padrão (arquivo
+> ~20KB, não é gargalo).
 
 > **Fora do fluxo (RNF-04).** Observado na **validação da sessão 0040 (J3)**: o
 > `GET /battle` passou de ~38s (P1) para **~2min** na 1ª chamada.
@@ -742,6 +751,19 @@
   os itens ao inventário (`InventoryRepository`), e o handler `remove_team_member`
   (`server.rb:263`) não restaura. Corrigir = nova sessão (TDD): na remoção, devolver os
   itens equipados (assigned + held) ao estoque antes do delete.
+
+### BUG-4. App vaza conexões PG em produção (ConnectionRegistry sem limpeza)
+
+- **Bug (observado 2026-08-25, durante benchmark da 0050):** o `ConnectionRegistry`
+  (`lib/connection_registry.rb`) registra **uma conexão por (repositório, thread)** —
+  a limpeza (`close_all!`) só roda no `after_teardown` do Minitest (`test_helper.rb`).
+  Em **produção o app nunca fecha**: sob o `run!` multi-thread do Sinatra, cada request
+  em thread nova cria conexões e **acumula**. No benchmark, o app (web container) chegou
+  a **80 conexões no `pokedex`** após alguns requests → somado ao limite 100 do PG,
+  derrubou a suíte com "too many clients already" (workaround: `docker compose stop web`).
+  Corrigir = nova sessão (TDD): limpeza/coleta de conexões por thread no app (ex.:
+  release da thread no fim do request, ou reaproveitar um pool finito), preservando o
+  isolamento por thread (0044). Interage com a anotação "Sem CI".
 
 ### BUG-3. Remover do time às vezes exige clicar 2x
 
