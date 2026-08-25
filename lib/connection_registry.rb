@@ -17,6 +17,18 @@ module ConnectionRegistry
       end
     end
 
+    def release_current_thread!
+      thread_id = Thread.current.object_id
+      @mutex.synchronize do
+        @entries.delete_if do |(_, entry_thread_id), connection|
+          next false unless entry_thread_id == thread_id
+
+          connection.close unless connection.finished?
+          true
+        end
+      end
+    end
+
     def size
       @mutex.synchronize { @entries.size }
     end

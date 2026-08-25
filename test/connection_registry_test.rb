@@ -35,6 +35,17 @@ class ConnectionRegistryTest < Minitest::Test
     assert_operator open_connection_count, :<=, baseline + 1
   end
 
+  def test_release_current_thread_closes_and_removes_entries
+    ConnectionRegistry.close_all!
+    TeamRepository.new.all("user-a")
+    TeamRepository.new.all("user-b")
+    assert_equal 2, ConnectionRegistry.size
+
+    ConnectionRegistry.release_current_thread!
+
+    assert_equal 0, ConnectionRegistry.size, "release da thread remove as entradas da thread atual"
+  end
+
   private
 
   def open_connection_count
