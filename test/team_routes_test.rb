@@ -684,3 +684,47 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
     assert_match(/Recome\S* jornada/, last_response.body)
   end
 end
+
+class ServerTeamRemoveHtmxTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def setup
+    super
+    fill_team("user-a")
+  end
+
+  def test_htmx_delete_team_removes_and_swaps_both_fragments
+    id = @repository.all("user-a").first.id
+
+    delete "/team", { id: id, offset: "0", q: "" }, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 5, @repository.all("user-a").size
+    refute_includes last_response.body, "pikachu"
+    assert_includes last_response.body, "bulbasaur"
+    assert_includes last_response.body, %(hx-swap-oob="innerHTML")
+    assert_includes last_response.body, 'id="pokemon-list"'
+  end
+
+  def test_delete_team_is_idempotent_on_second_request
+    id = @repository.all("user-a").first.id
+    delete "/team", { id: id, offset: "0", q: "" }, htmx_session("user-a")
+    assert_equal 5, @repository.all("user-a").size
+
+    delete "/team", { id: id, offset: "0", q: "" }, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 5, @repository.all("user-a").size
+    refute_includes last_response.body, "Algo deu errado"
+  end
+
+  def test_remove_form_prevents_double_submit
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    remove_form = last_response.body[%r{<form[^>]*hx-delete="/team".*?</form>}m]
+    refute_nil remove_form
+    assert_match(/hx-disabled-elt/, remove_form)
+  end
+end

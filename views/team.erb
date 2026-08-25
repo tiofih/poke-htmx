@@ -51,6 +51,6 @@
       hx-include=".list-state"
       hx-params="*">
     <input type="hidden" name="id" value="<%= poke.id %>">
-    <button type="submit" class="btn">Remover do time</button>
+    <button type="submit" class="btn" hx-disabled-elt="this">Remover do time</button>
   </form>
 <% end %>
