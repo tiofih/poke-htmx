@@ -46,6 +46,37 @@ class ConnectionRegistryTest < Minitest::Test
     assert_equal 0, ConnectionRegistry.size, "release da thread remove as entradas da thread atual"
   end
 
+  def test_caps_total_connections_with_lru_eviction
+    ConnectionRegistry.close_all!
+    db = ENV.fetch("DATABASE_URL")
+    first = ConnectionRegistry.connection_for(:owner, 3000, db)
+    (ConnectionRegistry::MAX_CONNECTIONS - 1).times do |i|
+      ConnectionRegistry.connection_for(:owner, 3001 + i, db)
+    end
+    assert_equal ConnectionRegistry::MAX_CONNECTIONS, ConnectionRegistry.size
+
+    ConnectionRegistry.connection_for(:owner, 3999, db)
+
+    assert_operator ConnectionRegistry.size, :<=, ConnectionRegistry::MAX_CONNECTIONS
+    assert first.finished?, "LRU evictada quando o teto estoura"
+  end
+
+  def test_eviction_prefers_dead_threads
+    ConnectionRegistry.close_all!
+    db = ENV.fetch("DATABASE_URL")
+    dead_conn = Thread.new do
+      ConnectionRegistry.connection_for(:dead_owner, Thread.current.object_id, db)
+    end.value
+    refute dead_conn.finished?, "sanity: conexao viva antes da eviccao"
+
+    ConnectionRegistry::MAX_CONNECTIONS.times do |i|
+      ConnectionRegistry.connection_for(:live_owner, 5000 + i, db)
+    end
+
+    assert dead_conn.finished?, "eviccao fecha a conexao de thread morta antes das LRU vivas"
+    assert_operator ConnectionRegistry.size, :<=, ConnectionRegistry::MAX_CONNECTIONS
+  end
+
   private
 
   def open_connection_count
