@@ -2,7 +2,9 @@
 
 require_relative "test_helper"
 require_relative "../lib/team_repository"
+require_relative "../lib/progression_repository"
 require_relative "../lib/user_state_repository"
+require_relative "../lib/wallet_repository"
 require_relative "../lib/journey_service"
 
 module JourneyServiceTestHelpers
@@ -113,5 +115,55 @@ class JourneyMarkWhenFullTest < Minitest::Test
     @journey.mark_started_when_full("user-a")
 
     assert_equal false, UserStateRepository.new.started?("user-a")
+  end
+end
+
+class JourneyGameOverTest < Minitest::Test
+  include JourneyServiceTestHelpers
+
+  def setup
+    super
+    @wallet = WalletRepository.new
+    @heal_cost = 100
+    @journey = JourneyService.new(
+      user_state: UserStateRepository.new, team: @team,
+      wallet: @wallet, heal_preview: ->(_user_id) { @heal_cost }
+    )
+  end
+
+  def zero_all_hp(user_id)
+    @team.all(user_id).each do |member|
+      @progression.update_hp(user_id, member.id, 200, 0)
+    end
+  end
+
+  def test_game_over_when_all_hp_zero_and_unaffordable
+    fill_team("user-a")
+    zero_all_hp("user-a")
+    @wallet.grant("user-a", 50)
+
+    assert_equal true, @journey.game_over?("user-a")
+  end
+
+  def test_not_game_over_when_heal_affordable
+    fill_team("user-a")
+    zero_all_hp("user-a")
+    @wallet.grant("user-a", 200)
+
+    assert_equal false, @journey.game_over?("user-a")
+  end
+
+  def test_not_game_over_when_partial_hp
+    fill_team("user-a")
+    zeroed = @team.all("user-a")
+    zeroed[1..].each { |member| @progression.update_hp("user-a", member.id, 200, 0) }
+
+    assert_equal false, @journey.game_over?("user-a")
+  end
+
+  def test_not_game_over_below_team_of_six
+    @team.add("user-a", build_pokemon_record("pikachu", 25))
+
+    assert_equal false, @journey.game_over?("user-a")
   end
 end

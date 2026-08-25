@@ -649,7 +649,11 @@ class Server < Sinatra::Base
     set :api, PokeApi.instance
     set :inventory, InventoryRepository.new
     set :user_state, UserStateRepository.new
-    set :journey, JourneyService.new(user_state: settings.user_state, team: settings.team)
+    set :journey, JourneyService.new(
+      user_state: settings.user_state, team: settings.team,
+      wallet: settings.wallet,
+      heal_preview: ->(user_id) { settings.heal.preview_cost(user_id) }
+    )
     deps = {
       api: -> { settings.api }, battles: settings.battles, team: settings.team,
       progression: settings.progression, battle_history: settings.battle_history,
