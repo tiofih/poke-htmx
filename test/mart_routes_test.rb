@@ -61,6 +61,33 @@ class ServerMartTest < Minitest::Test
     assert_includes last_response.body, "Saldo: 100"
   end
 
+  def test_mart_fragment_shows_affordable_quantity
+    @repository.add("user-a", pikachu_pokemon)
+    @wallet.grant("user-a", 100)
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Pocao — 20 ×5"
+    assert_includes last_response.body, "Super Pocao — 50 ×2"
+    assert_includes last_response.body, "Hiper Pocao — 100 ×1"
+    mart_form = last_response.body[%r{<form[^>]*hx-post="/mart/buy".*?</form>}m]
+    refute_nil mart_form
+    refute_includes mart_form, "disabled"
+  end
+
+  def test_mart_fragment_disables_buy_when_insufficient_balance
+    @repository.add("user-a", pikachu_pokemon)
+    @wallet.grant("user-a", 10)
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    mart_form = last_response.body[%r{<form[^>]*hx-post="/mart/buy".*?</form>}m]
+    refute_nil mart_form
+    assert_includes mart_form, "disabled"
+  end
+
   def test_mart_buy_adds_row_visible_in_fragment_inventory
     @repository.add("user-a", pikachu_pokemon)
     @wallet.grant("user-a", 100)
