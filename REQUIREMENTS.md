@@ -579,6 +579,19 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       Candidatos: paralelizar a varredura (via `Parallelizer`), cap de varredura,
       pré-computar/cachear o rating, ou pré-cachear a banda offline. Ver
       `draft-auto-battler.md` (anotações de performance). Fora de sessão (RNF-04).
+- [ ] **Bug: "Novo confronto" repete o time/oponente anterior (anotado 2026-08-25,
+      durante a validação da 0048 — fora de sessão, RNF-04):** `BattleService#build_opponent`
+      (`lib/battle_service.rb:64`) usa `Random.new(user_id.sum)` — **seed determinístico
+      por usuário** — então o `OpponentGenerator` produz o **mesmo oponente** a cada
+      `prepare`, independente do time atual/nível. A banda
+      (`band_for_level(average_player_level(...))`) varia, mas a escolha dentro da banda
+      é determinística. Corrigir = gerar oponente **novo a cada confronto** ajustando a
+      dificuldade ao time atual (nova sessão TDD).
+- [ ] **Ideias novas (anotado 2026-08-25, fora do fluxo — RNF-04):** (1) **Poke
+      Center/Mart como janelas flutuantes** em vez de levar à tela de lista/time;
+      (2) **gerenciar golpes no Poke Center e itens no Poke Mart**, reestruturando como
+      gerenciamos os golpes dos pokes — esboço: **4 selects** (um por slot, cap 4).
+      Ver `draft-ui-ux.md` §6.
 
 ## Roadmap (executado em `SESSIONS.md`)
 

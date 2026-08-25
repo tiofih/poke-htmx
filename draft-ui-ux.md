@@ -177,3 +177,23 @@ mantendo `/team` página própria — sessão 0042. A página `/team` deixa de s
 (404 em navegação direta); vira fragmento htmx interno (`#team-view`).
 
 ---
+
+## 6. Janelas flutuantes (Poke Center / Poke Mart) e gestão de golpes/itens (anotação 2026-08-25 — fora do fluxo, RNF-04)
+
+> Ideias novas do usuário, **não refinadas** (RNF-04). Vão virar sessão própria após a
+> 0048 concluir/validar — a critério do usuário. Hoje os CTAs do gameloop (JN-5, 0048)
+> **levam à Lista** (`/`), onde `#team-view` mostra os partials `_center.erb`/`_mart.erb`.
+
+- **Poke Center / Poke Mart como janelas flutuantes (modais)**: em vez de levar à
+  tela de lista/time (`/`), os CTAs do circuito (fim de batalha / painel do time)
+  abrem o Center/Mart em **janela flutuante** (overlay/modal) sobre a tela atual —
+  mantendo o contexto (batalha terminada, painel do time) sem navegação. Cruz com o
+  JN-5 (0048) que acabou de criar esses CTAs como links de navegação.
+- **Gerenciar golpes no Poke Center e itens no Poke Mart**: estender Center/Mart para
+  além de curar/comprar — **editar golpes dos pokes** (hoje no `team_manage`) e
+  **gerenciar itens** (equipar/desequipar) dentro do circuito. Cruz com J2
+  (personalização).
+- **Reestruturar como gerenciamos os golpes dos pokes — esboço: 4 selects** para
+  selecionar os golpes (um por slot, cap 4), em vez da lista clicável atual do
+  `team_manage.erb` (JN-2). Refinamento futuro fechará modelo/UI.
+

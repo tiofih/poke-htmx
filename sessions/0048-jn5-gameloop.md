@@ -164,5 +164,18 @@ como no JN-4).
 - **Anotado (fora desta sessão, RNF-04):** dar destino rígido ao `OpponentGenerator`
   ("novo confronto respeitando a ordem" do circuito) — a critério do usuário em sessão
   futura.
+- **Bug anotado em 2026-08-25 (durante a validação, fora de critério — RNF-04):**
+  "Novo confronto" **repete o time/oponente anterior**. Causa provável:
+  `BattleService#build_opponent` (`lib/battle_service.rb:64`) usa
+  `Random.new(user_id.sum)` — **seed determinístico por usuário** — então o
+  `OpponentGenerator` produz o **mesmo oponente** a cada `prepare`, independente do
+  time atual/nível. A banda (`band_for_level(average_player_level(...))`) varia, mas a
+  escolha dentro da banda é determinística. Corrigir = nova sessão (TDD): gerar oponente
+  novo a cada confronto ajustando a dificuldade ao time atual.
+- **Ideias anotadas (2026-08-25, fora do fluxo — RNF-04):** (1) **Poke Center/Mart
+  como janelas flutuantes** em vez de levar à tela de lista/time; (2) **gerenciar
+  golpes no Poke Center e itens no Poke Mart**, reestruturando como gerenciamos golpes
+  dos pokes — esboço: **4 selects para selecionar os golpes**. Ver `draft-ui-ux.md` /
+  `draft-auto-battler.md` e o roadmap.
 - Próximas da fila (anotadas): J2 (personalização), J4 (identidade legível), D4 (draft
   temático) e P2 (perf da 1ª batalha ~2min).
