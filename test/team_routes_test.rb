@@ -581,6 +581,23 @@ class ServerTeamJourneyMarkTest < Minitest::Test
   end
 end
 
+class ServerTeamHpGateTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def test_team_panel_hides_battle_cta_when_all_hp_zero
+    fill_team("user-a")
+    @repository.all("user-a").each { |member| @progression.update_hp("user-a", member.id, 200, 0) }
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    refute_match(/gameloop-cta battle/, last_response.body)
+    assert_includes last_response.body, "Poke Center"
+    assert_includes last_response.body, "Poke Mart"
+  end
+end
+
 class ServerTeamJourneyFragmentTest < Minitest::Test
   include ServerTestHelpers
   include TestSupport

@@ -350,7 +350,8 @@ module ServerBattleActions
   end
 
   def prepare_battle_fragment
-    return journey_gate_fragment unless settings.journey.started?(current_user)
+    gate = battle_gate_fragment
+    return gate if gate
 
     result = settings.battle.prepare(current_user)
     return empty_team_fragment if result[:reason] == :empty_team
@@ -358,6 +359,13 @@ module ServerBattleActions
 
     @engine = result[:engine]
     erb :battle, layout: false
+  end
+
+  def battle_gate_fragment
+    return journey_gate_fragment unless settings.journey.started?(current_user)
+    return defeated_gate_fragment unless settings.journey.battle_ready?(current_user)
+
+    nil
   end
 
   def journey_gate_notice
@@ -370,8 +378,15 @@ module ServerBattleActions
     erb :battle, layout: false
   end
 
+  def defeated_gate_fragment
+    @message = "Seu time está todo derrotado. Cure seus Pokémon no Poke Center."
+    @gate_cta = { href: "/", label: "Ir para o Poke Center" }
+    erb :battle, layout: false
+  end
+
   def prepare_team_fragment_data
     @journey_started = settings.journey.started?(current_user)
+    @can_battle = settings.journey.battle_ready?(current_user)
     @team = settings.team.all(current_user)
     center_data
     mart_data
@@ -405,6 +420,9 @@ module ServerBattleActions
   end
 
   def new_confront_battle
+    gate = battle_gate_fragment
+    return gate if gate
+
     result = settings.battle.new_confront(current_user)
     return empty_team_fragment if result[:reason] == :empty_team
     return battle_error_fragment unless result[:engine]

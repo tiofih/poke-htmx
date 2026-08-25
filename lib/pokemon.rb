@@ -18,4 +18,8 @@ class Pokemon < Dry::Struct
   attribute :evolutions, Types::Strict::Array.of(Pokemon).default([].freeze)
   attribute :assigned_item, Types::Coercible::String.optional.default(nil)
   attribute :held_item, Types::Coercible::String.optional.default(nil)
+
+  def usable_hp?
+    hp_max.to_i <= 0 || hp_current.to_i.positive?
+  end
 end

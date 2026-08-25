@@ -1,5 +1,8 @@
 <% if @message %>
   <p class="notice notice--info"><%= @message %></p>
+  <% if @gate_cta %>
+    <a class="gameloop-cta" href="<%= @gate_cta[:href] %>"><%= @gate_cta[:label] %></a>
+  <% end %>
 <% elsif @engine %>
   <h1>Batalha</h1>
   <p class="round">Rodada <%= @engine.rounds %><% if @engine.finished? %> — Fim de batalha<% end %></p>

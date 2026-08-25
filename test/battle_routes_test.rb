@@ -266,12 +266,13 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_new_confront_generates_new_opponent
     TestDatabase.clear_team!
-    @repository.add("user-a", pikachu_pokemon)
+    fill_team("user-a")
     first = nil
     second = nil
     names = %w[pikachu bulbasaur charmander squirtle eevee jigglypuff]
     details = names.to_h { |name| [name, battle_pokemon_named(name, 1)] }
                    .merge(25 => pikachu_pokemon)
+    [1, 4, 7, 16, 19].each { |number| details[number] = battle_pokemon_for_test }
 
     with_seeded_battle_rng do
       PokeApiStub.with_all_names(names) do
@@ -731,6 +732,50 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert last_response.ok?
     assert_includes last_response.body, "HP 200/200",
                     "membro que nunca batalhou entra com HP cheio"
+  end
+end
+
+class ServerBattleHpGateTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+  include ServerBattleTestHelpers
+
+  def zero_all_hp(user_id)
+    @repository.all(user_id).each { |member| @progression.update_hp(user_id, member.id, 200, 0) }
+  end
+
+  def test_battle_blocked_when_all_hp_zero
+    fill_team("user-a")
+    zero_all_hp("user-a")
+
+    get "/battle", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/Poke Center/, last_response.body)
+    refute_includes last_response.body, %(hx-post="/battle/play")
+  end
+
+  def test_new_confront_blocked_when_all_hp_zero
+    fill_team("user-a")
+    zero_all_hp("user-a")
+
+    post "/battle/new", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/Poke Center/, last_response.body)
+    refute_includes last_response.body, %(hx-post="/battle/play")
+  end
+
+  def test_battle_opens_when_partial_team_has_hp
+    fill_team("user-a")
+    zero_all_hp("user-a")
+    first = @repository.all("user-a").first
+    @progression.update_hp("user-a", first.id, 200, 100)
+
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Batalha"
   end
 end
 

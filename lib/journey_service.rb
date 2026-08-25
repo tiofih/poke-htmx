@@ -10,6 +10,10 @@ class JourneyService
     @team.all(user_id).size >= TeamRepository::MAX_TEAM_SIZE
   end
 
+  def battle_ready?(user_id)
+    started?(user_id) && @team.all(user_id).any?(&:usable_hp?)
+  end
+
   def mark_started(user_id)
     @user_state.mark_started(user_id)
   end
