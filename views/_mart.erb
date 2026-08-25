@@ -11,7 +11,14 @@
 <% if @inventory.any? %>
   <ul class="inventory">
     <% @inventory.each do |entry| %>
-      <li><strong><%= entry[:name] %></strong> — <%= entry[:quantity] %>×</li>
+      <li>
+        <strong><%= entry[:name] %></strong> — <%= entry[:quantity] %>×
+        <form hx-post="/mart/sell" hx-target="#team-view" hx-swap="innerHTML">
+          <input type="hidden" name="item_name" value="<%= entry[:name] %>">
+          <input type="hidden" name="quantity" value="1">
+          <button type="submit" class="btn">Vender</button>
+        </form>
+      </li>
     <% end %>
   </ul>
 <% end %>

@@ -287,6 +287,13 @@ module ServerTeamActions
     render_result_notice(@result)
   end
 
+  def sell_from_mart
+    return journey_gate_notice unless settings.journey.started?(current_user)
+
+    @result = settings.mart.sell(current_user, params[:item_name], params[:quantity].to_i)
+    render_result_notice(@result)
+  end
+
   def render_result_notice(result)
     @notice = result[:notice]
     @notice_kind = result[:kind]
@@ -531,6 +538,7 @@ module MartRoutes
 
   def self.register_buy(app)
     app.post("/mart/buy") { buy_from_mart }
+    app.post("/mart/sell") { sell_from_mart }
   end
 end
 
