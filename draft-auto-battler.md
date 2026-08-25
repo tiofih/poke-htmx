@@ -752,3 +752,72 @@
   confirmar no QA):** o 1º clique dispara o delete mas o swap/estado não atualiza o
   painel (ou o `id` chega vazio/duplicado no 1º request), então o jogador clica de novo
   e só então o membro sai. Investigar no playtest de QA (evento htmx, params, OOB).
+
+---
+
+## Anotações do usuário — 2026-08-25 (durante a validação da 0050)
+
+> **Fora do fluxo (RNF-04).** 7 pedidos novos, **não refinados** — viram sessão própria
+> após a 0050 concluir/validar, a critério do usuário. O usuário também reportou que o
+> `GET /battle` **ainda está lento** (perf da 0050) — análise diferida por ele.
+
+### IA-2. IA usa todos os golpes / zera todos os PP antes de usar Struggle
+
+- **Pedido:** a IA do oponente (e o motor) deve **esgotar todos os golpes/PP antes de
+  cair em Struggle**. Hoje `BattleActions#choose_move` (`lib/battle_engine.rb:30`)
+  considera só moves com `power.to_i.positive? && pp.positive?` e usa `struggle_move`
+  (linha 37) quando não há nenhum **damaging** move com PP — ou seja, o Struggle pode
+  entrar antes de a IA ter "usado todos os golpes". Confirmar o caso real no playtest
+  (quando o Struggle apareceu cedo) e fechar a regra de escolha (ex.: usar o melhor
+  damaging disponível; Struggle só quando **todos** os moves, incluindo status, tiverem
+  PP zerado — conforme o pedido).
+
+### IA-3. Golpes de debuff (status moves que reduzem stats)
+
+- **Pedido (ligado ao IA-2):** implementar **moves de debuff** (ex.: Growl, Tail Whip —
+  reduzem Attack/Defense do alvo). Hoje `choose_move` **filtra** `power.to_i.positive?`
+  (`lib/battle_engine.rb:31`), então todo status move (power `nil`) é **ignorado** pela
+  IA. Implica modelar o efeito de stat (novo campo no `Move`? tabela de efeitos),
+  aplicar no alvo por N rodadas e a IA decidir quando usar. Determinar o alcance
+  (só oponente ou também o jogador — hoje o jogador só escolhe golpes de dano).
+
+### IA-4. Sistema de crítico e RNG
+
+- **Pedido:** dano hoje é **determinístico** (`move_damage_for`, `lib/battle_engine.rb:45`).
+  Implementar **chance de crítico** (multiplicador, ex. ×1.5/×2, chance ~6.25%) e **RNG
+  de variação de dano**, mantendo determinismo testável (rng injetável, como `opponent_rng`
+  da 0049). Definir regras (crit só em damaging? STAB/type intactos) e exposição no log.
+
+### OPP-1. Oponentes não devem ser evoluções (Silcoon nível 1 apareceu)
+
+- **Bug/pedido:** numa batalha apareceu **Silcoon nível 1** — é evolução e **não deveria
+  estar no pool de oponentes**. O pool do oponente usa `fetch_all_names` **sem filtro**
+  (`BattleService#build_opponent`, `lib/battle_service.rb`) — a lista do jogador filtra
+  `base_form?`, o oponente não. Aplicar o mesmo filtro de **forma base** (reusar
+  `base_form?` do gateway) ao pool adversário.
+
+### OPP-2. Filtrar lendários, G-Max, V-Max e variações dependentes de evolução anterior
+
+- **Pedido (refino do OPP-1):** além de evoluções, **excluir do pool** lendários/míticos,
+  formas G-Max/V-Max e demais **variações que dependem de um Pokémon anterior**
+  (cross-gen evolutions, regional forms derivados etc.). Definir a lista/regra de exclusão
+  (reusar `base_form?` + blacklist de slugs especiais) e aplicar a **lista e ao pool de
+  oponentes** (e talvez ao rating/banda). Interage com a 0044 (paginação) e com o
+  `PokemonRating`.
+
+### GL-1. Game over quando a vida de todos os pokes zerar
+
+- **Pedido:** fluxo explícito de **derrota** quando **todos os Pokémon do time zeram a
+  vida**. Hoje `BattleResult#result` devolve `:win`/`:lose` (`lib/battle_engine.rb:210`)
+  e o fim de batalha só recompensa (`xp_for`/`money_for` do `RewardRule`) — não há tela/
+  estado de "game over" da jornada (ver JN-5/0048: fim de batalha mostra CTAs Center/
+  Mart/"Novo confronto"). Definir o que muda ao perder (jornada termina? retry? fila de
+  derrota no histórico?) e a UI.
+
+### CURA-1. Outros modos de cura ou poções fora de batalha
+
+- **Pedido:** hoje a cura fora de batalha é **só o Poke Center** (heal total via
+  `HealService` no painel `_center.erb`) e **poções só funcionam em batalha**
+  (`ItemUsePolicy`). Implementar **outros modos de cura** ou **permitir usar poções no
+  painel do time** (fora de batalha, debitando do estoque — reusar `TeamItemOperations`/
+  `HealService`). Definir quais itens curam fora de batalha e as regras de consumo.

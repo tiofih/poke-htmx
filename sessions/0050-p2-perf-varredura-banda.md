@@ -156,14 +156,19 @@ que evita re-ratear (re-fetch de `detail` + `moves_for`) espécies já avaliadas
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Pendente.** *Feedback parcial em 2026-08-25: o usuário reportou que o `GET /battle`
+**ainda está lento** (evidência manual do C4 nok) e **diferiu a análise detalhada**
+("isso depois analiso com calma"). Critérios C1–C4 **sem ok/nok formal** — aguardando o
+fechamento do usuário. Não reabrir critério (S3) até a análise diferida. Enquanto isso,
+7 novos pedidos foram **anotados** em `draft-auto-battler.md` (RNF-04 — não abrem escopo
+aqui).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 varredura paralela da banda | `./scripts/test test/opponent_generator_test.rb` | — (domínio puro) | |
-| C2 cap + fallback puro | `./scripts/test test/opponent_generator_test.rb` | — (domínio puro) | |
-| C3 cache de rating | `./scripts/test test/pokemon_rating_cache_test.rb` | — (componente puro) | |
-| C4 ratings + cap no service, banda preservada | `./scripts/test test/battle_service_test.rb` | `GET /battle` 1ª chamada mais rápida (~2min → segundos); oponentes da banda do nível | |
+| C1 varredura paralela da banda | `./scripts/test test/opponent_generator_test.rb` | — (domínio puro) | pendente |
+| C2 cap + fallback puro | `./scripts/test test/opponent_generator_test.rb` | — (domínio puro) | pendente |
+| C3 cache de rating | `./scripts/test test/pokemon_rating_cache_test.rb` | — (componente puro) | pendente |
+| C4 ratings + cap no service, banda preservada | `./scripts/test test/battle_service_test.rb` | `GET /battle` 1ª chamada: usuário reportou **ainda lento** — análise diferida | pendente |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.
@@ -176,3 +181,9 @@ que evita re-ratear (re-fetch de `detail` + `moves_for`) espécies já avaliadas
   (montagem dos escolhidos) segue usando `detail` — já coberto pelo cache P1.
 - O duplo fetch de `moves_for` na montagem do oponente (caminho D da anotação) ficou de
   fora — anotar no draft se o usuário quiser.
+- **Feedback do usuário em 2026-08-25:** `GET /battle` **ainda lento** (perf diferida —
+  análise com calma depois). Suspeita nova a investigar: com o pool não filtrado (inclui
+  evoluções/lendários — ver OPP-1/OPP-2 no draft), a varredura da banda avalia candidatos
+  fora de jogo; o cap 256 e o cache de rating podem não estar atacando o gargalo real
+  (re-fetch `moves_for` dos escolhidos? varredura ainda serial por outra via?). Não reabre
+  critério agora (S3) — registrado como pendência.
