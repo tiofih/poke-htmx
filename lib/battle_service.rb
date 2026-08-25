@@ -66,7 +66,7 @@ module BattleServicePreparation
     OpponentGenerator.new(
       names: api.fetch_all_names,
       fetcher: api.method(:detail),
-      rng: Random.new(user_id.sum),
+      rng: @opponent_rng.call,
       level: 1,
       options: opponent_options(band)
     ).team
@@ -272,6 +272,7 @@ class BattleService
     @battle_history = dependencies[:battle_history]
     @wallet = dependencies[:wallet]
     @inventory = dependencies[:inventory]
+    @opponent_rng = dependencies[:opponent_rng] || -> { Random.new }
   end
 
   def prepare(user_id)

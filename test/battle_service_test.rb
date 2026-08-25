@@ -136,7 +136,7 @@ class BattleServiceTest < Minitest::Test
     @progression = ProgressionRepository.new
   end
 
-  def build_service(api)
+  def build_service(api, opponent_rng: nil)
     deps = {
       api: -> { api },
       battles: BattleRegistry.new,
@@ -146,6 +146,7 @@ class BattleServiceTest < Minitest::Test
       wallet: WalletRepository.new,
       inventory: InventoryRepository.new
     }
+    deps[:opponent_rng] = opponent_rng if opponent_rng
     BattleService.new(dependencies: deps)
   end
 
@@ -175,14 +176,16 @@ class BattleServiceTest < Minitest::Test
     assert_operator api.max_active, :>, 1, "fetches de detail/moves deveriam ser paralelos"
   end
 
-  def test_prepare_returns_same_opponent_for_same_user
-    service = build_service(counting_api)
+  def test_prepare_generates_new_opponent_for_each_confront
+    seed = 0
+    service = build_service(TieredApi.new, opponent_rng: -> { Random.new(seed += 1) })
     add_team_for("user-1")
 
     first = service.prepare("user-1")[:engine]
     second = service.prepare("user-1")[:engine]
 
-    assert_equal first.teams[1].map(&:name), second.teams[1].map(&:name)
+    refute_equal first.teams[1].map(&:name), second.teams[1].map(&:name),
+                 "oponente novo a cada confronto (sem seed fixa por usuário)"
   end
 
   def grant_xp_to(user_id, amount)
