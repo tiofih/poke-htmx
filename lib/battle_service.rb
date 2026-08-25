@@ -61,6 +61,22 @@ module BattleServicePreparation
     end
   end
 
+  def active_battle?(engine)
+    engine && !engine.rounds.zero?
+  end
+
+  def build_or_reuse_engine(user_id, members, existing)
+    player = player_team(user_id, members)
+    return unprepared(:unavailable) if player.size < members.size
+
+    opponent = existing ? existing.teams[1] : opponent_team(user_id)
+    return unprepared(:unavailable) unless opponent
+
+    engine = build_engine(player, opponent, user_id)
+    @battles.set(user_id, engine)
+    { engine: engine, reason: :ok }
+  end
+
   def build_opponent(user_id)
     band = PokemonRating.band_for_level(average_player_level(user_id, @team.all(user_id)))
     OpponentGenerator.new(
@@ -279,15 +295,19 @@ class BattleService
     members = @team.all(user_id)
     return unprepared(:empty_team) if members.empty?
 
-    player = player_team(user_id, members)
-    return unprepared(:unavailable) if player.size < members.size
+    existing = @battles.fetch(user_id)
+    return { engine: existing, reason: :ok } if active_battle?(existing)
 
-    opponent = opponent_team(user_id)
-    return unprepared(:unavailable) unless opponent
+    build_or_reuse_engine(user_id, members, existing)
+  end
 
-    engine = build_engine(player, opponent, user_id)
-    @battles.set(user_id, engine)
-    { engine: engine, reason: :ok }
+  def new_confront(user_id)
+    @battles.clear(user_id)
+    prepare(user_id)
+  end
+
+  def invalidate(user_id)
+    @battles.clear(user_id)
   end
 
   def advance(user_id)

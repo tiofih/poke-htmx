@@ -16,4 +16,8 @@ class BattleRegistry
   def clear(user_id)
     @battles.delete(user_id)
   end
+
+  def clear_all
+    @battles.clear
+  end
 end

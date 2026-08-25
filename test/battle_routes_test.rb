@@ -230,7 +230,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
     assert last_response.ok?
     assert_includes last_response.body, "Vencedor:"
-    assert_includes last_response.body, "hx-get=\"/battle\""
+    assert_includes last_response.body, 'hx-post="/battle/new"'
   end
 
   def test_battle_end_shows_gameloop_ctas
@@ -248,14 +248,14 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     20.times { post "/battle/play", {}, user_session("user-a") }
     persisted_hp = @repository.all("user-a").map(&:hp_current)
 
-    stub_battle_start { get "/battle", {}, user_session("user-a") }
+    stub_battle_start { post "/battle/new", {}, user_session("user-a") }
 
     assert last_response.ok?
     assert_includes last_response.body, "Rodada 0",
-                    "reset recria a batalha do zero"
+                    "novo confronto recria a batalha do zero"
     persisted_hp.each do |hp|
       assert_includes last_response.body, "HP #{hp}/",
-                      "time danificado (HP #{hp}) entra no reset"
+                      "time danificado (HP #{hp}) entra no novo confronto"
     end
   end
 

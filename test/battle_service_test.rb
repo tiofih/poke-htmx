@@ -176,7 +176,7 @@ class BattleServiceTest < Minitest::Test
     assert_operator api.max_active, :>, 1, "fetches de detail/moves deveriam ser paralelos"
   end
 
-  def test_prepare_generates_new_opponent_for_each_confront
+  def test_prepare_keeps_same_opponent_when_battle_not_started
     seed = 0
     service = build_service(TieredApi.new, opponent_rng: -> { Random.new(seed += 1) })
     add_team_for("user-1")
@@ -184,8 +184,74 @@ class BattleServiceTest < Minitest::Test
     first = service.prepare("user-1")[:engine]
     second = service.prepare("user-1")[:engine]
 
+    assert_equal first.teams[1].map(&:name), second.teams[1].map(&:name),
+                 "batalha nao iniciada mantem o mesmo oponente ao revisitar"
+  end
+
+  def test_prepare_generates_new_opponent_after_new_confront
+    seed = 0
+    service = build_service(TieredApi.new, opponent_rng: -> { Random.new(seed += 1) })
+    add_team_for("user-1")
+
+    first = service.prepare("user-1")[:engine]
+    second = service.new_confront("user-1")[:engine]
+
     refute_equal first.teams[1].map(&:name), second.teams[1].map(&:name),
-                 "oponente novo a cada confronto (sem seed fixa por usuário)"
+                 "novo confronto gera oponente novo"
+  end
+
+  def test_prepare_refreshes_player_hp_while_keeping_opponent
+    seed = 0
+    service = build_service(TieredApi.new, opponent_rng: -> { Random.new(seed += 1) })
+    add_team_for("user-1")
+
+    first = service.prepare("user-1")[:engine]
+    member_id = @team.all("user-1").first.id
+    @progression.update_hp("user-1", member_id, 200, 50)
+    second = service.prepare("user-1")[:engine]
+
+    assert_equal first.teams[1].map(&:name), second.teams[1].map(&:name),
+                 "oponente preservado na batalha nao iniciada"
+    assert_equal 50, second.teams[0].first.hp_current,
+                 "time do jogador re-derivado do estado persistido (HP curado)"
+  end
+
+  def test_prepare_preserves_in_progress_battle
+    seed = 0
+    service = build_service(TieredApi.new, opponent_rng: -> { Random.new(seed += 1) })
+    add_team_for("user-1")
+
+    first = service.prepare("user-1")[:engine]
+    service.advance("user-1")
+    second = service.prepare("user-1")[:engine]
+
+    assert_same first, second, "batalha em andamento preservada (mesma instancia)"
+    assert second.rounds.positive?, "rodadas jogadas preservadas"
+  end
+
+  def test_prepare_returns_finished_battle_as_is
+    seed = 0
+    service = build_service(TieredApi.new, opponent_rng: -> { Random.new(seed += 1) })
+    add_team_for("user-1")
+
+    first = service.prepare("user-1")[:engine]
+    20.times { service.advance("user-1") }
+    second = service.prepare("user-1")[:engine]
+
+    assert_same first, second, "batalha finalizada mantem o resultado (nao prepara nova)"
+    assert second.finished?
+  end
+
+  def test_invalidate_clears_active_battle
+    seed = 0
+    service = build_service(TieredApi.new, opponent_rng: -> { Random.new(seed += 1) })
+    add_team_for("user-1")
+
+    first = service.prepare("user-1")[:engine]
+    service.invalidate("user-1")
+    second = service.prepare("user-1")[:engine]
+
+    refute_same first, second, "batalha ativa limpa pela invalidacao"
   end
 
   def grant_xp_to(user_id, amount)

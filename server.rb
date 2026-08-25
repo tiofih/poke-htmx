@@ -401,6 +401,15 @@ module ServerBattleActions
     erb :battle, layout: false
   end
 
+  def new_confront_battle
+    result = settings.battle.new_confront(current_user)
+    return empty_team_fragment if result[:reason] == :empty_team
+    return battle_error_fragment unless result[:engine]
+
+    @engine = result[:engine]
+    erb :battle, layout: false
+  end
+
   def expose_battle_result(result)
     @engine = result[:engine]
     @xp_gained = result[:xp_gained]
@@ -532,6 +541,7 @@ module BattleRoutes
   def self.registered(app)
     register_open(app)
     register_play(app)
+    register_new_confront(app)
   end
 
   def self.register_open(app)
@@ -540,6 +550,10 @@ module BattleRoutes
 
   def self.register_play(app)
     app.post("/battle/play") { advance_battle }
+  end
+
+  def self.register_new_confront(app)
+    app.post("/battle/new") { new_confront_battle }
   end
 end
 

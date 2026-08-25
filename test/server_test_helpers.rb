@@ -14,6 +14,7 @@ module ServerTestHelpers
     TestDatabase.setup!
     TestDatabase.clear_team!
     TestDatabase.clear_user_state!
+    Server.settings.battles.clear_all
     @repository = TeamRepository.new
     @progression = ProgressionRepository.new
     @wallet = WalletRepository.new
