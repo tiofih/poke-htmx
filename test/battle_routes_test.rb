@@ -233,6 +233,16 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_includes last_response.body, "hx-get=\"/battle\""
   end
 
+  def test_battle_end_shows_gameloop_ctas
+    start_battle_for("user-a")
+    20.times { post "/battle/play", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    assert_match(%r{<a class="gameloop-cta" href="/">Poke Center</a>}, last_response.body)
+    assert_match(%r{<a class="gameloop-cta" href="/">Poke Mart</a>}, last_response.body)
+    assert_includes last_response.body, "Novo confronto"
+  end
+
   def test_battle_reset_starts_a_fresh_battle_with_persisted_hp
     start_battle_for("user-a")
     20.times { post "/battle/play", {}, user_session("user-a") }

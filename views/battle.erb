@@ -40,7 +40,11 @@
               <% end %>
             </ul>
           <% end %>
-          <button hx-get="/battle" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
+          <div class="gameloop-ctas">
+            <a class="gameloop-cta" href="/">Poke Center</a>
+            <a class="gameloop-cta" href="/">Poke Mart</a>
+            <button class="gameloop-cta" hx-get="/battle" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
+          </div>
         <% else %>
           <button hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML"
             hx-indicator="#battle-loading">Jogar</button>

@@ -277,3 +277,33 @@ nav a.active {
   font-weight: bold;
   text-decoration: underline;
 }
+
+/* CTAs de fluxo do circuito (gameloop) */
+.gameloop-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5em;
+  margin-top: 0.5em;
+}
+
+.gameloop-cta {
+  display: inline-block;
+  padding: 0.4em 0.9em;
+  border: 1px solid #1f6feb;
+  border-radius: 5px;
+  background: #1f6feb;
+  color: #fff;
+  font-size: 0.95em;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.gameloop-cta:hover {
+  background: #1658c4;
+}
+
+.team-tools .gameloop-cta.battle {
+  margin-bottom: 0.6em;
+}
+
