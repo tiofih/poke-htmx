@@ -181,13 +181,15 @@ item" por membro no painel do lutador (`FighterPresenter#item_used?`).
 (poke fica sem), seguráveis permanecem até desequipar, option desabilitado + qtd
 livre.
 
-**Sessão 0046 (JN-3-B — equipamento por quantidade do estoque) refinada em 2026-08-24**
-(fase 1 concluída): itens/seguráveis são por poke (1 de cada), pokes só equipam
-conforme a quantidade do time — **equipar debita do estoque, desequipar repõe, trocar
-repõe o antigo e debita o novo, re-equipar o mesmo item não debita de novo**; item
-atribuído consumido em batalha **não debita de novo** e **limpa o `assigned_item`**;
-UI mostra a quantidade livre e desabilita (×0) itens esgotados. Próximo: JN-4, JN-5,
-J2, J4, D4 e P2 (perf da 1ª batalha ~2min) — a critério do usuário.
+**Sessão 0046 (JN-3-B — equipamento por quantidade do estoque) implementada em
+2026-08-24** (passos 1–3, suíte 714/2281, lint 0): itens/seguráveis são por poke (1 de
+cada) e os pokes só equipam conforme a quantidade do time — **equipar debita do
+estoque, desequipar repõe, trocar repõe o antigo e debita o novo, re-equipar o mesmo
+item não debita de novo** (`TeamItemOperations` em `lib/`); item atribuído consumido
+em batalha **não debita de novo** e **limpa o `assigned_item`** (`battle_items` soma
+atribuídos + `debit_used_items` por `attacker_index`); UI mostra a quantidade livre e
+desabilita (×0) itens esgotados. **Aguardando validação do usuário.** Próximo: JN-4,
+JN-5, J2, J4, D4 e P2 (perf da 1ª batalha ~2min) — a critério do usuário.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -256,7 +258,7 @@ J2, J4, D4 e P2 (perf da 1ª batalha ~2min) — a critério do usuário.
 | 0043 | Estabilidade do banco (correção direta, fora da fila): fim do "too many clients" na suíte — `ConnectionRegistry` registra as conexões dos repositórios e o `after_teardown` fecha todas após cada teste (pico 74 → 9), 7 repositórios/seed registrando conexão; warnings de constante nos seeds eliminados (`unless defined?` em `saldo_inicial.rb`) | Concluída | Done (passos 1–2, suíte 692/2193, lint 0, validado em 2026-08-24) |
 | 0044 | Onda 3 UX — estrutura: grade uniforme de 6 colunas com páginas cheias e paginação on-demand (`PAGE_SIZE` 36 = grid 6×6; página 1 = 27 iniciais + 9 comuns; cada página carrega só o próprio lote) corrigindo o bug visual do item e os slots vazios + largura cheia do Histórico (`body.page-history`); corrigidos também conexão PG por thread e banco de teste separado (fim do flakiness) | Concluída | Done (passos 1–3 + ajustes S3, suíte 694/2200, lint 0, validado em 2026-08-24) |
 | 0045 | JN-3 — itens de uso único por Pokémon: regra de **1 uso de item curativo por Pokémon por batalha** (`@items_used_by_member` no `BattleEngine`, bloqueio de novo uso do mesmo membro — pool comum e item atribuído) + badge "já usou item" por membro no painel do lutador | Concluída | Done (passos 1–3, suíte 701/2222, lint 0, validado em 2026-08-24; JN-3-B anotado — equipamento por quantidade do estoque) |
-| 0046 | JN-3-B — equipamento por quantidade do estoque: equipar **debita**, desequipar **repõe**, trocar **repõe o antigo e debita o novo**, re-equipar o mesmo item **não debita de novo**; item atribuído consumido em batalha **não debita de novo** e limpa o `assigned_item`; UI com quantidade livre + option `disabled` ×0 | **Refinamento** | Refinada em 2026-08-24 (fase 1); implementação pendente |
+| 0046 | JN-3-B — equipamento por quantidade do estoque: equipar **debita**, desequipar **repõe**, trocar **repõe o antigo e debita o novo**, re-equipar o mesmo item **não debita de novo**; item atribuído consumido em batalha **não debita de novo** e limpa o `assigned_item`; UI com quantidade livre + option `disabled` ×0 | **Implementação** | Passos 1–3 em 2026-08-24 (suíte 714/2281, lint 0); **aguardando validação do usuário** |
 
 ## Estrutura do arquivo de sessão
 

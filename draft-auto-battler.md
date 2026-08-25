@@ -481,10 +481,14 @@
 
 ### JN-3-B. Equipamento limitado pela quantidade do estoque (anotado 2026-08-24, pós JN-3)
 
-> **Fora do fluxo (RNF-04).** Anotado durante a validação da sessão 0045: o usuário
-> equipou o **mesmo `choice-band` em 2 pokes diferentes** do time e isso foi
-> permitido. Não é critério da 0045 (a 0045 trata de *uso* em batalha, não de
-> *equipamento*); registrado como candidata a sessão própria.
+> **Executada na sessão 0046 (2026-08-24) e VALIDADA pelo usuário em 2026-08-24.**
+> Suíte 714/2281, lint 0. **Regra aplicada:** itens/seguráveis são por poke (1 de
+> cada); **equipar debita do estoque** (`TeamItemOperations`, `assign_with_swap`),
+> **desequipar repõe**, **trocar repõe o antigo e debita o novo**, **re-equipar o
+> mesmo item não debita de novo**; item atribuído consumido em batalha **não debita
+> de novo** e **limpa o `assigned_item`** (`battle_items` soma atribuídos +
+> `debit_used_items` por `attacker_index`); UI mostra a quantidade livre e desabilita
+> (×0) itens esgotados. Anotação **resolvida — removida da fila**.
 
 - **Problema:** `TeamService#assign_item`/`assign_held_item` só fazem `SET` no membro
   (`team_pokemons.assigned_item`/`held_item`) — **sem respeitar a quantidade do
@@ -513,9 +517,6 @@
   indicar **em uso por outro poke** e/ou **quantidade livre** = estoque − já equipados)
   + `InventoryRepository` (débito/repõe reutilizando `use`/`add`) + testes de
   service/rotas do manage. Cruza com Eco-3/Eco-4.
-- **Aberto:** nada em aberto de regra — resta fechar no refinamento apenas a
-  nomenclatura exata da "quantidade livre" na UI.
-- **Aguarda sessão (RNF-04).**
 
 ### JN-4. Componentes de Poke Mart e Poke Center
 
