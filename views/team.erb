@@ -8,6 +8,12 @@
 <p class="team-tools">
   <a href="#" hx-get="/team/manage" hx-target="#team-view" hx-swap="innerHTML">Gerenciar time</a>
 </p>
+<% if @game_over %>
+  <p class="notice notice--error">Game Over — seu time está derrotado e você não tem dinheiro para curar. Venda itens no Poke Mart ou recomece a jornada.</p>
+  <form hx-post="/journey/restart" hx-target="#team-view" hx-swap="innerHTML">
+    <button type="submit" class="gameloop-cta">Recomeçar jornada</button>
+  </form>
+<% end %>
 <% if @journey_started %>
   <% unless @team.empty? %>
     <% if @can_battle %>

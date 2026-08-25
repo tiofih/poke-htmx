@@ -3,6 +3,11 @@
   <% if @gate_cta %>
     <a class="gameloop-cta" href="<%= @gate_cta[:href] %>"><%= @gate_cta[:label] %></a>
   <% end %>
+  <% if @gate_action %>
+    <form method="post" action="<%= @gate_action[:href] %>">
+      <button type="submit" class="gameloop-cta"><%= @gate_action[:label] %></button>
+    </form>
+  <% end %>
   <% if @gate_disabled_cta %>
     <button class="gameloop-cta" disabled title="<%= @gate_disabled_cta[:title] %>"><%= @gate_disabled_cta[:label] %></button>
   <% end %>

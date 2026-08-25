@@ -185,6 +185,19 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_match(/jornada/i, last_response.body)
   end
 
+  def test_battle_gate_shows_game_over_fragment_when_stuck
+    TestDatabase.clear_team!
+    fill_team("user-a")
+    @repository.all("user-a").each { |member| @progression.update_hp("user-a", member.id, 200, 0) }
+
+    get "/battle", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/game over/i, last_response.body)
+    assert_match(/Vender itens/i, last_response.body)
+    assert_match(/Recome\S* jornada/, last_response.body)
+  end
+
   def test_battle_play_advances_one_round_and_refreshes_fragment
     start_battle_for("user-a")
 
@@ -784,6 +797,7 @@ class ServerBattleHpGateTest < Minitest::Test
   def test_battle_blocked_when_all_hp_zero
     fill_team("user-a")
     zero_all_hp("user-a")
+    @wallet.grant("user-a", 1000)
 
     get "/battle", {}, user_session("user-a")
 
@@ -796,6 +810,7 @@ class ServerBattleHpGateTest < Minitest::Test
   def test_new_confront_blocked_when_all_hp_zero
     fill_team("user-a")
     zero_all_hp("user-a")
+    @wallet.grant("user-a", 1000)
 
     post "/battle/new", {}, user_session("user-a")
 

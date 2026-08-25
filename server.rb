@@ -353,6 +353,8 @@ module ServerJourneyActions
     settings.team_strategy.reset(current_user)
     settings.wallet.set(current_user, SaldoInicial::INITIAL_BALANCE)
     settings.battle.invalidate(current_user)
+    return redirect "/" unless htmx_request?
+
     @notice = "Jornada recomeçada. Monte seu time inicial de 6 Pokémon."
     @notice_kind = :info
     render_team_fragment_with_notice
@@ -385,6 +387,7 @@ module ServerBattleActions
 
   def battle_gate_fragment
     return journey_gate_fragment unless settings.journey.started?(current_user)
+    return game_over_fragment if settings.journey.game_over?(current_user)
     return defeated_gate_fragment unless settings.journey.battle_ready?(current_user)
 
     nil
@@ -407,12 +410,25 @@ module ServerBattleActions
     erb :battle, layout: false
   end
 
+  def game_over_fragment
+    @message = "Game Over — seu time está derrotado e você não tem dinheiro para curar no Poke Center."
+    @gate_cta = { href: "/", label: "Vender itens no Poke Mart" }
+    @gate_action = { href: "/journey/restart", label: "Recomeçar jornada" }
+    erb :battle, layout: false
+  end
+
   def prepare_team_fragment_data
-    @journey_started = settings.journey.started?(current_user)
-    @can_battle = settings.journey.battle_ready?(current_user)
+    load_journey_state
     @team = settings.team.all(current_user)
     center_data
     mart_data
+  end
+
+  def load_journey_state
+    journey = settings.journey
+    @journey_started = journey.started?(current_user)
+    @can_battle = journey.battle_ready?(current_user)
+    @game_over = journey.game_over?(current_user)
   end
 
   def render_team_fragment_with_notice

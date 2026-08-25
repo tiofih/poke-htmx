@@ -671,4 +671,16 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
     refute_includes last_response.body, "Poke Mart"
     assert_match(/Monte seu time inicial/, last_response.body)
   end
+
+  def test_team_panel_shows_game_over_banner_when_stuck
+    TestDatabase.clear_team!
+    fill_team("user-a")
+    @repository.all("user-a").each { |member| @progression.update_hp("user-a", member.id, 200, 0) }
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/game over/i, last_response.body)
+    assert_match(/Recome\S* jornada/, last_response.body)
+  end
 end

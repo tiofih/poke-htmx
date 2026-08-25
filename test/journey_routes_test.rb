@@ -14,7 +14,7 @@ class JourneyRestartTest < Minitest::Test
   end
 
   def test_restart_journey_clears_team_and_resets_balance
-    post "/journey/restart", {}, user_session("user-a")
+    post "/journey/restart", {}, htmx_session("user-a")
 
     assert last_response.ok?
     assert_empty @repository.all("user-a")
@@ -24,21 +24,29 @@ class JourneyRestartTest < Minitest::Test
 
   def test_restart_journey_returns_equipped_items_to_inventory
     member = @repository.all("user-a").first
-    post "/team/#{member.id}/item", { item_name: "potion" }, user_session("user-a")
+    post "/team/#{member.id}/item", { item_name: "potion" }, htmx_session("user-a")
     assert_equal 2, TestDatabase.inventory_quantity("user-a", "potion"), "equipar debita (3 -> 2)"
 
-    post "/journey/restart", {}, user_session("user-a")
+    post "/journey/restart", {}, htmx_session("user-a")
 
     assert_equal 3, TestDatabase.inventory_quantity("user-a", "potion"), "item equipado devolvido ao estoque"
     assert_empty @repository.all("user-a")
   end
 
   def test_restart_journey_reblocks_battle_gate
-    post "/journey/restart", {}, user_session("user-a")
+    post "/journey/restart", {}, htmx_session("user-a")
 
     get "/battle", {}, htmx_session("user-a")
 
     assert last_response.ok?
     assert_match(/Monte seu time inicial/i, last_response.body)
+  end
+
+  def test_restart_journey_full_page_redirects_to_root
+    post "/journey/restart", {}, user_session("user-a")
+
+    assert_equal 302, last_response.status
+    assert_equal "/", URI(last_response["Location"]).path
+    assert_empty @repository.all("user-a")
   end
 end
