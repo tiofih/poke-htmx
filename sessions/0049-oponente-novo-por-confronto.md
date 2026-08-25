@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25; **ajuste S3 em 2026-08-25** (reabertura do C1 + novo escopo) |
-| Implementação | **Reaberta (S3)** — passos 1–2 feitos, passos 3–5 pendentes |
+| Implementação | **Concluída** — passos 1–5 verdes (suíte 735/2358, lint 0) |
 | Validação | **Pendente** (executada pelo usuário) — C1 original reprovado em 2026-08-25, critérios reabertos e ajustados |
 
 ---

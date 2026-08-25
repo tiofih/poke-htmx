@@ -707,14 +707,22 @@
 
 ### BUG-1. Oponente SEMPRE o mesmo por usuário (sem variedade nem escala)
 
+- **CORRIGIDO na sessão 0049 (2026-08-25).** Fim da seed fixa
+  `Random.new(user_id.sum)` em `BattleService#build_opponent` — o service usa a
+  dependência injetável `opponent_rng` (default `-> { Random.new }`). Para o oponente
+  novo vir **apenas em um novo confronto** (não a cada acesso a `/battle`), a 0049
+  entregou a **máquina de estado da batalha ativa**: `prepare` reusa a batalha por
+  estado (preparada não iniciada → re-deriva o time do jogador preservando o oponente;
+  em andamento/finalizada → preserva o engine), "Novo confronto" virou ação explícita
+  `POST /battle/new` (limpa e prepara novo) e add/remove/move **invalidam** a batalha
+  ativa (`BattleService#invalidate`). Histórico do bug abaixo.
 - **Bug (anotado 2026-08-25, confirmado no playtest 2):** toda batalha de um mesmo
   usuário repete **o mesmo time oponente nível 1** (mesmas espécies), tanto via "Novo
   confronto" quanto ao re-entrar em `/battle`. `BattleService#build_opponent`
   (`lib/battle_service.rb:64`) usa `Random.new(user_id.sum)` — **seed determinístico
   por usuário** — então o `OpponentGenerator` devolve sempre o mesmo oponente a cada
   `prepare`, independente do time atual/nível (a banda varia, mas a escolha dentro dela
-  é determinística). Corrigir = gerar oponente **novo a cada confronto**, ajustando a
-  dificuldade ao time atual (nova sessão TDD).
+  é determinística).
 
 ### BUG-2. Remover Pokémon com itens equipados perde os itens (estoque)
 
