@@ -297,19 +297,19 @@ reaberto e re-aprovado: botão "Novo confronto" desabilitado com tooltip na tela
 batalha após derrota e no gate de HP; suíte 770/2473, lint 0).**
 
 **Sessão 0053 (QA Q4+Q5+GL-1 — aviso de busca base-form, remoção em 1 clique e game
-over) refinada em 2026-08-25** (fase 1 concluída — critérios C1–C12 e plano TDD fechados
-em `sessions/0053-qa-busca-remocao-gameover.md`): **Q4** — a busca segue só formas base e
-ganha **aviso informativo** quando o termo só casa com não-base/starter (aponta a evolução
-base via `evolutions.first` ou os destaques iniciais); **Q5** — investigação do "remover
-2x" intermitente (hipótese: OOB `#pokemon-list` lento re-faz os 27 destaques + varredura
-a cada remove) com hardening (`hx-disabled-elt` no form de remove) + idempotência; **GL-1**
-— **game over** quando todos os pokes zeram HP **e** o saldo < custo da cura total
-(`game_over?` no `JourneyService`, deps `wallet:`/`heal_preview:`), com **venda de itens**
-(novo `POST /mart/sell` + `SellPolicy` = metade do preço, geral do Mart) e **recomeçar
-jornada** (`POST /journey/restart` — `TeamService#reset` devolvendo itens + `WalletRepository#set`
-p/ saldo inicial 200). Depois da 0053: a fila (J2, J4, D4, M2) e as limitações técnicas
-(escritas não atômicas, erros com status real, race no add, identidade/CSRF, CI) — a
-critério do usuário.
+over) refinada e implementada em 2026-08-25** (passos 1–7, suíte 797/2579, lint 0 —
+AGUARDANDO validação do usuário; arquivo `sessions/0053-qa-busca-remocao-gameover.md`):
+**Q4** — a busca segue só formas base e ganha **aviso informativo** quando o termo só
+casa com não-base/starter (aponta a evolução base via `evolutions.first` ou os destaques
+iniciais); **Q5** — remoção robusta (botão "Remover" com `hx-disabled-elt="this"` +
+regressão do `DELETE` htmx exato remove em 1 request e é idempotente); **GL-1** — **game
+over** quando todos os pokes zeram HP **e** o saldo < custo da cura total (`game_over?`
+no `JourneyService`, deps `wallet:`/`heal_preview:`), com **venda de itens** (novo
+`POST /mart/sell` + `SellPolicy` = metade do preço, geral do Mart) e **recomeçar jornada**
+(`POST /journey/restart` — `TeamService#reset` devolvendo itens + `WalletRepository#set`
+p/ saldo inicial 200; redirect full-page para `/`). Depois da 0053: a fila (J2, J4, D4,
+M2) e as limitações técnicas (escritas não atômicas, erros com status real, race no add,
+identidade/CSRF, CI) — a critério do usuário.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -385,7 +385,7 @@ critério do usuário.
 | 0050 | P2 — performance da varredura da banda do oponente: varredura **paralela em lotes** no `OpponentGenerator` (caminho `ratings:` nome→tier, determinística por seed) + **cap de varredura** `max_candidates:` com fallback puro + **cache de rating persistente** (`PokemonRatingCache`, keyed por nome, TTL 7d, write-through) + **C4-b (S3): escrita do cache HTTP coalescida** (`PersistentJsonStore` — store em memória + writer background + `flush!`) | Concluída | Done (passos 1–7, suíte 751/2391, lint 0, validado em 2026-08-25; ajuste S3 — C4 reaberto e resolvido no C4-b: 1ª batalha ~60s → 2.81s / frio real 1.64s; anotado GL-2 — trava para time com HP zerado) |
 | 0051 | BUG-4 — vazamento de conexões PG em produção (`ConnectionRegistry` só limpa no `after_teardown`; app acumulou 80 conexões no benchmark e derrubou a suíte): **liberação por request** (`after` no `server.rb` → `release_current_thread!`) + **teto global** `MAX_CONNECTIONS` 30 com evicção (thread morta primeiro, senão LRU), isolamento por thread (0044) preservado | Concluída | Done (passos 1–3, suíte 755/2404, lint 0, validado em 2026-08-25; `pokedex` estável em 14 conexões — antes 80 — e suíte verde com o `web` ativo) |
 | 0052 | QA Q2+Q3+GL-2 — gate da jornada por tamanho do time (Q3: `started?` = `team >= 6`, flag deixa de liberar — remover abaixo de 6 re-bloqueia), gate de HP no `/battle` (GL-2: `battle_ready?` com poke cheio se nunca lutou, aviso+CTA "cure no Poke Center", CTA "Batalhar" escondido no painel, botão "Novo confronto" desabilitado na tela de fim após derrota) e itens devolvidos no remove (Q2: `TeamService#remove_member` repõe `assigned_item`/`held_item` ao estoque) | Concluída | Done (passos 1–3 + ajuste S3, suíte 770/2473, lint 0, validado em 2026-08-25; flag `user_state` vira vestigial — anotado no draft) |
-| 0053 | QA Q4+Q5+GL-1 — aviso de busca base-form, remoção em 1 clique e game over (vender/recomeçar): **Q4** hint informativo quando o termo só casa com não-base/starter (aponta a evolução base ou os destaques iniciais); **Q5** remoção robusta (investigação do "2 cliques" intermitente — hardening `hx-disabled-elt` no form + idempotência); **GL-1** game over = time todo zerado **e** saldo < custo da cura (`game_over?` no `JourneyService`), com venda de itens (`POST /mart/sell` + `SellPolicy` 50% do preço) e recomeço da jornada (`POST /journey/restart` — `TeamService#reset` devolvendo itens + `WalletRepository#set` p/ saldo inicial 200) | Refinamento | **Concluída** — critérios C1–C12 e plano TDD fechados em 2026-08-25 (implementação pendente) |
+| 0053 | QA Q4+Q5+GL-1 — aviso de busca base-form, remoção em 1 clique e game over (vender/recomeçar): **Q4** hint informativo quando o termo só casa com não-base/starter (aponta a evolução base ou os destaques iniciais); **Q5** remoção robusta (investigação do "2 cliques" intermitente — hardening `hx-disabled-elt` no form + idempotência); **GL-1** game over = time todo zerado **e** saldo < custo da cura (`game_over?` no `JourneyService`), com venda de itens (`POST /mart/sell` + `SellPolicy` 50% do preço) e recomeço da jornada (`POST /journey/restart` — `TeamService#reset` devolvendo itens + `WalletRepository#set` p/ saldo inicial 200) | Implementação | Concluída — passos 1–7, suíte 797/2579, lint 0, **aguardando validação do usuário** (2026-08-25) |
 
 ## Estrutura do arquivo de sessão
 

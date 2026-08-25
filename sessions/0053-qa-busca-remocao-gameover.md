@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25 |
-| Implementação | **Pendente** |
+| Implementação | **Concluída** — passos 1–7 + docs, suíte 797/2579, lint 0 (2026-08-25) |
 | Validação | **Pendente** (executada pelo usuário) |
 
 ---
@@ -249,3 +249,5 @@ Center, com as opções **vender itens** (novo `POST /mart/sell`) e **recomeçar
   caminho terminal quando nem vendendo dá.
 - Após a 0053, a fila restante é J2/J4/D4/M2 + limitações técnicas (escritas não
   atômicas, erros com status real, race no add, identidade/CSRF, CI).
+- Próximo passo do fluxo: **fase 2 concluída (passos 1–7 + docs, suíte 797/2579, lint 0) —
+  PARAR e aguardar a validação do usuário (fase 3)**.
