@@ -689,3 +689,13 @@
 - **Pontos em aberto:** CSS/animação pura (preferência do projeto, sem lib JS) vs
   técnica com htmx; dado de origem/alvo (o log do `BattleLogPresenter` já tem
   atacante/golpe — falta o alvo explícito); acessibilidade (redução de movimento).
+
+### BUG-2. Remover Pokémon com itens equipados perde os itens (estoque)
+
+- **Bug (anotado 2026-08-25, durante a preparação do playtest 2):** ao **remover um
+  Pokémon com itens/seguráveis equipados, todos os itens somem** (não voltam ao
+  estoque). `assigned_item`/`held_item` vivem na própria linha do `team_pokemons`;
+  `TeamRepository#remove` (`lib/team_repository.rb:188`) faz o `DELETE` sem **repor**
+  os itens ao inventário (`InventoryRepository`), e o handler `remove_team_member`
+  (`server.rb:263`) não restaura. Corrigir = nova sessão (TDD): na remoção, devolver os
+  itens equipados (assigned + held) ao estoque antes do delete.

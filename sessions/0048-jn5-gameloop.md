@@ -171,6 +171,14 @@ como no JN-4).
   time atual/nível. A banda (`band_for_level(average_player_level(...))`) varia, mas a
   escolha dentro da banda é determinística. Corrigir = nova sessão (TDD): gerar oponente
   novo a cada confronto ajustando a dificuldade ao time atual.
+- **Bug anotado em 2026-08-25 (durante a preparação do playtest 2, fora de critério —
+  RNF-04):** ao **remover um Pokémon com itens/seguráveis equipados, todos os itens
+  somem** (perdem-se no estoque). Causa: `assigned_item`/`held_item` vivem na própria
+  linha do `team_pokemons`; `TeamRepository#remove` (`lib/team_repository.rb:188`) faz
+  `DELETE FROM team_pokemons` sem **repor** os itens equipados ao inventário
+  (`InventoryRepository`), e o handler `remove_team_member` (`server.rb:263`) não
+  restaura. Corrigir = nova sessão (TDD): na remoção, devolver os itens equipados
+  (assigned + held) ao estoque antes do delete.
 - **Ideias anotadas (2026-08-25, fora do fluxo — RNF-04):** (1) **Poke Center/Mart
   como janelas flutuantes** em vez de levar à tela de lista/time; (2) **gerenciar
   golpes no Poke Center e itens no Poke Mart**, reestruturando como gerenciamos golpes

@@ -587,6 +587,14 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       (`band_for_level(average_player_level(...))`) varia, mas a escolha dentro da banda
       é determinística. Corrigir = gerar oponente **novo a cada confronto** ajustando a
       dificuldade ao time atual (nova sessão TDD).
+- [ ] **Bug: remover Pokémon com itens equipados perde os itens (anotado 2026-08-25,
+      durante a preparação do playtest 2 — fora de sessão, RNF-04):** ao **remover um
+      Pokémon com itens/seguráveis equipados, todos os itens somem** do estoque.
+      `assigned_item`/`held_item` vivem na própria linha do `team_pokemons`;
+      `TeamRepository#remove` (`lib/team_repository.rb:188`) faz o `DELETE` sem **repor**
+      os itens ao inventário, e o handler `remove_team_member` (`server.rb:263`) não
+      restaura. Corrigir = nova sessão (TDD): na remoção, devolver os itens equipados
+      (assigned + held) ao estoque antes do delete.
 - [ ] **Ideias novas (anotado 2026-08-25, fora do fluxo — RNF-04):** (1) **Poke
       Center/Mart como janelas flutuantes** em vez de levar à tela de lista/time;
       (2) **gerenciar golpes no Poke Center e itens no Poke Mart**, reestruturando como
