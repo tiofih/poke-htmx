@@ -12,7 +12,7 @@ class HealService
 
   def heal(user_id)
     members = @team.all(user_id)
-    missing = members.sum { |member| @policy.missing_hp(member.hp_max, member.hp_current) }
+    missing = missing_hp(members)
     return full_notice if missing.zero?
 
     cost = @policy.cost(missing)
@@ -22,7 +22,15 @@ class HealService
     heal_result(user_id, members, cost)
   end
 
+  def preview_cost(user_id)
+    @policy.cost(missing_hp(@team.all(user_id)))
+  end
+
   private
+
+  def missing_hp(members)
+    members.sum { |member| @policy.missing_hp(member.hp_max, member.hp_current) }
+  end
 
   def heal_result(user_id, members, cost)
     new_balance = charge_and_heal(user_id, members, cost)

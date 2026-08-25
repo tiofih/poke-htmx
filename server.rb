@@ -203,6 +203,11 @@ module ServerTeamActions
     @balance = settings.wallet.balance(current_user)
   end
 
+  def center_data
+    @heal_cost = settings.heal.preview_cost(current_user)
+    @balance = settings.wallet.balance(current_user)
+  end
+
   def render_team_manage
     team_manage_context
     erb :team_manage, layout: false
@@ -365,6 +370,7 @@ module ServerBattleActions
   def prepare_team_fragment_data
     @journey_started = settings.journey.started?(current_user)
     @team = settings.team.all(current_user)
+    center_data
     mart_data
   end
 

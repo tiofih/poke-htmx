@@ -1,7 +1,0 @@
-<ul class="team-hp">
-  <% @team.each do |poke| %>
-    <% if poke.hp_max.to_i > 0 %>
-      <li><strong><%= poke.name %></strong> — HP <%= poke.hp_current %>/<%= poke.hp_max %></li>
-    <% end %>
-  <% end %>
-</ul>

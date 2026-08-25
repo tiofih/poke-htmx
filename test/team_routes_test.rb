@@ -455,6 +455,54 @@ class ServerTeamTest < Minitest::Test
     assert last_response.ok?
     refute_includes last_response.body, "Poke Center"
   end
+
+  def test_center_fragment_shows_heal_cost_upfront
+    start_journey("user-a")
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+    @wallet.grant("user-a", 200)
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Poke Center"
+    assert_includes last_response.body, "HP 100/200"
+    assert_match(/Custo[^:]*:\s*50/, last_response.body)
+    heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
+    refute_nil heal_form
+    refute_includes heal_form, "disabled"
+  end
+
+  def test_center_fragment_disables_heal_when_cured
+    start_journey("user-a")
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 200)
+    @wallet.grant("user-a", 100)
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
+    refute_nil heal_form
+    assert_includes heal_form, "disabled"
+  end
+
+  def test_center_fragment_disables_heal_when_insufficient_balance
+    start_journey("user-a")
+    @repository.add("user-a", pikachu_pokemon)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+    @wallet.grant("user-a", 10)
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
+    refute_nil heal_form
+    assert_includes heal_form, "disabled"
+  end
 end
 
 class ServerHealJourneyGateTest < Minitest::Test

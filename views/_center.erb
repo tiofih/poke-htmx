@@ -1,0 +1,12 @@
+<h2>Poke Center</h2>
+<ul class="team-hp">
+  <% @team.each do |poke| %>
+    <% if poke.hp_max.to_i > 0 %>
+      <li><strong><%= poke.name %></strong> — HP <%= poke.hp_current %>/<%= poke.hp_max %></li>
+    <% end %>
+  <% end %>
+</ul>
+<p class="heal-cost">Custo total: <%= @heal_cost %></p>
+<form hx-post="/team/heal" hx-target="#team-view" hx-swap="innerHTML">
+  <button type="submit" class="btn"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar</button>
+</form>

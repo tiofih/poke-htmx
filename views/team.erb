@@ -10,28 +10,9 @@
 </p>
 <% if @journey_started %>
   <% unless @team.empty? %>
-    <h2>Poke Center</h2>
-    <%= erb :team_hp, layout: false %>
-    <form hx-post="/team/heal" hx-target="#team-view" hx-swap="innerHTML">
-      <button type="submit" class="btn">Curar</button>
-    </form>
+    <%= erb :_center, layout: false %>
 
-    <h2>Poke Mart</h2>
-    <p class="balance">Saldo: <%= @balance %></p>
-    <% @catalog.each do |item| %>
-      <form hx-post="/mart/buy" hx-target="#team-view" hx-swap="innerHTML">
-        <input type="hidden" name="item_name" value="<%= item.name %>">
-        <input type="hidden" name="quantity" value="1">
-        <button type="submit" class="btn"><%= item.display_name %> — <%= item.price %></button>
-      </form>
-    <% end %>
-    <% if @inventory.any? %>
-      <ul class="inventory">
-        <% @inventory.each do |entry| %>
-          <li><strong><%= entry[:name] %></strong> — <%= entry[:quantity] %>×</li>
-        <% end %>
-      </ul>
-    <% end %>
+    <%= erb :_mart, layout: false %>
   <% end %>
 <% end %>
 <% @team.each do |poke| %>

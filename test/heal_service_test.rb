@@ -116,4 +116,17 @@ class HealServiceTest < Minitest::Test
     assert_equal 20, result[:cost], "10 HP faltante * 2 = 20"
     assert_equal 80, result[:balance]
   end
+
+  def test_preview_cost_returns_total_cost_without_mutating
+    add_pokemon("user-a", "pikachu", 25, hp_max: 45, hp_current: 35)
+    add_pokemon("user-a", "bulbasaur", 1, hp_max: 50, hp_current: 40)
+    @wallet.grant("user-a", 100)
+
+    cost = @service.preview_cost("user-a")
+
+    assert_equal 10, cost, "(10 + 10) * 0.5 = 10"
+    assert_equal 100, @wallet.balance("user-a"), "preview não debita"
+    assert_equal 35, @progression.get("user-a", TestDatabase.team_id("pikachu", "user-a"))[:hp_current],
+                 "preview não cura"
+  end
 end
