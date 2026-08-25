@@ -857,3 +857,13 @@
   o time pode ficar todo zerado e ainda disparar `GET /battle`. Definir a regra (ex.:
   gate estende `started?` com "pelo menos 1 poke com `hp_current > 0`"; UX: aviso "cure
   seu time no Poke Center" + CTA) e o teste.
+
+### Flag `user_state` vestigial para o gate da jornada (anotado 2026-08-25, sessão 0052)
+
+- **Refatoração futura:** após a 0052 (Q3), `JourneyService#started?` passou a ser
+  **derivado apenas do tamanho do time** (`team >= 6`); a flag `user_state` deixou de ser
+  lida pelo gate (escrita em `mark_started`/`mark_started_when_full` preservada e hoje
+  inerte). Considerar **remover a tabela `user_state`, o repositório e as escritas** (rota
+  `POST /team` → `mark_started_when_full`) ou redefinir o papel do marcador (ex.: marcar
+  "primeira jornada completada" para outro propósito). Interage com a migração 0036
+  (`user_state`), seeds e `TestDatabase.clear_user_state!`.

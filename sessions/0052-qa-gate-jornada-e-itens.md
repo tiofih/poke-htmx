@@ -7,7 +7,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25 |
-| Implementação | **Pendente** |
+| Implementação | **Concluída** — passos 1–3 + docs, suíte 768/2455, lint 0 (2026-08-25) |
 | Validação | **Pendente** (executada pelo usuário) |
 
 ---
@@ -168,5 +168,5 @@ CTA "Batalhar" escondido no painel); **(Q2)** remover Pokémon com item/seguráv
 - Migração de testes (Passo 1): ~21 `start_journey` em rotas + setup da `ServerBattleTest`
   (classe inteira) → substituir por time de 6 (`fill_team`); testes que adicionam poke
   próprio removem o add (o `fill_team` já fornece pikachu no slot 1).
-- Próximo passo do fluxo: **implementação TDD (fase 2, Passo 1)**; depois validação (fase 3)
-  pelo usuário.
+- Próximo passo do fluxo: **fase 2 concluída (passos 1–3 + docs, suíte 768/2455, lint 0) —
+  PARAR e aguardar a validação do usuário (fase 3)**.
