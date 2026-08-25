@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25 |
-| Implementação | **Pendente** |
+| Implementação | **Concluída** — passos 1–5 em 2026-08-25 (suíte 748/2387, lint 0) |
 | Validação | **Pendente** (executada pelo usuário) |
 
 ---

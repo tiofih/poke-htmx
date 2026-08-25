@@ -594,6 +594,15 @@
 
 ### P2. Varredura da banda do oponente (J3) sem paralelismo (anotado 2026-08-23)
 
+> **EXECUTADO na sessão 0050 (2026-08-25, implementado — aguardando validação).**
+> Estratégia fechada: A+B+cache — `OpponentGenerator` com novo caminho `ratings:`
+> (nome→tier) avaliando a banda em **lotes paralelos** via `Parallelizer`
+> (determinístico por seed) + **cap de varredura** `max_candidates:` (default 256 no
+> `BattleService`) com fallback puro + **`PokemonRatingCache`** (persistente, keyed por
+> nome, TTL 7d, write-through) injetado no `BattleService#opponent_options`. Caminho
+> `rater`/`moves_fetcher` preservado. Caminho **4 (evitar o duplo fetch de `moves_for`
+> na montagem)** ficou de fora — ganho marginal, rever se desejado.
+
 > **Fora do fluxo (RNF-04).** Observado na **validação da sessão 0040 (J3)**: o
 > `GET /battle` passou de ~38s (P1) para **~2min** na 1ª chamada.
 
