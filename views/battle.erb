@@ -49,7 +49,11 @@
           <div class="gameloop-ctas">
             <a class="gameloop-cta" href="/">Poke Center</a>
             <a class="gameloop-cta" href="/">Poke Mart</a>
-            <button class="gameloop-cta" hx-post="/battle/new" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
+            <% if @can_new_confront %>
+              <button class="gameloop-cta" hx-post="/battle/new" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
+            <% else %>
+              <button class="gameloop-cta" disabled title="Recupere seus pokémons no Poke Center para batalhar.">Novo confronto</button>
+            <% end %>
           </div>
         <% else %>
           <button hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML"

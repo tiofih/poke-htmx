@@ -220,7 +220,44 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
     assert last_response.ok?
     assert_includes last_response.body, "Vencedor:"
+    assert_match(/Novo confronto/, last_response.body)
+  end
+
+  def test_finish_screen_disables_new_confront_when_team_defeated
+    TestDatabase.clear_team!
+    fill_team("user-a")
+    @repository.all("user-a").each { |member| @progression.update_hp("user-a", member.id, 200, 0) }
+
+    weak = build_pokemon(number: 1, name: "weak", hp: 10, attack: 1, defense: 1, speed: 1)
+    strong = build_pokemon(number: 2, name: "strong", hp: 100, attack: 50, defense: 50, speed: 50)
+    engine = BattleEngine.new(team_a: [weak], team_b: [strong])
+    engine.play_round until engine.finished?
+    Server.settings.battles.set("user-a", engine)
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Vencedor:"
+    assert_match(/Novo confronto/, last_response.body)
+    assert_match(/disabled title="Recupere seus pok[ée]mons/, last_response.body)
+  end
+
+  def test_finish_screen_keeps_new_confront_active_when_team_has_hp
+    TestDatabase.clear_team!
+    fill_team("user-a")
+
+    hero = build_pokemon(number: 1, name: "hero", hp: 100, attack: 50, defense: 50, speed: 50)
+    minion = build_pokemon(number: 2, name: "minion", hp: 10, attack: 1, defense: 1, speed: 1)
+    engine = BattleEngine.new(team_a: [hero], team_b: [minion])
+    engine.play_round until engine.finished?
+    Server.settings.battles.set("user-a", engine)
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Vencedor:"
     assert_includes last_response.body, 'hx-post="/battle/new"'
+    refute_match(/disabled title="Recupere seus pok/, last_response.body)
   end
 
   def test_battle_end_shows_gameloop_ctas

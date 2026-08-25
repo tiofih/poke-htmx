@@ -358,6 +358,7 @@ module ServerBattleActions
     return battle_error_fragment unless result[:engine]
 
     @engine = result[:engine]
+    @can_new_confront = settings.journey.battle_ready?(current_user)
     erb :battle, layout: false
   end
 
@@ -429,6 +430,7 @@ module ServerBattleActions
     return battle_error_fragment unless result[:engine]
 
     @engine = result[:engine]
+    @can_new_confront = settings.journey.battle_ready?(current_user)
     erb :battle, layout: false
   end
 
@@ -438,6 +440,7 @@ module ServerBattleActions
     @money_gained = result[:money_gained]
     @evolution_news = result[:evolution_news]
     @learned_news = result[:learned_news]
+    @can_new_confront = settings.journey.battle_ready?(current_user)
   end
 end
 
