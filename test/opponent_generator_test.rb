@@ -14,6 +14,7 @@ end
 
 class OpponentGeneratorTest < Minitest::Test
   NAMES = %w[pikachu bulbasaur squirtle charmander eevee snorlax meowth psyduck].freeze
+  MANY_NAMES = Array.new(24) { |i| "poke#{i}" }.freeze
 
   def build_pokemon(name)
     Pokemon.new(
@@ -134,6 +135,40 @@ class OpponentGeneratorTest < Minitest::Test
 
   def ratings_provider
     ->(name) { tiers_by_name.fetch(name, :C) }
+  end
+
+  def many_ratings(received:)
+    lambda do |name|
+      received << name
+      %w[poke0 poke1].include?(name) ? :S : :F
+    end
+  end
+
+  def test_team_names_caps_scan_and_falls_back
+    received = []
+    gen = generator(names: MANY_NAMES, size: 6, seed: 42,
+                    ratings: many_ratings(received: received), band: [:S],
+                    max_candidates: 10)
+
+    names = gen.team_names
+
+    assert_equal 6, names.size
+    assert_equal names.uniq, names, "fallback nao repete nomes"
+    assert_operator received.size, :<, MANY_NAMES.size,
+                    "cap corta a varredura antes de avaliar o pool inteiro"
+    refute names.all? { |name| %w[poke0 poke1].include?(name) },
+           "fallback puro completa o time com nomes fora da banda"
+  end
+
+  def test_team_names_without_cap_scans_until_band_fills
+    received = []
+    gen = generator(names: MANY_NAMES, size: 2, seed: 42,
+                    ratings: many_ratings(received: received), band: [:S])
+
+    names = gen.team_names
+
+    assert_equal 2, names.size
+    assert_operator received.size, :>, 2, "sem cap a varredura segue avaliando candidatos"
   end
 
   def test_team_names_filters_to_band_with_ratings
