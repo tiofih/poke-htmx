@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25; **ajuste S3 em 2026-08-25** (reabertura do C1 + novo escopo) |
 | Implementação | **Concluída** — passos 1–5 verdes (suíte 735/2358, lint 0) |
-| Validação | **Pendente** (executada pelo usuário) — C1 original reprovado em 2026-08-25, critérios reabertos e ajustados |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-25 (critérios C1–C7 ok, suíte 735/2358, lint 0) |
 
 ---
 
@@ -181,20 +181,21 @@ jogador refletindo o estado atual (HP curado) na batalha ainda não iniciada.
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Concluída.** *Validada pelo usuário em 2026-08-25. Suíte executada: 735 runs / 2358
+asserts, lint 0.* *(S2: uma linha por critério.)*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 — novo confronto ≠ acesso à tela | `./scripts/test -n /keeps_same_opponent|after_new_confront/` | entrar na batalha, sair e voltar → mesmo oponente; "Novo confronto" → time diferente | |
-| C2 — banda pela nível preservada | `./scripts/test -n /band_for_level_player/` (2 testes) | — | |
-| C3 — determinismo do gerador | `./scripts/test -n /deterministic/` (`test/opponent_generator_test.rb`) | — | |
-| C4 — preparada estável + HP atual | `./scripts/test -n /refreshes_player_hp|revisits_keep_same_opponent/` | ver poke sem vida → curar → voltar: mesmo oponente e poke curado | |
-| C5 — em andamento preservada | `./scripts/test -n /preserves_in_progress/` | iniciar batalha, jogar rodada, recarregar `/battle` → mesma rodada | |
-| C6 — finalizada mostra resultado | `./scripts/test -n /returns_finished_battle/` | terminar batalha, re-visitar → resultado; "Novo confronto" → novo | |
-| C7 — mudança de time reseta | `./scripts/test -n /invalidates_active_battle|resets_prepared_battle/` | batalha preparada, remover/add membro, voltar → oponente novo | |
+| C1 — novo confronto ≠ acesso à tela | `./scripts/test -n /keeps_same_opponent\|after_new_confront/` (verdes) | entrar na batalha, sair e voltar → mesmo oponente; "Novo confronto" → time diferente | ok |
+| C2 — banda pelo nível preservada | `./scripts/test -n /band_for_level_player/` (2 testes verdes) | — | ok |
+| C3 — determinismo do gerador | `./scripts/test -n /deterministic/` (`test/opponent_generator_test.rb`, verdes) | — | ok |
+| C4 — preparada estável + HP atual | `./scripts/test -n /refreshes_player_hp\|revisits_keep_same_opponent/` (verdes) | ver poke sem vida → curar → voltar: mesmo oponente e poke curado | ok |
+| C5 — em andamento preservada | `./scripts/test -n /preserves_in_progress/` (verde) | iniciar batalha, jogar rodada, recarregar `/battle` → mesma rodada | ok |
+| C6 — finalizada mostra resultado | `./scripts/test -n /returns_finished_battle/` (verde) | terminar batalha, re-visitar → resultado; "Novo confronto" → novo | ok |
+| C7 — mudança de time reseta | `./scripts/test -n /invalidates_active_battle\|resets_prepared_battle/` (verdes) | batalha preparada, remover/add membro, voltar → oponente novo | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e
-> obter nova aprovação do usuário.
+> obter nova aprovação do usuário. *(Nenhum ajuste necessário na validação de 2026-08-25.)*
 
 ## 8. Observações
 
