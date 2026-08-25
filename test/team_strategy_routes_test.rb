@@ -8,6 +8,7 @@ class ServerTeamItemTest < Minitest::Test
   def test_post_team_item_assigns_item_to_member
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 1)
 
     post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
 
@@ -49,6 +50,76 @@ class ServerTeamItemTest < Minitest::Test
     assert last_response.ok?
     assert_nil @repository.all("user-a").first.assigned_item
     assert_includes last_response.body, "Item não disponível"
+  end
+
+  def test_post_team_item_without_stock_shows_notice_and_does_not_assign
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_nil @repository.all("user-a").first.assigned_item
+    assert_includes last_response.body, "sem estoque"
+  end
+
+  def test_post_team_item_debits_stock_on_assign
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 2)
+
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal "potion", @repository.all("user-a").first.assigned_item
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "equipar debita 1 do estoque"
+  end
+
+  def test_post_team_item_reequip_same_item_does_not_debit_again
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 2)
+
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion")
+
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal "potion", @repository.all("user-a").first.assigned_item
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "re-equipar mesmo item nao debita de novo"
+  end
+
+  def test_post_team_item_switch_restores_old_and_debits_new
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 1)
+    @inventory.add("user-a", "super-potion", 1)
+
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "potion")
+
+    post "/team/#{pikachu_id}/item", { item_name: "super-potion" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal "super-potion", @repository.all("user-a").first.assigned_item
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "antigo reposto ao estoque"
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "super-potion"), "novo debitado"
+  end
+
+  def test_post_team_item_empty_clears_and_restores_stock
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 1)
+
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "potion")
+
+    post "/team/#{pikachu_id}/item", { item_name: "" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_nil @repository.all("user-a").first.assigned_item
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "desequipar repoe ao estoque"
   end
 
   def test_post_team_item_of_other_users_member_is_noop
@@ -131,7 +202,7 @@ class ServerTeamHeldItemTest < Minitest::Test
 
     assert last_response.ok?
     assert_nil @repository.all("user-a").first.held_item
-    assert_includes last_response.body, "Item não disponível para equipar."
+    assert_includes last_response.body, "sem estoque"
   end
 
   def test_post_team_held_item_with_consumable_rejected
@@ -144,6 +215,65 @@ class ServerTeamHeldItemTest < Minitest::Test
     assert last_response.ok?
     assert_nil @repository.all("user-a").first.held_item
     assert_includes last_response.body, "Item não disponível para equipar."
+  end
+
+  def test_post_team_held_item_debits_stock_on_assign
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "choice-band", 2)
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal "choice-band", @repository.all("user-a").first.held_item
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "choice-band"), "equipar debita 1 do estoque"
+  end
+
+  def test_post_team_held_item_reequip_same_item_does_not_debit_again
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "choice-band", 1)
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "choice-band")
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal "choice-band", @repository.all("user-a").first.held_item
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "choice-band"), "re-equipar nao debita de novo"
+  end
+
+  def test_post_team_held_item_switch_restores_old_and_debits_new
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "choice-band", 1)
+    @inventory.add("user-a", "choice-scarf", 1)
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "choice-band")
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-scarf" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal "choice-scarf", @repository.all("user-a").first.held_item
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "choice-band"), "antigo reposto"
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "choice-scarf"), "novo debitado"
+  end
+
+  def test_post_team_held_item_empty_clears_and_restores_stock
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "choice-band", 1)
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "choice-band")
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_nil @repository.all("user-a").first.held_item
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "choice-band"), "desequipar repoe ao estoque"
   end
 
   def test_post_team_held_item_of_other_users_member_is_noop

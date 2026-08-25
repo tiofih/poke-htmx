@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
 require_relative "item_catalog"
+require_relative "team_item_operations"
 require_relative "team_repository"
 require_relative "inventory_repository"
 require_relative "wallet_repository"
 
 class TeamService
+  include TeamItemOperations
+
   def initialize(api:, team:, progression:, inventory:, wallet:, catalog: ItemCatalog)
     @api_provider = api
     @team = team
@@ -99,34 +102,6 @@ class TeamService
     available = member ? available_moves[member.id].to_a.map { |move| move[:name] } : []
     return "Golpe não disponível para este Pokémon." if selected.any? { |move| !available.include?(move) }
 
-    nil
-  end
-
-  def clear_item(user_id, member)
-    @team.assign_item(user_id, member.id, nil)
-    nil
-  end
-
-  def assign_catalog_item(user_id, member, item_name)
-    item = @catalog.find(item_name)
-    return "Item não disponível para atribuição." unless item && item.heal_amount.to_i.positive?
-
-    @team.assign_item(user_id, member.id, item_name)
-    nil
-  end
-
-  def clear_held_item(user_id, member)
-    @team.assign_held_item(user_id, member.id, nil)
-    nil
-  end
-
-  def assign_held_catalog_item(user_id, member, item_name)
-    item = @catalog.find(item_name)
-    unless item && item.category == "held" && @inventory.count(user_id, item_name).positive?
-      return "Item não disponível para equipar."
-    end
-
-    @team.assign_held_item(user_id, member.id, item_name)
     nil
   end
 end
