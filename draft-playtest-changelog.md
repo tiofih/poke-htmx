@@ -326,4 +326,39 @@ Ideias para reduzir o custo de cada sessão de playtest futura:
   solosis" várias vezes). Ver bug atualizado em `REQUIREMENTS.md` (limitações) e
   `draft-auto-battler.md` (BUG-1).
 
+---
+
+## Sessão 3 — 2026-08-25 (QA — caça e catálogo de bugs)
+
+> Execução: agente navegou o app real em Chrome (CDP) e percorreu **sistematicamente**
+> o fluxo procurando bugs: montagem do time, gerenciar (golpes/itens/seguráveis),
+> Centro, Mart, busca/paginação, detalhe, batalha. Foco: **encontrar e catalogar bugs**.
+
+### 3.1 Bugs confirmados / catalogados
+
+| # | Bug | Reprodução | Área | Status |
+| --- | --- | --- | --- | --- |
+| Q1 | **Oponente SEMPRE o mesmo por usuário** — toda batalha repete o mesmo time nível 1 (via "Novo confronto" e ao re-entrar em `/battle`); histórico mostra repetições idênticas | `Random.new(user_id.sum)` em `build_opponent` (`lib/battle_service.rb:64`) | Game design | = BUG-1 (confirmado) |
+| Q2 | **Item perdido ao remover Pokémon com item/segurável equipado** — equipa poção em um membro, remove o membro, a poção não volta ao estoque ("potion — 0×") | `TeamRepository#remove` faz `DELETE` sem repor itens (`lib/team_repository.rb:188`; `server.rb:263`) | Persistência | = BUG-2 (confirmado) |
+| Q3 | **Gate da jornada fica aberto após zerar o time** — o marcador `user_state` persiste; com time parcial (ou vazio), Poke Center/Mart e CTA "Batalhar" continuam visíveis | `JourneyService#started?` = `user_state.started? \|\| team >= 6` — o marcador nunca re-fecha | UX/fluxo | novo |
+| Q4 | **Busca só acha formas base** — "pika" retorna vazio (pikachu é não-base), "pichu" ok; "char" não acha charmander (starter excluído do pool de busca); Pokémon populares/evoluídos inalcançáveis pela busca | `common_candidates` filtra por `@q` + `reject STARTER_SLUGS` + `base_form_names` (`server.rb:132`) | UX/game design | novo |
+| Q5 | **Remover do time às vezes exige clicar 2x** — relatado pelo usuário; não reproduzido deterministicamente no QA (intermitente; hipótese: race com o swap/OOB do `#team-view`) | `hx-delete="/team"` + `hx-include=".list-state"` (`views/team.erb:40`) | UX (intermitente) | = BUG-3 (a investigar) |
+
+### 3.2 Verificado funcionando (não é bug)
+
+- Detail modal abre (tipos, stats, cadeia evolutiva, Adicionar/Fechar).
+- Links de evolução no detalhe navegam (`hx-get="/pokemon/N"` → `#pokemon-detail`).
+- Paginação "Próxima" avança (página 1 = iniciais+comuns → página 2 = comuns).
+- Busca filtra formas base corretamente (comportamento do design, mas vira Q4).
+- Estado do botão Add ("No time ✓" = Pokémon já no time; "Adicionar ao time" = livre; cheio desabilita).
+- Equipar item debita do estoque (JN-3-B ok); Center cura + debita; Mart compra + debita.
+
+### 3.3 Priorização sugerida
+
+1. **Q1 (oponente repetido)** — bloqueante de gameplay (sem variedade/escala).
+2. **Q2 (item perdido no remove)** — perda de progresso/recursos.
+3. **Q3 (gate aberto após zerar)** — fluxo de jornada.
+4. **Q4 (busca base-form)** — UX de descoberta.
+5. **Q5 (remover 2x)** — intermitente, investigar com dados/evento htmx.
+
 <!-- registros futuros adicionados abaixo -->

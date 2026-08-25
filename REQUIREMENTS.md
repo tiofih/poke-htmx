@@ -602,6 +602,18 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       `hx-params="*"`); handler `remove_team_member` (`server.rb:263`) só age se
       `params[:id]`. Hipótese: 1º clique dispara mas o swap/estado não atualiza o painel
       (ou `id` chega vazio/duplicado). Investigar no QA (evento htmx, params, OOB).
+- [ ] **Bug: gate da jornada fica aberto após zerar o time (anotado 2026-08-25, no QA):**
+      o marcador `user_state` persiste — `JourneyService#started?` =
+      `user_state.started? \|\| team >= 6` — então, mesmo com o time zerado/parcial, o
+      Poke Center/Mart e o CTA "Batalhar" continuam visíveis. Decidir: o gate deve
+      re-fechar quando o time ficar < 6, ou a jornada é irreversível (uma vez iniciada,
+      sempre aberta)?
+- [ ] **Bug/UX: busca só acha formas base (anotado 2026-08-25, no QA):** "pika" retorna
+      vazio (pikachu é não-base da cadeia pichu→pikachu→raichu), "pichu" ok; "char" não
+      acha charmander (starter excluído do pool de busca via `reject STARTER_SLUGS`).
+      `common_candidates` (`server.rb:132`) filtra `fetch_all_names` por `@q` + rejeita
+      starters + `base_form_names`. Pokémon populares/evoluídos ficam inalcançáveis pela
+      busca. Decidir: incluir não-base na busca (e na listagem?) ou mostrar um aviso.
 - [ ] **Ideias novas (anotado 2026-08-25, fora do fluxo — RNF-04):** (1) **Poke
       Center/Mart como janelas flutuantes** em vez de levar à tela de lista/time;
       (2) **gerenciar golpes no Poke Center e itens no Poke Mart**, reestruturando como
