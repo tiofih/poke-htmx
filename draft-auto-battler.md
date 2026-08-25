@@ -520,6 +520,16 @@
 
 ### JN-4. Componentes de Poke Mart e Poke Center
 
+> **Executada na sessão 0047 (2026-08-24) — implementação concluída (passos 1–2,
+> suíte 724/2329, lint 0); aguardando validação do usuário.** Blocos de
+> `views/team.erb` viram partials reutilizáveis `_mart.erb`/`_center.erb` no painel
+> do time (`#team-view`), **sem rotas/páginas novas**. **Cura (HP × custo):** HP
+> atual/máx por membro + **custo total antecipado** via `HealService#preview_cost`
+> (0.5/HP sem mutar); botão Curar `disabled` quando já curado (custo 0) ou saldo <
+> custo. **Compra (stock × saldo):** preço × **quantidade comprável** (`saldo/preço`,
+> ex. "×5"); botão `disabled` quando saldo < preço. `team_hp.erb` absorvido pelo
+> `_center.erb` (removido).
+
 - **Ideia:** as seções de Poke Mart (Eco-3) e Poke Center (Eco-2) hoje vivem como
   blocos dentro de `team.erb` — virar **componentes próprios** (telas/fragmentos
   reutilizáveis), completando visualmente compra (stock × saldo) e cura (HP × custo).
