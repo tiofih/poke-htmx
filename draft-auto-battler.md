@@ -755,16 +755,18 @@
 
 ### BUG-4. App vaza conexões PG em produção (ConnectionRegistry sem limpeza)
 
-- **Bug (observado 2026-08-25, durante benchmark da 0050):** o `ConnectionRegistry`
+- **Bug (observado 2026-08-25, durante benchmark da 0050) e CORRIGIDO na sessão 0051
+  (2026-08-25, implementado — aguardando validação):** o `ConnectionRegistry`
   (`lib/connection_registry.rb`) registra **uma conexão por (repositório, thread)** —
-  a limpeza (`close_all!`) só roda no `after_teardown` do Minitest (`test_helper.rb`).
-  Em **produção o app nunca fecha**: sob o `run!` multi-thread do Sinatra, cada request
-  em thread nova cria conexões e **acumula**. No benchmark, o app (web container) chegou
-  a **80 conexões no `pokedex`** após alguns requests → somado ao limite 100 do PG,
-  derrubou a suíte com "too many clients already" (workaround: `docker compose stop web`).
-  Corrigir = nova sessão (TDD): limpeza/coleta de conexões por thread no app (ex.:
-  release da thread no fim do request, ou reaproveitar um pool finito), preservando o
-  isolamento por thread (0044). Interage com a anotação "Sem CI".
+  a limpeza (`close_all!`) só rodava no `after_teardown` do Minitest (`test_helper.rb`).
+  Em **produção o app nunca fechava**: sob o `run!` do Sinatra/Puma, cada request em
+  thread nova cria conexões e **acumula** (7 repos × threads). No benchmark da 0050 o
+  app chegou a **80 conexões no `pokedex`** → somado ao limite 100 do PG, derrubou a
+  suíte com "too many clients already". **Fix:** `after { ConnectionRegistry.release_current_thread! }`
+  no `server.rb` (cada request fecha as conexões da sua thread) + teto
+  **`MAX_CONNECTIONS`** (30, env `PG_MAX_CONNECTIONS`) com **evicção** (thread morta
+  primeiro, senão LRU). Isolamento por thread (0044) preservado. Manual de validação:
+  `pg_stat_activity` estável após requests e a suíte roda verde com o `web` ativo.
 
 ### BUG-3. Remover do time às vezes exige clicar 2x
 
