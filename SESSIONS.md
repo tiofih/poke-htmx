@@ -236,6 +236,19 @@ C1–C7 e plano TDD fechados (`sessions/0049-oponente-novo-por-confronto.md`); s
 verde, lint 0, validado em 2026-08-25. Depois da 0049: organizar os demais
 itens do QA (Q2–Q5) e a fila (J2, J4, D4, P2, M2) — a critério do usuário.
 
+**Sessão 0050 (P2 — performance da varredura da banda do oponente) refinada em
+2026-08-25** (fase 1 concluída — critérios C1–C4 e plano TDD fechados em
+`sessions/0050-p2-perf-varredura-banda.md`): ataque ao `GET /battle` ~2min da 1ª
+chamada (anotado na validação da 0040) sem mudar a banda — **varredura paralela em
+lotes** no `OpponentGenerator` (novo caminho `ratings:` nome→tier, ordem
+determinística por seed, lote via `Parallelizer`) + **cap de varredura**
+(`max_candidates:` default 256) com fallback puro + **cache de rating persistente**
+(`PokemonRatingCache` novo, keyed por nome, TTL 7d, write-through, sem Faraday)
+evitando re-ratear espécies já avaliadas; caminho `rater`/`moves_fetcher` intacto
+(backward-compat). Decisões: estratégia A+B+cache; `ratings:` como novo caminho
+opcional; cache persistente keyed por nome; cap 256 heurístico (S3). Depois da 0050:
+organizar o resto do QA (Q2–Q5) e a fila (J2, J4, D4, M2) — a critério do usuário.
+
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
 > 2026-08-19 — GET /battle ~38s, 2º play ~4s)**. **J1 concluído e validado (0036,
@@ -307,6 +320,7 @@ itens do QA (Q2–Q5) e a fila (J2, J4, D4, P2, M2) — a critério do usuário.
 | 0047 | JN-4 — componentes de Poke Mart e Poke Center: blocos de `views/team.erb` viram partials reutilizáveis (`_mart.erb`/`_center.erb`) no painel do time, com cura completada (HP atual/máx + custo total antecipado, Curar desabilitado quando curado/insuficiente) e compra completada (preço × quantidade comprável, botão desabilitado quando saldo < preço); sem rotas/páginas novas | Concluída | Done (passos 1–3, suíte 724/2329, lint 0, validado em 2026-08-24; `team_hp.erb` removido) |
 | 0048 | JN-5 — gameloop: circuito explícito por CTAs (fluxo guiado) — fim de batalha mostra CTAs Poke Center/Poke Mart (levam à Lista `/`) + "Novo confronto" mantido; painel do time pós-jornada ganha CTA "Batalhar" (`/battle`); nav permanece Lista/Batalha/Histórico; sem páginas/rotas novas | Concluída | Done (passos 1–2, suíte 727/2344, lint 0, validado em 2026-08-25; anotações RNF-04 registradas) |
 | 0049 | BUG-1/Q1 — oponente novo a cada confronto + máquina de estado do gameloop: fim da seed fixa por usuário (`opponent_rng` injetável, default `Random.new`) + reuso da batalha ativa por estado (preparada → re-deriva o time preservando o oponente; em andamento/finalizada → preserva), "Novo confronto" via `POST /battle/new`, add/remove/move invalidam a batalha | Concluída | Done (passos 1–5, suíte 735/2358, lint 0, validado em 2026-08-25; ajuste S3 — C1 reprovado e reaberto: oponente trocava a cada acesso) |
+| 0050 | P2 — performance da varredura da banda do oponente: varredura **paralela em lotes** no `OpponentGenerator` (caminho `ratings:` nome→tier, determinística por seed) + **cap de varredura** `max_candidates:` com fallback puro + **cache de rating persistente** (`PokemonRatingCache`, keyed por nome, TTL 7d, write-through) evitando re-ratear espécies já avaliadas — banda do nível médio preservada | Refinamento | **Concluída** (criterios C1-C4 e plano TDD fechados em 2026-08-25; implementacao pendente) |
 
 ## Estrutura do arquivo de sessão
 
