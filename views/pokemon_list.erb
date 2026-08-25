@@ -5,6 +5,17 @@
 <% if @notice %>
   <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
 <% end %>
+<% if @search_hint %>
+  <p class="notice notice--info">
+    <% if @search_hint[:kind] == :evolution %>
+      "<%= @search_hint[:name] %>" é a evolução de "<%= @search_hint[:base] %>" — monte seu time com a primeira evolução.
+    <% elsif @search_hint[:kind] == :starter %>
+      "<%= @search_hint[:name] %>" é um Pokémon inicial — limpe a busca para escolher nos destaques.
+    <% else %>
+      Nenhum Pokémon base encontrado para "<%= @search_hint[:name] %>".
+    <% end %>
+  </p>
+<% end %>
 <div class="pokemon-grid">
   <% unless @starters.empty? %>
     <ul class="pokemon-list starters">

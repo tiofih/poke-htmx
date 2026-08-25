@@ -54,19 +54,20 @@ module ServerCommon
   end
 end
 
+STARTER_SLUGS = %w[
+  bulbasaur charmander squirtle
+  chikorita cyndaquil totodile
+  treecko torchic mudkip
+  turtwig chimchar piplup
+  snivy tepig oshawott
+  chespin fennekin froakie
+  rowlet litten popplio
+  grookey scorbunny sobble
+  sprigatito fuecoco quaxly
+].freeze
+
 module ServerListActions
   PAGE_SIZE = 36
-  STARTER_SLUGS = %w[
-    bulbasaur charmander squirtle
-    chikorita cyndaquil totodile
-    treecko torchic mudkip
-    turtwig chimchar piplup
-    snivy tepig oshawott
-    chespin fennekin froakie
-    rowlet litten popplio
-    grookey scorbunny sobble
-    sprigatito fuecoco quaxly
-  ].freeze
   FIRST_PAGE_COMMONS = PAGE_SIZE - STARTER_SLUGS.size
   SCAN_BATCH = 24
 
@@ -92,8 +93,13 @@ module ServerListActions
     @starters = @q.empty? && @offset.zero? ? load_starters : []
     build_page
     @items = Parallelizer.map(@page_names) { |name| [name, settings.api.find(name)] }
+    load_search_hint
     @notice = "Não foi possível carregar a lista de Pokémon." if @page_names.empty? && @q.empty?
     load_team_names
+  end
+
+  def load_search_hint
+    @search_hint = search_hint(@q) if !@q.empty? && @items.empty?
   end
 
   def build_page
@@ -185,6 +191,28 @@ module ServerListActions
       @message = "Pokémon não encontrado."
       erb :error, layout: false
     end
+  end
+end
+
+module ServerSearchHintActions
+  private
+
+  def search_hint(query)
+    match = first_search_match(query)
+    return nil unless match
+
+    return { kind: :starter, name: match } if STARTER_SLUGS.include?(match)
+
+    base = base_form_for(match)
+    base ? { kind: :evolution, name: match, base: base.name } : { kind: :generic, name: match }
+  end
+
+  def first_search_match(query)
+    settings.api.fetch_all_names.to_a.find { |name| name.downcase.include?(query.downcase) }
+  end
+
+  def base_form_for(match)
+    settings.api.detail(match)&.evolutions&.first
   end
 end
 
@@ -713,6 +741,7 @@ class Server < Sinatra::Base
 
   include ServerCommon
   include ServerListActions
+  include ServerSearchHintActions
   include ServerTeamActions
   include ServerTeamItemActions
   include ServerTeamHeldActions

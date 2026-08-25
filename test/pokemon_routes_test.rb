@@ -614,3 +614,59 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, "Não foi possível carregar a lista de Pokémon."
   end
 end
+
+class ServerPokemonSearchHintTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def test_search_non_base_shows_evolution_hint
+    names = %w[pikachu pichu raichu bulbasaur]
+    forms = { "pikachu" => false, "pichu" => true, "raichu" => false, "bulbasaur" => true }
+    pikachu = Pokemon.new(
+      name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25,
+      evolutions: [build_pokemon_record("pichu", 172), build_pokemon_record("pikachu", 25)]
+    )
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_base_forms(forms) do
+        PokeApiStub.with_detail({ "pikachu" => pikachu }) do
+          get "/pokemons", { q: "pika" }, user_session("user-a")
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_match(/evolução de "pichu"/i, last_response.body)
+    assert_match(/monte/i, last_response.body)
+  end
+
+  def test_search_starter_shows_starter_hint
+    names = %w[charmander charmeleon charizard]
+    forms = { "charmander" => true, "charmeleon" => false, "charizard" => false }
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_base_forms(forms) do
+        get "/pokemons", { q: "char" }, user_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    assert_match(/charmander/i, last_response.body)
+    assert_match(/inicial/i, last_response.body)
+  end
+
+  def test_search_base_form_lists_without_hint
+    names = %w[pikachu pichu raichu]
+    forms = { "pikachu" => false, "pichu" => true, "raichu" => false }
+    records = { "pichu" => build_pokemon_record("pichu", 172) }
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_find(records) do
+        PokeApiStub.with_base_forms(forms) do
+          get "/pokemons", { q: "pich" }, user_session("user-a")
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "pichu"
+    refute_match(/evolução de/i, last_response.body)
+  end
+end
