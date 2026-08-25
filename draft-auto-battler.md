@@ -690,6 +690,17 @@
   técnica com htmx; dado de origem/alvo (o log do `BattleLogPresenter` já tem
   atacante/golpe — falta o alvo explícito); acessibilidade (redução de movimento).
 
+### BUG-1. Oponente SEMPRE o mesmo por usuário (sem variedade nem escala)
+
+- **Bug (anotado 2026-08-25, confirmado no playtest 2):** toda batalha de um mesmo
+  usuário repete **o mesmo time oponente nível 1** (mesmas espécies), tanto via "Novo
+  confronto" quanto ao re-entrar em `/battle`. `BattleService#build_opponent`
+  (`lib/battle_service.rb:64`) usa `Random.new(user_id.sum)` — **seed determinístico
+  por usuário** — então o `OpponentGenerator` devolve sempre o mesmo oponente a cada
+  `prepare`, independente do time atual/nível (a banda varia, mas a escolha dentro dela
+  é determinística). Corrigir = gerar oponente **novo a cada confronto**, ajustando a
+  dificuldade ao time atual (nova sessão TDD).
+
 ### BUG-2. Remover Pokémon com itens equipados perde os itens (estoque)
 
 - **Bug (anotado 2026-08-25, durante a preparação do playtest 2):** ao **remover um

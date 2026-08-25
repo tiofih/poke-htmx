@@ -579,14 +579,15 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       Candidatos: paralelizar a varredura (via `Parallelizer`), cap de varredura,
       pré-computar/cachear o rating, ou pré-cachear a banda offline. Ver
       `draft-auto-battler.md` (anotações de performance). Fora de sessão (RNF-04).
-- [ ] **Bug: "Novo confronto" repete o time/oponente anterior (anotado 2026-08-25,
-      durante a validação da 0048 — fora de sessão, RNF-04):** `BattleService#build_opponent`
-      (`lib/battle_service.rb:64`) usa `Random.new(user_id.sum)` — **seed determinístico
-      por usuário** — então o `OpponentGenerator` produz o **mesmo oponente** a cada
-      `prepare`, independente do time atual/nível. A banda
-      (`band_for_level(average_player_level(...))`) varia, mas a escolha dentro da banda
-      é determinística. Corrigir = gerar oponente **novo a cada confronto** ajustando a
-      dificuldade ao time atual (nova sessão TDD).
+- [ ] **Bug: oponente SEMPRE o mesmo por usuário (anotado 2026-08-25, confirmado no
+      playtest 2):** toda batalha de um mesmo usuário repete **o mesmo time oponente
+      nível 1** (mesmas espécies), tanto via "Novo confronto" quanto ao re-entrar em
+      `/battle`. Causa: `BattleService#build_opponent` (`lib/battle_service.rb:64`) usa
+      `Random.new(user_id.sum)` — **seed determinístico por usuário** — então o
+      `OpponentGenerator` produz sempre o mesmo oponente para o mesmo usuário, a cada
+      `prepare`, independente do time atual/nível (a banda varia, mas a escolha dentro
+      dela é determinística). Corrigir = gerar oponente **novo a cada confronto**
+      ajustando a dificuldade ao time atual (nova sessão TDD).
 - [ ] **Bug: remover Pokémon com itens equipados perde os itens (anotado 2026-08-25,
       durante a preparação do playtest 2 — fora de sessão, RNF-04):** ao **remover um
       Pokémon com itens/seguráveis equipados, todos os itens somem** do estoque.

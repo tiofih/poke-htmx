@@ -270,4 +270,60 @@ Ideias para reduzir o custo de cada sessão de playtest futura:
 
 ---
 
+## Sessão 2 — 2026-08-25 (playtest via browser-harness)
+
+> Execução: agente navegou o app real em Chrome (CDP) e jogou o **gameloop novo
+> (0048)** de ponta a ponta: jornada inicial (montar time de 6) → Batalhar →
+> batalha completa → fim com CTAs do circuito → curar no Center → comprar no Mart →
+> nova batalha. Foco: **UX e game design** (o loop mudou com a 0048).
+
+### 2.1 O que foi testado
+
+- **Início de jornada**: adicionar 6 Pokémon pela lista de iniciais (gate abre).
+- **Gameloop (0048)**: CTA **"Batalhar"** no painel do time (`/`); batalha; fim de
+  batalha com **Poke Center / Poke Mart / Novo confronto**; curar (Center) e comprar
+  (Mart) a partir da Lista.
+- **Centro**: cura completa (HP por membro + custo antecipado + debita saldo).
+- **Mart**: compra de poção (debita saldo, adiciona inventário).
+- **Repetição de confronto**: "Novo confronto" e re-entrada em `/battle`.
+
+### 2.2 Experiência (o que o jogador sente)
+
+- **O circuito do gameloop funciona e fecha (0048 ok)**: Batalhar → batalha →
+  fim com CTAs → curar/comprar → Batalhar de novo. A jornada inicial (montar 6) abre
+  o gate e o loop flui.
+- **O oponente é SEMPRE o mesmo** para o mesmo usuário: não importa se é "Novo
+  confronto" ou re-entrar em `/battle` — vem **o mesmo time nível 1** (bunnelby,
+  weedle, toxel, nidoran-m, tympole, goomy). O jogo perde variedade e escalonamento;
+  vira rotina na 1ª batalha.
+- **Oponentes têm 4 golpes, o jogador tem 2** (nível 1): o time do jogador começa com
+  growl/tackle/scratch etc. enquanto o oponente vem com wild-charge/tera-blast/etc.
+  Sensação de desvantagem no moveset sem explicação.
+- **A batalha pede vários cliques "Jogar"** (uma por rodada até o fim) — com o loop
+  fechado, o jogador sente atrito: esperaria "batalhar" resolver.
+- **O ranking segue com o bot "seed-shop" no topo** (P8 sessão 1 não resolvido) —
+  desmotiva olhar o histórico.
+
+### 2.3 Melhorias anotadas (playtest 2)
+
+| # | Achado | Impacto | Área |
+| --- | --- | --- | --- |
+| U1 | Notice "Time cheio (máx. 6)." **duplicado** na Lista (2× no DOM do `#team-view`/`#add-status`) | Poluição visual / redundância | UX |
+| U2 | **Mart ambíguo**: catálogo mostra "Pocao — 20 ×N" (qtd comprável) e logo abaixo inventário com "potion — 0×"; dois blocos de itens confusos | Entendimento errado do estoque | UX |
+| U3 | CTAs do fim de batalha (Center/Mart/Novo confronto) **próximos em linha** — fácil clicar errado (aconteceu no playtest: clique em Center virou novo confronto) | Erro de navegação | UX |
+| U4 | **Sem destaque do time danificado** antes da batalha: HP carrega reduzido (bulbasaur 0/45) e a batalha inicia com Pokémon "mortos" sem aviso "cure seu time" (reforça P7 sessão 1) | Confuso | UX |
+| G1 | **Oponente SEMPRE o mesmo por usuário** (seed `Random.new(user_id.sum)`): repete em "Novo confronto" E em nova entrada em `/battle` — sem variedade nem escala | Gameplay estagna | Game design |
+| G2 | Oponentes nível 1 fixos com **4 golpes vs 2 do jogador** — sem curva de dificuldade (reforça P3 sessão 1) | Desvantagem injusta | Game design |
+| G3 | **Ranking com bot "seed-shop" no topo** (P8 sessão 1 não resolvido) | Desmotiva | Game design |
+| G4 | **Batalha exige N cliques "Jogar"** (uma por rodada) — atrito no loop fechado (reforça a ideia B5 de resolver a batalha inteira num clique) | Atrito de interação | Game design |
+
+### 2.4 Observações do bug do oponente (G1)
+
+- Confirmado e **mais grave que o anotado**: não é só "Novo confronto" — **toda batalha
+  do mesmo usuário repete o mesmo time oponente nível 1**, pois `build_opponent` usa
+  `Random.new(user_id.sum)` (seed determinístico por usuário). O histórico mostrou
+  repetições idênticas ("Vitória contra delibird, skiploom, meditite, bunnelby, abra,
+  solosis" várias vezes). Ver bug atualizado em `REQUIREMENTS.md` (limitações) e
+  `draft-auto-battler.md` (BUG-1).
+
 <!-- registros futuros adicionados abaixo -->
