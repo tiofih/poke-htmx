@@ -633,6 +633,10 @@ class Server < Sinatra::Base
     session[:user_id] ||= SecureRandom.uuid
   end
 
+  after do
+    ConnectionRegistry.release_current_thread!
+  end
+
   include ServerCommon
   include ServerListActions
   include ServerTeamActions

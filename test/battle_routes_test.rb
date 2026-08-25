@@ -28,6 +28,16 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_equal 404, last_response.status
   end
 
+  def test_request_releases_thread_connections
+    @repository.add("user-a", pikachu_pokemon)
+    refute_equal 0, ConnectionRegistry.size, "sanity: conexao registrada antes do request"
+
+    get "/", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 0, ConnectionRegistry.size, "after do request libera as conexoes da thread"
+  end
+
   def test_battle_renders_remaining_stock_in_player_panel
     @repository.add("user-a", pikachu_pokemon)
     @inventory.add("user-a", "potion", 2)
