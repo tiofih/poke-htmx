@@ -6,6 +6,7 @@ require_relative "parallelizer"
 
 class OpponentGenerator
   DEFAULT_TEAM_SIZE = 6
+  SCAN_BATCH_SIZE = Parallelizer::DEFAULT_CONCURRENCY
 
   def initialize(names:, size: DEFAULT_TEAM_SIZE, rng: Random.new,
                  fetcher: PokeApi.instance.method(:detail), level: 1,
@@ -15,10 +16,7 @@ class OpponentGenerator
     @rng = rng
     @fetcher = fetcher
     @level = level
-    @parallelizer = options.fetch(:parallelizer, Parallelizer)
-    @rater = options[:rater]
-    @moves_fetcher = options[:moves_fetcher]
-    @band = options[:band]
+    assign_options(options)
   end
 
   def team_names
@@ -35,7 +33,7 @@ class OpponentGenerator
   private
 
   def rated?
-    @rater && @moves_fetcher && @band && !@band.empty?
+    @band && !@band.empty? && (@ratings || (@rater && @moves_fetcher))
   end
 
   def random_names
@@ -43,16 +41,56 @@ class OpponentGenerator
   end
 
   def rated_names
+    return rated_names_with_ratings if @ratings
+
+    rated_names_with_rater
+  end
+
+  def rated_names_with_rater
     collected = []
     @names.shuffle(random: @rng).each do |name|
       break if collected.size >= @size
 
       collected << name if in_band?(name)
     end
+    complete_with_fallback(collected)
+  end
+
+  def rated_names_with_ratings
+    collected = []
+    evaluated = 0
+    @names.shuffle(random: @rng).each_slice(SCAN_BATCH_SIZE) do |batch|
+      break if collected.size >= @size || capped?(evaluated)
+
+      collect_rating_batch(collected, batch)
+      evaluated += batch.size
+    end
+    complete_with_fallback(collected)
+  end
+
+  def collect_rating_batch(collected, batch)
+    @parallelizer.map(batch) { |name| [name, in_rating_band?(name)] }.each do |name, ok|
+      break if collected.size >= @size
+
+      collected << name if ok
+    end
+  end
+
+  def capped?(evaluated)
+    @max_candidates && evaluated >= @max_candidates
+  end
+
+  def complete_with_fallback(collected)
     return collected if collected.size == @size
 
     remaining = @names - collected
     collected + remaining.sample([@size - collected.size, remaining.size].min, random: @rng)
+  end
+
+  def assign_options(options)
+    @parallelizer = options.fetch(:parallelizer, Parallelizer)
+    @rater, @moves_fetcher, @band = options.values_at(:rater, :moves_fetcher, :band)
+    @ratings, @max_candidates = options.values_at(:ratings, :max_candidates)
   end
 
   def in_band?(name)
@@ -61,5 +99,10 @@ class OpponentGenerator
 
     moves = @moves_fetcher.call(pokemon.number)
     @band.include?(@rater.call(pokemon, moves))
+  end
+
+  def in_rating_band?(name)
+    tier = @ratings.call(name)
+    tier && @band.include?(tier)
   end
 end

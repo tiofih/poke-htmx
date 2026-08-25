@@ -26,13 +26,15 @@ class OpponentGeneratorTest < Minitest::Test
   end
 
   def generator(names: NAMES, size: 6, seed: 42, fetcher: nil, level: 1,
-                parallelizer: nil, rater: nil, moves_fetcher: nil, band: nil)
+                parallelizer: nil, rater: nil, moves_fetcher: nil, band: nil,
+                ratings: nil, max_candidates: nil)
     fetcher ||= ->(name) { build_pokemon(name) }
     moves_fetcher ||= ->(_number) { [] }
     OpponentGenerator.new(
       names: names, size: size, rng: Random.new(seed), fetcher: fetcher, level: level,
       options: {
-        parallelizer: parallelizer, rater: rater, moves_fetcher: moves_fetcher, band: band
+        parallelizer: parallelizer, rater: rater, moves_fetcher: moves_fetcher,
+        band: band, ratings: ratings, max_candidates: max_candidates
       }.compact
     )
   end
@@ -128,6 +130,50 @@ class OpponentGeneratorTest < Minitest::Test
 
   def rater
     ->(pokemon, _moves) { tiers_by_name.fetch(pokemon.name, :C) }
+  end
+
+  def ratings_provider
+    ->(name) { tiers_by_name.fetch(name, :C) }
+  end
+
+  def test_team_names_filters_to_band_with_ratings
+    gen = generator(size: 3, ratings: ratings_provider, band: [:B])
+
+    names = gen.team_names
+
+    assert_equal 3, names.size
+    assert_equal %w[charmander eevee snorlax].sort, names.sort
+  end
+
+  def test_team_names_with_ratings_is_deterministic_for_seed
+    first = generator(size: 3, seed: 42, ratings: ratings_provider, band: [:B]).team_names
+    second = generator(size: 3, seed: 42, ratings: ratings_provider, band: [:B]).team_names
+
+    assert_equal first, second
+  end
+
+  def test_ratings_scan_uses_parallelizer_in_batches
+    parallelizer = PlumbingParallelizer.new
+    gen = generator(size: 3, seed: 42, parallelizer: parallelizer,
+                    ratings: ratings_provider, band: [:B])
+
+    gen.team_names
+
+    refute_empty parallelizer.items, "varredura da banda delegada ao parallelizer em lotes"
+  end
+
+  def test_ratings_receives_species_name
+    received = []
+    ratings = lambda do |name|
+      received << name
+      tiers_by_name.fetch(name, :C)
+    end
+    gen = generator(size: 2, ratings: ratings, band: [:B])
+
+    gen.team_names
+
+    refute_empty received, "ratings consultado por nome de espécie"
+    assert_includes received, "charmander"
   end
 
   def test_team_names_filters_to_band
