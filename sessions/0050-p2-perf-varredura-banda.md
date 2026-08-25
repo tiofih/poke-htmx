@@ -109,6 +109,19 @@ que evita re-ratear (re-fetch de `detail` + `moves_for`) espécies já avaliadas
       no `opponent_options`, preservando a banda derivada do nível médio do jogador** —
       prova: `test/battle_service_test.rb` (novo `test_build_opponent_uses_ratings_provider*`
       + os testes de banda da 0040 seguem verdes).
+- [ ] **C4-b (REABERTO via S3 em 2026-08-25) — perf da 1ª batalha: escrita do cache HTTP
+      deixa de reescrever o arquivo inteiro a cada miss.** Diagnóstico do benchmark:
+      `GET /battle` 1ª chamada ~55-63s (2ª ~0.01-0.07s); `PersistentJsonStore#store`
+      chama `write_file` (arquivo 260MB, ~1.45s/miss: generate 0.98s + write 0.47s) sob
+      `@store_mutex` a cada miss; a 1ª batalha faz ~50-100 misses (scan da banda + time
+      do oponente) → ~60s. Fix: `store` atualiza **só em memória** e agenda escrita;
+      **writer em background** (intervalo, processo único `server.rb` — sem Puma fork)
+      + `flush!` síncrono (testes/exit) escrevem o snapshot coalescido; `get`/`peek`
+      continuam imediatos — prova: `test/persistent_json_store_test.rb`
+      (novos `test_store_updates_memory_without_writing`, `test_flush_writes_file`,
+      `test_background_writer_coalesces` via `flush!`; existentes ajustados com
+      `background: false` + `flush!`) + `test/poke_api_http_test.rb` (persistência
+      via `flush!`).
 
 ### Garantias (RNF)
 
@@ -139,6 +152,15 @@ que evita re-ratear (re-fetch de `detail` + `moves_for`) espécies já avaliadas
   (acoplado a HTTP) ou cache só em memória.
 - **2026-08-25 — Cap default `RATING_SCAN_CAP = 256` no `BattleService`** (heurística —
   ajustável via S3 como a fórmula da 0040).
+- **2026-08-25 — S3: C4 reaberto e estendido (perf da 1ª batalha).** Benchmark mostrou
+  o gargalo no **write-through do `PersistentJsonStore`** (260MB reescritos a cada miss,
+  ~1.45s/miss, sob `@store_mutex`), não na varredura. Fix fechado: **escrita coalescida
+  em background** (intervalo `WRITE_INTERVAL`, processo único `run!`) + `flush!` síncrono
+  para testes/exit; `store` passa a atualizar só em memória. Preteridos: journal
+  append-only com compactação (mais complexo); reduzir tamanho do cache (LRU) sem
+  atacar o custo por escrita; só aumentar `RATING_SCAN_CAP` (não ataca o gargalo).
+  Escopo limitado ao `PersistentJsonStore` (cache HTTP) — o `PokemonRatingCache` tem o
+  mesmo padrão mas o arquivo é ~20KB (não é o gargalo; anotar se desejado).
 
 ## 6. Plano TDD (passos)
 
@@ -151,7 +173,9 @@ que evita re-ratear (re-fetch de `detail` + `moves_for`) espécies já avaliadas
 | 2 | C2 — `max_candidates:` + fallback puro quando o cap/pool esgota antes de completar a banda | suíte verde + lint 0, commit `Passo 2:` |
 | 3 | C3 — `PokemonRatingCache` (novo): miss computa/grava, hit devolve sem re-fetch, TTL, persistência, `nil` sem cachear | suíte verde + lint 0, commit `Passo 3:` |
 | 4 | C4 — `BattleService` injeta `ratings:` (cache memoizado) + `RATING_SCAN_CAP`; banda do nível médio preservada | suíte verde + lint 0, commit `Passo 4:` |
-| 5 | **Docs:** REQUIREMENTS.md (roadmap — P2 executado), SESSIONS.md (0050 fase 2 + próximas), draft-auto-battler.md (P2 executado) | suíte verde + lint 0, commit `Passo 5:` |
+| 5 | **Docs (fase 2 original):** REQUIREMENTS.md (roadmap — P2 executado), SESSIONS.md (0050 fase 2 + próximas), draft-auto-battler.md (P2 executado) | suíte verde + lint 0, commit `Passo 5:` |
+| 6 | **S3/C4-b — `PersistentJsonStore`: store só em memória + writer background (intervalo) + `flush!`; testes `background: false` + `flush!`** | suíte verde + lint 0, commit `Passo 6:` |
+| 7 | **Docs do S3:** sessão 0050 (seção 7 reaberta + observações com benchmark), REQUIREMENTS (limitação perf marcada executada no C4-b), SESSIONS, draft-auto-battler (diagnóstico write-through) | suíte verde + lint 0, commit `Passo 7:` |
 | — | **Fase 2 concluída** → **PARAR** para validação do usuário (fase 3). |
 
 ## 7. Validação (executada pelo usuário)
@@ -163,12 +187,19 @@ fechamento do usuário. Não reabrir critério (S3) até a análise diferida. En
 7 novos pedidos foram **anotados** em `draft-auto-battler.md` (RNF-04 — não abrem escopo
 aqui).*
 
+**Reaberta via S3 em 2026-08-25** (usuário: "vamos trabalhar nessa melhoria já agora").
+O C4 foi **reaberto e estendido** (seção 4, C4-b): o benchmark apontou o gargalo no
+**write-through do `PersistentJsonStore`** (1ª chamada ~55-63s; store de 260MB ~1.45s/
+miss). Fix em andamento (passos 6-7). *Critérios C1–C3 verdes; C4 original pendente —
+C4-b define a resolução da perf.*
+
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
 | C1 varredura paralela da banda | `./scripts/test test/opponent_generator_test.rb` | — (domínio puro) | pendente |
 | C2 cap + fallback puro | `./scripts/test test/opponent_generator_test.rb` | — (domínio puro) | pendente |
 | C3 cache de rating | `./scripts/test test/pokemon_rating_cache_test.rb` | — (componente puro) | pendente |
-| C4 ratings + cap no service, banda preservada | `./scripts/test test/battle_service_test.rb` | `GET /battle` 1ª chamada: usuário reportou **ainda lento** — análise diferida | pendente |
+| C4 ratings + cap no service, banda preservada | `./scripts/test test/battle_service_test.rb` | `GET /battle` 1ª chamada: usuário reportou **ainda lento** (55-63s medido) — reaberto (S3) | nok |
+| C4-b escrita do cache HTTP coalescida | `./scripts/test test/persistent_json_store_test.rb` | `GET /battle` 1ª chamada cai de ~60s para rede-bound (~10s?) | pendente |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.
@@ -181,9 +212,13 @@ aqui).*
   (montagem dos escolhidos) segue usando `detail` — já coberto pelo cache P1.
 - O duplo fetch de `moves_for` na montagem do oponente (caminho D da anotação) ficou de
   fora — anotar no draft se o usuário quiser.
-- **Feedback do usuário em 2026-08-25:** `GET /battle` **ainda lento** (perf diferida —
-  análise com calma depois). Suspeita nova a investigar: com o pool não filtrado (inclui
-  evoluções/lendários — ver OPP-1/OPP-2 no draft), a varredura da banda avalia candidatos
-  fora de jogo; o cap 256 e o cache de rating podem não estar atacando o gargalo real
-  (re-fetch `moves_for` dos escolhidos? varredura ainda serial por outra via?). Não reabre
-  critério agora (S3) — registrado como pendência.
+- **Benchmark 2026-08-25 (via curl, app de pé na 3000):** `GET /battle` com time de 6,
+  nível 1 (banda F-D): usuário 1 → 1ª **55.45s** / 2ª **0.07s**; usuário 2 → 1ª
+  **62.80s** / 2ª **0.013s**. `pokeapi_cache.json` (260MB) cresceu ~5-7MB por batalha
+  (~50-100 misses de detail). Medido no container: store = generate 0.98s + write 0.47s
+  ≈ **1.45s/miss** (arquivo 260MB, 3788 entradas); boot parse ~3s. Conclusão: o gargalo
+  é o **write-through do `PersistentJsonStore`** (reescreve o arquivo inteiro sob
+  `@store_mutex` a cada miss), não a varredura — o cap 256 + rating cache resolvem a 2ª
+  batalha, mas a 1ª paga as reescritas. Fix fechado no C4-b (S3). Resíduos anotados:
+  boot parse 260MB (~3s) e o `PokemonRatingCache` com o mesmo padrão de escrita (arquivo
+  ~20KB, não é gargalo).
