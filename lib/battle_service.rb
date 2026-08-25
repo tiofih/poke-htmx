@@ -8,6 +8,7 @@ require_relative "move"
 require_relative "opponent_generator"
 require_relative "parallelizer"
 require_relative "pokemon_rating"
+require_relative "pokemon_rating_cache"
 require_relative "progression_repository"
 require_relative "reward_rule"
 require_relative "team_repository"
@@ -16,6 +17,8 @@ require_relative "wallet_repository"
 require_relative "inventory_repository"
 
 module BattleServicePreparation
+  RATING_SCAN_CAP = 256
+
   private
 
   def player_team(user_id, members)
@@ -91,9 +94,9 @@ module BattleServicePreparation
   def opponent_options(band)
     {
       parallelizer: Parallelizer,
-      rater: ->(pokemon, moves) { PokemonRating.rate(pokemon, moves: moves)[:tier] },
-      moves_fetcher: api.method(:moves_for),
-      band: band
+      ratings: ->(name) { @rating_cache.rating_for(name) },
+      band: band,
+      max_candidates: RATING_SCAN_CAP
     }
   end
 
@@ -289,6 +292,7 @@ class BattleService
     @wallet = dependencies[:wallet]
     @inventory = dependencies[:inventory]
     @opponent_rng = dependencies[:opponent_rng] || -> { Random.new }
+    @rating_cache = dependencies[:rating_cache] || default_rating_cache
   end
 
   def prepare(user_id)
@@ -325,6 +329,14 @@ class BattleService
 
   def api
     @api_provider.call
+  end
+
+  def default_rating_cache
+    PokemonRatingCache.new(
+      path: ENV["POKERATING_CACHE_PATH"] || "tmp/pokemon_rating_cache.json",
+      fetcher: api.method(:detail),
+      moves_fetcher: api.method(:moves_for)
+    )
   end
 
   def build_engine(player, opponent, user_id)

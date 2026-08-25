@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
+require "tmpdir"
 require_relative "test_helper"
 require_relative "test_support"
 require_relative "../lib/battle_registry"
 require_relative "../lib/battle_repository"
 require_relative "../lib/battle_service"
 require_relative "../lib/inventory_repository"
+require_relative "../lib/pokemon_rating_cache"
 require_relative "../lib/progression_repository"
 require_relative "../lib/team_repository"
 require_relative "../lib/wallet_repository"
@@ -134,9 +136,10 @@ class BattleServiceTest < Minitest::Test
     TestDatabase.clear_team!
     @team = TeamRepository.new
     @progression = ProgressionRepository.new
+    @cache_dir = Dir.mktmpdir("pokedex-ratings")
   end
 
-  def build_service(api, opponent_rng: nil)
+  def build_service(api, opponent_rng: nil, rating_cache: nil)
     deps = {
       api: -> { api },
       battles: BattleRegistry.new,
@@ -144,7 +147,12 @@ class BattleServiceTest < Minitest::Test
       progression: @progression,
       battle_history: BattleRepository.new,
       wallet: WalletRepository.new,
-      inventory: InventoryRepository.new
+      inventory: InventoryRepository.new,
+      rating_cache: rating_cache || PokemonRatingCache.new(
+        path: File.join(@cache_dir, "ratings.json"),
+        fetcher: api.method(:detail),
+        moves_fetcher: api.method(:moves_for)
+      )
     }
     deps[:opponent_rng] = opponent_rng if opponent_rng
     BattleService.new(dependencies: deps)
@@ -282,5 +290,30 @@ class BattleServiceTest < Minitest::Test
                  "nivel 1 (banda F-D) prioriza oponentes fracos"
     assert_equal 2, (TieredApi::STRONG & opponent_names).size,
                  "fallback completa o time com o restante do pool"
+  end
+
+  def test_build_opponent_rates_pool_names_through_rating_cache
+    rating_cache = Class.new do
+      attr_reader :queried
+
+      def initialize(api)
+        @api = api
+        @queried = []
+      end
+
+      def rating_for(name)
+        @queried << name
+        TieredApi::STRONG.include?(name) ? :S : :F
+      end
+    end.new(TieredApi.new)
+    service = build_service(TieredApi.new, rating_cache: rating_cache)
+    add_team_for("user-1")
+    grant_xp_to("user-1", 12_000)
+
+    result = service.prepare("user-1")
+
+    refute_empty rating_cache.queried, "varredura da banda passa pelo rating cache"
+    assert_equal TieredApi::STRONG.sort, result[:engine].teams[1].map(&:name).sort,
+                 "banda A-S preservada via ratings provider"
   end
 end
