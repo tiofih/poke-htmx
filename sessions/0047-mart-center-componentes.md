@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-24 |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — passos 1–3 verdes (suíte 724/2329, lint 0) |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-24 |
 
 ---
 
@@ -145,21 +145,22 @@ saldo < preço). Sem rotas/páginas novas.
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Concluída em 2026-08-24 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 — Center em partial com custo antecipado | `./scripts/test test/team_routes_test.rb` | Abrir `/`, com jornada iniciada e poke com HP baixo: painel do time mostra HP atual/máx + "Custo total" antes de curar | |
-| C2 — Curar desabilitado quando curado/insuficiente | `./scripts/test test/team_routes_test.rb` | Com time curado ou saldo baixo, botão Curar aparece desabilitado | |
-| C3 — Mart em partial com qtd comprável | `./scripts/test test/mart_routes_test.rb` | Abrir `/` com saldo: item mostra preço × quantidade comprável (ex. potion ×5) | |
-| C4 — Comprar desabilitado quando saldo < preço | `./scripts/test test/mart_routes_test.rb` | Com saldo < 20, botão de compra desabilitado | |
-| C5 — Heal/buy inalterados | `./scripts/test` | Curar e comprar funcionam; notices e saldo corretos | |
+| C1 — Center em partial com custo antecipado | `test/team_routes_test.rb` (`test_center_fragment_shows_heal_cost_upfront` + regressão `test_team_fragment_shows_poke_center_with_hp_and_heal_button`) | `/`: com jornada + poke de HP baixo, painel do time mostra HP atual/máx + custo total antes de curar | **ok** |
+| C2 — Curar desabilitado quando curado/insuficiente | `test/team_routes_test.rb` (`test_center_fragment_disables_heal_when_cured`, `test_center_fragment_disables_heal_when_insufficient_balance`) | `/`: time curado ou saldo baixo → botão Curar desabilitado | **ok** |
+| C3 — Mart em partial com qtd comprável | `test/mart_routes_test.rb` (`test_mart_fragment_shows_affordable_quantity` + regressão `test_mart_fragment_shows_catalog_inventory_and_balance`) | `/` com saldo: item mostra preço × qtd comprável (ex. "Pocao — 20 ×5") | **ok** |
+| C4 — Comprar desabilitado quando saldo < preço | `test/mart_routes_test.rb` (`test_mart_fragment_disables_buy_when_insufficient_balance`) | `/` com saldo < 20: botão de compra desabilitado | **ok** |
+| C5 — Heal/buy inalterados | `test/team_routes_test.rb` (`test_team_heal_cures_team_and_charges_wallet`) + `test/mart_routes_test.rb` (`test_mart_buy_debits_wallet_and_adds_to_inventory`) + suíte completa (724/2329, lint 0) | curar e comprar funcionam; notices e saldo corretos | **ok** |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.
 
 ## 8. Observações
 
+- **Validada pelo usuário em 2026-08-24 (C1–C5 ok, sem ajustes S3).**
 - `test_team_fragment_omits_heal_button_for_empty_team` e o gate de jornada
   (`test_heal_blocked_before_journey`, `test_mart_buy_blocked_before_journey`)
   seguem válidos como regressão — as guardas `@journey_started`/`@team.empty?` no

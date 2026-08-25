@@ -520,8 +520,8 @@
 
 ### JN-4. Componentes de Poke Mart e Poke Center
 
-> **Executada na sessão 0047 (2026-08-24) — implementação concluída (passos 1–2,
-> suíte 724/2329, lint 0); aguardando validação do usuário.** Blocos de
+> **Executada na sessão 0047 (2026-08-24) e VALIDADA pelo usuário em 2026-08-24.**
+> Suíte 724/2329, lint 0. Blocos de
 > `views/team.erb` viram partials reutilizáveis `_mart.erb`/`_center.erb` no painel
 > do time (`#team-view`), **sem rotas/páginas novas**. **Cura (HP × custo):** HP
 > atual/máx por membro + **custo total antecipado** via `HealService#preview_cost`
