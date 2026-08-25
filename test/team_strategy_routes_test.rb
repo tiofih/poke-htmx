@@ -122,6 +122,58 @@ class ServerTeamItemTest < Minitest::Test
     assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "desequipar repoe ao estoque"
   end
 
+  def test_equip_and_clear_five_potions_restores_full_stock
+    add_team("user-a", [["pikachu", 25], ["bulbasaur", 1], ["charmander", 4], ["squirtle", 7], ["eevee", 133]])
+    @inventory.add("user-a", "potion", 5)
+
+    @repository.all("user-a").each do |poke|
+      post "/team/#{poke.id}/item", { item_name: "potion" }, user_session("user-a")
+    end
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", "potion"), "5 equipagens debitam 5"
+
+    @repository.all("user-a").each do |poke|
+      post "/team/#{poke.id}/item", { item_name: "" }, user_session("user-a")
+    end
+
+    assert_equal 5, TestDatabase.inventory_quantity("user-a", "potion"),
+                 "desequipar todos repoe as 5 pocoes"
+  end
+
+  def test_team_manage_shows_debited_stock_after_equip
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 5)
+
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Pocao ×4", "estoque exibido reflete o debito"
+    refute_includes last_response.body, "Pocao ×5", "nao mostra o estoque antigo"
+  end
+
+  def test_team_manage_shows_restored_stock_after_clear
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 1)
+
+    post "/team/#{pikachu_id}/item", { item_name: "potion" }, user_session("user-a")
+    post "/team/#{pikachu_id}/item", { item_name: "" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Pocao ×1", "desequipar repoe e exibe no estoque"
+  end
+
+  def test_team_manage_shows_debited_stock_after_held_equip
+    @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "choice-band", 3)
+
+    post "/team/#{pikachu_id}/held-item", { item_name: "choice-band" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Choice Band ×2", "estoque exibido reflete o debito do seguravel"
+  end
+
   def test_post_team_item_of_other_users_member_is_noop
     @repository.add("user-a", pikachu_pokemon)
     @repository.add("user-b", bulbasaur_pokemon)

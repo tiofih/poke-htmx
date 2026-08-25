@@ -46,6 +46,11 @@ module ServerCommon
     @available_moves = data[:available_moves]
     @inventory = data[:inventory]
   end
+
+  def reload_manage_state
+    @team = settings.team.all(current_user)
+    @inventory = settings.inventory.all(current_user)
+  end
 end
 
 module ServerListActions
@@ -309,7 +314,7 @@ module ServerTeamItemActions
   def save_team_item
     member = team_manage_context(params[:id])
     @notice = settings.team_strategy.assign_item(current_user, member, params[:item_name].to_s)
-    @team = settings.team.all(current_user)
+    reload_manage_state
     erb :team_manage, layout: false
   end
 end
@@ -320,7 +325,7 @@ module ServerTeamHeldActions
   def save_team_held_item
     member = team_manage_context(params[:id])
     @notice = settings.team_strategy.assign_held_item(current_user, member, params[:item_name].to_s)
-    @team = settings.team.all(current_user)
+    reload_manage_state
     erb :team_manage, layout: false
   end
 end
