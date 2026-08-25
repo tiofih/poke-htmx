@@ -39,6 +39,15 @@ class WalletRepository
     balance(user_id)
   end
 
+  def set(user_id, amount)
+    connection.exec_params(
+      "INSERT INTO wallet (user_id, balance) VALUES ($1, $2) " \
+      "ON CONFLICT (user_id) DO UPDATE SET balance = EXCLUDED.balance, updated_at = now()",
+      [user_id, amount.to_i]
+    )
+    balance(user_id)
+  end
+
   private
 
   def connection

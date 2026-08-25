@@ -131,3 +131,28 @@ class WalletSpendTest < Minitest::Test
     assert_equal 100, TestDatabase.wallet_balance("user-b")
   end
 end
+
+class WalletSetTest < Minitest::Test
+  include WalletRepositoryTestHelpers
+
+  def test_set_creates_row_with_amount
+    assert_equal 200, @repository.set("user-a", 200)
+    assert_equal 200, TestDatabase.wallet_balance("user-a")
+  end
+
+  def test_set_overwrites_existing_balance
+    @repository.grant("user-a", 500)
+
+    assert_equal 200, @repository.set("user-a", 200)
+    assert_equal 200, TestDatabase.wallet_balance("user-a")
+  end
+
+  def test_set_is_isolated_per_user
+    @repository.grant("user-a", 500)
+    @repository.grant("user-b", 50)
+    @repository.set("user-a", 200)
+
+    assert_equal 200, TestDatabase.wallet_balance("user-a")
+    assert_equal 50, TestDatabase.wallet_balance("user-b")
+  end
+end

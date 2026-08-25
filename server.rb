@@ -22,6 +22,7 @@ require_relative "lib/battle_service"
 require_relative "lib/team_service"
 require_relative "lib/user_state_repository"
 require_relative "lib/journey_service"
+require_relative "db/seeds/saldo_inicial"
 require_relative "lib/parallelizer"
 require_relative "lib/fighter_presenter"
 require_relative "lib/battle_log_presenter"
@@ -345,6 +346,19 @@ module ServerTeamHeldActions
   end
 end
 
+module ServerJourneyActions
+  private
+
+  def restart_journey
+    settings.team_strategy.reset(current_user)
+    settings.wallet.set(current_user, SaldoInicial::INITIAL_BALANCE)
+    settings.battle.invalidate(current_user)
+    @notice = "Jornada recomeçada. Monte seu time inicial de 6 Pokémon."
+    @notice_kind = :info
+    render_team_fragment_with_notice
+  end
+end
+
 module ServerBattleActions
   private
 
@@ -542,6 +556,16 @@ module MartRoutes
   end
 end
 
+module JourneyRoutes
+  def self.registered(app)
+    register_restart(app)
+  end
+
+  def self.register_restart(app)
+    app.post("/journey/restart") { restart_journey }
+  end
+end
+
 module ServerHistoryActions
   private
 
@@ -676,12 +700,14 @@ class Server < Sinatra::Base
   include ServerTeamActions
   include ServerTeamItemActions
   include ServerTeamHeldActions
+  include ServerJourneyActions
   include ServerBattleActions
   include ServerHistoryActions
 
   register PokemonRoutes
   register TeamRoutes
   register MartRoutes
+  register JourneyRoutes
   register BattleRoutes
   register HistoryRoutes
   register ErrorHandling

@@ -71,6 +71,10 @@ class TeamService
     @team.remove(user_id, id)
   end
 
+  def reset(user_id)
+    @team.all(user_id).each { |member| remove_member(user_id, member.id) }
+  end
+
   private
 
   def restore_items(user_id, member)
