@@ -243,6 +243,7 @@ class PokeApiHttpTest < Minitest::Test
       end
 
       assert_equal 25, api.find("pikachu").number
+      api.flush!
 
       Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed }
       reloaded = PokeApiHttp.new(cache_path: path)

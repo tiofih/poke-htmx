@@ -48,6 +48,10 @@ class PokeApiHttp
     @store ? @store.get(url) : transport_get(url)
   end
 
+  def flush!
+    @store&.flush!
+  end
+
   private
 
   def transport_get(url)

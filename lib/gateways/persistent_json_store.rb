@@ -6,15 +6,16 @@ require "json"
 
 class PersistentJsonStore
   DEFAULT_TTL = 7 * 24 * 60 * 60
+  DEFAULT_WRITE_INTERVAL = 30
 
-  def initialize(path:, ttl: DEFAULT_TTL, clock: nil)
+  def initialize(path:, ttl: DEFAULT_TTL, clock: nil, background: true,
+                 write_interval: DEFAULT_WRITE_INTERVAL)
     @path = path
     @ttl = ttl
     @clock = clock || -> { Process.clock_gettime(Process::CLOCK_REALTIME) }
-    @entries = load_file
-    @locks = {}
-    @keys_mutex = Mutex.new
-    @store_mutex = Mutex.new
+    @write_interval = write_interval
+    setup_state
+    setup_background if background
   end
 
   def get(url)
@@ -28,7 +29,52 @@ class PersistentJsonStore
     end
   end
 
+  def flush!
+    snapshot = nil
+    @store_mutex.synchronize do
+      if @dirty
+        snapshot = @entries.dup
+        @dirty = false
+      end
+    end
+    write_snapshot(snapshot) if snapshot
+  end
+
   private
+
+  def setup_state
+    @entries = load_file
+    @locks = {}
+    @keys_mutex = Mutex.new
+    @store_mutex = Mutex.new
+    @write_mutex = Mutex.new
+    @dirty = false
+  end
+
+  def setup_background
+    start_writer
+    at_exit { flush! }
+  end
+
+  def store(url, value)
+    @store_mutex.synchronize do
+      @entries[url] = { fetched_at: @clock.call, value: value }
+      @dirty = true
+    end
+  end
+
+  def start_writer
+    Thread.new do
+      loop do
+        sleep(@write_interval)
+        flush!
+      end
+    end
+  end
+
+  def write_snapshot(entries)
+    @write_mutex.synchronize { write_file(entries) }
+  end
 
   def transport_get(url)
     response = Faraday.get(url)
@@ -47,13 +93,6 @@ class PersistentJsonStore
     @store_mutex.synchronize { @entries[url] }
   end
 
-  def store(url, value)
-    @store_mutex.synchronize do
-      @entries[url] = { fetched_at: @clock.call, value: value }
-      write_file
-    end
-  end
-
   def lock_for(url)
     @keys_mutex.synchronize { @locks[url] ||= Mutex.new }
   end
@@ -69,10 +108,10 @@ class PersistentJsonStore
     {}
   end
 
-  def write_file
+  def write_file(entries)
     FileUtils.mkdir_p(File.dirname(@path))
     temporary = "#{@path}.tmp"
-    File.write(temporary, JSON.generate(@entries))
+    File.write(temporary, JSON.generate(entries))
     File.rename(temporary, @path)
   end
 end
