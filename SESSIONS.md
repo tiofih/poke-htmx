@@ -204,16 +204,21 @@ Curar desabilitado quando já curado ou saldo insuficiente) e compra completada
 preço). Sem rotas/páginas novas — `team_hp.erb` absorvido pelo `_center.erb`
 (removido). Próximo: organizar o resto (JN-5, J2, J4, D4 e P2) — a critério do usuário.
 
-**Sessão 0048 (JN-5 — gameloop: circuito explícito por CTAs) refinada em 2026-08-25
-e implementada em 2026-08-25** (passos 1–2, suíte 727/2344, lint 0; decisão do usuário:
-**fluxo guiado por CTAs**, sem páginas/rotas novas): o circuito montagem → batalha →
-Poke Center/Poke Mart → repete vira explícito na navegação — ao terminar a batalha, o
-painel de fim mostra CTAs para Poke Center e Poke Mart (levam à Lista `/`, onde
-`#team-view` mostra os partials `_center.erb`/`_mart.erb`) além do botão "Novo
-confronto" (mantido); no painel do time pós-jornada, um CTA **Batalhar** (`/battle`)
-fecha o circuito. `nav` permanece `Lista/Batalha/Histórico` (sem reordenação).
-Critérios C1–C5 e plano TDD fechados (`sessions/0048-jn5-gameloop.md`); suíte verde,
-lint 0 — aguardando validação do usuário.
+**Sessão 0048 (JN-5 — gameloop: circuito explícito por CTAs) refinada em 2026-08-25,
+implementada em 2026-08-25 e VALIDADA pelo usuário em 2026-08-25** (passos 1–2, suíte
+727/2344, lint 0; C1–C5 ok; decisão do usuário: **fluxo guiado por CTAs**, sem
+páginas/rotas novas): o circuito montagem → batalha → Poke Center/Poke Mart → repete
+vira explícito na navegação — ao terminar a batalha, o painel de fim mostra CTAs para
+Poke Center e Poke Mart (levam à Lista `/`, onde `#team-view` mostra os partials
+`_center.erb`/`_mart.erb`) além do botão "Novo confronto" (mantido); no painel do time
+pós-jornada, um CTA **Batalhar** (`/battle`) fecha o circuito. `nav` permanece
+`Lista/Batalha/Histórico` (sem reordenação). Ver
+`sessions/0048-jn5-gameloop.md`. **Anotações 2026-08-25 (RNF-04):** Center/Mart como
+janelas flutuantes + gerência de golpes/itens (4 selects); itens de evolução no Mart
+aleatórios por rodada; custo de montagem de time; "batalhar" resolve a batalha inteira;
+animações nos ataques; bug "novo confronto" repete oponente (seed determinístico por
+user). Próximo: organizar o resto (J2, J4, D4 e P2) + as novas anotações — a critério
+do usuário.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -284,7 +289,7 @@ lint 0 — aguardando validação do usuário.
 | 0045 | JN-3 — itens de uso único por Pokémon: regra de **1 uso de item curativo por Pokémon por batalha** (`@items_used_by_member` no `BattleEngine`, bloqueio de novo uso do mesmo membro — pool comum e item atribuído) + badge "já usou item" por membro no painel do lutador | Concluída | Done (passos 1–3, suíte 701/2222, lint 0, validado em 2026-08-24; JN-3-B anotado — equipamento por quantidade do estoque) |
 | 0046 | JN-3-B — equipamento por quantidade do estoque: equipar **debita**, desequipar **repõe**, trocar **repõe o antigo e debita o novo**, re-equipar o mesmo item **não debita de novo**; item atribuído consumido em batalha **não debita de novo** e limpa o `assigned_item`; UI com quantidade livre + option `disabled` ×0 | Concluída | Done (passos 1–3 + correções de UI na validação, suíte 718/2294, lint 0, validado em 2026-08-24; resíduo anotado — scroll ainda pula p/ baixo) |
 | 0047 | JN-4 — componentes de Poke Mart e Poke Center: blocos de `views/team.erb` viram partials reutilizáveis (`_mart.erb`/`_center.erb`) no painel do time, com cura completada (HP atual/máx + custo total antecipado, Curar desabilitado quando curado/insuficiente) e compra completada (preço × quantidade comprável, botão desabilitado quando saldo < preço); sem rotas/páginas novas | Concluída | Done (passos 1–3, suíte 724/2329, lint 0, validado em 2026-08-24; `team_hp.erb` removido) |
-| 0048 | JN-5 — gameloop: circuito explícito por CTAs (fluxo guiado) — fim de batalha mostra CTAs Poke Center/Poke Mart (levam à Lista `/`) + "Novo confronto" mantido; painel do time pós-jornada ganha CTA "Batalhar" (`/battle`); nav permanece Lista/Batalha/Histórico; sem páginas/rotas novas | Implementação | Passos 1–2 verdes (suíte 727/2344, lint 0); aguardando validação do usuário |
+| 0048 | JN-5 — gameloop: circuito explícito por CTAs (fluxo guiado) — fim de batalha mostra CTAs Poke Center/Poke Mart (levam à Lista `/`) + "Novo confronto" mantido; painel do time pós-jornada ganha CTA "Batalhar" (`/battle`); nav permanece Lista/Batalha/Histórico; sem páginas/rotas novas | Concluída | Done (passos 1–2, suíte 727/2344, lint 0, validado em 2026-08-25; anotações RNF-04 registradas) |
 
 ## Estrutura do arquivo de sessão
 

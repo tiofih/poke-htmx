@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25 |
 | Implementação | **Concluída** — passos 1–2 verdes (suíte 727/2344, lint 0) |
-| Validação | **Pendente** (executada pelo usuário) |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-25 |
 
 ---
 
@@ -143,19 +143,18 @@ como no JN-4).
 
 ## 7. Validação (executada pelo usuário)
 
-> **Pendente** — a ser preenchida pelo usuário após a implementação (S2: uma linha por
-> critério).
+**Concluída em 2026-08-25 — validada pelo usuário** *(S2: uma linha por critério).*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 — Fim de batalha com CTAs do circuito | `test/battle_routes_test.rb` (`test_battle_end_shows_gameloop_ctas` + regressão `test_battle_end_shows_winner_and_reset_button`) | terminar uma batalha → painel de fim mostra Poke Center/Poke Mart + "Novo confronto" | — |
-| C2 — CTAs levam à Lista e "Novo confronto" permanece | `test/battle_routes_test.rb` (assert `href="/"` + `class="gameloop-cta"` + "Novo confronto") | clicar "Poke Center" → painel do time (`/`) com `_center.erb`; "Novo confronto" segue funcionando | — |
-| C3 — CTA "Batalhar" pós-jornada | `test/team_routes_test.rb` (`test_team_panel_shows_battle_cta_after_journey`) | `/` pós-jornada → painel do time mostra "Batalhar" | — |
-| C4 — CTA "Batalhar" ausente pré-jornada | `test/team_routes_test.rb` (`test_team_panel_omits_battle_cta_before_journey`) | time < 6 → painel sem "Batalhar" | — |
-| C5 — Nav/rotas inalterados | regressões `test_battle_page_renders_full_page_with_battle_view`, `test_team_page_is_removed_and_returns_404_without_htmx` + suíte completa (724+/2329+, lint 0) | circuito completo navegável na UI (batalha → curar/comprar → novo confronto) | — |
+| C1 — Fim de batalha com CTAs do circuito | `test/battle_routes_test.rb` (`test_battle_end_shows_gameloop_ctas` + regressão `test_battle_end_shows_winner_and_reset_button`) | terminar uma batalha → painel de fim mostra Poke Center/Poke Mart + "Novo confronto" | **ok** |
+| C2 — CTAs levam à Lista e "Novo confronto" permanece | `test/battle_routes_test.rb` (assert `href="/"` + `class="gameloop-cta"` + "Novo confronto") | clicar "Poke Center" → painel do time (`/`) com `_center.erb`; "Novo confronto" segue funcionando | **ok** |
+| C3 — CTA "Batalhar" pós-jornada | `test/team_routes_test.rb` (`test_team_panel_shows_battle_cta_after_journey`) | `/` pós-jornada → painel do time mostra "Batalhar" | **ok** |
+| C4 — CTA "Batalhar" ausente pré-jornada | `test/team_routes_test.rb` (`test_team_panel_omits_battle_cta_before_journey`) | time < 6 → painel sem "Batalhar" | **ok** |
+| C5 — Nav/rotas inalterados | regressões `test_battle_page_renders_full_page_with_battle_view`, `test_team_page_is_removed_and_returns_404_without_htmx` + suíte completa (724+/2329+, lint 0) | circuito completo navegável na UI (batalha → curar/comprar → novo confronto) | **ok** |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
-> e obter nova aprovação do usuário.
+> e obter nova aprovação do usuário. Nenhum ajuste S3 nesta validação.
 
 ## 8. Observações
 
@@ -179,3 +178,13 @@ como no JN-4).
   `draft-auto-battler.md` e o roadmap.
 - Próximas da fila (anotadas): J2 (personalização), J4 (identidade legível), D4 (draft
   temático) e P2 (perf da 1ª batalha ~2min).
+- **Validada pelo usuário em 2026-08-25 (C1–C5 ok, sem ajustes S3).**
+- **4 ideias novas anotadas em 2026-08-25 (durante a validação, fora do fluxo —
+  RNF-04):** (1) **incluir mais itens como pedras e outros itens de evolução** que podem
+  aparecer no Mart **aleatoriamente por rodada**; (2) **sistema de custo para montagem
+  de time** — pokémons fortes mais caros, fracos mais baratos, e os com restrição de
+  evolução (pedras/itens específicos) muito baratos ou gratuitos; (3) **mudar o sistema
+  de rodadas** — ao apertar em "batalhar", cada ação ocorre **até o fim da batalha**
+  sem precisar clicar de novo; (4) **adicionar animações aos ataques** de cada pokémon,
+  indicando de onde saiu e para qual foi. Ver `draft-ui-ux.md` §6 / `draft-auto-battler.md`
+  e o roadmap.

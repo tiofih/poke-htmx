@@ -635,3 +635,57 @@
 - **Impacto:** nova fronteira de transporte além do htmx; cruza com JN-5 (gameloop) e
   Eco (loja/cura). O motor determinístico (B3/D1) facilita replay/teste de agentes.
 - **Aguarda sessão (RNF-04).**
+
+---
+
+## Anotações do usuário — 2026-08-25 (durante a validação da 0048)
+
+> **Fora do fluxo (RNF-04).** 4 ideias novas, **não refinadas** — viram sessão própria
+> após a 0048 concluir/validar, a critério do usuário. Cruzam com Eco (moeda/Mart),
+> D4 (draft temático), B3 (motor) e C1 (batalha por htmx).
+
+### UX-1. Poke Center / Poke Mart como janelas flutuantes + gerência de golpes/itens
+
+> Ver `draft-ui-ux.md` §6 (anotadas na mesma ocasião). Center/Mart como **modais** em
+> vez de levar à tela de lista/time; estender para **editar golpes no Center** e
+> **gerenciar itens no Mart**; **4 selects** para os golpes (reestruturar o
+> `team_manage`).
+
+### M1. Itens de evolução no Poke Mart (pedras e outros) — aparecem aleatoriamente por rodada
+
+- **Ideia:** incluir **mais itens** (pedras de evolução — fire/water/thunder/leaf
+  stone etc. — e outros itens de evolução específicos) no **Poke Mart**, com **oferta
+  aleatória por rodada** (rotatividade: nem todos os itens sempre disponíveis; o
+  catálogo muda a cada rodada/confronto).
+- **Pontos em aberto:** modelagem de pedra como item consumível por evolução
+  (`EvolutionRule` hoje é por nível — estender para item-gated); como o sorteio da
+  oferta interage com o nível do jogador/banda; preço das pedras; persistência da
+  oferta por rodada vs por usuário.
+
+### M2. Sistema de custo para montagem de time
+
+- **Ideia:** cada Pokémon tem um **custo** na montagem — **fortes mais caros, fracos
+  mais baratos**, e os com **restrição de evolução (pedras/itens específicos) muito
+  baratos ou gratuitos**. Balanceia o draft e a jornada (dá destino ao `PokemonRating`
+  do J3 — custo derivado do tier).
+- **Pontos em aberto:** fonte do custo (tier S–F × tipo × restrição de evolução);
+  onde entra o custo (na montagem inicial J1 / na troca de membros); orçamento
+  inicial do jogador; interação com a moeda Eco e com o draft temático (D4).
+
+### B5. "Batalhar" resolve a batalha inteira (fim das rodadas manuais)
+
+- **Ideia:** mudar o sistema de rodadas — ao apertar **"batalhar"**, **cada ação
+  ocorre até o fim da batalha**, sem precisar clicar de novo (execução automática até
+  o resultado; o log mostra a sequência). Oposta ao fluxo atual de clicar "Jogar" por
+  rodada.
+- **Pontos em aberto:** animação/escalonamento da resolução (instantânea vs passo a
+  passo com atraso); persistência de HP/estado entre rodadas (já existe — D2/Eco-2);
+  como isso interage com as recompensas (XP/dinheiro) no fim.
+
+### C2. Animações nos ataques
+
+- **Ideia:** **animar os ataques** de cada Pokémon na batalha, indicando **de onde
+  saiu e para qual foi** (projétil/efeito entre os painéis Seu Time ↔ Oponente).
+- **Pontos em aberto:** CSS/animação pura (preferência do projeto, sem lib JS) vs
+  técnica com htmx; dado de origem/alvo (o log do `BattleLogPresenter` já tem
+  atacante/golpe — falta o alvo explícito); acessibilidade (redução de movimento).
