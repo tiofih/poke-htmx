@@ -623,6 +623,13 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       evolução muito baratos/gratuitos; (5) **"batalhar" resolve a batalha inteira**
       (fim das rodadas manuais); (6) **animações nos ataques** (de onde saiu / para onde
       foi). Ver `draft-ui-ux.md` §6 e `draft-auto-battler.md` (anotações 2026-08-25).
+- [ ] **Ideias de encerramento 2026-08-25 (fora do fluxo — RNF-04):** (1) **exibir
+      ranking/custo dos pokes na lista** após implementar o custo por time (M2) — a
+      listagem mostra o custo/ranking (tier) de cada Pokémon para montar o time ciente
+      do preço; (2) **filtros além da busca por nome** — tipo, geração, custo, ranking
+      (combináveis com busca e paginação); (3) **alinhar a caixa da lista com a caixa do
+      time** (colunas da `/` com largura/altura/rolagem coerentes). Ver
+      `draft-auto-battler.md` (UX-2).
 
 ## Roadmap (executado em `SESSIONS.md`)
 

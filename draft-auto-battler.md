@@ -690,6 +690,21 @@
   técnica com htmx; dado de origem/alvo (o log do `BattleLogPresenter` já tem
   atacante/golpe — falta o alvo explícito); acessibilidade (redução de movimento).
 
+### UX-2. Custo/ranking na lista + filtros avançados + alinhamento das caixas (2026-08-25)
+
+> Anotações do encerramento do dia (RNF-04), dependentes do **custo de montagem de time**
+> (M2) e do ranking (J3).
+
+- **Exibir ranking/custo dos pokes na lista após implementar o custo por time:** quando
+  o **sistema de custo** (M2) entrar, a **listagem** deve mostrar o **custo/ranking** de
+  cada Pokémon (derivado do `PokemonRating`/tier), para o jogador montar o time sabendo
+  quanto custa cada um.
+- **Filtros além da busca por nome:** a lista hoje só filtra por nome (`q`). Serão
+  necessários filtros por **tipo, geração, custo e ranking** (e possivelmente
+  habilidade/moves) — UI de filtros combináveis com a busca e a paginação.
+- **Alinhar a caixa da lista com a caixa do time:** alinhar/equalizar o layout das duas
+  colunas da página `/` (lista vs painel do time) — largura/altura/rolagem coerentes.
+
 ### BUG-1. Oponente SEMPRE o mesmo por usuário (sem variedade nem escala)
 
 - **Bug (anotado 2026-08-25, confirmado no playtest 2):** toda batalha de um mesmo
