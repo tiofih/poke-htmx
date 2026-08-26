@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões ratificadas pelo usuário em 2026-08-26 (ajustes em D1/D2/D4) |
-| Implementação | **Pendente** (fase 2) |
-| Validação | **Pendente** (fase 3 — executada pelo usuário) |
+| Implementação | **Concluída** — passos 1–4 (commits 47bb5e5→15852f6→df3c23f→ddfbd3a), suíte 819/2701, lint 0 |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-26, todos os critérios ok |
 
 ---
 
@@ -229,18 +229,20 @@ O painel do time mostra custo/orçamento e o uso do teto de S.
 *(Fase 3 — executada pelo usuário. Registro por critério, um resultado por linha — S2.
 Ajuste de validação = alteração formal de critério com data e reaprovação — S3.)*
 
+**Validada pelo usuário em 2026-08-26.** Suíte 819/2701, lint 0.
+
 | Critério | Evidência automatizada | Evidência manual | Resultado |
 | --- | --- | --- | --- |
-| C1 (custo por tier da linha) | | | |
-| C2 (restrição paga metade) | | | |
-| C3 (checagem de orçamento) | | | |
-| C4 (teto de 3 S) | | | |
-| C5 (detecção no gateway) | | | |
-| C6 (tier da linha = máx. cadeia) | | | |
-| C7 (add dentro dos limites) | | | |
-| C8 (bloqueios com aviso) | | | |
-| C9 (remoção libera) | | | |
-| C10 (painel custo/orçamento/S) | | | |
+| C1 (custo por tier da linha) | `test_cost_by_line_tier` | — | ok |
+| C2 (restrição paga metade) | `test_restricted_evolution_costs_half` | — | ok |
+| C3 (checagem de orçamento) | `test_add_within_budget_allowed`, `test_add_over_budget_blocked` | — | ok |
+| C4 (teto de 3 S) | `test_s_limit_allows_three_and_blocks_fourth` | — | ok |
+| C5 (detecção no gateway) | `test_evolution_restricted_by_trigger` | — | ok |
+| C6 (tier da linha = máx. cadeia) | `test_cost_uses_highest_chain_tier` | — | ok |
+| C7 (add dentro dos limites) | `test_add_within_limits_updates_panel` | — | ok |
+| C8 (bloqueios com aviso) | `test_add_blocked_by_s_limit`, `test_add_blocked_by_budget` | — | ok |
+| C9 (remoção libera) | `test_remove_frees_budget_and_s_limit` | — | ok |
+| C10 (painel custo/orçamento/S) | `test_team_panel_shows_cost_budget_and_s_count` | Conferir visualmente com `./scripts/run` | ok |
 
 ## 8. Observações
 

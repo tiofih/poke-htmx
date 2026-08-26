@@ -333,23 +333,14 @@ decisão 0018), página de erro full-page estilizada, configurar htmx para swap 
 identidade/CSRF, estado transiente, `pry`, CI). Depois da 0054: as demais limitações
 técnicas e a fila J2/J4/D4/M2 — a critério do usuário.
 
-**Sessão 0055 (M2 — sistema de custo para montagem de time) refinada em 2026-08-26**
-(fase 1 concluída — critérios C1–C10 e plano TDD fechados em
-`sessions/0055-m2-custo-montagem.md`, decisões ratificadas pelo usuário com ajustes em
-D1/D2/D4): três regras combinadas em todo `POST /team` — **(1) teto duro de 3 Pokémon de
-linha S por time** (pedido do usuário; conta o tier da linha porque membros evoluem no
-meio da jornada — D2-A); **(2) custo pelo maior tier da cadeia evolutiva** ("evoluções
-muito fortes = mais caras"; tabela S=120/A=70/B=55/C=40/D=30/F=20, via
-`PokemonRatingCache` — o mesmo cache da varredura de oponentes), com **metade do custo**
-para restrição de evolução (pedra/item/troca — novo `evolution_restricted?` no gateway,
-reuso do trigger já parseado na cadeia); **(3) orçamento de montagem de 450 pontos**
-calibrado para permitir no máximo 3 S (3S+3F=420 cabe, 4S=480 não cabe), tudo como
-**limites derivados — sem débito no wallet/Eco** (D5). Painel do time mostra
-"Custo do time: X/450" e "S no time: n/3"; remoção libera teto e orçamento.
-**Fora de escopo:** UX-2 (custo/ranking na listagem + filtros — sessão futura), D4 (draft
-temático — desenho extensível), M1 (pedras no Mart) e a regra de remoção com vida zerada
-(candidato próprio). Depois da 0055: a fila J2/J4/D4, UX-2 e as demais limitações
-técnicas — a critério do usuário.
+**Sessão 0055 (M2 — sistema de custo para montagem de time) concluída e validada em
+2026-08-26** (suíte 819/2701, lint 0): custo pelo tier da linha evolutiva (S=120/A=70/
+B=55/C=40/D=30/F=20), metade para restrição de evolução, teto de 3 S + orçamento 450
+em todo `POST /team`, sem wallet. Painel do time mostra custo/orçamento/contagem de S.
+**Fora de escopo:** UX-2 (custo/ranking na listagem), D4 (draft temático), M1 (pedras no
+Mart), regra de vida zerada. **Próximas candidatas:** UX-2 (custo/ranking na listagem —
+depende do M2), bug Q5 (2 cliques no remover), fila J2/J4/D4 e limitações técnicas — a
+critério do usuário.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -427,7 +418,7 @@ técnicas — a critério do usuário.
 | 0052 | QA Q2+Q3+GL-2 — gate da jornada por tamanho do time (Q3: `started?` = `team >= 6`, flag deixa de liberar — remover abaixo de 6 re-bloqueia), gate de HP no `/battle` (GL-2: `battle_ready?` com poke cheio se nunca lutou, aviso+CTA "cure no Poke Center", CTA "Batalhar" escondido no painel, botão "Novo confronto" desabilitado na tela de fim após derrota) e itens devolvidos no remove (Q2: `TeamService#remove_member` repõe `assigned_item`/`held_item` ao estoque) | Concluída | Done (passos 1–3 + ajuste S3, suíte 770/2473, lint 0, validado em 2026-08-25; flag `user_state` vira vestigial — anotado no draft) |
 | 0053 | QA Q4+Q5+GL-1 — aviso de busca base-form, remoção em 1 clique e game over (vender/recomeçar): **Q4** hint informativo quando o termo só casa com não-base/starter (aponta a evolução base ou os destaques iniciais); **Q5** remoção robusta (investigação do "2 cliques" intermitente — hardening `hx-disabled-elt` no form + idempotência); **GL-1** game over = time todo zerado **e** saldo < custo da cura (`game_over?` no `JourneyService`), com venda de itens (`POST /mart/sell` + `SellPolicy` 50% do preço) e recomeço da jornada (`POST /journey/restart` — `TeamService#reset` em lote devolvendo itens + `WalletRepository#set` p/ saldo inicial 200) | Concluída | Done (passos 1–8 + ajustes S3, suíte 804/2623, lint 0, validado em 2026-08-25; game over também na tela de fim de batalha; fix do 500 no recomeçar — reset em lote; lista de venda sem `0×`; `#pokemon-list` refrescada via OOB após recomeçar) |
 | 0054 | Limitação técnica — erros com status real: handler global `error 500 do` passa a devolver **status 500** nas requisições **não-htmx** (monitoria/healthcheck/navegação direta) e mantém **200 + fragmento** (`views/error.erb`) nos swaps **htmx** (`htmx_request?`), preservando o log do erro original — fragmentos amigáveis 200 por rota (decisão 0018) e `halt 404` ficam fora | Concluída | Done (fase 2 + validação do usuário em 2026-08-26; C1/C2 por teste, C3-log `manual`; suíte 805/2630, lint 0) |
-| 0055 | M2 — sistema de custo para montagem de time: custo pelo **tier da linha evolutiva** (maior tier da cadeia, via `PokemonRatingCache` — S=120/A=70/B=55/C=40/D=30/F=20), **metade do custo** para restrição de evolução (novo `evolution_restricted?` no gateway), **teto duro de 3 Pokémon S por time** + **orçamento de montagem 450** validados em todo `POST /team` como **limites derivados — sem tocar o wallet/Eco**; painel do time mostra custo/orçamento/contagem de S — UX-2 (custo na listagem), D4, M1 e regra de vida zerada fora de escopo | Em andamento | Refinamento concluído em 2026-08-26 (decisões ratificadas pelo usuário — teto de 3 S, custo por linha evolutiva, orçamento 450); implementação pendente |
+| 0055 | M2 — sistema de custo para montagem de time: custo pelo **tier da linha evolutiva** (maior tier da cadeia, via `PokemonRatingCache` — S=120/A=70/B=55/C=40/D=30/F=20), **metade do custo** para restrição de evolução (novo `evolution_restricted?` no gateway), **teto duro de 3 Pokémon S por time** + **orçamento de montagem 450** validados em todo `POST /team` como **limites derivados — sem tocar o wallet/Eco**; painel do time mostra custo/orçamento/contagem de S | Concluída | Done (passos 1–4, suíte 819/2701, lint 0, validado em 2026-08-26; UX-2 e bug Q5 2 cliques anotados como candidatos) |
 
 ## Estrutura do arquivo de sessão
 
