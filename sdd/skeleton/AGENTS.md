@@ -28,6 +28,16 @@
   sessão — inclusive sessões fora da fila.
 - **S5 — `./scripts/check_docs` valida a consistência.** Confere `sessions/` ↔ tabela de
   progresso do `SESSIONS.md` ↔ "Próxima sessão". Rodar ao fechar refinamento e validação.
+- **S6 — Memória da sessão (handoff + gotchas) na validação.** Ao fechar a fase 3, o
+  implementador grava **handoff** (`memory_handoff_begin` — o que foi entregue, perguntas
+  em aberto, próximos passos) e **gotchas** levantados na sessão (`memory_write_page` em
+  `gotchas/`), sempre escopados ao projeto corrente — para o próximo agente partir com
+  contexto e as lições virarem conhecimento duradouro.
+- **S7 — Loop Implementador↔Revisor na fase 2c.** Ao fim da fase 2 (TDD), o **Revisor**
+  devolve um **veredito fechado** (`Aprovado` | `Requer ajuste` + severidade). Se não aprovado,
+  volta ao **Implementador**, que resolve os achados e re-commita; o Revisor re-revisa.
+  **Teto: 3 rodadas** — sem convergir, **escalar ao usuário (S3)**. Só o Implementador edita;
+  o Revisor nunca. Vai à validação (fase 3) apenas com veredito `Aprovado`.
 
 ## Ideias, melhorias e escopos grandes — anotar, refinar depois
 

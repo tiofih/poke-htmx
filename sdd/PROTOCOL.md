@@ -56,8 +56,12 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
   obter nova aprovação do usuário. Nunca aplicar "ajuste" sem esse registro.
 - Só então atualizar `REQUIREMENTS.md` (status) e `SESSIONS.md` (progresso + próxima)
   e commitar a validação.
+- **Memória fechada (S6):** ao finalizar a validação, gravar na memória do projeto
+  o **handoff** (`memory_handoff_begin` — o que a sessão entregou, perguntas em aberto,
+  próximos passos) e os **gotchas** levantados na sessão (`memory_write_page` em
+  `gotchas/`), sempre escopados ao projeto corrente. Nunca encerrar sem esse registro.
 
-## Regras do processo (S1–S5)
+## Regras do processo (S1–S7)
 
 - **S1 — Critérios apontam os testes que os provam.** Cada critério de aceite
   referencia o teste (arquivo/nome) que o prova; sem teste → `manual` explícito.
@@ -70,6 +74,16 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
   atualizados **no commit do refinamento** de toda sessão (inclusive fora de fila).
 - **S5 — `scripts/check_docs` valida a consistência.** Confere `sessions/` ↔ tabela de
   progresso ↔ "Próxima sessão". Rodar ao fechar refinamento e validação.
+- **S6 — Memória da sessão (handoff + gotchas) na validação.** Ao fechar a fase 3,
+  o implementador grava **handoff** (`memory_handoff_begin`) e **gotchas** levantados na
+  sessão (`memory_write_page` em `gotchas/`), escopados ao projeto corrente — para o
+  próximo agente partir com contexto e as lições virarem conhecimento duradouro.
+- **S7 — Loop Implementador↔Revisor na fase 2c.** Ao fim da fase 2 (TDD), o **Revisor**
+  revisa o diff e devolve um **veredito fechado**: `Aprovado` ou `Requer ajuste` (com
+  severidade Bloqueante/Ajuste). Se não aprovado, volta ao **Implementador**, que resolve
+  os achados e re-commita; o Revisor então re-revisa. **Teto: 3 rodadas** (3 passos do
+  Implementador) — sem convergência, **escalar ao usuário (S3)**. Só o Implementador edita;
+  o Revisor nunca edita. Só ir à validação (fase 3, do usuário) com veredito `Aprovado`.
 
 ## Escopo grande / ideias fora de fase
 
@@ -107,6 +121,8 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
 4. **Decisões de refinamento** — decisões fechadas com o usuário.
 5. **Validação** — tabela por critério (S2); suíte executada; ajustes (S3).
 6. **Observações** — impedimentos, dúvidas, próximo passo sugerido.
+7. **Gotchas / Lições (memória)** — lições e armadilhas levantadas na sessão, para
+   o registro de memória (S6).
 
 ## Verificação de consistência (S5)
 

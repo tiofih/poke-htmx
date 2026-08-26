@@ -138,6 +138,12 @@ for s in check_docs levantar-roadmap iniciar-sessao levantar-sessao \
   chmod +x "$TARGET/scripts/$s" 2>/dev/null || true
 done
 
+# --- agents de papel (subagents do opencode) ---
+mkdir -p "$TARGET/.opencode/agent"
+for a in refinador implementador-teste revisor playtester; do
+  install_file "$SKELETON_DIR/agents/$a.md" "$TARGET/.opencode/agent/$a.md"
+done
+
 # --- AGENTS.md: anexa as regras de workflow (idempotente) ---
 if [ "$DO_AGENTS" -eq 1 ]; then
   AGENTS="$TARGET/AGENTS.md"
