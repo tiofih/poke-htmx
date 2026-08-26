@@ -688,7 +688,7 @@ module ErrorHandling
     app.error 500 do
       logger.error "#{env['sinatra.error'].class}: #{env['sinatra.error'].message}" if env["sinatra.error"]
       @message = "Algo deu errado. Tente novamente."
-      status 200
+      status(htmx_request? ? 200 : 500)
       erb :error, layout: false
     end
   end

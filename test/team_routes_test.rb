@@ -420,9 +420,30 @@ class ServerTeamTest < Minitest::Test
     previous = Server.settings.api
     Server.set :api, raising_api
 
-    get "/team/manage", {}, user_session("user-a")
+    get "/team/manage", {}, htmx_session("user-a")
 
     assert last_response.ok?
+    assert_includes last_response.body, "Algo deu errado. Tente novamente."
+    refute_includes last_response.body, "<html"
+    refute_includes last_response.body, "boom inesperado"
+  ensure
+    Server.set :api, previous
+  end
+
+  def test_unexpected_error_returns_500_status_for_full_page_request
+    @repository.add("user-a", pikachu_pokemon)
+
+    raising_api = Class.new do
+      def learnable_moves(_number)
+        raise "boom inesperado"
+      end
+    end.new
+    previous = Server.settings.api
+    Server.set :api, raising_api
+
+    get "/team/manage", {}, user_session("user-a")
+
+    assert_equal 500, last_response.status
     assert_includes last_response.body, "Algo deu errado. Tente novamente."
     refute_includes last_response.body, "<html"
     refute_includes last_response.body, "boom inesperado"
