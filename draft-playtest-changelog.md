@@ -361,4 +361,293 @@ Ideias para reduzir o custo de cada sessão de playtest futura:
 4. **Q4 (busca base-form)** — UX de descoberta.
 5. **Q5 (remover 2x)** — intermitente, investigar com dados/evento htmx.
 
+---
+
+## Sessão 4 — 2026-08-26 (playtest focado em game design / UI / UX)
+
+> Execução: agente navegou o app real em Chrome (CDP) com gravação
+> `poke-playtest-s4` (61 frames em
+> `~/.config/browser-harness/agent-workspace/recordings/poke-playtest-s4`).
+> Foco explícito do usuário: **game design, UI e UX** (não caça de bugs — embora
+> bugs críticos tenham aparecido). Jogou a partir de uma conta seed
+> (`seed-shop`, posição 1 do ranking, saldo 200, time vazio).
+
+### 4.1 O que foi testado
+
+- Tela inicial `/` (Lista): 36 Pokémon (24 starters + 10 comuns + 2 extras),
+  paginação "Próxima", botão "Adicionar ao time" por card, mensagem
+  "Monte seu time inicial de 6 Pokémon para iniciar a jornada", painel
+  `#team-view` com contador "Time: 0/6".
+- Montagem do time: 6 cliques para adicionar (bulbasaur, charmander, squirtle,
+  chikorita, cyndaquil, totodile). Confirmação "Adicionado ao time." + slot
+  `#1..#6` com ▲/▼/Remover.
+- Painel de jornada (após 6/6): "Batalhar", "Poke Center" (Custo total, Curar),
+  "Poke Mart" (Pocao 20, Super Pocao 50, Hiper Pocao 100, Choice Band 80,
+  Choice Scarf 80 — todos com `×N` de estoque do Mart), "Gerenciar time".
+- Batalha `/battle`: 26+ rodadas clicando "Jogar", log textual cumulativo,
+  HP/PP por Pokémon, painel "Itens:", oponente nível 1 fixo.
+- Tela "Gerenciar time" (`hx-get="/team/manage"`): 3 forms por membro (golpes,
+  item, segurável), cada um com select + "Salvar …". Itens aparecem como
+  `Nenhum / Hiper Pocao ×0 / Pocao ×0 / Super Pocao ×0` (reflete estoque).
+- Poke Mart: comprou 1 Poção (saldo 200→180, estoque Mart ×10→×9, apareceu
+  `potion — 1×` + "Vender" no estoque do jogador).
+- Equipar item: selecionou "Pocao ×1" no #1 + "Salvar item" (estoque voltou
+  a ×0, sem mensagem de confirmação).
+- Poke Center: clicou "Curar" antes e depois da batalha — em ambos Custo total
+  = 0, sem feedback de ação.
+- Histórico `/history`: ranking global (2 entradas), "Sua posição: Posição 1
+  — Vitórias: 40 — Derrotas: 15", lista textual de últimas batalhas.
+
+### 4.2 Experiência (foco game design / UI / UX)
+
+- **Onboarding raso**: a tela inicial mostra uma lista de 36 Pokémon e um
+  contador "0/6" sem explicar *por que* 6, *o que* é jornada, *como* escolher
+  (por tipo? por stats?). Um novato sem contexto de Pokémon não tem critério
+  para escolher. O único guia é o nome do Pokémon.
+- **O momento "completei o time" é mudo**: ao adicionar o 6º, o contador
+  "Time: N/6" **desaparece** e o painel de jornada (Batalhar/Center/Mart)
+  aparece no lugar, sem transição nem "6/6 ✓ — jornada iniciada". Fui direto
+  para a batalha sem saber que o painel novo era o "próximo passo".
+- **A batalha é o ponto fraco do loop**: 26 cliques em "Jogar" para uma
+  batalha que **não terminou**. Não há botão "Jogar até o fim" / auto-resolver,
+  não há indicador de progresso ("3/6 oponentes restantes"), não há velocidade.
+  O auto-battler pede input manual a cada rodada — contradição com o gênero.
+- **O log de batalha mente**: o log diz "wattrel usou dual-wingbeat em bulbasaur,
+  2 de dano", mas o HP do bulbasaur cai de 45 para 3 em uma rodada onde o log
+  soma 5 de dano. O jogador **não pode confiar** no log para entender o que
+  aconteceu — e em um auto-battler onde a estratégia é pré-combate, o log é a
+  única forma de aprender com a derrota. Sem fidelity, não há aprendizado.
+- **Itens são uma camada invisível**: equipei uma Poção no bulbasaur via
+  Gerenciar — ela **sumiu do estoque da home** e **não apareceu em "Itens:" da
+  batalha**. Não sei se está equipada, se será usada, se perdi o item. A camada
+  de itens/seguráveis (que o conceito do jogo diz ser o coração da estratégia
+  pré-combate) é **opaca em todas as telas**.
+- **Estado do time é inconsistente entre telas**: a home/Center trata meu time
+  como **cheio** (Custo total 0) enquanto a batalha mostra o mesmo time
+  **massacrado** (5 KOs, totodile 22/50). O jogador não sabe qual estado é
+  "real" — e o Center gratuito (por ler estado cheio) vira exploit implícito.
+- **Economia sem tensão**: saldo inicial 200, Poção 20, Center "Custo total 0"
+  (quando lê estado cheio). Sem cura custosa, sem decisão de gastar vs.
+  economizar, sem razão para comprar Poção se Center é grátis. A camada
+  econômica não gera choices interessante.
+- **Ranking desmotivador desde o início**: "Sua posição: Posição 1 — Vitórias:
+  40" herdado do seed. O jogador começa no topo sem ter jogado — zera o senso
+  de progressão e o incentive de subir.
+- **Gerenciar time é repetitivo**: 3 forms salvar por membro (golpes, item,
+  segurável) = 18 botões para 6 membros. Cada mudança exige um clique de
+  salvar isolado; sem "Salvar tudo" ou auto-save no change.
+
+### 4.3 Achados de game design / UI / UX
+
+| # | Achado | Impacto | Área |
+| --- | --- | --- | --- |
+| P1 | **Transição muda ao completar 6/6** — contador "Time: N/6" desaparece e o painel de jornada aparece sem "6/6 ✓ — jornada iniciada"; parece que a UI quebrou | Confusão de onboarding | UX |
+| P2 | **Log de batalha não reflete dano real** — bulbasaur cai 45→3 HP em 1 rodada mas log soma só 5 dano; log é cosmético/fictional, não informa o jogador | Impossibilita aprendizado em auto-battler | Game design / UX |
+| P3 | **Batalha em impasse infinito** — 26+ rodadas em loop totodile (scratch 1) vs nincada (struggle-bug 2) sem cap de rodadas / condição de empate | Bloqueia o loop de jogo | Game design (crítico) |
+| P4 | **HP não decrementa conforme dano logado** — totodile mantém 22/50 há 15+ rodadas tomando "2/rodada"; PP decrementa certo, HP não | Corrompe o feedback da batalha | Game design / back (crítico) |
+| P5 | **Sem indicador de progresso da batalha** — não há "X/6 oponentes restantes", barra de progresso, nem contador de KO | Jogador perdido no estado da batalha | UX |
+| P6 | **Home não mostra HP/PP do time** — após batalha massacrada, a home lista só nomes; estado de saúde invisível fora da batalha | Jogador não sabe se precisa curar | UX |
+| P7 | **Adicionar Pokémon em rajada falha** — 6 cliques rápidos em "Adicionar ao time" só registram 1 (necessário esperar swap htmx entre cada clique) | Confunde na primeira ação do jogo | UX / robustez htmx |
+| P8 | **Gerenciar time: 3 "Salvar" por membro** — golpes, item, segurável como forms isolados (18 botões para 6 membros); sem "Salvar tudo" nem auto-save | Edição penosa e repetitiva | UX |
+| P9 | **Inconsistência de nomenclatura de item** — "Pocao" no Mart vs "potion" no estoque; tradução parcial de nomes | Falta de polish, confunde busca | UX |
+| P10 | **Item equipado SOME da home** — equipar Poção no #1 via Gerenciar a debita do estoque mas não aparece como "equipado" nem no estoque da home; item "desaparece" da perspectiva do jogador | Perda aparente de recurso, erode confiança | Persistência / UX (crítico) |
+| P11 | **Item equipado não aparece em "Itens:" da batalha** — a Poção equipada não é exibida nem usada no painel de batalha; camada de itens invisível em combate | Itens/seguráveis (núcleo do auto-battler) sem efeito visível | Game design / UX (crítico) |
+| P12 | **Estado divergente home vs batalha** — home/Center veem time com HP cheio (Custo 0); batalha mostra o mesmo time massacrado (5 KO); dois states of truth | Center gratuito vira exploit; jogador não sabe qual estado é real | Back / persistência (crítico) |
+| P13 | **Poke Center "Curar" sem feedback** — clicar com HP cheio (ou lendo estado cheio) é no-op silencioso, sem mensagem "nada a curar" | Jogador acha que o botão quebrou | UX |
+| P14 | **Jogador herda 40 vitórias do seed** — "Posição 1 — Vitórias: 40" antes de jogar; senso de progressão zerado | Desmotiva desde a primeira tela | Game design |
+| P15 | **Histórico de batalhas raso** — só "Resultado + 6 nomes de oponentes"; sem rounds, HP final, golpes usados, link para detalhe | Jogador não pode refletir sobre batalhas passadas | UX / game design |
+| P16 | **Sem "Jogar tudo" / auto-resolver** — auto-battler exige 26+ cliques em "Jogar" para resolver uma batalha; sem velocidade 2× ou resolver-instant | Tédio, contradição com o gênero | UX / game design |
+| P17 | **Targeting automático fixo** — time sempre foca o mesmo oponente até KO, sem prioridade por tipo/efetividade visível; estratégia pré-combate limitada a moveset/itens | Reduz a profundidade do auto-battler | Game design |
+| P18 | **Economia sem tensão** — Center lê estado cheio (cura grátis) + saldo inicial 200 cobre 10 Poções; sem escolha gastar vs. economizar | Camada econômica não gera choices | Game design |
+| P19 | **Onboarding sem critério de escolha** — lista de 36 Pokémon por slug sem tipo/stats visíveis no card; novato escolhe "por nome" | Primeira decisão é arbitrária | UX / game design |
+| P20 | **Painel "Itens:" vazio na batalha** — mesmo com item equipado, o painel de itens do time na batalha está sempre vazio | Itens não têm presença visual em combate | UX |
+
+### 4.4 Propostas de melhoria (TP)
+
+- **TP-1 — Feedback "6/6 ✓ — jornada iniciada"** (ref: P1): ao atingir 6
+  membros, mostrar toast/badge de confirmação antes de trocar o painel;
+  manter um indicador "Time: 6/6" persistente no painel de jornada.
+- **TP-2 — Log de batalha fiel + estruturado** (ref: P2, P4): o log textual
+  deve somar o dano real aplicado ao HP; complementar com um JSON por rodada
+  (ações, dano, PP, item usado) para análise/depuração. Aumentar fidelity é
+  pré-requisito para balancear o auto-battler.
+- **TP-3 — Cap de rodadas + condição de empate** (ref: P3): limite máximo de
+  rodadas (ex.: 30) com desempate por HP total restante, ou empate explícito
+  com recompensa parcial. Evita batalha infinita e dá fim ao loop.
+- **TP-4 — Indicador de progresso da batalha** (ref: P5): "Oponentes: X/6"
+  + marcador KO em cada card. Barra de progresso opcional.
+- **TP-5 — HP/PP do time na home** (ref: P6): cada card de membro no painel
+  `#team-view` mostra `HP a/b` e PP total; state badge (ferido/KO/saudável).
+- **TP-6 — Add em rajada robusto** (ref: P7): `hx-post="/team"` com
+  `hx-disabled-elt` + fila de requests (ou debounce no botão) para cliques
+  rápidos não se perderem; idealmente adicionar sem esperar swap.
+- **TP-7 — Gerenciar com auto-save ou "Salvar tudo"** (ref: P8): um único
+  botão "Salvar time" por sessão de edição, ou persistir mudança no `change`
+  do select (htmx `hx-post` por field, sem botão).
+- **TP-8 — Nomenclatura consistente de item** (ref: P9): usar o mesmo nome
+  traduzido em Mart/estoque/batalha; ou o mesmo slug em inglês em todos.
+- **TP-9 — Item equipado visível em todas as telas** (ref: P10, P11, P20):
+  mostrar "Equipado: Poção ×1" no card do membro na home e na batalha;
+  painel "Itens:" da batalha lista itens equipados do time com uso automático
+  visível no log ("bulbasaur usou Poção, +20 HP").
+- **TP-10 — Estado único do time** (ref: P12, P13): uma só fonte de verdade
+  para HP/PP/itens; home, Center, batalha e histórico leem o mesmo estado.
+  Center cobra proporcional ao HP faltante real; mensagem "nada a curar"
+  quando aplicável.
+- **TP-11 — Reset de progressão para jogadores novos** (ref: P14): não
+  herdar vitórias/derrotas do seed; jogador novo começa com 0/0/0 fora do
+  ranking até a primeira batalha.
+- **TP-12 — Detalhe de batalha no histórico** (ref: P15): cada batalha em
+  `/history` clicável → tela/sub-rotta com rodadas, HP final, golpes usados,
+  itens, XP/dinheiro ganho.
+- **TP-13 — "Jogar tudo" + velocidade** (ref: P16): botão "Resolver batalha"
+  (executa até fim) + velocidade 1×/2×/4×; reduz tédio do auto-battler.
+- **TP-14 — Card de Pokémon com tipo/stats na Lista** (ref: P19): cada card
+  na `/` mostra tipos (badges coloridos) + HP/Ataque/Defesa base; dá critério
+  de escolha ao novato já no onboarding.
+- **TP-15 — Targeting configurável ou documentado** (ref: P17): mostrar no
+  pré-combate qual a regra de targeting (ex.: "sempre o líder inimigo" /
+  "primeiro vivo") ou permitir marcar um alvo优先 por Pokémon do time.
+
+### 4.5 Priorização sugerida (impacto no jogador)
+
+1. **P3 + P4 (impasse + HP não decrementa)** — bloqueiam o loop de jogo; a
+   batalha nunca termina e o feedback é falso. **Crítico de game design/back.**
+2. **P12 + P10 + P11 (estado divergente + item some + item não aparece em
+   batalha)** — corrompem a confiança no estado; camada de itens (núcleo do
+   auto-battler) invisível. **Crítico de persistência/UX.**
+3. **P2 (log não reflete dano)** — sem fidelity, não há aprendizado; pré-requisito para balanceamento.
+4. **P16 + P5 (sem auto-resolver + sem progresso)** — tédio + desorientação na batalha.
+5. **P1 + P19 (onboarding)** — primeira impressão confusa.
+6. **P14 (herdar vitórias)** — desmotiva desde a primeira tela.
+7. **P8 + P6 (gerenciar repetitivo + HP invisível na home)** — polish de UX.
+8. **P9 + P13 + P15 + P18 + P17** — refinamentos de polish/economia/depth.
+
+### 4.6 Mapeamento para bugs já catalogados (Sessão 3)
+
+- **P16 (oponente sempre nível 1)** = **Q1** (confirmado novamente;同一
+  oponente por usuário nesta sessão: wattrel, panpour, jigglypuff, paras,
+  tympole, nincada — todos nível 1).
+- **P10/P11 (item some / não aparece em batalha)** é **variante de Q2**
+  (item perdido) — aqui o item some ao *equipar* (não ao remover), e não
+  aparece na batalha; mesmo sintoma de "item debitado do estoque e perdido".
+- **P7 (add em rajada)** é **novo** — não é Q5 (remover 2x); é falha de
+  clique rápido no `hx-post` de adicionar.
+- **P12 (estado divergente)** é **novo** — não catalogado antes; o Center
+  lê state diferente da batalha.
+
+### 4.7 Evidências
+
+- Gravação: `~/.config/browser-harness/agent-workspace/recordings/poke-playtest-s4`
+  (61 frames; sequência: lista → add 6 → battle r0..r26 → history → home →
+  mart buy → equip → center → manage).
+- Gravação continuação:
+  `~/.config/browser-harness/agent-workspace/recordings/poke-playtest-s4b`
+  (37 frames; sequência: battle travada → remove 6 via requestSubmit →
+  remontar time comum → battle 2 derrota → center curar → novo confronto →
+  battle 3 vitória).
+- Screenshots pontuais em `/tmp/poke-s4-01..17-*.png` e
+  `/tmp/poke-s4b-01..17-*.png` (34 capturas no total).
+- Batalha travada em rodada 26 reprodutível ao reabrir `/battle` (estado
+  persiste): totodile 22/50 vs nincada, log em loop `scratch 1 / struggle-bug 2`.
+
+### 4.8 Continuação do playtest (time remontado — refutações e refinamentos)
+
+Após a Sessão 4 inicial, remontei o time (6 Pokémon comuns: rattata, pidgey,
+ekans, sandshrew, nidoran-f, nidoran-m) e joguei mais 2 batalhas completas
+(derrota em 7 rodadas, vitória em 7 rodadas). Resultados que **refutam ou
+refinam** achados anteriores — importante para não trabalhar em cima de
+hipóteses erradas:
+
+#### Refutações (bug não reproduzido nesta sessão)
+
+- **Q1 ("oponente sempre o mesmo por usuário") — NÃO reproduzido**: 3 batalhas,
+  3 oponentes diferentes:
+  1. wattrel, panpour, jigglypuff, paras, tympole, nincada
+  2. spewpa, cosmog, darumaka-galar, cutiefly, pidove, gulpin
+  3. silcoon, kirlia, nymble, pichu, skitty, (e mais um)
+
+  Ou Q1 foi corrigido desde a Sessão 3, ou a hipótese `Random.new(user_id.sum)`
+  só se aplica a "Novo confronto" vs re-GET `/battle`, ou depende de o time ter
+  mudado. **Re-teste necessário antes de abrir sessão para corrigir Q1.**
+- **Q2 ("item perdido ao remover Pokémon com item equipado") — NÃO reproduzido**:
+  equipei Poção no bulbasaur (#1), removi o bulbasaur — a Poção **voltou ao
+  estoque** (`potion — 1×` reapareceu com botão "Vender"). Q2 pode ter sido
+  corrigido, ou só se manifesta com seguráveis (Choice Band/Scarf) vs.
+  consumíveis (Poção). **Re-teste com segurável recomendado.**
+- **Q3 ("gate da jornada fica aberto após zerar o time") — NÃO reproduzido ao
+  zerar (0/6)**: removi todos os 6 membros → o painel de jornada (Batalhar/
+  Center/Mart) **sumiu** e voltou a mensagem "Monte seu time inicial de 6
+  Pokémon". Q3 pode se manifestar só com time **parcial** (1-5), não com 0.
+  **Re-teste com time parcial recomendado.**
+- **P12 ("estado divergente home vs batalha") — REFUTADO**: após "Fim de
+  batalha" (derrota com time todo KO), a home/Center **leram corretamente** o
+  estado KO (`Custo total: 128`, lista com `rattata — HP 0/30` etc.). A
+  divergência observada antes era porque **sair de batalha em andamento
+  (não-finalizada) não persiste o dano** — só ao "Fim de batalha" o estado
+  pós-combate é salvo. **Isso confirma P10 como exploit real**: sair de uma
+  batalha ruim em andamento reverte o dano do time sem penalidade.
+
+#### Refinamentos (achado anterior ajustado)
+
+- **P9/P30 — "×N" do Mart é affordability, não estoque**: confirmei que o `×N`
+  ao lado de cada item no Mart é `floor(saldo/preço)`, não estoque físico.
+  Mapeamento perfeito: saldo 200 → Pocao ×10 (200/20), Super ×4 (200/50),
+  Hiper ×2 (200/100), Choice Band ×2 (200/80); saldo 92 → Pocao ×4 (92/20),
+  Super ×1 (92/50), Hiper ×0 (92/100), Choice Band ×1 (92/80). **Rótulo
+  confuso** — parece estoque, é affordability. Refinamento de P9.
+- **P28 — "clique no botão não dispara htmx" — RECLASSIFICADO como artefato de
+  automação**: o `click_at_xy` (CDP) e `.click()` (JS sintético) não disparam
+  handlers htmx em botões com `hx-*` fora de form; `form.requestSubmit()` e
+  `htmx.trigger(b, 'click')` funcionam. Um **humano real** clicando no botão
+  dispara o evento nativo corretamente. **Não é bug do app** — é limitação do
+  CDP/automação. P22 (remover via clique) tem a mesma causa. **Quem permanece
+  é Q5** ("remover 2×" relatado pelo humano) — possivelmente race com
+  `hx-disabled-elt` durante o swap htmx.
+- **P11 — "Itens:" da batalha mostra estoque livre, não equipados**: o painel
+  "Itens:" da batalha lista itens do **estoque do jogador** disponíveis para
+  uso automático (ex.: `Pocao ×1` quando há 1 no estoque). Itens **equipados
+  em Pokémon** (consumíveis ou seguráveis) **não aparecem em nenhuma tela da
+  batalha**. Achado mantém relevância: equipados são invisíveis em combate.
+
+#### Novos achados da continuação (P21-P34)
+
+| # | Achado | Impacto | Área |
+| --- | --- | --- | --- |
+| P21 | **Sem botão "Desistir"/"Render" na batalha** — só "Jogar" + navs; jogador preso no impasse sem saída limpa (P3) | Sem saída para batalha travada | UX / game design |
+| P22 | **Remover via clique é frágil** (artefato CDP + Q5 humano) — `click_at_xy`/`.click()` não disparam o `hx-delete` do form; só `requestSubmit()` funciona. Usuário humano relatou "2× cliques" (Q5) | Remover inconsistente | UX (confirma Q5) |
+| P23 | **Dano desbalanceado em nível 1** — golpes causam 1 a 210 de dano em Pokémon nível 1 com HP 20-70 (ex.: darumaka-galar freeze-dry 80-105, "210 de dano — KO!"); fórmula de dano provavelmente buggy | Combate caótico, sem previsibilidade | Game design / back (crítico) |
+| P24 | **cosmog usa Struggle com PP disponível** — cosmog só tinha teleport (PP 20) e splash (PP 40), mas usou "Struggle" (golpe de "sem PP"); AI do oponente não lida bem com Pokémon sem golpes ofensivos | AI duvidosa | Game design |
+| P25 | **Itens do estoque usados automaticamente na batalha sem escolha** — rattata "já usou item"; a Poção ×1 do estoque foi gasta automaticamente; jogador não decide quando/em quem curar | Auto-battler tira decisão de cura | Game design |
+| P26 | **Painel pós-batalha traz Center/Mart/Novo confronto** — após "Fim de batalha", a tela de batalha mostra ações de próximo passo no contexto | UX positiva | UX (positivo) |
+| P27 | **"Vencedor: Oponente" / "Vencedor: Seu" impessoal** — resultado da batalha announced em 3ª pessoa genérica; melhor "Você venceu!" / "Você perdeu" | Falta de imersão | UX |
+| P28 | ~~"Novo confronto" não funciona via clique~~ — **artefato de automação CDP** (htmx não dispara com `.click()` sintético); humano real funciona. Reclassificado | (não é bug do app) | — |
+| P29 | **Gate "batalhar requer time curado" existe** — "Novo confronto" disabled com title "Recupere seus pokémons no Poke Center" | Game design positivo | UX (positivo) |
+| P30 | **Mart "×N" = affordability** — refinado em P9 acima; não é estoque físico | (ver P9) | — |
+| P31 | **GET /battle mostra a última batalha finalizada, não inicia nova** — clicar em "Batalhar" (href=/battle) leva à tela de resultado anterior (Rodada 7, "Vencedor: ..."); só "Novo confronto" inicia nova | "Batalhar" da home é enganoso | UX (crítico) |
+| P32 | **Vitória recompensa 2,5× a derrota** — 50 XP + 100 dinheiro vs 20 XP + 40 dinheiro; incentivo real a vencer | Game design positivo | Game design (positivo) |
+| P33 | **Resultado impessoal** — mesma raiz de P27; "Vencedor: Seu" ao vencer | (ver P27) | UX |
+| P34 | **"Novo confronto" habilitado com time ferido** — após vitória com 3 KO + 1 ferido, o botão está habilitado; jogador entra na próxima batalha com time enfraquecido sem warning | Armadilha sem feedback | UX / game design |
+
+#### Propostas adicionais (TP-16 a TP-20)
+
+- **TP-16 — Botão "Desistir"/"Render" na batalha** (ref: P21, P3): permitir
+  abandonar uma batalha em andamento com penalidade explícita (ex.: perde XP,
+  mantém dano) — fecha o exploit de P10 (sair reverte dano) e dá saída ao
+  impasse de P3.
+- **TP-17 — Revisar fórmula de dano** (ref: P23, P2, P4): o dano precisa ser
+  previsível e consistente com o log; investigar por que nível 1 gera dano
+  1-210 e por que HP não decrementa conforme log. Pré-requisito para
+  balanceamento.
+- **TP-18 — AI do oponente com golpes não-ofensivos** (ref: P24): cosmog/splash
+  não deveria usar Struggle enquanto tem PP; definir política (usar golpe de
+  status ou Struggle só sem PP).
+- **TP-19 — GET /battle inicia nova batalha se a anterior está finalizada**
+  (ref: P31): `/battle` deve iniciar nova batalha quando não há batalha em
+  andamento; manter a tela de resultado só imediatamente após o fim, com CTA
+  "Novo confronto" / "Voltar".
+- **TP-20 — Warning de time ferido ao iniciar nova batalha** (ref: P34):
+  mostrar "Seu time está ferido (3/6 KO). Curar antes?" com CTA para Center,
+  ou bloquear "Novo confronto" se time tem KO.
+
 <!-- registros futuros adicionados abaixo -->
