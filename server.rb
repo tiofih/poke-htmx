@@ -91,25 +91,27 @@ module ServerListActions
     erb :pokemon_list, layout: false
   end
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   def load_pokemon_page
     @limit = PAGE_SIZE
     @type = normalized_type(params[:type])
     @generation = normalized_generation(params[:generation])
+    @tier = normalized_tier(params[:tier])
+    @cost_max = normalized_cost_max(params[:cost_max] || params[:cost])
     @starters = starters_visible? ? load_starters : []
     build_page
     @items = Parallelizer.map(@page_names) { |name| [name, settings.api.find(name)] }
     load_search_hint
-    if @page_names.empty? && @q.empty? && @type.nil? && @generation.nil?
+    if @page_names.empty? && @q.empty? && @type.nil? && @generation.nil? && @tier.nil? && @cost_max.nil?
       @notice = "Não foi possível carregar a lista de Pokémon."
     end
     load_team_names
     build_pokemon_costs
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   def starters_visible?
-    @q.empty? && @offset.zero? && @type.nil? && @generation.nil?
+    @q.empty? && @offset.zero? && @type.nil? && @generation.nil? && @tier.nil? && @cost_max.nil?
   end
 
   def normalized_type(value)
@@ -130,8 +132,26 @@ module ServerListActions
     n
   end
 
+  def normalized_tier(value)
+    v = value.to_s.strip.upcase
+    return nil if v.empty?
+    return nil unless %w[S A B C D F].include?(v)
+
+    v
+  end
+
+  def normalized_cost_max(value)
+    v = value.to_s.strip
+    return nil if v.empty?
+
+    n = Integer(v, 10, exception: false)
+    return nil unless n && n >= 0
+
+    n
+  end
+
   def filter_active?
-    !@type.nil? || !@generation.nil?
+    !@type.nil? || !@generation.nil? || !@tier.nil? || !@cost_max.nil?
   end
 
   def load_search_hint
@@ -181,6 +201,20 @@ module ServerListActions
     if @generation
       gen = Parallelizer.map(filtered) { |name| [name, settings.api.generation_for(name)] }
       filtered = gen.select { |_name, gen_val| gen_val == @generation }.map(&:first)
+    end
+    if @tier || @cost_max
+      tier_cost = Parallelizer.map(filtered) do |name|
+        pokemon = settings.api.find(name)
+        next [name, nil, nil] unless pokemon
+
+        tier = line_tier_for(pokemon).to_s
+        restricted = settings.api.evolution_restricted?(pokemon.name)
+        cost = TeamBudget.cost_for(line_tier: tier, restricted: restricted)
+        [name, tier, cost]
+      end
+      tier_cost = tier_cost.select { |_name, tier_val, _cost| tier_val == @tier } if @tier
+      tier_cost = tier_cost.select { |_name, _t, cost| cost && cost <= @cost_max } if @cost_max
+      filtered = tier_cost.map(&:first)
     end
     filtered
   end
