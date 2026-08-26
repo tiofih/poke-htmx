@@ -260,5 +260,11 @@ Ajuste de validação = alteração formal de critério com data e reaprovação
 - **Gotchas duráveis** levantados neste refinamento (paridade de interface do gateway,
   choke point do `PokemonRatingCache`, trigger já parseado na cadeia) registrados na
   memória do projeto (`gotchas/m2-custo-gateway-e-rating.md`).
-- Depois da 0055: a fila J2/J4/D4, **UX-2** (custo/ranking na listagem + filtros — depende
-  desta sessão) e as demais limitações técnicas — a critério do usuário.
+- **UX-2 promovida a candidato a próxima sessão** (2026-08-26 — pedido explícito do
+  usuário na validação da 0055): exibir **custo e ranking (tier) dos Pokémon na listagem**
+  da `GET /` (junto ao sprite e nome). Escopo mínimo: coluna "Custo" + coluna "Tier" por
+  Pokémon, usando o `PokemonRatingCache` e o `TeamBudget` já existentes; filtros
+  avançados (tipo, geração, custo, ranking combináveis com busca e paginação) ficam
+  **fora** — sessão futura, anotados no `REQUIREMENTS.md`/draft. Essa sessão **depende
+  do M2** (0055) porque o custo é derivado do tier da linha. Candidata imediata; após ela:
+  fila J2/J4/D4 e as demais limitações técnicas — a critério do usuário.
