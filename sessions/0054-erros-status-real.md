@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-26 |
 | Implementação | **Concluída (fase 2)** — aguardando validação do usuário (fase 3) |
-| Validação | Pendente (validação é do usuário — fase 3) |
+| Validação | **Concluída** — aprovada pelo usuário em 2026-08-26 (S2) |
 
 ---
 
@@ -128,7 +128,15 @@ invisível para monitoria/healthcheck sem quebrar a UX htmx.
 
 ## 7. Validação (executada pelo usuário)
 
-*(A preencher na fase 3 — o implementador para ao terminar a fase 2.)*
+*(Fase 3 — executada pelo usuário. Registro por critério, um resultado por linha — S2.)*
+
+| Critério | Evidência automatizada | Evidência manual | Resultado |
+| --- | --- | --- | --- |
+| C1 (status real p/ não-AJAX) | `test/team_routes_test.rb` → `test_unexpected_error_returns_500_status_for_full_page_request` (`assert_equal 500`, corpo amigável, sem `<html`) | — | ok |
+| C2 (swap htmx preservado) | `test/team_routes_test.rb` → `test_unexpected_error_renders_friendly_fragment_without_stack` (`htmx_session`, `ok?`, sem `<html`) | — | ok |
+| C3 (erro interno não vaza) | cobertura das C1/C2 (`refute_includes "<html"`/stack ausente) | log `RuntimeError: boom inesperado` em `server.rb:689` observado ao reproduzir (**manual**) | ok |
+
+> Aprovada pelo usuário em **2026-08-26** — suíte completa **805 runs / 2630 assertions / 0 failures**, lint RuboCop **0 offenses**. Nenhum ajuste de validação (S3) necessário.
 
 ## 8. Observações
 
