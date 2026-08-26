@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25 |
 | Implementação | **Concluída** — passos 1–8 + docs, suíte 804/2623, lint 0 (2026-08-25) |
-| Validação | **Pendente** (executada pelo usuário) |
+| Validação | **Concluída** — C1–C12 ok, validada pelo usuário em 2026-08-25 |
 
 ---
 
@@ -120,41 +120,41 @@ Center, com as opções **vender itens** (novo `POST /mart/sell`) e **recomeçar
 ## 4. Critérios de aceite
 
 ### Resultado
-- [ ] **C1 (Q4 evolução)** — busca cujo termo só casa com não-base mostra aviso
+- [x] **C1 (Q4 evolução)** — busca cujo termo só casa com não-base mostra aviso
       informativo apontando a forma base (ex.: "pikachu é evolução de pichu — monte com
       pichu"). — prova: `test/pokemon_routes_test.rb`
       (`test_search_non_base_shows_base_form_hint`).
-- [ ] **C2 (Q4 starter)** — busca cujo termo só casa com starter mostra aviso apontando
+- [x] **C2 (Q4 starter)** — busca cujo termo só casa com starter mostra aviso apontando
       os destaques iniciais. — prova: `test/pokemon_routes_test.rb`
       (`test_search_starter_shows_starter_hint`).
-- [ ] **C3 (Q4 regressão)** — busca que casa com forma base continua listando
+- [x] **C3 (Q4 regressão)** — busca que casa com forma base continua listando
       normalmente, sem aviso. — prova: `test/pokemon_routes_test.rb` (teste existente de
       busca preservado / novo `test_search_base_form_lists_without_hint`).
-- [ ] **C4 (Q5 1-clique)** — um único `DELETE /team` com `id` + `offset`/`q`
+- [x] **C4 (Q5 1-clique)** — um único `DELETE /team` com `id` + `offset`/`q`
       (`.list-state`) + `HX-Request` remove o membro e devolve `#team-view` sem o membro
       + OOB `#pokemon-list` válido na mesma resposta. — prova: `test/team_routes_test.rb`
       (`test_htmx_delete_team_removes_and_swaps_both_fragments`).
-- [ ] **C5 (Q5 idempotência)** — repetir o mesmo `DELETE` (mesmo `id`) não altera o time
+- [x] **C5 (Q5 idempotência)** — repetir o mesmo `DELETE` (mesmo `id`) não altera o time
       nem devolve erro (2º clique seguro). — prova: `test/team_routes_test.rb`
       (`test_delete_team_is_idempotent_on_second_request`).
-- [ ] **C6 (Q5 hardening)** — o form de remover do time ganhou proteção contra re-submit
+- [x] **C6 (Q5 hardening)** — o form de remover do time ganhou proteção contra re-submit
       (`hx-disabled-elt`), impedindo o disparo duplo. — prova: `test/team_routes_test.rb`
       (`test_remove_form_prevents_double_submit`) — `manual` complementar (1 clique no app).
-- [ ] **C7 (GL-1 condição)** — `JourneyService#game_over?` é verdadeiro só com time ≥ 6,
+- [x] **C7 (GL-1 condição)** — `JourneyService#game_over?` é verdadeiro só com time ≥ 6,
       todos os pokes zerados **e** saldo < custo da cura total; falso com saldo suficiente,
       com algum HP ou com time < 6. — prova: `test/journey_service_test.rb`
       (`test_game_over_when_all_hp_zero_and_unaffordable`, `test_not_game_over_when_heal_affordable`,
       `test_not_game_over_when_partial_hp`, `test_not_game_over_below_team_of_six`).
-- [ ] **C8 (GL-1 venda service)** — `SellPolicy#sell_price` = metade do preço (arredondado
+- [x] **C8 (GL-1 venda service)** — `SellPolicy#sell_price` = metade do preço (arredondado
       p/ baixo) e `MartService#sell` valida item/quantidade/estoque, debita o estoque e
       credita `sell_price × qty`; vende também seguráveis. — prova: `test/sell_policy_test.rb`
       (`test_sell_price_is_half_of_buy_price`) + `test/mart_service_test.rb`
       (`test_sell_credits_wallet_and_debits_inventory`).
-- [ ] **C9 (GL-1 venda rota)** — `POST /mart/sell` (gated `started?`) vende e re-renderiza
+- [x] **C9 (GL-1 venda rota)** — `POST /mart/sell` (gated `started?`) vende e re-renderiza
       o painel com notícia; `_mart.erb` mostra botão "Vender" por item do inventário. —
       prova: `test/mart_routes_test.rb` (`test_mart_sell_updates_balance_and_inventory`,
       `test_mart_fragment_shows_sell_buttons`).
-- [ ] **C10 (GL-1 recomeçar)** — `POST /journey/restart` remove todos os membros
+- [x] **C10 (GL-1 recomeçar)** — `POST /journey/restart` remove todos os membros
       (devolvendo itens equipados), reseta o saldo para o inicial (200), invalida a
       batalha e re-bloqueia a jornada (time < 6); **seguro sob chamadas concorrentes**
       (double-submit) — reset em lote (`TeamRepository#clear`) sem reindex por slot.
@@ -162,22 +162,22 @@ Center, com as opções **vender itens** (novo `POST /mart/sell`) e **recomeçar
       (`test_restart_journey_clears_team_and_resets_balance`,
       `test_restart_journey_returns_equipped_items`,
       `test_restart_journey_is_safe_under_concurrent_calls`).
-- [ ] **C11 (GL-1 UI gate + batalha)** — com game over, o gate de `GET /battle`/
+- [x] **C11 (GL-1 UI gate + batalha)** — com game over, o gate de `GET /battle`/
       `POST /battle/new` **e a tela de fim de batalha** mostram o fragmento/mensagem de
       game over (mensagem + CTAs "Vender itens" e "Recomeçar jornada" no lugar do
       "Novo confronto"). — prova: `test/battle_routes_test.rb`
       (`test_battle_gate_shows_game_over_fragment_when_stuck`,
       `test_finished_battle_shows_game_over_and_restart_when_broke`).
-- [ ] **C12 (GL-1 UI painel)** — o painel do time mostra o banner de game over com o botão
+- [x] **C12 (GL-1 UI painel)** — o painel do time mostra o banner de game over com o botão
       "Recomeçar jornada" quando `game_over?`. — prova: `test/team_routes_test.rb`
       (`test_team_panel_shows_game_over_banner`).
 
 ### Garantias (RNF)
-- [ ] Suíte completa verde com **baseline preservado** + novos testes e lint 0 em **todo**
+- [x] Suíte completa verde com **baseline preservado** + novos testes e lint 0 em **todo**
       green; commit obrigatório por passo; 0 regressão.
-- [ ] Sem gems novas / sem mudança de schema / testes sem rede / sem `rubocop:disable`
+- [x] Sem gems novas / sem mudança de schema / testes sem rede / sem `rubocop:disable`
       novos.
-- [ ] `REQUIREMENTS.md` + `SESSIONS.md` atualizados no passo docs; *status de validação*
+- [x] `REQUIREMENTS.md` + `SESSIONS.md` atualizados no passo docs; *status de validação*
       só após o usuário validar (S4).
 
 > **S1:** cada critério acima aponta o teste que o prova. C6 tem `manual` complementar
@@ -226,22 +226,29 @@ Center, com as opções **vender itens** (novo `POST /mart/sell`) e **recomeçar
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Validada em 2026-08-25** — S2: um resultado por critério. Ajustes S3 durante a
+validação (feedback do usuário, re-aprovados): C10 — 500 no "Recomeçar jornada"
+(double-submit concorrente colidia no unique `(user_id, slot)`) → reset em lote via
+`TeamRepository#clear`; C11 — game over também na **tela de fim de batalha** (mensagem +
+"Vender itens"/"Recomeçar jornada" no lugar do "Novo confronto"); C9 — lista de venda do
+Mart sem linhas `0×` do inventário (itens equipados/consumidos não vendáveis);
+C10 — `#pokemon-list` presa após o recomeçar (sem reiniciar o servidor) → refresh via OOB
+com `hx-include=".list-state"`.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (Q4 evolução) | `./scripts/test -n /search_non_base_shows_base_form_hint/` | Buscar "pika" no app → aviso "evolução de pichu" | |
-| C2 (Q4 starter) | `./scripts/test -n /search_starter_shows_starter_hint/` | Buscar "char" → aviso de inicial | |
-| C3 (Q4 regressão) | `./scripts/test -n /search_base_form_lists_without_hint/` | Buscar "pichu" → lista normal | |
-| C4 (Q5 1-clique) | `./scripts/test -n /htmx_delete_team_removes_and_swaps_both_fragments/` | 1 clique remove e atualiza lista | |
-| C5 (Q5 idempotência) | `./scripts/test -n /delete_team_is_idempotent_on_second_request/` | 2º clique não quebra | |
-| C6 (Q5 hardening) | `./scripts/test -n /remove_form_prevents_double_submit/` | botão desabilita durante o request | |
-| C7 (GL-1 condição) | `./scripts/test -n /game_over_when_all_hp_zero_and_unaffordable/` | — (serviço puro) | |
-| C8 (GL-1 venda service) | `./scripts/test -n /sell_price_is_half_of_buy_price/` + `/sell_credits_wallet_and_debits_inventory/` | — | |
-| C9 (GL-1 venda rota) | `./scripts/test -n /mart_sell_updates_balance_and_inventory/` | Vender poção no Mart → saldo sobe, estoque cai | |
-| C10 (GL-1 recomeçar) | `./scripts/test -n /restart_journey_clears_team_and_resets_balance/` | Recomeçar → time limpo, saldo 200 | |
-| C11 (GL-1 UI gate) | `./scripts/test -n /battle_gate_shows_game_over_fragment_when_stuck/` | Time zerado + saldo baixo → tela de game over | |
-| C12 (GL-1 UI painel) | `./scripts/test -n /team_panel_shows_game_over_banner/` | Banner de game over no painel do time | |
+| C1 (Q4 evolução) | `./scripts/test -n /search_non_base_shows_base_form_hint/` | Buscar "pika" no app → aviso "evolução de pichu" | ok |
+| C2 (Q4 starter) | `./scripts/test -n /search_starter_shows_starter_hint/` | Buscar "char" → aviso de inicial | ok |
+| C3 (Q4 regressão) | `./scripts/test -n /search_base_form_lists_without_hint/` | Buscar "pichu" → lista normal | ok |
+| C4 (Q5 1-clique) | `./scripts/test -n /htmx_delete_team_removes_and_swaps_both_fragments/` | 1 clique remove e atualiza lista | ok |
+| C5 (Q5 idempotência) | `./scripts/test -n /delete_team_is_idempotent_on_second_request/` | 2º clique não quebra | ok |
+| C6 (Q5 hardening) | `./scripts/test -n /remove_form_prevents_double_submit/` | botão desabilita durante o request | ok |
+| C7 (GL-1 condição) | `./scripts/test -n /game_over_when_all_hp_zero_and_unaffordable/` | — (serviço puro) | ok |
+| C8 (GL-1 venda service) | `./scripts/test -n /sell_price_is_half_of_buy_price/` + `/sell_credits_wallet_and_debits_inventory/` | — | ok |
+| C9 (GL-1 venda rota) | `./scripts/test -n /mart_sell_updates_balance_and_inventory/` | Vender poção no Mart → saldo sobe, estoque cai; sem linhas `0×` | ok (re-aprovado no ajuste S3) |
+| C10 (GL-1 recomeçar) | `./scripts/test -n /restart_journey_clears_team_and_resets_balance|restart_journey_is_safe_under_concurrent_calls/` | Recomeçar → time limpo, saldo 200, lista de pokes atualiza | ok (re-aprovado no ajuste S3) |
+| C11 (GL-1 UI gate + batalha) | `./scripts/test -n /battle_gate_shows_game_over_fragment_when_stuck|finished_battle_shows_game_over_and_restart_when_broke/` | Time zerado + saldo baixo → game over no gate e na tela de fim de batalha | ok (re-aprovado no ajuste S3) |
+| C12 (GL-1 UI painel) | `./scripts/test -n /team_panel_shows_game_over_banner/` | Banner de game over no painel do time | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.
@@ -271,5 +278,6 @@ Center, com as opções **vender itens** (novo `POST /mart/sell`) e **recomeçar
   o fragmento do time e a `#pokemon-list` ficava com os botões "No time ✓" do estado
   antigo; o restart agora re-renderiza a lista via OOB (`hx-include=".list-state"` no
   formulário do banner + `list_state_present?`). Suíte 804/2623.
-- Próximo passo do fluxo: **fase 2 concluída (passos 1–8, suíte 804/2623, lint 0) —
-  PARAR e aguardar a validação do usuário (fase 3)**.
+- Próximo passo do fluxo: **0053 concluída e validada (C1–C12 ok, 2026-08-25, suíte
+  804/2623, lint 0)** — organizar a fila (J2, J4, D4, M2) e as limitações técnicas — a
+  critério do usuário.
