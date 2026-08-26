@@ -409,8 +409,13 @@ module ServerBattleActions
     return battle_error_fragment unless result[:engine]
 
     @engine = result[:engine]
-    @can_new_confront = settings.journey.battle_ready?(current_user)
+    expose_new_confront_state
     erb :battle, layout: false
+  end
+
+  def expose_new_confront_state
+    @can_new_confront = settings.journey.battle_ready?(current_user)
+    @game_over = settings.journey.game_over?(current_user)
   end
 
   def battle_gate_fragment
@@ -495,7 +500,7 @@ module ServerBattleActions
     return battle_error_fragment unless result[:engine]
 
     @engine = result[:engine]
-    @can_new_confront = settings.journey.battle_ready?(current_user)
+    expose_new_confront_state
     erb :battle, layout: false
   end
 
@@ -505,7 +510,7 @@ module ServerBattleActions
     @money_gained = result[:money_gained]
     @evolution_news = result[:evolution_news]
     @learned_news = result[:learned_news]
-    @can_new_confront = settings.journey.battle_ready?(current_user)
+    expose_new_confront_state
   end
 end
 

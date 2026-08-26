@@ -51,6 +51,15 @@
               <% end %>
             </ul>
           <% end %>
+          <% if @game_over %>
+            <p class="notice notice--error">Game Over — seu time está derrotado e você não tem dinheiro para curar no Poke Center.</p>
+            <div class="gameloop-ctas">
+              <a class="gameloop-cta" href="/">Vender itens no Poke Mart</a>
+              <form method="post" action="/journey/restart">
+                <button type="submit" class="gameloop-cta">Recomeçar jornada</button>
+              </form>
+            </div>
+          <% else %>
           <div class="gameloop-ctas">
             <a class="gameloop-cta" href="/">Poke Center</a>
             <a class="gameloop-cta" href="/">Poke Mart</a>
@@ -60,6 +69,7 @@
               <button class="gameloop-cta" disabled title="Recupere seus pokémons no Poke Center para batalhar.">Novo confronto</button>
             <% end %>
           </div>
+          <% end %>
         <% else %>
           <button hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML"
             hx-indicator="#battle-loading">Jogar</button>

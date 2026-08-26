@@ -49,4 +49,21 @@ class JourneyRestartTest < Minitest::Test
     assert_equal "/", URI(last_response["Location"]).path
     assert_empty @repository.all("user-a")
   end
+
+  def test_restart_journey_is_safe_under_concurrent_calls
+    errors = Queue.new
+    threads = 3.times.map do
+      Thread.new do
+        session = Rack::Test::Session.new(Rack::MockSession.new(app))
+        session.post "/journey/restart", {}, { "rack.session" => { "user_id" => "user-a" } }
+        errors << session.last_response.status unless session.last_response.status == 302
+      rescue StandardError => e
+        errors << e
+      end
+    end
+    threads.each(&:join)
+
+    assert_equal 0, errors.size, "erros concorrentes: #{Array.new(errors.size) { errors.pop }.inspect}"
+    assert_empty @repository.all("user-a")
+  end
 end

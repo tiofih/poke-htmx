@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25 |
-| Implementação | **Concluída** — passos 1–7 + docs, suíte 797/2579, lint 0 (2026-08-25) |
+| Implementação | **Concluída** — passos 1–8 + docs, suíte 802/2612, lint 0 (2026-08-25) |
 | Validação | **Pendente** (executada pelo usuário) |
 
 ---
@@ -156,13 +156,18 @@ Center, com as opções **vender itens** (novo `POST /mart/sell`) e **recomeçar
       `test_mart_fragment_shows_sell_buttons`).
 - [ ] **C10 (GL-1 recomeçar)** — `POST /journey/restart` remove todos os membros
       (devolvendo itens equipados), reseta o saldo para o inicial (200), invalida a
-      batalha e re-bloqueia a jornada (time < 6). — prova: `test/team_routes_test.rb` /
-      `test/journey_routes_test.rb` (novo) (`test_restart_journey_clears_team_and_resets_balance`,
-      `test_restart_journey_returns_equipped_items`).
-- [ ] **C11 (GL-1 UI gate)** — com game over, o gate de `GET /battle`/`POST /battle/new`
-      mostra o fragmento de game over (mensagem + CTAs "Vender itens" e "Recomeçar
-      jornada") em vez do aviso de derrota simples. — prova: `test/battle_routes_test.rb`
-      (`test_battle_gate_shows_game_over_fragment_when_stuck`).
+      batalha e re-bloqueia a jornada (time < 6); **seguro sob chamadas concorrentes**
+      (double-submit) — reset em lote (`TeamRepository#clear`) sem reindex por slot.
+      — prova: `test/team_routes_test.rb` / `test/journey_routes_test.rb`
+      (`test_restart_journey_clears_team_and_resets_balance`,
+      `test_restart_journey_returns_equipped_items`,
+      `test_restart_journey_is_safe_under_concurrent_calls`).
+- [ ] **C11 (GL-1 UI gate + batalha)** — com game over, o gate de `GET /battle`/
+      `POST /battle/new` **e a tela de fim de batalha** mostram o fragmento/mensagem de
+      game over (mensagem + CTAs "Vender itens" e "Recomeçar jornada" no lugar do
+      "Novo confronto"). — prova: `test/battle_routes_test.rb`
+      (`test_battle_gate_shows_game_over_fragment_when_stuck`,
+      `test_finished_battle_shows_game_over_and_restart_when_broke`).
 - [ ] **C12 (GL-1 UI painel)** — o painel do time mostra o banner de game over com o botão
       "Recomeçar jornada" quando `game_over?`. — prova: `test/team_routes_test.rb`
       (`test_team_panel_shows_game_over_banner`).
@@ -249,5 +254,12 @@ Center, com as opções **vender itens** (novo `POST /mart/sell`) e **recomeçar
   caminho terminal quando nem vendendo dá.
 - Após a 0053, a fila restante é J2/J4/D4/M2 + limitações técnicas (escritas não
   atômicas, erros com status real, race no add, identidade/CSRF, CI).
-- Próximo passo do fluxo: **fase 2 concluída (passos 1–7 + docs, suíte 797/2579, lint 0) —
+- **Ajustes pós-implementação (feedback do usuário, 2026-08-25):** (1) game over também
+  na **tela de fim de batalha** (mensagem + "Vender itens"/"Recomeçar jornada" no lugar do
+  "Novo confronto") — `battle.erb` + `expose_new_confront_state`; (2) **500 no
+  "Recomeçar jornada"** — o reset antigo reusava `remove_member` (DELETE + reindex por
+  membro), e o double-submit concorrente colidia no unique `(user_id, slot)` → `reset`
+  virou **lote** (`restore_items` de todos + `TeamRepository#clear` em 1 DELETE, sem
+  reindex); suíte 802/2612.
+- Próximo passo do fluxo: **fase 2 concluída (passos 1–8, suíte 802/2612, lint 0) —
   PARAR e aguardar a validação do usuário (fase 3)**.

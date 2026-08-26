@@ -195,6 +195,13 @@ class TeamRepository
     reindex_after_removal(user_id, removed["slot"].to_i)
   end
 
+  def clear(user_id)
+    connection.exec_params(
+      "DELETE FROM team_pokemons WHERE user_id = $1",
+      [user_id]
+    )
+  end
+
   private
 
   def insert_team_member(user_id, pokemon, slot)
