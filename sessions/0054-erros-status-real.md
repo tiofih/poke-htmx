@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-26 |
-| Implementação | Pendente (plano TDD fechado — ver seção 6) |
+| Implementação | **Concluída (fase 2)** — aguardando validação do usuário (fase 3) |
 | Validação | Pendente (validação é do usuário — fase 3) |
 
 ---
@@ -86,7 +86,8 @@ invisível para monitoria/healthcheck sem quebrar a UX htmx.
 - [ ] **C3 (erro interno não vaza):** nenhum ramo expõe stack/erro no corpo (mensagem amigável
       em ambos) e o erro original continua logado (`env["sinatra.error"]`). — prova: cobertura
       das C1/C2 (`refute_includes last_response.body, "<html"` e stack ausente) + verificação
-      do log no passo de implementação.
+      do log: **manual** (observar a última linha `RuntimeError: boom inesperado` no log do
+      server ao reproduzir o erro — `server.rb:689`).
 
 ### Garantias (RNF)
 - [ ] **G1:** suíte completa verde após os 2 passos + lint 0 em **todo** green; commit
@@ -131,6 +132,11 @@ invisível para monitoria/healthcheck sem quebrar a UX htmx.
 
 ## 8. Observações
 
+- **Fase 2 (implementação) concluída** em 2026-08-26 — ver seção 6 (Passos 1–2) e o commit
+  `7c0b0d3` (`Passo 1: handler global devolve status 500 em requisicao nao-htmx e preserva
+  fragmento 200 no swap htmx`). Suíte completa verde (**805 runs, 2630 assertions, 0 failures**),
+  lint RuboCop **0 offenses**. **PARAR** — aguardando a validação do usuário (fase 3); nada de
+  marcar a sessão como Concluída/Done nem atualizar status de validação aqui.
 - **htmx não faz swap em resposta não-2xx por padrão** — por isso o ramo htmx deve continuar em
   200, senão o fragmento de erro não aparece na página (swap abortado). Se um dia se quiser 500 +
   swap, é preciso `htmx.config.responseHandling`/`beforeSwap` (JS) + verificação manual, o que
@@ -144,3 +150,22 @@ invisível para monitoria/healthcheck sem quebrar a UX htmx.
   status, não o log.
 - Após 0054, restam as outras limitações técnicas anotadas (escritas não atômicas, race no add,
   identidade/CSRF, estado transiente, `pry`, CI) e a fila J2/J4/D4/M2 — a critério do usuário.
+
+### Gotchas / Lições (fase 2)
+
+- **RuboCop `Style/IdenticalConditionalBranches`:** no `error 500 do`, as duas branches chamavam
+  `erb :error, layout: false` idêntico — o cop exige mover a parte comum para fora do `if`.
+  Solução: `status(htmx_request? ? 200 : 500)` + um único `erb :error, layout: false` (a branch
+  só difere no status). Vale como refactor para qualquer outro handler de erro que duplique o corpo.
+- **RuboCop `Metrics/MethodLength` (11/10):** acrescentar o `if/else` estourou o limite de linhas
+  do bloco. A forma ternária compacta (`status(htmx_request? ? 200 : 500)`) volta ao limite **sem**
+  `# rubocop:disable` — prefira compactar a chamada a desabilitar o cop.
+- **`htmx_request?` resolve dentro do handler `error 500 do`:** confirmado por teste que o helper
+  de instância (definido num módulo de rotas `register`ado) é acessível no bloco de erro do
+  Sinatra (`request.env` disponível) — a rota que lança cai no handler via `env["sinatra.error"]`.
+- **`status(...)` como método de leitura/escrita:** `status(htmx_request? ? 200 : 500)` seta a
+  resposta (equivalente a `status 200`/`status 500`); renderizar o `erb` depois preserva o
+  fragmento e o status escolhido.
+- **Reuso do stub `raising_api`:** o teste novo duplica o stub anônimo (`learnable_moves` que faz
+  `raise`) do teste existente via `Server.set :api` — é o jeito atual de forçar a rota a cair no
+  `error 500` sem tocar a PokeApi real.
