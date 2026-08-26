@@ -607,14 +607,15 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       (`server.rb:263`) não restaura. **Correção (0052):** `TeamService#remove_member`
       devolve `assigned_item`/`held_item` ao estoque antes do `TeamRepository#remove`
       (item consumido em batalha não devolve).
-- [x] **Bug: remover do time às vezes exige clicar 2x (anotado 2026-08-25; **RESOLVIDO na
-      sessão 0053, 2026-08-25**):** por vezes é preciso clicar 2x no botão "Remover do
-      time" para o membro sair. `views/team.erb` usa `hx-delete="/team"` (alvo `#team-view`,
+- [ ] **Bug: remover do time às vezes exige clicar 2x (anotado 2026-08-25; correção na
+      sessão 0053, 2026-08-25 — **persiste** conforme relatado pelo usuário na validação
+      da 0055, 2026-08-26):** por vezes é preciso clicar 2x no botão "Remover do time"
+      para o membro sair. `views/team.erb` usa `hx-delete="/team"` (alvo `#team-view`,
       `hx-include=".list-state"`, `hx-params="*"`); handler `remove_team_member`
-      (`server.rb`) só age se `params[:id]`. **Correção (0053):** botão com
-      `hx-disabled-elt="this"` (anti re-submit enquanto o request do 1º clique voa) +
-      regressão do `DELETE` htmx exato (id + `.list-state` + `HX-Request`) remove em 1
-      request e é idempotente (2º clique no-op seguro).
+      (`server.rb`) só age se `params[:id]`. **Correção parcial (0053):** botão com
+      `hx-disabled-elt="this"` (anti re-submit) + regressão do `DELETE` htmx exato.
+      **Status:** o bug **não foi resolvido de forma definitiva** — a investigação da 0053
+      apontou "intermitência" mas persiste. Candidato a sessão de correção independente.
 - [x] **Bug: gate da jornada fica aberto após zerar o time (anotado 2026-08-25, no QA;
       **RESOLVIDO na sessão 0052, 2026-08-25**):** o marcador `user_state` persistia —
       `JourneyService#started?` = `user_state.started? || team >= 6`. **Decisão (0052):**
