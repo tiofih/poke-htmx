@@ -66,4 +66,16 @@ class JourneyRestartTest < Minitest::Test
     assert_equal 0, errors.size, "erros concorrentes: #{Array.new(errors.size) { errors.pop }.inspect}"
     assert_empty @repository.all("user-a")
   end
+
+  def test_restart_journey_refreshes_pokemon_list_oob
+    PokeApiStub.with_all_names([]) do
+      PokeApiStub.with_find({}) do
+        post "/journey/restart", { offset: "0", q: "" }, htmx_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, %(hx-swap-oob="innerHTML")
+    assert_includes last_response.body, 'id="pokemon-list"'
+  end
 end

@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25 |
-| Implementação | **Concluída** — passos 1–8 + docs, suíte 803/2618, lint 0 (2026-08-25) |
+| Implementação | **Concluída** — passos 1–8 + docs, suíte 804/2623, lint 0 (2026-08-25) |
 | Validação | **Pendente** (executada pelo usuário) |
 
 ---
@@ -262,6 +262,10 @@ Center, com as opções **vender itens** (novo `POST /mart/sell`) e **recomeçar
   virou **lote** (`restore_items` de todos + `TeamRepository#clear` em 1 DELETE, sem
   reindex); (3) **lista de venda do Mart mostrava linhas de inventário em quantidade 0**
   (itens equipados/consumidos ficam como linha `0×` no `inventory`) — `_mart.erb` passa a
-  exibir **só quantidade > 0** + aviso "Nenhum item no estoque para vender". Suíte 803/2618.
-- Próximo passo do fluxo: **fase 2 concluída (passos 1–8, suíte 803/2618, lint 0) —
+  exibir **só quantidade > 0** + aviso "Nenhum item no estoque para vender"; (4) **lista
+  presa após "Recomeçar jornada"** (sem reiniciar o servidor) — o restart htmx só devolvia
+  o fragmento do time e a `#pokemon-list` ficava com os botões "No time ✓" do estado
+  antigo; o restart agora re-renderiza a lista via OOB (`hx-include=".list-state"` no
+  formulário do banner + `list_state_present?`). Suíte 804/2623.
+- Próximo passo do fluxo: **fase 2 concluída (passos 1–8, suíte 804/2623, lint 0) —
   PARAR e aguardar a validação do usuário (fase 3)**.

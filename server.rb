@@ -383,9 +383,19 @@ module ServerJourneyActions
     settings.battle.invalidate(current_user)
     return redirect "/" unless htmx_request?
 
+    render_restart_fragment
+  end
+
+  def render_restart_fragment
     @notice = "Jornada recomeçada. Monte seu time inicial de 6 Pokémon."
     @notice_kind = :info
-    render_team_fragment_with_notice
+    content = render_team_fragment_with_notice
+    content += oob_pokemon_list if list_state_present?
+    content
+  end
+
+  def list_state_present?
+    params.key?(:offset) || params.key?(:q)
   end
 end
 
