@@ -85,6 +85,22 @@ Entregar **UX-2b — filtros avançados, ordenação e alinhamento da página `/
 | 4 | **red→green — ordenação + persistência + alinhamento** (C3/C4): `sort` (`cost_asc`/`cost_desc`/`tier_desc`/`tier_asc`, default por número) ordena pool filtrado antes de paginar (usa `TIER_ORDER`/`TIER_COST`); `session[:list_filters]` guarda/restaura `type`/`generation`/`tier`/`cost`/`sort` (segundo request sem params restaura; limpar zera sessão); `#pokemon-list` OOB pós `POST/DELETE /team`/`restart` preserva filtros+sort+paginação; `public/style.css` alinha `list-column`↔`team-column` (largura/altura/rolagem coerentes, breakpoint 720px preservado); `C3` sem rede + OOB + `manual` visual | suíte completa + lint 0; commit `Passo 4: ordenacao por custo/tier, persistencia em sessao e alinhamento lista-time` |
 | — | **Fase 2 concluída** → **PARAR** e aguardar a validação do usuário (fase 3). Não marcar Done, não preencher a seção 7, não commitar conclusão. | — |
 
+## 5-A. Ajuste S3 2026-08-26 — validação reprovou C1 e C3 (hotfix)
+
+**Data:** 2026-08-26 — report do usuário: filtro `type=rock` => 2.5min e lista vazia.
+
+**C1 reaberto (tipo vazio):** `ServerListActions#filtered_base_forms` em `server.rb:305` usava `settings.api.find(name)` e filtrava por `pokemon.types`; porém `PokeApiHttp#find` (`lib/gateways/poke_api_http.rb:36`) retorna `Pokemon.new(name:, sprite:, number:)` sem `types`/`evolutions` (só `detail` traz). Logo `types == []` e `select` nunca casava => lista vazia. Tests passavam porque `PokeApiStub.with_find` injeta `types` no fake, mascarando o bug real. Também degradava `line_tier_for` (depende de `evolutions` via `pokemon.evolutions`).
+
+**C3 reaberto (performance p95 2.5min):** filtros de baixa cardinalidade (rock) varrem `common_candidates` full-scan (~1300 nomes) batendo `base_form?` + `find`/`generation_for` + `line_tier` sequencialmente por batch 24 sem cap; ordenação faz full-scan similar. Mitigação já prevista como risco em revisão.
+
+**Plano de correção (executado neste hotfix, aguardando revalidação do usuário):**
+1. Filtrar tipo via endpoint `/type/:name` (`PokeApiTypes#fetch_type_json` já existente) com novo `pokemon_names_by_type(type)` (extrai `json["pokemon"].map{dig("pokemon","name")}`) e cache em `PokeApiCache` + `PersistentJsonStore`; interseção `Set.new(type_names)` com `base_names` em `filtered_base_forms`, evitando N `find`s.
+2. Onde `types`/`evolutions`/`stats` são necessários, usar `settings.api.detail` (cacheado) em vez de `find` — `sort_names`, bloco `tier`/`cost` em `filtered_base_forms` e `evolution_chain_names`/`line_tier_for` passam a preferir `detail` mantendo `find` só para sprite.
+3. `PokeApiFake`/`PokeApiStub` expõem `pokemon_names_by_type` com `with_type_names`/`with_pokemon_names_by_type`; testes simulam `PokeApiHttp` real (`find` minimal sem `types`) e provam que filtro rock funciona via endpoint; `test_filters_by_type` segue verde via novo caminho e sem rede.
+4. Performance: com interseção O(1) o caso rock evita N fetches; primeira carga fria ainda paga `base_form?` mas warm cache reduz p95; documentado como limitação aceita. Alternativa futura (cap de varredura) anotada fora deste hotfix.
+
+**Status:** C1 reaberto e C3 reaberto em 2026-08-26; correção em `Passo 4b` desta sessão; aguardando segunda validação (fase 3) e reaprovação do usuário — **não marcar Done** até validação.
+
 ## 6. Decisões de refinamento (fechadas com o usuário em 2026-08-26)
 
 - **D1 — Objetivo/foco (A — UX-2b filtros avançados + alinhamento lista↔time, continuidade da 0056):** fecha o ciclo UX-2: a 0056 exibiu custo/tier na lista, esta entrega filtros/ordenação/persistência e alinha as caixas da `/`. Alternativas preteridas: B — só alinhamento sem filtros (deixaria a lista sem discovery com o orçamento M2) e C — só filtros sem alinhamento (a página em 2 colunas seguiria desbalanceada).
@@ -109,7 +125,9 @@ Ajuste de validação = alteração formal de critério com data e reaprovação
 | G2 (sem gems/schema, sem rede) | — | — | — |
 | G3 (S4/S5) | — | — | — |
 
-**Suíte executada na validação:** —
+**Validação 2026-08-26 (S3):** usuário reprovou **C1** (filtro `type=rock` retornou vazio) e **C3** (p95 2.5min) — ver **§5-A** para causa (`find` sem `types`) e plano via `/type` endpoint + `detail`. Critérios **C1 e C3 reabertos** em 2026-08-26; correção no `Passo 4b` desta sessão; aguarda **segunda validação** do usuário (reaprovação S3) — não marcar Done até então.
+
+**Suíte executada na validação:** — (primeira validação falhou; segunda pendente após hotfix)
 
 ## 8. Observações
 

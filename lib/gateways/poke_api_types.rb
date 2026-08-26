@@ -27,4 +27,13 @@ module PokeApiTypes
   def fetch_type_json(name)
     http_get("https://pokeapi.co/api/v2/type/#{name}")
   end
+
+  def pokemon_names_by_type(type)
+    json = fetch_type_json(type.to_s.strip.downcase)
+    return [] unless json
+
+    (json["pokemon"] || []).filter_map { |entry| entry.dig("pokemon", "name") }
+  rescue Faraday::Error, JSON::ParserError
+    []
+  end
 end

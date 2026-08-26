@@ -2,6 +2,7 @@ require "sinatra/base"
 require "sinatra/reloader"
 require "securerandom"
 require "time"
+require "set" # rubocop:disable Lint/RedundantRequireStatement
 require "pry" if ENV["RACK_ENV"] == "development"
 require_relative "lib/gateways/poke_api"
 require_relative "lib/team_repository"
@@ -274,7 +275,7 @@ module ServerListActions
   # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
   def sort_names(names)
     infos = Parallelizer.map(names) do |name|
-      pokemon = settings.api.find(name)
+      pokemon = settings.api.detail(name) || settings.api.find(name)
       # guard nil pokemon (should not happen for base forms)
       tier = pokemon ? line_tier_for(pokemon).to_s : "F"
       restricted = settings.api.evolution_restricted?(name)
@@ -296,16 +297,21 @@ module ServerListActions
   end
   # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
 
+  def type_pokemon_set
+    return @type_pokemon_set if defined?(@type_pokemon_set) && @type_pokemon_set && @type_pokemon_set_type == @type
+
+    @type_pokemon_set_type = @type
+    @type_pokemon_set = Set.new(settings.api.pokemon_names_by_type(@type))
+  end
+
   # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
   def filtered_base_forms(batch)
     forms = Parallelizer.map(batch) { |name| [name, settings.api.base_form?(name)] }
     base_names = forms.select { |_name, is_base| is_base }.map(&:first)
     filtered = base_names
     if @type
-      typed = Parallelizer.map(filtered) { |name| [name, settings.api.find(name)] }
-      filtered = typed.select do |_name, pokemon|
-        pokemon && pokemon.types.map(&:downcase).include?(@type)
-      end.map(&:first)
+      type_set = type_pokemon_set
+      filtered = filtered.select { |name| type_set.include?(name) }
     end
     if @generation
       gen = Parallelizer.map(filtered) { |name| [name, settings.api.generation_for(name)] }
@@ -313,7 +319,7 @@ module ServerListActions
     end
     if @tier || @cost_max
       tier_cost = Parallelizer.map(filtered) do |name|
-        pokemon = settings.api.find(name)
+        pokemon = settings.api.detail(name) || settings.api.find(name)
         next [name, nil, nil] unless pokemon
 
         tier = line_tier_for(pokemon).to_s
@@ -538,13 +544,15 @@ module ServerTeamActions
     tiers.empty? ? :F : tier_max(tiers)
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity
   def evolution_chain_names(pokemon)
     return pokemon.evolutions.map(&:name) if pokemon.evolutions.any?
 
-    resolved = settings.api.find(pokemon.name)
+    resolved = settings.api.detail(pokemon.name) || settings.api.find(pokemon.name)
     chain = resolved&.evolutions
     chain && !chain.empty? ? chain.map(&:name) : [pokemon.name]
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity
 
   # rubocop:disable Lint/UselessConstantScoping
   TIER_ORDER = %i[F D C B A S].freeze

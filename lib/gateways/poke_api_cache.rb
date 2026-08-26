@@ -71,6 +71,11 @@ class PokeApiCache
     fetch([:generation_for, name], accept: ->(value) { !value.nil? }) { @inner.generation_for(name) }
   end
 
+  def pokemon_names_by_type(type)
+    fetch([:pokemon_names_by_type, type.to_s.strip.downcase],
+          accept: ->(value) { value.is_a?(Array) && !value.empty? }) { @inner.pokemon_names_by_type(type) }
+  end
+
   private
 
   def fetch(key, accept: nil)

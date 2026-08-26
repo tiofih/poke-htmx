@@ -3,17 +3,19 @@
 require_relative "../lib/gateways/poke_api_http"
 
 class PokeApiFake
+  # rubocop:disable Metrics/ParameterLists
   def initialize(find: nil, detail: nil, fetch_all_names: nil,
                  moves_for: nil, move: nil, available_move_names: nil, type_relations: nil,
                  next_evolutions: nil, learnable_moves: nil, base_form: nil,
-                 evolution_restricted: nil, generation_for: nil)
+                 evolution_restricted: nil, generation_for: nil, pokemon_names_by_type: nil)
+    # rubocop:enable Metrics/ParameterLists
     @config = {
       find: find, detail: detail, fetch_all_names: fetch_all_names,
       moves_for: moves_for, move: move,
       available_move_names: available_move_names, type_relations: type_relations,
       next_evolutions: next_evolutions, learnable_moves: learnable_moves,
       base_form: base_form, evolution_restricted: evolution_restricted,
-      generation_for: generation_for
+      generation_for: generation_for, pokemon_names_by_type: pokemon_names_by_type
     }.freeze
     @find = find
     @detail = detail
@@ -27,6 +29,7 @@ class PokeApiFake
     @base_form = base_form
     @evolution_restricted = evolution_restricted
     @generation_for = generation_for
+    @pokemon_names_by_type = pokemon_names_by_type
   end
 
   attr_reader :config, :fetch_all_names, :type_relations
@@ -75,6 +78,10 @@ class PokeApiFake
 
   def generation_for(name)
     resolve(@generation_for, name)
+  end
+
+  def pokemon_names_by_type(type)
+    resolve(@pokemon_names_by_type, type.to_s.strip.downcase) || []
   end
 
   private

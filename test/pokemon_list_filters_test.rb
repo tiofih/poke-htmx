@@ -2,7 +2,7 @@
 
 require_relative "server_test_helpers"
 
-# rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Layout/HashAlignment
+# rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Layout/HashAlignment, Metrics/ClassLength
 class PokemonListFilterTest < Minitest::Test
   include ServerTestHelpers
   include TestSupport
@@ -38,12 +38,22 @@ class PokemonListFilterTest < Minitest::Test
     Pokemon.new(name: name, sprite: "https://example.com/#{name}.png", number: number, types: types)
   end
 
-  def stub_list(names, find_map: nil, types_map: {}, generation_map: {}, rating_map: {},
+  # rubocop:disable Metrics/MethodLength
+  def stub_list(names, find_map: nil, detail_map: nil, types_map: {}, generation_map: {}, rating_map: {},
                 restricted_map: {}, &block)
     forms = names.to_h { |name| [name, true] }
     rating = rating_map
     fmap = find_map || names.to_h do |name|
       [name, build_record(name, 100 + names.index(name), types: types_map[name] || [])]
+    end
+    dmap = detail_map || fmap
+    # derive type -> names index for pokemon_names_by_type endpoint (simula /type/:name)
+    type_names_map = {}
+    types_map.each do |name, tys|
+      Array(tys).each do |t|
+        key = t.to_s.strip.downcase
+        (type_names_map[key] ||= []) << name
+      end
     end
     generation = generation_map.empty? ? nil : generation_map
     restricted = restricted_map.empty? ? nil : restricted_map
@@ -61,18 +71,29 @@ class PokemonListFilterTest < Minitest::Test
         inner.call
       end
     end
+    with_detail = proc do |inner|
+      PokeApiStub.with_detail(dmap) { inner.call }
+    end
+    with_type_names = proc do |inner|
+      PokeApiStub.with_pokemon_names_by_type(type_names_map) { inner.call }
+    end
     PokeApiStub.with_all_names(names) do
       PokeApiStub.with_find(fmap) do
         PokeApiStub.with_base_forms(forms) do
-          with_generation.call(proc do
-            with_restricted.call(proc do
-              with_rating(rating, &block)
+          with_detail.call(proc do
+            with_type_names.call(proc do
+              with_generation.call(proc do
+                with_restricted.call(proc do
+                  with_rating(rating, &block)
+                end)
+              end)
             end)
           end)
         end
       end
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   def test_filters_by_type
     names = %w[charmander squirtle bulbasaur pikachu]
@@ -503,5 +524,94 @@ class PokemonListFilterTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, 'value="eevee"'
   end
+
+  def test_filters_by_type_via_endpoint_when_find_has_no_types
+    # Simula PokeApiHttp real: find retorna Pokemon minimal sem types (vazio)
+    names = %w[geodude onix pikachu]
+    # find minimal (sem types) — reproduz bug de find sem types
+    find_minimal = names.to_h { |n| [n, build_record(n, 1, types: [])] }
+    # endpoint /type/rock lista apenas geodude e onix
+    type_names = { "rock" => %w[geodude onix] }
+    detail_map = names.to_h { |n| [n, build_record(n, 1, types: n == "pikachu" ? %w[electric] : %w[rock ground])] }
+    forms = names.to_h { |n| [n, true] }
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_find(find_minimal) do
+        PokeApiStub.with_detail(detail_map) do
+          PokeApiStub.with_base_forms(forms) do
+            PokeApiStub.with_pokemon_names_by_type(type_names) do
+              get "/pokemons", type: "rock"
+              assert last_response.ok?
+              assert_includes last_response.body, 'value="geodude"'
+              assert_includes last_response.body, 'value="onix"'
+              refute_includes last_response.body, 'value="pikachu"'
+              # prova que find minimal sozinho falharia, mas endpoint corrige
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def test_tier_filter_uses_detail_for_evolutions_when_find_minimal
+    # find minimal tem evolutions vazio, detail tem cadeia ramificada (eevee-like)
+    names = %w[eevee]
+    vaporeon = build_record("vaporeon", 134)
+    jolteon = build_record("jolteon", 135)
+    flareon = build_record("flareon", 136)
+    eevee_base = build_record("eevee", 133)
+    eevee_with_chain = Pokemon.new(
+      name: "eevee", sprite: "s", number: 133,
+      evolutions: [eevee_base, vaporeon, jolteon, flareon].freeze
+    )
+    eevee_minimal = build_record("eevee", 133, types: [])
+    rating = { "eevee" => "F", "vaporeon" => "C", "jolteon" => "A", "flareon" => "S" }
+    forms = { "eevee" => true }
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_find("eevee" => eevee_minimal) do
+        PokeApiStub.with_detail("eevee" => eevee_with_chain) do
+          PokeApiStub.with_base_forms(forms) do
+            PokeApiStub.with_pokemon_names_by_type({}) do
+              with_rating(rating) do
+                get "/pokemons", tier: "S"
+                assert last_response.ok?
+                assert_includes last_response.body, 'value="eevee"'
+                get "/pokemons", tier: "F"
+                assert last_response.ok?
+                refute_includes last_response.body, 'value="eevee"'
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
+  def test_rock_type_with_large_pool_completes_quickly_via_endpoint
+    # 1300 nomes stubados, apenas 3 rocks; sem endpoint levaria N finds, com endpoint faz interseção
+    many = (1..1_300).map { |i| "pokemon#{i}" }
+    rocks = %w[rock1 rock2 rock3]
+    all_names = many + rocks
+    find_minimal = all_names.to_h { |n| [n, build_record(n, 1, types: [])] }
+    detail_map = find_minimal.dup
+    type_names = { "rock" => rocks }
+    forms = all_names.to_h { |n| [n, true] }
+    start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    PokeApiStub.with_all_names(all_names) do
+      PokeApiStub.with_find(find_minimal) do
+        PokeApiStub.with_detail(detail_map) do
+          PokeApiStub.with_base_forms(forms) do
+            PokeApiStub.with_pokemon_names_by_type(type_names) do
+              get "/pokemons", type: "rock"
+              assert last_response.ok?
+              rocks.each { |r| assert_includes last_response.body, "value=\"#{r}\"" }
+              refute_includes last_response.body, 'value="pokemon1"'
+            end
+          end
+        end
+      end
+    end
+    elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+    assert_operator elapsed, :<, 1.0, "filtro rock com 1300 nomes deve resolver em <1s via endpoint (#{elapsed}s)"
+  end
 end
-# rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Layout/HashAlignment
+# rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Layout/HashAlignment, Metrics/ClassLength

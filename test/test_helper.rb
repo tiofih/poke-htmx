@@ -287,4 +287,13 @@ module PokeApiStub
   def self.with_generation(map, &)
     with_gateway(generation_for: map, &)
   end
+
+  def self.with_pokemon_names_by_type(map, &)
+    normalized = map.transform_keys { |k| k.to_s.strip.downcase }
+    with_gateway(pokemon_names_by_type: normalized, &)
+  end
+
+  def self.with_type_names(map, &)
+    with_pokemon_names_by_type(map, &)
+  end
 end
