@@ -867,3 +867,32 @@
   `POST /team` → `mark_started_when_full`) ou redefinir o papel do marcador (ex.: marcar
   "primeira jornada completada" para outro propósito). Interage com a migração 0036
   (`user_state`), seeds e `TestDatabase.clear_user_state!`.
+
+### INFRA-1. Cache da PokéAPI em Redis (anotado 2026-08-26, fora do fluxo)
+
+- **Contexto:** `tmp/pokeapi_cache.json` cresceu para `322M/4324` chaves (2026-08-26) e o
+  `PersistentJsonStore:PersistentJsonStore` faz `JSON.parse(File.read)` síncrono no boot
+  (`lib/gateways/persistent_json_store.rb:100` + `lib/gateways/poke_api.rb:29`).
+  Custo medido: `3.26s` só de parse dentro do `web` — pago 54× na suíte (`./scripts/test`
+  = 1 `docker compose run` por arquivo) → minutos. Isolar `POKEAPI_CACHE_PATH` em teste
+  resolveu o sintoma; o arquivo continua compartilhado em dev/prod e cresce sem
+  `max_entries` (ao contrário do `PokeApiCache:lib/gateways/poke_api_cache.rb:7` 600s/1000).
+- **Ideia (intenção do usuário: regras novas + colocar online):** substituir o
+  `PersistentJsonStore` (arquivo + `Thread sleep 30s` flush) por `RedisJsonStore`
+  (`SETEX` com `DEFAULT_TTL=7d`, `EXISTS`/`GET`, `JSON.generate` só do valor), mantendo
+  `PokeApiCache` como L1 em memória e `PokeApiHttp:lib/gateways/poke_api_http.rb:17` como
+  choke point. Cache passa a ser compartilhado entre réplicas `web`, TTL/evicção nativos,
+  sem parse de 300M no boot.
+- **Impacto/escopo:** infra (`docker-compose.yml:2` + `redis:7-alpine`, `ENV REDIS_URL`),
+  `Gemfile:1` (`gem "redis"`), novo `lib/gateways/redis_json_store.rb` com mesma interface
+  `#get/#flush!` de `PokeApiHttp:47`, `lib/gateways/poke_api.rb:29` injeta `Redis` quando
+  `ENV["REDIS_URL"]` presente (fallback p/ `transport_get:57` se Redis cair), testes com
+  `fakeredis`/`mock_redis` ou `FLUSHDB` por suite. Memória Redis ~400M para o dataset
+  atual (precisa `maxmemory`+`allkeys-lru`).
+- **Decisão:** **não fazer agora** — tratar como sessão própria após a correção de
+  velocidade dos testes. Primeiro validar o fix isolado (`POKEAPI_CACHE_PATH` de teste +
+  cap do arquivo). Se escalar para N réplicas `web` ou cache quente compartilhado for
+  necessário no deploy, refinar INFRA-1 como sessão SDD (critérios: boot <1s, suíte sem
+  rede <30s, fallback sem Redis OK, `docker compose up` com `redis`).
+- **Aberto:** usar `Redis` vs reaproveitar o próprio `Postgres` (`pokeapi_cache` com
+  `jsonb`) vs manter arquivo com `max_entries`; preço/run de `REDIS_URL` em produção.
