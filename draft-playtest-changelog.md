@@ -651,3 +651,85 @@ hipóteses erradas:
   ou bloquear "Novo confronto" se time tem KO.
 
 <!-- registros futuros adicionados abaixo -->
+
+## Sessão 5 — 2026-08-26 (playtest via browser-harness)
+
+> Execução: agente conectou ao app real em Chrome (CDP), iniciou gravação em
+> `~/.config/browser-harness/agent-workspace/recordings/poke-playtest-session`,
+> percorreu Lista → Gerenciar → Center → Mart → batalha → Histórico. Foco:
+> jogar o máximo possível observando game design, UI e UX. A tentativa de
+> viewport móvel via CDP não alterou o viewport efetivo e não foi considerada
+> evidência responsiva.
+
+### 5.1 O que foi testado
+
+- Batalha automática com time existente e avanço de rodadas até o fim.
+- Leitura de HP/PP, log textual, resultado, XP/dinheiro e retorno à Lista.
+- Cura completa no Poke Center após derrota.
+- Compra de Poção e Choice Band no Mart, conferindo saldo e inventário.
+- Entrada em Gerenciar time e tentativa de equipar item/segurável.
+- Histórico de batalhas, ranking global e últimas batalhas.
+
+### 5.2 Experiência
+
+- O Center dá feedback claro quando a cura acontece: `Time curado por 128 de
+  dinheiro. Saldo: 104.` e os HP voltam a ficar legíveis na Lista. Esse é um
+  padrão de feedback que funciona e deveria ser replicado nas demais ações.
+- Depois da cura, abrir `/battle` continuou mostrando a batalha finalizada
+  anterior, com o time em HP 0, enquanto a Lista mostrava o time curado. Para o
+  jogador, ficam duas versões conflitantes do estado e não fica claro como
+  começar uma luta nova.
+- A batalha terminou em quatro rodadas nesta tentativa, mas o fluxo exige um
+  clique por rodada. A automação também revelou que o estado visual pode ficar
+  atrasado quando cliques são feitos antes do swap htmx, sem indicação de que a
+  ação está processando.
+- Comprar é compreensível pelo saldo e pelo preço, mas o Mart chama o item de
+  `Pocao` e o inventário de `potion`; a troca de idioma/slug permanece visível
+  para o jogador.
+- No Gerenciar, a tentativa de equipar Poção/Choice Band não exibiu mensagem de
+  sucesso nem passou a mostrar o item como selecionado: o card continuou com
+  `Nenhum` e apenas os itens disponíveis (`×1`). Mesmo quando a ação tiver sido
+  processada, o jogador não consegue confirmar o estado.
+- O Histórico continua colocando `seed-shop` no topo com 41 vitórias e fazendo
+  o jogador atual aparecer como posição 1 antes de uma leitura clara do próprio
+  progresso. As últimas batalhas mostram apenas resultado, oponentes e data;
+  não há rounds, HP final, itens ou golpes para aprender com a partida.
+
+### 5.3 Achados
+
+| # | Achado | Impacto | Área |
+| --- | --- | --- | --- |
+| S5-P1 | **`/battle` reabre resultado obsoleto após cura** — Lista mostra HP cheio e mensagem de cura, mas a rota de batalha ainda mostra a batalha anterior finalizada e HP 0 | Duas fontes de verdade; jogador não sabe se pode lutar | UX / estado |
+| S5-P2 | **Ações do Gerenciar não têm confirmação de equipamento** — após salvar, o card continua apresentando `Nenhum` e não há toast/estado selecionado | Estratégia central do auto-battler parece não ter sido aplicada | UX / game design |
+| S5-P3 | **Batalha sem feedback de processamento** — cada rodada requer clique e cliques durante o swap podem deixar a leitura atrasada | Atrito e risco de o jogador repetir/ perder ações | UX |
+| S5-P4 | **Nomenclatura de itens ainda inconsistente** — Mart usa `Pocao`, inventário usa `potion` | Reduz polish e confiança no inventário | UI |
+| S5-P5 | **Histórico não ajuda a iterar o time** — resumo não mostra rounds, HP, PP, golpes ou itens usados | O jogador não consegue transformar derrota em decisão de pré-combate | Game design / UX |
+| S5-P6 | **Ranking inicial continua sem senso de progressão** — `seed-shop` domina o topo e o jogador aparece com histórico herdado | Desmotiva a primeira sessão | Game design |
+
+### 5.4 Propostas
+
+- **S5-TP1 — Estado de batalha coerente após cura** (ref: S5-P1): invalidar/encerrar
+  a visão de resultado ao curar e fazer `/battle` abrir uma nova batalha quando
+  não houver combate ativo; manter um CTA explícito para iniciar confronto.
+- **S5-TP2 — Confirmação de equipamento** (ref: S5-P2): refletir item e segurável
+  selecionados no card, mostrar mensagem de sucesso/erro e listar o equipamento
+  no painel de batalha.
+- **S5-TP3 — Estado de processamento da rodada** (ref: S5-P3): desabilitar o
+  botão durante o request, mostrar indicador e oferecer `Resolver batalha` ou
+  velocidade configurável.
+- **S5-TP4 — Vocabulário único de itens** (ref: S5-P4): escolher nomes traduzidos
+  ou slugs em inglês e usá-los em Mart, inventário, Gerenciar e batalha.
+- **S5-TP5 — Detalhe acionável no Histórico** (ref: S5-P5): preservar resumo curto,
+  mas permitir abrir rounds, HP/PP finais, golpes, itens e recompensas.
+- **S5-TP6 — Ranking sem histórico herdado** (ref: S5-P6): separar seeds de
+  jogadores reais e iniciar o progresso do jogador em 0/0/0.
+
+### 5.5 Evidências e limites
+
+- A gravação cobre a sessão desde a entrada na Lista até Histórico; o caminho
+  exato foi mantido no diretório retornado pelo harness.
+- A tentativa de equipar via automação não deve ser usada sozinha para concluir
+  falha de persistência; o achado confirmado é a ausência de confirmação/estado
+  visível e requer revalidação com clique humano.
+- O teste móvel foi inconclusivo porque o viewport permaneceu em 1728 px; não há
+  conclusão sobre overflow ou responsividade nesta sessão.
