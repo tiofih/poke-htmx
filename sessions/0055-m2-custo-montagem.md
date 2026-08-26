@@ -268,3 +268,9 @@ Ajuste de validação = alteração formal de critério com data e reaprovação
   **fora** — sessão futura, anotados no `REQUIREMENTS.md`/draft. Essa sessão **depende
   do M2** (0055) porque o custo é derivado do tier da linha. Candidata imediata; após ela:
   fila J2/J4/D4 e as demais limitações técnicas — a critério do usuário.
+- **Bug Q5 persistente** (2026-08-26 — relatado pelo usuário na validação da 0055):
+  o botão "Remover do time" ainda exige **2 cliques** para remover de fato. A correção
+  da 0053 (hardening `hx-disabled-elt="this"` + regressão do `DELETE` htmx exato)
+  **não resolveu** o problema de forma definitiva. A investigação da 0053 apontou
+  "intermitência" — mas o usuário relata que persiste. **Candidato a sessão de correção
+  independente** (bug UX, impacto no fluxo de montagem, pode interagir com o M2/UX-2).
