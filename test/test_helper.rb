@@ -23,6 +23,7 @@ require_relative "../lib/gateways/poke_api"
 require_relative "../lib/team_repository"
 require_relative "test_support"
 require_relative "poke_api_fake"
+require_relative "vcr_setup"
 
 module Minitest
   class Test

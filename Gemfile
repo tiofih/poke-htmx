@@ -15,6 +15,8 @@ group :test do
   gem "minitest"
   gem "rack-test"
   gem "rake"
+  gem "vcr"
+  gem "webmock"
 end
 
 group :development do
