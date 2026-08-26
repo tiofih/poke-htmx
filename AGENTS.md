@@ -11,6 +11,19 @@
 - Ao receber o feedback, registrar a validação no arquivo da sessão e só então
   atualizar `REQUIREMENTS.md`/`SESSIONS.md` e commitar a validação.
 
+## Graphify — consulte o grafo antes de ler arquivos
+
+Quando `graphify-out/` existe no projeto, **use o graphify para responder perguntas sobre o
+código**, em vez de ler arquivos brutos ou fazer grep. O grafo já foi construído com
+tree-sitter AST e contém todos os nós e arestas do projeto.
+
+**Sempre que possível**, antes de usar ferramentas de busca/arquivo:
+- `graphify query "<pergunta>"` — resposta por BFS/DFS no grafo
+- `graphify path "A" "B"` — caminho mais curto entre dois conceitos
+- `graphify explain "Nó"` — explicação de um conceito e suas conexões
+
+O skill `graphify` está disponível globalmente (load via `skill(name: "graphify")`).
+
 ## SDD — robustez do fluxo (regras do processo)
 
 - **S1 — Critérios apontam os testes que os provam.** Cada critério de aceite (seções
