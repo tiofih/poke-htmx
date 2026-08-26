@@ -19,6 +19,7 @@ module PokeApi
   #   fetch_all_names                             -> [String]
   #   base_form?(name)                            -> Boolean
   #   evolution_restricted?(name)                 -> Boolean
+  #   generation_for(name)                        -> Integer (1..9) | nil
   #
   # Ponto de injeção: `PokeApi.instance` resolve o adapter usado por padrão —
   # decorado com `PokeApiCache` (TTL/LRU fixos, E1-B) sobre `PokeApiHttp` com cache

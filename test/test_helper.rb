@@ -283,4 +283,8 @@ module PokeApiStub
   def self.with_learnable_moves(data, &)
     with_gateway(learnable_moves: data, &)
   end
+
+  def self.with_generation(map, &)
+    with_gateway(generation_for: map, &)
+  end
 end

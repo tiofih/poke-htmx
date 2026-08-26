@@ -3,6 +3,7 @@
 require "faraday"
 require_relative "../pokemon"
 
+# rubocop:disable Metrics/ModuleLength
 module PokeApiParsing
   STAT_LABELS = {
     "hp" => "HP",
@@ -65,6 +66,27 @@ module PokeApiParsing
   rescue Faraday::Error, JSON::ParserError
     false
   end
+
+  # rubocop:disable Metrics/MethodLength
+  def generation_for(name)
+    data = pokemon_data(name)
+    return nil unless data
+
+    species_url = data.dig("species", "url")
+    return nil unless species_url
+
+    species = http_get(species_url)
+    return nil unless species
+
+    generation_url = species.dig("generation", "url").to_s
+    match = generation_url.match(%r{generation/(\d+)})
+    return nil unless match
+
+    match[1].to_i
+  rescue Faraday::Error, JSON::ParserError
+    nil
+  end
+  # rubocop:enable Metrics/MethodLength
 
   # Retorna true se o Pokémon tem pelo menos um estágio seguinte cujo trigger
   # ≠ "level-up" (pedra/item, troca, …); false para evolução só por nível ou
@@ -146,3 +168,4 @@ module PokeApiParsing
     { name: stage["species"]["name"], trigger: details.dig("trigger", "name"), min_level: details["min_level"] }
   end
 end
+# rubocop:enable Metrics/ModuleLength

@@ -67,6 +67,10 @@ class PokeApiCache
     fetch([:evolution_restricted, name], accept: ->(value) { value == true }) { @inner.evolution_restricted?(name) }
   end
 
+  def generation_for(name)
+    fetch([:generation_for, name], accept: ->(value) { !value.nil? }) { @inner.generation_for(name) }
+  end
+
   private
 
   def fetch(key, accept: nil)

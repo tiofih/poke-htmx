@@ -91,22 +91,25 @@ module ServerListActions
     erb :pokemon_list, layout: false
   end
 
-  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def load_pokemon_page
     @limit = PAGE_SIZE
     @type = normalized_type(params[:type])
+    @generation = normalized_generation(params[:generation])
     @starters = starters_visible? ? load_starters : []
     build_page
     @items = Parallelizer.map(@page_names) { |name| [name, settings.api.find(name)] }
     load_search_hint
-    @notice = "Não foi possível carregar a lista de Pokémon." if @page_names.empty? && @q.empty? && @type.nil?
+    if @page_names.empty? && @q.empty? && @type.nil? && @generation.nil?
+      @notice = "Não foi possível carregar a lista de Pokémon."
+    end
     load_team_names
     build_pokemon_costs
   end
-  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def starters_visible?
-    @q.empty? && @offset.zero? && @type.nil?
+    @q.empty? && @offset.zero? && @type.nil? && @generation.nil?
   end
 
   def normalized_type(value)
@@ -117,8 +120,18 @@ module ServerListActions
     v
   end
 
+  def normalized_generation(value)
+    v = value.to_s.strip
+    return nil if v.empty?
+
+    n = Integer(v, 10, exception: false)
+    return nil unless n&.between?(1, 9)
+
+    n
+  end
+
   def filter_active?
-    !@type.nil?
+    !@type.nil? || !@generation.nil?
   end
 
   def load_search_hint
@@ -154,16 +167,24 @@ module ServerListActions
     end
   end
 
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
   def filtered_base_forms(batch)
     forms = Parallelizer.map(batch) { |name| [name, settings.api.base_form?(name)] }
     base_names = forms.select { |_name, is_base| is_base }.map(&:first)
-    return base_names if @type.nil?
-
-    typed = Parallelizer.map(base_names) { |name| [name, settings.api.find(name)] }
-    typed.select { |_name, pokemon| pokemon && pokemon.types.map(&:downcase).include?(@type) }.map(&:first)
+    filtered = base_names
+    if @type
+      typed = Parallelizer.map(filtered) { |name| [name, settings.api.find(name)] }
+      filtered = typed.select do |_name, pokemon|
+        pokemon && pokemon.types.map(&:downcase).include?(@type)
+      end.map(&:first)
+    end
+    if @generation
+      gen = Parallelizer.map(filtered) { |name| [name, settings.api.generation_for(name)] }
+      filtered = gen.select { |_name, gen_val| gen_val == @generation }.map(&:first)
+    end
+    filtered
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
 
   def base_form_names(batch)
     forms = Parallelizer.map(batch) { |name| [name, settings.api.base_form?(name)] }

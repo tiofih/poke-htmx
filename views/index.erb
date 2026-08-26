@@ -18,6 +18,13 @@
           <option value="<%= t %>" <%= "selected" if @type == t %>><%= t.capitalize %></option>
         <% end %>
       </select>
+
+      <select name="generation" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+        <option value="" <%= "selected" if @generation.nil? %>>Todas as gerações</option>
+        <% (1..9).each do |g| %>
+          <option value="<%= g %>" <%= "selected" if @generation == g %>>Geração <%= g %></option>
+        <% end %>
+      </select>
     </div>
 
     <div id="pokemon-list">
