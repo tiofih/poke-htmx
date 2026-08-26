@@ -410,6 +410,75 @@ class PokemonListFilterTest < Minitest::Test
     end
   end
 
+  def test_pagination_follows_next_offset_with_filter_and_sort
+    many = (1..80).map { |i| "pokemon#{i}" }
+    types = many.to_h { |n| [n, %w[fire]] }
+    rating = many.to_h { |n| [n, "F"] }
+    rating["pokemon1"] = "S"
+    rating["pokemon2"] = "A"
+    find_map = many.to_h { |n| [n, build_record(n, n.scan(/\d+/).first.to_i, types: %w[fire])] }
+    stub_list(many, find_map: find_map, types_map: types, rating_map: rating) do
+      get "/pokemons", type: "fire", offset: "0"
+      assert last_response.ok?
+      assert_includes last_response.body, "Página 1"
+      # next_offset must be PAGE_SIZE (36) not FIRST_PAGE_COMMONS (9) when filter active
+      refute_includes last_response.body, 'offset=9"'
+      assert_includes last_response.body, "offset=36"
+      next_offset = last_response.body[%r{hx-get="/pokemons\?offset=(\d+)}, 1]
+      assert_equal "36", next_offset
+      get "/pokemons", type: "fire", offset: next_offset
+      assert last_response.ok?
+      assert_includes last_response.body, "Página 2"
+      assert_includes last_response.body, "offset=0"
+      assert_includes last_response.body, "offset=72"
+
+      # sort active also uses PAGE_SIZE
+      get "/pokemons", sort: "cost_desc", offset: "0"
+      assert last_response.ok?
+      assert_includes last_response.body, "Página 1"
+      next_sorted = last_response.body[%r{hx-get="/pokemons\?offset=(\d+)}, 1]
+      assert_equal "36", next_sorted
+      get "/pokemons", sort: "cost_desc", offset: next_sorted
+      assert last_response.ok?
+      assert_includes last_response.body, "Página 2"
+
+      # without filter/sort, first page still uses FIRST_PAGE_COMMONS (clear session first)
+      get "/pokemons", type: "", generation: "", tier: "", cost_max: "", cost: "", sort: "", q: "", offset: "0"
+      get "/pokemons", offset: "0"
+      assert last_response.ok?
+      first_next = last_response.body[%r{hx-get="/pokemons\?offset=(\d+)}, 1]
+      assert_equal "9", first_next
+    end
+  end
+
+  def test_oob_after_remove_preserves_filters_and_sort
+    names = %w[charmander squirtle bulbasaur pikachu]
+    types = {
+      "charmander" => %w[fire], "squirtle" => %w[water],
+      "bulbasaur" => %w[grass], "pikachu" => %w[electric]
+    }
+    find_map = names.to_h { |n| [n, build_record(n, 1, types: types[n])] }
+    rating = { "charmander" => "F", "squirtle" => "C", "bulbasaur" => "B", "pikachu" => "S" }
+    stub_list(names, find_map: find_map, types_map: types, rating_map: rating) do
+      get "/pokemons", type: "fire", sort: "cost_desc"
+      assert_includes last_response.body, 'value="charmander"'
+      poke = build_pokemon_record("pikachu", 25)
+      @repository.add("user-a", poke)
+      id = @repository.all("user-a").first.id
+      delete "/team",
+             { id: id, offset: "0", q: "", type: "fire", sort: "cost_desc" },
+             { "HTTP_HX_REQUEST" => "true", "rack.session" => { "user_id" => "user-a" } }
+      assert last_response.ok?
+      assert_includes last_response.body, 'id="pokemon-list"'
+      assert_includes last_response.body, "hx-swap-oob"
+      assert_includes last_response.body, 'value="charmander"'
+      refute_includes last_response.body, 'value="squirtle"'
+      # sort and type preserved in OOB hidden inputs (pagination link absent when single page)
+      assert_includes last_response.body, 'name="type" value="fire"'
+      assert_includes last_response.body, 'name="sort" value="cost_desc"'
+    end
+  end
+
   def test_without_network
     names = %w[eevee vaporeon jolteon]
     eevee_base = build_record("eevee", 133)

@@ -2,7 +2,7 @@ require "sinatra/base"
 require "sinatra/reloader"
 require "securerandom"
 require "time"
-require "pry"
+require "pry" if ENV["RACK_ENV"] == "development"
 require_relative "lib/gateways/poke_api"
 require_relative "lib/team_repository"
 require_relative "lib/battle_pokemon"
@@ -73,7 +73,6 @@ module ServerListActions
   PAGE_SIZE = 36
   FIRST_PAGE_COMMONS = PAGE_SIZE - STARTER_SLUGS.size
   SCAN_BATCH = 24
-  FILTER_TIER_ORDER = %i[F D C B A S].freeze
 
   private
 
@@ -288,9 +287,9 @@ module ServerListActions
     when "cost_desc"
       infos.sort_by { |_n, _t, c| -c }.map(&:first)
     when "tier_desc"
-      infos.sort_by { |_n, t, _c| -FILTER_TIER_ORDER.index(t.to_sym) }.map(&:first)
+      infos.sort_by { |_n, t, _c| -ServerTeamActions::TIER_ORDER.index(t.to_sym) }.map(&:first)
     when "tier_asc"
-      infos.sort_by { |_n, t, _c| FILTER_TIER_ORDER.index(t.to_sym) }.map(&:first)
+      infos.sort_by { |_n, t, _c| ServerTeamActions::TIER_ORDER.index(t.to_sym) }.map(&:first)
     else
       names
     end
@@ -343,8 +342,12 @@ module ServerListActions
     names.reject { |name| STARTER_SLUGS.include?(name) }
   end
 
+  def standard_pagination?
+    @q.empty? && !filter_active? && !sort_active?
+  end
+
   def current_page_number
-    if @q.empty? && !@offset.zero?
+    if standard_pagination? && !@offset.zero?
       ((@offset - FIRST_PAGE_COMMONS) / PAGE_SIZE) + 2
     else
       (@offset / PAGE_SIZE) + 1
@@ -353,13 +356,13 @@ module ServerListActions
 
   def previous_offset
     return nil if @offset.zero?
-    return 0 if @q.empty? && @current_page == 2
+    return 0 if standard_pagination? && @current_page == 2
 
     @offset - PAGE_SIZE
   end
 
   def next_page_offset
-    return FIRST_PAGE_COMMONS if @q.empty? && @offset.zero?
+    return FIRST_PAGE_COMMONS if standard_pagination? && @offset.zero?
 
     @offset + PAGE_SIZE
   end
