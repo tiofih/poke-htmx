@@ -5,6 +5,10 @@
   <p class="journey-progress">Time: <%= @team.size %>/6</p>
   <p class="notice notice--info">Monte seu time inicial de 6 Pokémon para iniciar a jornada.</p>
 <% end %>
+<% if @team_cost && @team_budget %>
+  <p class="team-budget">Custo do time: <%= @team_cost %>/<%= @team_budget %></p>
+  <p class="team-s-count">S no time: <%= @team_s_count %>/3</p>
+<% end %>
 <p class="team-tools">
   <a href="#" hx-get="/team/manage" hx-target="#team-view" hx-swap="innerHTML">Gerenciar time</a>
 </p>

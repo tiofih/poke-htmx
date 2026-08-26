@@ -553,6 +553,9 @@ module ServerBattleActions
   def prepare_team_fragment_data
     load_journey_state
     @team = settings.team.all(current_user)
+    @team_cost = team_total_cost(@team)
+    @team_budget = TeamBudget::BUDGET
+    @team_s_count = team_s_count(@team)
     center_data
     mart_data
   end

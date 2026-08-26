@@ -1,9 +1,28 @@
 # frozen_string_literal: true
 
 require_relative "server_test_helpers"
+
+# Rating fake padrão: todos os Pokémon tier F (custo mínimo 20)
+class DefaultFakeRating
+  def rating_for(_name)
+    :F
+  end
+end
+
 class ServerTeamTest < Minitest::Test
   include ServerTestHelpers
   include TestSupport
+
+  def setup
+    super
+    @default_rating = Server.settings.rating_source
+    Server.set :rating_source, DefaultFakeRating.new
+  end
+
+  def teardown
+    Server.set :rating_source, @default_rating
+    super
+  end
 
   def test_first_access_generates_session_cookie
     PokeApiStub.with_find(pikachu_pokemon) do
@@ -765,6 +784,17 @@ class TeamBudgetRoutesTest < Minitest::Test
     end
   end
 
+  def setup
+    super
+    @default_rating = Server.settings.rating_source
+    Server.set :rating_source, DefaultFakeRating.new
+  end
+
+  def teardown
+    Server.set :rating_source, @default_rating
+    super
+  end
+
   def with_budget_rating(rating_map, &)
     fake = FakeRatingSource.new(rating_map)
     original = Server.settings.rating_source
@@ -868,5 +898,84 @@ class TeamBudgetRoutesTest < Minitest::Test
     assert_match(/or[cç]amento/i, last_response.body)
     assert_equal 5, @repository.all("user-a").size
     refute_includes @repository.all("user-a").map(&:name), "over-budget"
+  end
+
+  # C7 — add dentro dos limites atualiza painel
+  def test_add_within_limits_updates_panel
+    rating = { "pikachu" => "F", "pichu" => "F", "raichu" => "F" }
+    PokeApiStub.with_find(pikachu_chain) do
+      with_budget_rating(rating) do
+        post "/team", { pokeName: "pikachu" }, user_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    team = @repository.all("user-a")
+    assert_equal 1, team.size
+    assert_match(%r{Custo do time: 20/450}, last_response.body)
+    assert_match(%r{S no time: 0/3}, last_response.body)
+  end
+
+  # C9 — remoção libera orçamento e teto de S
+  # rubocop:disable Metrics/AbcSize
+  def test_remove_frees_budget_and_s_limit
+    # Adiciona 3 Pokémon de linha S
+    s_mons = {}
+    3.times do |i|
+      name = "s-free-#{i}"
+      poke = Pokemon.new(name: name, sprite: "s", number: 400 + i,
+                         evolutions: [build_pokemon_record(name, 400 + i)])
+      s_mons[name] = poke
+      @repository.add("user-a", poke)
+    end
+
+    rating = s_mons.keys.to_h { |n| [n, "S"] }
+    # Remove o primeiro S
+    removed = @repository.all("user-a").first
+    PokeApiStub.with_find(s_mons) do
+      with_budget_rating(rating) do
+        delete "/team", { id: removed.id }, user_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    assert_equal 2, @repository.all("user-a").size
+    # Agora pode adicionar outro S
+    new_s = Pokemon.new(name: "s-new", sprite: "s", number: 500,
+                        evolutions: [build_pokemon_record("s-new", 500)])
+    rating["s-new"] = "S"
+    s_mons["s-new"] = new_s
+    PokeApiStub.with_find(s_mons) do
+      with_budget_rating(rating) do
+        post "/team", { pokeName: "s-new" }, user_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    assert_equal 3, @repository.all("user-a").size
+    assert_includes @repository.all("user-a").map(&:name), "s-new"
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  # C10 — painel mostra custo/orçamento/S
+  def test_team_panel_shows_cost_budget_and_s_count
+    # Time vazio
+    get "/team", {}, htmx_session("user-c")
+    assert last_response.ok?
+    assert_match(%r{Custo do time: 0/450}, last_response.body)
+    assert_match(%r{S no time: 0/3}, last_response.body)
+
+    # Adiciona um Pokémon F barato
+    poke = Pokemon.new(name: "cheap", sprite: "s", number: 600,
+                       evolutions: [build_pokemon_record("cheap", 600)])
+    PokeApiStub.with_find(poke) do
+      with_budget_rating({ "cheap" => "F" }) do
+        post "/team", { pokeName: "cheap" }, user_session("user-c")
+      end
+    end
+
+    assert last_response.ok?
+    assert_match(%r{Custo do time: 20/450}, last_response.body)
+    assert_match(%r{S no time: 0/3}, last_response.body)
   end
 end
