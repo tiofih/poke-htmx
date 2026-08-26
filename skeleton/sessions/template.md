@@ -68,7 +68,7 @@ descrição do resultado futuro — estado ANTES do code.)
 | 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `Sessao {{NNNN}}: refinamento concluido — ...` |
 | 1 | {{teste que falha → implementação mínima}} | suíte verde + lint 0, commit `Passo 1:` |
 | 2 | {{...}} | suíte verde + lint 0, commit `Passo 2:` |
-| — | **Fase 2 concluída** → **PARAR** e aguardar a validação do usuário (fase 3). |
+| — | **Fase 2 concluída** → **Revisor (2c)**: loop Implementador↔Revisor até veredito `Aprovado` (teto 3 rodadas, senão S3) → **PARAR** e aguardar a validação do usuário (fase 3). |
 
 ## 7. Validação (executada pelo usuário)
 
@@ -85,3 +85,9 @@ descrição do resultado futuro — estado ANTES do code.)
 ## 8. Observações
 
 {{Impedimentos, dúvidas, próximo passo sugerido.}}
+
+## 9. Gotchas / Lições (memória — S6)
+
+{{Armadilhas, lições e erros levantados na sessão (ex.: comportamento de lib, migração
+de schema, bug de concorrência). Alimentam o `memory_write_page` em `gotchas/` ao fechar
+a validação.}}

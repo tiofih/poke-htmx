@@ -19,6 +19,7 @@ Projetos adotam o kit por `git subtree` (veja "Adicionar via git" abaixo).
 | `skeleton/REQUIREMENTS.md` | Stub da fonte da verdade dos requisitos (`{{PROJETO}}`). |
 | `skeleton/SESSIONS.md` | Stub do registro de sessões (ciclo + tabela + "Próxima sessão"). |
 | `skeleton/sessions/template.md` | Modelo do arquivo de cada sessão (as 6 seções + S1/S2). |
+| `skeleton/agents/` | Subagents (opencode) por papel do fluxo: `refinador`, `implementador-teste`, `revisor`, `playtester` — instalados no projeto em `.opencode/agent/`. |
 | `skeleton/scripts/check_docs` | Verificação de consistência (roda no host, só grep). |
 
 ## Instalação (recomendada — `install.sh`)
@@ -28,7 +29,8 @@ Projetos adotam o kit por `git subtree` (veja "Adicionar via git" abaixo).
 ```
 
 Cria `REQUIREMENTS.md`, `SESSIONS.md`, `sessions/` (template + sessão **0001** já
-instanciada), `scripts/check_docs` e anexa as regras de workflow no `AGENTS.md` do alvo
+instanciada), `scripts/check_docs`, `scripts/*` de apoio, `.opencode/agent/` (subagents
+dos papéis do fluxo) e anexa as regras de workflow no `AGENTS.md` do alvo
 — tudo idempotente (2ª execução pula o que existe; `--force` sobrescreve) e encerra
 rodando o `check_docs` (instalação só é "sucesso" com docs consistentes).
 
@@ -86,9 +88,10 @@ Regras de sync:
 2. Substitua `{{PROJETO}}` e `{{PRÓXIMA_SESSAO}}` pelos valores reais.
 3. Copie `skeleton/sessions/template.md` → `sessions/0001-<slug>.md` (e mantenha o
    `template.md` como modelo para as próximas).
-4. Cole o conteúdo de `skeleton/AGENTS.md` (seção "workflow rules") no `AGENTS.md`
+4. Copie `skeleton/agents/*.md` → `.opencode/agent/` no projeto (opcional; roles do fluxo).
+5. Cole o conteúdo de `skeleton/AGENTS.md` (seção "workflow rules") no `AGENTS.md`
    do projeto — ou use o `PROTOCOL.md` como guia manual.
-5. Rode `./scripts/check_docs` a cada transição de fase (refinamento/validação).
+6. Rode `./scripts/check_docs` a cada transição de fase (refinamento/validação).
 
 ## Criando a sessão N
 
