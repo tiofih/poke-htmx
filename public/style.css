@@ -55,6 +55,50 @@ header nav a {
   display: block;
 }
 
+.poke-cost {
+  display: inline-block;
+  font-size: 0.8em;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #eee;
+  color: #333;
+}
+
+.poke-cost--restricted {
+  font-style: italic;
+}
+
+.poke-cost[data-tier="S"] {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.poke-cost[data-tier="A"] {
+  background: #ef4444;
+  color: #fff;
+}
+
+.poke-cost[data-tier="B"] {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.poke-cost[data-tier="C"] {
+  background: #10b981;
+  color: #fff;
+}
+
+.poke-cost[data-tier="D"] {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.poke-cost[data-tier="F"] {
+  background: #9ca3af;
+  color: #fff;
+}
+
 @media (max-width: 720px) {
   .pokemon-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));

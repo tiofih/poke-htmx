@@ -98,6 +98,7 @@ module ServerListActions
     load_search_hint
     @notice = "Não foi possível carregar a lista de Pokémon." if @page_names.empty? && @q.empty?
     load_team_names
+    build_pokemon_costs
   end
 
   def load_search_hint
@@ -173,6 +174,22 @@ module ServerListActions
 
   def load_starters
     Parallelizer.map(STARTER_SLUGS) { |name| [name, settings.api.find(name)] }
+  end
+
+  def build_pokemon_costs
+    @pokemon_costs = {}
+    ((@starters || []) + (@items || [])).each do |name, pokemon|
+      next unless pokemon
+
+      @pokemon_costs[name] = pokemon_cost_info(pokemon)
+    end
+  end
+
+  def pokemon_cost_info(pokemon)
+    tier = line_tier_for(pokemon)
+    restricted = settings.api.evolution_restricted?(pokemon.name)
+    cost = TeamBudget.cost_for(line_tier: tier.to_s, restricted: restricted)
+    { tier: tier, cost: cost, restricted: restricted }
   end
 
   def render_pokemon_fragment
@@ -315,7 +332,7 @@ module ServerTeamActions
     names = evolution_chain_names(pokemon)
     return :F if names.empty?
 
-    tiers = names.filter_map { |n| settings.rating_source.rating_for(n).to_sym }
+    tiers = names.filter_map { |n| settings.rating_source.rating_for(n)&.to_sym }
     tiers.empty? ? :F : tier_max(tiers)
   end
 
@@ -323,7 +340,8 @@ module ServerTeamActions
     return pokemon.evolutions.map(&:name) if pokemon.evolutions.any?
 
     resolved = settings.api.find(pokemon.name)
-    resolved&.evolutions&.map(&:name) || [pokemon.name]
+    chain = resolved&.evolutions
+    chain && !chain.empty? ? chain.map(&:name) : [pokemon.name]
   end
 
   # rubocop:disable Lint/UselessConstantScoping

@@ -4,6 +4,10 @@
       <img src="<%= pokemon.sprite %>" alt="<%= name %>" loading="lazy">
       <%= name %>
     </a>
+    <% info = @pokemon_costs && @pokemon_costs[name] %>
+    <% if info %>
+      <span class="poke-cost<%= ' poke-cost--restricted' if info[:restricted] %>" data-tier="<%= info[:tier] %>"><%= info[:tier] %> · <%= info[:cost] %><%= ' ◆' if info[:restricted] %></span>
+    <% end %>
   <% else %>
     <span><%= name %></span>
   <% end %>

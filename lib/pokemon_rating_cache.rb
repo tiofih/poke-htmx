@@ -38,7 +38,8 @@ class PokemonRatingCache
     pokemon = @fetcher.call(name)
     return nil unless pokemon
 
-    @rater.call(pokemon, moves: @moves_fetcher.call(pokemon.number))[:tier]
+    moves = @moves_fetcher.call(pokemon.number) || []
+    @rater.call(pokemon, moves: moves)[:tier]
   end
 
   def fresh?(entry)

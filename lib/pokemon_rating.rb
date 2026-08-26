@@ -26,6 +26,7 @@ class PokemonRating
   STAB_MULTIPLIER = 1.5
 
   def self.rate(pokemon, moves: [])
+    moves ||= []
     score = weighted_stats(pokemon.stats).round + move_bonus(pokemon.types, moves)
     { score: score, tier: tier_for(score) }
   end
