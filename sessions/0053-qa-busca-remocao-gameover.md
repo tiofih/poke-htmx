@@ -254,6 +254,10 @@ Center, com as opções **vender itens** (novo `POST /mart/sell`) e **recomeçar
   caminho terminal quando nem vendendo dá.
 - Após a 0053, a fila restante é J2/J4/D4/M2 + limitações técnicas (escritas não
   atômicas, erros com status real, race no add, identidade/CSRF, CI).
+- **Ideia anotada (2026-08-25, durante a validação — fora de sessão, RNF-04):** regra de
+  **Pokémon com vida zerada não poder ser removido do time** (remover/readicionar traria o
+  poke com HP cheio, contornando a cura e o game over) — registrada nas limitações do
+  `REQUIREMENTS.md` para virar sessão após a conclusão/validação da 0053.
 - **Ajustes pós-implementação (feedback do usuário, 2026-08-25):** (1) game over também
   na **tela de fim de batalha** (mensagem + "Vender itens"/"Recomeçar jornada" no lugar do
   "Novo confronto") — `battle.erb` + `expose_new_confront_state`; (2) **500 no
