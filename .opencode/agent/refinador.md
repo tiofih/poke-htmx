@@ -1,7 +1,6 @@
 ---
 description: Fase 1 do SDD (Refinamento) — modo INVESTIGAÇÃO/CONVERSA. Levanta objetivo, escopo, critérios e decisões como OPÇÕES e devolve um mapa de decisões para o usuário escolher; só escreve o arquivo da sessão quando receber as escolhas. Use para refinar uma sessão de forma interativa, não impositiva.
 mode: subagent
-model: opencode-go/qwen3.8-max
 permission:
   read: allow
   edit: allow
