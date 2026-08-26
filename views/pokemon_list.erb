@@ -1,6 +1,7 @@
 <div class="list-state" hidden>
   <input type="hidden" name="offset" value="<%= @offset %>">
   <input type="hidden" name="q" value="<%= @q %>">
+  <input type="hidden" name="type" value="<%= @type %>">
 </div>
 <% if @notice %>
   <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
@@ -32,10 +33,10 @@
 </div>
 <div class="pagination">
   <% if @prev_offset %>
-    <a href="#" hx-get="/pokemons?offset=<%= @prev_offset %>&q=<%= @q %>" hx-target="#pokemon-list" hx-swap="innerHTML">Anterior</a>
+    <a href="#" hx-get="/pokemons?offset=<%= @prev_offset %>&q=<%= @q %>&type=<%= @type %>" hx-target="#pokemon-list" hx-swap="innerHTML">Anterior</a>
   <% end %>
   Página <%= @current_page %>
   <% if @next_offset %>
-    <a href="#" hx-get="/pokemons?offset=<%= @next_offset %>&q=<%= @q %>" hx-target="#pokemon-list" hx-swap="innerHTML">Próxima</a>
+    <a href="#" hx-get="/pokemons?offset=<%= @next_offset %>&q=<%= @q %>&type=<%= @type %>" hx-target="#pokemon-list" hx-swap="innerHTML">Próxima</a>
   <% end %>
 </div>

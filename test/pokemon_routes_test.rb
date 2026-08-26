@@ -259,7 +259,8 @@ class ServerListTest < Minitest::Test
     assert_equal 9, last_response.body.scan('<li class="list-item">').size
     assert_includes last_response.body, 'name="q"'
     assert_includes last_response.body, "Página 1"
-    refute_dropdown_markup(last_response.body)
+    assert_includes last_response.body, 'name="type"'
+    assert_includes last_response.body, "<select"
   end
 
   def test_index_is_list_only_screen

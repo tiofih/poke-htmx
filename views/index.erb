@@ -1,13 +1,24 @@
 <div class="list-team-grid">
   <div class="list-column">
-    <input
-      type="text"
-      name="q"
-      placeholder="Filtrar por nome"
-      hx-target="#pokemon-list"
-      hx-trigger="keyup changed delay:300ms"
-      hx-get="/pokemons"
-      hx-swap="innerHTML">
+    <div class="filter-controls">
+      <input
+        type="text"
+        name="q"
+        class="filter-state"
+        placeholder="Filtrar por nome"
+        hx-target="#pokemon-list"
+        hx-trigger="keyup changed delay:300ms"
+        hx-get="/pokemons?offset=0"
+        hx-swap="innerHTML"
+        hx-include=".filter-state">
+
+      <select name="type" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+        <option value="" <%= "selected" if @type.nil? %>>Todos os tipos</option>
+        <% PokeApiTypes::TYPE_NAMES.each do |t| %>
+          <option value="<%= t %>" <%= "selected" if @type == t %>><%= t.capitalize %></option>
+        <% end %>
+      </select>
+    </div>
 
     <div id="pokemon-list">
       <%= erb :pokemon_list, layout: false %>

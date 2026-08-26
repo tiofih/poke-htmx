@@ -68,6 +68,7 @@ STARTER_SLUGS = %w[
   sprigatito fuecoco quaxly
 ].freeze
 
+# rubocop:disable Metrics/ModuleLength
 module ServerListActions
   PAGE_SIZE = 36
   FIRST_PAGE_COMMONS = PAGE_SIZE - STARTER_SLUGS.size
@@ -90,15 +91,34 @@ module ServerListActions
     erb :pokemon_list, layout: false
   end
 
+  # rubocop:disable Metrics/AbcSize
   def load_pokemon_page
     @limit = PAGE_SIZE
-    @starters = @q.empty? && @offset.zero? ? load_starters : []
+    @type = normalized_type(params[:type])
+    @starters = starters_visible? ? load_starters : []
     build_page
     @items = Parallelizer.map(@page_names) { |name| [name, settings.api.find(name)] }
     load_search_hint
-    @notice = "Não foi possível carregar a lista de Pokémon." if @page_names.empty? && @q.empty?
+    @notice = "Não foi possível carregar a lista de Pokémon." if @page_names.empty? && @q.empty? && @type.nil?
     load_team_names
     build_pokemon_costs
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def starters_visible?
+    @q.empty? && @offset.zero? && @type.nil?
+  end
+
+  def normalized_type(value)
+    v = value.to_s.strip.downcase
+    return nil if v.empty?
+    return nil unless PokeApiTypes::TYPE_NAMES.include?(v)
+
+    v
+  end
+
+  def filter_active?
+    !@type.nil?
   end
 
   def load_search_hint
@@ -113,7 +133,7 @@ module ServerListActions
   end
 
   def commons_window
-    if @q.empty? && @offset.zero?
+    if @q.empty? && @offset.zero? && !filter_active?
       fetch_commons(0, FIRST_PAGE_COMMONS)
     else
       fetch_commons(@offset, PAGE_SIZE)
@@ -129,10 +149,21 @@ module ServerListActions
 
   def collect_base_forms(base_forms, target)
     common_candidates.each_slice(SCAN_BATCH) do |batch|
-      base_forms.concat(base_form_names(batch))
+      base_forms.concat(filtered_base_forms(batch))
       break if base_forms.size >= target
     end
   end
+
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  def filtered_base_forms(batch)
+    forms = Parallelizer.map(batch) { |name| [name, settings.api.base_form?(name)] }
+    base_names = forms.select { |_name, is_base| is_base }.map(&:first)
+    return base_names if @type.nil?
+
+    typed = Parallelizer.map(base_names) { |name| [name, settings.api.find(name)] }
+    typed.select { |_name, pokemon| pokemon && pokemon.types.map(&:downcase).include?(@type) }.map(&:first)
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   def base_form_names(batch)
     forms = Parallelizer.map(batch) { |name| [name, settings.api.base_form?(name)] }
@@ -142,6 +173,8 @@ module ServerListActions
   def common_candidates
     names = settings.api.fetch_all_names.to_a
     names = names.select { |name| name.downcase.include?(@q.downcase) } unless @q.empty?
+    return names if filter_active?
+
     names.reject { |name| STARTER_SLUGS.include?(name) }
   end
 
@@ -212,6 +245,7 @@ module ServerListActions
     end
   end
 end
+# rubocop:enable Metrics/ModuleLength
 
 module ServerSearchHintActions
   private

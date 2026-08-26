@@ -23,7 +23,7 @@ end
 # e nas próximas execuções rodam offline. Evita depender de tmp/pokeapi_cache.json.
 module VCRPerTest
   def before_setup
-    cassette = "#{self.class.name}/#{name}".gsub(/[^a-zA-Z0-9_\/]/, "_")
+    cassette = "#{self.class.name}/#{name}".gsub(%r{[^a-zA-Z0-9_/]}, "_")
     VCR.insert_cassette(cassette, record: :new_episodes, allow_playback_repeats: true)
     super
   end
