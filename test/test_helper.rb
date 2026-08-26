@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 ENV["RACK_ENV"] = "test"
+# Isola o cache persistente da PokéAPI em teste para não carregar o arquivo de
+# 322M/4324 chaves de dev/prod (PersistentJsonStore faz JSON.parse síncrono no boot).
+# Sem isso cada `docker compose run` paga ~3.26s de parse (medido em 2026-08-26).
+ENV["POKEAPI_CACHE_PATH"] ||= "tmp/test_pokeapi_cache.json"
+ENV["POKERATING_CACHE_PATH"] ||= "tmp/test_pokemon_rating_cache.json"
 
 # Suíte roda num banco SEPARADO do app (pokedex_test), para não disputar locks/
 # dados com o Puma ativo (flakiness/hang). Deriva do DATABASE_URL do ambiente
@@ -29,15 +34,27 @@ module Minitest
 end
 
 module TestDatabase # rubocop:disable Metrics/ModuleLength
+  @setup_done = false
+  @setup_mutex = Mutex.new
+
   def self.setup!
-    ensure_database!
-    with_db do |connection|
-      connection.exec("SET client_min_messages TO warning")
-      connection.exec(File.read(File.expand_path("../db/schema.sql", __dir__)))
-      Dir[File.expand_path("../db/migrations/*.sql", __dir__)].each do |migration|
-        connection.exec(File.read(migration))
+    @setup_mutex.synchronize do
+      return if @setup_done
+
+      ensure_database!
+      with_db do |connection|
+        connection.exec("SET client_min_messages TO warning")
+        connection.exec(File.read(File.expand_path("../db/schema.sql", __dir__)))
+        Dir[File.expand_path("../db/migrations/*.sql", __dir__)].each do |migration|
+          connection.exec(File.read(migration))
+        end
       end
+      @setup_done = true
     end
+  end
+
+  def self.reset_setup!
+    @setup_mutex.synchronize { @setup_done = false }
   end
 
   def self.ensure_database!
