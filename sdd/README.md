@@ -20,6 +20,8 @@ Projetos adotam o kit por `git subtree` (veja "Adicionar via git" abaixo).
 | `skeleton/SESSIONS.md` | Stub do registro de sessões (ciclo + tabela + "Próxima sessão"). |
 | `skeleton/sessions/template.md` | Modelo do arquivo de cada sessão (as 6 seções + S1/S2). |
 | `skeleton/agents/` | Subagents (opencode) por papel do fluxo: `refinador`, `implementador-teste`, `revisor`, `playtester` — instalados no projeto em `.opencode/agent/`. |
+| `skeleton/commands/` | Comando orquestrador `/sessao` — abre/continua a sessão despachando os papéis. |
+| `skeleton/skills/sdd/` | Skill `sdd` — guia do ciclo de papéis (fases, S7 loop, parada na validação). |
 | `skeleton/scripts/check_docs` | Verificação de consistência (roda no host, só grep). |
 
 ## Instalação (recomendada — `install.sh`)
@@ -30,7 +32,8 @@ Projetos adotam o kit por `git subtree` (veja "Adicionar via git" abaixo).
 
 Cria `REQUIREMENTS.md`, `SESSIONS.md`, `sessions/` (template + sessão **0001** já
 instanciada), `scripts/check_docs`, `scripts/*` de apoio, `.opencode/agent/` (subagents
-dos papéis do fluxo) e anexa as regras de workflow no `AGENTS.md` do alvo
+dos papéis do fluxo), `.opencode/commands/sessao`, `.opencode/skills/sdd` (skill do ciclo)
+e anexa as regras de workflow no `AGENTS.md` do alvo
 — tudo idempotente (2ª execução pula o que existe; `--force` sobrescreve) e encerra
 rodando o `check_docs` (instalação só é "sucesso" com docs consistentes).
 

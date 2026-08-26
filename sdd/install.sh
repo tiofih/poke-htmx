@@ -144,6 +144,11 @@ for a in refinador implementador-teste revisor playtester; do
   install_file "$SKELETON_DIR/agents/$a.md" "$TARGET/.opencode/agent/$a.md"
 done
 
+# --- command orquestrador de sessão + skill sdd ---
+mkdir -p "$TARGET/.opencode/commands" "$TARGET/.opencode/skills/sdd"
+install_file "$SKELETON_DIR/commands/sessao.md" "$TARGET/.opencode/commands/sessao.md"
+install_file "$SKELETON_DIR/skills/sdd/SKILL.md" "$TARGET/.opencode/skills/sdd/SKILL.md"
+
 # --- AGENTS.md: anexa as regras de workflow (idempotente) ---
 if [ "$DO_AGENTS" -eq 1 ]; then
   AGENTS="$TARGET/AGENTS.md"
