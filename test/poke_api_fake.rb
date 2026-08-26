@@ -5,13 +5,14 @@ require_relative "../lib/gateways/poke_api_http"
 class PokeApiFake
   def initialize(find: nil, detail: nil, fetch_all_names: nil,
                  moves_for: nil, move: nil, available_move_names: nil, type_relations: nil,
-                 next_evolutions: nil, learnable_moves: nil, base_form: nil)
+                 next_evolutions: nil, learnable_moves: nil, base_form: nil,
+                 evolution_restricted: nil)
     @config = {
       find: find, detail: detail, fetch_all_names: fetch_all_names,
       moves_for: moves_for, move: move,
       available_move_names: available_move_names, type_relations: type_relations,
       next_evolutions: next_evolutions, learnable_moves: learnable_moves,
-      base_form: base_form
+      base_form: base_form, evolution_restricted: evolution_restricted
     }.freeze
     @find = find
     @detail = detail
@@ -23,6 +24,7 @@ class PokeApiFake
     @next_evolutions = next_evolutions
     @learnable_moves = learnable_moves
     @base_form = base_form
+    @evolution_restricted = evolution_restricted
   end
 
   attr_reader :config, :fetch_all_names, :type_relations
@@ -63,6 +65,10 @@ class PokeApiFake
 
   def base_form?(name)
     resolve(@base_form, name) == true
+  end
+
+  def evolution_restricted?(name)
+    resolve(@evolution_restricted, name) == true
   end
 
   private

@@ -339,6 +339,71 @@ class PokeApiTest < Minitest::Test
     Faraday.define_singleton_method(:get, original)
   end
 
+  # C5 — evolution_restricted? detecta trigger ≠ level-up
+  # rubocop:disable Metrics/MethodLength
+  def test_evolution_restricted_by_trigger
+    # Eevee: próximo estágio por pedra (use-item) → restrito
+    eevee_species = { "url" => "https://pokeapi.co/api/v2/pokemon-species/133" }
+    api.define_singleton_method(:pokemon_data) do |name|
+      return nil unless name == "eevee"
+
+      { "name" => "eevee", "id" => 133, "species" => eevee_species }
+    end
+    api.define_singleton_method(:fetch_chain_data) do |_url|
+      {
+        "species" => { "name" => "eevee" },
+        "evolves_to" => [
+          {
+            "species" => { "name" => "vaporeon" },
+            "evolution_details" => [{ "trigger" => { "name" => "use-item" } }],
+            "evolves_to" => []
+          }
+        ]
+      }
+    end
+
+    assert api.evolution_restricted?("eevee")
+
+    # Caterpie: só level-up → não restrito
+    caterpie_species = { "url" => "https://pokeapi.co/api/v2/pokemon-species/10" }
+    api.define_singleton_method(:pokemon_data) do |name|
+      return nil unless name == "caterpie"
+
+      { "name" => "caterpie", "id" => 10, "species" => caterpie_species }
+    end
+    api.define_singleton_method(:fetch_chain_data) do |_url|
+      {
+        "species" => { "name" => "caterpie" },
+        "evolves_to" => [
+          {
+            "species" => { "name" => "metapod" },
+            "evolution_details" => [{ "trigger" => { "name" => "level-up" }, "min_level" => 7 }],
+            "evolves_to" => []
+          }
+        ]
+      }
+    end
+
+    refute api.evolution_restricted?("caterpie")
+
+    # Magikarp: sem evolução → não restrito
+    magikarp_species = { "url" => "https://pokeapi.co/api/v2/pokemon-species/129" }
+    api.define_singleton_method(:pokemon_data) do |name|
+      return nil unless name == "magikarp"
+
+      { "name" => "magikarp", "id" => 129, "species" => magikarp_species }
+    end
+    api.define_singleton_method(:fetch_chain_data) do |_url|
+      {
+        "species" => { "name" => "magikarp" },
+        "evolves_to" => []
+      }
+    end
+
+    refute api.evolution_restricted?("magikarp")
+  end
+  # rubocop:enable Metrics/MethodLength
+
   def test_fetch_all_names_does_not_memoize_failure
     calls = 0
     original = Faraday.method(:get)

@@ -63,6 +63,10 @@ class PokeApiCache
     fetch([:learnable_moves, number]) { @inner.learnable_moves(number) }
   end
 
+  def evolution_restricted?(name)
+    fetch([:evolution_restricted, name], accept: ->(value) { value == true }) { @inner.evolution_restricted?(name) }
+  end
+
   private
 
   def fetch(key, accept: nil)

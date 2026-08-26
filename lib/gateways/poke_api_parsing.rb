@@ -66,6 +66,25 @@ module PokeApiParsing
     false
   end
 
+  # Retorna true se o Pokémon tem pelo menos um estágio seguinte cujo trigger
+  # ≠ "level-up" (pedra/item, troca, …); false para evolução só por nível ou
+  # sem evolução. Reusa os mesmos fetches de espécie+cadeia já cacheados.
+  def evolution_restricted?(name)
+    data = pokemon_data(name)
+    return false unless data
+
+    species_url = data.dig("species", "url")
+    return false unless species_url
+
+    chain = fetch_chain_data(species_url)
+    return false unless chain
+
+    next_stages = find_current_species_next_stages(chain, data["name"])
+    next_stages.any? { |stage| stage[:trigger] && stage[:trigger] != "level-up" }
+  rescue Faraday::Error, JSON::ParserError
+    false
+  end
+
   def flatten_chain(chain)
     names = [chain["species"]["name"]]
     chain["evolves_to"].each { |stage| names.concat(flatten_chain(stage)) }

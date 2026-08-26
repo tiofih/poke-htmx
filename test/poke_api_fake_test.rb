@@ -21,6 +21,8 @@ class PokeApiFakeTest < Minitest::Test
       assert_respond_to adapter, :type_relations
       assert_respond_to adapter, :next_evolutions
       assert_respond_to adapter, :learnable_moves
+      assert_respond_to adapter, :base_form?
+      assert_respond_to adapter, :evolution_restricted?
     end
   end
 
@@ -87,5 +89,19 @@ class PokeApiFakeTest < Minitest::Test
     fake = PokeApiFake.new(learnable_moves: data)
 
     assert_equal data, fake.learnable_moves(25)
+  end
+
+  def test_evolution_restricted_returns_per_name_when_configured_with_a_hash
+    fake = PokeApiFake.new(evolution_restricted: { "eevee" => true, "pikachu" => false })
+
+    assert fake.evolution_restricted?("eevee")
+    refute fake.evolution_restricted?("pikachu")
+    refute fake.evolution_restricted?("unknown")
+  end
+
+  def test_evolution_restricted_returns_same_value_for_any_name_when_fixed
+    fake = PokeApiFake.new(evolution_restricted: true)
+
+    assert fake.evolution_restricted?("anything")
   end
 end

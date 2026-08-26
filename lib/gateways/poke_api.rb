@@ -17,6 +17,8 @@ module PokeApi
   #   learnable_moves(number)                     -> [{level:, name:}]
   #   type_relations                              -> { tipo => { double:, half:, no: } }
   #   fetch_all_names                             -> [String]
+  #   base_form?(name)                            -> Boolean
+  #   evolution_restricted?(name)                 -> Boolean
   #
   # Ponto de injeção: `PokeApi.instance` resolve o adapter usado por padrão —
   # decorado com `PokeApiCache` (TTL/LRU fixos, E1-B) sobre `PokeApiHttp` com cache
