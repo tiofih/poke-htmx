@@ -292,5 +292,147 @@ class PokemonListFilterTest < Minitest::Test
     assert_includes last_response.body, 'value="bulbasaur"'
     assert_includes last_response.body, 'value="charmander"'
   end
+
+  def test_ordering_by_cost_and_tier_sorts_before_pagination
+    names = %w[charmander squirtle bulbasaur pikachu]
+    # tier costs: F 20, A 70, B 55, S 120
+    rating = { "charmander" => "F", "squirtle" => "C", "bulbasaur" => "B", "pikachu" => "S" }
+    find_map = names.to_h { |n| [n, build_record(n, 1)] }
+    # cost_asc: F(20) < C(40) < B(55) < S(120)
+    stub_list(names, find_map: find_map, rating_map: rating) do
+      get "/pokemons", sort: "cost_asc"
+    end
+    assert last_response.ok?
+    body = last_response.body
+    idx_charm = body.index('value="charmander"')
+    idx_squirt = body.index('value="squirtle"')
+    idx_bulba = body.index('value="bulbasaur"')
+    idx_pika = body.index('value="pikachu"')
+    assert idx_charm < idx_squirt
+    assert idx_squirt < idx_bulba
+    assert idx_bulba < idx_pika
+
+    # tier_desc S->F : S, B, C, F
+    stub_list(names, find_map: find_map, rating_map: rating) do
+      get "/pokemons", sort: "tier_desc"
+    end
+    assert last_response.ok?
+    body = last_response.body
+    assert body.index('value="pikachu"') < body.index('value="bulbasaur"')
+    assert body.index('value="bulbasaur"') < body.index('value="squirtle"')
+    assert body.index('value="squirtle"') < body.index('value="charmander"')
+  end
+
+  def test_filters_persisted_in_session
+    names = %w[charmander squirtle bulbasaur]
+    types = { "charmander" => %w[fire], "squirtle" => %w[water], "bulbasaur" => %w[grass] }
+    generation = { "charmander" => 1, "squirtle" => 1, "bulbasaur" => 1 }
+    rating = { "charmander" => "F", "squirtle" => "A", "bulbasaur" => "B" }
+    find_map = names.to_h { |n| [n, build_record(n, 1, types: types[n])] }
+    stub_list(names, find_map: find_map, types_map: types, generation_map: generation,
+              rating_map: rating) do
+      get "/pokemons", type: "fire", sort: "cost_desc"
+      assert last_response.ok?
+      assert_includes last_response.body, 'value="charmander"'
+      # second request without params should restore via session
+      get "/pokemons"
+      assert last_response.ok?
+      assert_includes last_response.body, 'value="charmander"'
+      refute_includes last_response.body, 'value="squirtle"'
+      # limpar zera
+      get "/pokemons", type: "", generation: "", tier: "", cost_max: "", cost: "", sort: "", q: "", offset: "0"
+      assert last_response.ok?
+      assert_includes last_response.body, 'value="squirtle"'
+      # after clear, second request without params should NOT restore
+      get "/pokemons"
+      assert last_response.ok?
+      assert_includes last_response.body, 'value="squirtle"'
+      assert_includes last_response.body, 'value="charmander"'
+    end
+  end
+
+  def test_pagination_preserves_sort
+    many = (1..50).map { |i| "pokemon#{i}" }
+    # assign tiers to create predictable cost order
+    rating = many.to_h { |n| [n, "F"] }
+    rating["pokemon1"] = "S"
+    rating["pokemon2"] = "A"
+    find_map = many.to_h { |n| [n, build_record(n, n.scan(/\d+/).first.to_i)] }
+    stub_list(many, find_map: find_map, rating_map: rating) do
+      get "/pokemons", sort: "cost_desc", offset: "0"
+      assert last_response.ok?
+      assert_includes last_response.body, "Página 1"
+      # next page link should preserve sort
+      assert_includes last_response.body, "sort=cost_desc"
+      get "/pokemons", sort: "cost_desc", offset: "36"
+      assert last_response.ok?
+      assert_includes last_response.body, "Página 2"
+    end
+  end
+
+  def test_pagination_with_filters_and_search_preserved
+    names = (1..50).map { |i| "pokemon#{i}" } + %w[charmander charmeleon]
+    types = { "charmander" => %w[fire], "charmeleon" => %w[fire] }
+    names.each { |n| types[n] ||= %w[normal] }
+    rating = {}
+    find_map = names.to_h { |n| [n, build_record(n, 1, types: types[n] || %w[normal])] }
+    stub_list(names, find_map: find_map, types_map: types, rating_map: rating) do
+      get "/pokemons", type: "fire", q: "char", offset: "0"
+      assert last_response.ok?
+      assert_includes last_response.body, 'value="charmander"'
+      assert_includes last_response.body, 'value="charmeleon"'
+      assert_includes last_response.body, "Página 1"
+    end
+  end
+
+  def test_oob_after_add_preserves_filters_and_sort
+    names = %w[charmander squirtle bulbasaur pikachu]
+    types = {
+      "charmander" => %w[fire], "squirtle" => %w[water],
+      "bulbasaur" => %w[grass], "pikachu" => %w[electric]
+    }
+    find_map = names.to_h { |n| [n, build_record(n, 1, types: types[n])] }
+    rating = { "charmander" => "F", "squirtle" => "C", "bulbasaur" => "B", "pikachu" => "S" }
+    # first set filter via session
+    stub_list(names, find_map: find_map, types_map: types, rating_map: rating) do
+      get "/pokemons", type: "fire", sort: "cost_desc"
+      assert_includes last_response.body, 'value="charmander"'
+      # POST add should OOB preserve filter (via session + params)
+      post "/team",
+           { pokeName: "charmander", offset: "0", q: "", type: "fire", sort: "cost_desc" },
+           { "HTTP_HX_REQUEST" => "true", "rack.session" => { "user_id" => "user-a" } }
+      # response includes oob pokemon-list
+      assert last_response.ok?
+      assert_includes last_response.body, 'id="pokemon-list"'
+      # after add, filtered list still only fire
+      assert_includes last_response.body, 'value="charmander"'
+      refute_includes last_response.body, 'value="squirtle"'
+    end
+  end
+
+  def test_without_network
+    names = %w[eevee vaporeon jolteon]
+    eevee_base = build_record("eevee", 133)
+    vaporeon = build_record("vaporeon", 134)
+    jolteon = build_record("jolteon", 135)
+    eevee = Pokemon.new(
+      name: "eevee", sprite: "s", number: 133,
+      evolutions: [eevee_base, vaporeon, jolteon].freeze
+    )
+    rating = { "eevee" => "F", "vaporeon" => "A", "jolteon" => "S" }
+    find_map = { "eevee" => eevee, "vaporeon" => vaporeon, "jolteon" => jolteon }
+    forms = { "eevee" => true, "vaporeon" => false, "jolteon" => false }
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_find(find_map) do
+        PokeApiStub.with_base_forms(forms) do
+          with_rating(rating) do
+            get "/pokemons", tier: "S"
+          end
+        end
+      end
+    end
+    assert last_response.ok?
+    assert_includes last_response.body, 'value="eevee"'
+  end
 end
 # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Layout/HashAlignment

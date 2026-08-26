@@ -73,6 +73,7 @@ module ServerListActions
   PAGE_SIZE = 36
   FIRST_PAGE_COMMONS = PAGE_SIZE - STARTER_SLUGS.size
   SCAN_BATCH = 24
+  FILTER_TIER_ORDER = %i[F D C B A S].freeze
 
   private
 
@@ -94,15 +95,28 @@ module ServerListActions
   # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   def load_pokemon_page
     @limit = PAGE_SIZE
-    @type = normalized_type(params[:type])
-    @generation = normalized_generation(params[:generation])
-    @tier = normalized_tier(params[:tier])
-    @cost_max = normalized_cost_max(params[:cost_max] || params[:cost])
+    @type = normalized_type(params[:type]) if filter_param_present?("type")
+    @generation = normalized_generation(params[:generation]) if filter_param_present?("generation")
+    @tier = normalized_tier(params[:tier]) if filter_param_present?("tier")
+    if filter_param_present?("cost_max") || filter_param_present?("cost")
+      @cost_max = normalized_cost_max(params[:cost_max] || params[:cost])
+    end
+    @sort = normalized_sort(params[:sort]) if filter_param_present?("sort")
+    # restore from session when no explicit filter param
+    restore_filters_from_session unless any_filter_param_present?
+    # persist when explicit filter params were sent
+    persist_filters_to_session if any_filter_param_present?
+    # ensure nil defaults when no session and no params
+    @type ||= nil
+    @generation ||= nil
+    @tier ||= nil
+    @cost_max ||= nil
+    @sort ||= nil
     @starters = starters_visible? ? load_starters : []
     build_page
     @items = Parallelizer.map(@page_names) { |name| [name, settings.api.find(name)] }
     load_search_hint
-    if @page_names.empty? && @q.empty? && @type.nil? && @generation.nil? && @tier.nil? && @cost_max.nil?
+    if @page_names.empty? && @q.empty? && !filter_active? && !sort_active?
       @notice = "Não foi possível carregar a lista de Pokémon."
     end
     load_team_names
@@ -111,7 +125,7 @@ module ServerListActions
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 
   def starters_visible?
-    @q.empty? && @offset.zero? && @type.nil? && @generation.nil? && @tier.nil? && @cost_max.nil?
+    @q.empty? && @offset.zero? && !filter_active? && !sort_active?
   end
 
   def normalized_type(value)
@@ -150,9 +164,63 @@ module ServerListActions
     n
   end
 
+  def normalized_sort(value)
+    v = value.to_s.strip
+    return nil if v.empty?
+    return nil unless %w[cost_asc cost_desc tier_desc tier_asc].include?(v)
+
+    v
+  end
+
   def filter_active?
     !@type.nil? || !@generation.nil? || !@tier.nil? || !@cost_max.nil?
   end
+
+  def sort_active?
+    !@sort.nil?
+  end
+
+  def filter_param_present?(key)
+    params.key?(key) || params.key?(key.to_sym)
+  end
+
+  def any_filter_param_present?
+    %w[type generation tier cost cost_max sort].any? { |k| filter_param_present?(k) }
+  end
+
+  # rubocop:disable Metrics/MethodLength
+  def persist_filters_to_session
+    if @type.nil? && @generation.nil? && @tier.nil? && @cost_max.nil? && @sort.nil?
+      session.delete(:list_filters)
+    else
+      session[:list_filters] = {
+        "type" => @type,
+        "generation" => @generation,
+        "tier" => @tier,
+        "cost_max" => @cost_max,
+        "sort" => @sort
+      }.compact
+      session.delete(:list_filters) if session[:list_filters].empty?
+    end
+  end
+  # rubocop:enable Metrics/MethodLength
+
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
+  def restore_filters_from_session
+    stored = session[:list_filters]
+    return unless stored
+
+    @type = normalized_type(stored["type"] || stored[:type]) if stored["type"] || stored[:type]
+    gen = stored["generation"] || stored[:generation]
+    @generation = normalized_generation(gen) if gen
+    tier_val = stored["tier"] || stored[:tier]
+    @tier = normalized_tier(tier_val) if tier_val
+    cost_val = stored["cost_max"] || stored[:cost_max] || stored["cost"] || stored[:cost]
+    @cost_max = normalized_cost_max(cost_val) if cost_val
+    s = stored["sort"] || stored[:sort]
+    @sort = normalized_sort(s) if s
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
 
   def load_search_hint
     @search_hint = search_hint(@q) if !@q.empty? && @items.empty?
@@ -166,19 +234,28 @@ module ServerListActions
   end
 
   def commons_window
-    if @q.empty? && @offset.zero? && !filter_active?
+    if @q.empty? && @offset.zero? && !filter_active? && !sort_active?
       fetch_commons(0, FIRST_PAGE_COMMONS)
     else
       fetch_commons(@offset, PAGE_SIZE)
     end
   end
 
+  # rubocop:disable Metrics/MethodLength
   def fetch_commons(offset, count)
-    base_forms = []
-    collect_base_forms(base_forms, offset + count)
-    more = base_forms.size >= offset + count
-    [base_forms[offset, count].to_a, more]
+    if @sort
+      all = collect_all_filtered_base_forms
+      sorted = sort_names(all)
+      more = sorted.size > offset + count
+      [sorted[offset, count].to_a, more]
+    else
+      base_forms = []
+      collect_base_forms(base_forms, offset + count)
+      more = base_forms.size >= offset + count
+      [base_forms[offset, count].to_a, more]
+    end
   end
+  # rubocop:enable Metrics/MethodLength
 
   def collect_base_forms(base_forms, target)
     common_candidates.each_slice(SCAN_BATCH) do |batch|
@@ -186,6 +263,39 @@ module ServerListActions
       break if base_forms.size >= target
     end
   end
+
+  def collect_all_filtered_base_forms
+    all = []
+    common_candidates.each_slice(SCAN_BATCH) do |batch|
+      all.concat(filtered_base_forms(batch))
+    end
+    all
+  end
+
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
+  def sort_names(names)
+    infos = Parallelizer.map(names) do |name|
+      pokemon = settings.api.find(name)
+      # guard nil pokemon (should not happen for base forms)
+      tier = pokemon ? line_tier_for(pokemon).to_s : "F"
+      restricted = settings.api.evolution_restricted?(name)
+      cost = TeamBudget.cost_for(line_tier: tier, restricted: restricted)
+      [name, tier, cost]
+    end
+    case @sort
+    when "cost_asc"
+      infos.sort_by { |_n, _t, c| c }.map(&:first)
+    when "cost_desc"
+      infos.sort_by { |_n, _t, c| -c }.map(&:first)
+    when "tier_desc"
+      infos.sort_by { |_n, t, _c| -FILTER_TIER_ORDER.index(t.to_sym) }.map(&:first)
+    when "tier_asc"
+      infos.sort_by { |_n, t, _c| FILTER_TIER_ORDER.index(t.to_sym) }.map(&:first)
+    else
+      names
+    end
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
 
   # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
   def filtered_base_forms(batch)
@@ -228,7 +338,7 @@ module ServerListActions
   def common_candidates
     names = settings.api.fetch_all_names.to_a
     names = names.select { |name| name.downcase.include?(@q.downcase) } unless @q.empty?
-    return names if filter_active?
+    return names if filter_active? || sort_active?
 
     names.reject { |name| STARTER_SLUGS.include?(name) }
   end
@@ -592,7 +702,7 @@ module ServerJourneyActions
   end
 
   def list_state_present?
-    params.key?(:offset) || params.key?(:q)
+    %w[offset q type generation tier cost cost_max sort].any? { |k| params.key?(k) || params.key?(k.to_sym) }
   end
 end
 

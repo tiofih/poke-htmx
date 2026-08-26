@@ -262,9 +262,37 @@ body.page-list {
   align-items: start;
 }
 
+.list-column {
+  min-height: 420px;
+  max-height: 78vh;
+  overflow-y: auto;
+  padding-right: 0.2em;
+  overflow-anchor: none;
+}
+
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-bottom: 1em;
+  align-items: center;
+}
+
+.filter-controls select,
+.filter-controls input[type="text"] {
+  flex: 1 1 8em;
+  min-width: 8em;
+}
+
 @media (max-width: 720px) {
   .list-team-grid {
     grid-template-columns: 1fr;
+  }
+
+  .list-column,
+  .team-column {
+    max-height: none;
+    overflow-y: visible;
   }
 }
 
@@ -273,6 +301,9 @@ body.page-list {
   border-radius: 6px;
   padding: 0.8em 1em;
   overflow-anchor: none;
+  min-height: 420px;
+  max-height: 78vh;
+  overflow-y: auto;
 }
 
 .journey-progress {
