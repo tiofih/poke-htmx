@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões ratificadas pelo usuário em 2026-08-26 (todas A) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** |
+| Implementação | **Concluída** — passos 1–3 (commit c420352), suíte 826/2748, lint 0 |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-26, todos os critérios ok |
 
 ---
 
@@ -47,15 +47,15 @@ Exibir **custo e tier de cada Pokémon na listagem da `GET /`** para montar o ti
 
 ### Resultado
 
-- [ ] **C1 (listagem mostra custo e tier por Pokémon):** a `GET /` (e `GET /pokemons` fragmento) renderiza para cada Pokémon da lista um badge com **tier da linha** e **custo** (`S·120` etc.), com `data-tier` para cor; restrito mostra metade + indicador. — prova: `test/list_routes_test.rb` (`test_pokemon_list_shows_cost_and_tier` ou nome equivalente em `pokemon_list_test.rb`).
-- [ ] **C2 (custo da lista = TeamBudget por linha):** o custo exibido é `TeamBudget.cost_for(line_tier: max_tier_da_cadeia, restricted: evolution_restricted?)` — cadeia ramificada paga pelo **maior tier da cadeia** e restrito paga **metade (floor)**. Prova com cadeia ramificada stubada e `rating_for` determinístico nome→tier. — prova: `test/list_routes_test.rb` (`test_pokemon_list_cost_uses_line_tier_and_restricted_half` ou `test_list_cost_from_chain_max_with_half_for_restricted`).
-- [ ] **C3 (paginação/busca preservadas e sem rede + visual):** paginação on-demand (PAGE_SIZE 36, página 1 = 27+9) e busca por nome continuam funcionando; testes **sem rede** (rating e cadeia por stubs/fakes, como no M2); badge **alinhado**, **cores por tier** e **OOB de `#pokemon-list` pós add/remove** conferidos visualmente. — prova: `test/list_routes_test.rb` (`test_pokemon_list_pagination_and_search_preserved` e `test_pokemon_list_without_network`) + **manual** (conferir visualmente com `./scripts/run`: alinhamento do badge, cores por tier, OOB da lista após `POST /team`/`DELETE /team`).
+- [x] **C1 (listagem mostra custo e tier por Pokémon):** a `GET /` (e `GET /pokemons` fragmento) renderiza para cada Pokémon da lista um badge com **tier da linha** e **custo** (`S·120` etc.), com `data-tier` para cor; restrito mostra metade + indicador. — prova: `test/pokemon_list_cost_test.rb` (`test_pokemon_list_shows_cost_and_tier` + `test_index_shows_cost_and_tier`).
+- [x] **C2 (custo da lista = TeamBudget por linha):** o custo exibido é `TeamBudget.cost_for(line_tier: max_tier_da_cadeia, restricted: evolution_restricted?)` — cadeia ramificada paga pelo **maior tier da cadeia** e restrito paga **metade (floor)**. Prova com cadeia ramificada stubada e `rating_for` determinístico nome→tier. — prova: `test/pokemon_list_cost_test.rb` (`test_pokemon_list_cost_uses_line_tier_and_restricted_half` + `test_pokemon_list_restricted_shows_half_cost`).
+- [x] **C3 (paginação/busca preservadas e sem rede + visual):** paginação on-demand (PAGE_SIZE 36, página 1 = 27+9) e busca por nome continuam funcionando; testes **sem rede** (rating e cadeia por stubs/fakes, como no M2); badge **alinhado**, **cores por tier** e **OOB de `#pokemon-list` pós add/remove** conferidos visualmente. — prova: `test/pokemon_list_cost_test.rb` (`test_pokemon_list_pagination_and_search_preserved` + `test_pokemon_list_without_network` + `test_oob_after_add_preserves_badges`) + **manual** (conferido visualmente: alinhamento do badge, cores por tier, OOB da lista após `POST /team`/`DELETE /team`).
 
 ### Garantias (RNF)
 
-- [ ] **G1:** suíte completa verde após cada passo + lint 0 em todo green; commit obrigatório por passo; 0 regressão fora do escopo (paginação/busca/add existentes seguem verdes via fake de rating default).
-- [ ] **G2:** sem gems novas / sem mudança de schema / testes sem rede (rating e cadeia por stubs/fakes; reuso do `rating_source` injetável via `Server.set`); manter o padrão local de RuboCop em testes.
-- [ ] **G3:** `SESSIONS.md` atualizado no commit do refinamento (S4); status de validação só após o usuário validar (fase 3 — parar na fase 2 e aguardar).
+- [x] **G1:** suíte completa verde após cada passo + lint 0 em todo green; commit obrigatório por passo; 0 regressão fora do escopo (paginação/busca/add existentes seguem verdes via fake de rating default).
+- [x] **G2:** sem gems novas / sem mudança de schema / testes sem rede (rating e cadeia por stubs/fakes; reuso do `rating_source` injetável via `Server.set`); manter o padrão local de RuboCop em testes.
+- [x] **G3:** `SESSIONS.md` atualizado no commit do refinamento (S4); status de validação só após o usuário validar (fase 3 — parar na fase 2 e aguardar).
 
 > **S1:** cada critério acima aponta o teste que o prova. Sem teste automatizado → `manual` explícito + evidência esperada (ver C3).
 
@@ -80,16 +80,21 @@ Exibir **custo e tier de cada Pokémon na listagem da `GET /`** para montar o ti
 - **D5 — Fora de escopo (A — enxuto):** filtros avançados, alinhamento lista↔time, ordenação por custo/tier, persistir custo, Q5/race/escritas atômicas/CSRF/CI/pry, M1 pedras, regra vida zerada — todos preteridos nesta sessão (anotados no `REQUIREMENTS.md`/draft, RNF-04).
 - **D6 — Tamanho (A — 4 passos TDD):** refinamento + 3 greens (badge/derivação → metade/ramo → paginação/OOB/estilo). Alternativa preterida: 5+ passos com filtros/ordenação no mesmo ciclo.
 
-## 7. Validação (executada pelo usuário)
+## 7. Validação (executada pelo usuário em 2026-08-26)
 
 *(Fase 3 — executada pelo usuário. Registro por critério, um resultado por linha — S2.
 Ajuste de validação = alteração formal de critério com data e reaprovação — S3.)*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado |
 | --- | --- | --- | --- |
-| C1 (listagem mostra custo e tier) | `test/list_routes_test.rb` → `test_pokemon_list_shows_cost_and_tier` | — | — |
-| C2 (custo = TeamBudget por linha, máx. cadeia + metade restrito) | `test/list_routes_test.rb` → `test_pokemon_list_cost_uses_line_tier_and_restricted_half` | — | — |
-| C3 (paginação/busca preservadas, sem rede + visual) | `test/list_routes_test.rb` → `test_pokemon_list_pagination_and_search_preserved` / `test_pokemon_list_without_network` | Conferir alinhamento do badge, cores por tier e OOB da lista com `./scripts/run` (**manual**) | — |
+| C1 (listagem mostra custo e tier) | `test/pokemon_list_cost_test.rb` → `test_pokemon_list_shows_cost_and_tier` (B·55/A·70) + `test_index_shows_cost_and_tier` (S·120) — ambos com `FakeListRating` + `PokeApiStub` | — | ok |
+| C2 (custo = TeamBudget por linha, máx. cadeia + metade restrito) | `test/pokemon_list_cost_test.rb` → `test_pokemon_list_cost_uses_line_tier_and_restricted_half` (Eevee 5 ramos S=120) + `test_pokemon_list_restricted_shows_half_cost` (B 55→27 + `poke-cost--restricted`) | — | ok |
+| C3 (paginação/busca preservadas, sem rede + visual) | `test/pokemon_list_cost_test.rb` → `test_pokemon_list_pagination_and_search_preserved` (Página 2, 36 li, q=pik) + `test_pokemon_list_without_network` + `test_oob_after_add_preserves_badges` (`hx-swap-oob`) | Conferido visualmente: badge alinhado sem quebrar grid 6×6, cores por `data-tier` (S/A/B/C/D/F) e OOB da lista após `POST/DELETE /team` (`./scripts/run`) — ok | ok |
+| G1 (suíte + lint) | `./scripts/test` 826/2748 0 failures + `./scripts/lint` 109 files 0 offenses | — | ok |
+| G2 (sem gems/schema, sem rede) | fakes determinísticos `Server.set :rating_source` + `PokeApiStub` sem Faraday | — | ok |
+| G3 (S4/S5) | `./scripts/check_docs` ok, `./scripts/checar-sessao 0056` ok | — | ok |
+
+**Suíte executada na validação:** 826 runs, 2748 assertions, 0 failures, 0 errors — lint 0 offenses. Nenhum ajuste S3 necessário.
 
 ## 8. Observações
 
