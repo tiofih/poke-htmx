@@ -749,3 +749,124 @@ class ServerTeamRemoveHtmxTest < Minitest::Test
     assert_match(/hx-disabled-elt/, remove_form)
   end
 end
+
+# C6, C8 — custo de montagem: tier da linha, teto de S, orçamento
+class TeamBudgetRoutesTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  class FakeRatingSource
+    def initialize(map)
+      @map = map
+    end
+
+    def rating_for(name)
+      (@map[name.to_s] || "F").to_sym
+    end
+  end
+
+  def with_budget_rating(rating_map, &)
+    fake = FakeRatingSource.new(rating_map)
+    original = Server.settings.rating_source
+    Server.set :rating_source, fake
+    yield
+  ensure
+    Server.set :rating_source, original
+  end
+
+  def pikachu_chain
+    pichu = build_pokemon_record("pichu", 172)
+    pikachu = build_pokemon_record("pikachu", 25)
+    raichu = build_pokemon_record("raichu", 26)
+    Pokemon.new(
+      name: "pikachu", sprite: "s", number: 25,
+      evolutions: [pichu, pikachu, raichu].freeze
+    )
+  end
+
+  # C6 — tier da linha = máximo da cadeia
+  def test_cost_uses_highest_chain_tier
+    # pikachu (próprio F) mas linha tem raichu S → conta como S
+    rating = { "raichu" => "S", "pichu" => "F", "pikachu" => "F" }
+    PokeApiStub.with_find(pikachu_chain) do
+      with_budget_rating(rating) do
+        post "/team", { pokeName: "pikachu" }, user_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    team = @repository.all("user-a")
+    assert_equal 1, team.size
+    assert_equal "pikachu", team.first.name
+  end
+
+  # C8 — bloqueio pelo teto de 3 S
+  def test_add_blocked_by_s_limit
+    # 3 membros de linha S já no time
+    s_mons = {}
+    3.times do |i|
+      name = "s-mon-#{i}"
+      poke = Pokemon.new(name: name, sprite: "s", number: 300 + i,
+                         evolutions: [build_pokemon_record(name, 300 + i)])
+      s_mons[name] = poke
+      @repository.add("user-a", poke)
+    end
+
+    rating = { "raichu" => "S", "pikachu" => "F", "pichu" => "F" }.merge(
+      s_mons.keys.to_h { |n| [n, "S"] }
+    )
+    find_map = s_mons.merge({ "pikachu" => pikachu_chain })
+    PokeApiStub.with_find(find_map) do
+      with_budget_rating(rating) do
+        post "/team", { pokeName: "pikachu" }, user_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    assert_match(/m[aá]ximo.*3.*S/i, last_response.body)
+    assert_equal 3, @repository.all("user-a").size
+    refute_includes @repository.all("user-a").map(&:name), "pikachu"
+  end
+
+  # C8 — bloqueio por orçamento
+  def test_add_blocked_by_budget
+    # Time com custo = 435: 2S(240) + 1B(55) + 2A(140)
+    rating = {
+      "heavy-1" => "S", "heavy-2" => "S", "heavy-3" => "B",
+      "heavy-4" => "A", "heavy-5" => "A", "over-budget" => "C"
+    }
+    heavy1 = Pokemon.new(name: "heavy-1", sprite: "s", number: 101,
+                         evolutions: [build_pokemon_record("heavy-1", 101)])
+    heavy2 = Pokemon.new(name: "heavy-2", sprite: "s", number: 102,
+                         evolutions: [build_pokemon_record("heavy-2", 102)])
+    heavy3 = Pokemon.new(name: "heavy-3", sprite: "s", number: 103,
+                         evolutions: [build_pokemon_record("heavy-3", 103)])
+    heavy4 = Pokemon.new(name: "heavy-4", sprite: "s", number: 104,
+                         evolutions: [build_pokemon_record("heavy-4", 104)])
+    heavy5 = Pokemon.new(name: "heavy-5", sprite: "s", number: 105,
+                         evolutions: [build_pokemon_record("heavy-5", 105)])
+    @repository.add("user-a", heavy1)
+    @repository.add("user-a", heavy2)
+    @repository.add("user-a", heavy3)
+    @repository.add("user-a", heavy4)
+    @repository.add("user-a", heavy5)
+
+    candidate = Pokemon.new(name: "over-budget", sprite: "s", number: 200,
+                            evolutions: [build_pokemon_record("over-budget", 200)])
+
+    find_map = {
+      "heavy-1" => heavy1, "heavy-2" => heavy2, "heavy-3" => heavy3,
+      "heavy-4" => heavy4, "heavy-5" => heavy5, "over-budget" => candidate
+    }
+    PokeApiStub.with_find(find_map) do
+      with_budget_rating(rating) do
+        post "/team", { pokeName: "over-budget" }, user_session("user-a")
+      end
+    end
+
+    assert last_response.ok?
+    assert_match(/or[cç]amento/i, last_response.body)
+    assert_equal 5, @repository.all("user-a").size
+    refute_includes @repository.all("user-a").map(&:name), "over-budget"
+  end
+end

@@ -26,6 +26,8 @@ require_relative "db/seeds/saldo_inicial"
 require_relative "lib/parallelizer"
 require_relative "lib/fighter_presenter"
 require_relative "lib/battle_log_presenter"
+require_relative "lib/team_budget"
+require_relative "lib/pokemon_rating_cache"
 
 module ServerCommon
   private
@@ -216,6 +218,7 @@ module ServerSearchHintActions
   end
 end
 
+# rubocop:disable Metrics/ModuleLength
 module ServerTeamActions
   private
 
@@ -243,11 +246,27 @@ module ServerTeamActions
   end
 
   def add_team_member
-    notice = add_team_notice(new_member_from_api)
+    pokemon = new_member_from_api
+    budget_notice = budget_block_notice(pokemon)
+    return budget_blocked_response(budget_notice) if budget_notice
+
+    add_team_success(pokemon)
+  end
+
+  def add_team_success(pokemon)
+    notice = add_team_notice(pokemon)
     settings.journey.mark_started_when_full(current_user)
     settings.battle.invalidate(current_user) unless notice
     @notice = notice || "Adicionado ao time."
     @notice_kind = notice ? :error : :success
+    mini_status = erb :team_add_result, layout: false
+    prepare_team_fragment_data
+    "#{mini_status}#{oob_team_view}#{oob_pokemon_list}"
+  end
+
+  def budget_blocked_response(msg)
+    @notice = msg
+    @notice_kind = :error
     mini_status = erb :team_add_result, layout: false
     prepare_team_fragment_data
     "#{mini_status}#{oob_team_view}#{oob_pokemon_list}"
@@ -288,6 +307,76 @@ module ServerTeamActions
                      .map { |m| m[:name] }
                      .first(TeamRepository::MAX_MOVES_PER_POKEMON)
     pokemon.new(moves: names)
+  end
+
+  # Calcula o tier da linha evolutiva (máximo dos tiers dos membros da cadeia).
+  # Para membros do time (sem evolutions no DB), busca pelo nome via API.
+  def line_tier_for(pokemon)
+    names = evolution_chain_names(pokemon)
+    return :F if names.empty?
+
+    tiers = names.filter_map { |n| settings.rating_source.rating_for(n).to_sym }
+    tiers.empty? ? :F : tier_max(tiers)
+  end
+
+  def evolution_chain_names(pokemon)
+    return pokemon.evolutions.map(&:name) if pokemon.evolutions.any?
+
+    resolved = settings.api.find(pokemon.name)
+    resolved&.evolutions&.map(&:name) || [pokemon.name]
+  end
+
+  # rubocop:disable Lint/UselessConstantScoping
+  TIER_ORDER = %i[F D C B A S].freeze
+  # rubocop:enable Lint/UselessConstantScoping
+
+  def tier_max(tiers)
+    tiers.max_by { |t| TIER_ORDER.index(t) || 0 }
+  end
+
+  # Custo total derivado do time atual.
+  def team_total_cost(team)
+    team.sum do |member|
+      restricted = settings.api.evolution_restricted?(member.name)
+      lt = line_tier_for(member)
+      TeamBudget.cost_for(line_tier: lt.to_s, restricted: restricted)
+    end
+  end
+
+  # Contagem de membros de linha S no time.
+  def team_s_count(team)
+    team.count { |member| line_tier_for(member) == :S }
+  end
+
+  # Verifica teto de S e orçamento. Devolve notice de erro se bloqueado, nil se OK.
+  def budget_block_notice(pokemon)
+    return "Pokémon não encontrado." unless pokemon
+
+    lt = line_tier_for(pokemon)
+    cost = pokemon_cost(pokemon, lt)
+    team = settings.team.all(current_user)
+    current_cost = team_total_cost(team)
+    s_count = team_s_count(team)
+
+    s_limit_notice(lt, s_count) || budget_notice(current_cost, cost)
+  end
+
+  def pokemon_cost(pokemon, line_tier)
+    restricted = settings.api.evolution_restricted?(pokemon.name)
+    TeamBudget.cost_for(line_tier: line_tier.to_s, restricted: restricted)
+  end
+
+  def s_limit_notice(line_tier, current_s_count)
+    return unless line_tier == :S
+    return if TeamBudget.s_limit_ok?(current_s_count: current_s_count + 1)
+
+    "Máximo de 3 Pokémon de linha S por time."
+  end
+
+  def budget_notice(current_cost, new_cost)
+    return if TeamBudget.fits?(current_total: current_cost, new_cost: new_cost)
+
+    "Orçamento insuficiente para adicionar este Pokémon."
   end
 
   def remove_team_member
@@ -351,6 +440,7 @@ module ServerTeamActions
     notice
   end
 end
+# rubocop:enable Metrics/ModuleLength
 
 module ServerTeamItemActions
   private
@@ -717,6 +807,7 @@ class Server < Sinatra::Base
     register Sinatra::Reloader
   end
 
+  # rubocop:disable Metrics/BlockLength
   configure do
     enable :logging, :sessions
     set :session_secret, ENV["SESSION_SECRET"] ||
@@ -730,6 +821,11 @@ class Server < Sinatra::Base
     set :battle_history, BattleRepository.new
     set :wallet, WalletRepository.new
     set :api, PokeApi.instance
+    set :rating_source, PokemonRatingCache.new(
+      fetcher: ->(name) { settings.api.find(name) },
+      moves_fetcher: ->(number) { settings.api.moves_for(number) },
+      path: ENV["POKERATING_CACHE_PATH"] || "tmp/pokemon_rating_cache.json"
+    )
     set :inventory, InventoryRepository.new
     set :user_state, UserStateRepository.new
     set :journey, JourneyService.new(
@@ -744,6 +840,7 @@ class Server < Sinatra::Base
     }
     ServerServices.wire(self, deps)
   end
+  # rubocop:enable Metrics/BlockLength
 
   before do
     session[:user_id] = params["as"] if params["as"]
