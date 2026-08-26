@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-25 |
-| Implementação | **Concluída** — passos 1–8 + docs, suíte 802/2612, lint 0 (2026-08-25) |
+| Implementação | **Concluída** — passos 1–8 + docs, suíte 803/2618, lint 0 (2026-08-25) |
 | Validação | **Pendente** (executada pelo usuário) |
 
 ---
@@ -260,6 +260,8 @@ Center, com as opções **vender itens** (novo `POST /mart/sell`) e **recomeçar
   "Recomeçar jornada"** — o reset antigo reusava `remove_member` (DELETE + reindex por
   membro), e o double-submit concorrente colidia no unique `(user_id, slot)` → `reset`
   virou **lote** (`restore_items` de todos + `TeamRepository#clear` em 1 DELETE, sem
-  reindex); suíte 802/2612.
-- Próximo passo do fluxo: **fase 2 concluída (passos 1–8, suíte 802/2612, lint 0) —
+  reindex); (3) **lista de venda do Mart mostrava linhas de inventário em quantidade 0**
+  (itens equipados/consumidos ficam como linha `0×` no `inventory`) — `_mart.erb` passa a
+  exibir **só quantidade > 0** + aviso "Nenhum item no estoque para vender". Suíte 803/2618.
+- Próximo passo do fluxo: **fase 2 concluída (passos 1–8, suíte 803/2618, lint 0) —
   PARAR e aguardar a validação do usuário (fase 3)**.

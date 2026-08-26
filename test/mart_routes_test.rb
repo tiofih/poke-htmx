@@ -127,6 +127,21 @@ class ServerMartTest < Minitest::Test
     sell_form = last_response.body[%r{<form[^>]*hx-post="/mart/sell".*?</form>}m]
     refute_nil sell_form
   end
+
+  def test_mart_fragment_hides_zero_quantity_inventory_from_sell
+    @wallet.grant("user-a", 100)
+    @inventory.add("user-a", "potion", 1)
+    @inventory.use("user-a", "potion", 1)
+    @inventory.add("user-a", "hyper-potion", 2)
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "hyper-potion"
+    refute_includes last_response.body, "potion — 0"
+    potion_sell = last_response.body[%r{<strong>potion</strong>.*?</form>}m]
+    assert_nil potion_sell
+  end
 end
 
 class ServerMartJourneyGateTest < Minitest::Test
