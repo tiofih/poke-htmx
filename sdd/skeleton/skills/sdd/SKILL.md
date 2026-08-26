@@ -9,11 +9,19 @@ description: Fluxo de papéis do SDD do Poke-HTMX — Refinador → Implementado
 
 | Fase | Papel (subagent_type) | Entregável | Quando disparar |
 |---|---|---|---|
-| 1 — Refinamento | `refinador` | sessão `sessions/NNNN-*.md` (objetivo/escopo/critérios S1 → teste/`manual`/plano TDD) + `SESSIONS.md` (S4) | sessão nova / refinamento pendente |
+| 1 — Refinamento (CONVERSA) | `refinador` (investigação → finalize) | **investigação**: mapa de decisões (opções A/B/C, recomendada). **finalize**: sessão `sessions/NNNN-*.md` + `SESSIONS.md` (S4) | sessão nova / refinamento pendente |
 | 2 — TDD | `implementador-teste` | código + testes, commits `Passo N:`, suíte+lint verdes | refinamento aprovado |
 | 2c — Revisão | `revisor` | diff revisado + `VEREDITO: Aprovado` \| `Requer ajuste` | implementação feita |
 | 3 — pré-validação | `playtester` (OPCIONAL) | achados de UX/comportamento no app rodando | só se o usuário pedir / tiver valor |
 | 3 — Validação | **usuário** | tabela por critério (S2) / S3 | **nunca a IA** |
+
+## Fase 1 é conversa (não imposição)
+- O `refinador` em **investigação** NÃO decide: levanta objetivo, escopo/fora-de-escopo,
+  critérios→teste (S1) e decisões de design como **opções A/B/C + recomendação**, e devolve o
+  **mapa de decisões** (`AGUARDANDO ESCOLHA DO USUÁRIO`).
+- O orquestrador apresenta cada decisão ao usuário (via `question`) e coleta as escolhas.
+- Só então re-dispare o `refinador` em **finalize** (com as escolhas) para escrever a sessão + commitar.
+- **Nunca** aceitar um refinamento resolvido por um único passo automático do subagent.
 
 ## Regras que guiam o despacho
 

@@ -19,11 +19,17 @@ decida pelo estado do projeto.
 
 | Estado da sessão | Papel a disparar |
 | --- | --- |
-| Refinamento pendente | **fase 1** → subagent `refinador` (fecha objetivo/escopo/critérios S1/plano TDD). Apresente ao usuário e **aguarde aprovação**. |
+| Refinamento pendente | **fase 1 (conversa)** → subagent `refinador` **em modo investigação**: ele devolve um **mapa de decisões** (opções A/B/C + recomendação). Apresente as decisões ao usuário uma a uma (via `question`) e **deixe-o escolher**. Só então re-dispare `refinador` em **modo finalize** (com as escolhas) para escrever `sessions/NNNN-*.md` + `SESSIONS.md` (S4) e commitar. NUNCA deixe o refinador decidir sozinho. |
 | Refinamento feito, Implementação pendente | **fase 2** → subagent `implementador-teste` (TDD, suíte+lint verdes, commits `Passo N:`). |
 | Implementação feita | **fase 2c** → subagent `revisor`; se `VEREDITO: Requer ajuste`, re-dispare `implementador-teste` e depois `revisor` de novo (**loop S7, teto 3 rodadas**, senão escalar S3) até `Aprovado`. |
 | Pronto para validar | **fase 3** → **PARE** (é do usuário). NÃO marcar Done, NÃO validar, NÃO commitar conclusão. |
 | Playtester | só dispare se o usuário pedir / tiver valor (advisory, não substitui a S2). |
+
+## 2b. Refinamento = conversa (regra de ouro)
+Na fase 1, o Refinador investiga e **levanta opções**; **você** (orquestrador) apresenta cada
+decisão ao usuário e coleta a escolha. Só escreve o arquivo da sessão **depois** de todas as
+escolhas. Aplicar ao objetivo, escopo/fora-de-escopo, critérios→teste (S1) e decisões de design.
+**Não** aceitar um refinamento que o subagent resolveu sozinho em um único passo.
 
 ## 3. Como disparar cada papel
 - Sempre via **`task`** com `subagent_type`: `refinador` · `implementador-teste` · `revisor` · `playtester`.
