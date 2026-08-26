@@ -320,6 +320,19 @@ travados no estado antigo). Depois da
 limitações técnicas (escritas não atômicas, erros com status real, race no add,
 identidade/CSRF, CI) — a critério do usuário.
 
+**Sessão 0054 (limitação técnica — erros com status real) refinada em 2026-08-26**
+(fase 1 concluída — critérios C1–C3 e plano TDD fechados em
+`sessions/0054-erros-status-real.md`): o handler global `error 500 do` (`server.rb`)
+passa a devolver **status 500** nas requisições **não-htmx** (monitoria/healthcheck/
+navegação direta) — fim do "esconde falhas de monitoria" — e **mantém 200 + fragmento**
+(`views/error.erb`) nos swaps **htmx** via `htmx_request?` (padrão 0018 preservado);
+o log do erro original (`env["sinatra.error"]`) segue em ambos. **Fora de escopo:**
+`halt 404` (já devolve 404), os fragmentos amigáveis 200 **por rota** (PokeAPI nil etc.,
+decisão 0018), página de erro full-page estilizada, configurar htmx para swap em 5xx
+(preterido — ver D1) e as demais limitações anotadas (escritas não atômicas, race no add,
+identidade/CSRF, estado transiente, `pry`, CI). Depois da 0054: as demais limitações
+técnicas e a fila J2/J4/D4/M2 — a critério do usuário.
+
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
 > 2026-08-19 — GET /battle ~38s, 2º play ~4s)**. **J1 concluído e validado (0036,
@@ -395,6 +408,7 @@ identidade/CSRF, CI) — a critério do usuário.
 | 0051 | BUG-4 — vazamento de conexões PG em produção (`ConnectionRegistry` só limpa no `after_teardown`; app acumulou 80 conexões no benchmark e derrubou a suíte): **liberação por request** (`after` no `server.rb` → `release_current_thread!`) + **teto global** `MAX_CONNECTIONS` 30 com evicção (thread morta primeiro, senão LRU), isolamento por thread (0044) preservado | Concluída | Done (passos 1–3, suíte 755/2404, lint 0, validado em 2026-08-25; `pokedex` estável em 14 conexões — antes 80 — e suíte verde com o `web` ativo) |
 | 0052 | QA Q2+Q3+GL-2 — gate da jornada por tamanho do time (Q3: `started?` = `team >= 6`, flag deixa de liberar — remover abaixo de 6 re-bloqueia), gate de HP no `/battle` (GL-2: `battle_ready?` com poke cheio se nunca lutou, aviso+CTA "cure no Poke Center", CTA "Batalhar" escondido no painel, botão "Novo confronto" desabilitado na tela de fim após derrota) e itens devolvidos no remove (Q2: `TeamService#remove_member` repõe `assigned_item`/`held_item` ao estoque) | Concluída | Done (passos 1–3 + ajuste S3, suíte 770/2473, lint 0, validado em 2026-08-25; flag `user_state` vira vestigial — anotado no draft) |
 | 0053 | QA Q4+Q5+GL-1 — aviso de busca base-form, remoção em 1 clique e game over (vender/recomeçar): **Q4** hint informativo quando o termo só casa com não-base/starter (aponta a evolução base ou os destaques iniciais); **Q5** remoção robusta (investigação do "2 cliques" intermitente — hardening `hx-disabled-elt` no form + idempotência); **GL-1** game over = time todo zerado **e** saldo < custo da cura (`game_over?` no `JourneyService`), com venda de itens (`POST /mart/sell` + `SellPolicy` 50% do preço) e recomeço da jornada (`POST /journey/restart` — `TeamService#reset` em lote devolvendo itens + `WalletRepository#set` p/ saldo inicial 200) | Concluída | Done (passos 1–8 + ajustes S3, suíte 804/2623, lint 0, validado em 2026-08-25; game over também na tela de fim de batalha; fix do 500 no recomeçar — reset em lote; lista de venda sem `0×`; `#pokemon-list` refrescada via OOB após recomeçar) |
+| 0054 | Limitação técnica — erros com status real: handler global `error 500 do` passa a devolver **status 500** nas requisições **não-htmx** (monitoria/healthcheck/navegação direta) e mantém **200 + fragmento** (`views/error.erb`) nos swaps **htmx** (`htmx_request?`), preservando o log do erro original — fragmentos amigáveis 200 por rota (decisão 0018) e `halt 404` ficam fora | Refinamento | Refinamento concluído (fase 1 — critérios C1–C3 + plano TDD fechados em `sessions/0054-erros-status-real.md`, decidido em 2026-08-26; implementação/validação pendentes) |
 
 ## Estrutura do arquivo de sessão
 
