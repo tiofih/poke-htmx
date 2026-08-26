@@ -338,9 +338,22 @@ técnicas e a fila J2/J4/D4/M2 — a critério do usuário.
 B=55/C=40/D=30/F=20), metade para restrição de evolução, teto de 3 S + orçamento 450
 em todo `POST /team`, sem wallet. Painel do time mostra custo/orçamento/contagem de S.
 **Fora de escopo:** UX-2 (custo/ranking na listagem), D4 (draft temático), M1 (pedras no
-Mart), regra de vida zerada. **Próximas candidatas:** UX-2 (custo/ranking na listagem —
-depende do M2), bug Q5 (2 cliques no remover), fila J2/J4/D4 e limitações técnicas — a
-critério do usuário.
+Mart), regra de vida zerada.
+
+**Sessão 0056 (UX-2 — custo e tier na listagem) refinada em 2026-08-26** (fase 1
+concluída — critérios C1–C3 e plano TDD fechados em
+`sessions/0056-ux2-custo-tier-listagem.md`): exibir **custo e tier da linha evolutiva**
+na listagem da `GET /` via badge inline em `pokemon_list_item.erb`
+(`<span class="poke-cost" data-tier="B">B · 55</span>`, restrito mostra metade + ícone,
+cor por tier via CSS), reusando `PokemonRatingCache` (`rating_source` via `Server.set`,
+TTL 7d) + `TeamBudget.cost_for` + `api.evolution_restricted?` — `line_tier` = máximo da
+cadeia via `find(name).evolutions` já disponíveis no `Parallelizer` batch 24, sem fetch
+extra; paginação/busca preservadas e sem rede, OOB da lista pós add/remove, visual
+(alinhamento/cores) com verificação `manual`. **Fora de escopo:** filtros avançados,
+alinhamento lista↔time, ordenação por custo/tier, persistir custo, Q5/race/escritas
+atômicas/CSRF/CI/pry, M1 pedras, regra vida zerada — ficam para 0057 e demais sessões.
+**Próximas candidatas:** 0057 (UX-2b filtros), bug Q5 (2 cliques), fila J2/J4/D4 e
+limitações técnicas — a critério do usuário.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -419,6 +432,7 @@ critério do usuário.
 | 0053 | QA Q4+Q5+GL-1 — aviso de busca base-form, remoção em 1 clique e game over (vender/recomeçar): **Q4** hint informativo quando o termo só casa com não-base/starter (aponta a evolução base ou os destaques iniciais); **Q5** remoção robusta (investigação do "2 cliques" intermitente — hardening `hx-disabled-elt` no form + idempotência); **GL-1** game over = time todo zerado **e** saldo < custo da cura (`game_over?` no `JourneyService`), com venda de itens (`POST /mart/sell` + `SellPolicy` 50% do preço) e recomeço da jornada (`POST /journey/restart` — `TeamService#reset` em lote devolvendo itens + `WalletRepository#set` p/ saldo inicial 200) | Concluída | Done (passos 1–8 + ajustes S3, suíte 804/2623, lint 0, validado em 2026-08-25; game over também na tela de fim de batalha; fix do 500 no recomeçar — reset em lote; lista de venda sem `0×`; `#pokemon-list` refrescada via OOB após recomeçar) |
 | 0054 | Limitação técnica — erros com status real: handler global `error 500 do` passa a devolver **status 500** nas requisições **não-htmx** (monitoria/healthcheck/navegação direta) e mantém **200 + fragmento** (`views/error.erb`) nos swaps **htmx** (`htmx_request?`), preservando o log do erro original — fragmentos amigáveis 200 por rota (decisão 0018) e `halt 404` ficam fora | Concluída | Done (fase 2 + validação do usuário em 2026-08-26; C1/C2 por teste, C3-log `manual`; suíte 805/2630, lint 0) |
 | 0055 | M2 — sistema de custo para montagem de time: custo pelo **tier da linha evolutiva** (maior tier da cadeia, via `PokemonRatingCache` — S=120/A=70/B=55/C=40/D=30/F=20), **metade do custo** para restrição de evolução (novo `evolution_restricted?` no gateway), **teto duro de 3 Pokémon S por time** + **orçamento de montagem 450** validados em todo `POST /team` como **limites derivados — sem tocar o wallet/Eco**; painel do time mostra custo/orçamento/contagem de S | Concluída | Done (passos 1–4, suíte 819/2701, lint 0, validado em 2026-08-26; UX-2 e bug Q5 2 cliques anotados como candidatos) |
+| 0056 | UX-2 — custo e tier na listagem (M2): exibir custo e tier da linha evolutiva na `GET /` via badge inline em `pokemon_list_item.erb` (`poke-cost` + `data-tier`, S=120/A=70/B=55/C=40/D=30/F=20, restrito = metade floor) com cor por tier, reusando `PokemonRatingCache`/`TeamBudget`/`evolution_restricted?` (line_tier = máx. da cadeia via `evolutions` do batch 24, sem fetch extra); paginação/busca preservadas e sem rede, OOB da lista, visual com `manual` | Refinamento | Concluída — refinamento concluído em 2026-08-26, Implementação Pendente (plano TDD 3 passos, critérios C1–C3 S1 fechados) |
 
 ## Estrutura do arquivo de sessão
 
