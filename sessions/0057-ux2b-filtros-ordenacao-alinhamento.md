@@ -111,6 +111,20 @@ Prova: `test/pokemon_list_filters_test.rb#test_clear_filters_resets_dropdowns` �
 
 Status: hotfix **Passo 4c** em 2026-08-26; suíte verde + lint 0; aguarda revalidação do usuário — **não marcar Done** até validação (S3).
 
+**Ajuste 2026-08-26 — tiers/custo/sort sempre F e ordenação random (hotfix 4d):**
+
+Bug: tiers/custo/sort dependem de `line_tier_for` → `settings.rating_source.rating_for(name)` → `PokemonRatingCache` com `fetcher: ->(name) { settings.api.find(name) }` (`server.rb:1066`). `PokeApiHttp#find` retorna `Pokemon` sem `stats`/`types`/`moves` (só `name`/`sprite`/`number`), logo `PokemonRating.rate` calcula `weighted_stats([])=0` → `score 0` → `tier :F` para todos. Então filtro `tier=S/A/B` retorna vazio, `tier=F` retorna tudo, custo (derivado do tier via `TeamBudget.cost_for`) também errado (`F=20` sempre), `sort` por `tier`/`cost` fica random (todos `F`/`20`). Tests passavam porque `FakeListRating` injeta `tier` determinístico, mascarando o bug real. Antes da 0057, `M2`/`0056` já usavam mesmo `fetcher`, mas não tinham filtro `tier` — bug latente que só apareceu agora com filtros.
+
+Fix:
+1. `server.rb` `set :rating_source` → `fetcher: ->(name) { settings.api.detail(name) || settings.api.find(name) }` (mantém `moves_fetcher` igual). `detail` traz `stats`/`types`/`evolutions` via `pokemon_data` + `pokemon_attributes`, logo `PokemonRating.rate` calcula `score` real e `tier` correto.
+2. `filtered_base_forms` bloco `tier`/`cost` e `sort_names` já usavam `detail` (feito em `4b`) — mantidos, mas agora `rating` também correto, então filtro `tier` retorna resultados reais.
+3. Cache stale: `tmp/pokemon_rating_cache.json` continha `988` entradas todas `F` (e `tmp/test_pokemon_rating_cache.json` `186` com `184 F`) — TTL `7d` manteria `F` por dias. Invalidado no hotfix: `rm tmp/pokemon_rating_cache.json tmp/test_pokemon_rating_cache.json` (recriado vazio e reaquecido no próximo filtro `tier`/`sort`; primeira carga fria paga `detail` por membro da cadeia, depois `<1s` quente via `PokeApiCache` + `PokemonRatingCache`).
+4. TDD: `test/rating_detail_hotfix_test.rb` — `test_rating_for_uses_detail_not_find` (prova `find` minimal → `F`, `detail` rico → `S`), `test_tier_filter_uses_detail_rating_not_find` (integração `GET /pokemons tier=S/A/B` + `sort` com `detail` rico) e `test_server_default_rating_uses_detail_hotfix` (prova que `Server.settings.rating_source` via `detail` dá `S`; falha antes do fix com `find`, passa depois). `PokeApiStub.with_detail` + `with_find` minimal simulam `PokeApiHttp` real.
+
+Prova: `test/rating_detail_hotfix_test.rb` verde; `test/pokemon_list_filters_test.rb` segue verde (usa `FakeListRating`); suíte completa `851` testes `+ lint 0`. `filtered_base_forms`/`sort_names` já auditados.
+
+Status: hotfix **Passo 4d** em 2026-08-26; suíte verde + lint 0; aguarda revalidação do usuário — **não marcar Done** até validação (S3).
+
 ## 6. Decisões de refinamento (fechadas com o usuário em 2026-08-26)
 
 - **D1 — Objetivo/foco (A — UX-2b filtros avançados + alinhamento lista↔time, continuidade da 0056):** fecha o ciclo UX-2: a 0056 exibiu custo/tier na lista, esta entrega filtros/ordenação/persistência e alinha as caixas da `/`. Alternativas preteridas: B — só alinhamento sem filtros (deixaria a lista sem discovery com o orçamento M2) e C — só filtros sem alinhamento (a página em 2 colunas seguiria desbalanceada).

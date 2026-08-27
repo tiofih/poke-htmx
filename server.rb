@@ -1063,7 +1063,7 @@ class Server < Sinatra::Base
     set :wallet, WalletRepository.new
     set :api, PokeApi.instance
     set :rating_source, PokemonRatingCache.new(
-      fetcher: ->(name) { settings.api.find(name) },
+      fetcher: ->(name) { settings.api.detail(name) || settings.api.find(name) },
       moves_fetcher: ->(number) { settings.api.moves_for(number) },
       path: ENV["POKERATING_CACHE_PATH"] || "tmp/pokemon_rating_cache.json"
     )
