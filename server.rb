@@ -611,56 +611,8 @@ module ServerTeamActions
     settings.team_strategy.remove_member(current_user, params[:id]) if params[:id]
     settings.battle.invalidate(current_user)
     fragment = render_team_fragment_with_notice
-    return fragment if delete_skip_oob?
-
     "#{fragment}#{oob_pokemon_list}"
   end
-
-  def delete_skip_oob?
-    false
-  end
-
-  def delete_starters_visible?
-    q = params[:q].to_s
-    offset = params[:offset].to_i
-    return false unless q.empty? && offset.zero?
-    return false if delete_filter_active? || delete_sort_active?
-
-    true
-  end
-
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength, Layout/LineLength
-  def delete_filter_active?
-    type = normalized_type(params[:type] || params["type"]) if filter_param_present?("type")
-    gen = normalized_generation(params[:generation] || params["generation"]) if filter_param_present?("generation")
-    tier = normalized_tier(params[:tier] || params["tier"]) if filter_param_present?("tier")
-    cost = normalized_cost_max(params[:cost_max] || params["cost"] || params[:cost_max] || params["cost"]) if filter_param_present?("cost_max") || filter_param_present?("cost")
-    # fallback to session only when no explicit filter params sent
-    if type.nil? && gen.nil? && tier.nil? && cost.nil? && !any_filter_param_present?
-      stored = session[:list_filters]
-      if stored
-        type = normalized_type(stored["type"] || stored[:type]) if stored["type"] || stored[:type]
-        gen = normalized_generation(stored["generation"] || stored[:generation]) if stored["generation"] || stored[:generation]
-        tier = normalized_tier(stored["tier"] || stored[:tier]) if stored["tier"] || stored[:tier]
-        cval = stored["cost_max"] || stored[:cost_max] || stored["cost"] || stored[:cost]
-        cost = normalized_cost_max(cval) if cval
-      end
-    end
-    !type.nil? || !gen.nil? || !tier.nil? || !cost.nil?
-  end
-
-  def delete_sort_active?
-    sort = normalized_sort(params[:sort] || params["sort"]) if filter_param_present?("sort")
-    if sort.nil? && !any_filter_param_present?
-      stored = session[:list_filters]
-      if stored
-        s = stored["sort"] || stored[:sort]
-        sort = normalized_sort(s) if s
-      end
-    end
-    !sort.nil?
-  end
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength, Layout/LineLength
 
   def move_team_member
     settings.team.move(current_user, params[:id], params[:new_slot].to_i)

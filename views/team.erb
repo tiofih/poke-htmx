@@ -46,6 +46,7 @@
     <input type="hidden" name="new_slot" value="<%= poke.slot + 1 %>">
     <button type="submit" aria-label="Mover para baixo">▼</button>
   </form>
+  <!-- hx-params "*" garante id + list-state; hx-include ".list-state" explicita filtros (redundancia intencional) -->
   <form
       id='team-pokemon-<%= poke.id %>'
       hx-delete="/team"
