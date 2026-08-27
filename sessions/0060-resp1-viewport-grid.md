@@ -104,7 +104,7 @@ Desbloquear mobile/tablet adicionando `<meta viewport>` e corrigindo o grid da l
 
 ## 8. Observações
 
-- **Roadmap novo (UX > Economia > Estabilidade) fechado em 2026-08-27:** Onda 1 UX (0060 P0 → 0061 filtros/batalha responsivos → 0062 quick-wins contrato → 0063 juice), Onda 2 Economia (0064 vida zerada → 0065 death spiral+game over → 0066 pool oponente → 0067 pedras+modais → 0068 resolver batalha), Onda 3 Estabilidade (0069 race add → 0070 escritas atômicas → 0071 CSRF → 0072 respiro/pry/CI/Redis). J2/J4/D4 e IA-2/3/4 ficam pós-0072.
+- **Roadmap novo (UX > Economia > Estabilidade) fechado em 2026-08-27, ajustado 2026-08-27 (0063 após 0068):** Onda 1 UX (0060 P0 → 0061 filtros/batalha responsivos → 0062 quick-wins contrato), Onda 2 Economia (0064 vida zerada → 0065 death spiral+game over → 0066 pool oponente → 0067 pedras+modais → 0068 resolver batalha → **0063 juice**), Onda 3 Estabilidade (0069 race add → 0070 escritas atômicas → 0071 CSRF → 0072 respiro/pry/CI/Redis). J2/J4/D4 e IA-2/3/4 ficam pós-0072. 0063 é UX/juice pós-economia.
 - **Próxima após 0060:** 0061 RESP-1 P1 (filtros drawer 44px + battle 3col <900 + barras fluidas) — depende de 0060 verde.
 - **Risco:** `auto-fill` pode gerar 5 col em largura ímpar; fallback para breakpoints graduais é aceito sem reabrir critério se manter C2 verde.
 
