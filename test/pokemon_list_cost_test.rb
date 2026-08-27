@@ -173,6 +173,38 @@ class PokemonListCostTest < Minitest::Test
     assert_includes last_response.body, "poke-cost--restricted"
   end
 
+  def test_pokemon_list_shows_restricted_s_one_ten
+    # S puro 120, restrito 110 (exceção) + ◆ + classe
+    pichu = build_pokemon_record("pichu", 172)
+    pikachu = build_pokemon_record("pikachu", 25)
+    raichu = build_pokemon_record("raichu", 26)
+    pikachu_evo = Pokemon.new(
+      name: "pikachu", sprite: "https://example.com/pikachu.png", number: 25,
+      evolutions: [pichu, pikachu, raichu].freeze
+    )
+    names = %w[pikachu pichu raichu]
+    rating = { "pichu" => "F", "pikachu" => "S", "raichu" => "S" }
+    find_map = { "pikachu" => pikachu_evo, "pichu" => pichu, "raichu" => raichu }
+    forms = { "pikachu" => true, "pichu" => true, "raichu" => false }
+
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_find(find_map) do
+        PokeApiStub.with_base_forms(forms) do
+          PokeApiStub.with_gateway(evolution_restricted: { "pikachu" => true }) do
+            with_rating(rating) do
+              get "/pokemons", q: ""
+            end
+          end
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, "S · 110"
+    assert_includes last_response.body, "poke-cost--restricted"
+    assert_includes last_response.body, "◆"
+  end
+
   # C3 — paginação/busca preservadas e sem rede
   def test_pokemon_list_pagination_and_search_preserved
     names = two_hundred_fifty_names

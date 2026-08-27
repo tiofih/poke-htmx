@@ -885,7 +885,8 @@ class TeamBudgetRoutesTest < Minitest::Test
     team = @repository.all("user-a")
     assert_equal 1, team.size
     assert_match(%r{Custo do time: 20/450}, last_response.body)
-    assert_match(%r{S no time: 0/3}, last_response.body)
+    assert_match(/S no time: 0/, last_response.body)
+    refute_match(%r{S no time: 0/3}, last_response.body)
   end
 
   # C9 — remoção libera orçamento e teto de S
@@ -1081,7 +1082,8 @@ class TeamBudgetRoutesTest < Minitest::Test
     get "/team", {}, htmx_session("user-c")
     assert last_response.ok?
     assert_match(%r{Custo do time: 0/450}, last_response.body)
-    assert_match(%r{S no time: 0/3}, last_response.body)
+    assert_match(/S no time: 0/, last_response.body)
+    refute_match(%r{S no time: 0/3}, last_response.body)
 
     # Adiciona um Pokémon F barato
     poke = Pokemon.new(name: "cheap", sprite: "s", number: 600,
@@ -1094,6 +1096,41 @@ class TeamBudgetRoutesTest < Minitest::Test
 
     assert last_response.ok?
     assert_match(%r{Custo do time: 20/450}, last_response.body)
-    assert_match(%r{S no time: 0/3}, last_response.body)
+    assert_match(/S no time: 0/, last_response.body)
+    refute_match(%r{S no time: 0/3}, last_response.body)
+  end
+
+  # C5 — painel S n sem teto e custo reflete S_rest 110
+  def test_team_panel_shows_s_count_without_limit
+    s_poke = Pokemon.new(name: "solo-s", sprite: "s", number: 700,
+                         evolutions: [build_pokemon_record("solo-s", 700)])
+    PokeApiStub.with_find(s_poke) do
+      with_budget_rating({ "solo-s" => "S" }) do
+        post "/team", { pokeName: "solo-s" }, user_session("user-c")
+        assert last_response.ok?
+        assert_match(/S no time: 1/, last_response.body)
+        refute_match(%r{S no time: 1/3}, last_response.body)
+        # GET dentro do mesmo stub para rating consistente
+        get "/team", {}, htmx_session("user-c")
+        assert_match(/S no time: 1/, last_response.body)
+        refute_match(%r{/3}, last_response.body)
+      end
+    end
+  end
+
+  def test_team_panel_cost_reflects_restricted_s_one_ten
+    s_rest = Pokemon.new(name: "s-rest-panel", sprite: "s", number: 701,
+                         evolutions: [build_pokemon_record("s-rest-panel", 701)])
+    PokeApiStub.with_find(s_rest) do
+      with_budget_rating({ "s-rest-panel" => "S" }) do
+        PokeApiStub.with_gateway(evolution_restricted: { "s-rest-panel" => true }) do
+          post "/team", { pokeName: "s-rest-panel" }, user_session("user-d")
+        end
+      end
+    end
+    assert last_response.ok?
+    assert_match(%r{Custo do time: 110/450}, last_response.body)
+    assert_match(/S no time: 1/, last_response.body)
+    # OOB #pokemon-list preservado com badge? verificado em pokemon_list_cost_test
   end
 end
