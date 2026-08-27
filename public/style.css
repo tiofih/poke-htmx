@@ -24,15 +24,15 @@ header nav a {
   margin: 0 0.5em;
 }
 
-/* Grid uniforme da listagem (Onda 3) — 6 colunas em todas as páginas:
-   iniciais e comuns no MESMO grid (.pokemon-list com display: contents);
-   30 itens/página = 5 linhas completas; responsivo 6/3/1 também divide 30. */
+/* Grid uniforme da listagem (Onda 3 + RESP-1 P0) — auto-fill responsivo:
+   140px mínimo garante 6col em 1440 (154px), 4col em 1024 (85→~200px), 3col em 768,
+   2col em 520 e 1col em 375; fallback graduais preservam divisão 36 sem buraco. */
 .pokemon-grid {
   display: grid;
   gap: 12px;
   list-style: none;
   padding-left: 0;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 }
 
 .pokemon-list {
