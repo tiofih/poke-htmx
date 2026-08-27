@@ -197,3 +197,22 @@ mantendo `/team` página própria — sessão 0042. A página `/team` deixa de s
   selecionar os golpes (um por slot, cap 4), em vez da lista clicável atual do
   `team_manage.erb` (JN-2). Refinamento futuro fechará modelo/UI.
 
+
+## 7. Playtest 02 — Responsividade (2026-08-27, levantamento browser-harness)
+
+> Levantamento fora do fluxo (RNF-04) — não abre escopo agora. Base: `playtest-02-responsividade.md` (medições CDP). Virará sessão `RESP-1` após M2b.
+
+**Blocker P0:** falta `<meta viewport>` em `views/layout.erb` — mobile renderiza 980px desktop, media-queries 720/480 nunca disparam. Injeção de viewport fez `375→346px 1col` funcionar.
+
+**Grid listagem (`public/style.css:18`):** `repeat(6)` até 720 quebra em `768` (6×42px inutilizável), `1024` (6×85px estreito). Proposta: `auto-fill minmax(140px,1fr)` ou breakpoints `1100:6 / 900:4 / 720:3 / 520:2 / 360:1`. `list-team-grid` colapsa em 720 mas `768` ainda é `319+396` espremido — subir para `960`.
+
+**Filtros (`_filter_controls`):** 7 filhos `flex 1 1 8em` → `375:117px` (3 linhas), `320:165px` (4 linhas), `768:179px` (2-3 linhas). Falta `min-height 44px` p/ toque, agrupamento ou drawer.
+
+**Lista+Time scroll:** `max-height 78vh` + `overflow:auto` cria duplo scroll em desktop; `min-height 420px` deixa buraco em mobile vazio.
+
+**Batalha (`battle-layout 3×1fr`):** sem `@media` — em `<900` deve empilhar `1fr` e barras `120/80px` fluidas.
+
+**Outros:** `team-column` border/padding fixos, `img` sem `max-width 100%`, `nav nowrap`, ranking UUID quebra.
+
+Priorização anotada: P0 viewport+grid+team collapse 960; P1 filtros+battle; P2 barras fluidas+polimento.
+

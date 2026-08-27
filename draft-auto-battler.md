@@ -914,3 +914,10 @@
   - Bloqueio de 4º S passa a ser só `budget_notice` ("Orçamento insuficiente").
   - Atualizar `test/team_budget_test.rb` (expect 60→110 p/ S restrito, `s_limit_ok?` removido) e `team_routes_test.rb` (4º S bloqueado por budget, não por S_LIMIT).
 - **Status:** Draft — aguardando refinamento SDD (fase 1) após validar playtest. Não abre escopo na sessão corrente (RNF-04).
+
+### RESP-1. Responsividade (playtest 02, 2026-08-27)
+
+- **Playtest:** browser-harness CDP 375/768/1024/1440, `public/style.css:11-384`, `views/layout.erb`. Sem `meta viewport` — mobile renderiza 980.
+- **Achados (levantamento):** grid 6 col até 720 quebra tablet 768 (42px), filtros 7 controles 165px em 320, `list-team-grid` 2 col espremida em 768, `battle-layout 3×1fr` sem breakpoint.
+- **Proposta (draft-ui-ux §7, playtest-02):** P0 viewport+grid auto-fill+team collapse 960; P1 filtros drawer+battle stack 900; P2 barras fluidas.
+- **Status:** Draft — sessão SDD futura após M2b.
