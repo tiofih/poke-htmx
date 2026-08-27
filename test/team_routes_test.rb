@@ -962,6 +962,119 @@ class TeamBudgetRoutesTest < Minitest::Test
     refute UserStateRepository.new.started?("user-a")
   end
 
+  # C4 — 4º S restrito (110) também bloqueado só por orçamento
+  def test_fourth_restricted_s_blocked_by_budget_only
+    s_mons = {}
+    3.times do |i|
+      name = "s-pure-#{i}"
+      poke = Pokemon.new(name: name, sprite: "s", number: 630 + i,
+                         evolutions: [build_pokemon_record(name, 630 + i)])
+      s_mons[name] = poke
+      @repository.add("user-a", poke)
+    end
+    rating = s_mons.keys.to_h { |n| [n, "S"] }
+    rating["candidate-rest"] = "S"
+    candidate = Pokemon.new(name: "candidate-rest", sprite: "s", number: 640,
+                            evolutions: [build_pokemon_record("candidate-rest", 640)])
+    find_map = s_mons.merge("candidate-rest" => candidate)
+    PokeApiStub.with_find(find_map) do
+      with_budget_rating(rating) do
+        PokeApiStub.with_gateway(evolution_restricted: { "candidate-rest" => true }) do
+          post "/team", { pokeName: "candidate-rest" }, user_session("user-a")
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_match(/or[cç]amento/i, last_response.body)
+    refute_match(/m[aá]ximo.*3.*S/i, last_response.body)
+    assert_equal 3, @repository.all("user-a").size
+    refute_includes @repository.all("user-a").map(&:name), "candidate-rest"
+  end
+
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def test_restricted_s_not_hard_capped
+    # 2S puro (240) + 1 S_rest (110) = 350; + S_rest 110 = 460 bloqueia
+    s_mons = {}
+    %w[s-pure-a s-pure-b].each_with_index do |name, idx|
+      poke = Pokemon.new(name: name, sprite: "s", number: 650 + idx,
+                         evolutions: [build_pokemon_record(name, 650 + idx)])
+      s_mons[name] = poke
+      @repository.add("user-a", poke)
+    end
+    s_rest = Pokemon.new(name: "s-rest-1", sprite: "s", number: 652,
+                         evolutions: [build_pokemon_record("s-rest-1", 652)])
+    s_mons["s-rest-1"] = s_rest
+    @repository.add("user-a", s_rest)
+    rating = { "s-pure-a" => "S", "s-pure-b" => "S", "s-rest-1" => "S",
+               "s-rest-2" => "S", "a-rest" => "A" }
+    candidate2 = Pokemon.new(name: "s-rest-2", sprite: "s", number: 653,
+                             evolutions: [build_pokemon_record("s-rest-2", 653)])
+    find_map = s_mons.merge("s-rest-2" => candidate2)
+    PokeApiStub.with_find(find_map) do
+      with_budget_rating(rating) do
+        PokeApiStub.with_gateway(evolution_restricted: { "s-rest-1" => true, "s-rest-2" => true }) do
+          post "/team", { pokeName: "s-rest-2" }, user_session("user-a")
+        end
+      end
+    end
+    assert_match(/or[cç]amento/i, last_response.body)
+    assert_equal 3, @repository.all("user-a").size
+
+    # prova que não é trava hard: 1S puro + 1S_rest (230) + A_rest 35 cabe (265 ≤450)
+    TestDatabase.clear_team!
+    one_s = Pokemon.new(name: "solo-s", sprite: "s", number: 654,
+                        evolutions: [build_pokemon_record("solo-s", 654)])
+    solo_rest = Pokemon.new(name: "solo-rest", sprite: "s", number: 655,
+                            evolutions: [build_pokemon_record("solo-rest", 655)])
+    @repository.add("user-b", one_s)
+    @repository.add("user-b", solo_rest)
+    a_rest = Pokemon.new(name: "a-rest", sprite: "s", number: 656,
+                         evolutions: [build_pokemon_record("a-rest", 656)])
+    find_map2 = { "solo-s" => one_s, "solo-rest" => solo_rest, "a-rest" => a_rest }
+    PokeApiStub.with_find(find_map2) do
+      with_budget_rating(rating) do
+        PokeApiStub.with_gateway(evolution_restricted: { "solo-rest" => true, "a-rest" => true }) do
+          post "/team", { pokeName: "a-rest" }, user_session("user-b")
+        end
+      end
+    end
+    assert_match(/Adicionado ao time/, last_response.body)
+    assert_equal 3, @repository.all("user-b").size
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
+
+  def test_remove_frees_budget_for_restricted_s
+    s_mons = {}
+    3.times do |i|
+      name = "s-free-rest-#{i}"
+      poke = Pokemon.new(name: name, sprite: "s", number: 660 + i,
+                         evolutions: [build_pokemon_record(name, 660 + i)])
+      s_mons[name] = poke
+      @repository.add("user-a", poke)
+    end
+    rating = s_mons.keys.to_h { |n| [n, "S"] }
+    rating["s-rest-new"] = "S"
+    # remove um S puro (custo 120) → total 240, agora S_rest 110 cabe (350)
+    removed = @repository.all("user-a").first
+    delete "/team", { id: removed.id }, user_session("user-a")
+    assert_equal 2, @repository.all("user-a").size
+    new_rest = Pokemon.new(name: "s-rest-new", sprite: "s", number: 670,
+                           evolutions: [build_pokemon_record("s-rest-new", 670)])
+    find_map = s_mons.merge("s-rest-new" => new_rest)
+    PokeApiStub.with_find(find_map) do
+      with_budget_rating(rating) do
+        PokeApiStub.with_gateway(evolution_restricted: { "s-rest-new" => true }) do
+          post "/team", { pokeName: "s-rest-new" }, user_session("user-a")
+        end
+      end
+    end
+    assert last_response.ok?
+    assert_match(/Adicionado ao time/, last_response.body)
+    assert_equal 3, @repository.all("user-a").size
+    assert_includes @repository.all("user-a").map(&:name), "s-rest-new"
+  end
+
   # C10 — painel mostra custo/orçamento/S
   def test_team_panel_shows_cost_budget_and_s_count
     # Time vazio
