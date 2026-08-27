@@ -285,6 +285,25 @@ body.page-list {
   min-width: 8em;
 }
 
+@media (max-width: 600px) {
+  .filter-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75em;
+  }
+
+  .filter-controls input[name="q"] {
+    grid-column: 1 / -1;
+  }
+
+  .filter-controls select,
+  .filter-controls input[type="text"],
+  .filter-controls a {
+    min-height: 44px;
+    min-width: 0;
+  }
+}
+
 @media (max-width: 960px) {
   .list-team-grid {
     grid-template-columns: 1fr;

@@ -37,4 +37,22 @@ class StyleResponsiveTest < Minitest::Test
     assert_match(/\.list-item img[^{]*,[^{]*\.starter-item img[^}]*max-width:\s*100%/m, content,
                  "expected list-item images to have max-width: 100%")
   end
+
+  def test_filter_controls_has_touch_target_and_mobile_grid
+    content = style_content
+
+    assert_match(/@media\s*\(max-width:\s*600px\)[^}]*\.filter-controls[^}]*display:\s*grid/m, content,
+                 "expected filter-controls to use display:grid at max-width:600px")
+    media_600_grid =
+      /@media\s*\(max-width:\s*600px\)[^}]*\.filter-controls[^}]*grid-template-columns:\s*1fr\s+1fr/m
+    assert_match(media_600_grid, content,
+                 "expected filter-controls to use grid-template-columns:1fr 1fr at 600px")
+    assert_match(%r{grid-column:\s*1\s*/\s*-1}, content,
+                 "expected input[name=\"q\"] to span full width with grid-column:1 / -1")
+    assert_match(/min-height:\s*44px/, content,
+                 "expected filter-controls children to have min-height:44px")
+    # gap .75em e min-width:0 garantem fluidez em 375 sem overflow
+    assert_match(/\.filter-controls[^{]*\{[^}]*gap:\s*0\.75em/m, content,
+                 "expected filter-controls mobile grid to use gap .75em")
+  end
 end
