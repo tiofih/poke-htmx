@@ -358,29 +358,7 @@ persistir custo, Q5/race/escritas atômicas/CSRF/CI/pry, M1 pedras, regra vida z
 alinhamento lista↔time), bug Q5 (2 cliques — persiste), fila J2/J4/D4 e limitações
 técnicas (escritas não atômicas, race no add, identidade/CSRF) — a critério do usuário.
 
-**Sessão 0057 (UX-2b — filtros avançados + ordenação + alinhamento lista↔time)
-refinada em 2026-08-26** (fase 1 concluída — critérios C1–C4 e plano TDD fechados em
-`sessions/0057-ux2b-filtros-ordenacao-alinhamento.md`): filtros combináveis **tipo
-(18 tipos) + geração (1..9) + custo/tier** (line_tier = máx. da cadeia via
-`PokemonRatingCache` + `TeamBudget.cost_for` + `evolution_restricted?` metade floor,
-cadeia ramificada prova máx. ramo) **server-side no `load_pokemon_page`** (derivação no
-batch 24, filtrar/ordenar **antes** de paginar, `PAGE_SIZE` 36, página 1 = 27+9 filtrados,
-páginas 2+ = 36 filtrados, compatível com `q` e hint base-form), **ordenação por
-custo/tier** (`sort` cost_asc/cost_desc/tier_desc/tier_asc, antes de paginar) + botão
-**"limpar filtros"** (query vazia + limpa `session[:list_filters]`) + **persistência em
-`session[:list_filters]`** (Sinatra `session`, restaura sem params, OOB de
-`#pokemon-list` pós `POST/DELETE /team` preserva filtros/sort/paginação) + **alinhamento
-lista↔time** (colunas da `/` com largura/altura/rolagem coerentes, grid 6×6 e breakpoint
-720px preservados); novo `generation_for(name)` no gateway (`species.generation.url` →
-1..9); paginação/busca/OOB preservados e **sem rede** (stubs/fakes determinísticos);
-`manual` para o alinhamento/rolagem/cores. Decisões D1 A (UX-2b), D2 A2 (filtros
-tipo+geração+custo/tier + ordenação + limpar), D3 B (4 critérios granulados C1–C4), D4 A
-(server-side), D5 C (ordenação+persistência **IN-SCOPE**, fora enxuto removido), D6 B
-(4 passos: tipo → geração → custo/tier+limpar → ordenação+persistência+alinhamento).
-Próximas candidatas após 0057: bug Q5 (2 cliques — persiste), fila J2/J4/D4 e limitações
-técnicas (escritas não atômicas, race no add, identidade/CSRF, CI, `pry`, M1 pedras,
-regra vida zerada, Poke Center flutuante, itens evolução aleatórios no Mart,
-"batalhar resolve tudo", animações) — a critério do usuário.
+**Sessão 0057 (UX-2b — filtros avançados + ordenação + alinhamento lista↔time) concluída e validada em 2026-08-26** (refinamento + implementação passos 1–4 + 4a–4e em 2026-08-26 — commits ffc0fc2/80fe761/3e68b71/3088200/2de0e0b/0595757/ed1651d/19af345/f813b19, suíte 854/3016, lint 0; revisor **Aprovado** 2/3): filtros combináveis **tipo (18 tipos) + geração (1..9) + custo/tier** (line_tier = máx. da cadeia via `PokemonRatingCache` + `TeamBudget.cost_for` + `evolution_restricted?` metade floor, cadeia ramificada prova máx. ramo) **server-side no `load_pokemon_page`** (derivação no batch 24, filtrar/ordenar **antes** de paginar, `PAGE_SIZE` 36, `generation_for` + `pokemon_names_by_type` via `/type` endpoint, `session[:list_filters]` com OOBs, grid 6×6 preservado); **ordenação por custo/tier** (`sort` cost_asc/cost_desc/tier_desc/tier_asc) + botão **"limpar filtros"** (com OOB `filter-controls` condicional, debounce 300ms sem perder foco) + alinhamento `list-column`↔`team-column`. Hotfixes S3 na validação: **4b** tipo rock via `/type` + `detail` (2.5min→<1s), **4c** limpar dropdowns OOB, **4d** rating via `detail` (tier F→real), **4e** busca sem perder foco. **Fora de escopo:** Q5/race/escritas atômicas/CSRF/CI/M1/J2/J4/D4. **Próximas candidatas:** bug Q5 (2 cliques — persiste), fila J2/J4/D4 e limitações técnicas (escritas não atômicas, race no add, identidade/CSRF, CI, `pry`, M1 pedras, regra vida zerada, Poke Center flutuante, itens evolução aleatórios no Mart, "batalhar resolve tudo", animações) — a critério do usuário.
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -460,7 +438,7 @@ regra vida zerada, Poke Center flutuante, itens evolução aleatórios no Mart,
 | 0054 | Limitação técnica — erros com status real: handler global `error 500 do` passa a devolver **status 500** nas requisições **não-htmx** (monitoria/healthcheck/navegação direta) e mantém **200 + fragmento** (`views/error.erb`) nos swaps **htmx** (`htmx_request?`), preservando o log do erro original — fragmentos amigáveis 200 por rota (decisão 0018) e `halt 404` ficam fora | Concluída | Done (fase 2 + validação do usuário em 2026-08-26; C1/C2 por teste, C3-log `manual`; suíte 805/2630, lint 0) |
 | 0055 | M2 — sistema de custo para montagem de time: custo pelo **tier da linha evolutiva** (maior tier da cadeia, via `PokemonRatingCache` — S=120/A=70/B=55/C=40/D=30/F=20), **metade do custo** para restrição de evolução (novo `evolution_restricted?` no gateway), **teto duro de 3 Pokémon S por time** + **orçamento de montagem 450** validados em todo `POST /team` como **limites derivados — sem tocar o wallet/Eco**; painel do time mostra custo/orçamento/contagem de S | Concluída | Done (passos 1–4, suíte 819/2701, lint 0, validado em 2026-08-26; UX-2 e bug Q5 2 cliques anotados como candidatos) |
 | 0056 | UX-2 — custo e tier na listagem (M2): exibir custo e tier da linha evolutiva na `GET /` via badge inline em `pokemon_list_item.erb` (`poke-cost` + `data-tier`, S=120/A=70/B=55/C=40/D=30/F=20, restrito = metade floor) com cor por tier, reusando `PokemonRatingCache`/`TeamBudget`/`evolution_restricted?` (line_tier = máx. da cadeia via `evolutions` do batch 24, sem fetch extra); paginação/busca preservadas e sem rede, OOB da lista, visual com `manual` | Concluída | Done (passos 1–3, suíte 826/2748, lint 0, validado em 2026-08-26) |
-| 0057 | UX-2b — filtros avançados + ordenação + alinhamento lista↔time: filtros combináveis tipo+geração+custo/tier (line_tier = máx. da cadeia + metade restrito via `TeamBudget`/`evolution_restricted?`), ordenação por custo/tier, botão "limpar filtros", persistência em `session[:list_filters]` e alinhamento das colunas da `/` (server-side no `load_pokemon_page`, batch 24, `PAGE_SIZE` 36, novo `generation_for` no gateway, sem rede, OOB preservado) | Refinada | Refinada em 2026-08-26 (fase 1 concluída — critérios C1–C4 e plano TDD fechados em `sessions/0057-ux2b-filtros-ordenacao-alinhamento.md`) |
+| 0057 | UX-2b — filtros avançados + ordenação + alinhamento lista↔time: filtros combináveis tipo+geração+custo/tier (line_tier = máx. da cadeia + metade restrito via `TeamBudget`/`evolution_restricted?`), ordenação por custo/tier, botão "limpar filtros", persistência em `session[:list_filters]` e alinhamento das colunas da `/` (server-side no `load_pokemon_page`, batch 24, `PAGE_SIZE` 36, novo `generation_for`/`pokemon_names_by_type` via `/type`, debounce 300ms, sem rede, OOB preservado) | Concluída | Done (passos 1–4 + 4a–4e + S3 4b–4e, suíte 854/3016, lint 0, validado em 2026-08-26; revisor Aprovado 2/3) |
 
 ## Estrutura do arquivo de sessão
 

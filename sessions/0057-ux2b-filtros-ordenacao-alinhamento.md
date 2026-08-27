@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões ratificadas pelo usuário em 2026-08-26 (D1 A, D2 A2, D3 B, D4 A, D5 C, D6 B) |
-| Implementação | **Pendente** — aguardando fase 2 (TDD) |
-| Validação | **Pendente** — aguardando validação do usuário (fase 3 — parar na fase 2) |
+| Implementação | **Concluída** — passos 1–4 + 4a–4e (commits ffc0fc2/80fe761/3e68b71/3088200/2de0e0b/0595757/ed1651d/19af345/f813b19), suíte 854/3016 lint 0, revisor Aprovado 2/3 |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-26, todos os critérios ok (após S3 4b–4e) |
 
 ---
 
@@ -151,17 +151,17 @@ Ajuste de validação = alteração formal de critério com data e reaprovação
 
 | Critério | Evidência automatizada | Evidência manual | Resultado |
 | --- | --- | --- | --- |
-| C1 (tipo+geração combináveis com busca) | — | — | — |
-| C2 (custo/tier combináveis, max cadeia + metade restrito + limpar) | — | — | — |
-| C3 (paginação/busca/OOB preservados, sem rede) | — | — | — |
-| C4 (ordenação+persistência+alinhamento) | — | — | — |
-| G1 (suíte + lint) | — | — | — |
-| G2 (sem gems/schema, sem rede) | — | — | — |
-| G3 (S4/S5) | — | — | — |
+| C1 (tipo+geração combináveis com busca) | `test/pokemon_list_filters_test.rb` `test_filters_by_type` + `test_filters_by_generation` + `test_filters_combined_type_and_generation_with_search` + hotfix `test_filters_by_type_via_endpoint_when_find_has_no_types` (rock via `/type`) — todos com `FakeListRating`/`PokeApiStub`/`detail` stubado, sem rede | Validado: `type=rock` lista rocks, `generation=1` filtra gen 1, combinados com `q` funcionam (após hotfix 4b) | ok |
+| C2 (custo/tier combináveis, max cadeia + metade restrito + limpar) | `test_filters_by_tier` + `test_filters_by_cost` + `test_filter_cost_uses_line_tier_and_restricted_half` (Eevee-like ramo máximo + metade floor) + `test_filters_combined_tier_cost_type_generation` + `test_clear_filters_button_resets_list` + hotfix `test_tier_filter_uses_detail_for_evolutions_when_find_minimal` e `rating_detail_hotfix_test.rb` (`tier=S` via `detail`) | Validado: `tier`/`cost_max` filtram por `line_tier`/`TeamBudget` (restrito metade) e `Limpar filtros` reseta lista + dropdowns via OOB (hotfix 4c) | ok |
+| C3 (paginação/busca/OOB preservados, sem rede) | `test_pagination_with_filters_and_search_preserved` + `test_pagination_follows_next_offset_with_filter_and_sort` (next=36 com filtro/sort, 9 sem) + `test_oob_after_add_preserves_filters_and_sort` + `test_oob_after_remove_preserves_filters_and_sort` + `test_without_network` | Validado: `PAGE_SIZE`36 (p1=27+9 sem filtro, 36 com), busca `q` preservada, OOB `#pokemon-list` após add/remove | ok |
+| C4 (ordenação+persistência+alinhamento) | `test_ordering_by_cost_and_tier_sorts_before_pagination` + `test_filters_persisted_in_session` + `test_pagination_preserves_sort` + `test_clear_filters_resets_dropdowns`/`test_typing_q_does_not_swap_filter_controls` (4e) | Validado visualmente: `sort` `cost_asc/desc`/`tier_desc/asc` ordena pool filtrado antes de paginar, `session[:list_filters]` persiste, `Limpar` zera sessão, grid 6×6 preservado, alinhamento `list-column`↔`team-column` coerente, cores `data-tier`, busca mantém foco com debounce 300ms (hotfix 4e) | ok |
+| G1 (suíte + lint) | `./scripts/test` 854/3016 0 falhas + `./scripts/lint` 0 offenses (após 4e) | — | ok |
+| G2 (sem gems/schema, sem rede) | fakes determinísticos `Server.set :rating_source` + `PokeApiStub`/`PokeApiFake` sem Faraday, `generation_for`/`pokemon_names_by_type` stubados | — | ok |
+| G3 (S4/S5) | `./scripts/check_docs` ok, `./scripts/checar-sessao 0057` ok | — | ok |
 
-**Validação 2026-08-26 (S3):** usuário reprovou **C1** (filtro `type=rock` retornou vazio) e **C3** (p95 2.5min) — ver **§5-A** para causa (`find` sem `types`) e plano via `/type` endpoint + `detail`. Critérios **C1 e C3 reabertos** em 2026-08-26; correção no `Passo 4b` desta sessão; aguarda **segunda validação** do usuário (reaprovação S3) — não marcar Done até então.
+**Validação 2026-08-26 (S3):** usuário reprovou **C1** (filtro `type=rock` retornou vazio) e **C3** (p95 2.5min) — ver **§5-A** para causa (`find` sem `types`) e plano via `/type` endpoint + `detail`. Critérios **C1 e C3 reabertos** em 2026-08-26; correções `Passo 4b`–`4e` (0595757/ed1651d/19af345/f813b19) aplicadas. **Segunda validação 2026-08-26:** usuário revalidou — `limpar` reseta dropdowns (4c), `tiers/custo/sort` via `detail` (4d), busca sem perder foco (4e) e `type=rock` rápido; todos os critérios **ok**. S3 reaprovação registrada.
 
-**Suíte executada na validação:** — (primeira validação falhou; segunda pendente após hotfix)
+**Suíte executada na validação:** 854 runs, 3016 assertions, 0 failures, 0 errors — lint 0 offenses (após hotfix 4e)
 
 ## 8. Observações
 
