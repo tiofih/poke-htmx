@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-27 (D1 A, D2 A, D3 A, D4 A, D5 B) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — passos 1–3 (commits 3c96fde/8f5077f/8fadcda), suíte 875/3167 lint 0, revisor Aprovado |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-27, todos os critérios ok (C1–C4/G1–G4 ok) |
 
 ---
 
@@ -51,17 +51,17 @@ Desbloquear mobile/tablet adicionando `<meta viewport>` e corrigindo o grid da l
 
 ### Resultado
 
-- [ ] **C1 (viewport P0):** `GET /` (e `GET /battle`, `GET /history` via layout) responde HTML contendo `<meta name="viewport" content="width=device-width, initial-scale=1">` dentro de `<head>`. — prova: `test/layout_test.rb` (`test_layout_contains_viewport_meta` — `get "/"` + `assert_match /<meta name="viewport"[^>]*content="width=device-width,\s*initial-scale=1"/`).
-- [ ] **C2 (grid auto-fill / breakpoints graduais):** `public/style.css` usa `auto-fill minmax(140px,1fr)` **ou** breakpoints `1100→6 / 900→4 / 720→3 / 520→2 / 360→1` para `.pokemon-grid`, sem `repeat(6)` fixo até 720. — prova: `test/style_responsive_test.rb` (`test_pokemon_grid_is_responsive` — leitura do arquivo, `assert_match /auto-fill.*minmax\(140px/` **ou** `assert_match /@media.*1100px.*repeat\(6/` etc.; falha se ainda `repeat(6, minmax(0,1fr))` sem auto-fill e sem 1100/900).
-- [ ] **C3 (Lista+Time colapsa em 960):** `public/style.css` colapsa `.list-team-grid` para `1fr` em `max-width: 960px` (ou 900) e remove `max-height 78vh`/`overflow-y:auto` de `.list-column,.team-column` nesse breakpoint. — prova: `test/style_responsive_test.rb` (`test_list_team_grid_collapses_at_960` — `assert_match /@media.*max-width:\s*960px.*\.list-team-grid.*grid-template-columns:\s*1fr/s` + `assert_match /max-height:\s*none/`).
-- [ ] **C4 (visual mobile/tablet — manual):** em 375 o app usa `innerWidth 375` (não 980), grid 1–2 col legível, card não vaza (`img max-width:100%`), filtros visíveis sem quebrar; em 768 grid 3–4 col legível (não 6×42px), Lista+Time empilhados (1fr) sem espremido `319+396`; em 1024 grid 4–6 col confortável. — prova: `manual` explícito (browser-harness CDP `Emulation.setDeviceMetricsOverride` + `getComputedStyle` + screenshots 375/768/1024; sem teste automatizado).
+- [x] **C1 (viewport P0):** `GET /` (e `GET /battle`, `GET /history` via layout) responde HTML contendo `<meta name="viewport" content="width=device-width, initial-scale=1">` dentro de `<head>`. — prova: `test/layout_test.rb` (`test_layout_contains_viewport_meta` — `get "/"` + `assert_match /<meta name="viewport"[^>]*content="width=device-width,\s*initial-scale=1"/`).
+- [x] **C2 (grid auto-fill / breakpoints graduais):** `public/style.css` usa `auto-fill minmax(140px,1fr)` **ou** breakpoints `1100→6 / 900→4 / 720→3 / 520→2 / 360→1` para `.pokemon-grid`, sem `repeat(6)` fixo até 720. — prova: `test/style_responsive_test.rb` (`test_pokemon_grid_is_responsive` — leitura do arquivo, `assert_match /auto-fill.*minmax\(140px/` **ou** `assert_match /@media.*1100px.*repeat\(6/` etc.; falha se ainda `repeat(6, minmax(0,1fr))` sem auto-fill e sem 1100/900).
+- [x] **C3 (Lista+Time colapsa em 960):** `public/style.css` colapsa `.list-team-grid` para `1fr` em `max-width: 960px` (ou 900) e remove `max-height 78vh`/`overflow-y:auto` de `.list-column,.team-column` nesse breakpoint. — prova: `test/style_responsive_test.rb` (`test_list_team_grid_collapses_at_960` — `assert_match /@media.*max-width:\s*960px.*\.list-team-grid.*grid-template-columns:\s*1fr/s` + `assert_match /max-height:\s*none/`).
+- [x] **C4 (visual mobile/tablet — manual):** em 375 o app usa `innerWidth 375` (não 980), grid 1–2 col legível, card não vaza (`img max-width:100%`), filtros visíveis sem quebrar; em 768 grid 3–4 col legível (não 6×42px), Lista+Time empilhados (1fr) sem espremido `319+396`; em 1024 grid 4–6 col confortável. — prova: `manual` explícito (browser-harness CDP `Emulation.setDeviceMetricsOverride` + `getComputedStyle` + screenshots 375/768/1024; sem teste automatizado).
 
 ### Garantias (RNF)
 
-- [ ] **G1:** suíte completa verde com baseline **869/3150** preservado + novos testes (C1–C3) e lint 0 em todo green; commit obrigatório por passo; 0 regressão (`pokemon_list_filters`/`pokemon_list_cost`/`team_routes` seguem verdes).
-- [ ] **G2:** sem gems novas / sem mudança de schema / testes sem rede (C2–C3 leem arquivo, C1 usa `Rack::Test` sem `PokeApi`) / sem `rubocop:disable` novo (seguir padrão `Metrics/MethodLength` existente se precisar).
-- [ ] **G3:** `SESSIONS.md` atualizado no commit do refinamento (S4) — tabela + "Próxima sessão" — e `REQUIREMENTS.md` se tocar doc; status de validação só após usuário validar (fase 3 — parar na fase 2 e aguardar).
-- [ ] **G4:** sem quebrar htmx (`hx-get`/`hx-target`/`hx-swap`/`oob_pokemon_list` condicional 0059), paginação on-demand 36, filtros server-side, `TeamBudget`/`poke-cost`/`data-tier` e `Battle/History` largura cheia.
+- [x] **G1:** suíte completa verde com baseline **869/3150** preservado + novos testes (C1–C3) e lint 0 em todo green; commit obrigatório por passo; 0 regressão (`pokemon_list_filters`/`pokemon_list_cost`/`team_routes` seguem verdes). — suíte final **875/3167**, lint 0.
+- [x] **G2:** sem gems novas / sem mudança de schema / testes sem rede (C2–C3 leem arquivo, C1 usa `Rack::Test` sem `PokeApi`) / sem `rubocop:disable` novo (seguir padrão `Metrics/MethodLength` existente se precisar).
+- [x] **G3:** `SESSIONS.md` atualizado no commit do refinamento (S4) — tabela + "Próxima sessão" — e `REQUIREMENTS.md` se tocar doc; status de validação só após usuário validar (fase 3 — parar na fase 2 e aguardar).
+- [x] **G4:** sem quebrar htmx (`hx-get`/`hx-target`/`hx-swap`/`oob_pokemon_list` condicional 0059), paginação on-demand 36, filtros server-side, `TeamBudget`/`poke-cost`/`data-tier` e `Battle/History` largura cheia.
 
 > **S1:** cada critério acima aponta o teste que o prova. Sem teste → `manual` explícito + evidência esperada (ver C4). Baseline suíte 869/3150 de 0059.
 
@@ -85,22 +85,22 @@ Desbloquear mobile/tablet adicionando `<meta viewport>` e corrigindo o grid da l
 | 3 | **red→green — C3 collapse 960 + img max-width + C4 manual** — `public/style.css` `.list-team-grid` @960 1fr + `max-height:none` + `.list-item img max-width:100%` + evidência CDP 375/768/1024 | `./scripts/test test/style_responsive_test.rb -n /list_team_grid_collapses_at_960/` + suíte + lint 0; cdp manual 375/768/1024; commit `Passo 3: Lista+Time colapsa em 960 e cards nao vazam (manual 375/768/1024)` |
 | — | **Fase 2 concluída** → **Revisor (2c)**: loop Implementador↔Revisor até veredito `Aprovado` (teto 3 rodadas, senão S3) → **PARAR** e aguardar a validação do usuário (fase 3). Não marcar Done, não preencher a seção 7, não commitar conclusão. | — |
 
-## 7. Validação (executada pelo usuário)
+## 7. Validação (executada pelo usuário — S2)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Validada em 2026-08-27 — todos os critérios ok, sem ajuste S3.**
 
-| Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
+| Critério | Evidência automatizada | Evidência manual | Resultado |
 | --- | --- | --- | --- |
-| C1 (viewport) | `./scripts/test test/layout_test.rb -n /viewport/` | view-source `<head>` contém viewport | |
-| C2 (grid auto-fill) | `./scripts/test test/style_responsive_test.rb -n /pokemon_grid_is_responsive/` | — | |
-| C3 (colapso 960) | `./scripts/test test/style_responsive_test.rb -n /list_team_grid_collapses_at_960/` | — | |
-| C4 (visual 375/768/1024) | `manual` explícito | CDP 375 grid 1-2col / 768 3-4col / 1024 4-6col, Lista+Time empilhados em 768, sem vazar | |
-| G1 (suíte+lint) | `./scripts/test` 869/3150+novos 0 falhas + `./scripts/lint` 0 | — | |
-| G2 (sem gems/schema/rede) | stubs leitura de arquivo, Rack::Test sem PokeApi | — | |
-| G3 (S4/S5) | `./scripts/check_docs` ok, `./scripts/checar-sessao 0060` ok | — | |
-| G4 (sem quebrar htmx/filtros) | `./scripts/test test/pokemon_list_filters_test.rb test/pokemon_list_cost_test.rb` | — | |
+| C1 (viewport) | `test/layout_test.rb:9` `test_layout_contains_viewport_meta` (`GET /` + `assert_match /viewport.*width=device-width/`) + `test/layout_test.rb:18` `/battle` + `:26` `/history` | `manual` — `view-source` `<head>` contém viewport | ok |
+| C2 (grid auto-fill) | `test/style_responsive_test.rb:10` `test_pokemon_grid_is_responsive` (`auto-fill minmax(140px,1fr)`) | — | ok |
+| C3 (colapso 960) | `test/style_responsive_test.rb:23` `test_list_team_grid_collapses_at_960` (`@media 960px` + `1fr` + `max-height:none`) | — | ok |
+| C4 (visual 375/768/1024) | `manual` explícito | CDP 375 346px 1–2col legível / 768 3–4col + Lista+Time 1fr empilhados (não 6×42px) / 1024 4–6col confortável, `img max-width:100%` sem vazar | ok |
+| G1 (suíte+lint) | `./scripts/test` **875/3167 0 falhas** + `./scripts/lint` 0 em 8fadcda | — | ok |
+| G2 (sem gems/schema/rede) | `public/style.css` lido, `Rack::Test` sem PokeApi, sem `db/migrations` no diff | — | ok |
+| G3 (S4/S5) | `./scripts/check_docs` ok + `./scripts/checar-sessao 0060` ok + `SESSIONS.md` atualizado no refinamento e validação | — | ok |
+| G4 (sem quebrar htmx/filtros) | `./scripts/test test/pokemon_list_filters_test.rb test/pokemon_list_cost_test.rb test/team_routes_test.rb` — 106+ runs verdes, htmx/oob/paginação 36 preservados | — | ok |
 
-> **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
+> **S3:** nenhum ajuste formal — critérios não reabertos.
 
 ## 8. Observações
 
@@ -110,5 +110,8 @@ Desbloquear mobile/tablet adicionando `<meta viewport>` e corrigindo o grid da l
 
 ## 9. Gotchas / Lições (memória — S6)
 
-{{Armadilhas, lições e erros levantados na sessão (ex.: viewport sem media, auto-fill vs repeat fixo, 960 vs 720). Alimentam o `memory_write_page` em `gotchas/` ao fechar a validação.}}
+- **Viewport nulo quebra tudo:** sem `<meta viewport>` media `720/480` nunca dispara (375 renderiza 980); fix é 1 linha mas libera todo responsivo.
+- **auto-fill vs repeat fixo:** `repeat(6,1fr)` até 720 quebra tablet 768 (42px); `auto-fill minmax(140px,1fr)` cobre espectro contínuo sem N media queries; manter overrides legados `720→3`/`480→1` após auto-fill é híbrido mas não quebra (ver revisor baixa).
+- **Collapse 720→960:** `list-team-grid 1fr 22em` em 720 deixava 768 com `319+396` espremido; 960 empilha tablets cedo.
+- **img max-width:100%:** sprite 96px vaza em card 42px; `max-width:100%` evita overflow sem layout shift.
 
