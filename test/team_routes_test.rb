@@ -885,8 +885,7 @@ class TeamBudgetRoutesTest < Minitest::Test
     team = @repository.all("user-a")
     assert_equal 1, team.size
     assert_match(%r{Custo do time: 20/450}, last_response.body)
-    assert_match(/S no time: 0/, last_response.body)
-    refute_match(%r{S no time: 0/3}, last_response.body)
+    refute_match(/S no time:/, last_response.body)
   end
 
   # C9 — remoção libera orçamento e teto de S
@@ -1076,14 +1075,13 @@ class TeamBudgetRoutesTest < Minitest::Test
     assert_includes @repository.all("user-a").map(&:name), "s-rest-new"
   end
 
-  # C10 — painel mostra custo/orçamento/S
+  # C10 — painel mostra custo/orçamento sem contador S
   def test_team_panel_shows_cost_budget_and_s_count
-    # Time vazio
+    # Time vazio — apenas custo, sem S no time
     get "/team", {}, htmx_session("user-c")
     assert last_response.ok?
     assert_match(%r{Custo do time: 0/450}, last_response.body)
-    assert_match(/S no time: 0/, last_response.body)
-    refute_match(%r{S no time: 0/3}, last_response.body)
+    refute_match(/S no time:/, last_response.body)
 
     # Adiciona um Pokémon F barato
     poke = Pokemon.new(name: "cheap", sprite: "s", number: 600,
@@ -1096,11 +1094,10 @@ class TeamBudgetRoutesTest < Minitest::Test
 
     assert last_response.ok?
     assert_match(%r{Custo do time: 20/450}, last_response.body)
-    assert_match(/S no time: 0/, last_response.body)
-    refute_match(%r{S no time: 0/3}, last_response.body)
+    refute_match(/S no time:/, last_response.body)
   end
 
-  # C5 — painel S n sem teto e custo reflete S_rest 110
+  # C5 — painel sem contador S, só custo (S removido do front)
   def test_team_panel_shows_s_count_without_limit
     s_poke = Pokemon.new(name: "solo-s", sprite: "s", number: 700,
                          evolutions: [build_pokemon_record("solo-s", 700)])
@@ -1108,12 +1105,12 @@ class TeamBudgetRoutesTest < Minitest::Test
       with_budget_rating({ "solo-s" => "S" }) do
         post "/team", { pokeName: "solo-s" }, user_session("user-c")
         assert last_response.ok?
-        assert_match(/S no time: 1/, last_response.body)
-        refute_match(%r{S no time: 1/3}, last_response.body)
+        assert_match(%r{Custo do time: 120/450}, last_response.body)
+        refute_match(/S no time:/, last_response.body)
         # GET dentro do mesmo stub para rating consistente
         get "/team", {}, htmx_session("user-c")
-        assert_match(/S no time: 1/, last_response.body)
-        refute_match(%r{/3}, last_response.body)
+        assert_match(%r{Custo do time: 120/450}, last_response.body)
+        refute_match(/S no time:/, last_response.body)
       end
     end
   end
@@ -1130,7 +1127,7 @@ class TeamBudgetRoutesTest < Minitest::Test
     end
     assert last_response.ok?
     assert_match(%r{Custo do time: 110/450}, last_response.body)
-    assert_match(/S no time: 1/, last_response.body)
+    refute_match(/S no time:/, last_response.body)
     # OOB #pokemon-list preservado com badge? verificado em pokemon_list_cost_test
   end
 end
