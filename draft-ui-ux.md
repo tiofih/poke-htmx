@@ -216,3 +216,7 @@ mantendo `/team` página própria — sessão 0042. A página `/team` deixa de s
 
 Priorização anotada: P0 viewport+grid+team collapse 960; P1 filtros+battle; P2 barras fluidas+polimento.
 
+
+## 8. Playtest 03 — Gameplay completo (2026-08-27)
+
+> Loop 6 starters → lose 40 → heal 131 trap → buy/sell → history/manage. Artefato `playtest-03-gameplay.md`. Game Design: death spiral lose/heal, XP ok, oponente band; UI: filtros/battle/manage/histórico; Bugs P0 heal trap + remove escape, P1 viewport/grid/pokemon.erb, P2 race.

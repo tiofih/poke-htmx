@@ -921,3 +921,11 @@
 - **Achados (levantamento):** grid 6 col até 720 quebra tablet 768 (42px), filtros 7 controles 165px em 320, `list-team-grid` 2 col espremida em 768, `battle-layout 3×1fr` sem breakpoint.
 - **Proposta (draft-ui-ux §7, playtest-02):** P0 viewport+grid auto-fill+team collapse 960; P1 filtros drawer+battle stack 900; P2 barras fluidas.
 - **Status:** Draft — sessão SDD futura após M2b.
+
+### PLAYTEST-03. Rodada completa de gameplay (2026-08-27)
+
+- **Loop:** montar 6 starters 420/450 → batalha 6 rounds lose 40 XP/40$ → heal 131 > saldo 40 → Game Over softlock; buy/sell 20/10 não recupera; history/manage/remove 5/6 escapa.
+- **Achados design:** economy death spiral (lose 40 vs heal 131), XP 50/40 grind ok, oponente band F/D mas venceu A, itens 80 inacessíveis early.
+- **Achados UI:** lista+time ok mas filtros 117px, grid 6 col tablet, battle 3 col sem breakpoint, manage lista longa, histórico UUID, nav sem badge.
+- **Bugs P0:** heal trap, remove escapa Game Over, HP zero persistente; P1: pokemon.erb sem aspas, sem viewport, grid, manage, UUID; P2: race add, OPP pool, PP Struggle.
+- **Artefato:** `playtest-03-gameplay.md` — virará sessões `RESP-1`, `M2b`, `ECO` rebalance.
