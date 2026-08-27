@@ -486,8 +486,14 @@ module ServerTeamActions
 
   def add_team_member
     pokemon = new_member_from_api
-    budget_notice = budget_block_notice(pokemon)
-    return budget_blocked_response(budget_notice) if budget_notice
+    return budget_blocked_response("Pokémon não encontrado.") unless pokemon
+
+    lt = line_tier_for(pokemon)
+    cost = pokemon_cost(pokemon, lt)
+    team = settings.team.all(current_user)
+    current_cost = team_total_cost(team)
+    notice = budget_notice(current_cost, cost)
+    return budget_blocked_response(notice) if notice
 
     add_team_success(pokemon)
   end
@@ -590,29 +596,9 @@ module ServerTeamActions
     team.count { |member| line_tier_for(member) == :S }
   end
 
-  # Verifica teto de S e orçamento. Devolve notice de erro se bloqueado, nil se OK.
-  def budget_block_notice(pokemon)
-    return "Pokémon não encontrado." unless pokemon
-
-    lt = line_tier_for(pokemon)
-    cost = pokemon_cost(pokemon, lt)
-    team = settings.team.all(current_user)
-    current_cost = team_total_cost(team)
-    s_count = team_s_count(team)
-
-    s_limit_notice(lt, s_count) || budget_notice(current_cost, cost)
-  end
-
   def pokemon_cost(pokemon, line_tier)
     restricted = settings.api.evolution_restricted?(pokemon.name)
     TeamBudget.cost_for(line_tier: line_tier.to_s, restricted: restricted)
-  end
-
-  def s_limit_notice(line_tier, current_s_count)
-    return unless line_tier == :S
-    return if TeamBudget.s_limit_ok?(current_s_count: current_s_count + 1)
-
-    "Máximo de 3 Pokémon de linha S por time."
   end
 
   def budget_notice(current_cost, new_cost)

@@ -830,35 +830,7 @@ class TeamBudgetRoutesTest < Minitest::Test
     assert_equal "pikachu", team.first.name
   end
 
-  # C8 — bloqueio pelo teto de 3 S
-  def test_add_blocked_by_s_limit
-    # 3 membros de linha S já no time
-    s_mons = {}
-    3.times do |i|
-      name = "s-mon-#{i}"
-      poke = Pokemon.new(name: name, sprite: "s", number: 300 + i,
-                         evolutions: [build_pokemon_record(name, 300 + i)])
-      s_mons[name] = poke
-      @repository.add("user-a", poke)
-    end
-
-    rating = { "raichu" => "S", "pikachu" => "F", "pichu" => "F" }.merge(
-      s_mons.keys.to_h { |n| [n, "S"] }
-    )
-    find_map = s_mons.merge({ "pikachu" => pikachu_chain })
-    PokeApiStub.with_find(find_map) do
-      with_budget_rating(rating) do
-        post "/team", { pokeName: "pikachu" }, user_session("user-a")
-      end
-    end
-
-    assert last_response.ok?
-    assert_match(/m[aá]ximo.*3.*S/i, last_response.body)
-    assert_equal 3, @repository.all("user-a").size
-    refute_includes @repository.all("user-a").map(&:name), "pikachu"
-  end
-
-  # C8 — bloqueio por orçamento
+  # C8 — bloqueio por orçamento (único limitador; trava S removida)
   def test_add_blocked_by_budget
     # Time com custo = 435: 2S(240) + 1B(55) + 2A(140)
     rating = {

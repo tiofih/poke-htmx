@@ -65,13 +65,4 @@ class TeamBudgetTest < Minitest::Test
     assert TeamBudget.fits?(current_total: 430, new_cost: 20)
     assert TeamBudget.fits?(current_total: 0, new_cost: 450)
   end
-
-  # C4 — s_limit_ok? permite 3, bloqueia 4º (será removido no Passo 2)
-  def test_s_limit_allows_three_and_blocks_fourth
-    assert TeamBudget.s_limit_ok?(current_s_count: 0)
-    assert TeamBudget.s_limit_ok?(current_s_count: 1)
-    assert TeamBudget.s_limit_ok?(current_s_count: 2)
-    assert TeamBudget.s_limit_ok?(current_s_count: 3)
-    refute TeamBudget.s_limit_ok?(current_s_count: 4)
-  end
 end

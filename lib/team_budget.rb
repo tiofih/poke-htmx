@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
-# Política de custo para montagem de time (M2).
+# Política de custo para montagem de time (M2/M2b).
 #
 # Custo derivado do tier da linha evolutiva (máximo dos tiers da cadeia).
-# Orçamento e teto de S são limites de montagem — não tocam wallet/Eco.
+# Orçamento é o único limitador de montagem — não toca wallet/Eco.
 module TeamBudget
   BUDGET = 450
-  S_LIMIT = 3
 
   TIER_COST = {
     "S" => 120,
@@ -31,10 +30,5 @@ module TeamBudget
   # Checa se o time atual + novo custo cabe no orçamento.
   def self.fits?(current_total:, new_cost:)
     current_total + new_cost <= BUDGET
-  end
-
-  # Checa se o time ainda pode aceitar mais Pokémon de linha S.
-  def self.s_limit_ok?(current_s_count:)
-    current_s_count <= S_LIMIT
   end
 end
