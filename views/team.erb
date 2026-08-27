@@ -52,7 +52,9 @@
       hx-target="#team-view"
       hx-swap="innerHTML"
       hx-include=".list-state"
-      hx-params="*">
+      hx-params="*"
+      hx-sync="closest form:replace"
+      hx-indicator="#team-view">
     <input type="hidden" name="id" value="<%= poke.id %>">
     <button type="submit" class="btn" hx-disabled-elt="this">Remover do time</button>
   </form>

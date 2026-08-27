@@ -286,4 +286,45 @@ class PokemonListCostTest < Minitest::Test
     end
     assert_includes last_response.body, 'data-tier="B"'
   end
+
+  # Sessao 0059 C4 — OOB após DELETE preserva badges poke-cost/data-tier
+  # rubocop:disable Metrics/AbcSize
+  def test_oob_after_delete_preserves_badges
+    # nomes curtos para não pagar varredura grande, com rating determinístico
+    names = %w[pikachu bulbasaur charmander]
+    rating = { "pikachu" => "B", "bulbasaur" => "S", "charmander" => "A" }
+    # S restrito 110 com ◆
+    restricted = { "bulbasaur" => true }
+    forms = names.to_h { |n| [n, true] }
+    find_map = records_for(names)
+
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    id = @repository.all("user-a").first.id
+
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_find(find_map) do
+        PokeApiStub.with_base_forms(forms) do
+          PokeApiStub.with_gateway(evolution_restricted: restricted) do
+            with_rating(rating) do
+              delete "/team", { id: id, offset: "0", q: "" }, htmx_session("user-a")
+            end
+          end
+        end
+      end
+    end
+
+    assert last_response.ok?
+    # OOB deve estar presente quando visible (q.empty? && offset.zero?)
+    assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
+    # badges preservados: B 55, S 110 ◆, A 70
+    assert_includes last_response.body, 'data-tier="B"'
+    assert_includes last_response.body, "B · 55"
+    assert_includes last_response.body, 'data-tier="S"'
+    assert_includes last_response.body, "S · 110"
+    assert_includes last_response.body, "◆"
+    assert_includes last_response.body, 'data-tier="A"'
+    assert_includes last_response.body, "A · 70"
+    assert_includes last_response.body, 'class="poke-cost'
+  end
+  # rubocop:enable Metrics/AbcSize
 end

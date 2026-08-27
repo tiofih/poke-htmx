@@ -769,6 +769,128 @@ class ServerTeamRemoveHtmxTest < Minitest::Test
   end
 end
 
+# Sessao 0059 — Q5 remover em 1 clique (hardening htmx + OOB condicional)
+class ServerTeamRemoveQ5Test < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def setup
+    super
+    fill_team("user-a")
+    @default_rating = Server.settings.rating_source
+    Server.set :rating_source, DefaultFakeRating.new
+  end
+
+  def teardown
+    Server.set :rating_source, @default_rating
+    super
+  end
+
+  # C1 — DELETE htmx remove em 1 request e devolve OOB valido
+  def test_htmx_delete_removes_in_one_request_with_both_fragments
+    id = @repository.all("user-a").find { |poke| poke.name == "pikachu" }.id
+    assert_includes @repository.all("user-a").map(&:name), "pikachu"
+
+    delete "/team", { id: id, offset: "0", q: "" }, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 5, @repository.all("user-a").size
+    refute_includes @repository.all("user-a").map { |poke| poke.id.to_s }, id.to_s
+    # #team-view (main target innerHTML) sem o membro removido
+    refute_includes last_response.body, "team-pokemon-#{id}"
+    refute_includes last_response.body, ">pikachu<"
+    assert_includes last_response.body, "bulbasaur"
+    # OOB #pokemon-list válido quando starters_visible? (q.empty? && offset.zero?)
+    assert_includes last_response.body, 'id="pokemon-list"'
+    assert_includes last_response.body, 'hx-swap-oob="innerHTML"'
+    # garante que veio lista (não erro)
+    refute_includes last_response.body, "Algo deu errado"
+  end
+
+  # C2 — 2º DELETE mesmo id idempotente (200, time intacto)
+  def test_delete_is_idempotent_on_second_request
+    id = @repository.all("user-a").first.id
+    delete "/team", { id: id, offset: "0", q: "" }, htmx_session("user-a")
+    assert last_response.ok?
+    assert_equal 5, @repository.all("user-a").size
+
+    delete "/team", { id: id, offset: "0", q: "" }, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 5, @repository.all("user-a").size
+    refute_includes last_response.body, "Algo deu errado"
+    # ainda devolve fragmento do time (innerHTML, sem wrapper id)
+    assert_includes last_response.body, "bulbasaur"
+  end
+
+  # C3 — form tem hardening hx-disabled-elt="this" + hx-sync="closest form:replace" + hx-indicator="#team-view"
+  def test_remove_form_has_hardening_attrs
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    remove_form = last_response.body[%r{<form[^>]*hx-delete="/team".*?</form>}m]
+    refute_nil remove_form, "form hx-delete nao encontrado"
+    assert_match(/hx-disabled-elt="this"/, remove_form)
+    assert_match(/hx-sync="closest form:replace"/, remove_form)
+    assert_match(/hx-indicator="#team-view"/, remove_form)
+  end
+
+  # C4 — OOB condicional: quando filtrado/paginado/busca não varre starters (sem starter-item)
+  # mas ainda devolve OOB filtrado; quando visível, inclui starters
+  # rubocop:disable Metrics/AbcSize
+  def test_oob_conditional_skips_starters_when_filtered_or_paginated
+    id = @repository.all("user-a").first.id
+
+    # q não vazio → OOB presente mas sem starters
+    delete "/team", { id: id, offset: "0", q: "pika" }, htmx_session("user-a")
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
+    refute_includes last_response.body, "starter-item",
+                    "starters nao deveriam aparecer quando q nao vazio"
+    assert_includes last_response.body, "bulbasaur"
+
+    # restaura time para próximo caso
+    @repository.add("user-a", build_pokemon_record("pikachu", 25)) if @repository.all("user-a").size == 5
+    id2 = @repository.all("user-a").last.id
+
+    # offset >0 → sem starters
+    delete "/team", { id: id2, offset: "36", q: "" }, htmx_session("user-a")
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
+    refute_includes last_response.body, "starter-item",
+                    "starters nao deveriam aparecer quando offset>0"
+
+    # type filter → sem starters
+    @repository.add("user-a", build_pokemon_record("pikachu", 25)) if @repository.all("user-a").size == 5
+    id3 = @repository.all("user-a").last.id
+    delete "/team", { id: id3, type: "fire", offset: "0", q: "" }, htmx_session("user-a")
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
+    refute_includes last_response.body, "starter-item",
+                    "starters nao deveriam aparecer quando type filtrado"
+
+    # sort ativo → sem starters
+    @repository.add("user-a", build_pokemon_record("pikachu", 25)) if @repository.all("user-a").size == 5
+    id4 = @repository.all("user-a").last.id
+    delete "/team", { id: id4, sort: "cost_desc", offset: "0", q: "" }, htmx_session("user-a")
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
+    refute_includes last_response.body, "starter-item",
+                    "starters nao deveriam aparecer quando sort ativo"
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def test_oob_includes_starters_when_visible
+    id = @repository.all("user-a").first.id
+
+    delete "/team", { id: id, offset: "0", q: "" }, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
+    assert_includes last_response.body, "starter-item"
+  end
+end
+
 # C6, C8 — custo de montagem: tier da linha, teto de S, orçamento
 class TeamBudgetRoutesTest < Minitest::Test
   include ServerTestHelpers
