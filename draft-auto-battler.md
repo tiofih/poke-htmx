@@ -896,3 +896,21 @@
   rede <30s, fallback sem Redis OK, `docker compose up` com `redis`).
 - **Aberto:** usar `Redis` vs reaproveitar o próprio `Postgres` (`pokeapi_cache` com
   `jsonb`) vs manter arquivo com `max_entries`; preço/run de `REDIS_URL` em produção.
+
+### M2b. Balanceamento economia — remover trava hard de 3× S via custo (playtest 01, 2026-08-27)
+
+- **Playtest:** browser-harness + simulações `sim_economia.rb`/`sim3.rb`/`sim100.rb` via `docker compose exec web ruby`. Foco: achar número mágico onde max 3 S caiba por orçamento, sem `S_LIMIT`.
+- **Estado atual (`lib/team_budget.rb:7-15`):** `BUDGET 450`, `TIER_COST S 120 / A 70 / B 55 / C 40 / D 30 / F 20`, `cost_for` com `restricted ? base/2 : base` (◆). `server.rb:593` bloqueia `S_LIMIT` antes de `fits?`. UI `team.erb` mostra `S n/3`.
+- **Furo comprovado:** `4×S 480 >450` bloqueia, mas `4×S_r 60 =240` e `6×S_r 360` cabem. `curl -c /tmp/c POST /team` sequencial `growlithe 60 → onix 60 → porygon 60 =180`, 4º `magnemite 120` projetaria `300` (<450) mas trava hard bloqueia — sem trava, 4º S entraria. `GET /pokemons?tier=S` confirma mix 120/60◆.
+- **Magic number:** com desconto 50% não existe `B` que satisfaça `3S+3F≤B<4S_r+2F` (exige `B<420` e `B≥420` ao mesmo tempo). Threshold p/ `B 450` é `S_r ≥108` (`4×108+20=452`).
+- **Decisão do playtest (2026-08-27):** subir `S_r` para **110** (desconto ~8% p/ S, demais tiers mantêm 50%). Mantém números redondos e fecha:
+  - `3S+3F = 420 ≤450 OK`, `4S+2F = 520 bloq`
+  - `3S_r+3F = 390 ≤450 OK`, `4S_r+2F = 480 bloq` (`4×110+40`)
+  - `4S_r+2Fr(10)=460 bloq`, `6S_r=660 bloq`
+  - Alternativa `S_r 100` descartada: `4×100+40=440 FURO` com `B 450`; só fecharia com `F 30` ou `B <420` que quebra `3S`.
+- **Mudança proposta (próxima sessão refinamento):**
+  - `TeamBudget.cost_for`: `restricted ? (line_tier=="S" ? 110 : base/2) : base` (ou `max(base/2,110)` p/ S) — floor 110 p/ S restrito.
+  - Remover `S_LIMIT = 3` e `s_limit_ok?` / `s_limit_notice` (`server.rb:611-614`, `team_budget.rb:34`) e UI `S n/3` → `S n` (ou remover contador).
+  - Bloqueio de 4º S passa a ser só `budget_notice` ("Orçamento insuficiente").
+  - Atualizar `test/team_budget_test.rb` (expect 60→110 p/ S restrito, `s_limit_ok?` removido) e `team_routes_test.rb` (4º S bloqueado por budget, não por S_LIMIT).
+- **Status:** Draft — aguardando refinamento SDD (fase 1) após validar playtest. Não abre escopo na sessão corrente (RNF-04).
