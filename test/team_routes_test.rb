@@ -929,6 +929,39 @@ class TeamBudgetRoutesTest < Minitest::Test
   end
   # rubocop:enable Metrics/AbcSize
 
+  # C3 — 4º S puro bloqueado só por orçamento (sem trava hard)
+  def test_fourth_pure_s_blocked_by_budget_only
+    s_mons = {}
+    3.times do |i|
+      name = "s-pure-#{i}"
+      poke = Pokemon.new(name: name, sprite: "s", number: 610 + i,
+                         evolutions: [build_pokemon_record(name, 610 + i)])
+      s_mons[name] = poke
+      @repository.add("user-a", poke)
+    end
+    rating = s_mons.keys.to_h { |n| [n, "S"] }
+    rating["candidate-pure"] = "S"
+    candidate = Pokemon.new(name: "candidate-pure", sprite: "s", number: 620,
+                            evolutions: [build_pokemon_record("candidate-pure", 620)])
+    find_map = s_mons.merge("candidate-pure" => candidate)
+    # garante que nenhum é restrito (custo 120)
+    PokeApiStub.with_find(find_map) do
+      with_budget_rating(rating) do
+        PokeApiStub.with_gateway(evolution_restricted: {}) do
+          post "/team", { pokeName: "candidate-pure" }, user_session("user-a")
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_match(/or[cç]amento/i, last_response.body)
+    refute_match(/m[aá]ximo.*3.*S/i, last_response.body)
+    assert_equal 3, @repository.all("user-a").size
+    refute_includes @repository.all("user-a").map(&:name), "candidate-pure"
+    # jornada não marcada e batalha não invalidada (time segue <6)
+    refute UserStateRepository.new.started?("user-a")
+  end
+
   # C10 — painel mostra custo/orçamento/S
   def test_team_panel_shows_cost_budget_and_s_count
     # Time vazio
