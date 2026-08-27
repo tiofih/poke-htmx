@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões ratificadas pelo usuário em 2026-08-27 (D1 A, D2 A, D3 B, D4 B, D5 A, D6 B) |
-| Implementação | **Pendente** — aguardando fase 2 (TDD passos 1–4) |
-| Validação | **Pendente** — aguardando usuário (fase 3) |
+| Implementação | **Concluída** — passos 1–4 + cleanups 1–4 (commits a715877/8398006/91619c2/86982e9), suíte 869/3150 lint 0, revisor Aprovado |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-27, todos os critérios ok (C1–C5/G1–G3 ok) |
 
 ---
 
@@ -49,17 +49,17 @@ Fazer o `DELETE /team` via htmx **remover em 1 request**, **idempotente e sem re
 
 ### Resultado
 
-- [ ] **C1 (DELETE htmx remove em 1 request + OOB ambos):** um único `DELETE /team` com `id` + `offset`/`q` (`.list-state`) + header `HX-Request: true` remove o membro e devolve na mesma resposta o fragmento `#team-view` sem o membro **e** `oob_pokemon_list` válido (quando `starters_visible?` — ex.: `q.empty? && offset.zero? && !filter_active? && !sort_active?`). — prova: `test/team_routes_test.rb` (`test_htmx_delete_removes_in_one_request_with_both_fragments`).
-- [ ] **C2 (idempotência — 2º DELETE no-op):** repetir o mesmo `DELETE /team` com o mesmo `id` (mesmo `offset`/`q` + `HX-Request`) não altera o time nem devolve erro — 2º clique é seguro (idempotente, `TeamService#remove_member` retorna `false`, fragmento devolvido com time inalterado). — prova: `test/team_routes_test.rb` (`test_delete_is_idempotent_on_second_request`).
-- [ ] **C3 (hardening anti re-submit):** o form de remover do time em `views/team.erb` contém **os três** atributos de hardening — `hx-disabled-elt="this"` (já existente) **e** `hx-sync="closest form:replace"` **e** `hx-indicator="#team-view"` — impedindo disparo duplo e dando feedback no painel durante o request. — prova: `test/team_routes_test.rb` (`test_remove_form_has_hardening_attrs` — `assert_match /hx-disabled-elt="this"/` + `assert_match /hx-sync="closest form:replace"/` + `assert_match /hx-indicator="#team-view"/` no HTML do `GET /`/`GET /team` fragmento).
-- [ ] **C4 (OOB condicional preserva badges e não varre starters desnecessário):** após `DELETE /team`, o OOB `#pokemon-list` **preserva** badges `poke-cost`/`data-tier` (S puros 120 / S restrito 110 `◆`, demais `A 35/B 27/C 20/D 15/F 10` metade floor via `TeamBudget.cost_for` + `evolution_restricted?`) quando `starters_visible?`; e **não inclui** OOB com starters quando `!starters_visible?` (ex.: `q=pika` não vazio, `offset=36`, `type=fire`, `sort=cost_desc` — resposta sem `<div id="pokemon-list" hx-swap-oob>` com 27 destaques, ou com lista filtrada sem destaques varridos). — prova: `test/pokemon_list_cost_test.rb` (`test_oob_after_delete_preserves_badges`) + `test/team_routes_test.rb` (`test_oob_conditional_skips_starters_when_filtered_or_paginated` + `test_oob_includes_starters_when_visible`).
-- [ ] **C5 (1 clique visual — manual):** no navegador, 1 clique em "Remover do time" remove o membro com feedback imediato (`hx-indicator` na `#team-view`) e sem necessidade de 2º clique, com busca/filtros/ordenação preservados; 2º clique rápido não re-submete (hardening visível — botão desabilitado/indicador). — prova: `manual` explícito (conferido via `./scripts/run` — fluxo htmx no app; sem teste automatizado).
+- [x] **C1 (DELETE htmx remove em 1 request + OOB ambos):** um único `DELETE /team` com `id` + `offset`/`q` (`.list-state`) + header `HX-Request: true` remove o membro e devolve na mesma resposta o fragmento `#team-view` sem o membro **e** `oob_pokemon_list` válido (quando `starters_visible?` — ex.: `q.empty? && offset.zero? && !filter_active? && !sort_active?`). — prova: `test/team_routes_test.rb` (`test_htmx_delete_removes_in_one_request_with_both_fragments`).
+- [x] **C2 (idempotência — 2º DELETE no-op):** repetir o mesmo `DELETE /team` com o mesmo `id` (mesmo `offset`/`q` + `HX-Request`) não altera o time nem devolve erro — 2º clique é seguro (idempotente, `TeamService#remove_member` retorna `false`, fragmento devolvido com time inalterado). — prova: `test/team_routes_test.rb` (`test_delete_is_idempotent_on_second_request`).
+- [x] **C3 (hardening anti re-submit):** o form de remover do time em `views/team.erb` contém **os três** atributos de hardening — `hx-disabled-elt="this"` (já existente) **e** `hx-sync="closest form:replace"` **e** `hx-indicator="#team-view"` — impedindo disparo duplo e dando feedback no painel durante o request. — prova: `test/team_routes_test.rb` (`test_remove_form_has_hardening_attrs` — `assert_match /hx-disabled-elt="this"/` + `assert_match /hx-sync="closest form:replace"/` + `assert_match /hx-indicator="#team-view"/` no HTML do `GET /`/`GET /team` fragmento).
+- [x] **C4 (OOB condicional preserva badges e não varre starters desnecessário):** após `DELETE /team`, o OOB `#pokemon-list` **preserva** badges `poke-cost`/`data-tier` (S puros 120 / S restrito 110 `◆`, demais `A 35/B 27/C 20/D 15/F 10` metade floor via `TeamBudget.cost_for` + `evolution_restricted?`) quando `starters_visible?`; e **não inclui** OOB com starters quando `!starters_visible?` (ex.: `q=pika` não vazio, `offset=36`, `type=fire`, `sort=cost_desc` — resposta sem `<div id="pokemon-list" hx-swap-oob>` com 27 destaques, ou com lista filtrada sem destaques varridos). — prova: `test/pokemon_list_cost_test.rb` (`test_oob_after_delete_preserves_badges`) + `test/team_routes_test.rb` (`test_oob_conditional_skips_starters_when_filtered_or_paginated` + `test_oob_includes_starters_when_visible`).
+- [x] **C5 (1 clique visual — manual):** no navegador, 1 clique em "Remover do time" remove o membro com feedback imediato (`hx-indicator` na `#team-view`) e sem necessidade de 2º clique, com busca/filtros/ordenação preservados; 2º clique rápido não re-submete (hardening visível — botão desabilitado/indicador). — prova: `manual` explícito (conferido via `./scripts/run` — fluxo htmx no app; sem teste automatizado).
 
 ### Garantias (RNF)
 
-- [ ] **G1:** suíte completa verde após cada passo + lint 0 em todo green; commit obrigatório por passo; 0 regressão fora do escopo (adds/batalha/M2b/UX-2b seguem verdes via fakes de rating default).
-- [ ] **G2:** sem gems novas / sem mudança de schema / testes sem rede (rating e cadeia por stubs/fakes determinísticos, reuso do `rating_source` injetável via `Server.set`; manter padrão local de RuboCop em testes — `# rubocop:disable Metrics/AbcSize` quando necessário).
-- [ ] **G3:** `SESSIONS.md` atualizado no commit do refinamento (S4); status de validação só após o usuário validar (fase 3 — parar na fase 2 e aguardar).
+- [x] **G1:** suíte completa verde após cada passo + lint 0 em todo green; commit obrigatório por passo; 0 regressão fora do escopo (adds/batalha/M2b/UX-2b seguem verdes via fakes de rating default).
+- [x] **G2:** sem gems novas / sem mudança de schema / testes sem rede (rating e cadeia por stubs/fakes determinísticos, reuso do `rating_source` injetável via `Server.set`; manter padrão local de RuboCop em testes — `# rubocop:disable Metrics/AbcSize` quando necessário).
+- [x] **G3:** `SESSIONS.md` atualizado no commit do refinamento (S4); status de validação só após o usuário validar (fase 3 — parar na fase 2 e aguardar).
 
 > **S1:** cada critério acima aponta o teste que o prova. Sem teste automatizado → `manual` explícito + evidência esperada (ver C5).
 
@@ -92,14 +92,18 @@ Ajuste de validação = alteração formal de critério com data e reaprovação
 
 | Critério | Evidência automatizada | Evidência manual | Resultado |
 | --- | --- | --- | --- |
-| C1 (DELETE htmx remove + OOB ambos quando visível) | `test/team_routes_test.rb` `test_htmx_delete_removes_in_one_request_with_both_fragments` | — | — |
-| C2 (idempotência 2º DELETE) | `test/team_routes_test.rb` `test_delete_is_idempotent_on_second_request` | — | — |
-| C3 (hardening hx-disabled-elt/hx-sync/hx-indicator) | `test/team_routes_test.rb` `test_remove_form_has_hardening_attrs` | `manual` — botão desabilitado + `hx-sync` substitui re-submit + `hx-indicator` em `#team-view` durante o request | — |
-| C4 (OOB condicional preserva badges e não varre starters) | `test/pokemon_list_cost_test.rb` `test_oob_after_delete_preserves_badges` + `test/team_routes_test.rb` `test_oob_conditional_skips_starters_when_filtered_or_paginated` / `test_oob_includes_starters_when_visible` | `manual` — badges `S·110/A 35/B 27/C 20/D 15/F 10` preservados, grid 6×6, cores por `data-tier` | — |
-| C5 (1 clique visual) | `manual` explícito — sem teste automatizado | conferido via `./scripts/run` — 1 clique remove com feedback do `hx-indicator`, sem 2º clique, busca/filtros preservados | — |
-| G1 (suíte + lint) | `./scripts/test` suíte completa + `./scripts/lint` 0 em todo green | — | — |
-| G2 (sem gems/schema, sem rede) | stubs/fakes determinísticos (`FakeListRating`/`PokeApiStub`, `Server.set :rating_source`), `TeamBudget` real | — | — |
-| G3 (S4/S5) | `./scripts/check_docs` ok, `./scripts/checar-sessao 0059` ok, `SESSIONS.md` atualizado no refinamento (S4) | — | — |
+| C1 (DELETE htmx remove + OOB ambos quando visível) | `test/team_routes_test.rb` `test_htmx_delete_removes_in_one_request_with_both_fragments` (DELETE com `HX-Request: true` + `id` + `.list-state`, `#team-view` sem membro + OOB `#pokemon-list` quando `starters_visible?`) | — | ok |
+| C2 (idempotência 2º DELETE) | `test/team_routes_test.rb` `test_delete_is_idempotent_on_second_request` (repetir mesmo `id`/`HX-Request` → time inalterado, sem erro, `TeamService#remove_member` false) | — | ok |
+| C3 (hardening hx-disabled-elt/hx-sync/hx-indicator) | `test/team_routes_test.rb` `test_remove_form_has_hardening_attrs` (`hx-disabled-elt="this"` + `hx-sync="closest form:replace"` + `hx-indicator="#team-view"` no HTML do form) | `manual` — botão desabilitado + `hx-sync` substitui re-submit + `hx-indicator` em `#team-view` durante request | ok |
+| C4 (OOB condicional preserva badges e não varre starters) | `test/pokemon_list_cost_test.rb` `test_oob_after_delete_preserves_badges` (badges `S·110 ◆`/`A 35/B 27/C 20/D 15/F 10` via `TeamBudget.cost_for`) + `test/team_routes_test.rb` `test_oob_conditional_skips_starters_when_filtered_or_paginated` (q/type/offset/sort → sem OOB starters) / `test_oob_includes_starters_when_visible` (q vazio + offset 0 + sem filtro/sort → OOB com starters) | `manual` — badges preservados, grid 6×6, cores por `data-tier` | ok |
+| C5 (1 clique visual) | `manual` explícito — sem teste automatizado | clique único no app via `./scripts/run` removeu em 1 clique sem 2º clique, `hx-indicator` visível em `#team-view`, badges preservados, busca/filtros/ordenação mantidos | ok |
+| G1 (suíte + lint) | `./scripts/test` 869/3150 0 falhas + `./scripts/lint` 0 offenses (após cleanups 1–4, revisor Aprovado) | — | ok |
+| G2 (sem gems/schema, sem rede) | stubs/fakes determinísticos (`FakeListRating`/`FakeRatingSource` via `Server.set :rating_source`, `PokeApiStub.with_find`/`with_gateway(evolution_restricted:)`), sem Faraday, `TeamBudget` real, sem schema | — | ok |
+| G3 (S4/S5) | `./scripts/check_docs` ok, `./scripts/checar-sessao 0059` ok, `SESSIONS.md` atualizado no refinamento + na validação (S4) | — | ok |
+
+**Validação 2026-08-27 (S2):** usuário validou "comportamento validado" antes dos cleanups 1–4 e confirmou manter **validado após cleanups** (869/3150). Todos os critérios **C1–C5/G1–G3 ok**; sem ajuste S3. Revisor **Aprovado** antes dos cleanups; cleanups baixa mantiveram suíte/lint verdes.
+
+**Suíte executada na validação:** 869 runs, 3150 assertions, 0 failures, 0 errors — lint 0 offenses (após cleanups 1–4)
 
 ## 8. Observações
 
