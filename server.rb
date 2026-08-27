@@ -89,7 +89,11 @@ module ServerListActions
     @offset = params[:offset].to_i
     @q = params[:q].to_s
     load_pokemon_page
-    erb :pokemon_list, layout: false
+    erb(:pokemon_list, layout: false) + oob_filter_controls
+  end
+
+  def oob_filter_controls
+    %(<div id="filter-controls" hx-swap-oob="innerHTML">#{erb :_filter_controls, layout: false}</div>)
   end
 
   # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
@@ -303,6 +307,12 @@ module ServerListActions
     @type_pokemon_set_type = @type
     @type_pokemon_set = Set.new(settings.api.pokemon_names_by_type(@type))
   end
+
+  # NOTA PERF 0057-4c: tipo usa endpoint /type (1 fetch_type_json) + interseção Set — rápido (~<1s/1300 nomes).
+  # Geração/tier/cost ainda varrem candidatos em lotes 24 com base_form? + detail (+ line_tier) por item.
+  # Primeira carga fria lê PersistentJsonStore (~60s/300MB em dev, quente ~0.01s — sessao 0050 C4-b);
+  # se p95 rock ainda alto após 4b é warm-up frio, não implementação. Próximo passo: índice
+  # por geração/tier similar a /type ou cap max_candidates (fora deste hotfix, limitação aceita).
 
   # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
   def filtered_base_forms(batch)

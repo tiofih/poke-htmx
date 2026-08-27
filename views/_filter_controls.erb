@@ -1,0 +1,52 @@
+<input
+  type="text"
+  name="q"
+  class="filter-state"
+  placeholder="Filtrar por nome"
+  value="<%= @q %>"
+  hx-target="#pokemon-list"
+  hx-trigger="keyup changed delay:300ms"
+  hx-get="/pokemons?offset=0"
+  hx-swap="innerHTML"
+  hx-include=".filter-state">
+
+<select name="type" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+  <option value="" <%= "selected" if @type.nil? %>>Todos os tipos</option>
+  <% PokeApiTypes::TYPE_NAMES.each do |t| %>
+    <option value="<%= t %>" <%= "selected" if @type == t %>><%= t.capitalize %></option>
+  <% end %>
+</select>
+
+<select name="generation" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+  <option value="" <%= "selected" if @generation.nil? %>>Todas as gerações</option>
+  <% (1..9).each do |g| %>
+    <option value="<%= g %>" <%= "selected" if @generation == g %>>Geração <%= g %></option>
+  <% end %>
+</select>
+
+<select name="tier" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+  <option value="" <%= "selected" if @tier.nil? %>>Todos os tiers</option>
+  <% %w[S A B C D F].each do |t| %>
+    <option value="<%= t %>" <%= "selected" if @tier == t %>><%= t %></option>
+  <% end %>
+</select>
+
+<select name="cost_max" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+  <option value="" <%= "selected" if @cost_max.nil? %>>Qualquer custo</option>
+  <option value="20" <%= "selected" if @cost_max == 20 %>>≤ 20</option>
+  <option value="30" <%= "selected" if @cost_max == 30 %>>≤ 30</option>
+  <option value="40" <%= "selected" if @cost_max == 40 %>>≤ 40</option>
+  <option value="55" <%= "selected" if @cost_max == 55 %>>≤ 55</option>
+  <option value="70" <%= "selected" if @cost_max == 70 %>>≤ 70</option>
+  <option value="120" <%= "selected" if @cost_max == 120 %>>≤ 120</option>
+</select>
+
+<select name="sort" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+  <option value="" <%= "selected" if @sort.nil? %>>Padrão</option>
+  <option value="cost_asc" <%= "selected" if @sort == "cost_asc" %>>Custo ↑</option>
+  <option value="cost_desc" <%= "selected" if @sort == "cost_desc" %>>Custo ↓</option>
+  <option value="tier_desc" <%= "selected" if @sort == "tier_desc" %>>Tier S→F</option>
+  <option value="tier_asc" <%= "selected" if @sort == "tier_asc" %>>Tier F→S</option>
+</select>
+
+<a href="#" hx-get="/pokemons?offset=0&amp;q=&amp;type=&amp;generation=&amp;tier=&amp;cost=&amp;cost_max=&amp;sort=" hx-target="#pokemon-list" hx-swap="innerHTML">Limpar filtros</a>

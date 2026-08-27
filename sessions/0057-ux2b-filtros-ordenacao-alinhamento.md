@@ -101,6 +101,16 @@ Entregar **UX-2b — filtros avançados, ordenação e alinhamento da página `/
 
 **Status:** C1 reaberto e C3 reaberto em 2026-08-26; correção em `Passo 4b` desta sessão; aguardando segunda validação (fase 3) e reaprovação do usuário — **não marcar Done** até validação.
 
+**Ajuste 2026-08-26 — limpar filtros não resetava dropdowns (hotfix 4c):**
+
+Bug: `Limpar filtros` (`hx-get="/pokemons?offset=0&q=&type=&generation=&tier=&cost=&cost_max=&sort="` com `hx-target="#pokemon-list"`) resetava a lista mas os `select`s continuavam com o valor anterior — `views/index.erb` tinha os controles **fora** de `#pokemon-list` (`div.filter-controls` sem `id`), então o `hx-swap` só trocava a lista.
+
+Fix: `views/index.erb` → `div` dos controles ganha `id="filter-controls"` e extrai para `views/_filter_controls.erb`; `ServerListActions#render_pokemons_list` passa a concatenar `oob_filter_controls` em **todo** `GET /pokemons` (`<div id="filter-controls" hx-swap-oob="innerHTML">#{erb :_filter_controls}</div>`) hidratando `@type/@generation/@tier/@cost_max/@sort` já normalizados (quando clear, `nil` → `Todos os tipos` / `Todas as gerações` / `Todos os tiers` / `Qualquer custo` / `Padrão` com `selected`). Sempre OOB (não só no clear) para manter selects sincronizados com sessão e `q`.
+
+Prova: `test/pokemon_list_filters_test.rb#test_clear_filters_resets_dropdowns` — `GET /pokemons type=rock generation=1` devolve OOB com `id="filter-controls" hx-swap-oob` + `value="rock" selected` e `value="1" selected`; `GET /pokemons` clear (`type="" generation="" …`) devolve OOB com `Todos os tipos selected`/`Todas as gerações selected`/`Todos os tiers selected`/`Qualquer custo selected`/`Padrão selected` e sem `rock selected`. `test/pokemon_routes_test.rb` ajustado para exigir `id="filter-controls"` + `hx-swap-oob` em `GET /pokemons`.
+
+Status: hotfix **Passo 4c** em 2026-08-26; suíte verde + lint 0; aguarda revalidação do usuário — **não marcar Done** até validação (S3).
+
 ## 6. Decisões de refinamento (fechadas com o usuário em 2026-08-26)
 
 - **D1 — Objetivo/foco (A — UX-2b filtros avançados + alinhamento lista↔time, continuidade da 0056):** fecha o ciclo UX-2: a 0056 exibiu custo/tier na lista, esta entrega filtros/ordenação/persistência e alinha as caixas da `/`. Alternativas preteridas: B — só alinhamento sem filtros (deixaria a lista sem discovery com o orçamento M2) e C — só filtros sem alinhamento (a página em 2 colunas seguiria desbalanceada).

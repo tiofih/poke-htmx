@@ -410,7 +410,7 @@ class ServerListTest < Minitest::Test
     assert_includes last_response.body, ".type"
   end
 
-  def test_pokemons_renders_clickable_list
+  def test_pokemons_renders_clickable_list # rubocop:disable Metrics/AbcSize
     stub_list(two_hundred_fifty_names) do
       get "/pokemons", q: "pokemon"
     end
@@ -422,9 +422,10 @@ class ServerListTest < Minitest::Test
     assert_equal 36, last_response.body.scan('name="pokeName"').size
     assert_includes last_response.body, 'hx-post="/team"'
     assert_includes last_response.body, "Página 1"
-    refute_dropdown_markup(last_response.body)
+    assert_includes last_response.body, 'id="filter-controls"'
+    assert_includes last_response.body, 'hx-swap-oob="innerHTML"'
     refute_includes last_response.body, "<html"
-  end
+  end # rubocop:enable Metrics/AbcSize
 
   def test_pokemons_add_buttons_use_pt_br_copy
     stub_list(two_hundred_fifty_names) do
@@ -563,7 +564,8 @@ class ServerListTest < Minitest::Test
 
     assert last_response.ok?
     assert_empty last_response.body.scan('<li class="list-item">')
-    refute_includes last_response.body, "<select"
+    assert_includes last_response.body, 'id="filter-controls"'
+    assert_includes last_response.body, 'hx-swap-oob="innerHTML"'
     refute_includes last_response.body, 'value="pikachu"'
   end
 

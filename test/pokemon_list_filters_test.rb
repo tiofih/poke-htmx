@@ -613,5 +613,38 @@ class PokemonListFilterTest < Minitest::Test
     elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
     assert_operator elapsed, :<, 1.0, "filtro rock com 1300 nomes deve resolver em <1s via endpoint (#{elapsed}s)"
   end
+
+  def test_clear_filters_resets_dropdowns
+    names = %w[geodude onix pikachu]
+    types = {
+      "geodude" => %w[rock ground],
+      "onix" => %w[rock ground],
+      "pikachu" => %w[electric]
+    }
+    generation = { "geodude" => 1, "onix" => 1, "pikachu" => 1 }
+    rating = { "geodude" => "F", "onix" => "F", "pikachu" => "F" }
+    find_map = names.to_h { |n| [n, build_record(n, 1, types: types[n])] }
+    stub_list(names, find_map: find_map, types_map: types, generation_map: generation,
+                   rating_map: rating) do
+      get "/pokemons", type: "rock", generation: "1"
+      assert last_response.ok?
+      assert_includes last_response.body, 'id="filter-controls"'
+      assert_includes last_response.body, 'hx-swap-oob="innerHTML"'
+      assert_includes last_response.body, 'value="rock" selected'
+      assert_match(/value="1" selected.*Gera..o 1/m, last_response.body)
+
+      get "/pokemons", offset: "0", q: "", type: "", generation: "", tier: "", cost: "", cost_max: "", sort: ""
+      assert last_response.ok?
+      assert_includes last_response.body, 'id="filter-controls"'
+      assert_includes last_response.body, 'hx-swap-oob="innerHTML"'
+      assert_match(%r{<option value="" selected>Todos os tipos</option>}, last_response.body)
+      assert_match(%r{<option value="" selected>Todas as gera..es</option>}, last_response.body)
+      assert_match(%r{<option value="" selected>Todos os tiers</option>}, last_response.body)
+      assert_match(%r{<option value="" selected>Qualquer custo</option>}, last_response.body)
+      assert_match(%r{<option value="" selected>Padr.o</option>}, last_response.body)
+      refute_includes last_response.body, 'value="rock" selected'
+      refute_match(/value="1" selected.*Gera..o 1/m, last_response.body)
+    end
+  end
 end
 # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Layout/HashAlignment, Metrics/ClassLength
