@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões ratificadas pelo usuário em 2026-08-27 (D1 B, D2 B, D3 B, D4 B, D5 A, D6 C) |
-| Implementação | **Pendente** — aguardando fase 2 (TDD, 5 passos) |
-| Validação | **Pendente** — fase 3 pelo usuário (S2/S3) |
+| Implementação | **Concluída** — passos 1–5 + ajuste S3 (commits 938bbbf/dbe8a4f/b46a8a4/d490923/8a051de/06b5d10), suíte 863/3070 lint 0, revisor Aprovado |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-27, todos os critérios ok (após S3) |
 
 ---
 
@@ -77,7 +77,15 @@ Remover a **trava hard de 3 Pokémon S por time** e fazer o **orçamento de mont
 
 ## 5-A. Ajuste S3 (validação — alteração formal de critério)
 
-*(Vazio — preenchido na fase 3 se a validação reprovar algum critério. Registrar data, critério reaberto, alteração e reaprovação — S3.)*
+**Data:** 2026-08-27 — ajuste S3 aplicado durante a validação (commit 06b5d10), reprovado C5 e reaberto, reaprovação do usuário ok.
+
+**Critério reaberto:** C5 (painel S n sem teto implícito).
+
+**Alteração:** painel do time — `S no time: n/3` → `S no time: n` (passo 5, sem "/3") → **removido completamente** (`views/team.erb` sem `S no time:`; `span.team-s-count` removido). O painel passa a exibir **só** `Custo do time: X/450` (orçamento 450 como único limitador visual; contagem de S deixa de ser exibida).
+
+**Reaprovação:** usuário validou "ok, validado" em 2026-08-27 após o ajuste; C5 revalidado ok (suíte 863/3070 lint 0, testes `test_team_panel_shows_s_count_without_limit` + `test_team_panel_cost_reflects_restricted_s_one_ten` + `test_team_panel_shows_cost_budget_and_s_count` atualizados para `refute_match /S no time:/` e `assert_match /Custo do time: 120\/450|110\/450/`).
+
+**Status:** C5 reaberto e resolvido no ajuste S3 (06b5d10) em 2026-08-27; aguardando registro da validação — **Done** após revalidação.
 
 ## 6. Decisões de refinamento (fechadas com o usuário em 2026-08-27)
 
@@ -95,15 +103,19 @@ Ajuste de validação = alteração formal de critério com data e reaprovação
 
 | Critério | Evidência automatizada | Evidência manual | Resultado |
 | --- | --- | --- | --- |
-| C1 (cost_for S restrito 110) | — | — | — |
-| C2 (fits? fronteira 450) | — | — | — |
-| C3 (4º S puro bloqueado por orçamento) | — | — | — |
-| C4 (4º S restrito bloqueado por orçamento) | — | — | — |
-| C5 (painel S n sem teto) | — | — | — |
-| C6 (badge + visual) | — | `manual` (badge S·110/S·120, cores data-tier, OOB #pokemon-list, alinhamento) | — |
-| G1 (suíte + lint) | — | — | — |
-| G2 (sem gems/schema, sem rede) | — | — | — |
-| G3 (S4/S5) | — | — | — |
+| C1 (cost_for S restrito 110) | `test/team_budget_test.rb` `test_cost_restricted_s_is_one_ten` (S restrito 110) + `test_restricted_costs_half_except_s` (A 35/B 27/C 20/D 15/F 10) + `test_cost_by_line_tier`/`test_cost_by_line_tier_pure` (puros S 120/A 70/B 55/C 40/D 30/F 20) | — | ok |
+| C2 (fits? fronteira 450) | `test/team_budget_test.rb` `test_fits_blocks_over_budget` (360+110=470 bloqueia, 360+120=480 bloqueia) + `test_fits_allows_exact_budget` (330+120=450 permite, 340+110=450 permite) + `test_add_within_budget_allowed`/`test_add_over_budget_blocked` | — | ok |
+| C3 (4º S puro bloqueado por orçamento) | `test/team_routes_test.rb` `TeamBudgetRoutesTest#test_fourth_pure_s_blocked_by_budget_only` (3S 360 + S puro 120 =480>450, notice "Orçamento insuficiente", sem "Máximo de 3…", time 3, jornada/batalha preservados) | — | ok |
+| C4 (4º S restrito bloqueado por orçamento) | `test/team_routes_test.rb` `TeamBudgetRoutesTest#test_fourth_restricted_s_blocked_by_budget_only` (3S 360+S_rest 110=470>450) + `test_restricted_s_not_hard_capped` (2S+S_rest 350+S_rest 110=460 bloqueia; 230+A_rest 35=265 permite — prova não é trava hard) + `test_remove_frees_budget_for_restricted_s` (remove S 120 libera S_rest 110) | — | ok |
+| C5 (painel sem S, só Custo X/450) | `test/team_routes_test.rb` `TeamBudgetRoutesTest#test_team_panel_shows_s_count_without_limit` + `test_team_panel_cost_reflects_restricted_s_one_ten` + `test_team_panel_shows_cost_budget_and_s_count` (todos `refute_match /S no time:/` + `assert_match /Custo do time: 110\/450|120\/450|20\/450/`, após ajuste S3 06b5d10 `views/team.erb` sem `span.team-s-count`) | `manual` — layout do painel conferido via `./scripts/run`: `Custo do time: X/450` consistente após add/remove/OOB, sem "S no time" | ok |
+| C6 (badge + visual) | `test/pokemon_list_cost_test.rb` `test_pokemon_list_shows_restricted_s_one_ten` (S·110 ◆ + `poke-cost--restricted`) + `test_pokemon_list_restricted_shows_half_cost` + `test_oob_after_add_preserves_badges` (OOB `#pokemon-list` preserva badges) | `manual` — badge S·110/S·120, cores por `data-tier`, OOB `#pokemon-list` pós add/remove, alinhamento grid 6×6 | ok |
+| G1 (suíte + lint) | `./scripts/test` 863/3070 0 falhas + `./scripts/lint` 0 offenses (após ajuste S3) | — | ok |
+| G2 (sem gems/schema, sem rede) | `FakeRatingSource`/`DefaultFakeRating` via `Server.set :rating_source` + `PokeApiStub.with_find`/`with_gateway(evolution_restricted:)` sem Faraday, `TeamBudget` real | — | ok |
+| G3 (S4/S5) | `./scripts/check_docs` ok, `./scripts/checar-sessao 0058` ok, `SESSIONS.md` atualizado no refinamento + na validação (S4) | — | ok |
+
+**Validação 2026-08-27 (S3):** usuário validou "ok, validado" — C5 original (`S no time: n/3 → S n`) foi **reprovado** porque ainda exibia contagem informativa de S; critério **C5 reaberto** em 2026-08-27 e corrigido no **ajuste S3 06b5d10** (ver §5-A): `views/team.erb` sem `S no time:` (só `Custo do time: X/450`), testes atualizados para `refute_match /S no time:/`. **Revalidação 2026-08-27:** usuário revalidou ok; todos os critérios **ok**. S3 reaprovação registrada.
+
+**Suíte executada na validação:** 863 runs, 3070 assertions, 0 failures, 0 errors — lint 0 offenses (após ajuste S3)
 
 ## 8. Observações
 
