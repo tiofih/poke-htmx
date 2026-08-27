@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+# Pipeline QoL: roda testes (via ./scripts/test) e depois lint (via ./scripts/lint).
+# Falha no teste interrompe antes do lint (set -e).
+# Repassa args para o teste (ex.: ./scripts/pipeline -n /foo/ ou TEST=...).
+
+echo "pipeline> test"
+./scripts/test "$@"
+echo "pipeline> lint"
+./scripts/lint
+echo "pipeline> ok — test + lint verdes"
