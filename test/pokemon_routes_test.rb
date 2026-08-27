@@ -422,8 +422,8 @@ class ServerListTest < Minitest::Test
     assert_equal 36, last_response.body.scan('name="pokeName"').size
     assert_includes last_response.body, 'hx-post="/team"'
     assert_includes last_response.body, "Página 1"
-    assert_includes last_response.body, 'id="filter-controls"'
-    assert_includes last_response.body, 'hx-swap-oob="innerHTML"'
+    refute_includes last_response.body, 'id="filter-controls"'
+    refute_includes last_response.body, 'hx-swap-oob="innerHTML"'
     refute_includes last_response.body, "<html"
   end # rubocop:enable Metrics/AbcSize
 
@@ -564,8 +564,8 @@ class ServerListTest < Minitest::Test
 
     assert last_response.ok?
     assert_empty last_response.body.scan('<li class="list-item">')
-    assert_includes last_response.body, 'id="filter-controls"'
-    assert_includes last_response.body, 'hx-swap-oob="innerHTML"'
+    refute_includes last_response.body, 'id="filter-controls"'
+    refute_includes last_response.body, 'hx-swap-oob="innerHTML"'
     refute_includes last_response.body, 'value="pikachu"'
   end
 

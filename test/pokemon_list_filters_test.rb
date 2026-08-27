@@ -646,5 +646,48 @@ class PokemonListFilterTest < Minitest::Test
       refute_match(/value="1" selected.*Gera..o 1/m, last_response.body)
     end
   end
+
+  def test_typing_q_does_not_swap_filter_controls
+    names = %w[pikachu pichu bulbasaur]
+    find_map = names.to_h { |n| [n, build_record(n, 1)] }
+    stub_list(names, find_map: find_map) do
+      get "/pokemons", q: "pi"
+      assert last_response.ok?
+      refute_includes last_response.body, 'id="filter-controls"'
+      refute_includes last_response.body, 'hx-swap-oob="innerHTML"'
+      assert_includes last_response.body, 'value="pikachu"'
+    end
+  end
+
+  def test_clear_still_resets_filter_controls
+    names = %w[geodude onix pikachu]
+    types = {
+      "geodude" => %w[rock ground],
+      "onix" => %w[rock ground],
+      "pikachu" => %w[electric]
+    }
+    generation = { "geodude" => 1, "onix" => 1, "pikachu" => 1 }
+    rating = { "geodude" => "F", "onix" => "F", "pikachu" => "F" }
+    find_map = names.to_h { |n| [n, build_record(n, 1, types: types[n])] }
+    stub_list(names, find_map: find_map, types_map: types, generation_map: generation,
+                   rating_map: rating) do
+      get "/pokemons", offset: "0", q: "", type: "", generation: "", tier: "", cost: "", cost_max: "", sort: ""
+      assert last_response.ok?
+      assert_includes last_response.body, 'id="filter-controls"'
+      assert_includes last_response.body, 'hx-swap-oob="innerHTML"'
+      assert_match(%r{<option value="" selected>Todos os tipos</option>}, last_response.body)
+    end
+  end
+
+  def test_pagination_does_not_swap_filter_controls
+    names = %w[pikachu bulbasaur charmander squirtle]
+    find_map = names.to_h { |n| [n, build_record(n, 1)] }
+    stub_list(names, find_map: find_map) do
+      get "/pokemons", offset: "36"
+      assert last_response.ok?
+      refute_includes last_response.body, 'id="filter-controls"'
+      refute_includes last_response.body, 'hx-swap-oob="innerHTML"'
+    end
+  end
 end
 # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Layout/HashAlignment, Metrics/ClassLength

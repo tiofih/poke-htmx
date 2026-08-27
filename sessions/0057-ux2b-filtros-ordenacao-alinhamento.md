@@ -125,6 +125,16 @@ Prova: `test/rating_detail_hotfix_test.rb` verde; `test/pokemon_list_filters_tes
 
 Status: hotfix **Passo 4d** em 2026-08-26; suíte verde + lint 0; aguarda revalidação do usuário — **não marcar Done** até validação (S3).
 
+**Ajuste 2026-08-26 — foco perdido ao digitar busca (hotfix 4e):**
+
+Bug: `views/index.erb` input `q` já tinha `hx-trigger="keyup changed delay:300ms"` (debounce existe), mas `server.rb#render_pokemons_list` em `4c` passou a concatenar `oob_filter_controls` (`hx-swap-oob="innerHTML"` para `#filter-controls`) em TODO `GET /pokemons`. A cada `keyup` o `#filter-controls` inteiro (inclui o `<input q>`) é re-renderizado via OOB e trocado, perdendo foco → usuário precisa clicar de novo. Debounce existente é anulado pelo replace.
+
+Fix: OOB de `#filter-controls` NÃO deve ir em toda requisição. Condicionado a `filter_controls_needs_sync?` que retorna `true` apenas quando há param de filtro real (`type`/`generation`/`tier`/`cost`/`cost_max`/`sort` presente via `filter_param_present?`) — `q` e `offset` sozinhos não contam. `server.rb` → novo helper `filter_controls_needs_sync?` e `render_pokemons_list` passa a fazer `erb(:pokemon_list, layout: false) + (filter_controls_needs_sync? ? oob_filter_controls : "")`. Assim digitação (`q=pi`) e paginação (`offset=36`) não swapam os controles, preservando foco/debounce 300ms; `clear` (`type=""&generation=""&tier=""&cost=""&cost_max=""&sort=""&q=""&offset=0`) continua com `filter_controls_needs_sync? == true` → OOB enviado e dropdowns resetam para `Todos os tipos`/`Todas as gerações`/etc. `views/_filter_controls.erb` mantém `hx-trigger="keyup changed delay:300ms"` (300ms suficiente; `hx-preserve` não necessário com fix).
+
+Prova: `test/pokemon_list_filters_test.rb#test_typing_q_does_not_swap_filter_controls` — `GET /pokemons?q=pi` verifica body NÃO contém `id="filter-controls"` nem `hx-swap-oob`; `test_clear_still_resets_filter_controls` — clear com `type=""&generation=""&...` verifica OOB presente com `Todos os tipos selected`; `test_pagination_does_not_swap_filter_controls` — `GET /pokemons?offset=36` sem filtro não contém OOB; `test_clear_filters_resets_dropdowns` e `test/pokemon_routes_test.rb` (`test_pokemons_renders_clickable_list` e `test_pokemons_filter_without_matches_renders_empty_list` agora `refute` OOB em `q`-only) seguem verdes. Suíte `854` runs/ `3016` asserts + lint 0.
+
+Status: hotfix **Passo 4e** em 2026-08-26; suíte verde + lint 0; aguarda revalidação do usuário — **não marcar Done** até validação (S3).
+
 ## 6. Decisões de refinamento (fechadas com o usuário em 2026-08-26)
 
 - **D1 — Objetivo/foco (A — UX-2b filtros avançados + alinhamento lista↔time, continuidade da 0056):** fecha o ciclo UX-2: a 0056 exibiu custo/tier na lista, esta entrega filtros/ordenação/persistência e alinha as caixas da `/`. Alternativas preteridas: B — só alinhamento sem filtros (deixaria a lista sem discovery com o orçamento M2) e C — só filtros sem alinhamento (a página em 2 colunas seguiria desbalanceada).

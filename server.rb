@@ -89,11 +89,15 @@ module ServerListActions
     @offset = params[:offset].to_i
     @q = params[:q].to_s
     load_pokemon_page
-    erb(:pokemon_list, layout: false) + oob_filter_controls
+    erb(:pokemon_list, layout: false) + (filter_controls_needs_sync? ? oob_filter_controls : "")
   end
 
   def oob_filter_controls
     %(<div id="filter-controls" hx-swap-oob="innerHTML">#{erb :_filter_controls, layout: false}</div>)
+  end
+
+  def filter_controls_needs_sync?
+    %w[type generation tier cost cost_max sort].any? { |k| filter_param_present?(k) }
   end
 
   # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
