@@ -55,4 +55,12 @@ class StyleResponsiveTest < Minitest::Test
     assert_match(/\.filter-controls[^{]*\{[^}]*gap:\s*0\.75em/m, content,
                  "expected filter-controls mobile grid to use gap .75em")
   end
+
+  def test_battle_layout_stacks_at_900 # rubocop:disable Naming/VariableNumber
+    content = style_content
+
+    assert_match(/@media\s*\(max-width:\s*900px\)[^}]*\.battle-layout[^}]*grid-template-columns:\s*1fr/m,
+                 content,
+                 "expected battle-layout to collapse to 1fr at max-width:900px")
+  end
 end

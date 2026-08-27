@@ -175,6 +175,16 @@ body.page-history {
   align-items: start;
 }
 
+@media (max-width: 900px) {
+  .battle-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .battle-column {
+    min-width: 0;
+  }
+}
+
 .battle-controls {
   display: flex;
   flex-direction: column;
