@@ -231,17 +231,17 @@ class PokemonListFilterTest < Minitest::Test
       "eevee" => eevee, "vaporeon" => vaporeon, "jolteon" => jolteon,
       "flareon" => flareon, "espeon" => espeon
     }
-    # eevee chain max S = 120, but restricted => 60, so cost_max 60 includes, cost_max 59 excludes
+    # eevee chain max S = 120, but restricted => 110 (exceção S), so cost_max 110 includes, 109 excludes
     stub_list(all_names, find_map: find_map, rating_map: rating,
               restricted_map: { "eevee" => true }) do
-      get "/pokemons", cost_max: "60"
+      get "/pokemons", cost_max: "110"
     end
     assert last_response.ok?
     assert_includes last_response.body, 'value="eevee"'
 
     stub_list(all_names, find_map: find_map, rating_map: rating,
               restricted_map: { "eevee" => true }) do
-      get "/pokemons", cost_max: "59"
+      get "/pokemons", cost_max: "109"
     end
     assert last_response.ok?
     refute_includes last_response.body, 'value="eevee"'

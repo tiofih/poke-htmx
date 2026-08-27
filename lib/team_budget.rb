@@ -18,10 +18,14 @@ module TeamBudget
   }.freeze
 
   # Custo de um Pokémon pelo tier da sua linha evolutiva.
-  # Quando restricted=true (evolução por item/pedra/troca), paga metade (arredondado p/ baixo).
+  # Quando restricted=true (evolução por item/pedra/troca), paga metade (floor),
+  # exceto linha S que paga 110 quando restrita.
   def self.cost_for(line_tier:, restricted:)
     base = TIER_COST.fetch(line_tier)
-    restricted ? base / 2 : base
+    return base unless restricted
+    return 110 if line_tier == "S"
+
+    base / 2
   end
 
   # Checa se o time atual + novo custo cabe no orçamento.
