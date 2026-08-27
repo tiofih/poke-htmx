@@ -63,4 +63,19 @@ class StyleResponsiveTest < Minitest::Test
                  content,
                  "expected battle-layout to collapse to 1fr at max-width:900px")
   end
+
+  def test_bars_are_fluid
+    content = style_content
+
+    assert_match(/\.hp-bar[^}]*width:\s*100%[^}]*max-width:\s*120px/m, content,
+                 "expected .hp-bar to use width:100% + max-width:120px")
+    assert_match(/\.pp-bar[^}]*width:\s*100%[^}]*max-width:\s*80px/m, content,
+                 "expected .pp-bar to use width:100% + max-width:80px")
+    assert_match(/min-width:\s*0/, content,
+                 "expected .fighter or .bar to have min-width:0 to prevent overflow")
+    # Manual C4: 375/320/768/1024 misurando offsetHeight >=44, battleLayout 1fr, hpBar sem vazar.
+    # Este teste cobre C3 automaticamente; C4 requer CDP browser-harness manual (documentado).
+    assert_match(/@media\s*\(max-width:\s*960px\)[\s\S]*?\.team-column[^}]*min-height:\s*auto/m, content,
+                 "expected team-column to have min-height:auto at 960px")
+  end
 end

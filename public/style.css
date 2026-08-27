@@ -201,6 +201,11 @@ body.page-history {
 }
 
 .fighter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3em;
+  min-width: 0;
   margin: 0.4em 0;
 }
 
@@ -209,23 +214,27 @@ body.page-history {
   margin-right: 6px;
 }
 
-/* Barras de HP/PP */
+/* Barras de HP/PP — fluidas: width 100% + max-width para não vazar em card estreito */
 .bar {
   display: inline-block;
   vertical-align: middle;
   border-radius: 4px;
   background: #eee;
   overflow: hidden;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .hp-bar {
-  width: 120px;
+  width: 100%;
+  max-width: 120px;
   height: 8px;
   margin: 0 6px;
 }
 
 .pp-bar {
-  width: 80px;
+  width: 100%;
+  max-width: 80px;
   height: 6px;
   margin-left: 6px;
 }
@@ -323,6 +332,7 @@ body.page-list {
   .team-column {
     max-height: none;
     overflow-y: visible;
+    min-height: auto;
   }
 }
 
