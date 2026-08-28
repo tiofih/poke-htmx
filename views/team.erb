@@ -57,6 +57,6 @@
       hx-sync="closest form:replace"
       hx-indicator="#team-view">
     <input type="hidden" name="id" value="<%= poke.id %>">
-    <button type="submit" class="btn" hx-disabled-elt="this">Remover do time</button>
+    <button type="submit" class="btn" hx-disabled-elt="this"<%= ' disabled title="Pokémon derrotado — cure antes de remover"' if poke.fainted? %>>Remover do time</button>
   </form>
 <% end %>
