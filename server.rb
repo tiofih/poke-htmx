@@ -611,12 +611,21 @@ module ServerTeamActions
     "Orçamento insuficiente para adicionar este Pokémon."
   end
 
-  def remove_team_member
-    settings.team_strategy.remove_member(current_user, params[:id]) if params[:id]
+  def remove_team_member # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    if params[:id]
+      member = settings.team.all(current_user).find { |poke| poke.id.to_s == params[:id].to_s }
+      result = settings.team_strategy.remove_member(current_user, params[:id])
+      if result == false && member&.fainted?
+        @notice = "Pokémon derrotado — cure antes de remover"
+        @notice_kind = :error
+        fragment = render_team_fragment_with_notice
+        return "#{fragment}#{oob_pokemon_list}#{oob_nav_badge}"
+      end
+    end
     settings.battle.invalidate(current_user)
     fragment = render_team_fragment_with_notice
     "#{fragment}#{oob_pokemon_list}#{oob_nav_badge}"
-  end
+  end # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def move_team_member
     settings.team.move(current_user, params[:id], params[:new_slot].to_i)
