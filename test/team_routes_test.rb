@@ -1299,3 +1299,35 @@ class TeamHealRoutesTest < Minitest::Test
     assert_includes heal_form, "disabled"
   end
 end
+
+# Sessao 0065 — C7 reset limpa mesmo no spiral (bypass)
+class JourneyRestartSpiralTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def test_restart_clears_fainted_team_in_spiral_and_resets_balance # rubocop:disable Metrics/AbcSize
+    fill_team("user-a")
+    @repository.all("user-a").each { |m| @progression.update_hp("user-a", m.id, 10, 0) }
+    first = @repository.all("user-a").first
+    @inventory.add("user-a", "potion", 1)
+    @repository.assign_item("user-a", first.id, "potion")
+    @inventory.add("user-a", "choice-band", 1)
+    @repository.assign_held_item("user-a", first.id, "choice-band")
+    @wallet.grant("user-a", 5) # saldo insuficiente -> game_over
+    assert_equal true, Server.settings.journey.game_over?("user-a")
+
+    post "/journey/restart", { offset: "0", q: "" }, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_empty @repository.all("user-a"), "reset deve limpar mesmo com todos fainted (6->0)"
+    assert_equal 2, TestDatabase.inventory_quantity("user-a", "potion"), "potion devolvido (1+1)"
+    assert_equal 2, TestDatabase.inventory_quantity("user-a", "choice-band"), "choice-band devolvido (1+1)"
+    assert_equal 200, TestDatabase.wallet_balance("user-a"), "saldo reset 200"
+    assert_includes last_response.body, "Jornada recomeçada"
+    assert_includes last_response.body, 'id="pokemon-list"'
+    assert_includes last_response.body, 'id="nav-badge"'
+    assert_includes last_response.body, "notice--info"
+    assert_equal false, Server.settings.journey.game_over?("user-a"),
+                 "após reset time vazio + saldo 200 => nao game_over"
+  end # rubocop:enable Metrics/AbcSize
+end

@@ -183,3 +183,38 @@ class ServerMartJourneyGateTest < Minitest::Test
     assert_equal 0, @wallet.balance("user-novo")
   end
 end
+
+# Sessao 0065 — C6 venda breaker no spiral
+class SellInSpiralTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def test_sell_when_game_over_succeeds_and_enables_eventual_heal # rubocop:disable Metrics/AbcSize
+    # spiral: 6 fainted (hp 10 each, 0/10) -> missing 60 -> cost 30, saldo 5 => game_over true
+    fill_team("user-a")
+    @repository.all("user-a").each { |m| @progression.update_hp("user-a", m.id, 10, 0) }
+    @wallet.grant("user-a", 5)
+    @inventory.add("user-a", "choice-band", 2) # price 80 -> sell 40 each
+    # sanity: game_over? deve ser true
+    assert_equal true, Server.settings.journey.game_over?("user-a")
+
+    post "/mart/sell", { item_name: "choice-band", quantity: "1" }, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/vendido/i, last_response.body)
+    assert_includes last_response.body, "notice--success"
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", "choice-band"), "estoque decrementado"
+    assert_equal 45, @wallet.balance("user-a"), "saldo 5 + 40 = 45"
+    # ainda em game_over? mas vendavel; após vender, saldo 45 >=30 => heal liberado
+    assert_equal false, Server.settings.journey.game_over?("user-a"),
+                 "após venda saldo >= preview_cost => nao mais game_over"
+
+    # heal agora deve curar tudo (bloqueio total liberado)
+    post "/team/heal", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/curado por 30/i, last_response.body)
+    assert_equal 15, @wallet.balance("user-a"), "45 -30 =15 após cura"
+    assert_equal 10, @progression.get("user-a", @repository.all("user-a").first.id)[:hp_current]
+  end # rubocop:enable Metrics/AbcSize
+end
