@@ -130,3 +130,76 @@ class HealServiceTest < Minitest::Test
                  "preview não cura"
   end
 end
+
+# Sessao 0065 — C1 heal suficiente cura tudo (bloqueio total, sem parcial)
+class HealingWhenAffordableTest < Minitest::Test
+  include HealServiceTestHelpers
+
+  def test_heal_when_balance_sufficient_heals_all_and_charges
+    # 2 membros com dano: 10 + 10 = 20 missing -> cost 10 (0.5)
+    add_pokemon("user-a", "pikachu", 25, hp_max: 45, hp_current: 35)
+    add_pokemon("user-a", "bulbasaur", 1, hp_max: 50, hp_current: 40)
+    @wallet.grant("user-a", 100)
+
+    result = @service.heal("user-a")
+
+    assert_equal true, result[:healed]
+    assert_equal :success, result[:kind]
+    assert_equal 10, result[:cost]
+    assert_equal 90, result[:balance]
+    assert_match(/curado por 10/i, result[:notice])
+    assert_match(/Saldo: 90/, result[:notice])
+    assert_equal 45, @progression.get("user-a", TestDatabase.team_id("pikachu", "user-a"))[:hp_current]
+    assert_equal 50, @progression.get("user-a", TestDatabase.team_id("bulbasaur", "user-a"))[:hp_current]
+    assert_equal 90, @wallet.balance("user-a")
+  end
+end
+
+# Sessao 0065 — C2 heal bloqueado (bloqueio total D3 A)
+class HealingWhenUnaffordableTest < Minitest::Test
+  include HealServiceTestHelpers
+
+  def test_heal_when_balance_insufficient_does_not_heal
+    add_pokemon("user-a", "pikachu", 25, hp_max: 45, hp_current: 35)
+    add_pokemon("user-a", "bulbasaur", 1, hp_max: 50, hp_current: 40)
+    @wallet.grant("user-a", 5)
+
+    result = @service.heal("user-a")
+
+    assert_equal false, result[:healed]
+    assert_equal :error, result[:kind]
+    assert_equal 10, result[:cost]
+    assert_equal 5, result[:balance]
+    assert_match(/Dinheiro insuficiente para curar \(custo 10, saldo 5\)/, result[:notice])
+    assert_equal 35, @progression.get("user-a", TestDatabase.team_id("pikachu", "user-a"))[:hp_current],
+                 "nada curado quando saldo insuficiente"
+    assert_equal 40, @progression.get("user-a", TestDatabase.team_id("bulbasaur", "user-a"))[:hp_current],
+                 "nada curado quando saldo insuficiente"
+    assert_equal 5, @wallet.balance("user-a"), "wallet intacto"
+  end
+end
+
+# Sessao 0065 — C5 preview_cost sem mutacao, ignora hp_max 0, arredonda 0.5
+class HealPreviewCostTest < Minitest::Test
+  include HealServiceTestHelpers
+
+  def test_preview_cost_returns_total_cost_without_mutating
+    add_pokemon("user-a", "pikachu", 25, hp_max: 45, hp_current: 35)
+    add_pokemon("user-a", "bulbasaur", 1, hp_max: 50, hp_current: 40)
+    add_pokemon("user-a", "charmander", 4) # hp_max 0 -> ignorado
+    @wallet.grant("user-a", 7)
+
+    cost = @service.preview_cost("user-a")
+
+    assert_equal 10, cost, "(10 + 10) * 0.5 = 10, hp_max 0 ignorado"
+    assert_equal 7, @wallet.balance("user-a"), "preview nao debita"
+    assert_equal 35, @progression.get("user-a", TestDatabase.team_id("pikachu", "user-a"))[:hp_current],
+                 "preview nao cura"
+    assert_equal 40, @progression.get("user-a", TestDatabase.team_id("bulbasaur", "user-a"))[:hp_current]
+  end
+
+  def test_preview_cost_rounds_half
+    add_pokemon("user-a", "pikachu", 25, hp_max: 10, hp_current: 9) # missing 1 -> cost 1 (0.5 round)
+    assert_equal 1, @service.preview_cost("user-a")
+  end
+end

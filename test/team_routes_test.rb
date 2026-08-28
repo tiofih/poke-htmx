@@ -1253,3 +1253,44 @@ class TeamBudgetRoutesTest < Minitest::Test
     # OOB #pokemon-list preservado com badge? verificado em pokemon_list_cost_test
   end
 end
+
+# Sessao 0065 — C2 heal bloqueado (rota) + C5 preview disabled
+class TeamHealRoutesTest < Minitest::Test
+  include ServerTestHelpers
+  include TestSupport
+
+  def test_heal_blocked_when_insufficient_balance
+    fill_team("user-a")
+    target = @repository.all("user-a").first
+    @progression.update_hp("user-a", target.id, 200, 0)
+    # missing 200 -> cost 100, saldo 10 insuficiente
+    @wallet.grant("user-a", 10)
+
+    post "/team/heal", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/Dinheiro insuficiente para curar \(custo 100, saldo 10\)/, last_response.body)
+    assert_includes last_response.body, "notice--error"
+    assert_equal 0, @progression.get("user-a", target.id)[:hp_current], "nada curado"
+    assert_equal 10, @wallet.balance("user-a")
+    # team-view ainda mostra HP 0/200 e custo
+    assert_match(%r{HP 0/200}, last_response.body)
+    assert_match(/Custo total: 100/, last_response.body)
+  end
+
+  def test_center_shows_preview_cost_and_disables_heal_when_unaffordable
+    fill_team("user-a")
+    target = @repository.all("user-a").first
+    @progression.update_hp("user-a", target.id, 200, 100)
+    @wallet.grant("user-a", 10) # cost 50 > 10
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Poke Center"
+    assert_match(/Custo total: 50/, last_response.body)
+    heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
+    refute_nil heal_form
+    assert_includes heal_form, "disabled"
+  end
+end
