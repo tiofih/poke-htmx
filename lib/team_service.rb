@@ -66,6 +66,7 @@ class TeamService
   def remove_member(user_id, id)
     member = @team.all(user_id).find { |poke| poke.id.to_s == id.to_s }
     return false unless member
+    return false if member.fainted?
 
     restore_items(user_id, member)
     @team.remove(user_id, id)

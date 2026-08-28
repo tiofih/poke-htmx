@@ -22,4 +22,15 @@ class Pokemon < Dry::Struct
   def usable_hp?
     hp_max.to_i <= 0 || hp_current.to_i.positive?
   end
+
+  # Fainted = vida zerada após já ter lutado (hp_max>0 && hp_current==0).
+  # Nunca lutou (hp_max==0) nunca é fainted — coerente com usable_hp? e JourneyService#battle_ready?.
+  # Espelha BattlePokemon#fainted? (lib/battle_pokemon.rb:88) mas para Pokemon persistido.
+  def fainted?
+    hp_max.to_i.positive? && hp_current.to_i.zero?
+  end
+
+  def alive?
+    !fainted?
+  end
 end
