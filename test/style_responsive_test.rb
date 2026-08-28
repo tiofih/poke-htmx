@@ -111,4 +111,28 @@ class StyleResponsiveTest < Minitest::Test
     assert_match(/header nav a[^}]*min-height:\s*44px/m, content,
                  "expected header nav a to have min-height:44px")
   end
+
+  def test_body_padding_is_8px_at_600 # rubocop:disable Naming/VariableNumber
+    content = style_content
+
+    assert_match(/@media\s*\(max-width:\s*600px\)[\s\S]*?body[^}]*padding[^}]*8px/m, content,
+                 "expected @media (max-width: 600px) to apply body padding 8px")
+  end
+
+  def test_columns_use_calc_viewport_height
+    content = style_content
+
+    assert_match(/\.list-column[^}]*max-height:\s*calc\(100vh - 110px\)/m, content,
+                 "expected .list-column to use max-height: calc(100vh - 110px)")
+    assert_match(/\.team-column[^}]*max-height:\s*calc\(100vh - 110px\)/m, content,
+                 "expected .team-column to use max-height: calc(100vh - 110px)")
+    assert_match(/\.list-column[^}]*overflow-y:\s*auto/m, content,
+                 "expected .list-column to use overflow-y:auto")
+    assert_match(/\.team-column[^}]*overflow-y:\s*auto/m, content,
+                 "expected .team-column to use overflow-y:auto")
+    assert_match(/@media\s*\(max-width:\s*960px\)[\s\S]*?max-height:\s*none/m, content,
+                 "expected @media 960px to reset max-height:none")
+    assert_match(/@media\s*\(max-width:\s*960px\)[\s\S]*?overflow-y:\s*visible/m, content,
+                 "expected @media 960px to reset overflow-y:visible")
+  end
 end

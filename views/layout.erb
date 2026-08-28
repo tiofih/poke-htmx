@@ -13,7 +13,7 @@
     <header>
       <nav>
         <strong>Poké-HTMX</strong>
-        <a href="/" class="<%= "active" if request.path == "/" %>">Lista</a>
+        <a href="/" class="<%= "active" if request.path == "/" %>">Lista <span class="nav-badge"><%= @team_size || 0 %>/6</span></a>
         <a href="/battle" class="<%= "active" if request.path == "/battle" %>">Batalha</a>
         <a href="/history" class="<%= "active" if request.path == "/history" %>">Histórico</a>
       </nav>

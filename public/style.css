@@ -294,7 +294,7 @@ body.page-list {
 
 .list-column {
   min-height: 420px;
-  max-height: 78vh;
+  max-height: calc(100vh - 110px);
   overflow-y: auto;
   padding-right: 0.2em;
   overflow-anchor: none;
@@ -338,6 +338,11 @@ body.page-list {
     min-height: 44px;
     min-width: 0;
   }
+
+  body {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
 }
 
 @media (max-width: 960px) {
@@ -359,7 +364,7 @@ body.page-list {
   padding: 0.8em 1em;
   overflow-anchor: none;
   min-height: 420px;
-  max-height: 78vh;
+  max-height: calc(100vh - 110px);
   overflow-y: auto;
 }
 

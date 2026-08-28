@@ -1077,6 +1077,7 @@ class Server < Sinatra::Base
   before do
     session[:user_id] = params["as"] if params["as"]
     session[:user_id] ||= SecureRandom.uuid
+    @team_size = settings.team.all(current_user).size
   end
 
   after do
