@@ -32,6 +32,8 @@ Quando `graphify-out/` existe no projeto, **use o graphify** em vez de ler arqui
 - `graphify explain "Nó"` — conexões do nó
 - `skill(name: "graphify")` e `skill(name: "codebase-memory")` para guias completos
 
+**Orquestrador → subagent (obrigatório):** antes de `task(subagent_type: refinador|implementador-teste|revisor)`, rode **no parent** `search_graph limit10 + get_code_snippet + trace_path + check_index_coverage` e injete no `prompt` do filho: `tier/pagination/qualified_name/paths/coverage/scopes`. Subagents **não** herdam MCP automaticamente — sem esse contexto eles recaem em `read/grep`. Ver `.opencode/skills/sdd/SKILL.md` (seção Grafo obrigatório).
+
 **Regra de economia (medido 2026-08-28, fluxo POST /team → TeamRepository.add:171):** `CBM Scout` (`search limit10 + snippet + trace inbound1`) ~875 tokens com prova em `lib/team_repository.rb:171-179` + `server.rb:905`; `graphify query --budget 1500` ~1,2k tokens; `grep brute` ~9,8k tokens com ruído; `graph.json` bruto ~1M tokens. Para fluxo/impacto → **CBM Scout**; navegação ampla/arquitetura → `graphify`; literais→ `grep` cirúrgico; `ruby-mcp` só para transformar o já encontrado. Sempre `check_index_coverage` após CBM.
 
 ## SDD — robustez do fluxo (regras do processo)

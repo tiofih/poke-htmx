@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -uo pipefail
+cd "$(dirname "$0")/.."
+
+ok() { printf 'ok> %s\n' "$*"; }
+warn() { printf 'warn> %s\n' "$*" >&2; }
+fail() { printf 'medir-uso-grafo> FALHA: %s\n' "$*" >&2; }
+
+echo "# Medição uso grafo vs read (economia 2026-08-28)"
+echo "# Fluxo POST /team → TeamRepository.add:171 | graph.json 4.0MB ~1M tokens"
+echo "# CBM Scout (search limit10+snippet+trace inbound1) ~875 tokens"
+echo "# graphify query --budget 1500 ~1.2k tokens | grep brute ~9.8k tokens"
+echo ""
+
+# 1. Grafo existe?
+if [ -d "graphify-out" ] && [ -f "graphify-out/graph.json" ]; then
+  nodes=$(grep -o '"id"' graphify-out/graph.json 2>/dev/null | wc -l | tr -d ' ')
+  ok "graphify-out/graph.json presente (~${nodes} nós, ~4MB — nunca ler bruto)"
+else
+  warn "graphify-out/graph.json ausente — gere o grafo antes de medir"
+fi
+
+if [ -d ".agents/skills/ai-memory-retrieval" ]; then
+  ok ".agents/skills/ai-memory-* presentes (routing instalado)"
+else
+  warn ".agents/skills/ai-memory-* ausente — rode memory_install_self_routing"
+fi
+
+# 2. AGENTS.md tem regra obrigatória?
+if grep -q "NUNCA use.*read.*grep.*glob.*quando o grafo" AGENTS.md 2>/dev/null; then
+  ok "AGENTS.md contém regra 'NUNCA use read/grep quando grafo disponível'"
+else
+  warn "AGENTS.md sem regra de grafo obrigatório"
+fi
+
+if grep -q "Orquestrador.*subagent" AGENTS.md 2>/dev/null && grep -q "Grafo obrigatório" .opencode/skills/sdd/SKILL.md 2>/dev/null; then
+  ok "SDD skill contém delegação com grafo (orquestrador → subagent)"
+else
+  warn "SDD skill sem seção Grafo obrigatório"
+fi
+
+# 3. Sessões recentes sem evidência de grafo
+echo ""
+echo "## Sessões (últimas 5) — evidência de grafo no markdown"
+for f in $(ls -1 sessions/[0-9]*-*.md 2>/dev/null | sort | tail -5); do
+  base=$(basename "$f")
+  if grep -Eq "search_graph|trace_path|get_code_snippet|check_index_coverage|graphify query|graphify explain" "$f"; then
+    ok "$base — contém evidência de grafo"
+  else
+    warn "$base — SEM evidência de grafo (read/grep puro?)"
+  fi
+done
+
+# 4. Dica de Scout vs brute
+echo ""
+echo "## Regra de ouro (medido)"
+echo "- Fluxo/impacto → CBM Scout: search_graph limit10 + get_code_snippet + trace_path (~875 tokens)"
+echo "- Navegação ampla → graphify query --budget 1500 (~1.2k tokens)"
+echo "- Literais/configs → grep cirúrgico em lib/ ou arquivo alvo"
+echo "- Sempre check_index_coverage após CBM; graphify-out dirty é esperado"
+echo ""
+ok "medir-uso-grafo concluído — o que é medido é otimizado"

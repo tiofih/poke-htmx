@@ -37,7 +37,9 @@ description: Fluxo de papéis do SDD do Poke-HTMX — Refinador → Implementado
 - **Contexto mínimo:** cada papel lê `./scripts/levantar-sessao NNNN`,
   `./scripts/levantar-requisito RF-XX`, `./scripts/levantar-testes`, `./scripts/levantar-roadmap`.
   NUNCA ler `REQUIREMENTS.md`/`SESSIONS.md` inteiros.
-- **Comandos de projeto:** `./scripts/test`, `./scripts/lint`, `./scripts/check_docs`.
+- **Grafo obrigatório (antes de qualquer read/grep):** quando `graphify-out/` existe (índice `Users-tiofih-workspace-poke-htmx` 5196 nodes), **NUNCA** usar `read`/`grep`/`glob` para explorar — use `codebase-memory-mcp` (`search_graph limit10` → `get_code_snippet` → `trace_path` → `check_index_coverage`) ou `graphify query/explain/path`. `read` é só para **editar** (precisa do byte exato p/ `edit` casar). `grep` só para literais/mensagens de erro/configs ou quando MCP retorna insuficiente (e então cite o gap).
+- **Delegação com grafo (orquestrador → subagent):** antes de `task(subagent_type)`, o orquestrador **deve** rodar `search_graph + get_code_snippet + trace_path + check_index_coverage` no parent e injetar no `prompt` do filho: `tier` (Verify por padrão), `project`, `qualified_name`, `paths`, `coverage` (`no_recorded_issue` vs `parse_partial` com ranges), `scopes` e perguntas em aberto. O filho **não** herda MCP automaticamente — sem esse contexto ele volta ao `read`.
+- **Comandos de projeto:** `./scripts/test`, `./scripts/lint`, `./scripts/check_docs` (+ `scripts/medir-uso-grafo` para taxa read:mcp).
   NUNCA `rake`/`rubocop` no host.
 
 ## Regra de ouro para o agente
