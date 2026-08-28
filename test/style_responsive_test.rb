@@ -78,4 +78,26 @@ class StyleResponsiveTest < Minitest::Test
     assert_match(/@media\s*\(max-width:\s*960px\)[\s\S]*?\.team-column[^}]*min-height:\s*auto/m, content,
                  "expected team-column to have min-height:auto at 960px")
   end
+
+  def test_pokemon_erb_has_quoted_value
+    content = File.read(File.join(__dir__, "../views/pokemon.erb"))
+
+    assert_match(/value="<%= @pokemon\.name %>"/, content,
+                 'expected pokemon.erb to have value="<%= @pokemon.name %>" with quotes')
+    refute_match(/value=<%= @pokemon\.name %>/, content,
+                 "expected pokemon.erb not to have unquoted value=")
+  end
+
+  def test_clear_filters_is_centered
+    content = style_content
+
+    assert_match(/\.filter-controls a[^}]*display:\s*flex/m, content,
+                 "expected .filter-controls a to use display:flex")
+    assert_match(/\.filter-controls a[^}]*align-items:\s*center/m, content,
+                 "expected .filter-controls a to use align-items:center")
+    assert_match(/\.filter-controls a[^}]*justify-content:\s*center/m, content,
+                 "expected .filter-controls a to use justify-content:center")
+    assert_match(/\.filter-controls a[^}]*min-height:\s*44px/m, content,
+                 "expected .filter-controls a to have min-height:44px")
+  end
 end

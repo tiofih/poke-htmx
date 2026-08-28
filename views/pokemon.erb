@@ -9,7 +9,7 @@
     <a href="#" hx-get="/pokemon/<%= @pokemon.number %>" hx-target="#pokemon-detail" hx-swap="innerHTML">
       <img src="<%= @pokemon.sprite %>" alt="<%= @pokemon.name %>">
     </a><br>
-    <input type="hidden" name="pokeName" value=<%= @pokemon.name %>>
+    <input type="hidden" name="pokeName" value="<%= @pokemon.name %>">
   </div>
   <button class="btn">Adicionar ao time</button>
 </form>
