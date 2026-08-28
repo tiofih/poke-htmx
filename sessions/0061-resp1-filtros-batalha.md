@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-27 (D1 B, D2 B, D3 A, D4 A, D5 A, D6 B) |
-| Implementação | **Pendente** — aguardando fase 2 (TDD passos 1–3) |
-| Validação | **Pendente** — aguardando validação do usuário (fase 3) |
+| Implementação | **Concluída** — passos 1–3 (commits 2ccd024/f6be561/6e29138), suíte 878/3187 lint 0, revisor **Aprovado** (fase 2c) |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-27, todos os critérios ok (C1–C4/G1–G4 ok, sem S3) |
 
 ---
 
@@ -55,7 +55,7 @@ Tornar filtros e batalha responsivos fechando o P1 do `playtest-02` (RESP-1): `f
 
 ### Resultado
 
-- [ ] **C1 (filtros 44px + grid 2col <600 + q full-width):** `public/style.css` em `max-width:600px` aplica `filter-controls` em `grid 1fr 1fr` com `q` em `grid-column:1 / -1` e todos os controles com `min-height:44px`. — prova: `test/style_responsive_test.rb` (`test_filter_controls_has_touch_target_and_mobile_grid` — leitura do arquivo, `assert_match /@media.*600px.*\.filter-controls.*grid.*1fr 1fr/s` + `assert_match /grid-column:\s*1\s*\/\s*-1/` + `assert_match /min-height:\s*44px/`).
+- [x] **C1 (filtros 44px + grid 2col <600 + q full-width):** `public/style.css` em `max-width:600px` aplica `filter-controls` em `grid 1fr 1fr` com `q` em `grid-column:1 / -1` e todos os controles com `min-height:44px`. — prova: `test/style_responsive_test.rb` (`test_filter_controls_has_touch_target_and_mobile_grid` — leitura do arquivo, `assert_match /@media.*600px.*\.filter-controls.*grid.*1fr 1fr/s` + `assert_match /grid-column:\s*1\s*\/\s*-1/` + `assert_match /min-height:\s*44px/`).
 
 ### Garantias — teste que prova (S1)
 
@@ -66,9 +66,9 @@ Tornar filtros e batalha responsivos fechando o P1 do `playtest-02` (RESP-1): `f
 | C3 (barras fluidas 100% + max-width) | `test/style_responsive_test.rb` `test_bars_are_fluid` | — |
 | C4 (visual CDP 375/320/768/1024) | `manual` explícito | CDP `Emulation.setDeviceMetricsOverride` + `getComputedStyle` + screenshots 375/320/768/1024: filtros 2col 44px, q full-width sem overflow, battle 1fr, barras sem vazar |
 
-- [ ] **C2 (battle empilha em 900):** `public/style.css` colapsa `.battle-layout` para `1fr` em `max-width:900px`. — prova: `test/style_responsive_test.rb` (`test_battle_layout_stacks_at_900` — `assert_match /@media.*max-width:\s*900px.*\.battle-layout.*grid-template-columns:\s*1fr/s`).
-- [ ] **C3 (barras fluidas):** `.hp-bar` usa `width:100%` + `max-width:120px` e `.pp-bar` `width:100%` + `max-width:80px` com `min-width:0`/`flex` no contexto `.fighter`/`.bar`. — prova: `test/style_responsive_test.rb` (`test_bars_are_fluid` — `assert_match /\.hp-bar[^}]*width:\s*100%[^}]*max-width:\s*120px/m` + `assert_match /\.pp-bar[^}]*width:\s*100%[^}]*max-width:\s*80px/m` + `assert_match /min-width:\s*0/`).
-- [ ] **C4 (visual CDP — manual):** em 375 filtros 2col legíveis com 44px e `q` full-width sem quebrar; 320 sem overflow; 768 battle empilhado 1fr legível; 1024 3col confortável; barras 100% sem vazar em 100px. — prova: `manual` explícito (CDP + `getComputedStyle` + screenshots 375/320/768/1024; sem teste automatizado).
+- [x] **C2 (battle empilha em 900):** `public/style.css` colapsa `.battle-layout` para `1fr` em `max-width:900px`. — prova: `test/style_responsive_test.rb` (`test_battle_layout_stacks_at_900` — `assert_match /@media.*max-width:\s*900px.*\.battle-layout.*grid-template-columns:\s*1fr/s`).
+- [x] **C3 (barras fluidas):** `.hp-bar` usa `width:100%` + `max-width:120px` e `.pp-bar` `width:100%` + `max-width:80px` com `min-width:0`/`flex` no contexto `.fighter`/`.bar`. — prova: `test/style_responsive_test.rb` (`test_bars_are_fluid` — `assert_match /\.hp-bar[^}]*width:\s*100%[^}]*max-width:\s*120px/m` + `assert_match /\.pp-bar[^}]*width:\s*100%[^}]*max-width:\s*80px/m` + `assert_match /min-width:\s*0/`).
+- [x] **C4 (visual CDP — manual):** em 375 filtros 2col legíveis com 44px e `q` full-width sem quebrar; 320 sem overflow; 768 battle empilhado 1fr legível; 1024 3col confortável; barras 100% sem vazar em 100px. — prova: `manual` explícito (CDP + `getComputedStyle` + screenshots 375/320/768/1024; sem teste automatizado).
 
 ### Garantias (RNF)
 
@@ -79,10 +79,10 @@ Tornar filtros e batalha responsivos fechando o P1 do `playtest-02` (RESP-1): `f
 | G3 (S4/S5) | `./scripts/check_docs` + `./scripts/checar-sessao 0061` + `SESSIONS.md` atualizado no refinamento | — |
 | G4 (htmx preservado) | `./scripts/test test/pokemon_list_filters_test.rb test/pokemon_list_cost_test.rb` htmx/oob/paginação 36 preservados | — |
 
-- [ ] **G1:** suíte completa verde com baseline **875/3167** preservado + novos testes (C1–C3) e lint 0 em todo green; commit obrigatório por passo; 0 regressão.
-- [ ] **G2:** sem gems novas / sem mudança de schema / testes sem rede (C1–C3 leem arquivo) / sem `rubocop:disable` novo.
-- [ ] **G3:** `SESSIONS.md` atualizado no commit do refinamento (S4) — tabela + "Próxima sessão" — e `REQUIREMENTS.md` se tocar doc; status de validação só após usuário validar (fase 3 — parar na fase 2 e aguardar).
-- [ ] **G4:** sem quebrar htmx (`hx-get`/`hx-target`/`hx-swap`/`hx-include=".filter-state"`/`oob_pokemon_list` condicional 0059), paginação on-demand 36, filtros server-side, `TeamBudget`/`poke-cost`/`data-tier` e `Battle/History` largura cheia.
+- [x] **G1:** suíte completa verde com baseline **875/3167** preservado + novos testes (C1–C3) e lint 0 em todo green; commit obrigatório por passo; 0 regressão. — suíte final **878/3187**, lint 0.
+- [x] **G2:** sem gems novas / sem mudança de schema / testes sem rede (C1–C3 leem arquivo) / sem `rubocop:disable` novo (só `Naming/VariableNumber` padrão local pré-existente).
+- [x] **G3:** `SESSIONS.md` atualizado no commit do refinamento (S4) — tabela + "Próxima sessão" — e validação só após usuário validar (fase 3 cumprida).
+- [x] **G4:** sem quebrar htmx (`hx-get`/`hx-target`/`hx-swap`/`hx-include=".filter-state"`/`oob_pokemon_list` condicional 0059), paginação on-demand 36, filtros server-side, `TeamBudget`/`poke-cost`/`data-tier` e `Battle/History` largura cheia.
 
 > **S1:** cada critério acima aponta o teste que o prova. Sem teste → `manual` explícito + evidência esperada (ver C4). Baseline suíte 875/3167 de 0060.
 
@@ -109,20 +109,20 @@ Tornar filtros e batalha responsivos fechando o P1 do `playtest-02` (RESP-1): `f
 
 ## 7. Validação (executada pelo usuário — S2)
 
-_Pendente — aguardando implementação (fase 2) e validação do usuário (fase 3). Não preencher antes da fase 3._
+**Validada em 2026-08-27 — todos os critérios ok, sem ajuste S3.**
 
 | Critério | Evidência automatizada | Evidência manual | Resultado |
 | --- | --- | --- | --- |
-| C1 (filtros 44px + grid 2col) | `test/style_responsive_test.rb` `test_filter_controls_has_touch_target_and_mobile_grid` — pendente | — | pendente |
-| C2 (battle 900) | `test/style_responsive_test.rb` `test_battle_layout_stacks_at_900` — pendente | — | pendente |
-| C3 (barras fluidas) | `test/style_responsive_test.rb` `test_bars_are_fluid` — pendente | — | pendente |
-| C4 (visual 375/320/768/1024) | `manual` explícito — pendente | CDP 375/320/768/1024 — pendente | pendente |
-| G1 (suíte+lint) | `./scripts/test` 875/3167 + `./scripts/lint` 0 — pendente | — | pendente |
-| G2 (sem gems/schema/rede) | sem `db/migrations`/`Gems` no diff, testes sem rede — pendente | — | pendente |
-| G3 (S4/S5) | `./scripts/check_docs` + `./scripts/checar-sessao 0061` + `SESSIONS.md` — pendente | — | pendente |
-| G4 (htmx preservado) | htmx/oob/paginação 36 preservados — pendente | — | pendente |
+| C1 (filtros 44px + grid 2col) | `test/style_responsive_test.rb:40` `test_filter_controls_has_touch_target_and_mobile_grid` (`@media 600px` grid 1fr 1fr + q `grid-column:1/-1` + `min-height:44px`, gap .75em) | — | ok |
+| C2 (battle 900) | `test/style_responsive_test.rb:59` `test_battle_layout_stacks_at_900` (`@media 900px` `.battle-layout 1fr` + `.battle-column min-width:0`) | — | ok |
+| C3 (barras fluidas) | `test/style_responsive_test.rb:68` `test_bars_are_fluid` (`.hp-bar width:100% max-width:120px` + `.pp-bar width:100% max-width:80px` + `.bar flex:1 min-width:0` + `@960 team-column min-height:auto`) | — | ok |
+| C4 (visual 375/320/768/1024) | `manual` explícito | CDP 375 filtros 2col 44px q full-width sem overflow / 320 sem overflow / 768 battle 1fr empilhado / 1024 3col confortável + barras sem vazar em 100px | ok |
+| G1 (suíte+lint) | `./scripts/test` **878/3187 0 falhas** + `./scripts/lint` 0 em 6e29138 (passos 1–3) | — | ok |
+| G2 (sem gems/schema/rede) | `git diff -- Gemfile* db/` vazio, testes `File.read` sem rede, sem migração | — | ok |
+| G3 (S4/S5) | `./scripts/check_docs` ok + `./scripts/checar-sessao 0061` ok + `SESSIONS.md` atualizado no refinamento e validação | — | ok |
+| G4 (htmx preservado) | `./scripts/test test/pokemon_list_filters_test.rb test/pokemon_list_cost_test.rb` verdes, `hx-get/hx-target/hx-include=.filter-state/oob_pokemon_list` intactos, `server.rb/lib` não tocados | — | ok |
 
-> **S3:** nenhum ajuste formal — critérios não reabertos (pendente).
+> **S3:** nenhum ajuste formal — critérios não reabertos.
 
 ## 8. Observações
 
@@ -133,5 +133,8 @@ _Pendente — aguardando implementação (fase 2) e validação do usuário (fas
 
 ## 9. Gotchas / Lições (memória — S6)
 
-_Pendente — registrar na validação (fase 3) se surgirem lições duradouras (ex.: drawer vs grid, hx-include preservado, barras fluidas min-width:0)._
+- **Grid sem JS vence drawer:** `display:grid 1fr 1fr` em 600px com `q` full-width resolve 375 sem estado/colapso JS; `hx-include=".filter-state"` permanece intacto mesmo fechado — drawer `<details>` quebraria acoplamento.
+- **900 vs 960:** `battle-layout 1fr @900` empilha 768 mas preserva 3col em 1024 (>900); reusar `@960 team-column min-height:auto` remove buraco 420px do playtest-02 sem novo breakpoint.
+- **Barras fluidas precisam de `min-width:0`:** `.hp-bar 120px` fixo vazava em flex 100px; `width:100% max-width` + `flex:1 min-width:0` no `.bar`/`.fighter` evita overflow sem media extra (gotcha já visto em 0060 com `img max-width`).
+- **`min-height:44px` no `<a>` sem flex:** link "Limpar filtros" com `min-height` vira block mas texto não centraliza sem `display:flex; align-items:center` — validar no C4 CDP, deixar para 0062 se desalinhado (revisor baixa).
 
