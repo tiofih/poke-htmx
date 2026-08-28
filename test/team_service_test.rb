@@ -52,7 +52,7 @@ class PokemonFaintedTest < Minitest::Test
   end
 end
 
-class FaintedRemoveTest < Minitest::Test
+class TeamServiceFaintedRemoveTest < Minitest::Test
   include TestSupport
 
   def setup

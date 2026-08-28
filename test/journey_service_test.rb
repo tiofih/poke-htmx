@@ -167,3 +167,59 @@ class JourneyGameOverTest < Minitest::Test
     assert_equal false, @journey.game_over?("user-a")
   end
 end
+
+# Sessao 0065 — C3 game_over true no spiral (visivel)
+class JourneyGameOverSpiralTest < Minitest::Test
+  include JourneyServiceTestHelpers
+
+  def setup
+    super
+    @wallet = WalletRepository.new
+    @heal_cost = 100
+    @journey = JourneyService.new(
+      user_state: UserStateRepository.new, team: @team,
+      wallet: @wallet, heal_preview: ->(_user_id) { @heal_cost }
+    )
+  end
+
+  def zero_all_hp(user_id)
+    @team.all(user_id).each do |member|
+      @progression.update_hp(user_id, member.id, 200, 0)
+    end
+  end
+
+  def test_game_over_when_all_fainted_and_unaffordable_is_true
+    fill_team("user-a")
+    zero_all_hp("user-a")
+    @wallet.grant("user-a", 50) # < 100
+
+    assert_equal true, @journey.game_over?("user-a"),
+                 "started + todos fainted + saldo < preview_cost => game_over"
+  end
+
+  def test_game_over_false_when_all_fainted_but_affordable
+    fill_team("user-a")
+    zero_all_hp("user-a")
+    @wallet.grant("user-a", 150) # >=100
+
+    assert_equal false, @journey.game_over?("user-a"),
+                 "ainda derrotado mas curavel => nao game_over"
+  end
+
+  def test_game_over_false_when_not_started
+    # sem time cheio, mesmo com HP zero e sem saldo, nao eh game over
+    @team.add("user-a", build_pokemon_record("pikachu", 25))
+    @progression.update_hp("user-a", TestDatabase.team_id("pikachu", "user-a"), 200, 0)
+
+    assert_equal false, @journey.game_over?("user-a")
+  end
+
+  def test_game_over_false_when_partial_hp
+    fill_team("user-a")
+    zeroed = @team.all("user-a")
+    zeroed[1..].each { |member| @progression.update_hp("user-a", member.id, 200, 0) }
+    @wallet.grant("user-a", 10) # pouco saldo, mas ainda tem 1 vivo
+
+    assert_equal false, @journey.game_over?("user-a")
+  end
+end

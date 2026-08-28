@@ -722,6 +722,11 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
     assert last_response.ok?
     assert_match(/game over/i, last_response.body)
     assert_match(/Recome\S* jornada/, last_response.body)
+    # C3: banner + CTAs Vender/Venda | Recomeçar visíveis
+    assert_match(/Venda itens no Poke Mart/i, last_response.body)
+    assert_match(/Recome\S* jornada/, last_response.body)
+    assert_includes last_response.body, "notice--error"
+    assert_includes last_response.body, 'hx-post="/journey/restart"'
   end
 end
 

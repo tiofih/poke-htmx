@@ -140,3 +140,6 @@ class ServerTeamFaintedTest < Minitest::Test
     assert_equal [1, 2, 3, 4, 5, 6], after.map(&:slot), "slots intactos quando bloqueado"
   end
 end
+
+# Sessao 0065 — C4 alias para S1 (FaintedRemoveTest) reaproveita 0064 C7 sem duplicar passo
+class FaintedRemoveTest < ServerTeamFaintedTest; end
