@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-28 (D1 A, D2 B, D3 A, D4 A, D5 C, D6 A, D7 A, D8 A) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — passos 1–3 (ce9ada6/d547d73/26fa4ba, suíte 925/3510 lint 0, revisor Aprovado sem S3) |
+| Validação | **Concluída** em 2026-08-28 (S2 por critério ok) |
 
 ---
 
@@ -118,22 +118,22 @@ Visibilizar o death spiral do heal sem introduzir cura parcial: manter o bloquei
 
 ## 7. Validação (executada pelo usuário — S2)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+> Validado pelo usuário em 2026-08-28. Suíte 925/3510 lint 0, revisor Aprovado sem S3.
 
-| Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
+| Critério | Evidência automatizada | Evidência manual | Resultado |
 | --- | --- | --- | --- |
-| C1 (heal suficiente cura tudo) | `./scripts/test test/heal_service_test.rb -n /HealingWhenAffordable|heal_when_balance_sufficient/` | — | |
-| C2 (heal bloqueado, bloqueio total) | `./scripts/test test/heal_service_test.rb test/team_routes_test.rb -n /HealingWhenUnaffordable|heal_blocked_when_insufficient/` | — | |
-| C3 (game_over true no spiral + banner) | `./scripts/test test/journey_service_test.rb test/team_routes_test.rb -n /JourneyGameOverSpiral|game_over_when_all_fainted_and_unaffordable|team_panel_shows_game_over_banner/` | CDP 375/768/1024: banner Game Over + CTAs Vender/Recomeçar | |
-| C4 (fainted não remove, regressão) | `./scripts/test test/team_fainted_routes_test.rb -n /delete_fainted_blocked/` | — | |
-| C5 (preview_cost) | `./scripts/test test/heal_service_test.rb -n /HealPreviewCost|preview_cost/` | — | |
-| C6 (venda breaker no spiral) | `./scripts/test test/mart_routes_test.rb test/mart_service_test.rb -n /SellInSpiral|sell_when_game_over/` | — | |
-| C7 (reset no spiral) | `./scripts/test test/team_routes_test.rb -n /JourneyRestartSpiral|restart_clears_fainted_team_in_spiral/` | — | |
-| G1 (suíte+lint) | `./scripts/test` (baseline 906/3367 preservado) + `./scripts/lint` 0 | — | |
-| G2 (sem migração) | `git diff -- db/` vazio + `grep affordable_hp lib/ → só comentário` | — | |
-| G3 (S4/S5) | `./scripts/check_docs` + `./scripts/checar-sessao 0065` | — | |
+| C1 (heal suficiente cura tudo) | `test/heal_service_test.rb:135` `HealingWhenAffordableTest#test_heal_when_balance_sufficient_heals_all_and_charges` — `balance>=cost` → `healed:true kind:success cost+balance hp_max` | — | ok |
+| C2 (heal bloqueado, bloqueio total) | `test/heal_service_test.rb:159` `HealingWhenUnaffordableTest#test_heal_when_balance_insufficient_does_not_heal` + `test/team_routes_test.rb:1263` `TeamHealRoutesTest#test_heal_blocked_when_insufficient_balance` — `balance<cost` → `false error` nada curado | — | ok |
+| C3 (game_over true no spiral + banner) | `test/journey_service_test.rb:172` `JourneyGameOverSpiralTest#test_game_over_when_all_fainted_and_unaffordable_is_true` + `test/team_routes_test.rb:673` `ServerTeamJourneyFragmentTest#test_team_panel_shows_game_over_banner_when_stuck` — banner + CTAs Vender/Recomeçar + `notice--error` | CDP 375/768/1024 conferido | ok |
+| C4 (fainted não remove, regressão) | `test/team_fainted_routes_test.rb:145` `FaintedRemoveTest < ServerTeamFaintedTest` (`test_delete_fainted_blocked` herança) + `test_delete_fainted_blocked_does_not_break_oob_when_filtered` — 6→6 + `notice--error` + OOBs | — | ok |
+| C5 (preview_cost) | `test/heal_service_test.rb:183` `HealPreviewCostTest#test_preview_cost_returns_total_cost_without_mutating` + `test/team_routes_test.rb:1263` disabled center | — | ok |
+| C6 (venda breaker no spiral) | `test/mart_routes_test.rb:188` `SellInSpiralTest#test_sell_when_game_over_succeeds_and_enables_eventual_heal` — `game_over true` → `sold true proceeds price/2` → `game_over false` + `heal` libera | — | ok |
+| C7 (reset no spiral) | `test/team_routes_test.rb:1304` `JourneyRestartSpiralTest#test_restart_clears_fainted_team_in_spiral_and_resets_balance` — 6 fainted →0 + potion/choice-band devolvidos + saldo 200 + OOBs | — | ok |
+| G1 (suíte+lint) | `./scripts/test` 925/3510 0F + `./scripts/lint` 117 files 0 | — | ok |
+| G2 (sem migração) | `git diff -- db/` vazio + `grep affordable_hp lib/` vazio | — | ok |
+| G3 (S4/S5) | `./scripts/check_docs` ok + `./scripts/checar-sessao 0065` ok + `SESSIONS.md` atualizado | — | ok |
 
-> **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
+> **S2:** um resultado por critério, nunca bloco único "todos atendidos". **S3:** sem ajuste — nenhum critério reaberto; se houver, registrar alteração com data e reaprovar.
 
 ## 8. Observações
 
