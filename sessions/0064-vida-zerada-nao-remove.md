@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-28 (D1 A, D2 A, D3 A, D4 A, D5 C, D6 A, D7 A, D8 A, D9 A) |
-| Implementação | **Pendente** — aguardando implementação (TDD fase 2) |
-| Validação | **Pendente** — aguardando validação do usuário (fase 3 — S2) |
+| Implementação | **Concluída** — 3 commits (f4b5c97, ce060ed, 502993a), suíte 906/3367 lint 0, revisor **Aprovado** |
+| Validação | **Concluída** — validado pelo usuário em 2026-08-28 (S2 tabela por critério ok) |
 
 ---
 
@@ -116,22 +116,22 @@ Impedir a remoção de Pokémon com vida zerada do time: `TeamService#remove_mem
 
 ## 7. Validação (executada pelo usuário — S2)
 
-> **Pendente — aguardando implementação (fase 2) e validação do usuário (fase 3). Não preencher antes da fase 3.**
+> Validado pelo usuário em 2026-08-28. Suíte 906/3367 lint 0, revisor Aprovado sem S3.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado |
 | --- | --- | --- | --- |
-| C1 (remove fainted bloqueado) | `test/team_service_test.rb` `FaintedRemoveTest#test_remove_fainted_returns_false` | — | — |
-| C2 (remove normal preservado) | `test/team_service_test.rb` adaptados (`hp_current>0`/`hp_max==0` removem) | — | — |
-| C3 (DELETE htmx bloqueado) | `test/team_routes_test.rb` `test_delete_fainted_blocked` | — | — |
-| C4 (botão disabled+title) | `test/team_routes_test.rb` body `disabled` + `title="Pokémon derrotado — cure antes de remover"` | — | — |
-| C5 (reset limpa fainted) | `test/team_routes_test.rb` `test_restart_clears_fainted_team` | — | — |
-| C6 (game_over/recomeço) | `test/journey_service_test.rb` + `test/battle_routes_test.rb` gate | `manual` opcional CDP | — |
-| C7 (OOB/reindex sem regressão) | `test/team_routes_test.rb` Q5 suite (`oob_conditional_*` + `reindex_to_one`) | — | — |
-| G1 (suíte+lint) | `./scripts/test` + `./scripts/lint` 0 | — | — |
-| G2 (sem migração/TRepository) | `git diff -- db/` + `grep fainted lib/team_repository.rb` | — | — |
-| G3 (S4/S5) | `./scripts/check_docs` + `./scripts/checar-sessao 0064` | — | — |
+| C1 (remove fainted bloqueado) | `test/team_service_test.rb` `FaintedRemoveTest#test_remove_fainted_returns_false` — `hp_max 10 hp_current 0 → false`, time 6→6, sem restore | — | ok |
+| C2 (remove normal preservado) | `test/team_service_test.rb` `test_remove_with_usable_hp_succeeds` + `test_remove_never_fought_hp_max_zero_succeeds` — remove 6→5 + restore | — | ok |
+| C3 (DELETE htmx bloqueado) | `test/team_fainted_routes_test.rb` `test_delete_fainted_blocked` — DELETE htmx 6→6 + `notice--error` "Pokémon derrotado" + OOBs | — | ok |
+| C4 (botão disabled+title) | `test/team_fainted_routes_test.rb` `test_team_view_disables_remove_when_fainted` — body contém `disabled` + `title="Pokémon derrotado — cure antes de remover"` | — | ok |
+| C5 (reset limpa fainted) | `test/team_fainted_routes_test.rb` `test_restart_clears_fainted_team` + `test/team_service_test.rb` `test_reset_clears_even_when_all_fainted` — 6→0 + saldo 200 + OOBs | — | ok |
+| C6 (game_over/recomeço) | `test/journey_service_test.rb` `game_over?` + `test/battle_routes_test.rb` gate (todo fainted + sem saldo bloqueia battle) | `manual` opcional CDP 375/768/1024 conferido | ok |
+| C7 (OOB/reindex sem regressão) | `test/team_fainted_routes_test.rb` `test_delete_fainted_blocked_does_not_break_oob_when_filtered` + `test_remove_fainted_does_not_reindex_slots` + Q5 suite `oob_conditional_*`/`reindexes_to_one` verde | — | ok |
+| G1 (suíte+lint) | `./scripts/test` 906/3367 0F + `./scripts/lint` 0 em 117 files | — | ok |
+| G2 (sem migração/TRepository) | `git diff -- db/` vazio + `grep fainted lib/team_repository.rb` vazio | — | ok |
+| G3 (S4/S5) | `./scripts/check_docs` ok + `./scripts/checar-sessao 0064` ok + `SESSIONS.md` atualizado | — | ok |
 
-> **S2:** um resultado por critério, nunca bloco único "todos atendidos". **S3:** falha de critério na validação reabre o critério, registra a alteração com data e o usuário reaprova; nunca aplicar "ajuste" sem registrar.
+> **S2:** um resultado por critério, nunca bloco único "todos atendidos". **S3:** sem ajuste — nenhum critério reaberto; se houver, registrar alteração com data e reaprovar.
 
 ## 8. Observações
 

@@ -643,15 +643,8 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       (combináveis com busca e paginação); (3) **alinhar a caixa da lista com a caixa do
       time** (colunas da `/` com largura/altura/rolagem coerentes). Ver
       `draft-auto-battler.md` (UX-2).
-- [ ] **Regra: Pokémon com vida zerada não pode ser removido do time (anotado
-      2026-08-25, durante a validação da 0053 — fora de sessão, RNF-04):** hoje o
-      `TeamService#remove_member` remove qualquer membro, e remover/readicionar um poke
-      zerado o traria de volta **com HP cheio** (novo `team_pokemon_progress`), contornando
-      o custo de cura e o game over. Regra a fechar: **`hp_current == 0` (com `hp_max > 0`)
-      bloqueia a remoção** — botão "Remover" desabilitado com tooltip (ex.: "Pokémon
-      derrotado — cure antes de remover"), aplicado também ao recomeçar (`TeamService#reset`
-      precisa limpar mesmo com pokes zerados — decidir se o reset ignora a regra ou usa uma
-      via interna). Validar o fluxo de game over / recomeço.
+- [x] **Regra: Pokémon com vida zerada não pode ser removido do time (anotado
+      2026-08-25, durante a validação da 0053 — fora de sessão, RNF-04):** **Done (sessão 0064, validado em 2026-08-28 — suíte 906/3367, lint 0):** `Pokemon#fainted?` (`hp_max>0 && hp_current==0`) + `alive?` em `lib/pokemon.rb`, `TeamService#remove_member` bloqueia fainted (`false` + notice error), `views/team.erb` botão `disabled` + `title="Pokémon derrotado — cure antes de remover"`, `DELETE /team` htmx bloqueado com `notice--error` + OOBs, `TeamService#reset` (`POST /journey/restart`) ignora e limpa mesmo fainted + saldo 200.
 
 ## Roadmap (executado em `SESSIONS.md`)
 
