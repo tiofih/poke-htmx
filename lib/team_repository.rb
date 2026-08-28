@@ -142,7 +142,7 @@ module ItemAssignmentOperations
   end
 end
 
-class TeamRepository
+class TeamRepository # rubocop:disable Metrics/ClassLength
   DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
   MAX_TEAM_SIZE = 6
   MAX_MOVES_PER_POKEMON = 4
@@ -186,13 +186,15 @@ class TeamRepository
   end
 
   def remove(user_id, id)
-    removed = connection.exec_params(
-      "DELETE FROM team_pokemons WHERE id = $1 AND user_id = $2 RETURNING slot",
-      [id, user_id]
-    ).first
-    return unless removed
+    connection.transaction do
+      removed = connection.exec_params(
+        "DELETE FROM team_pokemons WHERE id = $1 AND user_id = $2 RETURNING slot",
+        [id, user_id]
+      ).first
+      next unless removed
 
-    reindex_after_removal(user_id, removed["slot"].to_i)
+      reindex_after_removal(user_id, removed["slot"].to_i)
+    end
   end
 
   def clear(user_id)

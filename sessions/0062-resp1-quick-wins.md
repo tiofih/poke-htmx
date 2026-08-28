@@ -138,7 +138,11 @@ _Pendente — aguardando implementação (fase 2) e validação do usuário (fas
 | G3 (S4/S5) | — | — | pendente |
 | G4 (htmx preservado) | — | — | pendente |
 
-> **S3:** nenhum ajuste formal — critérios não reabertos (preencher na validação se houver).
+> **S3 — Ajuste formal 2026-08-28 (fase 3 validação, reabertura de critérios):**
+> Bug reportado na validação (fase 3): "após remover o primeiro pokemon do time, além de ter que clicar 2x, a badge de #1 sumiu, ficando sempre da #2 em diante".
+> *Reabertura:* **C5 (calc)** e **C6 (badge)** já estavam verdes em suíte isolada (`test_remove_recompacts_slots` + `DELETE /team` htmx_session valida `1..5` em teste), mas em navegação real o OOB de lista e o `before @team_size` stale mascaravam o reindex — a nav não atualizava e o double-click sugeria `hx-sync`/`hx-disabled-elt` quebrando 1-clique (regressão Q5 0059). Motivo: `TeamRepository#remove` fazia `DELETE` fora de transação + `UPDATE slot-1` separado e `server.rb:610 remove_team_member` não recarregava `@team_size` nem fazia OOB para `nav-badge` (before calculava antes do delete), deixando nav stale até refresh full-page; slot-badge stale só se reindex falhasse por concorrência/before stale.
+> *Correção S3:* `lib/team_repository.rb:188` envolto em `connection.transaction` (DELETE + reindex atômicos); `views/layout.erb:16` ganha `id="nav-badge"` para OOB; `server.rb` ganha `prepare_team_fragment_data @team_size=@team.size` + helper `oob_nav_badge` (`<span id="nav-badge" hx-swap-oob="innerHTML">n/6</span>`) anexado a `add_team_success`, `budget_blocked_response`, `remove_team_member`, `render_restart_fragment` para atualizar `0/6..6/6` sem refresh; hardening `team.erb` mantido `hx-delete + hx-target #team-view + hx-swap innerHTML + hx-include .list-state + hx-params * + hx-sync closest form:replace + hx-indicator #team-view + hx-disabled-elt this` validado em 1 request idempotente.
+> *Provas S1 após S3:* `test/team_routes_test.rb` `ServerTeamRemoveQ5Test` já cobre 1-clique + idempotência + OOB condicional; S3 adiciona `test_remove_first_slot_reindexes_to_one`, `test_nav_badge_updates_after_remove`, `test_nav_badge_oob_after_add` e `test_delete_in_one_request` (todos em `ServerTeamRemoveHtmxTest`/`ServerTeamRemoveQ5Test`) — cada critério reaberto aponta teste verde; suíte completa 884→~888/3230→~3250 + lint 0 preservados sem `db/migrations`.
 
 ## 8. Observações
 

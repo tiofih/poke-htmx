@@ -506,7 +506,7 @@ module ServerTeamActions
     @notice_kind = notice ? :error : :success
     mini_status = erb :team_add_result, layout: false
     prepare_team_fragment_data
-    "#{mini_status}#{oob_team_view}#{oob_pokemon_list}"
+    "#{mini_status}#{oob_team_view}#{oob_pokemon_list}#{oob_nav_badge}"
   end
 
   def budget_blocked_response(msg)
@@ -514,11 +514,15 @@ module ServerTeamActions
     @notice_kind = :error
     mini_status = erb :team_add_result, layout: false
     prepare_team_fragment_data
-    "#{mini_status}#{oob_team_view}#{oob_pokemon_list}"
+    "#{mini_status}#{oob_team_view}#{oob_pokemon_list}#{oob_nav_badge}"
   end
 
   def oob_team_view
     erb :team_view_oob, layout: false
+  end
+
+  def oob_nav_badge
+    %(<span id="nav-badge" hx-swap-oob="innerHTML">#{@team_size || @team.size}/6</span>)
   end
 
   def oob_pokemon_list
@@ -611,7 +615,7 @@ module ServerTeamActions
     settings.team_strategy.remove_member(current_user, params[:id]) if params[:id]
     settings.battle.invalidate(current_user)
     fragment = render_team_fragment_with_notice
-    "#{fragment}#{oob_pokemon_list}"
+    "#{fragment}#{oob_pokemon_list}#{oob_nav_badge}"
   end
 
   def move_team_member
@@ -710,6 +714,7 @@ module ServerJourneyActions
     @notice_kind = :info
     content = render_team_fragment_with_notice
     content += oob_pokemon_list if list_state_present?
+    content += oob_nav_badge
     content
   end
 
@@ -782,6 +787,7 @@ module ServerBattleActions
   def prepare_team_fragment_data
     load_journey_state
     @team = settings.team.all(current_user)
+    @team_size = @team.size
     @team_cost = team_total_cost(@team)
     @team_budget = TeamBudget::BUDGET
     @team_s_count = team_s_count(@team)
