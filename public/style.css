@@ -15,8 +15,18 @@
 }
 
 /* Navegação */
+header nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em 0.75em;
+  align-items: center;
+}
+
 header nav a {
   margin-right: 1em;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 /* Listagem / paginação */

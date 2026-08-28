@@ -100,4 +100,15 @@ class StyleResponsiveTest < Minitest::Test
     assert_match(/\.filter-controls a[^}]*min-height:\s*44px/m, content,
                  "expected .filter-controls a to have min-height:44px")
   end
+
+  def test_nav_wraps_with_gap_and_touch_target
+    content = style_content
+
+    assert_match(/header nav[^}]*flex-wrap:\s*wrap/m, content,
+                 "expected header nav to use flex-wrap:wrap")
+    assert_match(/header nav[^}]*gap:/m, content,
+                 "expected header nav to use gap")
+    assert_match(/header nav a[^}]*min-height:\s*44px/m, content,
+                 "expected header nav a to have min-height:44px")
+  end
 end
