@@ -26,7 +26,12 @@ header nav a {
   margin-right: 1em;
   display: inline-flex;
   align-items: center;
+  gap: 0.3em;
   min-height: 44px;
+}
+
+.nav-badge {
+  margin-left: 0.15em;
 }
 
 /* Listagem / paginação */

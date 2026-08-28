@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-28 (D1 C maximal, D2 B calc, D3 C CSS+ERB+server.rb, D4 A file-read+style, D5 B 3 passos+refinamento, D6 C badge real via before) |
-| Implementação | Pendente |
-| Validação | Pendente |
+| Implementação | **Concluída** — passos 1–3 (eda6ea6/caa637b/5eec85b) + S3 passo 4 (f85c5f6/b145620) + ajustes pós-validação (Time + gap), suíte 889/3279 lint 0, revisor Aprovado |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-28, todos os critérios ok (C1–C7/G1–G4 ok, S3 badge #1/2 cliques ok, Time 0/6 com espaço ok) |
 
 ---
 
@@ -122,21 +122,25 @@ Fechar RESP-1 P2 com quick-wins maximal: corrigir contrato + polir responsivo + 
 
 ## 7. Validação (executada pelo usuário — S2)
 
-_Pendente — aguardando implementação (fase 2) e validação do usuário (fase 3). Não preencher antes da fase 3._
+**Validada em 2026-08-28 — todos os critérios ok, S3 incluído.**
 
 | Critério | Evidência automatizada | Evidência manual | Resultado |
 | --- | --- | --- | --- |
-| C1 (aspas) | — | — | pendente |
-| C2 (limpar filtros flex) | — | — | pendente |
-| C3 (nav wrap/gap/44px) | — | — | pendente |
-| C4 (body 8px @600) | — | — | pendente |
-| C5 (calc 100vh-110) | — | — | pendente |
-| C6 (badge n/6) | — | — | pendente |
-| C7 (visual CDP) | `manual` | — | pendente |
-| G1 (suíte+lint) | — | — | pendente |
-| G2 (sem gems/schema/rede) | — | — | pendente |
-| G3 (S4/S5) | — | — | pendente |
-| G4 (htmx preservado) | — | — | pendente |
+| C1 (aspas) | `test/style_responsive_test.rb:81` `test_pokemon_erb_has_quoted_value` (`value="<%= @pokemon.name %>"`) | — | ok |
+| C2 (limpar filtros flex) | `test/style_responsive_test.rb` `test_clear_filters_is_centered` (`.filter-controls a display:flex` + `center` + `44px`) | — | ok |
+| C3 (nav wrap/gap/44px) | `test/style_responsive_test.rb` `test_nav_wraps_with_gap_and_touch_target` (`flex-wrap:wrap` + `gap` + `44px`) | — | ok |
+| C4 (body 8px @600) | `test/style_responsive_test.rb` `test_body_padding_is_8px_at_600` (`@600 body 8px`) | — | ok |
+| C5 (calc 100vh-110) | `test/style_responsive_test.rb` `test_columns_use_calc_viewport_height` (`calc(100vh -110px)` + `@960 none`) | — | ok |
+| C6 (badge n/6) | `test/layout_test.rb:33` `test_nav_shows_team_badge` (`@team_size` + `/6` + `GET / 0/6..6/6`) + S3 `test/team_remove_s3_test.rb` OOB `5/6` | — | ok |
+| C7 (visual CDP) | `manual` explícito | CDP 375 nav wrap 44px + limpar filtros centralizado + body 8px + calc sem duplo scroll + badge Time 0/6 com espaço (gap 0.3em) | ok |
+| G1 (suíte+lint) | `./scripts/test` **889/3279 0 falhas** + `./scripts/lint` 0 em f85c5f6/b145620 e pós-ajustes Time/gap | — | ok |
+| G2 (sem gems/schema/rede) | `git diff -- Gemfile* db/` vazio, `rubocop:disable` só `Metrics/ClassLength`/`VariableNumber` justificados | — | ok |
+| G3 (S4/S5) | `./scripts/check_docs` ok + `./scripts/checar-sessao 0062` ok + `SESSIONS.md` atualizado no refinamento e validação | — | ok |
+| G4 (htmx preservado) | `test/pokemon_list_filters_test.rb` + `test/pokemon_list_cost_test.rb` verdes, `hx-delete` 1 clique idempotente + OOB `pokemon-list`/`nav-badge` | — | ok |
+
+> **Ajustes pós-validação (2026-08-28):** `views/layout.erb:16` `Lista` → `Time` (nav) + `public/style.css:25-31` `header nav a gap:0.3em` + `.nav-badge margin-left:0.15em` para garantir `Time 0/6` com espaço (flex `inline-flex` colapsava whitespace). Validado visual + `test/pokemon_routes_test.rb:294` atualizado para `Time`.
+
+> **S3 — Ajuste formal 2026-08-28 (fase 3 validação, reabertura de critérios):**
 
 > **S3 — Ajuste formal 2026-08-28 (fase 3 validação, reabertura de critérios):**
 > Bug reportado na validação (fase 3): "após remover o primeiro pokemon do time, além de ter que clicar 2x, a badge de #1 sumiu, ficando sempre da #2 em diante".

@@ -291,7 +291,7 @@ class ServerListTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "<nav"
-    assert_includes last_response.body, "Lista"
+    assert_includes last_response.body, "Time"
     assert_includes last_response.body, "Batalha"
     assert_includes last_response.body, 'href="/"'
     refute_includes last_response.body, 'href="/team"'
