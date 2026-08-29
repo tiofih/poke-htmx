@@ -69,6 +69,8 @@ class PokeApiFake
   end
 
   def base_form?(name)
+    return true if @base_form.nil?
+
     resolve(@base_form, name) == true
   end
 

@@ -26,16 +26,19 @@ class OpponentGeneratorTest < Minitest::Test
     )
   end
 
-  def generator(names: NAMES, size: 6, seed: 42, fetcher: nil, level: 1,
+  def generator(names: NAMES, size: 6, seed: 42, fetcher: nil, level: 1, # rubocop:disable Metrics/ParameterLists
                 parallelizer: nil, rater: nil, moves_fetcher: nil, band: nil,
-                ratings: nil, max_candidates: nil)
+                ratings: nil, max_candidates: nil, base_checker: nil,
+                generation_checker: nil, restricted_checker: nil, budget_limit: nil) # rubocop:enable Metrics/ParameterLists
     fetcher ||= ->(name) { build_pokemon(name) }
     moves_fetcher ||= ->(_number) { [] }
     OpponentGenerator.new(
       names: names, size: size, rng: Random.new(seed), fetcher: fetcher, level: level,
       options: {
         parallelizer: parallelizer, rater: rater, moves_fetcher: moves_fetcher,
-        band: band, ratings: ratings, max_candidates: max_candidates
+        band: band, ratings: ratings, max_candidates: max_candidates,
+        base_checker: base_checker, generation_checker: generation_checker,
+        restricted_checker: restricted_checker, budget_limit: budget_limit
       }.compact
     )
   end
@@ -267,5 +270,64 @@ class OpponentGeneratorTest < Minitest::Test
     gen.team_names
 
     refute_empty fetched_numbers, "moves_fetcher consultado para classificar candidatos"
+  end
+
+  def test_team_names_via_base_checker_excludes_non_base
+    base_checker = ->(name) { name != "raichu" }
+    names = %w[pikachu raichu bulbasaur charmander eevee snorlax meowth psyduck]
+    gen = generator(names: names, size: 6, seed: 42,
+                    ratings: ->(_name) { :B }, band: [:B],
+                    base_checker: base_checker)
+
+    team = gen.team_names
+
+    refute_includes team, "raichu", "base_checker filtra nao-base"
+    assert_equal team.uniq, team
+  end
+
+  def test_team_names_filters_by_player_generation
+    gen_map = { "pikachu" => 1, "bulbasaur" => 1, "charmander" => 2, "squirtle" => 3,
+                "eevee" => 1, "snorlax" => 3, "meowth" => 2, "psyduck" => 1 }
+    generation_checker = lambda do |name|
+      gen = gen_map[name]
+      gen.nil? || gen <= 1
+    end
+    gen = generator(names: NAMES, size: 6, seed: 42,
+                    ratings: ratings_provider, band: %i[B A S D F C],
+                    generation_checker: generation_checker)
+
+    team = gen.team_names
+
+    assert team.none? { |n| gen_map[n] && gen_map[n] > 1 }, "geracao > player_gen excluida"
+    # nil fail open: nome desconhecido (sem geracao) deve ser mantido
+    gen_unknown = generator(names: %w[unknown pikachu], size: 2, seed: 42,
+                            ratings: ->(_n) { :B }, band: [:B],
+                            generation_checker: ->(n) { gen_map[n].nil? || gen_map[n] <= 1 })
+    assert_includes gen_unknown.team_names, "unknown", "geracao nil mantem candidato (fail open)"
+  end
+
+  def test_ratings_scan_uses_single_parallelizer_pass_for_base_and_generation_and_band
+    calls = [0]
+    counting = Class.new do
+      attr_reader :calls
+
+      def initialize(counter)
+        @counter = counter
+      end
+
+      def map(items, &block)
+        @counter[0] += 1
+        items.map(&block)
+      end
+    end.new(calls)
+    base_checker = ->(_n) { true }
+    generation_checker = ->(_n) { true }
+    gen = generator(names: NAMES, size: 3, seed: 42, parallelizer: counting,
+                    ratings: ratings_provider, band: [:B],
+                    base_checker: base_checker, generation_checker: generation_checker)
+
+    gen.team_names
+
+    assert_equal 1, calls[0], "single-pass Parallelizer.map por batch (nao duplica varredura)"
   end
 end

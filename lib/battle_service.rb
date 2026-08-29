@@ -16,6 +16,7 @@ require_relative "type_effectiveness"
 require_relative "wallet_repository"
 require_relative "inventory_repository"
 
+# rubocop:disable Metrics/ModuleLength
 module BattleServicePreparation
   RATING_SCAN_CAP = 256
 
@@ -80,18 +81,20 @@ module BattleServicePreparation
     { engine: engine, reason: :ok }
   end
 
-  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/MethodLength, Metrics/AbcSize
   def build_opponent(user_id)
     team = @team.all(user_id)
     avg = average_player_level(user_id, team)
     band = PokemonRating.band_for_level(avg)
     player_gen = generation_for_level(avg)
+    level = avg + band_offset(band)
+    level = 1 if level < 1
     names = api.respond_to?(:fetch_all_names) ? (api.fetch_all_names || []) : []
     OpponentGenerator.new(
       names: names,
       fetcher: api.method(:detail),
       rng: @opponent_rng.call,
-      level: 1,
+      level: level,
       options: opponent_options(band, player_gen)
     ).team
   end
@@ -112,10 +115,28 @@ module BattleServicePreparation
 
         gen = api.generation_for(name)
         gen.nil? || gen <= player_gen
+      end,
+      restricted_checker: lambda do |name|
+        return false unless api.respond_to?(:evolution_restricted?)
+
+        api.evolution_restricted?(name) == true
       end
     }
   end
-  # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/MethodLength, Metrics/AbcSize
+
+  # rubocop:disable Lint/DuplicateBranch
+  def band_offset(band)
+    case band
+    when %i[F D] then 0
+    when %i[D C] then 0
+    when %i[C B] then 1
+    when %i[B A] then 1
+    when %i[A S] then 1
+    else 0
+    end
+  end
+  # rubocop:enable Lint/DuplicateBranch
 
   # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity
   def generation_for_level(level)
@@ -164,6 +185,7 @@ module BattleServicePreparation
     [Move.new(name: "Struggle", type: pokemon.types.first || "normal", power: 10, accuracy: nil, pp: 100)]
   end
 end
+# rubocop:enable Metrics/ModuleLength
 
 module BattleServiceFinalization
   private

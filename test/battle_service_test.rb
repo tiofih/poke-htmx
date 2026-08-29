@@ -9,6 +9,7 @@ require_relative "../lib/battle_service"
 require_relative "../lib/inventory_repository"
 require_relative "../lib/pokemon_rating_cache"
 require_relative "../lib/progression_repository"
+require_relative "../lib/team_budget"
 require_relative "../lib/team_repository"
 require_relative "../lib/wallet_repository"
 
@@ -274,8 +275,16 @@ class BattleServiceTest < Minitest::Test
     result = service.prepare("user-1")
 
     opponent_names = result[:engine].teams[1].map(&:name)
-    assert_equal TieredApi::STRONG.sort, opponent_names.sort,
-                 "nivel alto (banda A-S) so gera oponentes fortes"
+    assert_equal 6, opponent_names.size
+    # banda A-S tenta fortes, mas orcamento 450 limita a 3 S (3*120=360) + 3 F (60)=420
+    assert_equal 3, (TieredApi::STRONG & opponent_names).size,
+                 "nivel alto (banda A-S) prioriza fortes mas respeita orcamento 450"
+    assert_equal 3, (TieredApi::WEAK & opponent_names).size
+    total = opponent_names.sum do |name|
+      tier = TieredApi::STRONG.include?(name) ? "S" : "F"
+      TeamBudget.cost_for(line_tier: tier, restricted: false)
+    end
+    assert_operator total, :<=, TeamBudget::BUDGET
   end
 
   def test_build_opponent_prioritizes_weak_band_for_low_level_player
@@ -313,7 +322,9 @@ class BattleServiceTest < Minitest::Test
     result = service.prepare("user-1")
 
     refute_empty rating_cache.queried, "varredura da banda passa pelo rating cache"
-    assert_equal TieredApi::STRONG.sort, result[:engine].teams[1].map(&:name).sort,
-                 "banda A-S preservada via ratings provider"
+    opponent_names = result[:engine].teams[1].map(&:name)
+    assert_equal 6, opponent_names.size
+    assert_equal 3, (TieredApi::STRONG & opponent_names).size,
+                 "banda A-S preservada via ratings provider mas limitada pelo orcamento"
   end
 end
