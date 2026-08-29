@@ -80,28 +80,64 @@ module BattleServicePreparation
     { engine: engine, reason: :ok }
   end
 
+  # rubocop:disable Metrics/MethodLength
   def build_opponent(user_id)
-    band = PokemonRating.band_for_level(average_player_level(user_id, @team.all(user_id)))
+    team = @team.all(user_id)
+    avg = average_player_level(user_id, team)
+    band = PokemonRating.band_for_level(avg)
+    player_gen = generation_for_level(avg)
+    names = api.respond_to?(:fetch_all_names) ? (api.fetch_all_names || []) : []
     OpponentGenerator.new(
-      names: api.fetch_all_names,
+      names: names,
       fetcher: api.method(:detail),
       rng: @opponent_rng.call,
       level: 1,
-      options: opponent_options(band)
+      options: opponent_options(band, player_gen)
     ).team
   end
 
-  def opponent_options(band)
+  def opponent_options(band, player_gen = 9)
     {
       parallelizer: Parallelizer,
       ratings: ->(name) { @rating_cache.rating_for(name) },
       band: band,
-      max_candidates: RATING_SCAN_CAP
+      max_candidates: RATING_SCAN_CAP,
+      base_checker: lambda do |name|
+        return true unless api.respond_to?(:base_form?)
+
+        api.base_form?(name) == true
+      end,
+      generation_checker: lambda do |name|
+        return true unless api.respond_to?(:generation_for)
+
+        gen = api.generation_for(name)
+        gen.nil? || gen <= player_gen
+      end
     }
   end
+  # rubocop:enable Metrics/MethodLength
+
+  # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity
+  def generation_for_level(level)
+    lvl = level.to_i
+    case lvl
+    when 1..2 then 1
+    when 3..5 then 2
+    when 6..9 then 3
+    when 10..14 then 4
+    when 15..20 then 5
+    when 21..27 then 6
+    when 28..34 then 7
+    when 35..41 then 8
+    else 9
+    end
+  end
+  # rubocop:enable Metrics/MethodLength, Metrics/CyclomaticComplexity
 
   def average_player_level(user_id, team)
     levels = team.map { |member| member_level(user_id, member) }
+    return 1 if levels.empty?
+
     (levels.sum / levels.size.to_f).round
   end
 
