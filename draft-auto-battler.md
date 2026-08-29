@@ -943,3 +943,10 @@
 
 - **Times iniciam no nível 5:** `TeamRepository#add` + `ProgressionRepository#create` devem criar progresso `level: 5` (não 1). Afeta `RewardRule`/`ExperienceCurve`, `average_player_level`, `band_for_level`/`generation_for_level` e custo inicial. Sem migração retroativa automática (times existentes ficam no nível atual).
 - **Vitórias +2 níveis, derrotas +1:** `BattleService#grant_finished_xp` / `RewardRule` ou `ProgressionRepository#grant` — vitória concede XP equivalente a 2 níveis (`level*100*2` ou `grant` 2×), derrota 1 nível (hoje win 50/draw 25/lose 20 com curva `level*100`). Definir curva pós-mudança (manter `level*100` ou ajustar) e interação com evolução/aprendizado por nível. Testes novos: `progressao_inicial_e_recompensa_test.rb`.
+
+### Encerramento — HTMX 4.0 + skills (anotado 2026-08-29, fora do fluxo — RNF-04)
+
+> **Anotado em 2026-08-29 (fim de projeto, não refinado agora).**
+
+- **Atualizar para HTMX 4.0:** `public/` + `views/layout.erb` (CDN/script) migrar de 1.x para **4.0** (breaking changes: `hx-*` → novo sintaxe se houver, `htmx.config` , `hx-indicator`/`hx-swap-oob` preservados). Testes htmx (`hx-get`/`hx-trigger="load"` em `#team` e `hx-delete`/`hx-sync`) devem continuar verdes. Sem mudar rotas/domínio.
+- **Adicionar skills da atualização:** mapear e instalar as **skills** (Agent Skills) da atualização HTMX 4.0 — inventariar `/.agents/skills`, `/.claude/skills` e `.opencode/skills` afetados, atualizar `AGENTS.md`/`CLAUDE.md` routing se mudar.
