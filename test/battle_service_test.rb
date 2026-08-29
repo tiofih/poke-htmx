@@ -327,4 +327,109 @@ class BattleServiceTest < Minitest::Test
     assert_equal 3, (TieredApi::STRONG & opponent_names).size,
                  "banda A-S preservada via ratings provider mas limitada pelo orcamento"
   end
+
+  def test_build_opponent_scales_level_to_average_plus_band_offset
+    service = build_service(TieredApi.new)
+    add_team_for("user-1")
+    # nivel 1 => banda F-D offset 0 => level 1
+    result = service.prepare("user-1")
+    levels = result[:engine].teams[1].map(&:level)
+    assert_equal [1], levels.uniq, "banda F-D (nivel 1) sem offset"
+
+    # testa band_offset e generation_for_level diretamente
+    assert_equal 0, service.send(:band_offset, %i[F D])
+    assert_equal 0, service.send(:band_offset, %i[D C])
+    assert_equal 1, service.send(:band_offset, %i[C B])
+    assert_equal 1, service.send(:band_offset, %i[B A])
+    assert_equal 1, service.send(:band_offset, %i[A S])
+    assert_equal 1, service.send(:generation_for_level, 1)
+    assert_equal 2, service.send(:generation_for_level, 3)
+    assert_equal 9, service.send(:generation_for_level, 42)
+
+    # nivel medio alto => opponent level escalado aumenta HP
+    # grant xp para subir nivel medio a ~6 (banda C-B offset 1)
+    grant_xp_to("user-1", 2000) # ~ nivel 6
+    service_high = build_service(TieredApi.new)
+    result_high = service_high.prepare("user-1")
+    assert_operator result_high[:engine].teams[1].first.hp_max, :>, 60,
+                    "level escalado aumenta HP vs base 60"
+  end
+
+  def test_build_opponent_filters_by_player_generation
+    # Api com geracoes distintas
+    gen_api = Class.new(TieredApi) do
+      def generation_for(name)
+        { "mewtwo" => 1, "mew" => 2, "rayquaza" => 3, "lugia" => 8,
+          "groudon" => 9, "kyogre" => 9,
+          "pikachu" => 1, "magikarp" => 1, "rattata" => 1, "caterpie" => 1 }[name]
+      end
+
+      def base_form?(_name)
+        true
+      end
+
+      def evolution_restricted?(_name)
+        false
+      end
+    end.new
+    service = build_service(gen_api)
+    add_team_for("user-1") # nivel 1 => player_gen 1 => so gen <=1
+    result = service.prepare("user-1")
+    opponent_names = result[:engine].teams[1].map(&:name)
+    # gen 8/9 devem ser filtrados quando player_gen 1
+    refute_includes opponent_names, "lugia", "geracao 8 filtrada para player gen 1"
+    refute_includes opponent_names, "groudon"
+    refute_includes opponent_names, "kyogre"
+    assert(opponent_names.all? { |n| [1, nil].include?(gen_api.generation_for(n)) })
+  end
+
+  def test_prepare_unavailable_when_opponent_empty
+    empty_api = Class.new do
+      def fetch_all_names
+        []
+      end
+
+      def detail(_id)
+        Pokemon.new(name: "pikachu", sprite: "s", number: 25, types: ["normal"],
+                    stats: [{ name: "HP", value: 60 }])
+      end
+
+      def move(_name)
+        Move.new(name: "tackle", type: "normal", power: 40, accuracy: 100, pp: 35)
+      end
+
+      def moves_for(_name)
+        []
+      end
+
+      def type_relations
+        { "normal" => { "double" => [], "half" => [], "no" => [] } }
+      end
+
+      def next_evolutions(_name)
+        []
+      end
+
+      def learnable_moves(_name)
+        []
+      end
+
+      def base_form?(_name)
+        true
+      end
+
+      def generation_for(_name)
+        1
+      end
+
+      def evolution_restricted?(_name)
+        false
+      end
+    end.new
+    service = build_service(empty_api)
+    add_team_for("user-1")
+    result = service.prepare("user-1")
+    assert_nil result[:engine], "opponent vazio => engine nil"
+    assert_equal :unavailable, result[:reason]
+  end
 end

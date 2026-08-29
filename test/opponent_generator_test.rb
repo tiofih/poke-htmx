@@ -330,4 +330,22 @@ class OpponentGeneratorTest < Minitest::Test
 
     assert_equal 1, calls[0], "single-pass Parallelizer.map por batch (nao duplica varredura)"
   end
+
+  def test_team_names_respects_budget_450 # rubocop:disable Naming/VariableNumber
+    # S=120, A=70, B=55, etc. 6x S =720 >450, deve descartar caro e completar com F (20)
+    tiers = { "a" => :S, "b" => :S, "c" => :S, "d" => :S, "e" => :S, "f" => :S,
+              "g" => :F, "h" => :F, "i" => :F, "j" => :F, "k" => :F, "l" => :F }
+    names = tiers.keys
+    ratings = ->(name) { tiers[name] }
+    gen = generator(names: names, size: 6, seed: 42, ratings: ratings, band: %i[S F],
+                    budget_limit: TeamBudget::BUDGET)
+
+    team = gen.team_names
+
+    assert_equal 6, team.size
+    total = team.sum { |n| TeamBudget.cost_for(line_tier: tiers[n].to_s, restricted: false) }
+    assert_operator total, :<=, TeamBudget::BUDGET, "orcamento ficticio 450 respeitado (#{total})"
+    # deve conter F para caber no orcamento, nao pode ser 6 S puro
+    refute_equal %w[a b c d e f].sort, team.sort, "6 S puro excede orcamento, fallback traz F"
+  end
 end
