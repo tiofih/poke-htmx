@@ -768,6 +768,13 @@
   primeiro, senão LRU). Isolamento por thread (0044) preservado. Manual de validação:
   `pg_stat_activity` estável após requests e a suíte roda verde com o `web` ativo.
 
+### Futuras — Ajuste de XP/dinheiro e dificuldade dinâmica (anotado 2026-08-28, fora do fluxo — RNF-04)
+
+> **Pedido do usuário (2026-08-28):** anotar como mudanças futuras, não refinadas agora.
+
+- **Ajuste da tabela de XP e dinheiro:** revisar `ExperienceCurve` (hoje `level*100` linear) e `RewardRule#money_for` (win 100/draw 50/lose 40, Eco-1) — progressão pode ficar rápida/lenta demais com o novo pool e escalonamento; balancear custo de curva vs recompensa por vitória/derrota/empate, mantendo `BattleService`/`ProgressionRepository` como fronteira.
+- **Dificuldade dinâmica por desempenho da batalha anterior:** além da banda estática `PokemonRating.band_for_level(average_player_level)` (F–D até A–S), ajustar o oponente seguinte pelo **desempenho da batalha anterior** (ex.: vitória fácil → sobe banda/nível, derrota → mantém/desce, placar/HP restante como sinal). Cruza com `OpponentGenerator` (`band`/`level`/`ratings:`), `BattleService#build_opponent` e `BattleEngine#result`. Não abrir na 0066; fica para sessão futura dedicada.
+
 ### BUG-3. Remover do time às vezes exige clicar 2x
 
 - **Bug (anotado 2026-08-25):** por vezes é preciso **clicar 2x no botão "Remover do
