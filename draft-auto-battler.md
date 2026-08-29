@@ -936,3 +936,10 @@
 - **Achados UI:** lista+time ok mas filtros 117px, grid 6 col tablet, battle 3 col sem breakpoint, manage lista longa, histórico UUID, nav sem badge.
 - **Bugs P0:** heal trap, remove escapa Game Over, HP zero persistente; P1: pokemon.erb sem aspas, sem viewport, grid, manage, UUID; P2: race add, OPP pool, PP Struggle.
 - **Artefato:** `playtest-03-gameplay.md` — virará sessões `RESP-1`, `M2b`, `ECO` rebalance.
+
+### Próximas 2026-08-29 — progressão inicial (validado em 0066, fora desta — RNF-04)
+
+> **Anotado em 2026-08-29 na validação da 0066 (não refinado agora).**
+
+- **Times iniciam no nível 5:** `TeamRepository#add` + `ProgressionRepository#create` devem criar progresso `level: 5` (não 1). Afeta `RewardRule`/`ExperienceCurve`, `average_player_level`, `band_for_level`/`generation_for_level` e custo inicial. Sem migração retroativa automática (times existentes ficam no nível atual).
+- **Vitórias +2 níveis, derrotas +1:** `BattleService#grant_finished_xp` / `RewardRule` ou `ProgressionRepository#grant` — vitória concede XP equivalente a 2 níveis (`level*100*2` ou `grant` 2×), derrota 1 nível (hoje win 50/draw 25/lose 20 com curva `level*100`). Definir curva pós-mudança (manter `level*100` ou ajustar) e interação com evolução/aprendizado por nível. Testes novos: `progressao_inicial_e_recompensa_test.rb`.

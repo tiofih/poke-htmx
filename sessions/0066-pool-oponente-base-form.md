@@ -4,9 +4,9 @@
 
 | Fase | Status |
 | --- | --- |
-| Refinamento | **Concluída** — decisões do usuário em 2026-08-28 (D1 A, D2/D3 B, D4 C, D5 C, D6 A, D7 A, D8 B, D9 C, D9plano B) + **ajuste S3 em 2026-08-29** (D10 — paridade de golpes) |
-| Implementação | Pendente — 3 passos entregues e revisados (**Aprovado** 2c, suíte 932/3546), **reaberta via S3** para Passo 4 (C13) |
-| Validação | Pendente — aguardar Passo 4 + re-revisão |
+| Refinamento | **Concluída** — decisões do usuário em 2026-08-28 (D1 A, D2/D3 B, D4 C, D5 C, D6 A, D7 A, D8 B, D9 C, D9plano B) + **ajuste S3 em 2026-08-29** (D10 — paridade de golpes, reaprovação "Reabrir 0066 via S3") |
+| Implementação | **Concluída** — 4 passos + S3 C13, suíte 934/3636 lint 0, revisor **Aprovado** (round 2/3, sem S3 pendente) — commits `91e39fa/a0aef8f/5d3ef00/6e8ff83/188026f` |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-29 (S2 por critério ok, C13 fiel mantida; Poliwag 4 em nível 1 é dado real, não cache) |
 
 ---
 
@@ -140,11 +140,32 @@ Alinhar o pool do oponente ao pool da Lista (J1/0044): o adversário passa a ser
 
 ## 7. Validação (executada pelo usuário — S2)
 
-Pendente — aguardar fase 2 (TDD) ser concluída e revisada (2c) antes de validar. Não preencher antes.
+**Validada pelo usuário em 2026-08-29.** Suíte `934/3636` lint 0, revisor **Aprovado** (round 2/3, C13 ok, S3 formal `6e8ff83` antes de `188026f`). Poliwag nível 1 com `bubble/hypnosis/water-gun/water-sport` validado como dado real (min level 1 em gens modernas, ver `lib/gateways/poke_api_moves.rb:51-55`), não cache poison — mantido fiel.
+
+| Critério | Evidência automatizada | Evidência manual | Resultado |
+| --- | --- | --- | --- |
+| C1 base_checker | `test/opponent_generator_test.rb` `test_team_names_via_base_checker_excludes_non_base` | — | ok |
+| C2 geração | `test/opponent_generator_test.rb` `test_team_names_filters_by_player_generation` | — | ok |
+| C3 intercalado single-pass | `test/opponent_generator_test.rb` `test_ratings_scan_uses_single_parallelizer_pass_for_base_and_generation_and_band` | — | ok |
+| C4 banda no pool base | `test/opponent_generator_test.rb` `test_team_names_filters_to_band_with_ratings` | — | ok |
+| C5 fallback pool base | `test/opponent_generator_test.rb` `test_team_names_falls_back_to_random_when_band_exhausted` + `test_team_names_caps_scan_and_falls_back` | — | ok |
+| C6 cap 256 | `test/opponent_generator_test.rb` `test_team_names_caps_scan_and_falls_back` (`max_candidates:10`) | — | ok |
+| C7 orçamento ≤450 | `test/opponent_generator_test.rb` `test_team_names_respects_budget_450` | — | ok |
+| C8 nível average+delta | `test/opponent_generator_test.rb` `test_team_with_explicit_level_scales_each_member` + `test/battle_service_test.rb` `test_build_opponent_scales_level_to_average_plus_band_offset` | — | ok |
+| C9 geração integrada | `test/battle_service_test.rb` `test_build_opponent_filters_by_player_generation` | `manual` CDP 375/768: Lista só base e Batalha oponente base+geração — ok | ok |
+| C10 vazio seguro | `test/battle_service_test.rb` `test_prepare_unavailable_when_opponent_empty` | — | ok |
+| C11 determinismo | `test/opponent_generator_test.rb` `test_same_seed_generates_same_team_order` | — | ok |
+| C12 size/empty | `test/opponent_generator_test.rb` `test_team_with_non_positive_size_returns_empty` | — | ok |
+| C13 paridade golpes por nível (S3) | `test/battle_service_test.rb` `test_opponent_moves_parity_by_level` + `test_opponent_moves_capped_at_learnable` (level 2 ≤2, level 20 ≤4, Struggle fallback) | `manual` Poliwag nível 1 4 golpes (live PokéAPI min 1 em sword-shield/scarlet-violet) — fiel, não cache | ok |
+| G1 suíte+lint | `./scripts/test` 934/3636 + `./scripts/lint` 117 files 0 por green | — | ok |
+| G2 sem migração/repo | `git diff -- db/` vazio + `grep -rn base_form lib/team_repository.rb` vazio | — | ok |
+| G3 S4/S5 | `./scripts/check_docs` ok + `./scripts/checar-sessao 0066` ok + `SESSIONS.md` atualizado no refinamento e na validação | — | ok |
+| S3 formal | `sessions/0066` C13/D10 com data 2026-08-29 + reaprovação "Reabrir 0066 via S3" commitado `6e8ff83` antes de `188026f` | — | ok |
 
 ## 8. Observações
 
-- **Próxima após 0066:** Onda 2 Economia **0067 pedras+modais** → **0068 resolver batalha** → **0063 juice**, depois Onda 3 Estabilidade (0069 race add → 0070 escritas atômicas → 0071 CSRF → 0072 respiro) — a critério do usuário; ver `SESSIONS.md:375` e `sessions/0065-death-spiral-game-over.md:8`. As futuras **ajuste XP/dinheiro** (`ExperienceCurve` level*100 + `RewardRule` 100/50/40) e **dificuldade dinâmica por desempenho da batalha anterior** ficam para **sessão futura dedicada** (fora desta) — ver `draft-auto-battler.md` § Futuras 2026-08-28.
+- **Validada em 2026-08-29:** S2 por critério ok (C1–C13 + G1–G3 + S3). Poliwag 4 golpes em nível 1 mantido fiel (live API min 1 em gens modernas). Próxima Onda 2 Economia **0067 pedras+modais** → **0068 resolver batalha** → **0063 juice**, depois Onda 3 Estabilidade (0069 race add → 0070 escritas atômicas → 0071 CSRF → 0072 respiro) — a critério do usuário; ver `SESSIONS.md:375` e `sessions/0065-death-spiral-game-over.md:8`. Futuras **ajuste XP/dinheiro** e dificuldade dinâmica por desempenho seguem para sessão futura dedicada — ver `draft-auto-battler.md` § Futuras 2026-08-28.
+- **Anotado em 2026-08-29 (fora desta, validado):** próximas mudanças pedidas — **times iniciam no nível 5** e **vitórias upam 2 níveis, derrotas upam 1** (ver `draft-auto-battler.md` § Próximas 2026-08-29 e `REQUIREMENTS.md` Limitações). Não abrem escopo nesta.
 - **Risco D4 C geração:** mapeamento nível→geração é heurístico (tabela `1-2→1 ... 42+→9`); se `generation_for` nil (erro PokéAPI), fail open (mantém candidato) para não esvaziar pool. Se `player_gen` muito baixo e banda A-S pedir gen alta, fallback puro do pool base pode trazer gen baixa mesmo — é o comportamento esperado (geração limita mas não quebra banda).
 - **Risco D8 B orçamento:** `TeamBudget.cost_for` depende de `line_tier` via `ratings` tier + `evolution_restricted?` (metade exceto S 110). Descartar candidato caro no meio da banda pode deixar time <6 se `max_candidates` já estourou — fallback do pool base barato (F 20) garante 6. Documentado no plano.
 
