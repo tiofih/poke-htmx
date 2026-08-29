@@ -61,7 +61,7 @@ module BattleServicePreparation
     return nil if opponent.empty?
 
     Parallelizer.map(opponent, concurrency: Parallelizer::DEFAULT_CONCURRENCY) do |battle_pokemon|
-      battle_pokemon.new(moves: moves_for(battle_pokemon))
+      battle_pokemon.new(moves: moves_for_opponent(battle_pokemon))
     end
   end
 
@@ -184,6 +184,17 @@ module BattleServicePreparation
 
     [Move.new(name: "Struggle", type: pokemon.types.first || "normal", power: 10, accuracy: nil, pp: 100)]
   end
+
+  # rubocop:disable Metrics/AbcSize
+  def moves_for_opponent(pokemon)
+    learnable = api.learnable_moves(pokemon.number).to_a
+                   .select { |entry| entry[:level].to_i <= pokemon.level.to_i }.last(4)
+    moves = learnable.filter_map { |entry| api.move(entry[:name]) }
+    return moves unless moves.empty?
+
+    [Move.new(name: "Struggle", type: pokemon.types.first || "normal", power: 10, accuracy: nil, pp: 100)]
+  end
+  # rubocop:enable Metrics/AbcSize
 end
 # rubocop:enable Metrics/ModuleLength
 

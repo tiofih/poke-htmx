@@ -432,4 +432,149 @@ class BattleServiceTest < Minitest::Test
     assert_nil result[:engine], "opponent vazio => engine nil"
     assert_equal :unavailable, result[:reason]
   end
+
+  def test_opponent_moves_parity_by_level
+    parity_api = Class.new(TieredApi) do
+      def learnable_moves(_number)
+        [
+          { level: 1, name: "tackle" },
+          { level: 2, name: "growl" },
+          { level: 5, name: "tail-whip" },
+          { level: 9, name: "quick-attack" },
+          { level: 15, name: "thunderbolt" },
+          { level: 20, name: "hyper-beam" }
+        ]
+      end
+
+      def move(name)
+        Move.new(name: name, type: "normal", power: 40, accuracy: 100, pp: 35)
+      end
+
+      def base_form?(_name)
+        true
+      end
+
+      def generation_for(_name)
+        1
+      end
+
+      def evolution_restricted?(_name)
+        false
+      end
+    end.new
+    service = build_service(parity_api)
+    add_team_for("parity-1")
+    grant_xp_to("parity-1", 100) # nivel 2 => opponent level 2 (banda F-D offset 0)
+    result = service.prepare("parity-1")
+    opponent = result[:engine].teams[1]
+    allowed = %w[tackle growl]
+    opponent.each do |fighter|
+      assert_operator fighter.moves.size, :<=, 2,
+                      "nivel 2 deve ter <=2 golpes, veio #{fighter.moves.size}"
+      fighter.moves.each do |mv|
+        assert_includes allowed, mv.name, "golpe #{mv.name} deve ser subset de learnable <= level 2"
+      end
+    end
+  end
+
+  def test_opponent_moves_capped_at_learnable # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    many_api = Class.new(TieredApi) do
+      def learnable_moves(_number)
+        [
+          { level: 1, name: "tackle" },
+          { level: 2, name: "growl" },
+          { level: 5, name: "tail-whip" },
+          { level: 9, name: "quick-attack" },
+          { level: 15, name: "thunderbolt" },
+          { level: 20, name: "hyper-beam" }
+        ]
+      end
+
+      def move(name)
+        Move.new(name: name, type: "normal", power: 40, accuracy: 100, pp: 35)
+      end
+
+      def base_form?(_name)
+        true
+      end
+
+      def generation_for(_name)
+        1
+      end
+
+      def evolution_restricted?(_name)
+        false
+      end
+    end.new
+    service_high = build_service(many_api)
+    add_team_for("cap-high")
+    grant_xp_to("cap-high", 12_000) # nivel alto => opponent ~16
+    result_high = service_high.prepare("cap-high")
+    opponent_high = result_high[:engine].teams[1]
+    opponent_high.each do |fighter|
+      assert_operator fighter.moves.size, :<=, 4, "nivel alto deve ter <=4 golpes"
+      refute_empty fighter.moves
+    end
+
+    single_api = Class.new(TieredApi) do
+      def learnable_moves(_number)
+        [{ level: 1, name: "tackle" }]
+      end
+
+      def move(name)
+        Move.new(name: name, type: "normal", power: 40, accuracy: 100, pp: 35)
+      end
+
+      def base_form?(_name)
+        true
+      end
+
+      def generation_for(_name)
+        1
+      end
+
+      def evolution_restricted?(_name)
+        false
+      end
+    end.new
+    service_single = build_service(single_api)
+    add_team_for("cap-single")
+    result_single = service_single.prepare("cap-single")
+    opponent_single = result_single[:engine].teams[1]
+    opponent_single.each do |fighter|
+      assert_equal 1, fighter.moves.size, "1 learnable => 1 golpe, sem Struggle indevido"
+      assert_equal "tackle", fighter.moves.first.name
+    end
+
+    empty_api = Class.new(TieredApi) do
+      def learnable_moves(_number)
+        []
+      end
+
+      def move(_name)
+        nil
+      end
+
+      def base_form?(_name)
+        true
+      end
+
+      def generation_for(_name)
+        1
+      end
+
+      def evolution_restricted?(_name)
+        false
+      end
+    end.new
+    service_empty = build_service(empty_api)
+    add_team_for("cap-empty")
+    result_empty = service_empty.prepare("cap-empty")
+    opponent_empty = result_empty[:engine].teams[1]
+    opponent_empty.each do |fighter|
+      assert_equal 1, fighter.moves.size
+      assert_equal "Struggle", fighter.moves.first.name
+      assert_equal 10, fighter.moves.first.power
+    end
+  end
 end
