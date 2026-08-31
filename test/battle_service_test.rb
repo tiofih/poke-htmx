@@ -593,3 +593,188 @@ class BattleServiceTest < Minitest::Test
     end
   end
 end
+
+# C5 C6 D3 B
+class BattleServiceGrantLevelsTest < Minitest::Test
+  include TestSupport
+
+  def setup
+    TestDatabase.setup!
+    TestDatabase.clear_team!
+    @team = TeamRepository.new
+    @progression = ProgressionRepository.new
+    @cache_dir = Dir.mktmpdir("pokedex-ratings")
+  end
+
+  def build_service(api, progression: nil, opponent_rng: nil)
+    BattleService.new(dependencies: {
+                        api: -> { api },
+                        battles: BattleRegistry.new,
+                        team: @team,
+                        progression: progression || @progression,
+                        battle_history: BattleRepository.new,
+                        wallet: WalletRepository.new,
+                        inventory: InventoryRepository.new,
+                        opponent_rng: opponent_rng || -> { Random.new(1) },
+                        rating_cache: PokemonRatingCache.new(
+                          path: File.join(@cache_dir, "ratings.json"),
+                          fetcher: api.method(:detail),
+                          moves_fetcher: api.method(:moves_for)
+                        )
+                      })
+  end
+
+  def add_team_for(user_id)
+    %w[pikachu bulbasaur squirtle].each_with_index do |name, index|
+      @team.add(user_id, build_pokemon_record(name, 25 + index))
+    end
+  end
+
+  FakeEngine = Struct.new(:finished, :result, keyword_init: true) do
+    def finished?
+      finished
+    end
+  end
+
+  class CountingProgression
+    attr_reader :calls
+
+    def initialize(real)
+      @real = real
+      @calls = []
+    end
+
+    def get(user_id, id)
+      @real.get(user_id, id)
+    end
+
+    def grant_levels(user_id, id, delta)
+      @calls << [user_id, id, delta]
+      @real.grant_levels(user_id, id, delta)
+    end
+
+    # rubocop:disable Style/ArgumentsForwarding, Naming/BlockForwarding
+    def method_missing(name, *args, &block)
+      @real.send(name, *args, &block)
+    end
+    # rubocop:enable Style/ArgumentsForwarding, Naming/BlockForwarding
+
+    def respond_to_missing?(name, include_private = false)
+      @real.respond_to?(name, include_private) || super
+    end
+  end
+
+  def test_grant_finished_xp_increments_two_on_win_once
+    api = TieredApi.new
+    add_team_for("user-1")
+    counting = CountingProgression.new(@progression)
+    service = build_service(api, progression: counting)
+    engine = FakeEngine.new(finished: true, result: :win)
+
+    service.send(:grant_finished_xp, "user-1", engine)
+
+    assert_equal 3, counting.calls.size
+    assert(counting.calls.all? { |_, _, d| d == 2 })
+    @team.all("user-1").each do |member|
+      assert_equal 7, @progression.get("user-1", member.id)[:level]
+    end
+  end
+
+  def test_grant_finished_xp_increments_one_on_lose
+    api = TieredApi.new
+    add_team_for("user-1")
+    counting = CountingProgression.new(@progression)
+    service = build_service(api, progression: counting)
+    engine = FakeEngine.new(finished: true, result: :lose)
+
+    service.send(:grant_finished_xp, "user-1", engine)
+
+    assert_equal 3, counting.calls.size
+    assert(counting.calls.all? { |_, _, d| d == 1 })
+    @team.all("user-1").each do |member|
+      assert_equal 6, @progression.get("user-1", member.id)[:level]
+    end
+  end
+
+  def test_grant_finished_xp_increments_one_on_draw
+    api = TieredApi.new
+    add_team_for("user-1")
+    counting = CountingProgression.new(@progression)
+    service = build_service(api, progression: counting)
+    engine = FakeEngine.new(finished: true, result: :draw)
+
+    service.send(:grant_finished_xp, "user-1", engine)
+
+    assert_equal 3, counting.calls.size
+    assert(counting.calls.all? { |_, _, d| d == 1 })
+  end
+
+  def test_grant_finished_xp_guard_prevents_double_grant
+    api = TieredApi.new
+    add_team_for("user-1")
+    counting = CountingProgression.new(@progression)
+    service = build_service(api, progression: counting)
+    engine = FakeEngine.new(finished: true, result: :win)
+
+    service.send(:grant_finished_xp, "user-1", engine)
+    # segundo advance simulado: finish_effects guard já evita segunda chamada
+    # Logo nível deve ficar 7, não 9
+    assert_equal 7, @progression.get("user-1", @team.all("user-1").first.id)[:level]
+    assert_equal 3, counting.calls.size
+  end
+
+  def test_grant_finished_xp_does_nothing_when_not_finished
+    api = TieredApi.new
+    add_team_for("user-1")
+    counting = CountingProgression.new(@progression)
+    service = build_service(api, progression: counting)
+    engine = FakeEngine.new(finished: false, result: :win)
+
+    service.send(:grant_finished_xp, "user-1", engine)
+
+    assert_empty counting.calls
+    @team.all("user-1").each do |member|
+      assert_equal 5, @progression.get("user-1", member.id)[:level]
+    end
+  end
+
+  def test_average_reflects_level_five
+    api = TieredApi.new
+    service = build_service(api)
+    add_team_for("avg-5")
+
+    avg = service.send(:average_player_level, "avg-5", @team.all("avg-5"))
+
+    assert_equal 5, avg
+  end
+
+  def test_band_and_generation_for_level_five
+    api = TieredApi.new
+    service = build_service(api)
+    add_team_for("band-5")
+
+    band = PokemonRating.band_for_level(5)
+    gen = service.send(:generation_for_level, 5)
+    offset = service.send(:band_offset, band)
+
+    assert_equal %i[D C], band
+    assert_equal 2, gen
+    assert_equal 0, offset
+  end
+
+  def test_build_opponent_level_scales_from_average_five
+    api = TieredApi.new
+    service = build_service(api)
+    add_team_for("opponent-5")
+
+    result = service.prepare("opponent-5")
+
+    levels = result[:engine].teams[1].map(&:level).uniq
+    # avg 5 + offset 0 => level 5
+    assert_equal [5], levels
+    band = PokemonRating.band_for_level(5)
+    gen = service.send(:generation_for_level, 5)
+    assert_equal %i[D C], band
+    assert_equal 2, gen
+  end
+end

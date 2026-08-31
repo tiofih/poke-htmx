@@ -571,7 +571,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     play_until_finish(fallback_plays: 300)
 
     after_finish = TestDatabase.progress_row(pokemon_id)["xp"].to_i
-    assert_includes [1020, 1025, 1050], after_finish, "XP concedido uma vez conforme o resultado"
+    assert_includes [1500, 2100], after_finish, "XP concedido uma vez conforme o resultado"
 
     5.times { post "/battle/play", {}, user_session("user-a") }
 

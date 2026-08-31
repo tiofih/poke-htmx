@@ -198,7 +198,7 @@ module BattleServicePreparation
 end
 # rubocop:enable Metrics/ModuleLength
 
-module BattleServiceFinalization
+module BattleServiceFinalization # rubocop:disable Metrics/ModuleLength
   private
 
   def debit_used_items(user_id, engine)
@@ -233,9 +233,13 @@ module BattleServiceFinalization
   end
 
   def grant_finished_xp(user_id, engine)
-    reward = RewardRule.new.xp_for(engine.result)
+    return unless engine.finished? && engine.result
+
+    delta = RewardRule.new.levels_for(engine.result)
+    return if delta.zero?
+
     @team.all(user_id).each do |member|
-      @progression.grant(user_id, member.id, reward)
+      @progression.grant_levels(user_id, member.id, delta)
     end
   end
 
