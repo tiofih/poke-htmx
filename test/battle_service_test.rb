@@ -340,7 +340,7 @@ class BattleServiceTest < Minitest::Test
                  "banda A-S preservada via ratings provider mas limitada pelo orcamento"
   end
 
-  def test_build_opponent_scales_level_to_average_plus_band_offset
+  def test_build_opponent_scales_level_to_average_plus_band_offset # rubocop:disable Metrics/AbcSize
     service = build_service(TieredApi.new)
     add_team_for("user-1")
     downgrade_all_to_one("user-1")
@@ -359,13 +359,16 @@ class BattleServiceTest < Minitest::Test
     assert_equal 2, service.send(:generation_for_level, 3)
     assert_equal 9, service.send(:generation_for_level, 42)
 
-    # nivel medio alto => opponent level escalado aumenta HP
-    # grant xp para subir nivel medio a ~6 (banda C-B offset 1)
-    grant_xp_to("user-1", 2000) # ~ nivel 6
+    # nivel medio alto => opponent level escalado aumenta HP/level
+    # bypass D3 B: grant_levels coerente com RewardRule levels_for, sem recalcular xp
+    @team.all("user-1").each { |member| @progression.grant_levels("user-1", member.id, 5) } # 1 -> 6
+    assert_equal 6, service.send(:average_player_level, "user-1", @team.all("user-1"))
     service_high = build_service(TieredApi.new)
     result_high = service_high.prepare("user-1")
-    assert_operator result_high[:engine].teams[1].first.hp_max, :>, 60,
-                    "level escalado aumenta HP vs base 60"
+    assert_equal [7], result_high[:engine].teams[1].map(&:level).uniq,
+                 "opponent level escala avg 6 + offset C-B(1)=7"
+    assert_operator result_high[:engine].teams[1].first.hp_max, :>, 40,
+                    "level 7 escala HP acima do base fraco 40"
   end
 
   def test_build_opponent_filters_by_player_generation
@@ -717,10 +720,12 @@ class BattleServiceGrantLevelsTest < Minitest::Test
     engine = FakeEngine.new(finished: true, result: :win)
 
     service.send(:grant_finished_xp, "user-1", engine)
-    # segundo advance simulado: finish_effects guard já evita segunda chamada
-    # Logo nível deve ficar 7, não 9
-    assert_equal 7, @progression.get("user-1", @team.all("user-1").first.id)[:level]
-    assert_equal 3, counting.calls.size
+    service.send(:grant_finished_xp, "user-1", engine)
+    # guard interno (@granted_xp_engines) + externo finish_effects (advance:397)
+    # garante 1x por :finished mesmo se chamado 2x isolado
+    assert_equal 7, @progression.get("user-1", @team.all("user-1").first.id)[:level],
+                 "segunda chamada nao duplica win +2 (7 nao 9)"
+    assert_equal 3, counting.calls.size, "apenas 3 grant_levels na primeira chamada"
   end
 
   def test_grant_finished_xp_does_nothing_when_not_finished

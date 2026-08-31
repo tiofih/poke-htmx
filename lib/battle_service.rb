@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "set" # rubocop:disable Lint/RedundantRequireStatement
 require_relative "battle_engine"
 require_relative "battle_registry"
 require_relative "battle_repository"
@@ -234,10 +235,12 @@ module BattleServiceFinalization # rubocop:disable Metrics/ModuleLength
 
   def grant_finished_xp(user_id, engine)
     return unless engine.finished? && engine.result
+    return if @granted_xp_engines.include?(engine.object_id)
 
     delta = RewardRule.new.levels_for(engine.result)
     return if delta.zero?
 
+    @granted_xp_engines.add(engine.object_id)
     @team.all(user_id).each do |member|
       @progression.grant_levels(user_id, member.id, delta)
     end
@@ -366,6 +369,7 @@ class BattleService
     @inventory = dependencies[:inventory]
     @opponent_rng = dependencies[:opponent_rng] || -> { Random.new }
     @rating_cache = dependencies[:rating_cache] || default_rating_cache
+    @granted_xp_engines = Set.new
   end
 
   def prepare(user_id)
