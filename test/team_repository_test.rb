@@ -345,8 +345,21 @@ class TeamProgressTest < Minitest::Test
     progress = TestDatabase.progress_row(pokemon_id)
 
     refute_nil progress, "esperava linha de progresso apos a montagem"
-    assert_equal 1, progress["level"].to_i
-    assert_equal 0, progress["xp"].to_i
+    assert_equal 5, progress["level"].to_i
+    assert_equal 1000, progress["xp"].to_i
+  end
+
+  # C1 D2 A
+  def test_add_creates_progress_at_level_five
+    @repository.add("user-a", build_pokemon_record("pikachu", 25))
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    progression = ProgressionRepository.new
+    result = progression.get("user-a", pokemon_id)
+
+    assert_equal 5, result[:level]
+    assert_equal 1000, result[:xp]
+    assert_equal 5, ExperienceCurve.level_for_xp(1000)
+    assert_equal 5, ExperienceCurve.level_for_xp(result[:xp])
   end
 
   def test_remove_deletes_progress_row_via_cascade
@@ -390,7 +403,7 @@ class TeamEvolveTest < Minitest::Test
     assert_equal 1, rows.first.slot, "slot intacto"
     assert_equal %w[thunder-shock], rows.first.moves, "moves intactos"
     refute_nil TestDatabase.progress_row(pikachu_id), "progresso intacto"
-    assert_equal 1, TestDatabase.progress_row(pikachu_id)["level"].to_i
+    assert_equal 5, TestDatabase.progress_row(pikachu_id)["level"].to_i
   end
 
   def test_evolve_returns_false_for_member_of_other_user

@@ -216,7 +216,7 @@ class TeamRepository # rubocop:disable Metrics/ClassLength
 
   def create_progress(team_pokemon_id)
     connection.exec_params(
-      "INSERT INTO team_pokemon_progress (team_pokemon_id, level, xp) VALUES ($1, 1, 0)",
+      "INSERT INTO team_pokemon_progress (team_pokemon_id, level, xp) VALUES ($1, 5, 1000)",
       [team_pokemon_id]
     )
   end

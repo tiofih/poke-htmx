@@ -12,10 +12,10 @@ class ExperienceCurve
       level
     end
 
-    private
-
     def cumulative_xp_for(level)
       level * (level + 1) * 100 / 2
     end
+
+    private # rubocop:disable Lint/UselessAccessModifier
   end
 end

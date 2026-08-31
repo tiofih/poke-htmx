@@ -165,6 +165,17 @@ class BattleServiceTest < Minitest::Test
     end
   end
 
+  def downgrade_all_to_one(user_id)
+    @team.all(user_id).each do |member|
+      TestDatabase.with_db do |connection|
+        connection.exec_params(
+          "UPDATE team_pokemon_progress SET level = 1, xp = 0 WHERE team_pokemon_id = $1",
+          [member.id]
+        )
+      end
+    end
+  end
+
   def counting_api
     SlowCountingApi.new(
       "pikachu" => 25, "bulbasaur" => 1, "squirtle" => 7, "charmander" => 4,
@@ -290,6 +301,7 @@ class BattleServiceTest < Minitest::Test
   def test_build_opponent_prioritizes_weak_band_for_low_level_player
     service = build_service(TieredApi.new)
     add_team_for("user-1")
+    downgrade_all_to_one("user-1")
 
     result = service.prepare("user-1")
 
@@ -331,6 +343,7 @@ class BattleServiceTest < Minitest::Test
   def test_build_opponent_scales_level_to_average_plus_band_offset
     service = build_service(TieredApi.new)
     add_team_for("user-1")
+    downgrade_all_to_one("user-1")
     # nivel 1 => banda F-D offset 0 => level 1
     result = service.prepare("user-1")
     levels = result[:engine].teams[1].map(&:level)
@@ -373,7 +386,8 @@ class BattleServiceTest < Minitest::Test
       end
     end.new
     service = build_service(gen_api)
-    add_team_for("user-1") # nivel 1 => player_gen 1 => so gen <=1
+    add_team_for("user-1")
+    downgrade_all_to_one("user-1") # nivel 1 => player_gen 1 => so gen <=1
     result = service.prepare("user-1")
     opponent_names = result[:engine].teams[1].map(&:name)
     # gen 8/9 devem ser filtrados quando player_gen 1
@@ -464,6 +478,7 @@ class BattleServiceTest < Minitest::Test
     end.new
     service = build_service(parity_api)
     add_team_for("parity-1")
+    downgrade_all_to_one("parity-1")
     grant_xp_to("parity-1", 100) # nivel 2 => opponent level 2 (banda F-D offset 0)
     result = service.prepare("parity-1")
     opponent = result[:engine].teams[1]

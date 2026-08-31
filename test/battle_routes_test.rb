@@ -114,7 +114,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_includes last_response.body, "Seu Time"
     assert_includes last_response.body, "Oponente"
     assert_includes last_response.body, "pikachu"
-    assert_includes last_response.body, "200/200"
+    assert_includes last_response.body, "202/202"
     assert_includes last_response.body, 'hx-target="#battle-view"'
   end
 
@@ -132,17 +132,17 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_hp_bar_width_reflects_hp_share
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
-    @progression.update_hp("user-a", pokemon_id, 200, 50)
+    @progression.update_hp("user-a", pokemon_id, 202, 50)
 
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, "HP 50/200",
+    assert_includes last_response.body, "HP 50/202",
                     "texto de HP preservado"
     assert_includes last_response.body, 'style="width: 25%"',
-                    "barra de HP com 25% para 50/200"
+                    "barra de HP com ~25% para 50/202"
   end
 
   def test_battle_panels_render_pp_bars_per_move
@@ -539,8 +539,8 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, "Nível 1"
-    assert_includes last_response.body, "200/200", "nível 1 não escala stats"
+    assert_includes last_response.body, "Nível 5"
+    assert_includes last_response.body, "202/202", "nível 5 escala stats"
   end
 
   def test_battle_uses_persisted_member_level_for_player_and_opponent
@@ -552,8 +552,8 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, "Nível 4"
-    assert_includes last_response.body, "202/202", "HP 200 escala para 202 no nível 4"
+    assert_includes last_response.body, "Nível 6"
+    assert_includes last_response.body, "203/203", "HP 202 escala para 203 no nível 6"
   end
 
   def test_battle_play_shows_xp_gained_message_at_finish
@@ -571,7 +571,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     play_until_finish(fallback_plays: 300)
 
     after_finish = TestDatabase.progress_row(pokemon_id)["xp"].to_i
-    assert_includes [20, 25, 50], after_finish, "XP concedido uma vez conforme o resultado"
+    assert_includes [1020, 1025, 1050], after_finish, "XP concedido uma vez conforme o resultado"
 
     5.times { post "/battle/play", {}, user_session("user-a") }
 
@@ -785,14 +785,14 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_new_battle_starts_with_persisted_hp
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
-    @progression.update_hp("user-a", pokemon_id, 200, 50)
+    @progression.update_hp("user-a", pokemon_id, 202, 50)
 
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, "HP 50/200",
+    assert_includes last_response.body, "HP 50/202",
                     "time danificado entra no próximo confronto com o HP persistido"
   end
 
@@ -802,7 +802,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, "HP 200/200",
+    assert_includes last_response.body, "HP 202/202",
                     "membro que nunca batalhou entra com HP cheio"
   end
 end

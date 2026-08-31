@@ -41,6 +41,13 @@ class ServerTeamManageTest < Minitest::Test
 
   def test_team_manage_gates_available_moves_by_member_level
     @repository.add("user-a", pikachu_pokemon)
+    pikachu_id = @repository.all("user-a").first.id
+    TestDatabase.with_db do |connection|
+      connection.exec_params(
+        "UPDATE team_pokemon_progress SET level = 1, xp = 0 WHERE team_pokemon_id = $1",
+        [pikachu_id]
+      )
+    end
 
     PokeApiStub.with_learnable_moves(
       [{ level: 1, name: "growl" },
@@ -59,6 +66,12 @@ class ServerTeamManageTest < Minitest::Test
   def test_team_manage_higher_level_member_sees_more_learnable_moves
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
+    TestDatabase.with_db do |connection|
+      connection.exec_params(
+        "UPDATE team_pokemon_progress SET level = 1, xp = 0 WHERE team_pokemon_id = $1",
+        [pikachu_id]
+      )
+    end
     @progression.grant("user-a", pikachu_id, 1200)
 
     PokeApiStub.with_learnable_moves(
@@ -288,6 +301,12 @@ class ServerTeamManageTest < Minitest::Test
   def test_post_team_moves_with_move_above_member_level_shows_notice_and_does_not_save
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
+    TestDatabase.with_db do |connection|
+      connection.exec_params(
+        "UPDATE team_pokemon_progress SET level = 1, xp = 0 WHERE team_pokemon_id = $1",
+        [pikachu_id]
+      )
+    end
 
     PokeApiStub.with_learnable_moves(
       [{ level: 1, name: "growl" }, { level: 5, name: "quick-attack" }]
@@ -303,6 +322,12 @@ class ServerTeamManageTest < Minitest::Test
   def test_post_team_moves_at_member_level_saves
     @repository.add("user-a", pikachu_pokemon)
     pikachu_id = @repository.all("user-a").first.id
+    TestDatabase.with_db do |connection|
+      connection.exec_params(
+        "UPDATE team_pokemon_progress SET level = 1, xp = 0 WHERE team_pokemon_id = $1",
+        [pikachu_id]
+      )
+    end
     @progression.grant("user-a", pikachu_id, 1200)
 
     PokeApiStub.with_learnable_moves(
