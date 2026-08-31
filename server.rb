@@ -713,6 +713,86 @@ module ServerTeamHeldActions
   end
 end
 
+module ServerTeamEvolutionActions
+  private
+
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+  def use_stone
+    member = team_member_by_id(params[:id])
+    return member_not_found_notice unless member
+    return fainted_evolution_notice(member) if member.fainted?
+
+    stone = params[:item_name].to_s
+    return stone_required_notice unless stone_item?(stone)
+    return stone_not_owned_notice(stone) unless settings.inventory.count(current_user, stone).positive?
+
+    stage = stone_stage_for(member, stone)
+    return no_stone_stage_notice(member, stone) unless stage
+
+    target = settings.api.find(stage[:name]) || settings.api.detail(stage[:name])
+    return no_stone_stage_notice(member, stone) unless target
+
+    return target_already_in_team_notice(member) unless settings.team.evolve(current_user, member.id, target)
+
+    settings.inventory.use(current_user, stone, 1)
+    @notice = "#{member.name} evoluiu para #{target.name}!"
+    @notice_kind = :success
+    render_team_fragment_with_notice
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+
+  def team_member_by_id(member_id)
+    settings.team.all(current_user).find { |poke| poke.id.to_s == member_id.to_s }
+  end
+
+  def stone_item?(name)
+    item = ItemCatalog.find(name)
+    item && item.category == "stone"
+  end
+
+  def stone_stage_for(member, stone)
+    settings.api.stone_evolutions(member.number).find { |stage| stage[:item] == stone }
+  end
+
+  def member_not_found_notice
+    @notice = "Membro não encontrado."
+    @notice_kind = :error
+    render_team_fragment_with_notice
+  end
+
+  def fainted_evolution_notice(member)
+    @notice = "#{member.name} está derrotado e não pode evoluir agora."
+    @notice_kind = :error
+    render_team_fragment_with_notice
+  end
+
+  def stone_required_notice
+    @notice = "Escolha uma pedra de evolução para usar."
+    @notice_kind = :error
+    render_team_fragment_with_notice
+  end
+
+  def stone_not_owned_notice(stone)
+    item = ItemCatalog.find(stone)
+    @notice = "Você não tem #{item&.display_name || stone} no inventário."
+    @notice_kind = :error
+    render_team_fragment_with_notice
+  end
+
+  def no_stone_stage_notice(member, stone)
+    item = ItemCatalog.find(stone)
+    @notice = "#{item&.display_name || stone} não evolui #{member.name}."
+    @notice_kind = :error
+    render_team_fragment_with_notice
+  end
+
+  def target_already_in_team_notice(member)
+    @notice = "A evolução de #{member.name} já está no seu time."
+    @notice_kind = :error
+    render_team_fragment_with_notice
+  end
+end
+
 module ServerJourneyActions
   private
 
@@ -909,6 +989,7 @@ module TeamRoutes
     register_save_moves(app)
     register_save_item(app)
     register_save_held_item(app)
+    register_use_stone(app)
   end
 
   def self.register_team(app)
@@ -945,6 +1026,10 @@ module TeamRoutes
 
   def self.register_save_held_item(app)
     app.post("/team/:id/held-item") { save_team_held_item }
+  end
+
+  def self.register_use_stone(app)
+    app.post("/team/:id/evolve") { use_stone }
   end
 end
 
@@ -1118,6 +1203,7 @@ class Server < Sinatra::Base
   include ServerTeamActions
   include ServerTeamItemActions
   include ServerTeamHeldActions
+  include ServerTeamEvolutionActions
   include ServerJourneyActions
   include ServerBattleActions
   include ServerHistoryActions
