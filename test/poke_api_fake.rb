@@ -6,14 +6,15 @@ class PokeApiFake
   # rubocop:disable Metrics/ParameterLists
   def initialize(find: nil, detail: nil, fetch_all_names: nil,
                  moves_for: nil, move: nil, available_move_names: nil, type_relations: nil,
-                 next_evolutions: nil, learnable_moves: nil, base_form: nil,
+                 next_evolutions: nil, stone_evolutions: nil, learnable_moves: nil, base_form: nil,
                  evolution_restricted: nil, generation_for: nil, pokemon_names_by_type: nil)
     # rubocop:enable Metrics/ParameterLists
     @config = {
       find: find, detail: detail, fetch_all_names: fetch_all_names,
       moves_for: moves_for, move: move,
       available_move_names: available_move_names, type_relations: type_relations,
-      next_evolutions: next_evolutions, learnable_moves: learnable_moves,
+      next_evolutions: next_evolutions, stone_evolutions: stone_evolutions,
+      learnable_moves: learnable_moves,
       base_form: base_form, evolution_restricted: evolution_restricted,
       generation_for: generation_for, pokemon_names_by_type: pokemon_names_by_type
     }.freeze
@@ -25,6 +26,7 @@ class PokeApiFake
     @available_move_names = available_move_names
     @type_relations = type_relations
     @next_evolutions = next_evolutions
+    @stone_evolutions = stone_evolutions
     @learnable_moves = learnable_moves
     @base_form = base_form
     @evolution_restricted = evolution_restricted
@@ -62,6 +64,10 @@ class PokeApiFake
 
   def next_evolutions(_number)
     @next_evolutions
+  end
+
+  def stone_evolutions(_number)
+    @stone_evolutions
   end
 
   def learnable_moves(_number)

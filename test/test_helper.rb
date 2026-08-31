@@ -280,6 +280,10 @@ module PokeApiStub
     with_gateway(next_evolutions: data, &)
   end
 
+  def self.with_stone_evolutions(data, &)
+    with_gateway(stone_evolutions: data, &)
+  end
+
   def self.with_learnable_moves(data, &)
     with_gateway(learnable_moves: data, &)
   end

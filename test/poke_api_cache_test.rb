@@ -6,7 +6,8 @@ require_relative "../lib/gateways/poke_api_cache"
 class CountingApi
   attr_reader :detail_calls, :find_calls, :fetch_all_names_calls,
               :move_calls, :moves_for_calls, :type_relations_calls,
-              :available_move_names_calls, :next_evolutions_calls, :learnable_moves_calls
+              :available_move_names_calls, :next_evolutions_calls, :stone_evolutions_calls,
+              :learnable_moves_calls
 
   def initialize
     @detail_calls = 0
@@ -17,6 +18,7 @@ class CountingApi
     @type_relations_calls = 0
     @available_move_names_calls = 0
     @next_evolutions_calls = 0
+    @stone_evolutions_calls = 0
     @learnable_moves_calls = 0
   end
 
@@ -64,6 +66,11 @@ class CountingApi
   def next_evolutions(_number)
     @next_evolutions_calls += 1
     [{ number: 5, name: "charmeleon", min_level: 16 }]
+  end
+
+  def stone_evolutions(_number)
+    @stone_evolutions_calls += 1
+    [{ number: 134, name: "vaporeon", item: "water-stone" }]
   end
 
   def learnable_moves(_number)
@@ -312,6 +319,20 @@ class PokeApiCacheTest < Minitest::Test
 
     assert_same first, second
     assert_equal 1, @inner.next_evolutions_calls
+  end
+
+  def test_stone_evolutions_is_delegated_via_interface
+    @cache.stone_evolutions(133)
+
+    assert_equal 1, @inner.stone_evolutions_calls
+  end
+
+  def test_stone_evolutions_is_cached_by_number
+    first = @cache.stone_evolutions(133)
+    second = @cache.stone_evolutions(133)
+
+    assert_same first, second
+    assert_equal 1, @inner.stone_evolutions_calls
   end
 
   def test_learnable_moves_is_delegated_via_interface

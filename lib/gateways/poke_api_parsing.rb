@@ -55,6 +55,31 @@ module PokeApiParsing
     []
   end
 
+  # Estágios seguintes acionados por item (pedra de evolução) — trigger
+  # "use-item" — com o nome do item capturado de evolution_details. Falha de
+  # rede/parsing -> [] (modal graceful).
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+  def stone_evolutions(number)
+    data = pokemon_data(number)
+    return [] unless data
+
+    species_url = data.dig("species", "url")
+    return [] unless species_url
+
+    chain = fetch_chain_data(species_url)
+    return [] unless chain
+
+    stages = find_current_species_next_stages(chain, data["name"])
+    stages.select { |s| s[:trigger] == "use-item" && s[:item] }
+          .filter_map do |s|
+      pokemon = find(s[:name])
+      pokemon&.number ? { number: pokemon.number, name: s[:name], item: s[:item] } : nil
+    end
+  rescue Faraday::Error, JSON::ParserError
+    []
+  end
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+
   def base_form?(name)
     data = pokemon_data(name)
     return false unless data
@@ -165,7 +190,12 @@ module PokeApiParsing
 
   def stage_details(stage)
     details = stage["evolution_details"].first || {}
-    { name: stage["species"]["name"], trigger: details.dig("trigger", "name"), min_level: details["min_level"] }
+    {
+      name: stage["species"]["name"],
+      trigger: details.dig("trigger", "name"),
+      min_level: details["min_level"],
+      item: details.dig("item", "name")
+    }
   end
 end
 # rubocop:enable Metrics/ModuleLength

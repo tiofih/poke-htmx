@@ -169,6 +169,77 @@ class PokeApiHttpTest < Minitest::Test
     Faraday.define_singleton_method(:get, @original_faraday)
   end
 
+  def test_stone_evolutions_returns_use_item_stages
+    setup_next_evolutions_stubs(
+      pokemon_data: { "species" => { "url" => "https://pokeapi.co/api/v2/pokemon-species/133/" }, "name" => "eevee" },
+      chain_json: {
+        "evolution_chain" => { "url" => "https://pokeapi.co/api/v2/evolution-chain/67/" },
+        "chain" => {
+          "species" => { "name" => "eevee" },
+          "evolves_to" => [
+            { "species" => { "name" => "vaporeon" },
+              "evolution_details" => [{ "trigger" => { "name" => "use-item" },
+                                        "item" => { "name" => "water-stone" } }],
+              "evolves_to" => [] },
+            { "species" => { "name" => "flareon" },
+              "evolution_details" => [{ "trigger" => { "name" => "use-item" },
+                                        "item" => { "name" => "fire-stone" } }],
+              "evolves_to" => [] }
+          ]
+        }
+      },
+      find_map: { "vaporeon" => 134, "flareon" => 136 }
+    )
+
+    result = @api.stone_evolutions(133)
+
+    assert_equal 2, result.size
+    assert_equal 134, result.first[:number]
+    assert_equal "vaporeon", result.first[:name]
+    assert_equal "water-stone", result.first[:item]
+  end
+
+  def test_stone_evolutions_ignores_level_up_stages
+    setup_next_evolutions_stubs(
+      pokemon_data: { "species" => { "url" => "https://pokeapi.co/api/v2/pokemon-species/133/" }, "name" => "eevee" },
+      chain_json: {
+        "evolution_chain" => { "url" => "https://pokeapi.co/api/v2/evolution-chain/67/" },
+        "chain" => {
+          "species" => { "name" => "eevee" },
+          "evolves_to" => [
+            { "species" => { "name" => "vaporeon" },
+              "evolution_details" => [{ "trigger" => { "name" => "use-item" },
+                                        "item" => { "name" => "water-stone" } }],
+              "evolves_to" => [] },
+            { "species" => { "name" => "umbreon" },
+              "evolution_details" => [{ "trigger" => { "name" => "level-up" }, "min_level" => 20 }],
+              "evolves_to" => [] }
+          ]
+        }
+      },
+      find_map: { "vaporeon" => 134, "umbreon" => 197 }
+    )
+
+    result = @api.stone_evolutions(133)
+
+    assert_equal 1, result.size
+    assert_equal "vaporeon", result.first[:name]
+  end
+
+  def test_stone_evolutions_empty_on_network_error
+    @api.define_singleton_method(:pokemon_data) do |_number|
+      { "species" => { "url" => "https://pokeapi.co/api/v2/pokemon-species/133/" }, "name" => "eevee" }
+    end
+    @original_faraday = Faraday.method(:get)
+    Faraday.define_singleton_method(:get) { |_url| raise Faraday::ConnectionFailed, "timeout" }
+
+    result = @api.stone_evolutions(133)
+
+    assert_equal [], result
+  ensure
+    Faraday.define_singleton_method(:get, @original_faraday)
+  end
+
   def test_learnable_moves_returns_level_up_moves_with_min_level_per_move
     @api.define_singleton_method(:pokemon_data) do |_number|
       {

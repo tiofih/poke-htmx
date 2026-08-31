@@ -20,6 +20,7 @@ class PokeApiFakeTest < Minitest::Test
       assert_respond_to adapter, :available_move_names
       assert_respond_to adapter, :type_relations
       assert_respond_to adapter, :next_evolutions
+      assert_respond_to adapter, :stone_evolutions
       assert_respond_to adapter, :learnable_moves
       assert_respond_to adapter, :base_form?
       assert_respond_to adapter, :evolution_restricted?
@@ -82,6 +83,13 @@ class PokeApiFakeTest < Minitest::Test
     fake = PokeApiFake.new(next_evolutions: data)
 
     assert_equal data, fake.next_evolutions(4)
+  end
+
+  def test_stone_evolutions_returns_configured_data
+    data = [{ number: 134, name: "vaporeon", item: "water-stone" }]
+    fake = PokeApiFake.new(stone_evolutions: data)
+
+    assert_equal data, fake.stone_evolutions(133)
   end
 
   def test_learnable_moves_returns_configured_data
