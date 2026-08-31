@@ -149,3 +149,12 @@ Entregar as **pedras de evolução** como itens compráveis no Poke Mart (catál
 - `EvolutionOperations#evolve` (`lib/team_repository.rb:85-94`) retorna `false` em `PG::UniqueViolation` (alvo já no time) — o caminho manual deve tratar o mesmo caso (C9) sem estourar.
 - Reuso de `fainted?`/`alive?` (0064, `test/team_service_test.rb`) para o gate D10 — padrão já testado de bloqueio com notice sem efeito colateral.
 - `shuffle(random:)` com `Random.new(seed)` é determinístico por seed — `hash(user_id)` é estável dentro do processo Ruby; combinar com `battle_count` para variar por rodada.
+
+### Gotchas da implementação (fase 2, 2026-08-31)
+
+- **`String#hash` é randomizado por processo no Ruby** — `seed = hash(user_id) + battle_count` é estável **dentro** do processo, mas **muda entre processos/reinícios**. Testes de rota que dependem da rotação real devem calcular em runtime (`StoneRotation.new("user-a", 0).stones` — mesmo processo que o servidor sob Rack::Test), **nunca** hardcodar pedras ofertadas.
+- **MT19937 com seeds consecutivos colide** — `Random.new(n)` e `Random.new(n+1)` podem gerar a **mesma** rotação (ex.: bc=6 e bc=7 colidem para "user-123"). O teste "muda ao avançar" precisa de counts verificados (bc=0 vs bc=1 para "user-1" diferem; conferir antes de trocar de user).
+- **`Style/Sample` (RuboCop) força `sample(3, random:)`** no lugar de `shuffle.first(3)` — ambos determinísticos por seed, mas produzem rotações diferentes; o teste não deve acoplar a ordem específica.
+- **`battles` é truncada no setup de cada teste** (`TestDatabase.clear_team!` TRUNCATE inclui `battles`) — battle_count = 0 determinístico nos testes de rota do mart.
+- **`./scripts/test` com pipe aborta de forma intermitente** (o consumer `tail`/`grep` fecha o pipe cedo e o `pipefail` do script reporta falha) — rodar com redirecionamento `> /tmp/x.txt` é estável.
+- **Modal re-renderizado via `hx-target="#evolution-modal" hx-swap="outerHTML"`** (POST evolve e close) — o close responde `""` e o outerHTML remove o overlay; validar visualmente na fase 3 (C13).
