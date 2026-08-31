@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-29 (D1 A, D2 A, D3 B, D4-D6 A, D7-D9 A) |
-| Implementação | Pendente — aguardando fase 2 (TDD) |
-| Validação | Pendente — parar ao fim da fase 2 e aguardar validação do usuário (fase 3) |
+| Implementação | **Concluída** — 3 passos + ajuste revisor, suíte 959/3697 lint 0, revisor **Aprovado** round 2/3 — commits `7c3135e/1943232/0bc0b42/80c83fb` |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-31 (S2 por critério ok, sem S3) |
 
 ---
 
@@ -54,12 +54,12 @@ Time inicial passa a nascer no **nível 5 com xp 1000** (`cumulative_xp_for(4)=1
 
 ### Resultado
 
-- [ ] **C1 add cria progress level 5 xp 1000 com invariante (D2 A):** `TeamRepository#add` insere `team_pokemon_progress level=5 xp=1000` e `ExperienceCurve.level_for_xp(1000)==5` (`cumulative_xp_for(4)=1000`). — prova: `test/team_repository_test.rb` `test_add_creates_progress_at_level_five`.
-- [ ] **C2 existentes não migrados (sem UPDATE retroativo):** membros criados antes de 0067 com `level 1 xp 0` permanecem `1/0` após novo `add`; sem migração `db/migrations`. — prova: `test/progression_repository_test.rb` `test_existing_progress_not_migrated`.
-- [ ] **C3 RewardRule levels_for + money_for preservado (D3 B):** `RewardRule#levels_for(:win)==2`, `:lose==1`, `:draw==1`, else `0`; `money_for` segue 100/50/40. — prova: `test/reward_rule_test.rb` `test_levels_for_win_is_two` + `test_levels_for_lose_is_one` + `test_levels_for_draw_is_one`.
-- [ ] **C4 grant_levels incrementa level direto (bypass, sem recalcular level_for_xp):** `ProgressionRepository#grant_levels(user_id, id, delta)` faz `level += delta` direto (`5+2→7`, `5+1→6`) e `xp` consistente para display; `grant(user_id,id,amount)` legado não usado pela batalha. — prova: `test/progression_repository_test.rb` `test_grant_levels_increments_level_directly`.
-- [ ] **C5 grant_finished_xp 1× por :finished com guard (D3 B):** `BattleService#grant_finished_xp` chama `grant_levels` **uma única vez** por batalha `:finished` (`win +2 / lose +1 / draw +1`); 2ª chamada não duplica; sem `:finished` não concede. — prova: `test/battle_service_test.rb` `test_grant_finished_xp_increments_two_on_win_once` + `test_grant_finished_xp_guard_prevents_double_grant`.
-- [ ] **C6 average/banda/gen escalam de 5 (D3 B efeito em oponente):** `average_player_level` com time nível 5 → `5`; `band_for_level(5)` + `generation_for_level(5)==2` + `opponent level = avg + band_offset(band)` refletem nível 5 sem mocks adicionais. — prova: `test/battle_service_test.rb` `test_average_reflects_level_five` + `test_build_opponent_level_scales_from_average_five`.
+- [x] **C1 add cria progress level 5 xp 1000 com invariante (D2 A):** `TeamRepository#add` insere `team_pokemon_progress level=5 xp=1000` e `ExperienceCurve.level_for_xp(1000)==5` (`cumulative_xp_for(4)=1000`). — prova: `test/team_repository_test.rb` `test_add_creates_progress_at_level_five`.
+- [x] **C2 existentes não migrados (sem UPDATE retroativo):** membros criados antes de 0067 com `level 1 xp 0` permanecem `1/0` após novo `add`; sem migração `db/migrations`. — prova: `test/progression_repository_test.rb` `test_existing_progress_not_migrated`.
+- [x] **C3 RewardRule levels_for + money_for preservado (D3 B):** `RewardRule#levels_for(:win)==2`, `:lose==1`, `:draw==1`, else `0`; `money_for` segue 100/50/40. — prova: `test/reward_rule_test.rb` `test_levels_for_win_is_two` + `test_levels_for_lose_is_one` + `test_levels_for_draw_is_one`.
+- [x] **C4 grant_levels incrementa level direto (bypass, sem recalcular level_for_xp):** `ProgressionRepository#grant_levels(user_id, id, delta)` faz `level += delta` direto (`5+2→7`, `5+1→6`) e `xp` consistente para display; `grant(user_id,id,amount)` legado não usado pela batalha. — prova: `test/progression_repository_test.rb` `test_grant_levels_increments_level_directly`.
+- [x] **C5 grant_finished_xp 1× por :finished com guard (D3 B):** `BattleService#grant_finished_xp` chama `grant_levels` **uma única vez** por batalha `:finished` (`win +2 / lose +1 / draw +1`); 2ª chamada não duplica; sem `:finished` não concede. — prova: `test/battle_service_test.rb` `test_grant_finished_xp_increments_two_on_win_once` + `test_grant_finished_xp_guard_prevents_double_grant`.
+- [x] **C6 average/banda/gen escalam de 5 (D3 B efeito em oponente):** `average_player_level` com time nível 5 → `5`; `band_for_level(5)` + `generation_for_level(5)==2` + `opponent level = avg + band_offset(band)` refletem nível 5 sem mocks adicionais. — prova: `test/battle_service_test.rb` `test_average_reflects_level_five` + `test_build_opponent_level_scales_from_average_five`.
 
 ### Garantias — teste que prova (S1)
 
@@ -75,9 +75,9 @@ Time inicial passa a nascer no **nível 5 com xp 1000** (`cumulative_xp_for(4)=1
 | G2 (sem migração) | `git diff -- db/` vazio + `grep -rn "UPDATE team_pokemon_progress" lib/team_repository.rb` só `create_progress` 5/1000 | — |
 | G3 (S4/S5) | `./scripts/check_docs` + `./scripts/checar-sessao 0067` + `SESSIONS.md` atualizado no refinamento | — |
 
-- [ ] **G1:** suíte completa verde com baseline **934/3636** preservada + novos testes (C1–C6) e lint 0 em todo green; commit obrigatório por passo; 0 regressão fora do escopo (batalha/0066/TeamBudget seguem verdes via fakes).
-- [ ] **G2:** sem `db/migrations` nova / sem `UPDATE` retroativo nos existentes / sem gems novas / sem rede em testes além de stubs; `HealService`/`JourneyService`/`OpponentGenerator` sem mudança; `TeamBudget S_rest 110` intacto.
-- [ ] **G3:** `SESSIONS.md` atualizado no commit do refinamento (S4) — tabela + "Próxima sessão" — e `REQUIREMENTS.md` se tocar doc; status de validação só após usuário validar (fase 3 — parar na fase 2 e aguardar).
+- [x] **G1:** suíte completa verde com baseline **934/3636** preservada + novos testes (C1–C6) e lint 0 em todo green; commit obrigatório por passo; 0 regressão fora do escopo (batalha/0066/TeamBudget seguem verdes via fakes).
+- [x] **G2:** sem `db/migrations` nova / sem `UPDATE` retroativo nos existentes / sem gems novas / sem rede em testes além de stubs; `HealService`/`JourneyService`/`OpponentGenerator` sem mudança; `TeamBudget S_rest 110` intacto.
+- [x] **G3:** `SESSIONS.md` atualizado no commit do refinamento (S4) — tabela + "Próxima sessão" — e `REQUIREMENTS.md` se tocar doc; status de validação só após usuário validar (fase 3 — parar na fase 2 e aguardar).
 
 > **S1:** cada critério acima aponta o teste que o prova. Sem teste → `manual` explícito + evidência esperada. Baseline suíte 934/3636 de 0066.
 > **Parar ao fim da fase 2 e aguardar validação do usuário (fase 3) — não marcar Done, não preencher a seção 7, não commitar conclusão.**
@@ -112,21 +112,21 @@ Time inicial passa a nascer no **nível 5 com xp 1000** (`cumulative_xp_for(4)=1
 
 > **Grafo obrigatório (tier Scout, generation 2026-08-29T21:16:44Z, full, 5196 nodes):** `search_graph query="TeamRepository add" limit 10` → `TeamRepository.add lib/team_repository.rb:171-179` + `create_progress 217-222`; `search_graph query="ExperienceCurve level_for_xp" limit 10` → `ExperienceCurve.level_for_xp lib/experience_curve.rb:9-13`, `cumulative_xp_for:17-19`; `search_graph query="RewardRule xp_for money_for" limit 10` → `RewardRule.xp_for lib/reward_rule.rb:17`, `money_for:21`; `search_graph query="ProgressionRepository grant" limit 10` → `ProgressionRepository.grant lib/progression_repository.rb:31`, `get:14`, `progress_row:47`; `search_graph query="BattleService grant_finished_xp average_player_level" limit 10` → `BattleService.grant_finished_xp lib/battle_service.rb:235`, `average_player_level:158`, `band_for_level`, `generation_for_level:142`; `check_index_coverage` em `lib/team_repository.rb/lib/experience_curve.rb/lib/reward_rule.rb/lib/progression_repository.rb/lib/battle_service.rb` → `no_recorded_issue` `metadata_match` `indexed_at 2026-08-29T21:16:44Z`.
 
-## 7. Validação (executada pelo usuário — S2)
+## 7. Validação (executada pelo usuário — S2 — 2026-08-31)
 
-> **PARAR ao fim da fase 2 e aguardar validação do usuário (fase 3) — não marcar Done, não preencher esta seção, não commitar conclusão.**
+> Validada pelo usuário em 2026-08-31 — S2 por critério ok, sem S3. Fase 3 concluída.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado |
 | --- | --- | --- | --- |
-| C1 add cria progress level 5 xp 1000 | `test/team_repository_test.rb` `test_add_creates_progress_at_level_five` | — | — |
-| C2 existentes não migrados | `test/progression_repository_test.rb` `test_existing_progress_not_migrated` | — | — |
-| C3 RewardRule levels_for win2/lose1/draw1 | `test/reward_rule_test.rb` `test_levels_for_*` | — | — |
-| C4 grant_levels incrementa direto | `test/progression_repository_test.rb` `test_grant_levels_increments_level_directly` | — | — |
-| C5 grant_finished_xp 1× guard | `test/battle_service_test.rb` `test_grant_finished_xp_*` | — | — |
-| C6 average/banda/gen refletem 5 | `test/battle_service_test.rb` `test_average_reflects_level_five` + `test_build_opponent_level_scales_from_average_five` | — | — |
-| G1 suíte+lint | `./scripts/test` 934/3636 + `./scripts/lint` 0 por green | — | — |
-| G2 sem migração | `git diff -- db/` vazio + `grep -rn UPDATE lib/team_repository.rb` só create 5/1000 | — | — |
-| G3 S4/S5 | `./scripts/check_docs` ok + `./scripts/checar-sessao 0067` ok + `SESSIONS.md` atualizado | — | — |
+| C1 add cria progress level 5 xp 1000 | `test/team_repository_test.rb` `test_add_creates_progress_at_level_five` — `progression.get=={level:5,xp:1000}` + `level_for_xp(1000)==5` | — | ok |
+| C2 existentes não migrados | `test/progression_repository_test.rb` `test_existing_progress_not_migrated` — seed 1/0 permanece após novo add, sem `db/migrations` | — | ok |
+| C3 RewardRule levels_for win2/lose1/draw1 | `test/reward_rule_test.rb` `test_levels_for_win_is_two`/`lose_is_one`/`draw_is_one` — `levels_for` win2/lose1/draw1 money 100/50/40 | — | ok |
+| C4 grant_levels incrementa direto | `test/progression_repository_test.rb` `test_grant_levels_increments_level_directly` — `5+2→7 xp cumulative(6)` bypass `level_for_xp` | — | ok |
+| C5 grant_finished_xp 1× guard | `test/battle_service_test.rb` `test_grant_finished_xp_increments_two_on_win_once` + `test_grant_finished_xp_guard_prevents_double_grant` — `Set` guard 2× idempotente | — | ok |
+| C6 average/banda/gen refletem 5 | `test/battle_service_test.rb` `test_average_reflects_level_five` + `test_build_opponent_level_scales_from_average_five` — avg5 banda D-C gen2 oponente 5 | — | ok |
+| G1 suíte+lint | `./scripts/test` 959/3697 0 falhas + `./scripts/lint` 117 0 — Revisão round 2/3 Aprovado (G1 flaky ConnectionRegistry isolado passa) | — | ok |
+| G2 sem migração | `git diff -- db/` vazio + `grep -rn UPDATE` só `create_progress` 5/1000, `Gemfile` diff vazio | — | ok |
+| G3 S4/S5 | `./scripts/check_docs` ok + `./scripts/checar-sessao 0067` ok + `SESSIONS.md` atualizado no refinamento e na validação | — | ok |
 
 ## 8. Observações
 
