@@ -87,4 +87,50 @@ class EvolutionRoutesTest < Minitest::Test
     assert_equal "pikachu", @repository.all("user-a").first.name
     assert_equal 1, TestDatabase.inventory_quantity("user-a", "thunder-stone"), "pedra permanece"
   end
+
+  def test_modal_lists_stone_evolutions_and_inventory_quantity
+    fill_team("user-a")
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    @inventory.add("user-a", "thunder-stone", 2)
+
+    PokeApiStub.with_stone_evolutions([
+                                        { number: 26, name: "raichu", item: "thunder-stone" },
+                                        { number: 134, name: "vaporeon", item: "water-stone" }
+                                      ]) do
+      get "/team/#{pikachu_id}/evolution", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="evolution-modal"'
+    assert_includes last_response.body, 'role="dialog"'
+    assert_includes last_response.body, "raichu"
+    assert_includes last_response.body, "vaporeon"
+    assert_includes last_response.body, "Inventário: 2"
+    assert_includes last_response.body, "water-stone"
+    assert_includes last_response.body, %(hx-post="/team/#{pikachu_id}/evolve")
+  end
+
+  def test_team_fragment_and_manage_show_evolve_button_per_member
+    fill_team("user-a")
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    evolve_trigger = %(hx-get="/team/#{pikachu_id}/evolution")
+
+    get "/team", {}, htmx_session("user-a")
+    assert_includes last_response.body, evolve_trigger
+
+    get "/team/manage", {}, user_session("user-a")
+    assert_includes last_response.body, evolve_trigger
+  end
+
+  def test_evolve_response_rerenders_the_modal
+    fill_team("user-a")
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    @inventory.add("user-a", "thunder-stone", 1)
+
+    use_stone_on("user-a", pikachu_id, "thunder-stone")
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="evolution-modal"', "resposta re-renderiza o mesmo modal"
+    assert_match(/evoluiu para raichu/i, last_response.body)
+  end
 end

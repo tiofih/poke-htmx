@@ -720,26 +720,39 @@ module ServerTeamEvolutionActions
   def use_stone
     member = team_member_by_id(params[:id])
     return member_not_found_notice unless member
-    return fainted_evolution_notice(member) if member.fainted?
+    return evolution_modal_error(member, "#{member.name} está derrotado e não pode evoluir agora.") if member.fainted?
 
     stone = params[:item_name].to_s
-    return stone_required_notice unless stone_item?(stone)
-    return stone_not_owned_notice(stone) unless settings.inventory.count(current_user, stone).positive?
+    return evolution_modal_error(member, "Escolha uma pedra de evolução para usar.") unless stone_item?(stone)
+    unless settings.inventory.count(current_user, stone).positive?
+      return evolution_modal_error(member, stone_not_owned_message(stone))
+    end
 
     stage = stone_stage_for(member, stone)
-    return no_stone_stage_notice(member, stone) unless stage
+    return evolution_modal_error(member, no_stone_stage_message(member, stone)) unless stage
 
     target = settings.api.find(stage[:name]) || settings.api.detail(stage[:name])
-    return no_stone_stage_notice(member, stone) unless target
+    return evolution_modal_error(member, no_stone_stage_message(member, stone)) unless target
 
-    return target_already_in_team_notice(member) unless settings.team.evolve(current_user, member.id, target)
+    unless settings.team.evolve(current_user, member.id, target)
+      return evolution_modal_error(member, "A evolução de #{member.name} já está no seu time.")
+    end
 
     settings.inventory.use(current_user, stone, 1)
-    @notice = "#{member.name} evoluiu para #{target.name}!"
-    @notice_kind = :success
-    render_team_fragment_with_notice
+    render_evolution_modal(member, "#{member.name} evoluiu para #{target.name}!", :success)
   end
   # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
+
+  def open_evolution_modal
+    member = team_member_by_id(params[:id])
+    return member_not_found_notice unless member
+
+    render_evolution_modal(member, nil, nil)
+  end
+
+  def close_evolution_modal
+    ""
+  end
 
   def team_member_by_id(member_id)
     settings.team.all(current_user).find { |poke| poke.id.to_s == member_id.to_s }
@@ -754,40 +767,31 @@ module ServerTeamEvolutionActions
     settings.api.stone_evolutions(member.number).find { |stage| stage[:item] == stone }
   end
 
+  def render_evolution_modal(member, notice, kind) # rubocop:disable Metrics/AbcSize
+    @member = settings.team.all(current_user).find { |poke| poke.id.to_s == member.id.to_s } || member
+    @notice = notice
+    @notice_kind = kind
+    @evolutions = settings.api.stone_evolutions(@member.number)
+    @inventory_qty = @evolutions.to_h { |evo| [evo[:item], settings.inventory.count(current_user, evo[:item])] }
+    erb :_evolution_modal, layout: false
+  end
+
+  def evolution_modal_error(member, message)
+    render_evolution_modal(member, message, :error)
+  end
+
+  def stone_not_owned_message(stone)
+    item = ItemCatalog.find(stone)
+    "Você não tem #{item&.display_name || stone} no inventário."
+  end
+
+  def no_stone_stage_message(member, stone)
+    item = ItemCatalog.find(stone)
+    "#{item&.display_name || stone} não evolui #{member.name}."
+  end
+
   def member_not_found_notice
     @notice = "Membro não encontrado."
-    @notice_kind = :error
-    render_team_fragment_with_notice
-  end
-
-  def fainted_evolution_notice(member)
-    @notice = "#{member.name} está derrotado e não pode evoluir agora."
-    @notice_kind = :error
-    render_team_fragment_with_notice
-  end
-
-  def stone_required_notice
-    @notice = "Escolha uma pedra de evolução para usar."
-    @notice_kind = :error
-    render_team_fragment_with_notice
-  end
-
-  def stone_not_owned_notice(stone)
-    item = ItemCatalog.find(stone)
-    @notice = "Você não tem #{item&.display_name || stone} no inventário."
-    @notice_kind = :error
-    render_team_fragment_with_notice
-  end
-
-  def no_stone_stage_notice(member, stone)
-    item = ItemCatalog.find(stone)
-    @notice = "#{item&.display_name || stone} não evolui #{member.name}."
-    @notice_kind = :error
-    render_team_fragment_with_notice
-  end
-
-  def target_already_in_team_notice(member)
-    @notice = "A evolução de #{member.name} já está no seu time."
     @notice_kind = :error
     render_team_fragment_with_notice
   end
@@ -1030,6 +1034,8 @@ module TeamRoutes
 
   def self.register_use_stone(app)
     app.post("/team/:id/evolve") { use_stone }
+    app.get("/team/:id/evolution") { open_evolution_modal }
+    app.get("/team/:id/evolution/close") { close_evolution_modal }
   end
 end
 

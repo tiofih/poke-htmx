@@ -449,3 +449,57 @@ nav a.active {
   margin-bottom: 0.6em;
 }
 
+/* Modal de evolucao (sessao 0068) — overlay htmx + CSS, a11y basica */
+.evolution-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1em;
+}
+
+.evolution-modal-box {
+  background: #fff;
+  color: #222;
+  border-radius: 8px;
+  max-width: 420px;
+  width: 100%;
+  padding: 1em 1.2em;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.evolution-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.evolution-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.4em;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.evolution-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  padding: 0.4em 0;
+  border-bottom: 1px solid #eee;
+}
+
+.evolution-qty {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.evolution-empty {
+  color: #666;
+}

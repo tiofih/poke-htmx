@@ -32,6 +32,8 @@
   <p class="slot">#<%= poke.slot %></p>
   <img src="<%= poke.sprite %>" alt="<%= poke.name %>"><br>
   <strong><%= poke.name %></strong><br>
+  <button type="button" class="btn evolution-trigger"
+          hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</button>
   <form
       hx-post="/team/<%= poke.id %>/move"
       hx-target="#team-view"
