@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require_relative "server_test_helpers"
+require_relative "../lib/item_catalog"
+require_relative "../lib/stone_rotation"
 class ServerMartTest < Minitest::Test
   include ServerTestHelpers
   include TestSupport
@@ -141,6 +143,43 @@ class ServerMartTest < Minitest::Test
     refute_includes last_response.body, "potion — 0"
     potion_sell = last_response.body[%r{<strong>potion</strong>.*?</form>}m]
     assert_nil potion_sell
+  end
+
+  def test_mart_buy_stone_not_in_rotation_is_rejected_without_debit
+    @wallet.grant("user-a", 200)
+    stone_names = ItemCatalog.all.select { |item| item.category == "stone" }.map(&:name)
+    not_offered = (stone_names - StoneRotation.new("user-a", 0).stones).first
+
+    post "/mart/buy", { item_name: not_offered, quantity: "1" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/oferta/i, last_response.body.strip)
+    assert_equal 0, TestDatabase.inventory_quantity("user-a", not_offered)
+    assert_equal 200, @wallet.balance("user-a")
+  end
+
+  def test_mart_buy_offered_stone_debits_80_and_adds_inventory
+    @wallet.grant("user-a", 100)
+    offered = StoneRotation.new("user-a", 0).stones.first
+
+    post "/mart/buy", { item_name: offered, quantity: "1" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/comprado/i, last_response.body.strip)
+    assert_equal 1, TestDatabase.inventory_quantity("user-a", offered)
+    assert_equal 20, @wallet.balance("user-a")
+  end
+
+  def test_mart_fragment_shows_only_offered_stones
+    @wallet.grant("user-a", 100)
+    offered = StoneRotation.new("user-a", 0).stones
+    not_offered = ItemCatalog.all.select { |item| item.category == "stone" }.map(&:name) - offered
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    offered.each { |name| assert_includes last_response.body, name }
+    not_offered.each { |name| refute_includes last_response.body, name }
   end
 end
 

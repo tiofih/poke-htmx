@@ -1,6 +1,7 @@
 <h2>Poke Mart</h2>
 <p class="balance">Saldo: <%= @balance %></p>
 <% @catalog.each do |item| %>
+  <% next if item.category == "stone" && !@rotation.include?(item.name) %>
   <% affordable = @balance / item.price %>
   <form hx-post="/mart/buy" hx-target="#team-view" hx-swap="innerHTML">
     <input type="hidden" name="item_name" value="<%= item.name %>">

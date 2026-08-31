@@ -92,6 +92,47 @@ class MartServiceTest < Minitest::Test
     assert_equal 100, result[:cost]
     assert_equal 0, result[:balance]
   end
+
+  def test_buy_stone_not_in_rotation_is_rejected_without_debit
+    @service = MartService.new(
+      inventory: @inventory, wallet: @wallet,
+      rotation_source: ->(_user_id) { %w[fire-stone water-stone thunder-stone] }
+    )
+    @wallet.grant("user-a", 200)
+
+    result = @service.buy("user-a", "moon-stone")
+
+    assert_equal false, result[:bought]
+    assert_match(/oferta/i, result[:notice])
+    assert_equal 0, @inventory.count("user-a", "moon-stone")
+    assert_equal 200, @wallet.balance("user-a")
+  end
+
+  def test_buy_stone_debits_80_and_adds_inventory
+    @service = MartService.new(
+      inventory: @inventory, wallet: @wallet,
+      rotation_source: ->(_user_id) { %w[fire-stone water-stone thunder-stone] }
+    )
+    @wallet.grant("user-a", 100)
+
+    result = @service.buy("user-a", "fire-stone")
+
+    assert_equal true, result[:bought]
+    assert_equal 80, result[:cost]
+    assert_equal 20, result[:balance]
+    assert_match(/comprado/i, result[:notice])
+    assert_equal 1, @inventory.count("user-a", "fire-stone")
+    assert_equal 20, @wallet.balance("user-a")
+  end
+
+  def test_buy_stone_offered_without_rotation_source_is_allowed
+    @wallet.grant("user-a", 100)
+
+    result = @service.buy("user-a", "fire-stone")
+
+    assert_equal true, result[:bought]
+    assert_equal 80, result[:cost]
+  end
 end
 
 class MartServiceSellTest < Minitest::Test

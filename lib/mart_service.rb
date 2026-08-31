@@ -4,11 +4,12 @@ require_relative "item_catalog"
 require_relative "sell_policy"
 
 class MartService
-  def initialize(inventory:, wallet:, catalog: ItemCatalog, policy: SellPolicy.new)
+  def initialize(inventory:, wallet:, catalog: ItemCatalog, policy: SellPolicy.new, rotation_source: nil)
     @inventory = inventory
     @wallet = wallet
     @catalog = catalog
     @policy = policy
+    @rotation_source = rotation_source
   end
 
   def buy(user_id, item_name, quantity = 1)
@@ -16,6 +17,8 @@ class MartService
     return quantity_invalid_notice if invalid_quantity?(quantity)
 
     item = @catalog.find(item_name)
+    return stone_not_in_rotation_notice(item) if stone_not_offered?(user_id, item)
+
     cost = item.price * quantity.to_i
     balance = @wallet.balance(user_id)
     return insufficient_notice(item, quantity, cost, balance) if balance < cost
@@ -35,6 +38,22 @@ class MartService
   end
 
   private
+
+  def stone_not_offered?(user_id, item)
+    return false unless item.category == "stone"
+    return false unless @rotation_source
+
+    !@rotation_source.call(user_id).include?(item.name)
+  end
+
+  def stone_not_in_rotation_notice(item)
+    {
+      bought: false,
+      kind: :error,
+      item: item,
+      notice: "#{item.display_name} não está na oferta desta rodada."
+    }
+  end
 
   def purchase_result(user_id, item, quantity, cost)
     @inventory.add(user_id, item.name, quantity.to_i)

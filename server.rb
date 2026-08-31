@@ -29,6 +29,7 @@ require_relative "lib/fighter_presenter"
 require_relative "lib/battle_log_presenter"
 require_relative "lib/team_budget"
 require_relative "lib/pokemon_rating_cache"
+require_relative "lib/stone_rotation"
 
 module ServerCommon
   private
@@ -472,6 +473,12 @@ module ServerTeamActions
     @catalog = ItemCatalog.all
     @inventory = settings.inventory.all(current_user)
     @balance = settings.wallet.balance(current_user)
+    @rotation = stone_rotation_stones(current_user)
+  end
+
+  def stone_rotation_stones(user_id)
+    battle_count = settings.battle_history.stats(user_id)[:total]
+    StoneRotation.new(user_id, battle_count).stones
   end
 
   def center_data
@@ -1034,9 +1041,15 @@ end
 module ServerServices
   module_function
 
-  def wire(app, deps)
+  def wire(app, deps) # rubocop:disable Metrics/AbcSize
     app.set :heal, HealService.new(team: deps[:team], progression: deps[:progression], wallet: deps[:wallet])
-    app.set :mart, MartService.new(inventory: deps[:inventory], wallet: deps[:wallet])
+    app.set :mart, MartService.new(
+      inventory: deps[:inventory], wallet: deps[:wallet],
+      rotation_source: lambda { |user_id|
+        battle_count = deps[:battle_history].stats(user_id)[:total]
+        StoneRotation.new(user_id, battle_count).stones
+      }
+    )
     app.set :battle, BattleService.new(dependencies: deps)
     app.set :team_strategy, TeamService.new(**strategy_dependencies(deps))
   end
