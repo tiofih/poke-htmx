@@ -7,7 +7,10 @@ class RewardRule
     lose_xp: 20,
     win_money: 100,
     draw_money: 50,
-    lose_money: 40
+    lose_money: 40,
+    win_levels: 2,
+    draw_levels: 1,
+    lose_levels: 1
   }.freeze
 
   def initialize(options = {})
@@ -20,6 +23,10 @@ class RewardRule
 
   def money_for(result)
     reward_for(result, :win_money, :draw_money, :lose_money)
+  end
+
+  def levels_for(result)
+    reward_for(result, :win_levels, :draw_levels, :lose_levels)
   end
 
   private

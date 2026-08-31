@@ -176,3 +176,82 @@ class ProgressionGrantTest < Minitest::Test
     assert_nil @progression.grant("user-a", "999999", 100)
   end
 end
+
+class ProgressionGrantLevelsTest < Minitest::Test
+  include ProgressionRepositoryTestHelpers
+
+  # C4 D3 B
+  def test_grant_levels_increments_level_directly
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+
+    result = @progression.grant_levels("user-a", pokemon_id, 2)
+
+    assert_equal 7, result[:level]
+    assert_equal ExperienceCurve.cumulative_xp_for(6), result[:xp]
+    assert_equal({ level: 7, xp: ExperienceCurve.cumulative_xp_for(6), hp_max: 0, hp_current: 0 },
+                 @progression.get("user-a", pokemon_id))
+  end
+
+  def test_grant_levels_increments_one_on_lose
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+
+    @progression.grant_levels("user-a", pokemon_id, 1)
+
+    assert_equal 6, @progression.get("user-a", pokemon_id)[:level]
+    assert_equal ExperienceCurve.cumulative_xp_for(5), @progression.get("user-a", pokemon_id)[:xp]
+  end
+
+  def test_grant_levels_increments_one_on_draw
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+
+    @progression.grant_levels("user-a", pokemon_id, 1)
+
+    assert_equal 6, @progression.get("user-a", pokemon_id)[:level]
+  end
+
+  def test_grant_levels_sets_xp_consistent
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+
+    @progression.grant_levels("user-a", pokemon_id, 2)
+    stored = @progression.get("user-a", pokemon_id)
+
+    assert_equal ExperienceCurve.cumulative_xp_for(stored[:level] - 1), stored[:xp]
+  end
+
+  def test_grant_levels_bypasses_level_for_xp
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    # xp 1000 -> level 5, grant delta 2 should go to 7 even though xp would otherwise be 5
+    @progression.grant_levels("user-a", pokemon_id, 2)
+
+    assert_equal 7, @progression.get("user-a", pokemon_id)[:level]
+    # xp 1500 would be level 6, but bypass gives 7, proving bypass
+    assert_equal ExperienceCurve.cumulative_xp_for(6), @progression.get("user-a", pokemon_id)[:xp]
+  end
+
+  def test_grant_levels_for_unknown_is_noop
+    assert_nil @progression.grant_levels("user-a", "999999", 2)
+  end
+
+  def test_grant_levels_for_another_user_is_noop
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+
+    assert_nil @progression.grant_levels("user-b", pokemon_id, 2)
+    assert_equal 5, @progression.get("user-a", pokemon_id)[:level]
+  end
+
+  def test_grant_levels_zero_is_noop
+    add_pokemon("user-a", "pikachu", 25)
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+
+    result = @progression.grant_levels("user-a", pokemon_id, 0)
+
+    assert_equal 5, result[:level]
+    assert_equal 1000, result[:xp]
+  end
+end

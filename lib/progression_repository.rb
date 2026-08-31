@@ -42,6 +42,24 @@ class ProgressionRepository
     { level: level, xp: total }
   end
 
+  def grant_levels(user_id, team_pokemon_id, delta) # rubocop:disable Metrics/MethodLength
+    current = get(user_id, team_pokemon_id)
+    return unless current
+
+    delta = delta.to_i
+    return { level: current[:level], xp: current[:xp] } if delta.zero?
+
+    new_level = current[:level] + delta
+    new_level = 1 if new_level < 1
+    new_xp = ExperienceCurve.cumulative_xp_for(new_level - 1)
+    connection.exec_params(
+      "UPDATE team_pokemon_progress SET level = $2, xp = $3, updated_at = now() " \
+      "WHERE team_pokemon_id = $1",
+      [team_pokemon_id, new_level, new_xp]
+    )
+    { level: new_level, xp: new_xp }
+  end
+
   private
 
   def progress_row(user_id, team_pokemon_id)
