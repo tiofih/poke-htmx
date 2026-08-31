@@ -89,4 +89,32 @@ class ItemCatalogTest < Minitest::Test
     refute_includes held_names, "potion"
     assert(ItemCatalog.can_hold.all? { |item| item.category == "held" })
   end
+
+  def test_stone_catalog_has_six_stones_price_80 # rubocop:disable Naming/VariableNumber
+    stones = ItemCatalog.all.select { |item| item.category == "stone" }
+
+    assert_equal 6, stones.size
+    assert_equal %w[fire-stone leaf-stone moon-stone sun-stone thunder-stone water-stone],
+                 stones.map(&:name).sort
+
+    stones.each do |stone|
+      assert_equal "stone", stone.category
+      assert_equal 80, stone.price
+    end
+  end
+
+  def test_stone_catalog_has_pt_br_display_names
+    expected = {
+      "fire-stone" => "Pedra de Fogo",
+      "water-stone" => "Pedra de Agua",
+      "thunder-stone" => "Pedra de Trovao",
+      "leaf-stone" => "Pedra de Folha",
+      "moon-stone" => "Pedra Lunar",
+      "sun-stone" => "Pedra Solar"
+    }
+
+    expected.each do |name, display|
+      assert_equal display, ItemCatalog.find(name).display_name, "#{name} display pt-BR"
+    end
+  end
 end

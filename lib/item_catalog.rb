@@ -12,7 +12,13 @@ class ItemCatalog
     Item.new(name: "choice-band", display_name: "Choice Band", category: "held", price: 80,
              stat: "Attack", multiplier: 1.5),
     Item.new(name: "choice-scarf", display_name: "Choice Scarf", category: "held", price: 80,
-             stat: "Speed", multiplier: 1.5)
+             stat: "Speed", multiplier: 1.5),
+    Item.new(name: "fire-stone", display_name: "Pedra de Fogo", category: "stone", price: 80),
+    Item.new(name: "water-stone", display_name: "Pedra de Agua", category: "stone", price: 80),
+    Item.new(name: "thunder-stone", display_name: "Pedra de Trovao", category: "stone", price: 80),
+    Item.new(name: "leaf-stone", display_name: "Pedra de Folha", category: "stone", price: 80),
+    Item.new(name: "moon-stone", display_name: "Pedra Lunar", category: "stone", price: 80),
+    Item.new(name: "sun-stone", display_name: "Pedra Solar", category: "stone", price: 80)
   ].freeze
 
   def self.all
