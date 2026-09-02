@@ -922,7 +922,7 @@ module ServerBattleActions
   end
 
   def advance_battle
-    result = settings.battle.advance(current_user)
+    result = settings.battle.resolve(current_user)
     return erb :battle, layout: false unless result
 
     expose_battle_result(result)

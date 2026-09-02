@@ -14,6 +14,10 @@ class BattleLogPresenter
     recent_rounds.flat_map { |round| entries_for_round(round) }
   end
 
+  def entries_all
+    @log.map { |entry| entry[:round] }.uniq.sort.reverse.flat_map { |round| entries_for_round(round) }
+  end
+
   private
 
   def recent_rounds

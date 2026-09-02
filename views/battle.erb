@@ -77,7 +77,7 @@
         <% end %>
       </div>
 
-      <% log_entries = BattleLogPresenter.new(@engine.log).entries %>
+      <% log_entries = BattleLogPresenter.new(@engine.log).entries_all %>
       <% unless log_entries.empty? %>
         <ul class="battle-log">
           <% log_entries.each do |entry| %>

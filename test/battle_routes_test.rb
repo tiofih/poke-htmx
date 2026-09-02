@@ -58,19 +58,23 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, "usou Pocao"
-    assert_match(/\+20 HP/, last_response.body)
-    assert_equal 1, TestDatabase.inventory_quantity("user-a", "potion"), "uma pocao debitada"
+    used = last_response.body.scan("usou Pocao").size
+    assert_operator used, :>=, 1, "pocao usada ao menos uma vez no log"
+    assert_equal 2 - used, TestDatabase.inventory_quantity("user-a", "potion"),
+                 "cada uso de pocao debitado do inventario"
   end
 
   def test_battle_play_without_item_use_does_not_debit_inventory
     @inventory.add("user-a", "potion", 2)
+    weak = build_pokemon(number: 1, name: "weak", hp: 10, attack: 1, defense: 1, speed: 1)
+    strong = build_pokemon(number: 2, name: "strong", hp: 100, attack: 50, defense: 50, speed: 50)
+    engine = BattleEngine.new(team_a: [strong], team_b: [weak])
+    Server.settings.battles.set("user-a", engine)
 
-    stub_battle_start { get "/battle", {}, user_session("user-a") }
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
-    refute_includes last_response.body, "usou Pocao"
+    refute_includes last_response.body, "usou Pocao", "batalha sem itens nao usa pocao"
     assert_equal 2, TestDatabase.inventory_quantity("user-a", "potion"), "nada debitado sem item usado"
   end
 
@@ -198,33 +202,48 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_match(/Recome\S* jornada/, last_response.body)
   end
 
-  def test_battle_play_advances_one_round_and_refreshes_fragment
+  def test_battle_play_after_resolve_keeps_final_state
     start_battle_for("user-a")
+
+    post "/battle/play", {}, user_session("user-a")
+    final_round = last_response.body[/Rodada (\d+) — Fim de batalha/, 1]
+    final_hp = last_response.body[%r{HP \d+/\d+}]
 
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, "Rodada 1"
-    assert_includes last_response.body, "usou thunder-shock em"
-  end
-
-  def test_battle_play_reuses_state_between_requests
-    start_battle_for("user-a")
-
-    post "/battle/play", {}, user_session("user-a")
-    round_one_hp = last_response.body
-
-    post "/battle/play", {}, user_session("user-a")
-
-    assert last_response.ok?
-    assert_includes last_response.body, "Rodada 2"
-    refute_equal round_one_hp, last_response.body, "estado avança (HP/log mudam) a cada play"
+    assert_match(/Rodada #{final_round} — Fim de batalha/, last_response.body,
+                 "play apos resolver nao avanca a rodada")
+    assert_includes last_response.body, final_hp, "estado final preservado"
   end
 
   def test_battle_play_without_started_battle_does_not_break
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
+  end
+
+  def test_battle_play_resolves_entire_battle_in_one_request
+    start_battle_for("user-a")
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Fim de batalha", "um unico play resolve a batalha inteira"
+    assert_includes last_response.body, "Vencedor:"
+    assert_includes last_response.body, "Novo confronto"
+  end
+
+  def test_battle_log_shows_all_rounds_after_resolve
+    start_battle_for("user-a")
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "Rodada 1",
+                    "log completo mostra a primeira rodada apos resolver"
+    assert_match(/Fim de batalha/, last_response.body,
+                 "resolver leva a batalha ao fim")
   end
 
   def test_battle_end_shows_winner_and_reset_button
@@ -404,29 +423,6 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert last_response.ok?
     assert_includes last_response.body, "thunder-shock"
     assert_includes last_response.body, "usou thunder-shock em"
-  end
-
-  def test_battle_log_shows_previous_rounds_after_multiple_plays
-    start_battle_for("user-a")
-
-    post "/battle/play", {}, user_session("user-a")
-    post "/battle/play", {}, user_session("user-a")
-
-    assert last_response.ok?
-    assert_includes last_response.body, "Rodada 2"
-    assert_includes last_response.body, "Rodada 1",
-                    "log mantém entradas da rodada anterior (últimas 3 rodadas)"
-  end
-
-  def test_battle_log_drops_rounds_older_than_three
-    start_battle_for("user-a")
-
-    6.times { post "/battle/play", {}, user_session("user-a") }
-
-    assert last_response.ok?
-    refute_includes last_response.body, "Rodada 1",
-                    "rodada mais antiga que as últimas 3 sai do log"
-    assert_includes last_response.body, "Rodada 6"
   end
 
   def test_battle_with_struggle_fallback_does_not_break
@@ -611,8 +607,8 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
     post "/battle/play", {}, user_session("user-a")
 
-    refute_includes last_response.body, "Fim de batalha", "batalha de 3v6 não termina em 1 round"
-    assert_equal 0, @wallet.balance("user-a"), "moeda não concedida antes do fim"
+    assert_includes last_response.body, "Fim de batalha", "um play resolve a batalha inteira"
+    assert_includes [40, 50, 100], @wallet.balance("user-a"), "moeda concedida ao resolver"
   end
 
   def test_battle_finish_shows_money_gained_message
@@ -733,9 +729,9 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_in_progress_does_not_persist_record
     start_battle_for("user-a")
-    post "/battle/play", {}, user_session("user-a")
 
-    assert_empty TestDatabase.battle_rows("user-a")
+    assert_empty TestDatabase.battle_rows("user-a"),
+                 "batalha aberta (nao resolvida) nao persiste registro"
   end
 
   def test_battle_records_are_isolated_per_user
@@ -776,11 +772,10 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_in_progress_does_not_persist_hp
     start_battle_for("user-a")
-    post "/battle/play", {}, user_session("user-a")
 
     members = @repository.all("user-a")
     assert members.all? { |member| member.hp_max.zero? },
-           "batalha em andamento não persiste HP"
+           "batalha aberta (nao resolvida) nao persiste HP"
   end
 
   def test_new_battle_starts_with_persisted_hp

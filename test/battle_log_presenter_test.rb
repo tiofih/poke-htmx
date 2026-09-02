@@ -93,4 +93,14 @@ class BattleLogPresenterTest < Minitest::Test
 
     assert_equal 3, presenter.entries.size
   end
+
+  def test_entries_all_returns_every_round
+    log = (1..5).map { |round| attack_entry(round: round, side: 0, attacker: "a", target: "b", move: "m", damage: 5) }
+    presenter = BattleLogPresenter.new(log)
+
+    assert_equal 5, presenter.entries_all.size,
+                 "modo completo devolve todas as rodadas"
+    assert_equal [5, 4, 3, 2, 1], presenter.entries_all.map { |entry| entry[:round] },
+                 "mais recente no topo, sem limite"
+  end
 end
