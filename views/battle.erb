@@ -72,16 +72,20 @@
           <% end %>
         <% else %>
           <button hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML"
-            hx-indicator="#battle-loading">Jogar</button>
+            hx-indicator="#battle-loading">Batalhar</button>
           <span id="battle-loading" class="battle-loading" aria-hidden="true">Carregando…</span>
         <% end %>
       </div>
 
       <% log_entries = BattleLogPresenter.new(@engine.log).entries_all %>
       <% unless log_entries.empty? %>
+        <% round_order = log_entries.map { |entry| entry[:round] }.uniq.each_with_index.to_h %>
         <ul class="battle-log">
           <% log_entries.each do |entry| %>
-            <li><span class="log-round">Rodada <%= entry[:round] %>:</span> <%= entry[:side] %>: <strong><%= entry[:text] %></strong></li>
+            <li class="battle-log__entry"
+                style="--log-delay: <%= (round_order.size - 1 - round_order.fetch(entry[:round])) * 0.25 %>s">
+              <span class="log-round">Rodada <%= entry[:round] %>:</span> <%= entry[:side] %>: <strong><%= entry[:text] %></strong>
+            </li>
           <% end %>
         </ul>
       <% end %>

@@ -281,6 +281,29 @@ body.page-history {
   font-size: 0.9em;
 }
 
+/* Revelação do log rodada a rodada (0069) — fade/slide-in escalonado, sem JS */
+.battle-log__entry {
+  animation: battle-log-in 0.35s ease-out both;
+  animation-delay: var(--log-delay, 0s);
+}
+
+@keyframes battle-log-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-log__entry {
+    animation: none;
+  }
+}
+
 .winner {
   font-size: 1.1em;
 }

@@ -161,25 +161,22 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
                     "texto de PP preservado"
   end
 
-  def test_battle_fragment_has_play_button
+  def test_battle_fragment_has_battle_button_and_no_play_button
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
 
     assert last_response.ok?
+    assert_includes last_response.body, ">Batalhar</button>"
     assert_includes last_response.body, "hx-post=\"/battle/play\""
-    refute_includes last_response.body, "Vencedor"
-  end
+    assert_includes last_response.body, "hx-indicator=\"#battle-loading\""
+    refute_includes last_response.body, ">Jogar<", "botao manual por rodada removido"
 
-  def test_battle_play_button_has_local_hx_indicator
-    stub_battle_start do
-      get "/battle", {}, user_session("user-a")
-    end
+    post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, "hx-indicator",
-                    "botão Jogar com indicador de carregamento local"
-    assert_includes last_response.body, "hx-post=\"/battle/play\""
+    assert_includes last_response.body, "battle-log__entry",
+                    "entradas do log com classe de animacao escalonada"
   end
 
   def test_battle_with_empty_team_shows_journey_gate
