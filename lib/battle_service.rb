@@ -359,6 +359,8 @@ class BattleService
   include BattleServicePreparation
   include BattleServiceFinalization
 
+  ROUND_CAP = 100
+
   def initialize(dependencies:)
     @api_provider = dependencies[:api]
     @battles = dependencies[:battles]
@@ -398,6 +400,20 @@ class BattleService
     finishing = !engine.finished?
     engine.play_round
     debit_used_items(user_id, engine)
+    news = finish_effects(user_id, engine) if finishing && engine.finished?
+    battle_payload(engine, news || empty_news)
+  end
+
+  def resolve(user_id)
+    engine = @battles.fetch(user_id)
+    return nil unless engine
+
+    finishing = !engine.finished?
+    ROUND_CAP.times do
+      break if engine.finished?
+
+      engine.play_round
+    end
     news = finish_effects(user_id, engine) if finishing && engine.finished?
     battle_payload(engine, news || empty_news)
   end

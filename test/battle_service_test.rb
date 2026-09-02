@@ -274,6 +274,35 @@ class BattleServiceTest < Minitest::Test
     refute_same first, second, "batalha ativa limpa pela invalidacao"
   end
 
+  def test_resolve_plays_until_finished
+    service = build_service(TieredApi.new)
+    add_team_for("user-1")
+
+    engine = service.prepare("user-1")[:engine]
+    result = service.resolve("user-1")
+
+    assert result[:engine].finished?, "resolve joga todas as rodadas ate o fim"
+    assert_operator result[:engine].rounds, :>, 0, "rodadas foram jogadas no servidor"
+    assert_same engine, result[:engine], "mesma instancia de engine evoluida"
+    refute_nil result[:xp_gained], "payload final carrega XP"
+    refute_nil result[:money_gained], "payload final carrega dinheiro"
+  end
+
+  def test_resolve_stops_at_round_cap
+    service = build_service(TieredApi.new)
+    add_team_for("user-1")
+    tank = build_pokemon(number: 1, name: "tank", hp: 2_000_000, attack: 1, defense: 200, speed: 1)
+    engine = BattleEngine.new(team_a: [tank], team_b: [tank.new(number: 2, name: "tank-b")])
+    service.instance_variable_get(:@battles).set("user-1", engine)
+
+    result = service.resolve("user-1")
+
+    assert_equal BattleService::ROUND_CAP, engine.rounds, "teto de rodadas forca a parada"
+    refute result[:engine].finished?, "batalha eterna nao termina sozinha"
+    assert_nil result[:xp_gained], "sem fim nao ha recompensa XP"
+    assert_nil result[:money_gained], "sem fim nao ha recompensa em dinheiro"
+  end
+
   def grant_xp_to(user_id, amount)
     @team.all(user_id).each { |member| @progression.grant(user_id, member.id, amount) }
   end
