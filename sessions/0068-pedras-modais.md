@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-08-31 (D1–D10 fechadas) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — 7 passos, suíte 983/3819 lint 0, revisor **Aprovado** — commits `77c22bc/94780fd/9e33fa8/04d004d/ff840db/91a1274/3884f1a/a00a67c` |
+| Validação | **Concluída** — validada pelo usuário em 2026-08-31 (S2 por critério ok, C13 `manual` ok via navegador, sem S3) |
 
 ---
 
@@ -111,28 +111,28 @@ Entregar as **pedras de evolução** como itens compráveis no Poke Mart (catál
 - **D9 — Pedras vendáveis** pelo fluxo atual (SellPolicy 50%).
 - **D10 — Fainted BLOQUEADO** — usar pedra em membro `fainted?` → notice de erro **sem consumir** a pedra. *(Fora da recomendação do refinador — decisão explícita do usuário; entra como C10.)*
 
-## 7. Validação (executada pelo usuário — S2)
+## 7. Validação (executada pelo usuário — S2 — 2026-08-31)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+> Validada pelo usuário em 2026-08-31 — S2 por critério ok, C13 `manual` ok (validação visual do modal via navegador), sem S3. Fase 3 concluída.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 catálogo 6 pedras price 80 stone | `test/item_catalog_test.rb` `test_stone_catalog_has_six_stones_price_80` | — | |
-| C2 oferta 3 distintas determinística | `test/stone_rotation_test.rb` (`test_rotation_is_deterministic_three_distinct` + `test_rotation_changes_as_battle_count_grows`) | — | |
-| C3 compra só ofertada | `test/mart_service_test.rb` `test_buy_stone_not_in_rotation_is_rejected_without_debit` | — | |
-| C4 compra debita 80 e soma | `test/mart_service_test.rb` `test_buy_stone_debits_80_and_adds_inventory` | — | |
-| C5 modal lista evoluções+qtd+botão | `test/evolution_routes_test.rb` `test_modal_lists_stone_evolutions_and_inventory_quantity` | — | |
-| C6 usar pedra evolui+consome | `test/evolution_routes_test.rb` `test_use_stone_evolves_member_and_consumes_one` | — | |
-| C7 sem estágio → notice sem consumir | `test/evolution_routes_test.rb` `test_use_stone_without_compatible_stage_notice_without_consuming` | — | |
-| C8 sem pedra → notice | `test/evolution_routes_test.rb` `test_use_stone_without_inventory_notice_without_consuming` | — | |
-| C9 alvo no time → não evolui | `test/evolution_routes_test.rb` `test_use_stone_target_already_in_team_notice` | — | |
-| C10 fainted → bloqueio sem consumir | `test/evolution_routes_test.rb` `test_use_stone_on_fainted_member_blocked_without_consuming` | — | |
-| C11 regressão automática | `test/battle_routes_test.rb` `test_battle_finish_evolves_member_when_level_reaches_min_level` | — | |
-| C12 stone_evolutions (use-item, rede→[]) | `test/poke_api_http_test.rb` (`test_stone_evolutions_returns_use_item_stages` + `test_stone_evolutions_empty_on_network_error`) | — | |
-| C13 modal overlay visual | — | `./scripts/run` + navegador: overlay real por membro, 3 estados, role/aria, fecha/volta | |
-| G1 suíte+lint | `./scripts/test` (baseline 959/3697 + novos) + `./scripts/lint` 0 | — | |
-| G2 sem gem/schema/API stub | `git diff -- Gemfile db/` vazio + fake da API | — | |
-| G3 S4/S5 | `./scripts/check_docs` + `./scripts/checar-sessao 0068` + `SESSIONS.md` atualizado | — | |
+| C1 catálogo 6 pedras price 80 stone | `test/item_catalog_test.rb` `test_stone_catalog_has_six_stones_price_80` | — | ok |
+| C2 oferta 3 distintas determinística | `test/stone_rotation_test.rb` (`test_rotation_is_deterministic_three_distinct` + `test_rotation_changes_as_battle_count_grows`) | — | ok |
+| C3 compra só ofertada | `test/mart_service_test.rb` `test_buy_stone_not_in_rotation_is_rejected_without_debit` | — | ok |
+| C4 compra debita 80 e soma | `test/mart_service_test.rb` `test_buy_stone_debits_80_and_adds_inventory` | — | ok |
+| C5 modal lista evoluções+qtd+botão | `test/evolution_routes_test.rb` `test_modal_lists_stone_evolutions_and_inventory_quantity` | — | ok |
+| C6 usar pedra evolui+consome | `test/evolution_routes_test.rb` `test_use_stone_evolves_member_and_consumes_one` | — | ok |
+| C7 sem estágio → notice sem consumir | `test/evolution_routes_test.rb` `test_use_stone_without_compatible_stage_notice_without_consuming` | — | ok |
+| C8 sem pedra → notice | `test/evolution_routes_test.rb` `test_use_stone_without_inventory_notice_without_consuming` | — | ok |
+| C9 alvo no time → não evolui | `test/evolution_routes_test.rb` `test_use_stone_target_already_in_team_notice` | — | ok |
+| C10 fainted → bloqueio sem consumir | `test/evolution_routes_test.rb` `test_use_stone_on_fainted_member_blocked_without_consuming` | — | ok |
+| C11 regressão automática | `test/battle_routes_test.rb` `test_battle_finish_evolves_member_when_level_reaches_min_level` | — | ok |
+| C12 stone_evolutions (use-item, rede→[]) | `test/poke_api_http_test.rb` (`test_stone_evolutions_returns_use_item_stages` + `test_stone_evolutions_empty_on_network_error`) | — | ok |
+| C13 modal overlay visual | — | `./scripts/run` + navegador: overlay real por membro, 3 estados, role/aria, fecha/volta | ok |
+| G1 suíte+lint | `./scripts/test` 983/3819 0 falhas + `./scripts/lint` 120 arquivos 0 offenses | — | ok |
+| G2 sem gem/schema/API stub | `git diff -- Gemfile db/` vazio + fake da API (sem rede — `test/poke_api_http_test.rb`) | — | ok |
+| G3 S4/S5 | `./scripts/check_docs` ok + `./scripts/checar-sessao 0068` ok + `SESSIONS.md` atualizado no refinamento e na validação | — | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 

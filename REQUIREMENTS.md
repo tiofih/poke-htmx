@@ -632,7 +632,8 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       (2) **gerenciar golpes no Poke Center e itens no Poke Mart**, reestruturando como
       gerenciamos os golpes dos pokes — esboço: **4 selects** (um por slot, cap 4);
       (3) **itens de evolução no Poke Mart** — **parcialmente atendido (sessão 0068,
-      implementação 2026-08-31)**: as **6 pedras clássicas** entraram com **oferta
+      Onda 2 Economia — implementada e validada em 2026-08-31, suíte 983/3819 lint 0)**:
+      as **6 pedras clássicas** entraram com **oferta
       determinística de 3 por rodada** (derivada de `hash(user_id)+battle_count`, sem
       tabela; D2 da 0068) a preço fixo 80; segue fora de escopo: **outros itens de
       evolução** (não-pedras), preço dinâmico por pedra e persistência da rotação
