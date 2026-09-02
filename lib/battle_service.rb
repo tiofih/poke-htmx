@@ -413,6 +413,7 @@ class BattleService
       break if engine.finished?
 
       engine.play_round
+      debit_used_items(user_id, engine)
     end
     news = finish_effects(user_id, engine) if finishing && engine.finished?
     battle_payload(engine, news || empty_news)

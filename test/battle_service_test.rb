@@ -129,6 +129,45 @@ class TieredApi
   end
 end
 
+class ItemDebitEngine
+  attr_reader :rounds, :log
+
+  def initialize
+    @rounds = 0
+    @log = []
+  end
+
+  def finished?
+    @rounds >= 3
+  end
+
+  def play_round
+    @rounds += 1
+    @log << attack_entry
+    @log << item_entry if [1, 3].include?(@rounds)
+  end
+
+  def result
+    :win
+  end
+
+  def teams
+    [[], []]
+  end
+
+  private
+
+  def attack_entry
+    { round: @rounds, attacker: 0, attacker_name: "pikachu",
+      target_name: "oponente", move: "tackle", move_type: "normal", damage: 5 }
+  end
+
+  def item_entry
+    { round: @rounds, attacker: 0, attacker_index: 0, action: :item, item: "potion",
+      healed: 20, attacker_name: "pikachu" }
+  end
+end
+
 class BattleServiceTest < Minitest::Test
   include TestSupport
 
@@ -301,6 +340,18 @@ class BattleServiceTest < Minitest::Test
     refute result[:engine].finished?, "batalha eterna nao termina sozinha"
     assert_nil result[:xp_gained], "sem fim nao ha recompensa XP"
     assert_nil result[:money_gained], "sem fim nao ha recompensa em dinheiro"
+  end
+
+  def test_resolve_debits_items_from_all_rounds
+    service = build_service(TieredApi.new)
+    add_team_for("user-1")
+    InventoryRepository.new.add("user-1", "potion", 5)
+    service.instance_variable_get(:@battles).set("user-1", ItemDebitEngine.new)
+
+    service.resolve("user-1")
+
+    assert_equal 3, TestDatabase.inventory_quantity("user-1", "potion"),
+                 "pocoes das rodadas 1 e 3 debitadas (nao so a ultima)"
   end
 
   def grant_xp_to(user_id, amount)
