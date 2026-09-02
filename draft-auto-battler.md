@@ -693,6 +693,12 @@
 
 ### B5. "Batalhar" resolve a batalha inteira (fim das rodadas manuais)
 
+> **Implementado na sessão 0069 (2026-09-02, fase 2 TDD — suíte 985/3831, lint 0, aguardando validação).**
+> `BattleService#resolve` (teto 100, débito de itens de todas as rodadas, `finish_effects` 1×),
+> `POST /battle/play` resolve tudo num request, log completo (`BattleLogPresenter#entries_all`,
+> `DEFAULT_LIMIT = 3` preservado), botão "Jogar" removido, revelação do log com animação CSS
+> escalonada + `prefers-reduced-motion`. `BattleEngine#battle` intocado (35 callers).
+
 - **Ideia:** mudar o sistema de rodadas — ao apertar **"batalhar"**, **cada ação
   ocorre até o fim da batalha**, sem precisar clicar de novo (execução automática até
   o resultado; o log mostra a sequência). Oposta ao fluxo atual de clicar "Jogar" por
