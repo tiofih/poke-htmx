@@ -132,3 +132,13 @@
 - `BattleEngine#battle` (`lib/battle_engine.rb:157-164`) usa contador `rounds` **local** (`play_round!`), não atualiza `@rounds` — reusá-lo quebraria o débito de itens e a contabilização; `BattleService#resolve` (que usa `play_round` + atualização de `@rounds`) é o caminho, com `BattleEngine` intocado (35 callers).
 - `BattleLogPresenter::DEFAULT_LIMIT = 3` — o log completo exige **modo explícito** (não mudar o default silenciosamente; `test_default_limit_is_three` existe e o histórico/ranking dependem do limite).
 - Reuso do guard de transição única (`finishing = !engine.finished?` do `advance`) no loop do `resolve` — `finish_effects` roda **uma vez**; as guardas de XP/money/record/HP já testadas continuam valendo.
+
+### Gotchas da implementação (fase 2, 2026-09-02)
+
+- **`./scripts/test -n` não aceita `|` no regex do filtro** — o rake quebra o `TESTOPTS` no `|` (`sh: 1: resolve/: not found`); usar um único token de regex (`-n /resolve/` cobre `test_resolve_*`) ou rodar os filtros em chamadas separadas.
+- **`./scripts/test` com pipe (`| tail`) aborta de forma intermitente** (consumer fecha o pipe cedo + `pipefail`) — redirecionar para arquivo (`> /tmp/x.out`) é estável.
+- **Entradas de log de item do engine real têm `attacker_index`** — fakes de engine para teste de débito precisam incluir `attacker_index`; sem ele, `members[nil]` estoura `TypeError: no implicit conversion from nil to integer` em `consume_used_item` (`lib/battle_service.rb:218`).
+- **A resposta do play que resolve difere do play seguinte** — `learned_news`/`evolution_news` só aparecem na transição (`finish_effects` → news; play após o fim → `empty_news`). Teste de idempotência não pode comparar bytes do fragmento; comparar estado (rodada final/HP).
+- **Testes de rota que assumiam 1 rodada/request podem "passar por coincidência"** — o log completo contém `Rodada 1`/`Rodada 2` (entradas do log), mascarando semânticas antigas; conferir nome/intenção, não só o resultado do assert.
+- **`BattleEngine#initialize` tem `items:` default `{}`** — engine direto (sem `items:`) nunca usa poção; útil para provar "sem item usado → sem débito" no caminho do `resolve`.
+- **Débito multi-rodada sem tocar o gotcha** — chamar `debit_used_items(user_id, engine)` **dentro** do loop logo após cada `play_round` faz `engine.rounds` apontar para a rodada recém-jogada, e o `items_used_in_round` existente (que filtra `round == engine.rounds`) passa a coletar todas as rodadas sem reescrever o método (mesmo padrão do `advance`).
