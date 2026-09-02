@@ -950,3 +950,13 @@
 
 - **Atualizar para HTMX 4.0:** `public/` + `views/layout.erb` (CDN/script) migrar de 1.x para **4.0** (breaking changes: `hx-*` → novo sintaxe se houver, `htmx.config` , `hx-indicator`/`hx-swap-oob` preservados). Testes htmx (`hx-get`/`hx-trigger="load"` em `#team` e `hx-delete`/`hx-sync`) devem continuar verdes. Sem mudar rotas/domínio.
 - **Adicionar skills da atualização:** mapear e instalar as **skills** (Agent Skills) da atualização HTMX 4.0 — inventariar `/.agents/skills`, `/.claude/skills` e `.opencode/skills` afetados, atualizar `AGENTS.md`/`CLAUDE.md` routing se mudar.
+
+### 0069 (resolver batalha) — ideias fora de escopo anotadas (2026-09-02, RNF-04)
+
+> **Anotado no refinamento da 0069 (não refinado agora — fora do escopo fechado pelo usuário).**
+
+- **Animação de painéis/HP/barras e projéteis durante a resolução** — a 0069 anima só o **log** (fade/slide-in escalonado). Animar painéis/HP e projéteis fica para o **0063 juice** e a ideia **C2** (animações nos ataques, § acima) — fora.
+- **Polling/SSE/streaming da resolução** — a 0069 resolve num **único request** (decisão D1). Se o log ficar muito longo no futuro, avaliar streaming — ideia anotada, fora.
+- **Persistência do log de batalha em DB** — hoje o log é derivado do engine em memória (`BattleLogPresenter`); persistir rodadas em tabela fica como ideia futura — fora.
+- **Mudanças na economia (XP/dinheiro/recompensas)** — a 0069 preserva `finish_effects` 1× (D4); ajustar valores/curvas segue para sessão futura dedicada — fora.
+- **Mecânica de batalha em si (`BattleEngine`)** — a 0069 não toca `BattleEngine#battle` (157-164; 35 callers, contador `@rounds` local); mudar o motor é sessão futura — fora.
