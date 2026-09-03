@@ -22,7 +22,8 @@ class BattleJuicePresenter
       initial_hp: initial_hp(side, name),
       damaged: damaged?(side, name),
       ko: fainted?(side, name),
-      shooting: shooting?(side, name)
+      shooting: shooting?(side, name),
+      damage_taken: damage_taken(side, name)
     }
   end
 

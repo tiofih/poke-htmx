@@ -1,11 +1,18 @@
 <div class="battle-pane">
   <h2><%= title %></h2>
   <% presenters.each do |fighter| %>
-    <p class="fighter">
+    <% juice_data = juice.fighter_juice(side, fighter.name) %>
+    <% max_hp = fighter.hp_label.split("/").last.to_i %>
+    <% initial_percent = max_hp.positive? ? ((juice_data[:initial_hp].to_f / max_hp) * 100).round : 0 %>
+    <p class="fighter<%= " fighter--flash" if juice_data[:damaged] %><%= " fighter--ko" if juice_data[:ko] %><%= " fighter--shooting" if juice_data[:shooting] %>"
+       data-hp-initial="<%= juice_data[:initial_hp] %>"
+       data-damage="<%= juice_data[:damage_taken] %>">
+      <% if juice_data[:shooting] %><span class="projectile" aria-hidden="true"></span><% end %>
       <img src="<%= fighter.sprite %>" alt="<%= fighter.alt %>">
       <span class="fighter-name"><%= fighter.name %></span> — Nível <%= fighter.level %>
       <span class="bar hp-bar hp-bar--<%= fighter.hp_tier %>" role="progressbar"
-            aria-valuenow="<%= fighter.hp_label %>" aria-valuemin="0">
+            aria-valuenow="<%= fighter.hp_label %>" aria-valuemin="0"
+            style="--hp-initial-percent: <%= initial_percent %>%">
         <span class="bar-fill" style="width: <%= fighter.hp_percent %>%"></span>
       </span>
       <span class="hp-text">HP <%= fighter.hp_label %></span>

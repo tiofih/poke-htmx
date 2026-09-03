@@ -243,6 +243,33 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
                  "resolver leva a batalha ao fim")
   end
 
+  def test_battle_fragment_marks_juice_targets
+    start_battle_for("user-a")
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_includes body, "Fim de batalha", "precondition: um play resolve a batalha"
+
+    # log: origem/alvo por entrada (juice C2)
+    assert_match(/data-round="\d+"/, body, "entrada do log marca a rodada")
+    assert_match(/data-from-side="[01]"/, body, "entrada do log marca a origem 0/1")
+    assert_match(/data-to-side="[01]"/, body, "entrada do log marca o alvo 0/1")
+
+    # painéis: HP inicial + flash de dano + KO + projétil
+    assert_match(/data-hp-initial="\d+"/, body, "painel marca o HP inicial do lutador")
+    assert_match(/data-damage="\d+"/, body, "painel marca o dano para o numero flutuante")
+    assert_match(/fighter--flash/, body, "painel do alvo marca flash de dano")
+    assert_match(/fighter--ko/, body, "lutador derrotado marca KO fade/grayscale")
+    assert_match(/fighter--shooting/, body, "painel do atacante marca o projetil")
+    assert_match(/class="projectile"/, body, "elemento do projetil presente no atacante")
+
+    # banner vitória/derrota + news com classes de animacao (D4 C)
+    assert_includes body, 'class="winner winner--pop"', "banner de vitoria animado"
+    assert_includes body, 'class="xp-gained xp-gained--pop"', "news de XP animada"
+  end
+
   def test_battle_end_shows_winner_and_reset_button
     start_battle_for("user-a")
     play_until_finish(fallback_plays: 300)

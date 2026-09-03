@@ -15,9 +15,15 @@
   <h1>Batalha</h1>
   <p class="round">Rodada <%= @engine.rounds %><% if @engine.finished? %> — Fim de batalha<% end %></p>
 
+  <% juice = BattleJuicePresenter.new(
+       log: @engine.log,
+       final_hp: { 0 => @engine.teams[0].to_h { |poke| [poke.name, poke.hp_current] },
+                   1 => @engine.teams[1].to_h { |poke| [poke.name, poke.hp_current] } }
+     ) %>
+
   <div class="battle-layout">
     <div class="battle-column">
-      <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", presenters: @engine.teams[0].each_with_index.map { |poke, index| FighterPresenter.new(poke, item_used: @engine.member_used_item?(0, index)) } } %>
+      <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", side: 0, juice: juice, presenters: @engine.teams[0].each_with_index.map { |poke, index| FighterPresenter.new(poke, item_used: @engine.member_used_item?(0, index)) } } %>
 
       <% unless @engine.items.empty? %>
         <p class="stock-items">Itens:
@@ -33,19 +39,19 @@
       <div class="battle-controls">
         <% if @engine.finished? %>
           <% winner_name = @engine.winner.zero? ? "Seu Time" : "Oponente" %>
-          <p class="winner"><strong>Vencedor: <%= winner_name %></strong></p>
+          <p class="winner winner--pop"><strong>Vencedor: <%= winner_name %></strong></p>
           <% if @xp_gained %>
-            <p class="xp-gained"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e #{@money_gained} de dinheiro." : "." %></strong></p>
+            <p class="xp-gained xp-gained--pop"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e #{@money_gained} de dinheiro." : "." %></strong></p>
           <% end %>
           <% if defined?(@evolution_news) && !@evolution_news&.empty? %>
-            <ul class="evolution-news">
+            <ul class="evolution-news news--pop">
               <% @evolution_news.each do |news| %>
                 <li><%= news %></li>
               <% end %>
             </ul>
           <% end %>
           <% if defined?(@learned_news) && !@learned_news&.empty? %>
-            <ul class="learned-news">
+            <ul class="learned-news news--pop">
               <% @learned_news.each do |news| %>
                 <li><%= news %></li>
               <% end %>
@@ -83,6 +89,9 @@
         <ul class="battle-log">
           <% log_entries.each do |entry| %>
             <li class="battle-log__entry"
+                data-round="<%= entry[:round] %>"
+                data-from-side="<%= entry[:from_side] %>"
+                data-to-side="<%= entry[:to_side] %>"
                 style="--log-delay: <%= (round_order.size - 1 - round_order.fetch(entry[:round])) * 0.25 %>s">
               <span class="log-round">Rodada <%= entry[:round] %>:</span> <%= entry[:side] %>: <strong><%= entry[:text] %></strong>
             </li>
@@ -92,7 +101,7 @@
     </div>
 
     <div class="battle-column">
-      <%= erb :_fighter_panel, layout: false, locals: { title: "Oponente", presenters: @engine.teams[1].map { |poke| FighterPresenter.new(poke) } } %>
+      <%= erb :_fighter_panel, layout: false, locals: { title: "Oponente", side: 1, juice: juice, presenters: @engine.teams[1].map { |poke| FighterPresenter.new(poke) } } %>
     </div>
   </div>
 <% end %>
