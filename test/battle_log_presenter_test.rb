@@ -103,4 +103,45 @@ class BattleLogPresenterTest < Minitest::Test
     assert_equal [5, 4, 3, 2, 1], presenter.entries_all.map { |entry| entry[:round] },
                  "mais recente no topo, sem limite"
   end
+
+  def test_entries_include_from_to_side
+    log = [
+      attack_entry(round: 1, side: 0, attacker: "pikachu", target: "squirtle", move: "thunder-shock", damage: 42),
+      attack_entry(round: 1, side: 1, attacker: "squirtle", target: "pikachu", move: "water-gun", damage: 18),
+      item_entry(round: 1, attacker: "pikachu", item: "potion", healed: 20)
+    ]
+    presenter = BattleLogPresenter.new(log)
+
+    entries = presenter.entries
+
+    assert_equal 0, entries[0][:from_side], "ataque do jogador sai do lado 0"
+    assert_equal 1, entries[0][:to_side], "ataque mira o lado oposto"
+    assert_equal 1, entries[1][:from_side], "ataque do oponente sai do lado 1"
+    assert_equal 0, entries[1][:to_side], "ataque do oponente mira o lado 0"
+    assert_equal 0, entries[2][:from_side], "item cura o proprio lado"
+    assert_equal 0, entries[2][:to_side], "item nao troca de lado (autocura)"
+    assert_equal %i[round side text], entries[0].keys.first(3),
+                 "contrato round/side/text preservado (backwards-compat)"
+    assert_equal "Seu Time", entries[0][:side]
+    assert_includes entries[0][:text], "42 de dano"
+  end
+
+  def test_entries_all_include_from_to_side
+    log = [
+      attack_entry(round: 1, side: 0, attacker: "a", target: "b", move: "m1", damage: 5),
+      attack_entry(round: 2, side: 1, attacker: "b", target: "a", move: "m2", damage: 7),
+      item_entry(round: 2, attacker: "a", item: "potion", healed: 10)
+    ]
+    presenter = BattleLogPresenter.new(log)
+
+    all = presenter.entries_all
+
+    assert_equal 3, all.size
+    assert all.all? { |entry| [0, 1].include?(entry[:from_side]) },
+           "toda entrada tem from_side 0/1"
+    assert all.all? { |entry| [0, 1].include?(entry[:to_side]) },
+           "toda entrada tem to_side 0/1"
+    assert_equal({ round: 1, side: "Seu Time", text: "a usou m1 em b, 5 de dano", from_side: 0, to_side: 1 },
+                 all.last, "contrato completo preservado em entries_all")
+  end
 end

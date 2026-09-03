@@ -32,8 +32,22 @@ class BattleLogPresenter
     {
       round: entry[:round],
       side: side_label(entry),
-      text: entry[:action] == :item ? format_item(entry) : format_attack(entry)
+      text: entry[:action] == :item ? format_item(entry) : format_attack(entry),
+      from_side: from_side(entry),
+      to_side: to_side(entry)
     }
+  end
+
+  # Origem/alvo (0 = Seu Time, 1 = Oponente) derivados do log bruto: ataque sai
+  # do lado do atacante e mira o lado oposto; item cura o proprio lado (0063 juice).
+  def from_side(entry)
+    entry[:from_side] || entry[:attacker].to_i
+  end
+
+  def to_side(entry)
+    return entry[:to_side] if entry[:to_side]
+
+    entry[:action] == :item ? from_side(entry) : 1 - from_side(entry)
   end
 
   def side_label(entry)
