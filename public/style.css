@@ -299,8 +299,246 @@ body.page-history {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .battle-log__entry {
+  .battle-log__entry,
+  .fighter--flash,
+  .fighter--flash::after,
+  .fighter--ko img,
+  .fighter--ko .fighter-name,
+  .fighter--shooting .projectile,
+  .battle-layout,
+  .hp-bar .bar-fill,
+  .add-toast,
+  .winner--pop,
+  .xp-gained--pop,
+  .news--pop li {
     animation: none;
+  }
+}
+
+/* === Juice (0063) — animações CSS-only de batalha, intensidade media ~0.3-0.5s === */
+
+/* HP animado (dano/cura): a barra parte do HP inicial (var setada no servidor) e chega no atual */
+@keyframes juice-hp {
+  from {
+    width: var(--hp-initial-percent, 100%);
+  }
+}
+
+.hp-bar .bar-fill {
+  animation: juice-hp 0.5s ease-out both;
+}
+
+/* Flash de dano no painel do alvo (box-shadow inset, sem mexer no layout) */
+.fighter {
+  position: relative;
+}
+
+.fighter--flash {
+  animation: juice-flash 0.4s ease-out;
+}
+
+@keyframes juice-flash {
+  0% {
+    box-shadow: inset 0 0 0 9999px rgba(255, 0, 0, 0.28);
+  }
+  100% {
+    box-shadow: inset 0 0 0 9999px rgba(255, 0, 0, 0);
+  }
+}
+
+/* Numero de dano flutuante — pseudo-elemento do painel danificado (total sofrido) */
+.fighter--flash::after {
+  content: attr(data-damage);
+  position: absolute;
+  top: -6px;
+  right: 8px;
+  font-weight: bold;
+  color: #b00;
+  pointer-events: none;
+  animation: juice-damage-number 0.5s ease-out both;
+}
+
+@keyframes juice-damage-number {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+
+/* KO fade/grayscale no lutador derrotado */
+.fighter--ko img,
+.fighter--ko .fighter-name {
+  filter: grayscale(1);
+  opacity: 0.6;
+  animation: juice-ko 0.5s ease-out both;
+}
+
+@keyframes juice-ko {
+  from {
+    filter: grayscale(0);
+    opacity: 1;
+  }
+  to {
+    filter: grayscale(1);
+    opacity: 0.6;
+  }
+}
+
+/* Screenshake leve no layout da batalha */
+.battle-layout {
+  animation: juice-shake 0.3s ease-out;
+}
+
+@keyframes juice-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(1px, -1px);
+  }
+  50% {
+    transform: translate(-1px, 1px);
+  }
+  75% {
+    transform: translate(1px, 1px);
+  }
+}
+
+/* Projetil — so em viewport >= 900px (D5 A); abaixo disso so flash no alvo */
+.projectile {
+  display: none;
+  position: absolute;
+  top: 40%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffd54f, #f57c00);
+  box-shadow: 0 0 6px rgba(245, 124, 0, 0.8);
+  z-index: 2;
+}
+
+@media (min-width: 900px) {
+  .fighter--shooting .projectile {
+    display: block;
+    animation: juice-projectile 0.4s ease-out 0.15s both;
+  }
+
+  .battle-column[data-side="0"] .fighter--shooting .projectile {
+    --fly: 1;
+    right: -6px;
+  }
+
+  .battle-column[data-side="1"] .fighter--shooting .projectile {
+    --fly: -1;
+    left: -6px;
+  }
+
+  @keyframes juice-projectile {
+    from {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(calc(var(--fly, 1) * (100% + 18em))) scale(0.35);
+      opacity: 0.85;
+    }
+  }
+}
+
+/* Toast do add — entrada/saida no #add-status (sprite + nome nos kinds de notice) */
+.add-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-bottom: 0.6em;
+  padding: 0.5em 0.8em;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  animation: juice-toast-in 0.35s ease-out both, juice-toast-out 0.35s ease-in 3s both;
+}
+
+.add-toast__sprite {
+  width: 40px;
+  height: 40px;
+}
+
+@keyframes juice-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes juice-toast-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* Hover/active em botoes (juice fora da batalha) */
+button,
+.gameloop-cta {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+button:hover,
+.gameloop-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+button:active,
+.gameloop-cta:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Banner de vitoria/derrota + news de evolucao/XP animadas (D4 C) */
+.winner--pop {
+  animation: juice-banner 0.45s ease-out both;
+}
+
+.xp-gained--pop,
+.news--pop li {
+  animation: juice-news 0.4s ease-out both;
+}
+
+@keyframes juice-banner {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes juice-news {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

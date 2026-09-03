@@ -22,7 +22,7 @@
      ) %>
 
   <div class="battle-layout">
-    <div class="battle-column">
+    <div class="battle-column" data-side="0">
       <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", side: 0, juice: juice, presenters: @engine.teams[0].each_with_index.map { |poke, index| FighterPresenter.new(poke, item_used: @engine.member_used_item?(0, index)) } } %>
 
       <% unless @engine.items.empty? %>
@@ -100,7 +100,7 @@
       <% end %>
     </div>
 
-    <div class="battle-column">
+    <div class="battle-column" data-side="1">
       <%= erb :_fighter_panel, layout: false, locals: { title: "Oponente", side: 1, juice: juice, presenters: @engine.teams[1].map { |poke| FighterPresenter.new(poke) } } %>
     </div>
   </div>

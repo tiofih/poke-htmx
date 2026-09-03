@@ -135,4 +135,63 @@ class StyleResponsiveTest < Minitest::Test
     assert_match(/@media\s*\(max-width:\s*960px\)[\s\S]*?overflow-y:\s*visible/m, content,
                  "expected @media 960px to reset overflow-y:visible")
   end
+
+  def test_juice_keyframes_present
+    content = style_content
+
+    %w[
+      juice-hp
+      juice-projectile
+      juice-flash
+      juice-ko
+      juice-damage-number
+      juice-shake
+      juice-toast-in
+      juice-toast-out
+      juice-banner
+      juice-news
+    ].each do |name|
+      assert_match(/@keyframes\s+#{Regexp.escape(name)}\b/, content,
+                   "keyframe #{name} deve existir no style.css")
+    end
+
+    assert_match(/button[^{}]*,[^{}]*\.gameloop-cta[^{}]*\{[^}]*transition:/m, content,
+                 "botoes devem ter transition para hover/active")
+    assert_match(/\.gameloop-cta:active[^{}]*\{[^}]*transform:/m, content,
+                 "active do botao deve ter transform (juice de clique)")
+  end
+
+  def test_juice_reduced_motion_disables
+    content = style_content
+    block = content[/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{(.*?)\n\}/m, 1]
+
+    refute_nil block, "media query prefers-reduced-motion deve existir"
+    assert_match(/animation:\s*none/, block, "reduce desliga as animacoes de juice")
+
+    %w[
+      .battle-log__entry
+      .fighter--flash
+      .fighter--ko
+      .projectile
+      .battle-layout
+      .hp-bar
+      .add-toast
+      .winner--pop
+      .xp-gained--pop
+      .news--pop
+    ].each do |selector|
+      assert_includes block, selector, "reduced-motion deve desligar #{selector}"
+    end
+  end
+
+  def test_projectile_only_above_900px
+    content = style_content
+
+    assert_match(/\.projectile[^}]*display:\s*none/m, content,
+                 "projetil invisivel por padrao — abaixo de 900px so flash no alvo (D5 A)")
+    assert_match(/@media\s*\(min-width:\s*900px\)[\s\S]*@keyframes\s+juice-projectile/m, content,
+                 "keyframes do projetil existem apenas no bloco min-width: 900px")
+    assert_match(/@media\s*\(min-width:\s*900px\)[\s\S]*\.projectile[^}]*animation:\s*juice-projectile/m,
+                 content, "projetil anima apenas em viewport >= 900px")
+  end
 end

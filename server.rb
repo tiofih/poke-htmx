@@ -512,6 +512,7 @@ module ServerTeamActions
     settings.battle.invalidate(current_user) unless notice
     @notice = notice || "Adicionado ao time."
     @notice_kind = notice ? :error : :success
+    @toast_pokemon = pokemon unless notice
     mini_status = erb :team_add_result, layout: false
     prepare_team_fragment_data
     "#{mini_status}#{oob_team_view}#{oob_pokemon_list}#{oob_nav_badge}"
