@@ -115,6 +115,7 @@ Juice de batalha CSS-only — HP animado (dano/cura), projéteis C2 (só ≥900p
 
 ## 8. Observações
 
+- **Fase 2 (TDD) executada em 2026-09-02:** commits `be8b08e` (Passo 1 — presenter juice), `6aa4f6e` (Passo 2 — marcação no fragmento), `62d9c7c` (Passo 3 — CSS juice + reduced-motion) e este (Passo 4 — regressão/docs); suíte **995/3936** lint 0; `./scripts/check_docs` e `./scripts/checar-sessao 0063` ok. **Aguardando Revisor (S7) e validação do usuário (fase 3) — status de validação não atualizado (S4).**
 - **Fila após 0063:** **Onda 3 Estabilidade** (race add, escritas atômicas, CSRF, respiro — numeração desliza após a 0063) — a critério do usuário.
 - **Reuso da 0069:** o `--log-delay`/stagger (`views/battle.erb:86`, `public/style.css:285-305`) é a base do escalonamento do juice; `prefers-reduced-motion` precisa **estender a lista** (hoje só cobre `.battle-log__entry` — C3).
 - **HP inicial sem persistência extra:** derivar por replay (`hp_final + dano − cura`) evita migração/estado novo; `BattleJuicePresenter` puro e testável (D6 A).
@@ -129,3 +130,12 @@ Juice de batalha CSS-only — HP animado (dano/cura), projéteis C2 (só ≥900p
 - **`prefers-reduced-motion` cobre todos os keyframes novos** — hoje o media query só lista `.battle-log__entry`; esquecer um keyframe (ex.: toast, screenshake) viola C3.
 - **Projétil é responsivo** — em viewport <900px (battle empilhado) o alvo está fora da linha visual; gate `min-width: 900px` + flash no alvo (D5 A) evita animação sem sentido.
 - **Toast do add é CSS no `#add-status`** (`views/index.erb:11`, `hx-target="#add-status"` em 3 formulários) — o notice atual é texto; virar toast exige classe + sprite reutilizando os kinds de notice existentes (`draft-ui-ux.md:138-141`), sem mexer na rota `add_team_member` (`server.rb:494`).
+
+### Da implementação (fase 2 — 2026-09-02)
+
+- **Lib nova não autoload — require explícito no `server.rb`:** `BattleJuicePresenter` não é autocarregado (o app usa `require_relative` por arquivo); sem `require_relative "lib/battle_juice_presenter"` o fragmento de batalha quebra com 500 (NameError). Toda lib nova precisa do require no `server.rb`.
+- **Somas do juice por nome, não por índice:** o log bruto não registra índice do alvo — `BattleJuicePresenter` casa por `target_name`/`attacker_name` (nomes únicos por time na prática; o time do jogador não duplica). `attacker_index` existe só em entradas de item (gotcha 0069).
+- **Toast preserva `notice--<kind>`:** testes assertam `notice--success`/`notice--error`/`notice--info` na resposta do add — o `team_add_result.erb` virou `.add-toast` mantendo `notice notice--<kind>` (backwards-compat com os kinds).
+- **Número de dano flutuante = total sofrido** (via `data-damage`): CSS-only não anima um número por golpe com valores distintos; aproximação por total aceita — C5 (manual) valida o visual.
+- **HP animado via custom property herdada:** `--hp-initial-percent` definida no `.hp-bar` (style attr) e lida no `.bar-fill` filho — custom properties herdam, então `var()` funciona; keyframe só com `from` anima até o `width` inline.
+- **Projétil direcional via `--fly` + `data-side`:** `transform: translateX(calc(var(--fly, 1) * (100% + 18em)))`; sem `data-side="0|1"` nas `.battle-column` o projétil voa na direção errada (lado 1 precisa `--fly: -1`).
