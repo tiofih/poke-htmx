@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-02 (D1–D5 fechadas) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — 5 passos, suíte 985/3831 lint 0, revisor **Aprovado** — commits `55dac87/25aa981/98411d6/d7a3a93/9f59d2b/92d6547` |
+| Validação | **Concluída** — validada pelo usuário em 2026-09-02 (S2 por critério ok, C8 `manual` e parte de C7 `manual` ok via navegador, sem S3) |
 
 ---
 
@@ -56,14 +56,14 @@
 
 ### Resultado
 
-- [ ] **C1 — `POST /battle/play` resolve a batalha inteira num único request** (todas as rodadas até `finished?`, sem cliques adicionais) — prova: `test/battle_routes_test.rb` (novo `test_battle_play_resolves_entire_battle_in_one_request`).
-- [ ] **C2 — Itens automáticos (poções/seguráveis/use_stone) debitados de TODAS as rodadas**, não só da última (correção do gotcha `items_used_in_round`) — prova: `test/battle_service_test.rb` (novo `test_resolve_debits_items_from_all_rounds`) + regressão `test/battle_routes_test.rb` (`test_battle_play_debits_used_item_and_shows_heal_log`).
-- [ ] **C3 — Recompensas (XP/dinheiro) concedidas UMA única vez** na transição para finalizada (`finish_effects` guardado: record + XP + money + evolução/aprendizado + rebuild + persist HP) — prova: `test/battle_routes_test.rb` (reuso `test_battle_play_grants_xp_once_on_transition_to_finished` + `test_battle_play_grants_money_once_on_transition_to_finished` + `test_battle_finish_persists_hp_only_once` + `test_battle_play_after_finish_does_not_duplicate_battle_record`) + `test/battle_service_test.rb` (`test_grant_finished_xp_guard_prevents_double_grant`).
-- [ ] **C4 — Teto de rodadas (100 → força fim)** contra loop infinito teórico — prova: `test/battle_service_test.rb` (novo `test_resolve_stops_at_round_cap`).
-- [ ] **C5 — Log completo**: todas as rodadas visíveis no estado final (limite 3 fora do caminho do resolve) — prova: `test/battle_log_presenter_test.rb` (novo `test_entries_all_returns_every_round`) + `test/battle_routes_test.rb` (novo `test_battle_log_shows_all_rounds_after_resolve`).
-- [ ] **C6 — Botão manual "Jogar" removido; existe apenas "Batalhar"** — prova: `test/battle_routes_test.rb` (novo `test_battle_fragment_has_battle_button_and_no_play_button`, substitui `test_battle_fragment_has_play_button`/`test_battle_play_button_has_local_hx_indicator`).
-- [ ] **C7 — Regressão: invalidação por add/remove/move, fainted mid-batalha, game over/spiral preservados** — prova: testes existentes verdes (`test/battle_routes_test.rb`: `test_removing_member_resets_prepared_battle` + `test_battle_blocked_when_all_hp_zero` + `test_finished_battle_shows_game_over_and_restart_when_broke`; `test/battle_service_test.rb`: `test_invalidate_clears_active_battle`) + `manual` na validação (navegador: add/remove/move invalida a batalha preparada; time todo `fainted?` bloqueia; spiral mostra banner Vender/Recomeçar).
-- [ ] **C8 — UI revela o log rodada a rodada com animação CSS local** (fade/slide-in escalonado), sem polling/SSE e sem novo request, com `prefers-reduced-motion` (a11y) — prova: **`manual`** (inspeção visual via `./scripts/run` + navegador: clique em "Batalhar", rodadas aparecem escalonadas; com `prefers-reduced-motion` ativo, sem animação) + presença das classes de animação coberta pelo teste de C6.
+- [x] **C1 — `POST /battle/play` resolve a batalha inteira num único request** (todas as rodadas até `finished?`, sem cliques adicionais) — prova: `test/battle_routes_test.rb` (novo `test_battle_play_resolves_entire_battle_in_one_request`).
+- [x] **C2 — Itens automáticos (poções/seguráveis/use_stone) debitados de TODAS as rodadas**, não só da última (correção do gotcha `items_used_in_round`) — prova: `test/battle_service_test.rb` (novo `test_resolve_debits_items_from_all_rounds`) + regressão `test/battle_routes_test.rb` (`test_battle_play_debits_used_item_and_shows_heal_log`).
+- [x] **C3 — Recompensas (XP/dinheiro) concedidas UMA única vez** na transição para finalizada (`finish_effects` guardado: record + XP + money + evolução/aprendizado + rebuild + persist HP) — prova: `test/battle_routes_test.rb` (reuso `test_battle_play_grants_xp_once_on_transition_to_finished` + `test_battle_play_grants_money_once_on_transition_to_finished` + `test_battle_finish_persists_hp_only_once` + `test_battle_play_after_finish_does_not_duplicate_battle_record`) + `test/battle_service_test.rb` (`test_grant_finished_xp_guard_prevents_double_grant`).
+- [x] **C4 — Teto de rodadas (100 → força fim)** contra loop infinito teórico — prova: `test/battle_service_test.rb` (novo `test_resolve_stops_at_round_cap`).
+- [x] **C5 — Log completo**: todas as rodadas visíveis no estado final (limite 3 fora do caminho do resolve) — prova: `test/battle_log_presenter_test.rb` (novo `test_entries_all_returns_every_round`) + `test/battle_routes_test.rb` (novo `test_battle_log_shows_all_rounds_after_resolve`).
+- [x] **C6 — Botão manual "Jogar" removido; existe apenas "Batalhar"** — prova: `test/battle_routes_test.rb` (novo `test_battle_fragment_has_battle_button_and_no_play_button`, substitui `test_battle_fragment_has_play_button`/`test_battle_play_button_has_local_hx_indicator`).
+- [x] **C7 — Regressão: invalidação por add/remove/move, fainted mid-batalha, game over/spiral preservados** — prova: testes existentes verdes (`test/battle_routes_test.rb`: `test_removing_member_resets_prepared_battle` + `test_battle_blocked_when_all_hp_zero` + `test_finished_battle_shows_game_over_and_restart_when_broke`; `test/battle_service_test.rb`: `test_invalidate_clears_active_battle`) + `manual` na validação (navegador: add/remove/move invalida a batalha preparada; time todo `fainted?` bloqueia; spiral mostra banner Vender/Recomeçar).
+- [x] **C8 — UI revela o log rodada a rodada com animação CSS local** (fade/slide-in escalonado), sem polling/SSE e sem novo request, com `prefers-reduced-motion` (a11y) — prova: **`manual`** (inspeção visual via `./scripts/run` + navegador: clique em "Batalhar", rodadas aparecem escalonadas; com `prefers-reduced-motion` ativo, sem animação) + presença das classes de animação coberta pelo teste de C6.
 
 ### Garantias — teste que prova (S1)
 
@@ -97,23 +97,23 @@
 | 5 | **red→green — C7 regressão completa + docs** — suíte completa (baseline 983/3819 + novos) verde: invalidação (`test_removing_member_resets_prepared_battle`), fainted (`test_battle_blocked_when_all_hp_zero`), game over/spiral (`test_finished_battle_shows_game_over_and_restart_when_broke`), `test_invalidate_clears_active_battle`; lint 0; `REQUIREMENTS.md`/`SESSIONS.md` no escopo docs (status de validação só após usuário — S4) | `./scripts/test` completa + `./scripts/lint` 0 + `./scripts/check_docs`; commit `Passo 5: regressao invalidação/fainted/game over preservada (resolve nao altera economia nem motor) + docs` |
 | — | **Fase 2 concluída (5 passos)** → **Revisor (2c)**: loop Implementador↔Revisor até veredito `Aprovado` (teto 3 rodadas, senão S3) → **PARAR** e aguardar a validação do usuário (fase 3). Não marcar Done, não preencher a seção 7, não commitar conclusão. | — |
 
-## 7. Validação (executada pelo usuário)
+## 7. Validação (executada pelo usuário — S2 — 2026-09-02)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+> Validada pelo usuário em 2026-09-02 — S2 por critério ok, C8 `manual` ok (animação CSS escalonada via navegador) e parte de C7 `manual` ok (add/remove/move invalida, fainted bloqueia, spiral mostra banner), sem S3. Fase 3 concluída.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 resolve tudo num request | `test/battle_routes_test.rb` `test_battle_play_resolves_entire_battle_in_one_request` | `./scripts/run` + navegador: 1 clique em "Batalhar" leva ao resultado final | |
-| C2 débito multi-rodada | `test/battle_service_test.rb` `test_resolve_debits_items_from_all_rounds` | — | |
-| C3 recompensa 1× | `test_battle_play_grants_xp_once_on_transition_to_finished` + `test_battle_play_grants_money_once_on_transition_to_finished` + `test_battle_finish_persists_hp_only_once` | — | |
-| C4 teto de rodadas | `test/battle_service_test.rb` `test_resolve_stops_at_round_cap` | — | |
-| C5 log completo | `test/battle_log_presenter_test.rb` `test_entries_all_returns_every_round` + `test_battle_log_shows_all_rounds_after_resolve` | — | |
-| C6 só "Batalhar" | `test/battle_routes_test.rb` `test_battle_fragment_has_battle_button_and_no_play_button` | — | |
-| C7 regressão invalidação/fainted/game over | `test_removing_member_resets_prepared_battle` + `test_battle_blocked_when_all_hp_zero` + `test_finished_battle_shows_game_over_and_restart_when_broke` + `test_invalidate_clears_active_battle` | add/remove/move invalida; time todo fainted bloqueia; spiral mostra banner Vender/Recomeçar | |
-| C8 animação CSS escalonada | — (presença das classes via C6) | `./scripts/run` + navegador: rodadas aparecem escalonadas; `prefers-reduced-motion` desliga a animação | |
-| G1 suíte+lint | `./scripts/test` (baseline 983/3819 + novos) + `./scripts/lint` 0 | — | |
-| G2 sem gem/schema/API stub | `git diff -- Gemfile db/` vazio + fake da API | — | |
-| G3 S4/S5 | `./scripts/check_docs` ok + `./scripts/checar-sessao 0069` ok | — | |
+| C1 resolve tudo num request | `test/battle_routes_test.rb` `test_battle_play_resolves_entire_battle_in_one_request` | `./scripts/run` + navegador: 1 clique em "Batalhar" leva ao resultado final | ok |
+| C2 débito multi-rodada | `test/battle_service_test.rb` `test_resolve_debits_items_from_all_rounds` | — | ok |
+| C3 recompensa 1× | `test_battle_play_grants_xp_once_on_transition_to_finished` + `test_battle_play_grants_money_once_on_transition_to_finished` + `test_battle_finish_persists_hp_only_once` + `test_battle_play_after_finish_does_not_duplicate_battle_record` | — | ok |
+| C4 teto de rodadas | `test/battle_service_test.rb` `test_resolve_stops_at_round_cap` | — | ok |
+| C5 log completo | `test/battle_log_presenter_test.rb` `test_entries_all_returns_every_round` + `test_battle_log_shows_all_rounds_after_resolve` | — | ok |
+| C6 só "Batalhar" | `test/battle_routes_test.rb` `test_battle_fragment_has_battle_button_and_no_play_button` | — | ok |
+| C7 regressão invalidação/fainted/game over | `test_removing_member_resets_prepared_battle` + `test_battle_blocked_when_all_hp_zero` + `test_finished_battle_shows_game_over_and_restart_when_broke` + `test_invalidate_clears_active_battle` | add/remove/move invalida; time todo fainted bloqueia; spiral mostra banner Vender/Recomeçar | ok |
+| C8 animação CSS escalonada | — (presença das classes via C6) | `./scripts/run` + navegador: rodadas aparecem escalonadas; `prefers-reduced-motion` desliga a animação | ok |
+| G1 suíte+lint | `./scripts/test` (baseline 983/3819 + novos, suíte final 985/3831) + `./scripts/lint` 0 | — | ok |
+| G2 sem gem/schema/API stub | `git diff -- Gemfile db/` vazio + fake da API | — | ok |
+| G3 S4/S5 | `./scripts/check_docs` ok + `./scripts/checar-sessao 0069` ok | — | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 

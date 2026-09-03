@@ -693,7 +693,7 @@
 
 ### B5. "Batalhar" resolve a batalha inteira (fim das rodadas manuais)
 
-> **Implementado na sessão 0069 (2026-09-02, fase 2 TDD — suíte 985/3831, lint 0, aguardando validação).**
+> **Implementado e validado na sessão 0069 (2026-09-02 — suíte 985/3831, lint 0, revisor Aprovado, validado pelo usuário).**
 > `BattleService#resolve` (teto 100, débito de itens de todas as rodadas, `finish_effects` 1×),
 > `POST /battle/play` resolve tudo num request, log completo (`BattleLogPresenter#entries_all`,
 > `DEFAULT_LIMIT = 3` preservado), botão "Jogar" removido, revelação do log com animação CSS
