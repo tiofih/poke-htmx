@@ -229,7 +229,7 @@ class ServerTeamTest < Minitest::Test
     assert_empty @repository.all("user-b")
   end
 
-  def test_post_team_when_full_returns_warning_and_keeps_six
+  def test_post_team_full_returns_error_notice
     six = (1..6).map do |n|
       build_pokemon_record("pokemon#{n}", n)
     end
@@ -242,6 +242,7 @@ class ServerTeamTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "Time cheio"
+    assert_includes last_response.body, "notice--error"
     assert_equal 6, @repository.all("user-a").size
     refute_includes @repository.all("user-a").map(&:name), "meowth"
   end
