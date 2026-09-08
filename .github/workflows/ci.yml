@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache do bundle
+        uses: actions/cache@v4
+        with:
+          path: vendor/bundle
+          key: bundle-${{ hashFiles('Gemfile.lock') }}
+          restore-keys: |
+            bundle-
+
+      - name: Build da imagem com cache de camadas
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: poke-htmx-web
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Testes
+        run: ./scripts/test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build da imagem com cache de camadas
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: poke-htmx-web
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Lint
+        run: ./scripts/lint
+
+  check_docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check docs (consistencia do SDD)
+        run: ./scripts/check_docs
