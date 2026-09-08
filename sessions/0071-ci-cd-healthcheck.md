@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-08 (D1 A, D2 A, D3 A, D4 A, D5 A, D6 A, D7 A) |
-| Implementação | **Pendente** |
+| Implementação | **Concluída (TDD) — passos 1–4 verdes (suíte 1003/3980, lint 0, check_docs ok); aguardando revisão (fase 2c) e validação do usuário (fase 3)** |
 | Validação | **Pendente** (executada pelo usuário) |
 
 ---
