@@ -31,6 +31,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Start DB e aguardar healthcheck
+        run: docker compose up -d --wait db
+
       - name: Testes
         run: ./scripts/test
 
