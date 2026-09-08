@@ -259,6 +259,34 @@ class ServerTeamTest < Minitest::Test
     assert_equal 1, @repository.all("user-a").size
   end
 
+  def test_concurrent_post_team_no_500 # rubocop:disable Naming/VariableNumber
+    specs = [["pikachu", 25], ["bulbasaur", 1], ["charmander", 4]]
+    pokemon_by_name = specs.to_h { |name, number| [name, build_pokemon_record(name, number)] }
+
+    PokeApiStub.with_gateway(find: pokemon_by_name) do
+      errors = Queue.new
+      responses = Queue.new
+      threads = specs.map do |name, _number|
+        Thread.new do
+          session = Rack::Test::Session.new(Rack::MockSession.new(app))
+          session.post "/team", { pokeName: name }, user_session("user-a")
+          responses << session.last_response
+        rescue StandardError => e
+          errors << e
+        end
+      end
+      threads.each(&:join)
+
+      assert errors.empty?, "erros concorrentes: #{Array.new(errors.size) { errors.pop }.inspect}"
+      until responses.empty?
+        response = responses.pop
+        assert response.ok?, "resposta nao-ok (#{response.status}) sob corrida"
+      end
+    end
+
+    assert_equal 3, @repository.all("user-a").size
+  end
+
   def test_get_team_returns_own_session_team
     @repository.add("user-a", pikachu_pokemon)
 
