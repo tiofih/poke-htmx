@@ -298,23 +298,6 @@ body.page-history {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .battle-log__entry,
-  .fighter--flash,
-  .fighter--flash::after,
-  .fighter--ko img,
-  .fighter--ko .fighter-name,
-  .fighter--shooting .projectile,
-  .battle-layout,
-  .hp-bar .bar-fill,
-  .add-toast,
-  .winner--pop,
-  .xp-gained--pop,
-  .news--pop li {
-    animation: none;
-  }
-}
-
 /* === Juice (0063) — animações CSS-only de batalha, intensidade media ~0.3-0.5s === */
 
 /* HP animado (dano/cura): a barra parte do HP inicial (var setada no servidor) e chega no atual */
@@ -763,4 +746,25 @@ nav a.active {
 
 .evolution-empty {
   color: #666;
+}
+
+/* Acessibilidade — desligar animações de juice (0063) quando o usuário pedir
+   movimento reduzido. Este bloco fica no FIM do arquivo de propósito: precisa vir
+   depois de todos os `animation: juice-*` para vencer a cascata (mesma
+   especificidade, regra posterior vence). Não mover para cima. */
+@media (prefers-reduced-motion: reduce) {
+  .battle-log__entry,
+  .fighter--flash,
+  .fighter--flash::after,
+  .fighter--ko img,
+  .fighter--ko .fighter-name,
+  .fighter--shooting .projectile,
+  .battle-layout,
+  .hp-bar .bar-fill,
+  .add-toast,
+  .winner--pop,
+  .xp-gained--pop,
+  .news--pop li {
+    animation: none;
+  }
 }

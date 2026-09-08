@@ -182,6 +182,16 @@ class StyleResponsiveTest < Minitest::Test
     ].each do |selector|
       assert_includes block, selector, "reduced-motion deve desligar #{selector}"
     end
+
+    # Ordem na cascata: o bloco reduce precisa vir DEPOIS de todos os `animation: juice-*`,
+    # senao a regra posterior de juice sobrescreve o `animation: none` (bug real detectado
+    # no playtest 0063 — o bloco estava na linha 301, antes das regras de juice na 328+).
+    reduce_index = content.index("@media (prefers-reduced-motion: reduce)")
+    last_juice_animation = content.rindex(/animation:\s*juice-/)
+    refute_nil last_juice_animation, "deve haver declaracoes animation: juice-*"
+    assert reduce_index > last_juice_animation,
+           "o bloco prefers-reduced-motion deve estar depois das declaracoes juice-* para vencer " \
+           "na cascata; hoje juice-* (linha posterior) sobrescreve o animation: none"
   end
 
   def test_projectile_only_above_900px
