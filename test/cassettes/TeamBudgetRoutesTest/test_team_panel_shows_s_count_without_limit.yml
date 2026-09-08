@@ -1,0 +1,329 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://<pokeapi>/api/v2/pokemon/solo-s
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.7.10
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      date:
+      - Thu, 27 Aug 2026 13:46:38 GMT
+      content-type:
+      - text/plain; charset=utf-8
+      content-length:
+      - '9'
+      connection:
+      - keep-alive
+      access-control-allow-origin:
+      - "*"
+      access-control-expose-headers:
+      - X-PokeAPI-Hash,X-PokeAPI-Deploy-Date
+      cache-control:
+      - public, max-age=432000, s-maxage=432000
+      etag:
+      - W/"9-0gXL1ngzMqISxa6S1zx3F4wtLyg"
+      function-execution-id:
+      - 25z2ojnom7e0
+      server:
+      - cloudflare
+      x-cloud-trace-context:
+      - 4e1cc4615b91209aee685677958035e8
+      x-powered-by:
+      - Express
+      accept-ranges:
+      - bytes
+      x-served-by:
+      - cache-chi-klot8100128-CHI
+      x-cache:
+      - MISS
+      x-cache-hits:
+      - '0'
+      x-timer:
+      - S1787838397.981807,VS0,VE1387
+      vary:
+      - Accept-Encoding, x-fh-requested-host, accept-encoding
+      alt-svc:
+      - h3=":443"; ma=86400
+      nel:
+      - '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+      cf-cache-status:
+      - MISS
+      report-to:
+      - '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=BuP%2BalZvAwqHJqvsUo%2F8rLUZpxf6%2FIfkDZW2KORANGAaTXM7pBteiyfPM78hgsxtdBulUz9u6yb%2Bxq4%2BI%2BmoW0CHTN%2B0RcKu4Fsswu4pojpRAsYxGjyLTKPNpmZg"}]}'
+      cf-ray:
+      - a31b85fcd86aa4df-MIA
+    body:
+      encoding: UTF-8
+      string: Not Found
+  recorded_at: Thu, 27 Aug 2026 13:46:38 GMT
+- request:
+    method: get
+    uri: https://<pokeapi>/api/v2/pokemon/solo-s
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.7.10
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      date:
+      - Thu, 27 Aug 2026 13:46:38 GMT
+      content-type:
+      - text/plain; charset=utf-8
+      content-length:
+      - '9'
+      connection:
+      - keep-alive
+      access-control-allow-origin:
+      - "*"
+      access-control-expose-headers:
+      - X-PokeAPI-Hash,X-PokeAPI-Deploy-Date
+      cache-control:
+      - public, max-age=432000, s-maxage=432000
+      etag:
+      - W/"9-0gXL1ngzMqISxa6S1zx3F4wtLyg"
+      function-execution-id:
+      - 25z2ojnom7e0
+      server:
+      - cloudflare
+      x-cloud-trace-context:
+      - 4e1cc4615b91209aee685677958035e8
+      x-powered-by:
+      - Express
+      accept-ranges:
+      - bytes
+      x-served-by:
+      - cache-chi-klot8100128-CHI
+      x-cache:
+      - MISS
+      x-cache-hits:
+      - '0'
+      x-timer:
+      - S1787838397.981807,VS0,VE1387
+      vary:
+      - Accept-Encoding, x-fh-requested-host, accept-encoding
+      alt-svc:
+      - h3=":443"; ma=86400
+      nel:
+      - '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+      age:
+      - '0'
+      cf-cache-status:
+      - HIT
+      report-to:
+      - '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=Ht7m%2FmD9OKepyifb00%2BjpliMA7g1AAJXSAz%2BbVn3nbdFJuKdBQKLdhzNEZcn%2B8x0NoDK4q0w8kdQxPNZ28H8wqkm5bhkDN%2F4VYi6P48yvdFExG6STZjPgutmShG1"}]}'
+      cf-ray:
+      - a31b8608fd07260e-MIA
+    body:
+      encoding: UTF-8
+      string: Not Found
+  recorded_at: Thu, 27 Aug 2026 13:46:38 GMT
+- request:
+    method: get
+    uri: https://<pokeapi>/api/v2/pokemon/solo-s
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.7.10
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      date:
+      - Thu, 27 Aug 2026 13:46:39 GMT
+      content-type:
+      - text/plain; charset=utf-8
+      content-length:
+      - '9'
+      connection:
+      - keep-alive
+      access-control-allow-origin:
+      - "*"
+      access-control-expose-headers:
+      - X-PokeAPI-Hash,X-PokeAPI-Deploy-Date
+      cache-control:
+      - public, max-age=432000, s-maxage=432000
+      etag:
+      - W/"9-0gXL1ngzMqISxa6S1zx3F4wtLyg"
+      function-execution-id:
+      - 25z2ojnom7e0
+      server:
+      - cloudflare
+      x-cloud-trace-context:
+      - 4e1cc4615b91209aee685677958035e8
+      x-powered-by:
+      - Express
+      accept-ranges:
+      - bytes
+      x-served-by:
+      - cache-chi-klot8100128-CHI
+      x-cache:
+      - MISS
+      x-cache-hits:
+      - '0'
+      x-timer:
+      - S1787838397.981807,VS0,VE1387
+      vary:
+      - Accept-Encoding, x-fh-requested-host, accept-encoding
+      alt-svc:
+      - h3=":443"; ma=86400
+      nel:
+      - '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+      age:
+      - '0'
+      cf-cache-status:
+      - HIT
+      report-to:
+      - '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=IrfH1%2FVBS%2BDf%2B%2Bev13tF4BmVAnYllfcLcL6LAjZg79SkmJEkuTsZ%2FggrbwxtZFIxAVavN4mdVUCq%2FXQVtCWGhb5FT%2FVwToczNznmbeU1%2FQjHGY5Bc%2BHStKQRibc0"}]}'
+      cf-ray:
+      - a31b860b7ca9708a-MIA
+    body:
+      encoding: UTF-8
+      string: Not Found
+  recorded_at: Thu, 27 Aug 2026 13:46:39 GMT
+- request:
+    method: get
+    uri: https://<pokeapi>/api/v2/pokemon/solo-s
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.7.10
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      date:
+      - Thu, 27 Aug 2026 13:46:39 GMT
+      content-type:
+      - text/plain; charset=utf-8
+      content-length:
+      - '9'
+      connection:
+      - keep-alive
+      access-control-allow-origin:
+      - "*"
+      access-control-expose-headers:
+      - X-PokeAPI-Hash,X-PokeAPI-Deploy-Date
+      cache-control:
+      - public, max-age=432000, s-maxage=432000
+      etag:
+      - W/"9-0gXL1ngzMqISxa6S1zx3F4wtLyg"
+      function-execution-id:
+      - 25z2ojnom7e0
+      server:
+      - cloudflare
+      x-cloud-trace-context:
+      - 4e1cc4615b91209aee685677958035e8
+      x-powered-by:
+      - Express
+      accept-ranges:
+      - bytes
+      x-served-by:
+      - cache-chi-klot8100128-CHI
+      x-cache:
+      - MISS
+      x-cache-hits:
+      - '0'
+      x-timer:
+      - S1787838397.981807,VS0,VE1387
+      vary:
+      - Accept-Encoding, x-fh-requested-host, accept-encoding
+      alt-svc:
+      - h3=":443"; ma=86400
+      nel:
+      - '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+      age:
+      - '1'
+      cf-cache-status:
+      - HIT
+      report-to:
+      - '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=jeaKoM5%2BvI6wGMFYPsTRN%2F5TDqyz2%2BRsN3ieoijT2OTGGMSQ%2BHoMUhfBvYRNpbfGCvBJ9BGy2WKPEbbXvpiY8uoxjglM3giQ1sltyOM2sUiWWxS8ScnqN%2FJl89v%2B"}]}'
+      cf-ray:
+      - a31b860e1a1633e0-MIA
+    body:
+      encoding: UTF-8
+      string: Not Found
+  recorded_at: Thu, 27 Aug 2026 13:46:39 GMT
+- request:
+    method: get
+    uri: https://<pokeapi>/api/v2/pokemon/solo-s
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v2.7.10
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      date:
+      - Thu, 27 Aug 2026 13:46:41 GMT
+      content-type:
+      - text/plain; charset=utf-8
+      content-length:
+      - '9'
+      connection:
+      - keep-alive
+      access-control-allow-origin:
+      - "*"
+      access-control-expose-headers:
+      - X-PokeAPI-Hash,X-PokeAPI-Deploy-Date
+      cache-control:
+      - public, max-age=432000, s-maxage=432000
+      etag:
+      - W/"9-0gXL1ngzMqISxa6S1zx3F4wtLyg"
+      function-execution-id:
+      - 25z2h7g7y0j3
+      server:
+      - cloudflare
+      x-cloud-trace-context:
+      - 8ac7cd21f46a0a0b6532ab4299bf3876
+      x-powered-by:
+      - Express
+      accept-ranges:
+      - bytes
+      x-served-by:
+      - cache-gig2250043-GIG
+      x-cache:
+      - MISS
+      x-cache-hits:
+      - '0'
+      x-timer:
+      - S1787838400.854892,VS0,VE1423
+      vary:
+      - Accept-Encoding, x-fh-requested-host, accept-encoding
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - MISS
+      report-to:
+      - '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=JbqLbwCFmCUWZhI%2BO7EcmDonr22AcqAI%2B5pl9YTt1QTu0v2DlgulRZW9QKXx9Ltpe7nD8j3cMXv6qav0aClsswS2o1b%2FAQRDkjiIKcYuGC7PIZ3b098PeYr1qVkP"}]}'
+      nel:
+      - '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+      cf-ray:
+      - a31b860f0b87c802-GIG
+    body:
+      encoding: UTF-8
+      string: Not Found
+  recorded_at: Thu, 27 Aug 2026 13:46:41 GMT
+recorded_with: VCR 6.4.0
