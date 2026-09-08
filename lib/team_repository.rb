@@ -146,6 +146,7 @@ class TeamRepository # rubocop:disable Metrics/ClassLength
   DEFAULT_DATABASE_URL = "postgres://pokedex:pokedex@localhost:5432/pokedex"
   MAX_TEAM_SIZE = 6
   MAX_MOVES_PER_POKEMON = 4
+  RACE_CONSTRAINTS = %w[idx_team_pokemons_user_number idx_team_pokemons_user_slot].freeze
 
   class TeamFullError < StandardError; end
   class DuplicateError < StandardError; end
@@ -168,15 +169,36 @@ class TeamRepository # rubocop:disable Metrics/ClassLength
     ).map { |row| row_to_pokemon(row) }
   end
 
+  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
   def add(user_id, pokemon)
-    slot = next_free_slot(user_id)
-    raise TeamFullError, "Time cheio (máx. #{MAX_TEAM_SIZE})." if slot.nil?
-    raise DuplicateError, "#{pokemon.name} já está no time." if duplicate?(user_id, pokemon.number)
+    last_error = nil
 
-    connection.transaction do
-      create_progress(insert_team_member(user_id, pokemon, slot))
+    MAX_TEAM_SIZE.times do
+      slot = next_free_slot(user_id)
+      raise TeamFullError, "Time cheio (máx. #{MAX_TEAM_SIZE})." if slot.nil?
+      raise DuplicateError, "#{pokemon.name} já está no time." if duplicate?(user_id, pokemon.number)
+
+      begin
+        result = connection.transaction do
+          create_progress(insert_team_member(user_id, pokemon, slot))
+        end
+        return result
+      rescue PG::UniqueViolation => e
+        # Corrida de slot (user_id, slot) ou número duplicado (user_id, number):
+        # outra thread inseriu entre o SELECT do next_free_slot/duplicate? e o INSERT.
+        # Re-tenta re-derivando ambos do início; só propaga violação não-corrida.
+        raise unless race_violation?(e)
+
+        last_error = e
+      end
     end
+
+    # Esgotou as tentativas — diagnostica a condição final (D3: manter comportamento).
+    raise TeamFullError, "Time cheio (máx. #{MAX_TEAM_SIZE})." if next_free_slot(user_id).nil?
+    raise DuplicateError, "#{pokemon.name} já está no time." if duplicate?(user_id, pokemon.number)
+    raise last_error if last_error
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
 
   def set_moves(user_id, id, moves)
     connection.exec_params(
@@ -251,6 +273,15 @@ class TeamRepository # rubocop:disable Metrics/ClassLength
       "SELECT 1 FROM team_pokemons WHERE user_id = $1 AND number = $2",
       [user_id, number]
     ).ntuples.positive?
+  end
+
+  # Retry apenas nas violações de corrida dos índices únicos de slot/número.
+  # Outras violações (FK, NOT NULL, PK) devem propagar sem mascarar.
+  def race_violation?(error)
+    result = error.result
+    return false unless result
+
+    RACE_CONSTRAINTS.include?(result.error_field(PG::PG_DIAG_CONSTRAINT_NAME))
   end
 
   def connection

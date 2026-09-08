@@ -72,6 +72,68 @@ class TeamAddTest < Minitest::Test
   end
 end
 
+class TeamAddConcurrencyTest < Minitest::Test
+  include TeamRepositoryTestHelpers
+
+  def test_concurrent_adds_do_not_raise
+    user_id = "user-concurrent-c1"
+    n = 6
+    pokemons = (1..n).map { |i| build_pokemon_record("pokemon#{i}", i) }
+
+    ready = Queue.new
+    go = Queue.new
+    threads = pokemons.map do |pokemon|
+      Thread.new do
+        ready << true
+        go.pop
+        @repository.add(user_id, pokemon)
+      end
+    end
+
+    n.times { ready.pop }
+    n.times { go << true }
+    threads.each(&:value)
+
+    rows = @repository.all(user_id)
+    assert_equal n, rows.size
+    assert_equal (1..n).to_a, rows.map(&:slot)
+  end
+
+  def test_concurrent_add_same_number_does_not_duplicate
+    user_id = "user-concurrent-c2"
+    pokemon = build_pokemon_record("pikachu", 25)
+
+    ready = Queue.new
+    go = Queue.new
+    errors = Queue.new
+
+    threads = 2.times.map do
+      Thread.new do
+        ready << true
+        go.pop
+        begin
+          @repository.add(user_id, pokemon)
+        rescue TeamRepository::DuplicateError
+          # perdedor esperado: o time mantém apenas um exemplar do número
+        rescue StandardError => e
+          errors << e
+        end
+      end
+    end
+
+    2.times { ready.pop }
+    2.times { go << true }
+    threads.each(&:value)
+
+    assert errors.empty?,
+           "esperava DuplicateError no perdedor, mas houve: #{Array.new(errors.size) { errors.pop }.inspect}"
+    rows = @repository.all(user_id)
+    assert_equal 1, rows.size
+    matching = rows.count { |member| member.number == 25 }
+    assert_equal 1, matching
+  end
+end
+
 class TeamReadTest < Minitest::Test
   include TeamRepositoryTestHelpers
 
