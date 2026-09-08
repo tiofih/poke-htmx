@@ -709,6 +709,13 @@
 
 ### C2. Animações nos ataques
 
+> **Implementado e validado na sessão 0063 (2026-09-08 — suíte 995/3938, lint 0, revisor Aprovado, validado pelo usuário).**
+> Juice de batalha CSS-only — HP animado (dano/cura), projéteis (**só ≥900px**; <900px
+> flash no alvo), flash de dano, KO fade/grayscale, número de dano flutuante e
+> screenshake leve; origem/alvo derivados no servidor (replay do log via
+> `BattleJuicePresenter`), reusa `--log-delay`/stagger da 0069, `prefers-reduced-motion`
+> desliga tudo, zero JS/polling/SSE.
+
 - **Ideia:** **animar os ataques** de cada Pokémon na batalha, indicando **de onde
   saiu e para qual foi** (projétil/efeito entre os painéis Seu Time ↔ Oponente).
 - **Pontos em aberto:** CSS/animação pura (preferência do projeto, sem lib JS) vs

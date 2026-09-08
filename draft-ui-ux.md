@@ -136,6 +136,10 @@ até time de 6) já coerente entre rotas e fragmentos.
   são fragmentos dentro da `/` já em largura cheia desde 0042.
 
 **Juice / micro-interações (anotado 2026-08-22, pós JN-1 — usuário pediu "mais juice")**
+> **Implementado e validado na sessão 0063 (2026-09-08 — suíte 995/3938, lint 0, revisor Aprovado, validado pelo usuário).**
+> Toast do add (sprite + nome, animação de entrada/saída, preservando `notice--<kind>`)
+> e hover/active/transição em botões; além do juice de batalha (HP/projétil/flash/KO/
+> dano/screenshake) em C2 do `draft-auto-battler.md`.
 - **Notificação ao incluir Pokémon:** hoje o add só troca o `#add-status` (texto);
   candidato a **toast** (sprite + nome, animação de entrada/saída) reutilizando os
   kinds de notice; explorar `HX-Trigger` para notificações de outros eventos.

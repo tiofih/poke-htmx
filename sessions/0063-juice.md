@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-02 (D1–D8 fechadas) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — 5 passos (be8b08e, 6aa4f6e, 62d9c7c, 938d145, 2ccc277), suíte 995/3938 lint 0, revisor **Aprovado** |
+| Validação | **Concluída** — validado pelo usuário em 2026-09-08 (S2 tabela por critério ok, C5 manual ok) |
 
 ---
 
@@ -96,27 +96,28 @@ Juice de batalha CSS-only — HP animado (dano/cura), projéteis C2 (só ≥900p
 | 4 | **red→green — C4 regressão + docs** — suíte completa (baseline 985/3831 + novos) verde; lint 0; `REQUIREMENTS.md`/`SESSIONS.md` no escopo docs (status de validação só após usuário — S4) | `./scripts/test` completa + `./scripts/lint` 0 + `./scripts/check_docs`; commit `Passo 4: regressao suíte/lint preservada (juice nao toca motor nem economia) + docs` |
 | — | **Fase 2 concluída (4 passos)** → **Revisor (2c)**: loop Implementador↔Revisor até veredito `Aprovado` (teto 3 rodadas, senão S3) → **PARAR** e aguardar a validação do usuário (fase 3, C5 `manual`). Não marcar Done, não preencher a seção 7, não commitar conclusão. | — |
 
-## 7. Validação (executada pelo usuário — S2)
+## 7. Validação (executada pelo usuário — S2 — 2026-09-08)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+> Validada pelo usuário em 2026-09-08 — S2 por critério ok, C5 `manual` ok (HP anima dano/cura, projétil ≥900 / flash <900, flash de dano, KO fade/grayscale, número de dano flutuante, screenshake leve, toast do add, hover/active em botões, banner vitória/derrota e news animadas, `prefers-reduced-motion` desliga tudo — via navegador), sem S3. Fase 3 concluída.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 presenter juice | `test/battle_log_presenter_test.rb` `test_entries_include_from_to_side`/`test_entries_all_include_from_to_side` + `test/battle_juice_presenter_test.rb` `test_initial_hp_derived_from_final_plus_damage_minus_heal` | — | |
-| C2 marcação juice | `test/battle_routes_test.rb` `test_battle_fragment_marks_juice_targets` | — | |
-| C3 CSS juice + a11y | `test/style_responsive_test.rb` `test_juice_keyframes_present`/`test_juice_reduced_motion_disables`/`test_projectile_only_above_900px` | — | |
-| C4 regressão | suíte completa + `./scripts/lint` 0 + `./scripts/check_docs` | — | |
-| C5 visual manual | — | `./scripts/run` + navegador: HP anima; projétil ≥900 (flash <900); flash; KO fade/grayscale; número de dano; screenshake; toast do add; hover/active; banner + news; reduced-motion desliga tudo | |
-| G1 suíte+lint | `./scripts/test` (baseline 985/3831 + novos) + `./scripts/lint` 0 | — | |
-| G2 sem gem/schema/rede | `git diff -- Gemfile db/` vazio + testes sem rede | — | |
-| G3 S4/S5 | `./scripts/check_docs` + `./scripts/checar-sessao 0063` | — | |
+| C1 presenter juice | `test/battle_log_presenter_test.rb` `test_entries_include_from_to_side`/`test_entries_all_include_from_to_side` + `test/battle_juice_presenter_test.rb` `test_initial_hp_derived_from_final_plus_damage_minus_heal` | — | ok |
+| C2 marcação juice | `test/battle_routes_test.rb` `test_battle_fragment_marks_juice_targets` | — | ok |
+| C3 CSS juice + a11y | `test/style_responsive_test.rb` `test_juice_keyframes_present`/`test_juice_reduced_motion_disables`/`test_projectile_only_above_900px` | — | ok |
+| C4 regressão | suíte completa + `./scripts/lint` 0 + `./scripts/check_docs` | — | ok |
+| C5 visual manual | — | `./scripts/run` + navegador: HP anima; projétil ≥900 (flash <900); flash; KO fade/grayscale; número de dano; screenshake; toast do add; hover/active; banner + news; reduced-motion desliga tudo | ok |
+| G1 suíte+lint | `./scripts/test` (baseline 985/3831 + novos, suíte final 995/3938) + `./scripts/lint` 0 | — | ok |
+| G2 sem gem/schema/rede | `git diff -- Gemfile db/` vazio + testes sem rede | — | ok |
+| G3 S4/S5 | `./scripts/check_docs` + `./scripts/checar-sessao 0063` | — | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
 ## 8. Observações
 
-- **Fase 2 (TDD) executada em 2026-09-02:** commits `be8b08e` (Passo 1 — presenter juice), `6aa4f6e` (Passo 2 — marcação no fragmento), `62d9c7c` (Passo 3 — CSS juice + reduced-motion) e este (Passo 4 — regressão/docs); suíte **995/3936** lint 0; `./scripts/check_docs` e `./scripts/checar-sessao 0063` ok. **Aguardando Revisor (S7) e validação do usuário (fase 3) — status de validação não atualizado (S4).**
-- **Fila após 0063:** **Onda 3 Estabilidade** (race add, escritas atômicas, CSRF, respiro — numeração desliza após a 0063) — a critério do usuário.
+- **Fase 2 (TDD) executada em 2026-09-02/08:** commits `be8b08e` (Passo 1 — presenter juice), `6aa4f6e` (Passo 2 — marcação no fragmento), `62d9c7c` (Passo 3 — CSS juice + reduced-motion), `938d145` (Passo 4 — regressão/docs) e `2ccc277` (Passo 5 — reduced-motion desliga todos os keyframes); suíte **995/3938** lint 0; `./scripts/check_docs` e `./scripts/checar-sessao 0063` ok. Revisor **Aprovado** (S7, 1ª rodada — achados baixo não-bloqueantes anotados em `gotchas/`).
+- **Validação (fase 3) em 2026-09-08:** usuário validou — S2 por critério ok, C5 `manual` ok via navegador; sem S3. **Fase 3 concluída.**
+- **Fila após 0063:** **Onda 3 Estabilidade** (race add, escritas atômicas, CSRF, respiro — numeração desliza) — a critério do usuário.
 - **Reuso da 0069:** o `--log-delay`/stagger (`views/battle.erb:86`, `public/style.css:285-305`) é a base do escalonamento do juice; `prefers-reduced-motion` precisa **estender a lista** (hoje só cobre `.battle-log__entry` — C3).
 - **HP inicial sem persistência extra:** derivar por replay (`hp_final + dano − cura`) evita migração/estado novo; `BattleJuicePresenter` puro e testável (D6 A).
 - **Gotchas da 0069 aplicáveis:** `./scripts/test -n` não aceita `|` no regex (usar token único); `./scripts/test` com pipe aborta (redirecionar para arquivo); entradas de log de item têm `attacker_index` (fakes precisam incluir).
