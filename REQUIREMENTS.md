@@ -572,8 +572,14 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       down`; migrações 0003/0007 usam `TRUNCATE` (apagam dados fora de dev).
 - [ ] **`pry` carregado no boot de produção (anotado 2026-08-20):** `require "pry"` em
       `server.rb` — mover para o grupo de dev.
-- [ ] **Sem CI (anotado 2026-08-20):** teste+lint rodam só local; sem validação
-      automatizada no push e sem healthcheck do app/banco.
+- [ ] **Sem CI (anotado 2026-08-20; **em andamento — sessão 0071**, refinada em 2026-09-08):**
+      teste+lint rodam só local; sem validação automatizada no push e sem healthcheck do
+      app/banco. **EM ANDAMENTO:** sessão 0071 adiciona CI no GitHub Actions (workflow
+      `test`+`lint`+`check_docs` via `docker compose`, cache build+bundle, gatilhos push
+      main + pull_request) e healthcheck do app (`GET /health` 200, sem rede) e do banco
+      (`pg_isready`). Resolução só após o run verde no Actions ser validado pelo usuário.
+- [ ] **CD / deploy (anotado 2026-09-08, fora de escopo da 0071 — D7):** CI só roda
+      checks; sem alvo de deploy (registry, serviço, secrets). Candidato a sessão futura.
 - [x] **Performance do `GET /battle` (anotado 2026-08-23, durante validação da 0040):**
       ~2min na 1ª chamada. Causa provável: a **varredura serial da banda** no
       `OpponentGenerator#rated_names` (percorre o pool chamando `detail` + `moves_for`
