@@ -1120,6 +1120,19 @@ module HistoryRoutes
   end
 end
 
+module HealthRoutes
+  def self.registered(app)
+    register_health(app)
+  end
+
+  def self.register_health(app)
+    app.get("/health") do
+      content_type :json
+      { status: "ok" }.to_json
+    end
+  end
+end
+
 module ErrorHandling
   def self.registered(app)
     app.error 500 do
@@ -1196,6 +1209,10 @@ class Server < Sinatra::Base
   # rubocop:enable Metrics/BlockLength
 
   before do
+    # Healthcheck puro: `/health` não deve tocar o banco (health do banco é
+    # responsabilidade do `pg_isready` no docker-compose.yml), nem a PokéAPI/rede.
+    next if request.path_info == "/health"
+
     session[:user_id] = params["as"] if params["as"]
     session[:user_id] ||= SecureRandom.uuid
     @team_size = settings.team.all(current_user).size
@@ -1222,6 +1239,7 @@ class Server < Sinatra::Base
   register JourneyRoutes
   register BattleRoutes
   register HistoryRoutes
+  register HealthRoutes
   register ErrorHandling
 
   run! if $PROGRAM_NAME == app_file
