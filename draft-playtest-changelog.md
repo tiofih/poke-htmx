@@ -733,3 +733,82 @@ hipóteses erradas:
   visível e requer revalidação com clique humano.
 - O teste móvel foi inconclusivo porque o viewport permaneceu em 1728 px; não há
   conclusão sobre overflow ou responsividade nesta sessão.
+
+## Sessão 6 — 2026-09-08 (playtest 3 perfis + levantamentos de melhorias)
+
+> Execução: 3 perfis jogaram em sequência no navegador compartilhado
+> (browser-harness) contra `localhost:3000`: **novato** (primeira vez), **casual**
+> (joga há um tempo, não min-max) e **hardcore** (otimizador, foca em chegar o mais
+> longe). Verificação visual via DOM/CSS (`getComputedStyle`, `matchMedia`,
+> `Emulation.setEmulatedMedia`) — **sem devolver imagens/screenshots** (limite do
+> harness). Relatório completo: `docs/playtest-0063-juice.md`. Objetivo: percepção
+> de jogo, friction de UX e bugs de comportamento. **Isto não é a validação formal**
+> da 0063 — a validação é do usuário (fase 3).
+
+### 6.1 O que foi jogado
+
+- Novato: listagem → adicionar Pokémon → toast → detalhe → batalhar → navegação
+  (Time/Mart/Center/Histórico/Jornada) → estados de borda (sem time/cheio/duplicado).
+- Casual: loop diário (montar → batalhar → curar → comprar), qualidade de vida,
+  progressão (XP/evolução/rank), economia, leitura do juice.
+- Hardcore: otimização de time (tier/custo/limite S/itens/seguráveis/golpes/ordem),
+  timing de evolução, farm/recompensas, espiral de morte, exploits/desequilíbrios.
+
+### 6.2 Achado crítico — reduced-motion NOK (0063 C3/C5)
+
+`prefers-reduced-motion: reduce` **não desliga o juice**: o bloco `@media` em
+`public/style.css:301` seta `animation: none`, mas as regras de juice (L328+) vêm
+**depois** e vencem na cascata (mesma especificidade). Confirmado por 3 agentes
+(`getComputedStyle(...).animationName` = `juice-*` sob reduce) e por leitura de fonte.
+Só `.battle-log__entry` (0069, definido antes) é desligado. Esta é uma falha de
+critério da 0063 → **sinalizada para reabertura (S3)**; decisão é do usuário. Fix
+provável: mover o bloco `@media` para o fim de `style.css` (ou `!important`).
+
+### 6.3 Outros achados de UX (ver `docs/playtest-0063-juice.md`)
+
+Toast do add e detalhe abrem fora da viewport; botões desabilitados sem motivo
+visível ("No time ✓" sem tooltip; remover/evoluir com motivo só em `title`); "×N" do
+Mart = afordabilidade (saldo/preço), não estoque; recompensa-positiva na derrota;
+consumo de itens em batalha opaco; nav oculta Mart/Center/Jornada até time 6/6.
+
+### 6.4 Levantamentos de melhorias anotados (fora do fluxo — RNF-04; nenhum entra na fila agora)
+
+**L1 — Facilitar playtest via IA (endpoints JSON + seed determinístico).**
+Hoje a IA joga dirigindo um navegador real e raspando DOM (lento/frágil) e teve que
+ler o código para descobrir as regras do motor. Proposta: expor rotas JSON de
+estado/engine (`/state`, `/battle/log.json` ou `?format=json`) — time, wallet,
+budget, custos por tier e log estruturado (round/atacante/alvo/dano/from_side/
+to_side, já disponível no `BattleLogPresenter`) — e um seed determinístico
+(`POST /playtest/seed` com RNG fixo) para replay reproduzível. **Esforço ~0,5–1 dia**
+para os endpoints JSON; +~0,5–1 dia para o seed. **Nota:** sobrepõe os drafts
+**TP-2** (estado determinístico por sessão) e **TP-3** (log estruturado JSON) já
+listados acima — recomendo consolidar L1 dentro de TP-2/TP-3 em vez de duplicar.
+(Opções maiores: um harness `./scripts/playtest` que sobe com seed e joga por HTTP
+sem browser — ~2–3 dias.)
+
+**L2 — Suite Grafana de observabilidade (Loki + Prometheus + Mimir + Tempo).**
+Stack atual = docker-compose com `web`+`db` (2 serviços); Puma/Sinatra/pg/Faraday têm
+OTel contrib, então a instrumentação é viável. Estimativa por componente: Prometheus
+(~1–2 dias via `prometheus-client` → `/metrics` + serviço no compose), Grafana
+(~1–2 dias, sobreposto), Loki (~1–2 dias, stdout do Puma com Alloy/Promtail), Tempo +
+OpenTelemetry (**~2–4 dias** — o maior: SDK + exporter + instrumentar Rack/Sinatra,
+pg, Faraday e camada engine/service). **Mimir: recomendo cortar** — é para retenção/
+escala horizontal; para app single-node, Prometheus basta (economiza ~2–4 dias).
+**Caveats:** viola a regra G2 (gem/schema em sessão) — idéia de roadmap, não da
+0063; testes rodam offline, a sonda não pode puxar collector no CI → observability
+dev-only; ROI baixo para app local de aprendizado. Se o objetivo for aprender o
+stack, vale; para monitorar de verdade, comece por Prometheus + Grafana + logs JSON
+do Puma.
+
+**L3 — Botão "reportar bug" que abre issue no GitHub.**
+Repo `tiofih/poke-htmx` (SSH). App é htmx sem JS e **sem autenticação** (sessão =
+UUID no cookie). Dois níveis: **Nível A (recomendado)** — link pré-preenchido para
+`https://github.com/tiofih/poke-htmx/issues/new?title=...&body=...` com URL, página,
+sessão e descrição do jogador; **zero segredo, zero backend, zero risco; ~30–60 min**.
+**Nível C** — criação automática via `POST /feedback` chamando a API do GitHub com
+`GITHUB_TOKEN`; problemas: segredo (viola "nunca commitar segredos" → exigiria
+env/`.env`), app sem auth (qualquer um poderia spam issues → precisa secret
+compartilhado/rate-limit/admin), token fino escopo `Issues: Write` nunca na resposta,
+tratar erro/rate-limit/dedupe; **~1–2 dias + setup do token + guarda de segurança**.
+Nível C só faz sentido com usuários reais **e** auth de verdade primeiro, senão é
+spam bomb.
