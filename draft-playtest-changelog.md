@@ -812,3 +812,18 @@ compartilhado/rate-limit/admin), token fino escopo `Issues: Write` nunca na resp
 tratar erro/rate-limit/dedupe; **~1–2 dias + setup do token + guarda de segurança**.
 Nível C só faz sentido com usuários reais **e** auth de verdade primeiro, senão é
 spam bomb.
+
+### 6.5 Levantamento técnico — recording bug dos cassettes VCR (anotação 2026-09-08)
+
+**Sintoma:** cassettes VCR enormes — `ServerTeamRemoveQ5Test/test_oob_conditional_skips_starters_when_filtered_or_paginated.yml` com **195 MB** (324k linhas, 9555 interações HTTP) foi rejeitado pelo GitHub (> 100 MB); há outros de 20M, 18M, 14M, 2.8M. Um cassette normal deveria ter poucos KB.
+
+**Causa provável:** em `test/vcr_setup.rb`, `record: :new_episodes` + `match_requests_on: %i[method uri]` + `allow_playback_repeats: true`. Testes que fazem **muitas requisições únicas** (ex. buscar detalhe/golpe de vários Pokémon, listas paginadas/filtradas) gravam a resposta inteira repetidamente a cada run, inchando o cassette. Testes que deveriam usar `PokeApiStub` (in-process fake, sem rede) podem estar caindo em hit real e gravando.
+
+**Impacto:** (a) repo/`git history` inchado (vários cassettes grandes **já commitados**: `ServerJourneyGateBattleTest` 20M, `ServerTeamJourneyFragmentTest` 18M); (b) um cassette de 195M não pode ser versionado no GitHub (limite 100 MB) — foi **gitignoreado** pontualmente, mas é gambiarra; (c) cassettes gigantes podem esconder dependência real de rede em testes que deveriam ser offline.
+
+**Caminhos (decisão do usuário; nenhum entra na fila agora):**
+- **A (recomendado):** trocar `record: :new_episodes` por `record: :once` (ou `:none`) + revisar os testes que fazem hit real para usar `PokeApiStub` (fake in-process, sem rede) — os cassettes voltam a ser pequenos/determinísticos.
+- **B:** manter `:new_episodes` mas usar **Git LFS** para `test/cassettes/`.
+- **C:** revisar se os cassettes gigantes são realmente necessários (testes que deveriam ser 100% stubbed) e limpá-los.
+
+**Referência (história):** o cassette `ServerJourneyGateBattleTest/test_battle_blocked_when_team_shrinks_below_six.yml` foi restaurado durante o commit (churn de ~9844 linhas em um run); os 17 cassettes untracked foram commitados e o de 195M gitignoreado no commit `a39d3d4`.
