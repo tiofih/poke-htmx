@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-08 (D1 B, D2 A, D3 A, D4 A) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — 4 passos (ce4254b, f28860f, 828452b, 7d3c7e7), suíte 998/3950 lint 0, revisor **Aprovado** |
+| Validação | **Concluída** — validado pelo usuário em 2026-09-08 (S2 tabela por critério ok) |
 
 ---
 
@@ -109,25 +109,26 @@ Corrigir a **race completa do `add`** do time: a colisão de **slot** (`(user_id
 | 4 | **red→green — C5 (regressão + docs)** — suíte completa + lint 0 (baseline 995/3938 preservado) + `REQUIREMENTS.md`/`SESSIONS.md` se tocar doc (limitação "Race no add" pode ser atualizada se resolvida na validação) | `./scripts/test` + `./scripts/lint` + `./scripts/check_docs` + `./scripts/checar-sessao 0070`; commit `Passo 4: regressao da suite de team e docs apos retry no add` |
 | — | **Fase 2 concluída** → **Revisor (2c)**: loop Implementador↔Revisor até veredito `Aprovado` (teto 3 rodadas, senão S3) → **PARAR** e aguardar a validação do usuário (fase 3). Não marcar Done, não preencher a seção 7, não commitar conclusão. | — |
 
-## 7. Validação (executada pelo usuário — S2)
+## 7. Validação (executada pelo usuário — S2 — 2026-09-08)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+> Validada pelo usuário em 2026-09-08 — S2 por critério ok, sem S3. Fase 3 concluída.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (adds concorrentes, N membros, slots contíguos) | `./scripts/test -n /test_concurrent_adds_do_not_raise/` | — | |
-| C2 (re-add mesmo number não duplica) | `./scripts/test -n /test_concurrent_add_same_number_does_not_duplicate/` | — | |
-| C3 (time cheio → `TeamFullError` + aviso) | `./scripts/test -n /seventh|team_full|full_returns/` | — | |
-| C4 (rota sem 500 sob corrida) | `./scripts/test -n /test_concurrent_post_team_no_500/` | — | |
-| C5 (sem regressão) | `./scripts/test` + `./scripts/lint` 0 | — | |
-| G1 (suíte+lint) | `./scripts/test` + `./scripts/lint` 0 | — | |
-| G2 (sem migração/gems/repo burro) | `git diff -- db/` vazio + grep sem gem/migração no escopo | — | |
-| G3 (S4/S5) | `./scripts/check_docs` + `./scripts/checar-sessao 0070` | — | |
+| C1 (adds concorrentes, N membros, slots contíguos) | `./scripts/test -n /test_concurrent_adds_do_not_raise/` | — | ok |
+| C2 (re-add mesmo number não duplica) | `./scripts/test -n /test_concurrent_add_same_number_does_not_duplicate/` | — | ok |
+| C3 (time cheio → `TeamFullError` + aviso) | `./scripts/test -n /seventh|team_full|full_returns/` | — | ok |
+| C4 (rota sem 500 sob corrida) | `./scripts/test -n /test_concurrent_post_team_no_500/` | — | ok |
+| C5 (sem regressão) | `./scripts/test` + `./scripts/lint` 0 | — | ok |
+| G1 (suíte+lint) | `./scripts/test` + `./scripts/lint` 0 | — | ok |
+| G2 (sem migração/gems/repo burro) | `git diff -- db/` vazio + grep sem gem/migração no escopo | — | ok |
+| G3 (S4/S5) | `./scripts/check_docs` + `./scripts/checar-sessao 0070` | — | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
 ## 8. Observações
 
+- **Validação (fase 3) em 2026-09-08:** usuário validou — S2 por critério ok, sem S3. **Fase 3 concluída.**
 - **Próxima após 0070:** Onda 3 Estabilidade — **0071 escritas atômicas** (batalha/compra) → **0072 CSRF** → **0073 respiro** (numeração desliza). Ver `SESSIONS.md:385` e o roadmap.
 - **Risco do retry sem transação externa:** `TeamRepository#add` hoje faz `next_free_slot`/`duplicate?` **fora** de transação e só o INSERT dentro de `connection.transaction`. O retry re-executa do início. Não há transação envolvendo os SELECTs, então não há estado "abortado" entre tentativas **dos SELECTs** — o único ROLLBACK é o do INSERT que estourou (ver gotcha 9).
 - **`PG::UniqueViolation` x outras violações:** o `rescue` deve ser **específico** de `PG::UniqueViolation` (constraint `(user_id, slot)`/`(user_id, number)`), **não** de `PG::Error` genérico — para não mascarar outros erros (ex.: FK, `NOT NULL`). Confirmar o `constraint` no `PG::UniqueViolation` se houver múltiplos índices.

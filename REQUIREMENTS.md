@@ -562,8 +562,11 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [ ] **Erros sem status real (anotado 2026-08-20):** handler global de erro devolve
       `status 200` — esconde falhas de monitoria/healthcheck; devolver o status correto +
       fragmento htmx de erro dedicado.
-- [ ] **Race no `add` do time (anotado 2026-08-20):** `next_free_slot` é check-then-insert;
-      adds concorrentes lançam `PG::UniqueViolation` não tratado (500).
+- [x] **Race no `add` do time (anotado 2026-08-20; **resolvido na sessão 0070, validado em 2026-09-08**):**
+      `next_free_slot` é check-then-insert; adds concorrentes lançam `PG::UniqueViolation`
+      não tratado (500). **RESOLVIDO:** `TeamRepository#add` faz `rescue PG::UniqueViolation` +
+      retry com re-deriva de `next_free_slot` (até `MAX_TEAM_SIZE`), mantendo
+      `TeamFullError`/`DuplicateError`; sem migração (índices únicos já existem).
 - [ ] **Estado transiente e migrações destrutivas (anotado 2026-08-20):** batalha ativa
       (`BattleRegistry`, memória) e cache PokeAPI (P1) não sobrevivem a `docker compose
       down`; migrações 0003/0007 usam `TRUNCATE` (apagam dados fora de dev).
