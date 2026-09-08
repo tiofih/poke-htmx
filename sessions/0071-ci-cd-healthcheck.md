@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-08 (D1 A, D2 A, D3 A, D4 A, D5 A, D6 A, D7 A) |
-| Implementação | **Concluída (TDD) — passos 1–4 verdes (suíte 1003/3980, lint 0, check_docs ok); aguardando revisão (fase 2c) e validação do usuário (fase 3)** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — commits `8c7ff87`/`c912e2e`/`13fcd68`/`e30dbba`/`f4e6152` + fixes de validação `400d5c2`/`fd81dc6`; suíte 1003/3980, lint 0 |
+| Validação | **Concluída** — usuário em 2026-09-08 (S2 por critério: C1–C6 + G1–G4 ok, sem S3) |
 
 ---
 
@@ -109,16 +109,18 @@ Adicionar **CI no GitHub Actions** (workflow que roda `test` + `lint` + `check_d
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (workflow roda test/lint/check_docs) | `./scripts/test -n /test_workflow_has_expected_jobs/` | — | |
-| C2 (gatilhos push + pull_request) | `./scripts/test -n /test_workflow_triggers_push_and_pull_request/` | — | |
-| C3 (cache build e bundle) | `./scripts/test -n /test_workflow_caches_build_and_bundle/` | — | |
-| C4 (healthcheck db via pg_isready) | `./scripts/test -n /test_db_has_healthcheck_pg_isready/` | — | |
-| C5 (`GET /health` 200 sem rede) | `./scripts/test -n /test_health_returns_ok/` | — | |
-| C6 (sem regressão) | `./scripts/test` + `./scripts/lint` 0 + `./scripts/check_docs` | — | |
-| G1 (suíte+lint) | `./scripts/test` + `./scripts/lint` 0 | — | |
-| G2 (sem gems/schema/rede) | `git diff -- Gemfile* db/` vazio + grep sem rede | — | |
-| G3 (S4/S5) | `./scripts/check_docs` + `./scripts/checar-sessao 0071` | — | |
-| G4 (run verde no Actions) | — | abrir o run no GitHub e confirmar `test`+`lint`+`check_docs` verdes | |
+| C1 (workflow roda test/lint/check_docs) | `./scripts/test -n /test_workflow_has_expected_jobs/` | — | **ok** |
+| C2 (gatilhos push + pull_request) | `./scripts/test -n /test_workflow_triggers_push_and_pull_request/` | — | **ok** |
+| C3 (cache build e bundle) | `./scripts/test -n /test_workflow_caches_build_and_bundle/` | — | **ok** |
+| C4 (healthcheck db via pg_isready) | `./scripts/test -n /test_db_has_healthcheck_pg_isready/` | — | **ok** |
+| C5 (`GET /health` 200 sem rede) | `./scripts/test -n /test_health_returns_ok/` | — | **ok** |
+| C6 (sem regressão) | `./scripts/test` + `./scripts/lint` 0 + `./scripts/check_docs` | — | **ok** |
+| G1 (suíte+lint) | `./scripts/test` + `./scripts/lint` 0 | — | **ok** |
+| G2 (sem gems/schema/rede) | `git diff -- Gemfile* db/` vazio + grep sem rede | — | **ok** |
+| G3 (S4/S5) | `./scripts/check_docs` + `./scripts/checar-sessao 0071` | — | **ok** |
+| G4 (run verde no Actions) | — | run `34276074017` verde (`test`+`lint`+`check_docs`) | **ok** |
+
+> **Validação do usuário (S2) — 2026-09-08:** todos os critérios C1–C6 e G1–G4 `ok`. Sem S3. A limitação "Sem CI" (`REQUIREMENTS.md:575-576`) é **atendida** com esta sessão. Durante a validação real no Actions foram necessários 2 fixes no workflow (commitados): `400d5c2` (`setup-buildx-action` — driver `docker-container` para o cache `gha`, o driver default `docker` não suporta exportar cache) e `fd81dc6` (job `test` aguarda o db saudável com `docker compose up -d --wait db` antes da suíte — race de startup do Postgres, achado A5 do revisor).
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
