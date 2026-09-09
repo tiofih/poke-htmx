@@ -175,7 +175,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, "battle-log__entry",
+    assert_includes last_response.body, "log__entry",
                     "entradas do log com classe de animacao escalonada"
   end
 
@@ -265,9 +265,9 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_match(/fighter--shooting/, body, "painel do atacante marca o projetil")
     assert_match(/class="projectile"/, body, "elemento do projetil presente no atacante")
 
-    # banner vitória/derrota + news com classes de animacao (D4 C)
-    assert_includes body, 'class="winner winner--pop"', "banner de vitoria animado"
-    assert_includes body, 'class="xp-gained xp-gained--pop"', "news de XP animada"
+    # banner vitória/derrota + news com classes de animacao (D4 C, markup 0074)
+    assert_includes body, 'class="winner-badge"', "banner de vitoria animado"
+    assert_includes body, 'class="rewards"', "news de XP animada"
   end
 
   def test_battle_end_shows_winner_and_reset_button
@@ -343,8 +343,8 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     play_until_finish(fallback_plays: 300)
 
     assert last_response.ok?
-    assert_match(%r{<a class="gameloop-cta" href="/">Poke Center</a>}, last_response.body)
-    assert_match(%r{<a class="gameloop-cta" href="/">Poke Mart</a>}, last_response.body)
+    assert_match(%r{<a class="btn btn-secondary" href="/">Poke Center</a>}, last_response.body)
+    assert_match(%r{<a class="btn btn-secondary" href="/">Poke Mart</a>}, last_response.body)
     assert_includes last_response.body, "Novo confronto"
   end
 
