@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-09 (A1 aditivo, B2 sakura fallback até a 0076, D1 shell agora) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — suíte **1009/4058**, lint 0; Revisor **Aprovado** (1 rodada, sem S3) |
+| Validação | **Concluída** (executada pelo usuário em 2026-09-09 — S2 por critério, C1–C6 + G1–G3 ok) |
 
 ---
 
@@ -98,19 +98,19 @@ Adicionar o **design system do redesenho** (`open-design/`) como **base aditiva*
 
 ## 7. Validação (executada pelo usuário — S2)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Validação concluída em 2026-09-09.** Assinatura: **validação do usuário (S2)**. Uma linha por critério (S2 — nunca bloco único); **S3 não foi acionado** (nenhum critério reaberto).
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (tokens oklch no `:root`) | `./scripts/test test/design_system_test.rb -n /root_tokens/` | — | |
-| C2 (classes-núcleo) | `./scripts/test test/design_system_test.rb -n /core_classes/` | — | |
-| C3 (layout.erb shell) | `./scripts/test test/design_system_test.rb -n /layout/` | — | |
-| C4 (design system autônomo) | `./scripts/test test/design_system_test.rb -n /sakura/` | — | |
-| C5 (rota `/style.css` 200 `text/css`) | `./scripts/test test/design_system_test.rb -n /style_css_route/` | — | |
-| C6 (body page-battle/page-history) | `./scripts/test test/design_system_test.rb -n /layout/` | — | |
-| G1 (sem regressão) | `./scripts/test` + `./scripts/lint` 0 | `style_responsive_test.rb` (14) + `layout_test.rb` (4) verdes | |
-| G2 (sem gems/schema) | `git diff -- Gemfile* db/ server.rb lib/` vazio | — | |
-| G3 (S4/S5) | `./scripts/check_docs` + `./scripts/checar-sessao 0072` | — | |
+| C1 (tokens oklch no `:root`) | `test/design_system_test.rb` `test_design_system_root_tokens_oklch` — suíte 1009/4058, 0 falhas | usuário confirmou visualmente (navegação `/`, `/battle`, `/history`) | **ok** |
+| C2 (classes-núcleo) | `test/design_system_test.rb` `test_design_system_core_classes` — suíte 1009/4058, 0 falhas | usuário confirmou visualmente (navegação `/`, `/battle`, `/history`) | **ok** |
+| C3 (layout.erb shell) | `test/design_system_test.rb` `test_layout_uses_topnav_footer_shell` — suíte 1009/4058, 0 falhas | usuário confirmou visualmente (navegação `/`, `/battle`, `/history`) | **ok** |
+| C4 (design system autônomo) | `test/design_system_test.rb` `test_design_system_does_not_depend_on_sakura` — suíte 1009/4058, 0 falhas | usuário confirmou visualmente (navegação `/`, `/battle`, `/history`) | **ok** |
+| C5 (rota `/style.css` 200 `text/css`) | `test/design_system_test.rb` `test_style_css_route_serves_text_css` — suíte 1009/4058, 0 falhas | usuário confirmou visualmente (navegação `/`, `/battle`, `/history`) | **ok** |
+| C6 (body page-battle/page-history) | `test/design_system_test.rb` `test_body_gets_page_battle_history` — suíte 1009/4058, 0 falhas | usuário confirmou visualmente (navegação `/`, `/battle`, `/history`) | **ok** |
+| G1 (sem regressão) | `./scripts/test` (1009/4058, 0 falhas) + `./scripts/lint` 0; `style_responsive_test.rb` (14) + `layout_test.rb` (4) verdes | usuário confirmou visualmente (navegação `/`, `/battle`, `/history`) | **ok** |
+| G2 (sem gems/schema/rede) | `git diff -- Gemfile* db/ server.rb lib/` vazio; testes sem rede (`File.read`/rota estática `/style.css`, `/battle` com `PokeApiStub`) | usuário confirmou visualmente (navegação `/`, `/battle`, `/history`) | **ok** |
+| G3 (S4/S5) | `./scripts/check_docs` + `./scripts/checar-sessao 0072` verdes | usuário confirmou visualmente (navegação `/`, `/battle`, `/history`) | **ok** |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 

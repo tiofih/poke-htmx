@@ -697,13 +697,15 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 > **Fila reordenada em 2026-09-08 (decisão do usuário):** implementar o **redesenho
 > do `open-design/`** (portar conforme `open-design/migration-guide.md`) **antes** das
-> correções pontuais da Onda 3 Estabilidade. Nova ordem de próximas sessões (numeração
-> desliza): **0072 open-design-base** (design system `style.css` tokens+classes, remover
-> sakura, novo `layout.erb`) → **0073 open-design-home** (`index`/`team`) →
-> **0074 open-design-battle** (`battle`/`_fighter_panel`) → **0075 open-design-history**
-> → **0076 open-design-modals-filters** (modais center/mart/membro + filtros
-> `team=in|out`). Depois volta a **Onda 3 Estabilidade:** **0077 escritas atômicas**
-> → **0078 CSRF** → **0079 respiro**. Referência em `SESSIONS.md` (nota da 0071).
+> correções pontuais da Onda 3 Estabilidade. **0072 open-design-base Done** (design
+> system `style.css` tokens oklch + classes-núcleo + shell `layout.erb`; sakura mantido
+> como fallback até a 0076) — validado em 2026-09-09 (S2 C1–C6 + G1–G3 ok, sem S3);
+> suíte 1009/4058, lint 0. A onda continua (numeração desliza): **0073 open-design-home**
+> (`index`/`team`) → **0074 open-design-battle** (`battle`/`_fighter_panel`) →
+> **0075 open-design-history** → **0076 open-design-modals-filters** (modais
+> center/mart/membro + filtros `team=in|out`) — **0076** também remove o sakura.
+> Depois volta a **Onda 3 Estabilidade:** **0077 escritas atômicas** → **0078 CSRF** →
+> **0079 respiro**. Referência em `SESSIONS.md` (nota da 0071).
 
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
