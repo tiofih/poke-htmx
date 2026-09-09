@@ -183,6 +183,264 @@
 .muted {
   color: var(--muted);
 }
+
+/* === Home (0073) — index/team adaptativos, catálogo .pcard, roster === */
+
+/* Cabeçalho da home: título + resumo de orçamento, na mesma linha */
+.app-head {
+  margin-bottom: 2em;
+}
+
+.app-head h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5em, 3vw, 2.1em);
+  line-height: 1.15;
+  margin: 0.2em 0 0;
+}
+
+/* Resumo de orçamento (custo do time + barra + Gerenciar time) */
+.budget-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  max-width: 20em;
+  min-width: 16em;
+}
+
+.budget-meta {
+  flex-wrap: wrap;
+}
+
+.budget-meta .num {
+  font-weight: 700;
+}
+
+/* Barra de progresso do orçamento */
+.meter {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--fg-soft);
+  overflow: hidden;
+}
+
+.meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.meter-fill.over {
+  background: var(--danger);
+}
+
+.meter-fill.near {
+  background: var(--warn);
+}
+
+/* Grid home: time (2 partes) + catálogo (1 parte); colapsa <=920px */
+.grid-2-1 {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--gutter);
+  align-items: start;
+}
+
+@media (max-width: 920px) {
+  .grid-2-1 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Painel do catálogo (filtros + lista) */
+.catalog-pane {
+  min-width: 0;
+}
+
+/* Grade do catálogo visual */
+.catalog {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+/* Cartão de Pokémon do catálogo */
+.pcard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.8em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--fg);
+  text-align: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.pcard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  border-color: var(--accent);
+}
+
+.pcard a {
+  color: var(--fg);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.pcard .sprite-tile,
+.pcard img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  display: block;
+}
+
+.pcard-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95em;
+}
+
+.pcard-meta {
+  font-size: 0.8em;
+  color: var(--muted);
+}
+
+/* Botão adicionar (+/Adicionar), no rodapé do .pcard */
+.pcard-add {
+  margin-top: auto;
+  font-size: 0.85em;
+}
+
+/* Filtros do catálogo */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  margin-bottom: 1em;
+}
+
+.field label {
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+.input,
+.field input,
+.field select,
+.filter-grid input,
+.filter-grid select {
+  min-height: 44px;
+  padding: 0.5em 0.75em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75em;
+}
+
+/* Time (roster) */
+.roster {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+}
+
+.member {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  padding: 0.8em 1em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.member-top {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+}
+
+.sprite-tile img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  display: block;
+}
+
+.member-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  display: block;
+}
+
+.member-lvl {
+  font-size: 0.8em;
+  color: var(--muted);
+}
+
+.hp {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: 0.85em;
+}
+
+.hp-label {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.bar {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.hp-val {
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.member-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em;
+}
+
+/* Serviços (Poke Center / Poke Mart) com saldo */
+.services {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+}
+
+.services-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75em;
+}
+
 /* === Open Design System (0072): fim === */
 
 /* Layout interno das seções da página única */

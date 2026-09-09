@@ -41,6 +41,23 @@ class DesignSystemTest < Minitest::Test
     end
   end
 
+  def test_design_system_home_screen_classes
+    content = style_content
+
+    # Classes de tela anexadas na sessão 0073 (home/catálogo/roster) — C9.
+    %w[
+      grid-2-1 catalog-pane catalog
+      pcard pcard-name pcard-meta pcard-add
+      roster member member-top sprite-tile member-name member-lvl
+      hp hp-label bar bar-fill hp-val member-actions
+      budget-summary budget-meta meter meter-fill services services-row
+      field input filter-grid
+    ].each do |klass|
+      assert_match(/\.#{Regexp.escape(klass)}\b/, content,
+                   "expected style.css to define .#{klass}")
+    end
+  end
+
   def test_layout_uses_topnav_footer_shell
     layout = File.read(File.join(__dir__, "../views/layout.erb"))
 
