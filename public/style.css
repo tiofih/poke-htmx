@@ -29,6 +29,160 @@
   --radius: 12px; --radius-lg: 18px; --gutter: 32px;
   --container: 1180px;
 }
+
+/* Shell — topnav + footer */
+.topnav {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  color: var(--fg);
+}
+
+.topnav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gutter);
+  min-height: 64px;
+}
+
+.topnav nav {
+  display: flex;
+  gap: 1.25em;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.topnav a {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15em;
+  letter-spacing: 0.01em;
+}
+
+.pagefoot {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  padding: 1em 0;
+}
+
+/* Botões */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  padding: 0.55em 1em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.95em;
+  line-height: 1.2;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease,
+              background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--fg);
+  border-color: var(--border);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--fg);
+  border-color: transparent;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Superfícies */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding: 2em 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25em 1.5em;
+  color: var(--fg);
+}
+
+/* Tipo */
+.eyebrow {
+  font-family: var(--font-display);
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lead {
+  font-size: 1.1em;
+  color: var(--fg);
+}
+
+.meta {
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum";
+}
+
+.muted {
+  color: var(--muted);
+}
 /* === Open Design System (0072): fim === */
 
 /* Layout interno das seções da página única */

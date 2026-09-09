@@ -26,4 +26,18 @@ class DesignSystemTest < Minitest::Test
     assert_match(/--radius:/, root)
     assert_match(/--container:/, root)
   end
+
+  def test_design_system_core_classes
+    content = style_content
+
+    %w[
+      topnav topnav-inner logo pagefoot
+      btn btn-primary btn-secondary btn-ghost
+      container section stack row row-between card
+      eyebrow lead meta num muted
+    ].each do |klass|
+      assert_match(/\.#{Regexp.escape(klass)}\b/, content,
+                   "expected style.css to define .#{klass}")
+    end
+  end
 end
