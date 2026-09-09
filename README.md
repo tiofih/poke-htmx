@@ -127,8 +127,9 @@ com **validação feita pelo usuário** ao fim de cada requisito. Documentação
 
 - `REQUIREMENTS.md` — requisitos (RF), status, roadmap e backlog.
 - `SESSIONS.md` — registro de todas as sessões (refinamento → TDD → validação).
-- `draft-auto-battler.md` + `draft-arquitetura-design-patterns.md` — ideias e decisões de
-  arquitetura embrionárias (antes de virarem sessão).
+- `docs/draft-backlog.md` — draft único e consolidado (catálogo de feito/pendente) com
+  as ideias e decisões embrionárias antes de virarem sessão.
+- `docs/playtest-*.md` — registros de playtest (experiência/achados).
 - `docs/screens/` — descrições de tela (inspiração para as futuras telas da jornada).
 
 Convenções de commit (uma linha): `Passo N: ...` (green), `Sessao 00NN: refinamento...`,

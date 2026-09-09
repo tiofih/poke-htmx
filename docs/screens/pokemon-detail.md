@@ -57,7 +57,7 @@ blocks:
 
 ---
 
-## Desenho alvo — detalhe (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.3)
+## Desenho alvo — detalhe (análise UI/UX 2026-08-22; ref: `docs/draft-backlog.md` §2.3)
 
 ```
 ┌──────────────────────────────────────────┐

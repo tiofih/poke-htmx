@@ -30,7 +30,7 @@ A decisão segue nesta ordem:
 | `Refinamento` não `Concluída`/`Done` | **Refinar** a sessão (fase 1) conforme `SESSIONS.md` — fechar objetivo, escopo, critérios de aceite e plano TDD no arquivo da sessão. |
 | `Refinamento` feito e `Implementação` pendente | **Implementar (TDD)** (fase 2) conforme `SESSIONS.md` — red → green → commit por green, atualizar docs no escopo. |
 | `Refinamento` e `Implementação` feitos, `Validação` pendente | **Parar** — a fase 3 é executada pelo usuário. Avisar que o passo anterior concluiu a implementação (suíte/lint verdes) e aguardar o feedback antes de marcar `Done`/commitar conclusão. |
-| Todas as sessões fechadas | Propor a **próxima sessão** a partir de `SESSIONS.md` ("Próxima sessão") / `REQUIREMENTS.md` (roadmap) / `draft-auto-battler.md`, apresentar ao usuário e **aguardar confirmação** antes de criar arquivo novo. |
+| Todas as sessões fechadas | Propor a **próxima sessão** a partir de `SESSIONS.md` ("Próxima sessão") / `REQUIREMENTS.md` (roadmap) / `docs/draft-backlog.md`, apresentar ao usuário e **aguardar confirmação** antes de criar arquivo novo. |
 
 Se o usuário passou argumentos, eles podem **sobrescrever** a decisão automática
 (formato livre, ex.: `refinar 0012`, `implementar 0011`). Caso contrário, decida

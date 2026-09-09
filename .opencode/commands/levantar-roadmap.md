@@ -13,7 +13,7 @@ Se o usuário digitou uma ideia (via `$ARGUMENTS`), registre-a como **candidata 
 
 Varra as fontes em busca de itens que surgiram e ainda não estão no roadmap:
 
-1. `draft-auto-battler.md` — todas as entradas (A, B, C, D, refatorações, notas RNG).
+1. `docs/draft-backlog.md` — todas as entradas (A, B, C, D, refatorações, notas RNG).
 2. `REQUIREMENTS.md` — seções "Limitações Conhecidas / Pontos de Refinamento",
    "Ideias de auto-battler", "Roadmap", e qualquer requisito `Draft`/não `Done`.
 3. `SESSIONS.md` — seções "Próxima sessão" e observações de sessões concluídas.
@@ -25,7 +25,7 @@ Para cada candidato, classifique:
 | Categoria | Significado |
 | --- | --- |
 | **Já no roadmap** | Já listado na tabela `Roadmap` do `REQUIREMENTS.md` (mesmo que `Backlog`/`Draft`) |
-| **Em draft** | Presente só no `draft-auto-battler.md`, ainda não virou linha do roadmap |
+| **Em draft** | Presente só no `docs/draft-backlog.md`, ainda não virou linha do roadmap |
 | **Emerge** | Anotado em observações/limitações/sessões e **não** aparece nem no roadmap nem no draft (novo para o fluxo) |
 | **Descartável** | Obsoleto, já feito, ou sem ação (indique o porquê) |
 
@@ -46,7 +46,7 @@ Registre as **candidatas novas confirmadas** (as que o usuário disser para mant
 - Em `REQUIREMENTS.md`: na seção "Ideias de auto-battler" ou Lista de pontos,
   mantendo as convenções existentes (`[ ]` / anotações). Não crie requisito formal
   nem linha de roadmap ainda — isso é refinamento de fase futura (RNF-04).
-- Ideias que são decisões grandes de arquitetura/draft → `draft-auto-battler.md`
+- Ideias que são decisões grandes de arquitetura/draft → `docs/draft-backlog.md`
   (seção própria), somente com a nota de "aguarda sessão".
 - Deixe intacto o fluxo: **não** criar `sessions/NNNN-*`, **não** tocar em
   `SESSIONS.md` (progresso/next), **não** marcar requisito como `Done`.
@@ -56,6 +56,6 @@ explicitamente **o que entrou no roadmap/draft** e o que ficou para o usuário d
 
 ## 4. Próximo passo
 
-Ao concluir, diga: "Ideias consolidadas em `REQUIREMENTS.md`/`draft-auto-battler.md`.
+Ao concluir, diga: "Ideias consolidadas em `REQUIREMENTS.md`/`docs/draft-backlog.md`.
 Quando quiser virar sessão, rode `/iniciar-sessao` (ou continue a sessão corrente se
 uma estiver em andamento)". Não inicie a sessão nova agora.

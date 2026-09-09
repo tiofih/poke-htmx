@@ -63,7 +63,7 @@ DB `team_pokemon_progress: level 1 xp 0` (nenhum level up), `wallet 30`, `battle
 
 - 3 colunas `Seu Time | Controles/Log | Oponente` sem breakpoint (§02) — mobile espremido. Log mostra todas as rodadas (6) ok, mas sem scroll, texto denso.
 - “Jogar” auto-resolve até fim (B5) — bom, mas sem animação. HP `0/45` + barra `0%` clara, PP `40→33` mostra gasto.
-- Pós-batalha CTAs “Poke Center / Poke Mart / Novo confronto” levam à `/` (lista) — perde contexto da batalha. WIP: janelas flutuantes anotadas em `draft-ui-ux §6`.
+- Pós-batalha CTAs “Poke Center / Poke Mart / Novo confronto” levam à `/` (lista) — perde contexto da batalha. WIP: janelas flutuantes anotadas em `docs/draft-backlog.md` §6.
 - `battle-loading` “Carregando…” aparece só com `hx-indicator` — rápido, quase imperceptível.
 
 ### 3.3 Poke Center / Mart
@@ -95,7 +95,7 @@ DB `team_pokemon_progress: level 1 xp 0` (nenhum level up), `wallet 30`, `battle
 - [ ] **Histórico UUID** — deve mostrar apelido/`?as=` (J4).
 
 **P2 — técnicas / edge:**
-- [ ] **Race add:** `TeamRepository.add` checa `team_size` e `duplicate?` sem lock transacional forte — 2 `POST /team` paralelos podem estourar `MAX_TEAM_SIZE` (limitação já em `draft-auto-battler` “race no add”).
+- [ ] **Race add:** `TeamRepository.add` checa `team_size` e `duplicate?` sem lock transacional forte — 2 `POST /team` paralelos podem estourar `MAX_TEAM_SIZE` (limitação já em `docs/draft-backlog.md` “race no add”).
 - [ ] **BattleService `build_opponent` banda:** usa `average_level 1` → band F/D, mas oponente pode ter S se pool não filtrado por `base_form?` (OPP-1/2 no draft).
 - [ ] **PP `Struggle` infinito:** `choose_move` cai em `power 10 pp 100` quando sem PP — correto mas sem UI de “sem PP”.
 - [ ] **Cassettes pendentes:** `test/cassettes/ServerBattleTest/...` não limpos.

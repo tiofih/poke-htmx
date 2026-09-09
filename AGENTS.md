@@ -79,10 +79,10 @@ Quando `graphify-out/` existe no projeto, **use o graphify** em vez de ler arqui
 ## Draft de ideias — anotar para fases futuras
 
 - **Ideias, refatorações e decisões de mudanças grandes** (identificadas em qualquer
-  fase da sessão) são **anotadas em `draft-auto-battler.md`** (ou em um arquivo de
-  draft dedicado) para serem **incluídas em fases futuras** — seja em uma fase
-  específica mais adiante, seja quando todas as fases correntes/agendadas estiverem
-  finalizadas.
+  fase da sessão) são **anotadas em `docs/draft-backlog.md`** (o draft único e
+  consolidado — catálogo de feito/pendente) para serem **incluídas em fases futuras**
+  — seja em uma fase específica mais adiante, seja quando todas as fases
+  correntes/agendadas estiverem finalizadas.
 - O draft é **fora do fluxo** (não gera critérios de aceite nem plano TDD na hora).
   Registrar uma ideia no draft **não** abre novo escopo nem atrasa a sessão em curso.
 - Ao concluir as fases, o draft é **revisado**: o que entra vira sessão, o que não se

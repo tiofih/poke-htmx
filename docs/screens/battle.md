@@ -74,7 +74,7 @@ blocks:
 
 ---
 
-## Desenho alvo — batalha (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.6)
+## Desenho alvo — batalha (análise UI/UX 2026-08-22; ref: `docs/draft-backlog.md` §2.6)
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -101,7 +101,7 @@ layout: 3 colunas (grid fixo, tela cheia)
 deltas:
   - id: fighter-partial (novo)
     partial: um único partial de painel para player/opponent (fim da duplicação);
-             presenter formata linhas (ref: draft-arquitetura-design-patterns)
+             presenter formata linhas (ref: docs/draft-backlog.md)
   - id: hp-bars (novo)
     type: barra visual por membro (<hp_current>/<hp_max> como percent)
   - id: battle-log (alvo)

@@ -36,7 +36,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 ## Requisitos Funcionais
 
 ### RF-18 — Tratamento de erros (E2) — `Done` (sessão 0018, validado em 2026-08-09)
-- Implementar o **tratamento de erros** de ponta a ponta (E2 do `draft-auto-battler.md`,
+- Implementar o **tratamento de erros** de ponta a ponta (E2 do `docs/draft-backlog.md`,
   levantamento de roadmap 2026-08-09): **nenhuma rota devolve 500** quando a fonte
   (PokéAPI) falha ou recebe input inválido — cada falha devolve um **fragmento
   amigável com status 200** (padrão htmx `@notice`/`@message`) e um **handler global**
@@ -72,11 +72,11 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       página de erro padrão do Sinatra.
 - [x] Suíte completa verde (222 runs/778 asserts) e lint 0; commit a cada green;
       0 regressão RF-01..RF-17.
-- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo escopo.
+- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`docs/draft-backlog.md` atualizados no mesmo escopo.
       **Validado pelo usuário em 2026-08-09.**
 
 ### RF-17 — Página de gerenciamento de time (A3) — `Done` (sessão 0017, validado em 2026-08-09)
-- Página própria para gerenciar o time (A3 do `draft-auto-battler.md`, anotado na
+- Página própria para gerenciar o time (A3 do `docs/draft-backlog.md`, anotado na
   validação da 0015): o usuário **escolhe a posição (slot) de cada Pokémon** e
   **escolhe os golpes de cada um** — hoje a posição só muda via ▲/▼ no `#team`
   (RF-08) e os golpes são fixos (últimos 4 da PokéAPI, RF-15).
@@ -109,7 +109,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       `with_available_move_names`/`with_move`).
 - [x] Suíte completa verde (`./scripts/test` — 199 runs/708 asserts) e lint 0;
       commit a cada green; 0 regressão RF-01..RF-16.
-- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo
+- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`docs/draft-backlog.md` atualizados no mesmo
       escopo.
       **Validado pelo usuário em 2026-08-09.**
 
@@ -123,7 +123,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 > XP/evolução por batalha com oponente no mesmo nível do jogador (D2).
 
 ### RF-16 — Logs de batalha detalhados (C1) — `Done` (sessão 0016, validado em 2026-08-09)
-- Melhorar os **logs de batalha** (C1 do `draft-auto-battler.md`, anotado na validação
+- Melhorar os **logs de batalha** (C1 do `docs/draft-backlog.md`, anotado na validação
   da 0015): hoje o log mostra apenas o **lado** atacante ("Seu Time"/"Oponente"), o
   golpe e o dano — não diz **qual Pokémon** bateu em **qual**. O log passa a indicar
   **quem atacou quem**, com **qual golpe** e o **dano causado** (ex.: "Seu Time:
@@ -147,12 +147,12 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       `GET /battle` e `POST /battle/play`.
 - [x] Suíte completa verde (`./scripts/test`) e lint 0; commit a cada green; sem
       regressão de comportamento em RF-01..RF-15.
-- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo
+- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`docs/draft-backlog.md` atualizados no mesmo
       escopo.
       **Validado pelo usuário em 2026-08-09.**
 
 ### RF-15 — Golpes (moves) e PP (D1) — `Done` (sessão 0015, validado em 2026-08-09)
-- Dar **multi-move** à simulação de batalha (D1 do `draft-auto-battler.md`, roadmap
+- Dar **multi-move** à simulação de batalha (D1 do `docs/draft-backlog.md`, roadmap
   item 15): cada `BattlePokemon` passa a ter uma **lista de golpes** (nome, tipo,
   poder, precisão, PP). O `BattleEngine` **escolhe deterministicamente** qual golpe
   usar (maior dano esperado), aplica o **poder do golpe** no dano, **decai o PP** a
@@ -193,7 +193,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] Sem JS customizado (RNF-01); testes de rota sem rede (stubs incluem
       `PokeApiStub.with_moves_for`/`with_move`).
 - [x] Suíte completa verde (171 runs/610 asserts) e lint 0; commit a cada green;
-      0 regressão RF-01..RF-14; `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md`
+      0 regressão RF-01..RF-14; `REQUIREMENTS.md`/`SESSIONS.md`/`docs/draft-backlog.md`
       atualizados no mesmo escopo.
       **Validado pelo usuário em 2026-08-09.**
 
@@ -232,7 +232,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] `public/style.css` estiliza as classes atuais dos fragmentos (listagem, detalhe,
       team, batalha) sobre a base sakura; `GET /style.css` responde 200 via pasta pública.
 - [x] Suíte completa verde (146 runs/553 asserts) e lint 0; 0 regressão RF-01..RF-13;
-      commit a cada green; `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md`
+      commit a cada green; `REQUIREMENTS.md`/`SESSIONS.md`/`docs/draft-backlog.md`
       atualizados no mesmo escopo.
       **Validado pelo usuário em 2026-08-09.**
 
@@ -271,7 +271,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - [x] `index.erb` ganha entrada "Batalha" (`hx-get="/battle" hx-target="#battle"`).
 - [x] Sem JS custom (RNF-01); testes sem rede (`with_all_names`/`with_detail`/`with_type`).
 - [x] Suíte completa verde (135 runs/481 asserts) e lint 0; sem regressão RF-01..RF-12;
-      `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo escopo.
+      `REQUIREMENTS.md`/`SESSIONS.md`/`docs/draft-backlog.md` atualizados no mesmo escopo.
       **Validado pelo usuário em 2026-08-09.**
 
 ### RF-12 — Oponente automático (B4) — `Done` (sessão 0012, validado em 2026-08-08)
@@ -296,7 +296,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       diferentes variam.
 - [x] Domínio puro: `names`/`fetcher` injetados, testes sem rede (stub `fetcher`);
       suíte completa verde (118 runs/416 asserts) e lint 0; sem regressão RF-01..RF-11.
-- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`draft-auto-battler.md` atualizados no mesmo escopo.
+- [x] `REQUIREMENTS.md`/`SESSIONS.md`/`docs/draft-backlog.md` atualizados no mesmo escopo.
       **Validado pelo usuário em 2026-08-08.**
 
 ### RF-01 — Listar Pokémon — `Done` (sessão 0006)
@@ -593,7 +593,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       coalescida** (`PersistentJsonStore` — store em memória + writer em background 30s +
       `flush!`/`PokeApiHttp#flush!`, fim do write-through de 260MB/miss).
       **Resultado de validação:** 1ª batalha ~60s → **2.81s** (frio real **1.64s**),
-      2ª **0.01s**. Ver `draft-auto-battler.md` (anotações de performance).
+      2ª **0.01s**. Ver `docs/draft-backlog.md` (anotações de performance).
 - [x] **Bug: oponente SEMPRE o mesmo por usuário (anotado 2026-08-25, confirmado no
       playtest 2; **corrigido na sessão 0049 em 2026-08-25**):** toda batalha de um
       mesmo usuário repetia **o mesmo time oponente
@@ -647,18 +647,18 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       determinística de 3 por rodada** (derivada de `hash(user_id)+battle_count`, sem
       tabela; D2 da 0068) a preço fixo 80; segue fora de escopo: **outros itens de
       evolução** (não-pedras), preço dinâmico por pedra e persistência da rotação
-      (hoje derivada — ver sessão 0068 e `draft-auto-battler.md`);
+      (hoje derivada — ver sessão 0068 e `docs/draft-backlog.md`);
       (4) **custo de montagem de time** — fortes caros, fracos baratos, com restrição de
       evolução muito baratos/gratuitos; (5) **"batalhar" resolve a batalha inteira**
       (fim das rodadas manuais); (6) **animações nos ataques** (de onde saiu / para onde
-      foi). Ver `draft-ui-ux.md` §6 e `draft-auto-battler.md` (anotações 2026-08-25).
+      foi). Ver `docs/draft-backlog.md` §6 e `docs/draft-backlog.md` (anotações 2026-08-25).
 - [ ] **Ideias de encerramento 2026-08-25 (fora do fluxo — RNF-04):** (1) **exibir
       ranking/custo dos pokes na lista** após implementar o custo por time (M2) — a
       listagem mostra o custo/ranking (tier) de cada Pokémon para montar o time ciente
       do preço; (2) **filtros além da busca por nome** — tipo, geração, custo, ranking
       (combináveis com busca e paginação); (3) **alinhar a caixa da lista com a caixa do
       time** (colunas da `/` com largura/altura/rolagem coerentes). Ver
-      `draft-auto-battler.md` (UX-2).
+      `docs/draft-backlog.md` (UX-2).
 - [x] **Regra: Pokémon com vida zerada não pode ser removido do time (anotado
       2026-08-25, durante a validação da 0053 — fora de sessão, RNF-04):** **Done (sessão 0064, validado em 2026-08-28 — suíte 906/3367, lint 0):** `Pokemon#fainted?` (`hp_max>0 && hp_current==0`) + `alive?` em `lib/pokemon.rb`, `TeamService#remove_member` bloqueia fainted (`false` + notice error), `views/team.erb` botão `disabled` + `title="Pokémon derrotado — cure antes de remover"`, `DELETE /team` htmx bloqueado com `notice--error` + OOBs, `TeamService#reset` (`POST /journey/restart`) ignora e limpa mesmo fainted + saldo 200.
 
@@ -695,6 +695,16 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 | 24 | Candidatos futuros — D4 (draft temático), D1 (nível de aprendizado), J2 (personalização); ~~J3 (ranking S–F)~~ executado — sessão 0040, ver item 25; ~~J1 (seleção inicial)~~ movido para execução — sessão 0036, ver item 25; ~~JN-3 (itens de uso único)~~ executado — sessão 0045, ver item 25; ~~JN-3-B (equipamento por quantidade do estoque)~~ executado — sessão 0046, ver item 25; ~~JN-4 (componentes de Mart/Center)~~ executado — sessão 0047, ver item 25; ~~JN-5 (gameloop)~~ executado — sessão 0048, ver item 25 | Backlog |
 | 25 | **Próximas sessões (ordem fechada em 2026-08-18)** — 1. **Respiro 2** (extrair `BattleService`/`TeamService` + split `server_test.rb`); 2. **D1 parcial** (nível de aprendizado de golpes); 3. **J1** (seleção inicial); 4. **JN-2** (golpes em lista); 5. **J3** (ranking S–F); 6. **JN-1** (telas próprias, fim do empilhamento) — depois organizar o resto (JN-3, JN-4, JN-5, J2, J4, D4) | **Respiro 2 Done (sessão 0033, validado em 2026-08-19 — suíte 559/1696, lint 0, grep `rubocop:` em `server.rb` → 0)**: `BattleService` (`prepare`/`advance`, módulos Preparation/Finalization) + `TeamService` (`manage_data`/`save_moves`/`assign_item`/`assign_held_item`) — services usam providers lambda p/ a gateway (testes trocam instância em runtime) e compartilham as mesmas instâncias de repositórios; handlers de batalha/time/itens ficam **thin**; `test/server_test.rb` (1925 linhas) fatiado em 7 arquivos por área + `battle_test_helpers.rb`. **D1 parcial executado (sessão 0034, **concluída e validada em 2026-08-19 — suíte 566/1734, lint 0** — status `Done`)**: gating do manage por nível (`TeamService` com `progression` + `manage_data` via `learnable_moves` filtrado por `level <= nível` do membro), validação gated (golpe acima do nível → aviso, não salva), nível na UI (`"<nome> — Nível N"`), união com moves salvos (legados visíveis/removíveis, sem nível quando fora do `learnable_moves`), troca manual preservada (cap 4, sem substituição automática), `BattleService#learn_moves_for_member` (`:finished`) inalterado, `available_move_names` órfão na UI (mantido no gateway), stubs migrados para `with_learnable_moves`. Depois da 0034, **0035 (P1 — performance do gateway)** foi aberta **no lugar de J1** (decisão do usuário em 2026-08-19) e **concluída e validada em 2026-08-19 — suíte 586/1787, lint 0 — status `Done`**: `Parallelizer` puro (pool threads, ordem de entrada, exceção propagada) + `PokeApiCache` thread-safe (lock por chave, dedup in-flight) + `PersistentJsonStore` em `tmp/` (TTL 7d, write-through) + choke point `http_get` (boot com `POKEAPI_CACHE_PATH`) + fonte paralela (`type_relations` 18 tipos, `OpponentGenerator` com `parallelizer:`, `BattleService` prepare/finalize com prefetch; progresso DB pré-carregado/mutações seriais). **Resultados de validação: `GET /battle` ~38s (era ~93s), 2º play ~4s.** **J1 concluído e validado pelo usuário (sessão 0036 — implementação em 2026-08-21, validação com ajustes S3 e aprovação final em 2026-08-22, status `Done`)**: fim do dropdown (`pokemon_list.erb` vira lista clicável — sprite+nome linkam `GET /pokemon/:number`, botão Add por item faz `POST /team`; sem `<select>`), pool total paginado **20/página** (`PAGE_SIZE`, enriquecimento sprite/número na rota via `find` + `Parallelizer`, contrato `paginate` intacto) **e apenas formas base** (ajuste S3 de validação em 2026-08-22: predicado `base_form?(name)` — espécie raiz da própria cadeia evolutiva — em `PokeApiParsing`/`PokeApiCache`/fake; rota filtra antes de renderizar, fail-closed), destaques **"Iniciais"** (**27** slugs de **gen 1–9** no topo quando a busca está vazia — ajuste S3 de 2026-08-22; iniciais excluídos da listagem do pool para não duplicar), tela de entrada da jornada (gate em `GET /battle`, `POST /team/heal` e `POST /mart/buy` até o time de 6 — fragmento amigável sem ação; marcador persistido em `user_state` (migração 0036) **+ regra derivada** `team.size >= 6` via `JourneyService`; `POST /team` marca ao completar o 6º; `team.erb` esconde Poke Center/Mart antes da jornada). Suíte 611/1936, lint 0. **JN-2 Done (sessão 0037, implementada e validada pelo usuário em 2026-08-22 — suíte 614/1952, lint 0)**: fim dos checkboxes de golpes no manage — `team_manage.erb` renderiza **lista clicável com marcação via htmx** (linha por golpe com `data-move`, classe `marked` nos selecionados; rótulo "— Nível N" e legados fora do learnable preservados); clique alterna via round-trip na própria rota `POST /team/:id/moves` (`draft=1` + `toggle` + hidden `moves[]` carregando o rascunho) re-renderizando sem persistir; cap de 4 aplicado no preview com aviso (`TeamService#preview_move`); rascunho inicial = golpes salvos; save/validação intactos (`save_moves`). Testes de manage/golpes fatiados em `test/team_manage_test.rb`. Suíte 614/1952, lint 0. **Onda 0 UX Done (sessão 0038, implementada e validada pelo usuário em 2026-08-22 — suíte 624/2006, lint 0; decisão do usuário de priorizar UX antes da fila)**: `alt` nos sprites e `aria-label` nos botões ▲▼, `loading="lazy"` nas listagens, evoluções do detalhe viram links (`hx-get="/pokemon/:number"` → `#pokemon`), copy pt-BR ("Adicionar ao time", "Remover do time", "Filtrar por nome"), hierarquia de notices (`notice--info/success/error`; `kind:` nos resultados de HealService/MartService e `@notice_kind` nos handlers) e indicador global de carregamento (barra fixa acionada pelos eventos htmx). Suíte 624/2006, lint 0. **JN-1 Done (sessão 0039, implementada e validada pelo usuário em 2026-08-22 — suíte 626/2017, lint 0)**: cada área virou **página própria com layout** — Lista (`GET /`), Time (`GET /team`), Batalha (`GET /battle`), Histórico (`GET /history`) — com modo fragmento quando a requisição é htmx (`HX-Request`); nav com **links reais + estado ativo** por rota (hack de limpeza do SPA único removido); htmx restrito ao intra-tela (`#team-view`, `#battle-view`, `#pokemon-detail`, `#add-status`); `POST /team` na lista retorna **mini-status local** ("Adicionado ao time."/erro) em vez do fragmento do time; membros do time sem link cruzado de detalhe; rotas `GET /battle/close` e `GET /history/close` removidas (404) e `HX-Trigger: teamRefresh` eliminado. Suíte 626/2017, lint 0. Próxima: **J3 (ranking S–F) Done (sessão 0040, concluída e validada em 2026-08-23 — suíte 649/2063, lint 0)**: `PokemonRating` (domínio puro) classifica Pokémon em S–F por stats ponderados + bônus dos moves (top-4, STAB-aware) — `rate(pokemon, moves:) → {score:, tier:}` com thresholds S≥600/A≥500/B≥420/C≥350/D≥280/F<280 — + `band_for_level(level)` (≤2→F–D; 3–5→D–C; 6–9→C–B; 10–14→B–A; ≥15→A–S); `OpponentGenerator` ganhou `rater`/`moves_fetcher`/`band` (agrupados em `options:`) filtrando nomes pela banda com **fallback puro** quando a banda esvazia; `BattleService#build_opponent` deriva a banda do nível médio do jogador (fim do sorteio puro). Retorno `score` + `tier`, sem UI. **Perf anotada (limitações):** `GET /battle` ~2min na 1ª chamada — varredura serial da banda (RNF-04, fora de sessão). Próximo: **Onda 2 UX (leitura da batalha) — sessão 0041, concluída e validada em 2026-08-23 — suíte 680/2132, lint 0**: `Move#pp_max` (default = pp, preservado no `use_move`) + `FighterPresenter` (linha do lutador: HP/PP percent+tier, itens) + `BattleLogPresenter` (últimas 3 rodadas, mais recente no topo) + partial único `_fighter_panel.erb` (Seu Time/Oponente sem duplicação) com barras `hp-bar`/`pp-bar` (tokens do design system) + log com rótulo por rodada + `hx-indicator` local no botão Jogar; ajuste S3 de validação — layout em 3 colunas em tela cheia (Seu Time esq, controles centralizados + log centro, Oponente dir). **Onda 1 UX (jornada visível) — sessão 0042, concluída e validada em 2026-08-24 — suíte 689/2184, lint 0 (Caminho B: Lista+Time unificados)**: `GET /` virou **página única de 2 colunas em largura cheia** (busca + lista à esquerda, painel do time com contador "Time n/6" + membros à direita); **página `/team` removida** — `GET /team` sem `HX-Request` → 404, fragmento htmx interno preservado (alvo `#team-view`); **nav sem link "Time"**; `team_page.erb` removido; **estados do botão Add** (default / "No time ✓" desabilitado / cheio desabilitado) via `@team_names`/`@team_full` expostos na rota da listagem; add `POST /team` devolve mini-status **+ `#team-view` com `hx-swap-oob`**; **ajustes S3 de validação** — add/remove também re-renderizam `#pokemon-list` via OOB (`oob_pokemon_list`, offset/q via `hx-include=".list-state"`: remover de time cheio reativa os botões, adicionar o 6º desabilita) e link "Gerenciar time" em `<p class="team-tools">`; `body.page-list` com `max-width: none` + grid `list-team-grid`/`team-column`. Anotado (fora de sessão): flakiness `too many clients` na suíte com o container `web` ativo — workaround `docker compose stop web`. Depois: **Onda 3 UX (estrutura) — sessão 0044, refinada em 2026-08-24, implementada em 2026-08-24 e VALIDADA pelo usuário em 2026-08-24 (suíte 694/2200, lint 0)**: grade **uniforme de 6 colunas com páginas cheias e paginação on-demand** — `PAGE_SIZE` 36 = grid 6×6, página 1 = 27 iniciais + 9 comuns (sem título), páginas 2+ = 36 comuns, cada página carrega só o próprio lote (scan `base_form?` em batchs, "Página X" sem total) + largura cheia do Histórico (`body.page-history`). **Estabilidade:** conexão PG por thread (fim do "message type while idle" sob Puma), timeout 15s na gateway, banco de teste separado `pokedex_test` (suíte verde com `web` ativo). Depois: **JN-3 (itens de uso único) — sessão 0045, concluída e VALIDADA pelo usuário em 2026-08-24 (suíte 701/2222, lint 0)**: regra de **1 uso de item curativo por Pokémon por batalha** (`@items_used_by_member` no `BattleEngine`, bloqueio de novo uso do mesmo membro — pool comum e item atribuído) + badge "já usou item" por membro no painel do lutador (`FighterPresenter#item_used?`). **Anotado (JN-3-B, fora da fila):** equipamento não respeita a quantidade do estoque — regra: equipar debita, itens consumidos na batalha (poke fica sem), seguráveis permanecem até desequipar, option desabilitado + qtd livre. Depois: **JN-3-B (equipamento por quantidade) — sessão 0046, concluída e VALIDADA pelo usuário em 2026-08-24 (suíte 718/2294, lint 0)**: itens/seguráveis por poke (1 de cada), **equipar debita do estoque**, desequipar repõe, trocar repõe o antigo e debita o novo, re-equipar o mesmo item não debita; item atribuído consumido em batalha **não debita de novo** e **limpa o `assigned_item`** (`TeamItemOperations`, `battle_items` + `debit_used_items` por `attacker_index`); UI com quantidade livre + option `disabled` ×0. **Correções de UI na validação:** `reload_manage_state` no POST + fix de scroll. Depois: **JN-4 (componentes de Mart/Center) — sessão 0047, concluída e VALIDADA pelo usuário em 2026-08-24 (suíte 724/2329, lint 0)**: blocos de `views/team.erb` viram partials reutilizáveis `_mart.erb`/`_center.erb` no painel do time (`#team-view`), sem rotas/páginas novas — **cura completada** (HP atual/máx por membro + **custo total antecipado** via `HealService#preview_cost`; botão Curar `disabled` quando já curado ou saldo insuficiente) e **compra completada** (**preço × quantidade comprável = saldo/preço**, ex. "×5"; botão `disabled` quando saldo < preço). `team_hp.erb` absorvido pelo `_center.erb` (removido). Depois: **JN-5 (gameloop — circuito por CTAs) — sessão 0048, refinada em 2026-08-25, implementada em 2026-08-25 e VALIDADA pelo usuário em 2026-08-25 (passos 1–2, suíte 727/2344, lint 0; C1–C5 ok; decisão do usuário: **fluxo guiado por CTAs**, sem páginas/rotas novas)**: o circuito montagem → batalha → Poke Center/Poke Mart → repete vira explícito — fim de batalha mostra CTAs Poke Center/Poke Mart (levam à Lista `/`, onde `#team-view` mostra os partials) + botão "Novo confronto" mantido; painel do time pós-jornada ganha CTA **Batalhar** (`/battle`); `nav` permanece `Lista/Batalha/Histórico` (sem reordenação). **Anotações 2026-08-25 (RNF-04):** Center/Mart como janelas flutuantes + gerência de golpes/itens (4 selects); itens de evolução no Mart aleatórios por rodada; custo de montagem de time; "batalhar" resolve a batalha inteira; animações nos ataques; bug "novo confronto" repete oponente (seed determinístico por user). **0049 (BUG-1/Q1 — oponente novo a cada confronto + máquina de estado do gameloop) refinada e implementada em 2026-08-25 (passos 1–5, suíte 735/2358, lint 0)**: fim da seed fixa `Random.new(user_id.sum)` em `BattleService#build_opponent` — dependência injetável `opponent_rng` (default `-> { Random.new }`) — + **reuso da batalha ativa por estado** (preparada não iniciada → re-deriva o time do jogador preservando o oponente; em andamento/finalizada → preserva o engine), **"Novo confronto" via `POST /battle/new`** e **add/remove/move invalidam** a batalha ativa; banda/dificuldade pelo nível médio preservada. Ajuste **S3** (2026-08-25): C1 reprovado na validação (oponente trocava a cada acesso a `/battle`) → critérios reabertos (C1 redefinido + C4–C7). **Validada pelo usuário em 2026-08-25 (C1–C7 ok).** Depois: organizar o resto (J2, J4, D4, P2 e as novas anotações). **0050 (P2 — performance da varredura da banda) refinada, implementada e VALIDADA pelo usuário em 2026-08-25 (passos 1–7, suíte 751/2391, lint 0)**: varredura da banda em **lotes paralelos** (`ratings:` nome→tier no `OpponentGenerator`, determinístico por seed) + **cap de varredura** `max_candidates:` 256 com fallback puro + **`PokemonRatingCache`** persistente (keyed por nome, TTL 7d) injetado no `BattleService`; caminho `rater`/`moves_fetcher` intacto; banda do nível médio preservada (C4/C5 da 0040). **Ajuste S3 (C4-b):** gargalo real era o **write-through do `PersistentJsonStore`** (260MB/miss, ~1.45s) → **escrita coalescida** (store em memória + writer background + `flush!`/`PokeApiHttp#flush!`); 1ª batalha ~60s → **2.81s** (frio real **1.64s**). **Validada em 2026-08-25 (C1–C3 ok, C4 nok→ok, C4-b ok).** Anotado (RNF-04): GL-2 — trava para time com HP zerado ir batalhar. **0051 (BUG-4 — vazamento de conexões PG em produção) refinada, implementada e VALIDADA pelo usuário em 2026-08-25 (passos 1–3, suíte 755/2404, lint 0)**: `ConnectionRegistry` ganhou **`release_current_thread!`** + **teto `MAX_CONNECTIONS`** (30, env `PG_MAX_CONNECTIONS`) com evicção (thread morta primeiro, senão LRU); `server.rb` ganhou **`after { release_current_thread! }`** — cada request fecha as conexões da sua thread (isolamento por thread 0044 preservado; fim do "too many clients" por acúmulo — `pokedex` estável em 14 conexões, antes 80; suíte verde com o `web` ativo). Depois: organizar o resto do QA (Q2, Q3, Q5) e a fila (J2, J4, D4, M2, GL-2). **0052 (QA Q2+Q3+GL-2 — gate da jornada, gate de HP e itens no remove) refinada, implementada e VALIDADA pelo usuário em 2026-08-25 (passos 1–3 + ajuste S3, suíte 770/2473, lint 0; C1–C4 ok)**: **Q3** — `JourneyService#started?` passa a ser **derivado do tamanho do time** (`team >= 6`; a flag `user_state` deixa de liberar — remover abaixo de 6 re-bloqueia Batalha/Center/Mart; flag vira vestigial p/ o gate, escrita preservada); **GL-2** — `Pokemon#usable_hp?` (`hp_max ≤ 0` = nunca lutou → cheio; `hp_current > 0`) + `JourneyService#battle_ready?` aplicados a `GET /battle`/`POST /battle/new` (time todo zerado → aviso "cure no Poke Center" + CTA p/ a Lista) e o painel esconde o CTA "Batalhar" com time zerado (Center/Mart permanecem abertos); **ajuste S3 (C2)** — botão "Novo confronto" desabilitado (tooltip "Recupere seus pokémons...") na tela de fim de batalha após derrota e no gate de HP; **Q2** — `TeamService#remove_member` devolve `assigned_item`/`held_item` ao estoque antes de `TeamRepository#remove` (item consumido em batalha não devolve; rota usa o service). Migração de testes: `start_journey` (flag) → `fill_team` (time de 6). **0053 (QA Q4+Q5+GL-1 — aviso de busca base-form, remoção em 1 clique e game over) refinada, implementada e VALIDADA pelo usuário em 2026-08-25 (C1–C12 ok, passos 1–8 + ajustes S3, suíte 804/2623, lint 0)**: **Q4** — a busca segue só formas base e ganha **aviso informativo** quando o termo só casa com não-base/starter (`search_hint`/`first_search_match`/`base_form_for` no `server.rb`; aponta a evolução base via `evolutions.first` ou os destaques iniciais; aviso no `pokemon_list.erb`); **Q5** — remoção robusta: botão "Remover" com `hx-disabled-elt="this"` (anti re-submit) + regressão do `DELETE` htmx exato (id + `.list-state` + `HX-Request`) remove em 1 request e é idempotente (2º clique no-op seguro); **GL-1** — **game over** = `JourneyService#game_over?` (time ≥ 6 && todos zerados && `balance < heal_cost`; deps `wallet:`/`heal_preview:`), com **venda de itens** (`SellPolicy` = metade do preço + `MartService#sell` + `POST /mart/sell` + botão "Vender" no `_mart.erb`) e **recomeçar jornada** (`POST /journey/restart` — `TeamService#reset` em **lote** devolvendo itens + `WalletRepository#set` p/ saldo inicial 200; redirect full-page para `/`); UI: `game_over_fragment` no gate da batalha **e na tela de fim de batalha** (CTAs "Vender itens"/"Recomeçar jornada" no lugar do "Novo confronto") + banner de game over no painel do time; **ajustes S3 da validação** — fix 500 no recomeçar (reset em lote via `TeamRepository#clear` — double-submit concorrente não colide mais no unique `(user_id, slot)`), lista de venda sem linhas `0×` (itens equipados/consumidos não aparecem como vendáveis) e `#pokemon-list` refrescada via OOB após o recomeçar; `STARTER_SLUGS` movido p/ o topo do `server.rb`. Depois: a fila (J2, J4, D4, M2) e as limitações técnicas (escritas não atômicas, erros com status real, race no add, identidade/CSRF, CI) — a critério do usuário. |
 
+> **Fila reordenada em 2026-09-08 (decisão do usuário):** implementar o **redesenho
+> do `open-design/`** (portar conforme `open-design/migration-guide.md`) **antes** das
+> correções pontuais da Onda 3 Estabilidade. Nova ordem de próximas sessões (numeração
+> desliza): **0072 open-design-base** (design system `style.css` tokens+classes, remover
+> sakura, novo `layout.erb`) → **0073 open-design-home** (`index`/`team`) →
+> **0074 open-design-battle** (`battle`/`_fighter_panel`) → **0075 open-design-history**
+> → **0076 open-design-modals-filters** (modais center/mart/membro + filtros
+> `team=in|out`). Depois volta a **Onda 3 Estabilidade:** **0077 escritas atômicas**
+> → **0078 CSRF** → **0079 respiro**. Referência em `SESSIONS.md` (nota da 0071).
+
 ## Ideias de auto-battler (anotadas — ainda NÃO refinadas)
 
 > Regra RNF-04: escopos grandes são anotados aqui e só viram sessão **após** a sessão
@@ -718,7 +728,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
   HP/status persistido ou em memória a definir em refinamento próprio.
   **B1 (modelo de batalha) e B2 (efetividade de tipos) `Done` (sessões 0009/0010);
   B3 (motor de auto-batalha) `Done` (sessão 0011, validado em 2026-08-08;
-  ver draft-auto-battler.md).**
+  ver docs/draft-backlog.md).**
 - **Layout/estilos externos:** extrair layout, navbar e estilos compartilhados
   (a antiga sessão 0007-UI volta ao backlog como 0009+).
 
@@ -744,5 +754,5 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 > (XP/evolução)** → **D3 (histórico/rank)** → **Fase Eco (Eco-1..4)** → candidatos futuros
 > (D4, D1, J1/J2/J3). Visão fechada de D2: pokémon sempre 1ª evolução nível 1 na montagem,
 > ganham XP a cada batalha, aprendem movimentos e evoluem; oponente no mesmo nível do
-> jogador. Ver `draft-arquitetura-design-patterns.md` (seções 2 e 8) e a tabela do
+> jogador. Ver `docs/draft-backlog.md` (seções 2 e 8) e a tabela do
 > Roadmap acima.

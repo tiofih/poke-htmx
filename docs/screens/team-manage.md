@@ -50,7 +50,7 @@ blocks:
 
 ---
 
-## Desenho alvo — gerenciar time (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.5)
+## Desenho alvo — gerenciar time (análise UI/UX 2026-08-22; ref: `docs/draft-backlog.md` §2.5)
 
 > Alvo alinhado ao JN-2 (golpes em lista) — a troca de checkboxes por lista é
 > sessão própria (0037, refinamento pendente); o restante é cosmético.

@@ -50,7 +50,7 @@ reflete o novo membro na mesma tela). O nav não tem mais link "Time". Ver
 
 ---
 
-## Desenho alvo — time (análise UI/UX 2026-08-22; ref: `draft-ui-ux.md` §2.4)
+## Desenho alvo — time (análise UI/UX 2026-08-22; ref: `docs/draft-backlog.md` §2.4)
 
 Pré-jornada:
 

@@ -1,11 +1,11 @@
 # Screens — Poke-HTMX
 
 > Documentação dos fragmentos **atuais** no formato wireframe (sketch ASCII + YAML).
-> Formato definido em `draft-wireframes.md`. YAML é a fonte da verdade; o sketch é a
+> Formato definido em `docs/draft-backlog.md`. YAML é a fonte da verdade; o sketch é a
 > anotação visual.
 >
 > **Desenho alvo (2026-08-22):** cada doc traz também uma seção "Desenho alvo" com o
-> alvo visual proposto pela análise de UI/UX (`draft-ui-ux.md`) — anotação, não
+> alvo visual proposto pela análise de UI/UX (`docs/draft-backlog.md`) — anotação, não
 > estado atual. `history.md` documenta a tela existente e seu alvo no mesmo arquivo.
 
 ## Inventário dos fragmentos

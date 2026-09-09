@@ -49,7 +49,7 @@ Medições com viewport:
 
 Causa: breakpoint `720` só pega celular; tablet `768-1024` fica com 6 colunas em coluna estreita `319px` (`list-team-grid 319px 396px`). `list-column` tem `minmax(0,1fr)` mas com `gap 12px` + `6` colunas, card < 90px.
 
-Proposta (anotar em draft-ui-ux):
+Proposta (anotar em docs/draft-backlog.md):
 - Trocar para `auto-fill` ou breakpoints graduais: `>1100:6`, `900:4`, `720:3`, `520:2`, `360:1` — ou `repeat(auto-fill,minmax(140px,1fr))` que já resolve 768 (auto vira 2-3).
 - Revisar `list-team-grid` breakpoint: hoje `720` → colapsa para `1fr`; tablet `768` ainda é 2 colunas `319+396` com lista espremida. Sugerir `960` ou `900` (ex: `list-team-grid 1fr` em `<960`).
 
@@ -120,8 +120,8 @@ Proposta:
 - **Nav:** `header nav` `nowrap` sem wrap; em `320` ainda cabe (3 links curtos), mas `strong Poké-HTMX` + 3 links em 320 pode quebrar em 2 linhas (não medido com wrap). Aumentar `gap` e `padding` para alvo 44px.
 - **Sakura base:** body `max-width 38em` sobrescrito por `page-list/page-battle/page-history none` ok, mas `padding 13px` fixo em mobile reduz área útil (13*2=26 → 349px efetivo).
 - **Imagens:** sprite `96px` via PokeAPI, `.list-item img display:block` ok, mas sem `max-width 100%` — em card 42px a imagem vaza (medido 42px card vs 96px img).
-- **Manage (`/team/manage`):** `manage-member` lista vertical com dezenas de `form.move-row` + selects — sem grid, em mobile lista interminável. Não medido neste playtest, mas draft-ui-ux §2.5 já anota.
-- **Histórico:** sem grid, só `<p>` + `<ul>` — ok em mobile, mas ranking com `UUID` cru (draft-ui-ux §2.7) quebra linha em 375 (UUID 36 chars > 375).
+- **Manage (`/team/manage`):** `manage-member` lista vertical com dezenas de `form.move-row` + selects — sem grid, em mobile lista interminável. Não medido neste playtest, mas docs/draft-backlog.md §2.5 já anota.
+- **Histórico:** sem grid, só `<p>` + `<ul>` — ok em mobile, mas ranking com `UUID` cru (docs/draft-backlog.md §2.7) quebra linha em 375 (UUID 36 chars > 375).
 - **Tipografia/sakura:** `font-size` base 1.8rem sakura, sem escala fluida — ok mas em 320 texto grande.
 
 ---
@@ -155,4 +155,4 @@ COM viewport injetado:
 battle gate 375: sem battle-layout (precisa time de 6 p/ medir 3 col)
 ```
 
-Próximo: anotar em `draft-ui-ux.md` ou `draft-design-system.md` como `RESP-1` e abrir sessão SDD de responsividade após fechar M2b.
+Próximo: anotar em `docs/draft-backlog.md` ou `docs/draft-backlog.md` como `RESP-1` e abrir sessão SDD de responsividade após fechar M2b.
