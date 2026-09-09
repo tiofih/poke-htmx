@@ -10,10 +10,10 @@
 
   <body class="<%= "page-battle" if request.path == "/battle" %><%= " page-list" if request.path == "/" %><%= " page-history" if request.path == "/history" %>">
     <div id="global-loading" aria-hidden="true"></div>
-    <header class="topnav">
+    <header class="topnav" data-od-id="topnav">
       <div class="container topnav-inner">
         <a href="/" class="logo">Poké-HTMX</a>
-        <nav>
+        <nav data-od-id="nav">
           <a href="/" class="<%= "active" if request.path == "/" %>">Time <span class="nav-badge num" id="nav-badge"><%= @team_size || 0 %>/6</span></a>
           <a href="/history" class="<%= "active" if request.path == "/history" %>">Histórico</a>
         </nav>
@@ -25,7 +25,7 @@
       <%= yield %>
     </main>
 
-    <footer class="pagefoot">
+    <footer class="pagefoot" data-od-id="footer">
       <div class="container row-between">
         <span>© Poké-HTMX</span>
         <span class="meta">sprites oficiais PokéAPI</span>

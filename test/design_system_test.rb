@@ -158,9 +158,9 @@ class DesignSystemTest < Minitest::Test
   def test_layout_uses_topnav_footer_shell
     layout = File.read(File.join(__dir__, "../views/layout.erb"))
 
-    assert_match(/<header class="topnav">/, layout,
+    assert_match(/<header class="topnav"[^>]*>/, layout,
                  "expected layout.erb to open a <header class=\"topnav\">")
-    assert_match(/<footer class="pagefoot">/, layout,
+    assert_match(/<footer class="pagefoot"[^>]*>/, layout,
                  "expected layout.erb to open a <footer class=\"pagefoot\">")
     assert_match(%r{<link rel="stylesheet" href="/style\.css}, layout,
                  "expected layout.erb to link /style.css")

@@ -32,7 +32,7 @@
       <%= @game_over ? "Game over" : (@can_battle ? "Pronto p/ batalhar" : "Precisa de cura") %>
     </span>
   </div>
-  <ul class="roster">
+  <ul class="roster" data-od-id="members">
     <% @team.each do |poke| %>
       <li class="member">
         <div class="member-top">
