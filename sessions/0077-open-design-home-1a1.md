@@ -1,0 +1,114 @@
+# Sessão 0077 — open-design-home-1a1 (resíduo home: `home-team.html` → `_center`/`_mart` inner + `team_manage`/evolução + list-item/detalhe)
+
+## Status
+
+| Fase | Status |
+| --- | --- |
+| Refinamento | **Concluída** — escolhas do usuário em 2026-09-09 (fatiamento por tela, deslizamento 0077-0079→resíduo / 0080-0082→estabilidade, fidelidade híbrida, backend thin listado, S1 com 1 teste novo + extensões — ver seção 5) |
+| Implementação (fase 2, TDD) | Pendente |
+| Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
+
+---
+
+## 1. Objetivo
+
+Portar o **resíduo da home** do protótipo `open-design/home-team.html` (50KB, 97 classes) para as views existentes — **miolo dos modais** `_center.erb` (falta `heal-list`/`heal-item`) e `_mart.erb` (falta `mart`/`mart-name`/`item-icon`/`price`/`tabs`), **`team_manage.erb`** (falta `stat-grid`/`mv-row`/`evo-row`/`equip-row`), **`_evolution_modal.erb`** (trazer para o padrão `.modal`), **`pokemon_list_item.erb`** (falta `pcard-meta`/`name`) e **`pokemon_detail.erb`** (falta `tag-row`/`stat-grid`/`evo-row`) — em **fidelidade híbrida** (adaptação preservando o htmx onde há legado 0073/0076, cópia mais literal onde não há legado), com **backend thin listado e sem migração**.
+
+## 2. Contexto (estado atual — diagnóstico)
+
+- **0076 Done** (onda open-design fechada, baseline **1057/4900**, lint 0): overlay híbrido (rotas `GET /team/center|/team/mart`, `render_team_center` `server.rb:544-547`, `render_team_mart` `:549-552`), `render_team_manage` (`:535-538`), `render_evolution_modal` (`server.rb:839-846`), `render_pokemon_detail` (`:473-481`).
+- **Trace inbound de `render_team_center` = 0 callers** — rotas Sinatra não viram arestas CALLS (gap conhecido do índice); validar rotas por grep/zvec-rg, não pelo grafo.
+- **Falta portar (home-team.html):** `_center.erb` hoje só `team-hp`/`heal-cost` (falta `heal-list`/`heal-item`); `_mart.erb` hoje só `balance`/`inventory` (falta `mart`/`mart-name`/`item-icon`/`price`/`tabs`); `team_manage.erb` hoje só `manage-member`/`move-row` (falta `stat-grid`/`mv-row`/`evo-row`/`equip-row`); `_evolution_modal.erb` com `evolution-*` fora do padrão `.modal`; `pokemon_list_item.erb` sem `pcard-meta`/`name`; `pokemon_detail.erb` hoje só `type`/`stats`/`evolutions` (falta `tag-row`/`stat-grid`/`evo-row`).
+- **CSS:** `public/style.css` (35KB) tem o bloco ODS `/* === Open Design System (0072): inicio/fim === */` com seções por sessão; **CSS novo entra ANTES da linha `fim`**, cada sessão com seu próprio delimitador (permite edição paralela sem conflito).
+- **⚠️ `public/style.css` está DIRTY no git** (diff grande, ~1129+/1003- — verificado no refinamento): o implementador deve **conferir/stash antes de editar o CSS** (`git diff -- public/style.css`, `git stash push -- public/style.css` se for trabalho alheio) e **NÃO commitar `style.css` junto sem revisar**.
+- **Fila (deslizamento, seção 5):** 0077-0079 = resíduo open-design por tela; antigas 0077 escritas atômicas→**0080**, 0078 CSRF→**0081**, 0079 respiro→**0082**.
+
+## 3. Escopo
+
+### Produção
+
+- **Views (re-marcar, htmx preservado):** `_center.erb` (+`heal-list`/`heal-item`), `_mart.erb` (+`mart`/`mart-name`/`item-icon`/`price`/`tabs`), `team_manage.erb` (+`stat-grid`/`mv-row`/`evo-row`/`equip-row`), `_evolution_modal.erb` (padrão `.modal`, mantém `id`/close/3 estados), `pokemon_list_item.erb` (+`pcard-meta`/`name`), `pokemon_detail.erb` (+`tag-row`/`stat-grid`/`evo-row`).
+- **`public/style.css` (só dentro do bloco ODS, ANTES da linha `fim`, com delimitador próprio `0077`):** classes do `home-team.html` aplicáveis ao escopo acima, aditivas.
+- **Backend thin listado (sem migração/schema/gems/services):** ajustes só em `render_team_center`/`render_team_mart`/`render_team_manage`/`render_evolution_modal`/`render_pokemon_detail` para expor o dado que o markup novo exige (ex.: tipos já enriquecidos na 0076, custo/qtd já em `center_data`/`mart_data`); **nada além do listado**.
+
+### Testes
+
+- **Novo:** `test/home_residue_test.rb` (C1–C3: `test_center_mart_inner`, `test_manage_evolution`, `test_catalog_detail`).
+- **Estender (cirúrgico):** `test/design_system_test.rb` (classes 0077 no bloco), `test/home_view_test.rb` (miolo modais + manage), `test/modal_routes_test.rb` (miolo center/mart), `test/evolution_routes_test.rb` (só se o restyle quebrar — meta: verde sem edição).
+
+### Fora de escopo (não abrir — RNF-04)
+
+- Battle (`battle.html`/end-states/results-desktop = 0078); history (`history.html` = 0079); identidade `?as=`, CSRF, escritas atômicas → 0080/0081; erro-status, respiro → 0082; CD; cor-de-tipo nos moves (draft pós-onda).
+
+## 4. Critérios de aceite
+
+### Resultado (S1 — cada critério aponta o teste que o prova)
+
+| Critério | Teste que o prova | Estado |
+| --- | --- | --- |
+| C1 miolo dos modais: `_center` com `heal-list`/`heal-item` (cura por membro + custo) e `_mart` com `mart`/`mart-name`/`item-icon`/`price`/`tabs` (buy+sell), overlay/rotas 0076 intactos | `test/home_residue_test.rb` `test_center_mart_inner` (novo) + `test/modal_routes_test.rb` verde | pendente |
+| C2 manage + evolução: `team_manage.erb` com `stat-grid`/`mv-row`/`evo-row`/`equip-row` (golpes/itens/evoluir por membro) e `_evolution_modal` no padrão `.modal` (mantém `id` + close + 3 estados) | `test/home_residue_test.rb` `test_manage_evolution` (novo) + `test/evolution_routes_test.rb:91-135` verdes | pendente |
+| C3 catálogo + detalhe: `pokemon_list_item.erb` com `pcard-meta`/`name` e `pokemon_detail.erb` com `tag-row`/`stat-grid`/`evo-row`, htmx (`hx-get`/`hx-swap`) preservado | `test/home_residue_test.rb` `test_catalog_detail` (novo) + `test/home_view_test.rb` estendido | pendente |
+| C4 CSS 0077 no bloco: classes do `home-team.html` aplicáveis ao escopo, aditivas, ANTES da linha `fim`, com delimitador próprio `0077` | `test/design_system_test.rb` `test_design_system_home_residue_classes` (estendido) | pendente |
+
+### Garantias
+
+| Critério | Teste que o prova | Estado |
+| --- | --- | --- |
+| G1 sem regressão — suíte completa (baseline **1057/4900** + novos) + lint 0; `style.css` DIRTY conferido/stash antes de editar (não commitar alheio) | `./scripts/test` + `./scripts/lint` + `git status -- public/style.css` | pendente |
+| G2 backend só no listado (§3) — sem migração/schema/gems/services; testes sem rede | `git diff --stat -- db/ Gemfile*` vazio + revisão S7 confere | pendente |
+| G3 S4/S5 + revisão — `SESSIONS.md` + `check_docs` + `checar-sessao 0077` verdes; revisor S7 `Aprovado` antes da 3 | `./scripts/check_docs` + `./scripts/checar-sessao 0077` + veredito do Revisor | pendente |
+
+### Manual
+
+| Critério | Teste que o prova | Estado |
+| --- | --- | --- |
+| M1 passada visual da home no navegador (modais center/mart, manage, catálogo, detalhe, ≤920px sem overflow-x) | `manual` (`./scripts/run`, `/`) | pendente |
+
+> **S1:** cada critério acima aponta o teste que o prova (arquivo + método); o único critério puramente manual é **M1**. **Ao fim da fase 2 (suíte + lint verdes, revisor S7 `Aprovado`), PARAR e aguardar a validação do usuário — não marcar Done, não preencher a seção 7, não commitar conclusão.**
+
+## 5. Decisões de refinamento (fechadas com o usuário em 2026-09-09 — prevalecem sobre o mapa)
+
+- **Fatiamento por tela (escolhida):** 3 sessões — 0077 home (`home-team.html`), 0078 battle (`battle.html` + end-states + results-desktop), 0079 history (`history.html`).
+- **Deslizamento (escolhida):** resíduo vira 0077-0079; antigas 0077 escritas atômicas→**0080**, 0078 CSRF→**0081**, 0079 respiro→**0082**.
+- **Fidelidade híbrida (escolhida):** adaptação preservando htmx nas telas com legado (0073/0076), cópia mais literal onde não há legado.
+- **Backend thin listado sem migração (escolhida):** só os 5 renders do §3; sem schema/gems/services.
+- **S1 (escolhida):** 1 arquivo Minitest novo por tela (`home_residue_test.rb` nesta) + extensões cirúrgicas.
+
+## 6. Plano TDD (passos)
+
+> Cada passo = `red` → `green` (suíte completa + lint 0) → commit. Termina em Revisor (2c, S7, teto 3 rodadas) → **PARAR** p/ validação do usuário.
+
+| Passo | Escopo (red → green) | Verificação |
+| --- | --- | --- |
+| 0 | **Refinamento** — este arquivo + `SESSIONS.md` (linha 0077 + "Próxima sessão") | commit `Sessao 0077: refinamento concluido — ...` (**sem** `public/style.css`, que está dirty) |
+| 1 | **red→green — C4-css (bloco 0077)** — conferir/stash o dirty do `style.css`, anexar classes ANTES da linha `fim` com delimitador `0077`, estender `design_system_test.rb` | `./scripts/test test/design_system_test.rb` + suíte + lint 0; commit `Passo 1: classes home-team no bloco ODS (delimitador 0077), aditivo` |
+| 2 | **red→green — C1 (miolo center/mart)** — re-marcar `_center`/`_mart` + backend thin nos 2 renders; criar `test/home_residue_test.rb` (`test_center_mart_inner`) | `./scripts/test test/home_residue_test.rb test/modal_routes_test.rb` + suíte + lint 0; commit `Passo 2: miolo center/mart no ODS (heal-list/mart/tabs)` |
+| 3 | **red→green — C2 (manage + evolução)** — re-marcar `team_manage`/`_evolution_modal` + thin nos renders; `test_manage_evolution` | `./scripts/test test/home_residue_test.rb test/evolution_routes_test.rb` + suíte + lint 0; commit `Passo 3: manage/evolucao no ODS (stat-grid/mv-row/evo-row/equip-row)` |
+| 4 | **red→green — C3 (catálogo + detalhe)** — re-marcar `pokemon_list_item`/`pokemon_detail`; `test_catalog_detail` + estender `home_view_test.rb` | `./scripts/test test/home_residue_test.rb test/home_view_test.rb` + suíte + lint 0; commit `Passo 4: catalogo/detalhe no ODS (pcard-meta/tag-row/stat-grid)` |
+| 5 | **red→green — G1/G3 (regressão + docs)** — suíte + lint 0 + `check_docs` + `checar-sessao 0077` | `./scripts/test` + `./scripts/lint` + `./scripts/check_docs` + `./scripts/checar-sessao 0077`; commit `Passo 5: regressao e docs — residuo home fechado` |
+| — | **Fase 2 concluída** → **Revisor (2c)** até `Aprovado` (teto 3, senão S3) → **PARAR**, aguardar **validação 3**. Não marcar Done, não preencher §7, não commitar conclusão. | — |
+
+## 7. Validação (executada pelo usuário — S2)
+
+| Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
+| --- | --- | --- | --- |
+| C1 (miolo center/mart) | | | pendente |
+| C2 (manage + evolução) | | | pendente |
+| C3 (catálogo + detalhe) | | | pendente |
+| C4 (CSS 0077 no bloco) | | | pendente |
+| G1 (sem regressão) | | | pendente |
+| G2 (backend listado) | | | pendente |
+| G3 (docs + revisão) | | | pendente |
+| M1 (passada visual home) | — | | pendente |
+
+> **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
+
+## 8. Observações
+
+- **`public/style.css` DIRTY (~1129+/1003-):** conferir/stash antes de editar; nunca commitar junto sem revisar (Passo 1).
+- **Rotas Sinatra não aparecem no trace do grafo** (0 callers é gap do índice, não ausência de uso) — validar rotas por teste/grep.
+- **Fidelidade híbrida:** onde houver legado 0073/0076, adaptar preservando htmx/ids; onde não houver, copiar o protótipo mais literalmente.
+- **Fila:** 0077 home → **0078 battle** → 0079 history → 0080 escritas atômicas → 0081 CSRF → 0082 respiro.
+
+## 9. Gotchas / Lições (memória — S6, preencher na 3)
