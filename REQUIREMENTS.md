@@ -700,8 +700,11 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 > correções pontuais da Onda 3 Estabilidade. **0072 open-design-base Done** (design
 > system `style.css` tokens oklch + classes-núcleo + shell `layout.erb`; sakura mantido
 > como fallback até a 0076) — validado em 2026-09-09 (S2 C1–C6 + G1–G3 ok, sem S3);
-> suíte 1009/4058, lint 0. A onda continua (numeração desliza): **0073 open-design-home**
-> (`index`/`team`) → **0074 open-design-battle** (`battle`/`_fighter_panel`) →
+> suíte 1009/4058, lint 0. **0073 open-design-home Done** (home portada: `index` 2
+> colunas time+catálogo + `team` roster, catálogo `.pcard`/`.pcard-add`, Gerenciar em
+> `budget-summary`, classes aditivas no bloco do design system) — validado em 2026-09-09
+> (S2 C1–C10 + G1–G3 ok, sem S3); suíte 1011/4124, lint 0. A onda continua (numeração
+> desliza): **0074 open-design-battle** (`battle`/`_fighter_panel`) →
 > **0075 open-design-history** → **0076 open-design-modals-filters** (modais
 > center/mart/membro + filtros `team=in|out`) — **0076** também remove o sakura.
 > Depois volta a **Onda 3 Estabilidade:** **0077 escritas atômicas** → **0078 CSRF** →

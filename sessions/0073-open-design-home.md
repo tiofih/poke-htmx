@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-09 (A1, B2, C1, ITEM 3, D 1–10) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário — fase 3; **não** marcar Done) |
+| Implementação | **Concluída** — suíte **1011/4124**, lint 0; Revisor **Aprovado** (2 rodadas S7 — achado "botões de serviço mortos" resolvido em `3061b73`; sem S3) |
+| Validação | **Concluída** (executada pelo usuário em 2026-09-09 — S2 por critério, C1–C10 + G1–G3 ok, sem S3) |
 
 ---
 
@@ -77,7 +77,7 @@ Portar as telas **home** (`index` — 2 colunas time+catálogo) e **`team`** (ro
 
 - [ ] **G1 sem regressão** — suíte completa (baseline **1009/4058** + novos testes) + lint 0; `style_responsive_test.rb` (regra `.list-item img, .starter-item img max-width:100%` **mantida** — não remover regras) + `layout_test.rb` + `design_system_test.rb` (C1–C6) verdes; delimitadores `/* === Open Design System (0072) === */` estáveis.
 - [ ] **G2 sem gems/schema/rede** — `git diff -- Gemfile* db/ server.rb lib/` vazio (sessão toca só `views/*.erb` + `public/style.css` + testes); testes sem rede (rotas com `PokeApiStub`).
-- [ ] **G3 S4/S5** — `SESSIONS.md` (tabela linha "0073 open-design-home" — "Refinamento concluída, implementação/validação pendentes, NÃO Done" + "Próxima sessão" → **0074 open-design-battle**) atualizado no commit do refinamento; `./scripts/check_docs` + `./scripts/checar-sessao 0073` verdes; status de validação só após o usuário validar (fase 3 — **parar na fase 2 e aguardar**).
+- [ ] **G3 S4/S5** — `SESSIONS.md` (tabela linha "0073 open-design-home" + "Próxima sessão" → **0074 open-design-battle**) atualizado no commit do refinamento; `./scripts/check_docs` + `./scripts/checar-sessao 0073` verdes; status de validação só após o usuário validar (fase 3 — **parar na fase 2 e aguardar**).
 
 > **S1:** cada critério acima aponta o teste que o prova (arquivo + método). Nenhum critério é puramente manual (C10/G1 são verificações de ciclo, nota G1). **Parar ao fim da fase 2 e aguardar a validação do usuário (fase 3) — não marcar Done, não preencher a seção 7, não commitar conclusão.**
 
@@ -105,7 +105,25 @@ Portar as telas **home** (`index` — 2 colunas time+catálogo) e **`team`** (ro
 
 ## 7. Validação (executada pelo usuário — S2)
 
-**Pendente.** A preencher na fase 3 pelo implementador com a tabela `critério | evidência automatizada | evidência manual | resultado (ok/nok)` — um resultado **por critério** (C1–C10 + G1–G3), nunca um bloco único.
+**Validação concluída em 2026-09-09.** Assinatura: **validação do usuário (S2)**. Uma linha por critério (S2 — nunca bloco único); **S3 não foi acionado** (nenhum critério reaberto).
+
+| Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
+| --- | --- | --- | --- |
+| C1 (GET / → 200 `page-list` + `#team-view` + catálogo htmx) | `test/pokemon_routes_test.rb` `test_index_page_uses_full_width_list_body_class` (editado: `.grid-2-1`/`.catalog-pane`, mantém `page-list`) + rotas — suíte 1011/4124, 0 falhas | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| C2 (index `.app-head` + `#team-view` + `.services-row` com Saldo) | `test/home_view_test.rb` (novo, estrutural) — suíte 1011/4124, 0 falhas | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| C3 (alvos de fragmento `#pokemon-detail`/`#add-status`/`#filter-controls`/`#team-view` preservados) | `test/pokemon_routes_test.rb` `test_index_is_list_only_screen` + `test_index_uses_single_layout_with_external_css` — suíte 1011/4124, 0 falhas | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| C4 (team.erb roster `.member` + badge `#N` + sprite/alt/ordem) | `test/team_routes_test.rb` `test_team_panel_shows_members` + `test_index_team_panel_shows_members` — suíte 1011/4124, 0 falhas | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| C5 (▲▼ `name="new_slot"` + aria-labels) | `test/team_routes_test.rb` `test_team_slot_controls_*` — suíte 1011/4124, 0 falhas | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| C6 (hardening do Remover `hx-disabled-elt`/`hx-sync`/`hx-indicator`/`hx-include`) | `test/team_remove_s3_test.rb` `test_remove_form_*` + `test_team_remove_s3` — suíte 1011/4124, 0 falhas | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| C7 (Gerenciar no `budget-summary` do index, ausente no team.erb + `gameloop-cta battle`) | `test/team_routes_test.rb` `test_team_fragment_manage_link_is_on_its_own_line` (editado: `budget-summary` em GET `/`) + `test_team_panel_shows_battle_cta_after_journey` — suíte 1011/4124, 0 falhas | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| C8 (busca/limpar filtros re-renderizam `#pokemon-list`) | `test/pokemon_list_filters_test.rb` — suíte 1011/4124, 0 falhas | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| C9 (classes novas aditivas no bloco ODS) | `test/design_system_test.rb` `test_design_system_home_screen_classes` — suíte 1011/4124, 0 falhas | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| C10 (suíte verde + lint 0) | `./scripts/test` (1011/4124, 0 falhas) + `./scripts/lint` 0 | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| G1 (sem regressão) | `./scripts/test` (1011/4124, 0 falhas) + `./scripts/lint` 0; `style_responsive_test.rb` (14) + `layout_test.rb` + `design_system_test.rb` verdes | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| G2 (sem gems/schema/rede/`server.rb`/`lib`) | `git diff -- Gemfile* db/ server.rb lib/` vazio; testes sem rede (`PokeApiStub`) | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+| G3 (S4/S5 docs consistentes) | `./scripts/check_docs` + `./scripts/checar-sessao 0073` verdes | usuário confirmou visualmente (navegação `/` — roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary) | **ok** |
+
+> **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário. **Não acionado** nesta validação. O mix visual topnav dark + conteúdo sakura-light é esperado/temporário (até a 0076); o `.card.services` ficou só com Saldo (botões Curar/Mart voltam na 0076) — comportamentos esperados, não reabrem critério.
 
 ## 8. Observações
 
@@ -139,4 +157,6 @@ Portar as telas **home** (`index` — 2 colunas time+catálogo) e **`team`** (ro
 - [x] **Passo 3 (C4–C6) — `5af98e0`:** `team.erb` como roster (`.card`/`.roster`/`.member`/`.bar`/…) mantendo ▲▼ (`new_slot`/aria), badge `#N`, Evoluir por membro, `gameloop-cta battle`, restart, hardening do Remover, `disabled` fainted; `test_team_*` (slot/remove/fainted/battle) verdes.
 - [x] **Passo 4 (B2) — `c83dbae`:** `pokemon_list_item.erb` `<li class="pcard">` + botão `.pcard-add`; `test_index_renders_clickable_list` = 36×`<li class="pcard">` (27+9); **todas** as asserções de `list-item`/`starter-item` em `pokemon_routes_test.rb`/`pokemon_list_filters_test.rb`/`pokemon_list_cost_test.rb`/`team_routes_test.rb`/`team_fainted_routes_test.rb` reconciliadas para `.pcard` (contagens da pool/starters preservadas por extração do `<ul>` respectivo); `style_responsive_test.rb` verde (regra CSS mantida).
 - [x] **Passo 5 (ITEM 3) — `e44474c`:** "Gerenciar time" no `budget-summary` do `index.erb` (`class="btn btn-secondary"`, `hx-get="/team/manage"`, `hx-target="#team-view"`), removido de `team.erb` (bloco `team-tools` removido); `test_team_fragment_manage_link_is_on_its_own_line` atualizado (GET `/`, assert `budget-summary` antes do `#team-view` + ausência no fragmento `/team`); `test_team_panel_shows_battle_cta_after_journey` segue verde.
-- [x] **Passo 6 (C10/G1/G2/G3):** suíte completa **1011 runs/4124 assertions** (baseline **1009/4058** preservado + `home_view_test.rb`/`design_system_test.rb` estendido) + `./scripts/lint` 0 (126 arquivos); `style_responsive_test.rb`/`layout_test.rb`/`design_system_test.rb` verdes; `./scripts/check_docs` ok; `./scripts/checar-sessao 0073` ok; `git diff -- Gemfile* db/ server.rb lib/` **vazio** (G2); status de validação **pendente** (fase 3 — parar na fase 2 e aguardar o usuário).
+- [x] **Passo 6 (C10/G1/G2/G3):** suíte completa **1011 runs/4124 assertions** (baseline **1009/4058** preservado + `home_view_test.rb`/`design_system_test.rb` estendido) + `./scripts/lint` 0 (126 arquivos); `style_responsive_test.rb`/`layout_test.rb`/`design_system_test.rb` verdes; `./scripts/check_docs` ok; `./scripts/checar-sessao 0073` ok; `git diff -- Gemfile* db/ server.rb lib/` **vazio** (G2).
+- [x] **Rodada S7 (Revisor):** 2 rodadas — rodada 1 achado "botões de serviço mortos" (`GET /team/center|mart` no index sem rota/alvo) resolvido no commit `3061b73` (+1/-2, cirúrgico); rodada 2 **Aprovado**. Sem S3.
+- [x] **Validação (fase 3):** usuário validou em **2026-09-09** (S2 por critério, C1–C10 + G1–G3 ok, sem S3) — tabela na seção 7; confirmação visual ao subir o app (`./scripts/run`) e navegar `/` (roster, catálogo `.pcard`, busca/filtros, remover, Gerenciar no budget-summary).
