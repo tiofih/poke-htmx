@@ -40,4 +40,36 @@ class DesignSystemTest < Minitest::Test
                    "expected style.css to define .#{klass}")
     end
   end
+
+  def test_layout_uses_topnav_footer_shell
+    layout = File.read(File.join(__dir__, "../views/layout.erb"))
+
+    assert_match(/<header class="topnav">/, layout,
+                 "expected layout.erb to open a <header class=\"topnav\">")
+    assert_match(/<footer class="pagefoot">/, layout,
+                 "expected layout.erb to open a <footer class=\"pagefoot\">")
+    assert_match(%r{<link rel="stylesheet" href="/style\.css}, layout,
+                 "expected layout.erb to link /style.css")
+  end
+
+  def test_body_gets_page_battle_history
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/battle", {}, user_session("user-a")
+    end
+    assert last_response.ok?
+    assert_match(/class="[^"]*page-battle[^"]*"/, last_response.body,
+                 "expected /battle body to have page-battle class")
+
+    get "/history", {}, user_session("user-a")
+    assert last_response.ok?
+    assert_match(/class="[^"]*page-history[^"]*"/, last_response.body,
+                 "expected /history body to have page-history class")
+
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
+    assert last_response.ok?
+    assert_match(/class="[^"]*page-list[^"]*"/, last_response.body,
+                 "expected / body to keep page-list class")
+  end
 end

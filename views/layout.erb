@@ -10,18 +10,27 @@
 
   <body class="<%= "page-battle" if request.path == "/battle" %><%= " page-list" if request.path == "/" %><%= " page-history" if request.path == "/history" %>">
     <div id="global-loading" aria-hidden="true"></div>
-    <header>
-      <nav>
-        <strong>Poké-HTMX</strong>
-        <a href="/" class="<%= "active" if request.path == "/" %>">Time <span id="nav-badge" class="nav-badge"><%= @team_size || 0 %>/6</span></a>
-        <a href="/battle" class="<%= "active" if request.path == "/battle" %>">Batalha</a>
-        <a href="/history" class="<%= "active" if request.path == "/history" %>">Histórico</a>
-      </nav>
+    <header class="topnav">
+      <div class="container topnav-inner">
+        <a href="/" class="logo">Poké-HTMX</a>
+        <nav>
+          <a href="/" class="<%= "active" if request.path == "/" %>">Time <span class="nav-badge num" id="nav-badge"><%= @team_size || 0 %>/6</span></a>
+          <a href="/history" class="<%= "active" if request.path == "/history" %>">Histórico</a>
+        </nav>
+        <a href="/battle" class="<%= request.path == "/battle" ? "active" : "btn btn-primary" %>">Batalhar</a>
+      </div>
     </header>
 
-    <main>
+    <main id="content">
       <%= yield %>
     </main>
+
+    <footer class="pagefoot">
+      <div class="container row-between">
+        <span>© Poké-HTMX</span>
+        <span class="meta">sprites oficiais PokéAPI</span>
+      </div>
+    </footer>
     <script>
       document.addEventListener("htmx:beforeRequest", function () {
         document.getElementById("global-loading").classList.add("active");
