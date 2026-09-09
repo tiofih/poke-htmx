@@ -476,6 +476,417 @@
   gap: 0.75em;
 }
 
+/* === Batalha (0074) — arena/podium/log/result, traduzido do prototipo open-design/battle.html ===
+   Reuso do bloco: .bar/.bar-fill/.hp/.hp-label/.hp-val/.sprite-tile/.card/.btn ja existem
+   acima (roster 0073) e sao harmonizados aqui, nao duplicados. */
+
+/* Arena de 3 colunas; colapsa para 1 coluna <=980px (breakpoint do prototipo) */
+.arena {
+  display: grid;
+  grid-template-columns: 1fr 1.06fr 1fr;
+  gap: 2em;
+  align-items: start;
+}
+
+@media (max-width: 980px) {
+  .arena {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Cabecalho lateral do time/oponente */
+.side-head {
+  margin-bottom: 1em;
+}
+
+.side-head h2 {
+  margin: 0;
+}
+
+.side-head .meta {
+  margin-top: 0.25em;
+}
+
+/* Lista de lutadores */
+.fighters {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75em;
+}
+
+/* Card do lutador (li.fighter) */
+.fighter {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75em;
+  background: var(--surface);
+  color: var(--fg);
+  position: relative;
+  min-width: 0;
+}
+
+.fighter.engaged {
+  border-color: var(--accent);
+}
+
+.fighter-head {
+  display: flex;
+  gap: 0.65em;
+  align-items: center;
+}
+
+.fighter .sprite-tile {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
+  border-radius: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.fighter .sprite-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.fighter-id {
+  min-width: 0;
+  flex: 1;
+}
+
+.fname {
+  font-weight: 700;
+  font-size: 0.9em;
+  line-height: 1.15;
+}
+
+.fmeta {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-top: 0.2em;
+  flex-wrap: wrap;
+}
+
+.fmeta .lvl {
+  font-size: 0.75em;
+  color: var(--muted);
+}
+
+.ftags {
+  display: inline-flex;
+  gap: 0.25em;
+  flex-wrap: wrap;
+}
+
+.ftag {
+  padding: 0.1em 0.5em;
+  border-radius: 999px;
+  background: var(--fg-soft);
+  color: var(--fg);
+  font-size: 0.7em;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* Tiers do HP no card (presenter expoe high/medium/low; prototipo usa ok/mid/low) */
+.bar-fill.ok,
+.bar-fill.high {
+  background: var(--ok);
+}
+
+.bar-fill.mid,
+.bar-fill.medium {
+  background: var(--warn);
+}
+
+.bar-fill.low {
+  background: var(--danger);
+}
+
+/* Golpes do lutador */
+.moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+  margin-top: 0.65em;
+  list-style: none;
+  padding: 0;
+}
+
+.move {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.2em 0.5em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.75em;
+  color: var(--muted);
+}
+
+.move .ppnum {
+  font-family: var(--font-mono);
+  color: var(--fg);
+}
+
+.move .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.move .dot.ok,
+.move .dot.high {
+  background: var(--ok);
+}
+
+.move .dot.mid,
+.move .dot.medium {
+  background: var(--warn);
+}
+
+.move .dot.low {
+  background: var(--danger);
+}
+
+/* Centro: round-banner + controles + resultado + log */
+.podium {
+  position: sticky;
+  top: 84px;
+  min-width: 0;
+}
+
+.round-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75em;
+  margin-bottom: 0.9em;
+}
+
+.turn-status {
+  font-size: 1.25em;
+  font-weight: 800;
+  font-family: var(--font-display);
+}
+
+.controls {
+  margin-bottom: 1.1em;
+}
+
+/* Resultado do fim de batalha */
+.result {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1em;
+  background: var(--fg-soft);
+  margin-top: 0.9em;
+}
+
+.result .winner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-weight: 800;
+  font-size: 0.95em;
+}
+
+.result .rewards {
+  margin: 0.65em 0 0;
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.result .rewards strong {
+  color: var(--ok);
+}
+
+.result .ctas {
+  display: flex;
+  gap: 0.65em;
+  margin-top: 0.9em;
+  flex-wrap: wrap;
+}
+
+/* Log da batalha */
+.battle-log {
+  max-height: 380px;
+  overflow-y: auto;
+}
+
+.log-title {
+  font-family: var(--font-mono);
+  font-size: 0.7em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5em;
+}
+
+.log {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.log li {
+  display: flex;
+  gap: 0.65em;
+  padding: 0.45em 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.85em;
+  line-height: 1.45;
+}
+
+.log li:first-child {
+  border-top: 0;
+}
+
+.log .lside {
+  flex: 0 0 auto;
+  font-weight: 700;
+  font-size: 0.75em;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 0.15em 0.5em;
+  border-radius: 999px;
+  height: fit-content;
+}
+
+.log .lside.team {
+  color: var(--ink);
+  background: var(--accent);
+}
+
+.log .lside.opp {
+  color: var(--muted);
+  background: var(--fg-soft);
+}
+
+.log .txt {
+  color: var(--fg);
+}
+
+/* === Juice da batalha portado para os seletores novos (0074 B1b) ===
+   Regras de animacao/reduced-motion DENTRO do bloco ODS, espelhando o juice 0063
+   (keyframes juice-* reutilizados — globais no arquivo; o CSS antigo permanece
+   integro fora do bloco para o style_responsive_test). */
+
+/* Entrada do log: fade/slide escalonado via --log-delay (stagger 0069) */
+.log__entry {
+  animation: battle-log-in 0.35s ease-out both;
+  animation-delay: var(--log-delay, 0s);
+}
+
+/* HP animado: parte do HP inicial (var do servidor) ate o atual */
+.fighters .bar-fill {
+  animation: juice-hp 0.5s ease-out both;
+}
+
+/* Flash de dano no card do alvo */
+.fighter.is-hit {
+  animation: juice-flash 0.4s ease-out;
+}
+
+/* Numero de dano flutuante — pseudo-elemento do card danificado */
+.fighter.is-hit::after {
+  content: attr(data-damage);
+  position: absolute;
+  top: -6px;
+  right: 8px;
+  font-weight: bold;
+  color: var(--danger);
+  pointer-events: none;
+  animation: juice-damage-number 0.5s ease-out both;
+}
+
+/* KO fade/grayscale no lutador derrotado */
+.fighter.fainted img,
+.fighter.fainted .fname {
+  filter: grayscale(1);
+  opacity: 0.6;
+  animation: juice-ko 0.5s ease-out both;
+}
+
+.fighter.fainted {
+  opacity: 0.75;
+}
+
+/* Screenshake leve na arena */
+.arena {
+  animation: juice-shake 0.3s ease-out;
+}
+
+/* Projetil — so em viewport >= 900px; abaixo disso so flash no alvo */
+.shot {
+  display: none;
+  position: absolute;
+  top: 40%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffd54f, #f57c00);
+  box-shadow: 0 0 6px rgba(245, 124, 0, 0.8);
+  z-index: 2;
+}
+
+@media (min-width: 900px) {
+  .fighter.is-attacking .shot {
+    display: block;
+    animation: juice-projectile 0.4s ease-out 0.15s both;
+  }
+
+  .arena [data-side="0"] .fighter.is-attacking .shot {
+    --fly: 1;
+    right: -6px;
+  }
+
+  .arena [data-side="1"] .fighter.is-attacking .shot {
+    --fly: -1;
+    left: -6px;
+  }
+}
+
+/* Banner de vitoria + recompensas/XP animados */
+.winner-badge {
+  animation: juice-banner 0.45s ease-out both;
+}
+
+.rewards,
+.result .news--pop li {
+  animation: juice-news 0.4s ease-out both;
+}
+
+/* Reduced-motion NOVO do ODS: cobre os seletores novos (nao regredir a11y).
+   Fica no FIM do bloco ODS de proposito — depois das regras de juice acima.
+   Escrito como `@media screen and ...` (escopo correto: impressao nao anima)
+   e, como efeito colateral util, nao colide com o regex de primeiro-match do
+   style_responsive_test (que extrai o bloco reduce ANTIGO do fim do arquivo —
+   mantido integro para as regras legadas; remocao e 0076). */
+@media screen and (prefers-reduced-motion: reduce) {
+  .log__entry,
+  .fighter.is-hit,
+  .fighter.is-hit::after,
+  .fighter.fainted img,
+  .fighter.fainted .fname,
+  .fighter.is-attacking .shot,
+  .arena,
+  .fighters .bar-fill,
+  .winner-badge,
+  .rewards,
+  .result .news--pop li {
+    animation: none;
+  }
+}
+
 /* === Open Design System (0072): fim === */
 
 /* Layout interno das seções da página única */
@@ -690,7 +1101,10 @@ body.page-history {
   margin-bottom: 1em;
 }
 
-.fighter {
+/* Escopo-legado morto (0074 B1): o wrapper .battle-pane some na re-marcacao,
+   entao esta regra vira orfa sem deletar nada — neutraliza a colisao com o
+   .fighter novo do ODS sem tocar no resto do CSS antigo (remocao e 0076). */
+.battle-pane .fighter {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -699,7 +1113,7 @@ body.page-history {
   margin: 0.4em 0;
 }
 
-.fighter img {
+.battle-pane .fighter img {
   vertical-align: middle;
   margin-right: 6px;
 }
@@ -787,7 +1201,8 @@ body.page-history {
 }
 
 /* Flash de dano no painel do alvo (box-shadow inset, sem mexer no layout) */
-.fighter {
+/* Escopo-legado morto (0074 B1) — ver nota acima; regra orfa apos a re-marcacao. */
+.battle-pane .fighter {
   position: relative;
 }
 

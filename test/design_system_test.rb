@@ -58,6 +58,47 @@ class DesignSystemTest < Minitest::Test
     end
   end
 
+  def test_design_system_battle_screen_classes
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    # Classes de batalha anexadas na sessão 0074 (arena/podium/log/result — C7).
+    %w[
+      arena fighters fighter fainted engaged
+      fighter-head fighter-id fname fmeta lvl ftags ftag
+      moves move ppnum dot
+      podium round-banner turn-status controls
+      result winner-badge rewards ctas
+      battle-log log-title log lside
+    ].each do |klass|
+      assert_match(/\.#{Regexp.escape(klass)}\b/, block,
+                   "expected design system block to define .#{klass}")
+    end
+  end
+
+  def test_design_system_battle_juice_reduced_motion
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    # Juice 0063 portado para os seletores novos dentro do bloco ODS (B1b).
+    %w[
+      is-hit fainted is-attacking shot log__entry
+    ].each do |klass|
+      assert_match(/\.#{Regexp.escape(klass)}\b/, block,
+                   "expected design system block to port juice to .#{klass}")
+    end
+
+    reduce = block[/@media[^{]*prefers-reduced-motion:\s*reduce\)\s*\{(.*?)\n\s*\}/m, 1]
+    refute_nil reduce, "design system block must carry its own reduced-motion guard"
+    %w[.log__entry .is-hit .fainted .shot .arena .winner-badge .rewards].each do |selector|
+      assert_includes reduce, selector, "reduced-motion must cover #{selector}"
+    end
+  end
+
   def test_layout_uses_topnav_footer_shell
     layout = File.read(File.join(__dir__, "../views/layout.erb"))
 
