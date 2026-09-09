@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-09 (B, B, C, B, C, A, B, B — ver seção 5) |
-| Implementação fase 2a (0076a — visível/funcional, legado intacto) | **Pendente** — plano na seção 6; ao concluir (suíte + lint verdes, revisor S7 `Aprovado`) → **PARAR** e aguardar validação 2a (fase 3a) |
-| Validação fase 3a (0076a) | **Pendente** — executada pelo usuário (S2, tabela da seção 7) |
+| Implementação fase 2a (0076a — visível/funcional, legado intacto) | **Concluída** — 9 commits (`9867114`…`540d110`), suíte 1054/4847 0 falhas, lint 0, revisor 2c-2a **Aprovado** sem S3 |
+| Validação fase 3a (0076a) | **Concluída** — validada pelo usuário em 2026-09-09 (**Done 3a**; S2 C1–C10+G1–G3 ok + M1 ok, sem S3) |
 | Implementação fase 2b (0076b — limpeza/fechamento da onda) | **Pendente** — só inicia após a 3a validada; ao concluir → **PARAR** e aguardar validação 3b |
 | Validação fase 3b (0076b) | **Pendente** — executada pelo usuário (S2, tabela da seção 7); fecha a onda |
 
@@ -58,30 +58,30 @@ Portar os **modais** (center/mart/membro + evolução) para **overlay híbrido**
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| C1 `GET /team/center` + `GET /team/mart` devolvem `.overlay:target > .modal[role=dialog]` com o conteúdo atual (`_center` heal / `_mart` buy+sell) e os botões Serviços abrem via `hx-get` → `#center-modal`/`#mart-modal` | `test/modal_routes_test.rb` `test_center_fragment_renders_overlay_modal_with_heal_form` + `test_mart_fragment_renders_overlay_modal_with_buy_form` (novos) + `test/team_routes_test.rb:715-751` verdes (gates jornada intactos) | pendente |
-| C2 overlay híbrido: CSS `:target` no bloco (sem JS); `_evolution_modal` no mesmo padrão (mantém `id` + `role=dialog` + close + 3 estados + re-render no evolve); `GET /team/manage` em overlay de membro (mesma rota, todos os `POST /team/:id/*` intactos) | `test/modal_routes_test.rb` `test_overlay_opens_via_target_without_js` + `test_manage_renders_member_overlay` (novos) + `test/design_system_test.rb` `test_design_system_modal_screen_classes` (estendido) + `test/evolution_routes_test.rb:91-135` verdes | pendente |
-| C3 gates `@message` re-marcados (`.notice` + `.btn`/`.btn-secondary`, `gameloop-cta` → `.btn`, disabled com `title`) em `battle.erb:1-12` e `team.erb` (game-over/restart) | `test/battle_routes_test.rb:848/861` editados p/ `.btn[disabled]` + asserts game-over do time (editados, lista no passo) | pendente |
-| C4 contrato `data-od-id` nas 4 superfícies: shell+nav (topnav/nav/footer), home/team (`team-pane`/catalog/services/membros), battle (`side-team`/`side-opponent`/`controls` — ancorar), modais (`modal-center`/`modal-mart`/`modal-manage` + closes + ctas); history ancorado sem edição | `test/open_design_contract_test.rb` (novo, 1 método por superfície) | pendente |
-| C5 tags cor por tipo com dado real: `.ptags` no `pcard` (tipos do `api.find`), `.mtags` no roster/membro (enrichment §3), `.ftags` com tipos via `FighterPresenter#types`; cores `.ptag/.mtag/.ftag--<tipo>` no bloco | `test/open_design_contract_test.rb` `test_type_tags_use_real_data` (novo, com `PokeApiStub.with_find` retornando `types`) | pendente |
-| C6 `team=in|out` funcional: select Disponibilidade, `normalized_team` (fail-closed nil), `filter_active?`/sessão incluem `team`, filtragem por `@team_names` (names antes do `build_page`), starters ocultos com filtro ativo, `list-state` + paginação + "Limpar filtros" propagam `team=`, OOB preservado | `test/pokemon_list_filters_test.rb` `test_team_in_shows_only_members` + `test_team_out_excludes_members` + `test_team_invalid_falls_back_to_all` + `test_team_filter_persists_in_session` (estendido) | pendente |
-| C7 filtros vestidos no ODS (D94): `.filter-grid` no card + regras `.filter-state` no bloco + "Limpar filtros" `.btn.btn-ghost.btn-sm` com `team=` zerado + linha Arquivo/clear do guia `:178` | `test/home_view_test.rb` `test_filter_controls_wear_design_system` (novo) + `test/design_system_test.rb` (classes `.filter-grid`/`.filter-state` no bloco) | pendente |
-| C8 curadoria base fiel aditiva: topnav sticky/blur, botões, card, tipografia mono/lead, espaçamentos por tela, meter/pill/roster, tokens `--fs-*/--gap-*`, ausentes aplicáveis (sprite-tile, pcard-meta/add, end-states, battle ≤700px) | `test/design_system_test.rb` (asserts das classes no bloco, estendido) | pendente |
-| C9 conteúdo fiel por tela: battle (cabeçalho+contadores, CTAs, log, stock-items com regra), home/history (título+lead, meter acessível, catalog count/clear, pcard fiel, footer) | `test/battle_view_test.rb` + `test/home_view_test.rb` + `test/history_view_test.rb` (estendidos, edições mínimas listadas) | pendente |
-| C10 rede técnica 2a (D86/D88): `@keyframes juice-projectile` + `.add-toast` (+ keyframes) presentes **no bloco** (legado intacto) | `test/design_system_test.rb` `test_design_system_juice_safety_net_in_block` (novo) | pendente |
+| C1 `GET /team/center` + `GET /team/mart` devolvem `.overlay:target > .modal[role=dialog]` com o conteúdo atual (`_center` heal / `_mart` buy+sell) e os botões Serviços abrem via `hx-get` → `#center-modal`/`#mart-modal` | `test/modal_routes_test.rb` `test_center_fragment_renders_overlay_modal_with_heal_form` + `test_mart_fragment_renders_overlay_modal_with_buy_form` (novos) + `test/team_routes_test.rb:715-751` verdes (gates jornada intactos) | ok |
+| C2 overlay híbrido: CSS `:target` no bloco (sem JS); `_evolution_modal` no mesmo padrão (mantém `id` + `role=dialog` + close + 3 estados + re-render no evolve); `GET /team/manage` em overlay de membro (mesma rota, todos os `POST /team/:id/*` intactos) | `test/modal_routes_test.rb` `test_overlay_opens_via_target_without_js` + `test_manage_renders_member_overlay` (novos) + `test/design_system_test.rb` `test_design_system_modal_screen_classes` (estendido) + `test/evolution_routes_test.rb:91-135` verdes | ok |
+| C3 gates `@message` re-marcados (`.notice` + `.btn`/`.btn-secondary`, `gameloop-cta` → `.btn`, disabled com `title`) em `battle.erb:1-12` e `team.erb` (game-over/restart) | `test/battle_routes_test.rb:848/861` editados p/ `.btn[disabled]` + asserts game-over do time (editados, lista no passo) | ok |
+| C4 contrato `data-od-id` nas 4 superfícies: shell+nav (topnav/nav/footer), home/team (`team-pane`/catalog/services/membros), battle (`side-team`/`side-opponent`/`controls` — ancorar), modais (`modal-center`/`modal-mart`/`modal-manage` + closes + ctas); history ancorado sem edição | `test/open_design_contract_test.rb` (novo, 1 método por superfície) | ok |
+| C5 tags cor por tipo com dado real: `.ptags` no `pcard` (tipos do `api.find`), `.mtags` no roster/membro (enrichment §3), `.ftags` com tipos via `FighterPresenter#types`; cores `.ptag/.mtag/.ftag--<tipo>` no bloco | `test/open_design_contract_test.rb` `test_type_tags_use_real_data` (novo, com `PokeApiStub.with_find` retornando `types`) | ok |
+| C6 `team=in|out` funcional: select Disponibilidade, `normalized_team` (fail-closed nil), `filter_active?`/sessão incluem `team`, filtragem por `@team_names` (names antes do `build_page`), starters ocultos com filtro ativo, `list-state` + paginação + "Limpar filtros" propagam `team=`, OOB preservado | `test/pokemon_list_filters_test.rb` `test_team_in_shows_only_members` + `test_team_out_excludes_members` + `test_team_invalid_falls_back_to_all` + `test_team_filter_persists_in_session` (estendido) | ok |
+| C7 filtros vestidos no ODS (D94): `.filter-grid` no card + regras `.filter-state` no bloco + "Limpar filtros" `.btn.btn-ghost.btn-sm` com `team=` zerado + linha Arquivo/clear do guia `:178` | `test/home_view_test.rb` `test_filter_controls_wear_design_system` (novo) + `test/design_system_test.rb` (classes `.filter-grid`/`.filter-state` no bloco) | ok |
+| C8 curadoria base fiel aditiva: topnav sticky/blur, botões, card, tipografia mono/lead, espaçamentos por tela, meter/pill/roster, tokens `--fs-*/--gap-*`, ausentes aplicáveis (sprite-tile, pcard-meta/add, end-states, battle ≤700px) | `test/design_system_test.rb` (asserts das classes no bloco, estendido) | ok |
+| C9 conteúdo fiel por tela: battle (cabeçalho+contadores, CTAs, log, stock-items com regra), home/history (título+lead, meter acessível, catalog count/clear, pcard fiel, footer) | `test/battle_view_test.rb` + `test/home_view_test.rb` + `test/history_view_test.rb` (estendidos, edições mínimas listadas) | ok |
+| C10 rede técnica 2a (D86/D88): `@keyframes juice-projectile` + `.add-toast` (+ keyframes) presentes **no bloco** (legado intacto) | `test/design_system_test.rb` `test_design_system_juice_safety_net_in_block` (novo) | ok |
 
 ### Garantias fase 2a
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| G1 sem regressão — suíte completa (baseline **1025/4402** + novos) + lint 0; legado íntegro (diff fora do bloco/rotas só aditivo) | `./scripts/test` + `./scripts/lint` + `git diff -- public/style.css` (fora do bloco só adição) | pendente |
-| G2 backend só no listado (§3) — sem migração/schema/gems/services; testes sem rede | `git diff --stat -- db/ Gemfile* lib/` confinado ao listado + stubs; revisão S7 confere | pendente |
-| G3 S4/S5 + revisão — `SESSIONS.md` + `check_docs` + `checar-sessao 0076` verdes; revisor S7 `Aprovado` antes da 3a | `./scripts/check_docs` + `./scripts/checar-sessao 0076` + veredito do Revisor | pendente |
+| G1 sem regressão — suíte completa (baseline **1025/4402** + novos) + lint 0; legado íntegro (diff fora do bloco/rotas só aditivo) | `./scripts/test` + `./scripts/lint` + `git diff -- public/style.css` (fora do bloco só adição) | ok |
+| G2 backend só no listado (§3) — sem migração/schema/gems/services; testes sem rede | `git diff --stat -- db/ Gemfile* lib/` confinado ao listado + stubs; revisão S7 confere | ok |
+| G3 S4/S5 + revisão — `SESSIONS.md` + `check_docs` + `checar-sessao 0076` verdes; revisor S7 `Aprovado` antes da 3a | `./scripts/check_docs` + `./scripts/checar-sessao 0076` + veredito do Revisor | ok |
 
 ### Manual fase 2a
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| M1 modais abrir/fechar via `:target` no navegador (center/mart/membro/evolução, sem JS) + reflow ≤920px da home com filtros vestidos | `manual` (`./scripts/run`, `/` + time cheio/vazio, redimensionar ≤920px, sem overflow-x) | pendente |
+| M1 modais abrir/fechar via `:target` no navegador (center/mart/membro/evolução, sem JS) + reflow ≤920px da home com filtros vestidos | `manual` (`./scripts/run`, `/` + time cheio/vazio, redimensionar ≤920px, sem overflow-x) | ok |
 
 ### Resultado fase 2b — 0076b (S1)
 
@@ -146,7 +146,24 @@ Portar os **modais** (center/mart/membro + evolução) para **overlay híbrido**
 
 ## 7. Validação (executada pelo usuário — S2, uma tabela por fatia)
 
-**Fase 3a (0076a) — pendente.** | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) | C1–C10+G1–G3: (a preencher) | M1: (a preencher) |
+**Fase 3a (0076a) — validada pelo usuário em 2026-09-09 (resposta "validado", sem S3).**
+
+| Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
+| --- | --- | --- | --- |
+| C1 (center/mart em overlay) | `test/modal_routes_test.rb` (2 métodos) + `team_routes:715-751` | abrir via Serviços | ok |
+| C2 (overlay híbrido) | `modal_routes_test` + `design_system_modal_screen_classes` + `evolution:91-135`, POSTs intactos | abrir/fechar sem JS | ok |
+| C3 (gates sem gameloop-cta) | `battle_routes:848/861` + asserts game-over | estados de gate | ok |
+| C4 (data-od-id contrato) | `test/open_design_contract_test.rb` | — | ok |
+| C5 (tags cor por tipo) | `test_type_tags_use_real_data` (stub com types) | cores no roster/battle | ok |
+| C6 (team=in/out) | 4 testes (persist + OOB) | filtrar, recarregar, limpar | ok |
+| C7 (filtros vestidos) | `home_view` + design_system | visual dos controles | ok |
+| C8 (curadoria base) | design_system por tela | visual global | ok |
+| C9 (conteúdo) | battle/home/history views estendidas | cabeçalhos, CTAs, log, footer | ok |
+| C10 (rede juice) | `test_design_system_juice_safety_net_in_block` | projétil/toast animando | ok |
+| G1 (sem regressão) | suíte 1054/4847 + lint 0 | — | ok |
+| G2 (backend listado) | diff `db/`+`Gemfile*` vazio, presenter +4 | — | ok |
+| G3 (docs + revisão) | check_docs + checar-sessao + Aprovado | — | ok |
+| M1 (confete visual) | — | `./scripts/run`, modais sem JS, reflow ≤920px | ok |
 
 **Fase 3b (0076b) — pendente (só após a 3a).** | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) | C11–C14+G4–G5: (a preencher) | M2: (a preencher) |
 
