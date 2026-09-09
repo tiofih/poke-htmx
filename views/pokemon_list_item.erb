@@ -2,11 +2,11 @@
   <% if pokemon %>
     <a href="#" hx-get="/pokemon/<%= pokemon.number %>" hx-target="#pokemon-detail" hx-swap="innerHTML">
       <img src="<%= pokemon.sprite %>" alt="<%= name %>" loading="lazy">
-      <%= name %>
+      <div class="pcard-name"><%= name %></div>
     </a>
     <% info = @pokemon_costs && @pokemon_costs[name] %>
     <% if info %>
-      <span class="poke-cost<%= ' poke-cost--restricted' if info[:restricted] %>" data-tier="<%= info[:tier] %>"><%= info[:tier] %> · <%= info[:cost] %><%= ' ◆' if info[:restricted] %></span>
+      <div class="pcard-meta"><span class="poke-cost<%= ' poke-cost--restricted' if info[:restricted] %>" data-tier="<%= info[:tier] %>"><%= info[:tier] %> · <%= info[:cost] %><%= ' ◆' if info[:restricted] %></span></div>
     <% end %>
     <% unless pokemon.types.to_a.empty? %>
       <span class="ptags">

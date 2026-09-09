@@ -98,4 +98,64 @@ class HomeResidueTest < Minitest::Test
     refute_includes modal, "evolution-modal-box"
     refute_includes modal, "onclick"
   end
+
+  def test_catalog_cards
+    names = %w[charmander squirtle]
+    find_map = {
+      "charmander" => Pokemon.new(name: "charmander", sprite: "s", number: 4, types: %w[fire]),
+      "squirtle" => Pokemon.new(name: "squirtle", sprite: "s", number: 7, types: %w[water])
+    }
+    forms = names.to_h { |name| [name, true] }
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_find(find_map) do
+        PokeApiStub.with_base_forms(forms) do
+          get "/pokemons", {}, user_session(HOME_USER)
+        end
+      end
+    end
+
+    assert last_response.ok?
+    catalog = last_response.body
+    assert_match(/<li class="pcard">/, catalog)
+    assert_match(/class="pcard-name"/, catalog)
+    assert_match(/class="pcard-meta"/, catalog)
+    assert_match(%r{hx-get="/pokemon/4"[^>]*hx-target="#pokemon-detail"}, catalog)
+    refute_includes catalog, "onclick"
+  end
+
+  def test_catalog_detail
+    chain = {
+      charmander: build_pokemon_record("charmander", 4),
+      charmeleon: build_pokemon_record("charmeleon", 5)
+    }
+    charizard = Pokemon.new(
+      name: "charizard",
+      sprite: chain[:charmander].sprite,
+      number: 6,
+      types: %w[fire flying],
+      stats: [
+        { name: "HP", value: 78 },
+        { name: "Attack", value: 84 },
+        { name: "Defense", value: 78 },
+        { name: "Speed", value: 100 }
+      ],
+      evolutions: [chain[:charmander], chain[:charmeleon]]
+    )
+    PokeApiStub.with_detail(charizard) do
+      get "/pokemon/6", {}, user_session(HOME_USER)
+    end
+
+    assert last_response.ok?
+    detail = last_response.body
+    assert_match(/class="tag-row"/, detail)
+    assert_match(/class="stat-grid"/, detail)
+    assert_match(/class="evo-row"/, detail)
+    assert_includes detail, "fire"
+    assert_includes detail, "78"
+    assert_includes detail, "charmander"
+    assert_match(%r{hx-get="/pokemon/4"[^>]*hx-target="#pokemon-detail"}, detail)
+    assert_includes detail, %(hx-post="/team")
+    assert_includes detail, %(hx-get="/pokemon/close")
+    refute_includes detail, "onclick"
+  end
 end

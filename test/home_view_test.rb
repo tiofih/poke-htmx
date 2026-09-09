@@ -56,4 +56,54 @@ class HomeViewTest < Minitest::Test
     assert_match(/<li class="pcard">/, body, "expected catalog cards")
     assert_match(/<img[^>]*alt=/, body, "expected card sprites")
   end
+
+  def test_catalog_cards_wear_pcard_name_and_meta
+    names = %w[charmander squirtle]
+    find_map = {
+      "charmander" => Pokemon.new(name: "charmander", sprite: "s", number: 4, types: %w[fire]),
+      "squirtle" => Pokemon.new(name: "squirtle", sprite: "s", number: 7, types: %w[water])
+    }
+    forms = names.to_h { |name| [name, true] }
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_find(find_map) do
+        PokeApiStub.with_base_forms(forms) do
+          get "/pokemons"
+        end
+      end
+    end
+
+    assert last_response.ok?
+    assert_match(%r{<div class="pcard-name">charmander</div>}, last_response.body,
+                 "expected catalog cards to name members in .pcard-name")
+    assert_match(/class="pcard-meta"/, last_response.body,
+                 "expected catalog cards to wrap cost in .pcard-meta")
+  end
+
+  def test_pokemon_detail_wears_tag_row_stat_grid_evo_row
+    chain = {
+      charmander: build_pokemon_record("charmander", 4),
+      charmeleon: build_pokemon_record("charmeleon", 5)
+    }
+    charizard = Pokemon.new(
+      name: "charizard",
+      sprite: chain[:charmander].sprite,
+      number: 6,
+      types: %w[fire flying],
+      stats: [{ name: "HP", value: 78 }, { name: "Speed", value: 100 }],
+      evolutions: [chain[:charmander], chain[:charmeleon]]
+    )
+    PokeApiStub.with_detail(charizard) do
+      get "/pokemon/6"
+    end
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/class="tag-row"/, body, "expected detail types in .tag-row")
+    assert_match(/class="stat-grid"/, body, "expected detail stats in .stat-grid")
+    assert_match(/class="evo-row"/, body, "expected detail evolutions in .evo-row")
+    assert_match(%r{hx-get="/pokemon/4"[^>]*hx-target="#pokemon-detail"}, body,
+                 "expected evolution links to keep htmx targets")
+    assert_includes body, %(hx-post="/team")
+    refute_includes body, "onclick"
+  end
 end
