@@ -133,6 +133,10 @@ Adicionar o **design system do redesenho** (`open-design/`) como **base aditiva*
 - **Sakura mantido até a 0076** — remover é critério da 0076, não da 0072. Não colocar `refute_match` de sakura como critério de C4.
 - **`body class` do shell precisa preservar `page-list` para `/`** (D1) além de `page-battle`/`page-history` — o `layout_test.rb`/views atuais dependem de `page-list` na página única `/`.
 - **`layout_test.rb` `test_nav_shows_team_badge`** exige `@team_size` e `/6` no `layout.erb` — ao portar o shell, preservar o badge e o `@team_size`/`/6` no navbar.
+- **Nav `active` é um contrato mais rígido do que o §5.1 sugere** — `battle_routes_test.rb:20` + `pokemon_routes_test.rb:357-370` exigem um âncora `href="/<pagina>" class="active"` com a classe **exatamente** `active` (o `assert_includes` pede o literal `class="active"`). A CTA `.btn.btn-primary` do §5.1 **conflita** (classe não pode ser `active` exata e `btn btn-primary` ao mesmo tempo). Solução usada: a CTA "Batalhar" alterna `class="active"` em `/battle` (página atual) e `class="btn btn-primary"` nas demais páginas — preserva `battle_routes_test`/`pokemon_routes_test` e mantém o CTA na 0072.
+- **`get "/style.css"` passa pelo `before`/`after`** (toca o banco via `@team_size`); em um teste com `ServerTestHelpers` o `TestDatabase.setup!` cobre e **não** precisa de stub (estático do `public/`). Se um dia `/style.css` virar healthcheck puro, condicionar — hoje não é.
+- **Delimitadores do bloco do design system** — o C4 (autonomia) extrai `style.css` entre os marcadores `/* === Open Design System (0072): inicio/fim === */`; sem delimitadores, um `refute_match(/sakura/)` no arquivo inteiro falharia porque o **cabeçalho** do `style.css` ainda menciona "base sakura (CDN)" (e nem é critério da 0072). Ele é unitário dentro do bloco.
+- **`./scripts/test ... -n '/a|b/'`** precisa do regex entre **aspas simples**; o wrapper divide no `|` se não citado (`zsh: no such file or directory`). Preferir rodar o arquivo inteiro.
 
 ### Confirmações no green (a preencher pelo implementador)
 
