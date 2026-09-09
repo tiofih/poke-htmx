@@ -11,7 +11,7 @@
 <% if @game_over %>
   <p class="notice notice--error">Game Over — seu time está derrotado e você não tem dinheiro para curar. Venda itens no Poke Mart ou recomece a jornada.</p>
   <form hx-post="/journey/restart" hx-target="#team-view" hx-swap="innerHTML" hx-include=".list-state">
-    <button type="submit" class="gameloop-cta">Recomeçar jornada</button>
+    <button type="submit" class="btn btn-secondary">Recomeçar jornada</button>
   </form>
 <% end %>
 <% if @journey_started %>

@@ -765,6 +765,7 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
     assert_match(/Recome\S* jornada/, last_response.body)
     assert_includes last_response.body, "notice--error"
     assert_includes last_response.body, 'hx-post="/journey/restart"'
+    assert_includes last_response.body, '<button type="submit" class="btn btn-secondary">Recomeçar jornada</button>'
   end
 end
 
