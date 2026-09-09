@@ -45,7 +45,7 @@ class ServerTeamFaintedTest < Minitest::Test
     # view still shows member
     assert_includes last_response.body, reloaded.name
     # OOB condicional preservado: when visible includes starters
-    assert_includes last_response.body, "starter-item"
+    assert_includes last_response.body, '<ul class="pokemon-list starters">'
   end # rubocop:enable Metrics/AbcSize
 
   def test_delete_fainted_blocked_does_not_break_oob_when_filtered
@@ -58,7 +58,7 @@ class ServerTeamFaintedTest < Minitest::Test
     assert last_response.ok?
     assert_equal 6, @repository.all("user-a").size
     assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
-    refute_includes last_response.body, "starter-item",
+    refute_includes last_response.body, '<ul class="pokemon-list starters">',
                     "starters nao deveriam aparecer quando q nao vazio"
     assert_includes last_response.body, "Pokémon derrotado"
   end

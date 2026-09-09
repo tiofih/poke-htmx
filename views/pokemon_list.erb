@@ -26,13 +26,13 @@
   <% unless @starters.empty? %>
     <ul class="pokemon-list starters">
       <% @starters.each do |name, pokemon| %>
-        <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon, css_class: "starter-item" } %>
+        <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon } %>
       <% end %>
     </ul>
   <% end %>
   <ul class="pokemon-list">
     <% @items.each do |name, pokemon| %>
-      <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon, css_class: "list-item" } %>
+      <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon } %>
     <% end %>
   </ul>
 </div>

@@ -870,7 +870,7 @@ class ServerTeamRemoveQ5Test < Minitest::Test
     assert_match(/hx-indicator="#team-view"/, remove_form)
   end
 
-  # C4 — OOB condicional: quando filtrado/paginado/busca não varre starters (sem starter-item)
+  # C4 — OOB condicional: quando filtrado/paginado/busca não varre starters (sem bloco starters)
   # mas ainda devolve OOB filtrado; quando visível, inclui starters
   # rubocop:disable Metrics/AbcSize
   def test_oob_conditional_skips_starters_when_filtered_or_paginated
@@ -880,7 +880,7 @@ class ServerTeamRemoveQ5Test < Minitest::Test
     delete "/team", { id: id, offset: "0", q: "pika" }, htmx_session("user-a")
     assert last_response.ok?
     assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
-    refute_includes last_response.body, "starter-item",
+    refute_includes last_response.body, '<ul class="pokemon-list starters">',
                     "starters nao deveriam aparecer quando q nao vazio"
     assert_includes last_response.body, "bulbasaur"
 
@@ -892,7 +892,7 @@ class ServerTeamRemoveQ5Test < Minitest::Test
     delete "/team", { id: id2, offset: "36", q: "" }, htmx_session("user-a")
     assert last_response.ok?
     assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
-    refute_includes last_response.body, "starter-item",
+    refute_includes last_response.body, '<ul class="pokemon-list starters">',
                     "starters nao deveriam aparecer quando offset>0"
 
     # type filter → sem starters
@@ -901,7 +901,7 @@ class ServerTeamRemoveQ5Test < Minitest::Test
     delete "/team", { id: id3, type: "fire", offset: "0", q: "" }, htmx_session("user-a")
     assert last_response.ok?
     assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
-    refute_includes last_response.body, "starter-item",
+    refute_includes last_response.body, '<ul class="pokemon-list starters">',
                     "starters nao deveriam aparecer quando type filtrado"
 
     # sort ativo → sem starters
@@ -910,7 +910,7 @@ class ServerTeamRemoveQ5Test < Minitest::Test
     delete "/team", { id: id4, sort: "cost_desc", offset: "0", q: "" }, htmx_session("user-a")
     assert last_response.ok?
     assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
-    refute_includes last_response.body, "starter-item",
+    refute_includes last_response.body, '<ul class="pokemon-list starters">',
                     "starters nao deveriam aparecer quando sort ativo"
   end
   # rubocop:enable Metrics/AbcSize
@@ -922,7 +922,7 @@ class ServerTeamRemoveQ5Test < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, 'id="pokemon-list" hx-swap-oob'
-    assert_includes last_response.body, "starter-item"
+    assert_includes last_response.body, '<ul class="pokemon-list starters">'
   end
 end
 

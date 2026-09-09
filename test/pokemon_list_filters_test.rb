@@ -182,7 +182,7 @@ class PokemonListFilterTest < Minitest::Test
     assert last_response.ok?
     refute_includes last_response.body, 'value="bulbasaur"'
     refute_includes last_response.body, 'value="chikorita"'
-    assert_empty last_response.body.scan('<li class="list-item">')
+    assert_empty last_response.body.scan('<li class="pcard">')
   end
 
   def test_filters_by_tier

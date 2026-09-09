@@ -1,4 +1,4 @@
-<li class="<%= css_class %>">
+<li class="pcard">
   <% if pokemon %>
     <a href="#" hx-get="/pokemon/<%= pokemon.number %>" hx-target="#pokemon-detail" hx-swap="innerHTML">
       <img src="<%= pokemon.sprite %>" alt="<%= name %>" loading="lazy">
@@ -17,7 +17,7 @@
       in_team = Array(@team_names).include?(name)
       disabled = in_team || @team_full
     %>
-    <button type="submit" class="btn" <%= 'disabled="disabled"' if disabled %>>
+    <button type="submit" class="btn pcard-add" <%= 'disabled="disabled"' if disabled %>>
       <%= in_team ? "No time ✓" : "Adicionar ao time" %>
     </button>
   </form>

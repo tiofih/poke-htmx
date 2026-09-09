@@ -255,8 +255,7 @@ class ServerListTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, 'id="pokemon-list"'
-    assert_equal 27, last_response.body.scan('<li class="starter-item">').size
-    assert_equal 9, last_response.body.scan('<li class="list-item">').size
+    assert_equal 36, last_response.body.scan('<li class="pcard">').size
     assert_includes last_response.body, 'name="q"'
     assert_includes last_response.body, "Página 1"
     assert_includes last_response.body, 'name="type"'
@@ -416,7 +415,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_equal 36, last_response.body.scan('<li class="list-item">').size
+    assert_equal 36, last_response.body.scan('<li class="pcard">').size
     assert_equal 36, last_response.body.scan("hx-get=\"/pokemon/").size
     assert_equal 36, last_response.body.scan("<img src=").size
     assert_equal 36, last_response.body.scan('name="pokeName"').size
@@ -471,15 +470,18 @@ class ServerListTest < Minitest::Test
     assert last_response.ok?
     refute_includes last_response.body, 'value="raichu"'
     assert_includes last_response.body, 'value="pikachu"'
-    assert_equal 3, last_response.body.scan('<li class="list-item">').size
+    pool = last_response.body[%r{<ul class="pokemon-list">(.*?)</ul>}m, 1].to_s
+    assert_equal 3, pool.scan('<li class="pcard">').size
   end
 
   def test_pokemons_excludes_starters_from_pool_list
     stub_list(filtered_names) { get "/pokemons" }
 
     assert last_response.ok?
-    assert_equal 27, last_response.body.scan('<li class="starter-item">').size
-    assert_equal 4, last_response.body.scan('<li class="list-item">').size
+    starters = last_response.body[%r{<ul class="pokemon-list starters">(.*?)</ul>}m, 1].to_s
+    pool = last_response.body[%r{<ul class="pokemon-list">(.*?)</ul>}m, 1].to_s
+    assert_equal 27, starters.scan('<li class="pcard">').size
+    assert_equal 4, pool.scan('<li class="pcard">').size
     assert_equal 1, last_response.body.scan('value="bulbasaur"').size
   end
 
@@ -487,7 +489,8 @@ class ServerListTest < Minitest::Test
     stub_list(filtered_names) { get "/pokemons" }
 
     assert last_response.ok?
-    assert_equal 27, last_response.body.scan('<li class="starter-item">').size
+    starters = last_response.body[%r{<ul class="pokemon-list starters">(.*?)</ul>}m, 1].to_s
+    assert_equal 27, starters.scan('<li class="pcard">').size
     ALL_STARTERS.each do |slug|
       assert_includes last_response.body, "value=\"#{slug}\""
     end
@@ -499,7 +502,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    refute_includes last_response.body, '<li class="starter-item">'
+    refute_includes last_response.body, '<ul class="pokemon-list starters">'
   end
 
   def test_pokemons_first_page_has_no_previous_link
@@ -516,8 +519,8 @@ class ServerListTest < Minitest::Test
 
     assert last_response.ok?
     refute_includes last_response.body, "Iniciais"
-    assert_empty last_response.body.scan('<li class="starter-item">')
-    assert_equal 36, last_response.body.scan('<li class="list-item">').size
+    refute_includes last_response.body, '<ul class="pokemon-list starters">'
+    assert_equal 36, last_response.body.scan('<li class="pcard">').size
     assert_includes last_response.body, "Página 2"
   end
 
@@ -551,7 +554,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_equal 2, last_response.body.scan('<li class="list-item">').size
+    assert_equal 2, last_response.body.scan('<li class="pcard">').size
     refute_includes last_response.body, 'value="bulbasaur"'
     assert_includes last_response.body, "Página 1"
     refute_includes last_response.body, ">Próxima<"
@@ -563,7 +566,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_empty last_response.body.scan('<li class="list-item">')
+    assert_empty last_response.body.scan('<li class="pcard">')
     refute_includes last_response.body, 'id="filter-controls"'
     refute_includes last_response.body, 'hx-swap-oob="innerHTML"'
     refute_includes last_response.body, 'value="pikachu"'
@@ -586,7 +589,7 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_equal 4, last_response.body.scan('<li class="list-item">').size
+    assert_equal 4, last_response.body.scan('<li class="pcard">').size
   end
 
   def test_pokemons_with_empty_source_and_no_filter_shows_notice

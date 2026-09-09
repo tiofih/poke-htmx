@@ -215,7 +215,7 @@ class PokemonListCostTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "Página 2"
-    assert_equal 36, last_response.body.scan('<li class="list-item">').size
+    assert_equal 36, last_response.body.scan('<li class="pcard">').size
     # badge ainda presente sem quebrar paginação
     assert_includes last_response.body, 'class="poke-cost"'
 
