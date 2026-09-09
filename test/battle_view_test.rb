@@ -96,4 +96,19 @@ class BattleViewTest < Minitest::Test
     assert_includes body, 'hx-post="/battle/new"', "new confront posts to /battle/new"
     assert_includes body, "Novo confronto", "new confront label preserved"
   end
+
+  def test_battle_end_uses_results_desktop_markup
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/class="res-screen"/, body, "expected .res-screen wrapping the battle end")
+    assert_match(/class="res-top"/, body, "expected .res-top result bar (desktop)")
+    assert_match(/class="state-title"/, body, "expected .state-title with winner")
+    assert_match(/class="state-card"/, body, "expected .state-card for the end state")
+    assert_match(/class="mini-arena"/, body, "expected .mini-arena with both sides")
+    assert_match(/<li class="frow[ "]/, body, "expected li.frow rows per fighter")
+    assert_match(/class="result-card"/, body, "expected .result-card with winner + rewards")
+  end
 end
