@@ -1,0 +1,109 @@
+# Sessão 0078 — open-design-battle-1a1 (resíduo battle: `battle.html` + end-states + results-desktop → fim de `battle.erb`/`_fighter_panel`)
+
+## Status
+
+| Fase | Status |
+| --- | --- |
+| Refinamento | **Concluída** — escolhas do usuário em 2026-09-09 (fatiamento por tela, deslizamento 0077-0079→resíduo / 0080-0082→estabilidade, fidelidade híbrida, backend thin listado, S1 com 1 teste novo + extensões — ver seção 5) |
+| Implementação (fase 2, TDD) | Pendente |
+| Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
+
+---
+
+## 1. Objetivo
+
+Portar o **resíduo da batalha** dos protótipos `open-design/battle.html` (30KB), `battle-end-states.html` (30KB) e `battle-results-desktop.html` (17KB) — **nunca portados** — para o **fim de `battle.erb`** (`result`/`rewards`/`ctas`: `res-screen`/`state-card`/mini-arena) em **fidelidade híbrida** (adaptação preservando o htmx onde há legado 0074/0076, cópia mais literal onde não há legado), com `BattleService.resolve` (`lib/battle_service.rb:407-420`) / `finish_effects` (`:449-457`) e `expose_battle_result` (`server.rb:1015-1022`) como **leitura apenas**.
+
+## 2. Contexto (estado atual — diagnóstico)
+
+- **0076 Done** (onda open-design fechada, baseline **1057/4900**, lint 0): `battle.erb` tem `result`/`rewards`/`ctas` no ODS; **falta** `res-screen`/`state-card`/mini-arena dos protótipos de fim de batalha (preparado/andamento cobertos na 0074, **fim/game-over nunca portados**: `battle-end-states.html` + `battle-results-desktop.html`).
+- **Leitura apenas:** `BattleService.resolve` (`:407-420`) + `finish_effects` (`:449-457`) e `ServerBattleActions.expose_battle_result` (`:1015-1022`) — o fim de batalha só **lê** o resultado exposto; sem mudar motor/economia/XP.
+- **CSS:** `public/style.css` (35KB) tem o bloco ODS com seções por sessão; **CSS novo entra ANTES da linha `fim`**, com delimitador próprio `0078` (edição paralela sem conflito com 0077/0079).
+- **⚠️ `public/style.css` está DIRTY no git** (diff grande, ~1129+/1003- — verificado no refinamento): o implementador deve **conferir/stash antes de editar o CSS** (`git diff -- public/style.css`, `git stash push -- public/style.css` se for trabalho alheio) e **NÃO commitar `style.css` junto sem revisar**.
+- **Fila (deslizamento, seção 5):** 0077 home → **0078 battle** → 0079 history → 0080 escritas atômicas → 0081 CSRF → 0082 respiro.
+
+## 3. Escopo
+
+### Produção
+
+- **Views (re-marcar, htmx/contratos preservados):** fim de `battle.erb` (+`res-screen`/`state-card`/mini-arena cobrindo vitória/derrota/empate/game-over) + fim de `_fighter_panel.erb` (o que o end-state exigir); `#battle-view` (swap de `POST /battle/play`/`/battle/new`), `data-side`, juice 0063/0074 e `data-od-id` 0076 intactos.
+- **`public/style.css` (só dentro do bloco ODS, ANTES da linha `fim`, com delimitador próprio `0078`):** classes dos 3 protótipos aplicáveis ao fim de batalha, aditivas.
+- **Backend thin listado (sem migração/schema/gems/services; `resolve`/`finish_effects`/`expose_battle_result` só leitura):** ajustes só no que o markup novo exigir para exibir o resultado já exposto (ex.: flag/rotulo de estado final); **nenhuma mudança de motor, economia, XP ou ordem de efeitos**.
+
+### Testes
+
+- **Novo:** `test/battle_end_states_test.rb` (C1–C2: `test_battle_end_states`, `test_results_desktop`).
+- **Estender (cirúrgico):** `test/design_system_test.rb` (classes 0078 no bloco), `test/battle_view_test.rb` (fim de batalha), `test/battle_routes_test.rb` (asserts de fim/game-over já existentes, só se quebrar — meta: verde sem edição).
+
+### Fora de escopo (não abrir — RNF-04)
+
+- Home (0077); history (0079); motor de batalha (`BattleEngine`), economia/XP, `resolve`/`finish_effects` (leitura apenas); identidade `?as=`, CSRF, escritas atômicas → 0080/0081; erro-status, respiro → 0082; CD.
+
+## 4. Critérios de aceite
+
+### Resultado (S1 — cada critério aponta o teste que o prova)
+
+| Critério | Teste que o prova | Estado |
+| --- | --- | --- |
+| C1 end-states: fim de `battle.erb` com `res-screen`/`state-card` cobrindo vitória/derrota/empate/game-over (CTAs Novo confronto/Center/Mart + restart game-over intactos) | `test/battle_end_states_test.rb` `test_battle_end_states` (novo) + `test/battle_routes_test.rb` (fim/game-over) verdes | pendente |
+| C2 results-desktop: mini-arena + `rewards` (XP/dinheiro) no padrão `battle-results-desktop.html`, juice/`data-side`/`#battle-view` preservados | `test/battle_end_states_test.rb` `test_results_desktop` (novo) + `test/battle_view_test.rb` estendido | pendente |
+| C3 CSS 0078 no bloco: classes dos 3 protótipos aplicáveis ao fim de batalha, aditivas, ANTES da linha `fim`, com delimitador próprio `0078` | `test/design_system_test.rb` `test_design_system_battle_end_states_classes` (estendido) | pendente |
+
+### Garantias
+
+| Critério | Teste que o prova | Estado |
+| --- | --- | --- |
+| G1 sem regressão — suíte completa (baseline **1057/4900** + novos) + lint 0; `style.css` DIRTY conferido/stash antes de editar (não commitar alheio) | `./scripts/test` + `./scripts/lint` + `git status -- public/style.css` | pendente |
+| G2 backend só no listado (§3) — `resolve`/`finish_effects`/`expose_battle_result` intocados (leitura); sem migração/schema/gems/services; testes sem rede | `git diff -- lib/battle_service.rb` vazio (ou só leitura) + `git diff --stat -- db/ Gemfile*` vazio + revisão S7 confere | pendente |
+| G3 S4/S5 + revisão — `SESSIONS.md` + `check_docs` + `checar-sessao 0078` verdes; revisor S7 `Aprovado` antes da 3 | `./scripts/check_docs` + `./scripts/checar-sessao 0078` + veredito do Revisor | pendente |
+
+### Manual
+
+| Critério | Teste que o prova | Estado |
+| --- | --- | --- |
+| M1 fim de batalha no navegador (vitória/derrota/empate/game-over + rewards + CTAs, ≤920px sem overflow-x) | `manual` (`./scripts/run`, `/battle` até o fim) | pendente |
+
+> **S1:** cada critério acima aponta o teste que o prova (arquivo + método); o único critério puramente manual é **M1**. **Ao fim da fase 2 (suíte + lint verdes, revisor S7 `Aprovado`), PARAR e aguardar a validação do usuário — não marcar Done, não preencher a seção 7, não commitar conclusão.**
+
+## 5. Decisões de refinamento (fechadas com o usuário em 2026-09-09 — prevalecem sobre o mapa)
+
+- **Fatiamento por tela (escolhida):** 0078 = battle (inclui os 2 protótipos de fim nunca portados).
+- **Deslizamento (escolhida):** resíduo vira 0077-0079; antigas 0077 escritas atômicas→**0080**, 0078 CSRF→**0081**, 0079 respiro→**0082**.
+- **Fidelidade híbrida (escolhida):** adaptação preservando htmx onde há legado (0074/0076), cópia mais literal onde não há legado (end-states/results-desktop).
+- **Backend thin listado, motor só leitura (escolhida):** `resolve`/`finish_effects`/`expose_battle_result` não mudam; sem schema/gems/services.
+- **S1 (escolhida):** 1 arquivo Minitest novo (`battle_end_states_test.rb`) + extensões cirúrgicas.
+
+## 6. Plano TDD (passos)
+
+> Cada passo = `red` → `green` (suíte completa + lint 0) → commit. Termina em Revisor (2c, S7, teto 3 rodadas) → **PARAR** p/ validação do usuário.
+
+| Passo | Escopo (red → green) | Verificação |
+| --- | --- | --- |
+| 0 | **Refinamento** — este arquivo + `SESSIONS.md` (linha 0078 + "Próxima sessão") | commit `Sessao 0078: refinamento concluido — ...` (**sem** `public/style.css`, que está dirty) |
+| 1 | **red→green — C3-css (bloco 0078)** — conferir/stash o dirty do `style.css`, anexar classes ANTES da linha `fim` com delimitador `0078`, estender `design_system_test.rb` | `./scripts/test test/design_system_test.rb` + suíte + lint 0; commit `Passo 1: classes battle-end-states/results-desktop no bloco ODS (delimitador 0078), aditivo` |
+| 2 | **red→green — C1 (end-states)** — re-marcar fim de `battle.erb` (`res-screen`/`state-card` × 4 estados) + thin listado; criar `test/battle_end_states_test.rb` (`test_battle_end_states`) | `./scripts/test test/battle_end_states_test.rb test/battle_routes_test.rb` + suíte + lint 0; commit `Passo 2: fim de batalha no ODS (res-screen/state-card, 4 estados)` |
+| 3 | **red→green — C2 (results-desktop)** — mini-arena + `rewards` no padrão desktop; `test_results_desktop` + estender `battle_view_test.rb` | `./scripts/test test/battle_end_states_test.rb test/battle_view_test.rb` + suíte + lint 0; commit `Passo 3: rewards/mini-arena no padrao results-desktop` |
+| 4 | **red→green — G1/G3 (regressão + docs)** — suíte + lint 0 + `check_docs` + `checar-sessao 0078` | `./scripts/test` + `./scripts/lint` + `./scripts/check_docs` + `./scripts/checar-sessao 0078`; commit `Passo 4: regressao e docs — residuo battle fechado` |
+| — | **Fase 2 concluída** → **Revisor (2c)** até `Aprovado` (teto 3, senão S3) → **PARAR**, aguardar **validação 3**. Não marcar Done, não preencher §7, não commitar conclusão. | — |
+
+## 7. Validação (executada pelo usuário — S2)
+
+| Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
+| --- | --- | --- | --- |
+| C1 (end-states 4 estados) | | | pendente |
+| C2 (results-desktop) | | | pendente |
+| C3 (CSS 0078 no bloco) | | | pendente |
+| G1 (sem regressão) | | | pendente |
+| G2 (backend listado/motor leitura) | | | pendente |
+| G3 (docs + revisão) | | | pendente |
+| M1 (fim de batalha visual) | — | | pendente |
+
+> **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
+
+## 8. Observações
+
+- **`public/style.css` DIRTY (~1129+/1003-):** conferir/stash antes de editar; nunca commitar junto sem revisar (Passo 1).
+- **`resolve`/`finish_effects`/`expose_battle_result` são leitura:** qualquer necessidade de mudar o motor vira anotação (RNF-04), não escopo.
+- **Fila:** 0077 home → 0078 battle → **0079 history** → 0080 escritas atômicas → 0081 CSRF → 0082 respiro.
+
+## 9. Gotchas / Lições (memória — S6, preencher na 3)
