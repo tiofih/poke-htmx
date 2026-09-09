@@ -257,14 +257,13 @@
   min-width: 0;
 }
 
-/* Grade do catálogo visual */
+/* Grade do catálogo visual.
+   `#pokemon-list` recebe o .pokemon-grid de pokemon_list.erb via hx-swap="innerHTML",
+   entao .catalog e um recipiente (block); a grade em si e .pokemon-grid. */
 .catalog {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
 }
 
 /* Cartão de Pokémon do catálogo */

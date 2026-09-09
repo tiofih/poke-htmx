@@ -320,8 +320,8 @@ class ServerListTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, 'class=" page-list"'
-    assert_includes last_response.body, 'class="list-team-grid"'
-    assert_includes last_response.body, 'class="team-column"'
+    assert_includes last_response.body, 'class="grid-2-1"'
+    assert_match(/class="catalog-pane[^"]*"/, last_response.body)
   end
 
   def test_index_renders_team_panel_with_counter_when_not_started

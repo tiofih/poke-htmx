@@ -1,20 +1,41 @@
-<div class="list-team-grid">
-  <div class="list-column">
-    <div id="filter-controls" class="filter-controls">
-      <%= erb :_filter_controls, layout: false %>
+<section class="section">
+  <div class="container">
+    <div class="app-head row-between">
+      <div>
+        <p class="eyebrow">Seu time · Jornada</p>
+        <h1>Monte o esquadrão, batalhe, avance.</h1>
+      </div>
+      <div class="budget-summary">
+        <div class="budget-meta row">Custo do time <strong class="num"><%= @team_cost %>/<%= @team_budget %></strong></div>
+        <div class="meter"><span class="meter-fill" style="width:<%= (@team_cost.to_f / @team_budget * 100) %>%"></span></div>
+      </div>
     </div>
 
-    <div id="pokemon-list">
-      <%= erb :pokemon_list, layout: false %>
+    <div class="grid-2-1">
+      <div class="stack">
+        <div id="team-view">
+          <%= erb :team, layout: false %>
+        </div>
+        <div class="card services">
+          <div class="row-between"><h2>Serviços</h2><span class="meta num">Saldo <%= @balance %></span></div>
+          <div class="services-row">
+            <button class="btn btn-secondary" hx-get="/team/center" hx-target="#center-modal" hx-swap="outerHTML">Curar no Poke Center</button>
+            <button class="btn btn-secondary" hx-get="/team/mart" hx-target="#mart-modal" hx-swap="outerHTML">Poke Mart</button>
+          </div>
+        </div>
+      </div>
+      <aside class="catalog-pane stack">
+        <div class="card">
+          <div id="filter-controls">
+            <%= erb :_filter_controls, layout: false %>
+          </div>
+        </div>
+        <div id="pokemon-list" class="catalog">
+          <%= erb :pokemon_list, layout: false %>
+        </div>
+        <div id="add-status"></div>
+        <div id="pokemon-detail"></div>
+      </aside>
     </div>
-
-    <div id="add-status"></div>
-    <div id="pokemon-detail"> </div>
   </div>
-
-  <div class="team-column">
-    <div id="team-view">
-      <%= erb :team, layout: false %>
-    </div>
-  </div>
-</div>
+</section>
