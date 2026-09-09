@@ -1,0 +1,10 @@
+<div id="mart-modal" class="overlay open">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mart-modal-title">
+    <div class="modal-head">
+      <h2 id="mart-modal-title">Poke Mart</h2>
+      <a href="#" class="modal-close" aria-label="Fechar"
+         hx-get="/team/mart/close" hx-target="#mart-modal" hx-swap="outerHTML">×</a>
+    </div>
+    <%= erb :_mart, layout: false %>
+  </div>
+</div>

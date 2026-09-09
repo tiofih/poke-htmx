@@ -1161,6 +1161,12 @@
   display: flex;
 }
 
+/* Htmx-append: o fragmento chega com .open e mostra de imediato (sem JS);
+   fechar = rota close que troca o no pelo slot vazio (mesmo id). */
+.overlay.open {
+  display: flex;
+}
+
 .modal {
   background: var(--surface);
   color: var(--fg);

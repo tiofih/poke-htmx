@@ -1,0 +1,10 @@
+<div id="center-modal" class="overlay open">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="center-modal-title">
+    <div class="modal-head">
+      <h2 id="center-modal-title">Poke Center</h2>
+      <a href="#" class="modal-close" aria-label="Fechar"
+         hx-get="/team/center/close" hx-target="#center-modal" hx-swap="outerHTML">×</a>
+    </div>
+    <%= erb :_center, layout: false %>
+  </div>
+</div>

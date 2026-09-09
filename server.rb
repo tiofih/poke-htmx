@@ -492,6 +492,24 @@ module ServerTeamActions
     erb :team_manage, layout: false
   end
 
+  def render_team_center
+    prepare_team_fragment_data
+    erb :_center_modal, layout: false
+  end
+
+  def render_team_mart
+    prepare_team_fragment_data
+    erb :_mart_modal, layout: false
+  end
+
+  def close_team_center
+    erb :_center_slot, layout: false
+  end
+
+  def close_team_mart
+    erb :_mart_slot, layout: false
+  end
+
   def add_team_member
     pokemon = new_member_from_api
     return budget_blocked_response("Pokémon não encontrado.") unless pokemon
@@ -985,9 +1003,12 @@ module PokemonRoutes
 end
 
 module TeamRoutes
+  # rubocop:disable Metrics/MethodLength
   def self.registered(app)
     register_team(app)
     register_heal(app)
+    register_center(app)
+    register_mart(app)
     register_team_manage(app)
     register_add_member(app)
     register_remove_member(app)
@@ -997,6 +1018,7 @@ module TeamRoutes
     register_save_held_item(app)
     register_use_stone(app)
   end
+  # rubocop:enable Metrics/MethodLength
 
   def self.register_team(app)
     app.get("/team") { render_team }
@@ -1008,6 +1030,16 @@ module TeamRoutes
 
   def self.register_team_manage(app)
     app.get("/team/manage") { render_team_manage }
+  end
+
+  def self.register_center(app)
+    app.get("/team/center") { render_team_center }
+    app.get("/team/center/close") { close_team_center }
+  end
+
+  def self.register_mart(app)
+    app.get("/team/mart") { render_team_mart }
+    app.get("/team/mart/close") { close_team_mart }
   end
 
   def self.register_add_member(app)
