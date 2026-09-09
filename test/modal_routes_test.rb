@@ -84,4 +84,61 @@ class ModalRoutesTest < Minitest::Test
     assert_includes last_response.body, 'id="mart-modal"'
     refute_includes last_response.body, "Poke Mart"
   end
+
+  def test_manage_renders_member_overlay
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" }, { level: 1, name: "quick-attack" }]
+    ) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_includes body, 'id="manage-modal"'
+    assert_match(/class="[^"]*\boverlay\b/, body)
+    assert_match(/class="[^"]*\bmodal\b/, body)
+    assert_includes body, 'role="dialog"'
+    assert_includes body, "Gerenciar time"
+    assert_includes body, "Voltar"
+    assert_includes body, 'hx-post="/team/'
+    refute_includes body, "onclick"
+  end
+
+  def test_manage_close_removes_the_overlay_node
+    get "/team/manage/close", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal "", last_response.body.strip
+  end
+
+  def test_evolution_modal_uses_overlay_pattern
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    @inventory.add("user-a", "thunder-stone", 2)
+
+    PokeApiStub.with_stone_evolutions([
+                                        { number: 26, name: "raichu", item: "thunder-stone" },
+                                        { number: 134, name: "vaporeon", item: "water-stone" }
+                                      ]) do
+      get "/team/#{pikachu_id}/evolution", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_includes body, 'id="evolution-modal"'
+    assert_match(/class="[^"]*\boverlay\b/, body)
+    assert_includes body, 'role="dialog"'
+    assert_includes body, "raichu"
+    assert_includes body, %(hx-post="/team/#{pikachu_id}/evolve")
+    refute_includes body, "onclick"
+  end
+
+  def test_evolution_trigger_targets_modal_without_js
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_includes body, 'href="#evolution-modal"'
+    assert_includes body, "/evolution\""
+    refute_includes body, "onclick"
+  end
 end

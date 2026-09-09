@@ -489,7 +489,11 @@ module ServerTeamActions
 
   def render_team_manage
     team_manage_context
-    erb :team_manage, layout: false
+    erb :_manage_modal, layout: false
+  end
+
+  def close_team_manage
+    ""
   end
 
   def render_team_center
@@ -1030,6 +1034,7 @@ module TeamRoutes
 
   def self.register_team_manage(app)
     app.get("/team/manage") { render_team_manage }
+    app.get("/team/manage/close") { close_team_manage }
   end
 
   def self.register_center(app)

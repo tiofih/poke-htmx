@@ -48,8 +48,8 @@
           <span class="num hp-val"><%= poke.hp_current %>/<%= poke.hp_max %></span>
         </div>
         <div class="member-actions">
-          <button type="button" class="btn evolution-trigger"
-                  hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</button>
+          <a class="btn evolution-trigger" href="#evolution-modal"
+             hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</a>
           <form
               hx-post="/team/<%= poke.id %>/move"
               hx-target="#team-view"

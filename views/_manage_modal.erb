@@ -1,0 +1,10 @@
+<div id="manage-modal" class="overlay open">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="manage-modal-title">
+    <div class="modal-head">
+      <h2 id="manage-modal-title">Gerenciar time</h2>
+      <a href="#" class="modal-close" aria-label="Fechar"
+         hx-get="/team/manage/close" hx-target="#manage-modal" hx-swap="outerHTML">×</a>
+    </div>
+    <%= erb :team_manage, layout: false %>
+  </div>
+</div>
