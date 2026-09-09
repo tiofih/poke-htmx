@@ -3,6 +3,34 @@
  * As classes abaixo são as usadas pelos fragmentos htmx.
  */
 
+/* === Open Design System (0072): inicio — base aditiva (A1) === */
+:root {
+  --bg:      oklch(21% 0.05 165);
+  --surface: oklch(27% 0.045 165);
+  --fg:      oklch(95% 0.012 165);
+  --muted:   oklch(74% 0.02 165);
+  --border:  oklch(40% 0.04 165);
+  --accent:  oklch(66% 0.17 150);
+  --ink:     oklch(15% 0.01 165);
+  --ok:     oklch(58% 0.14 150);
+  --warn:   oklch(64% 0.15 85);
+  --danger: oklch(58% 0.18 25);
+  /* tipos (badges) */
+  --t-fire: oklch(60% 0.19 30); --t-water: oklch(55% 0.10 250); --t-electric: oklch(70% 0.15 95);
+  --t-grass: oklch(60% 0.15 150); --t-poison: oklch(55% 0.14 330); --t-normal: oklch(60% 0.01 260);
+  --t-dragon: oklch(52% 0.12 285); --t-bug: oklch(58% 0.13 100); --t-flying: oklch(62% 0.09 250);
+  --t-psychic: oklch(60% 0.15 350); --t-fighting: oklch(56% 0.14 30); --t-ghost: oklch(52% 0.10 290);
+  --t-fairy: oklch(64% 0.12 330);
+  --accent-soft: color-mix(in oklch, var(--accent) 16%, transparent);
+  --fg-soft:     color-mix(in oklch, var(--fg) 10%, transparent);
+  --font-display: 'Avenir Next Rounded', 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  --font-mono:    ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  --radius: 12px; --radius-lg: 18px; --gutter: 32px;
+  --container: 1180px;
+}
+/* === Open Design System (0072): fim === */
+
 /* Layout interno das seções da página única */
 #pokemon-list {
   margin-bottom: 1.5em;
