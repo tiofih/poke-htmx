@@ -293,6 +293,22 @@ class DesignSystemTest < Minitest::Test
     end
   end
 
+  def test_block_carries_all_juice_keyframes
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    # Juice parte so do bloco (0076 2b, C13/D86-D88 fechamento): todo `animation:`
+    # referenciado no bloco precisa do @keyframes correspondente DENTRO do bloco.
+    names = block.scan(/animation:\s*([a-z][\w-]*)/).flatten.uniq - %w[none]
+    assert names.any?, "expected the block to reference animations"
+    names.each do |name|
+      assert_match(/@keyframes\s+#{Regexp.escape(name)}\b/, block,
+                   "block references animation #{name} but lacks its @keyframes")
+    end
+  end
+
   def test_style_css_route_serves_text_css
     get "/style.css"
 

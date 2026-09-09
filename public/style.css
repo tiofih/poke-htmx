@@ -1425,6 +1425,98 @@
   }
 }
 
+/* === Keyframes do juice no bloco (0076 2b, C13/D86-D88 fechamento) ===
+   Port do juice 0063 referenciado acima (log/hp/flash/dano/ko/shake/banner/news);
+   os originais legados saem — o bloco vira a unica fonte das animacoes. */
+@keyframes battle-log-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes juice-hp {
+  from {
+    width: var(--hp-initial-percent, 100%);
+  }
+}
+
+@keyframes juice-flash {
+  0% {
+    box-shadow: inset 0 0 0 9999px rgba(255, 0, 0, 0.28);
+  }
+  100% {
+    box-shadow: inset 0 0 0 9999px rgba(255, 0, 0, 0);
+  }
+}
+
+@keyframes juice-damage-number {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+
+@keyframes juice-ko {
+  from {
+    filter: grayscale(0);
+    opacity: 1;
+  }
+  to {
+    filter: grayscale(1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes juice-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(1px, -1px);
+  }
+  50% {
+    transform: translate(-1px, 1px);
+  }
+  75% {
+    transform: translate(1px, 1px);
+  }
+}
+
+@keyframes juice-banner {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes juice-news {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* === Open Design System (0072): fim === */
 
 /* Layout interno das seções da página única */
@@ -1600,110 +1692,9 @@ body.page-history {
   font-size: 0.9em;
 }
 
-/* Revelação do log rodada a rodada (0069) — fade/slide-in escalonado, sem JS */
-.battle-log__entry {
-  animation: battle-log-in 0.35s ease-out both;
-  animation-delay: var(--log-delay, 0s);
-}
-
-@keyframes battle-log-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* === Juice (0063) — animações CSS-only de batalha, intensidade media ~0.3-0.5s === */
-
-/* HP animado (dano/cura): a barra parte do HP inicial (var setada no servidor) e chega no atual */
-@keyframes juice-hp {
-  from {
-    width: var(--hp-initial-percent, 100%);
-  }
-}
-
-.hp-bar .bar-fill {
-  animation: juice-hp 0.5s ease-out both;
-}
-
-/* Flash de dano no painel do alvo (box-shadow inset, sem mexer no layout) */
-.fighter--flash {
-  animation: juice-flash 0.4s ease-out;
-}
-
-@keyframes juice-flash {
-  0% {
-    box-shadow: inset 0 0 0 9999px rgba(255, 0, 0, 0.28);
-  }
-  100% {
-    box-shadow: inset 0 0 0 9999px rgba(255, 0, 0, 0);
-  }
-}
-
-/* Numero de dano flutuante — pseudo-elemento do painel danificado (total sofrido) */
-.fighter--flash::after {
-  content: attr(data-damage);
-  position: absolute;
-  top: -6px;
-  right: 8px;
-  font-weight: bold;
-  color: #b00;
-  pointer-events: none;
-  animation: juice-damage-number 0.5s ease-out both;
-}
-
-@keyframes juice-damage-number {
-  0% {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-16px);
-  }
-}
-
-/* KO fade/grayscale no lutador derrotado */
-.fighter--ko img,
-.fighter--ko .fighter-name {
-  filter: grayscale(1);
-  opacity: 0.6;
-  animation: juice-ko 0.5s ease-out both;
-}
-
-@keyframes juice-ko {
-  from {
-    filter: grayscale(0);
-    opacity: 1;
-  }
-  to {
-    filter: grayscale(1);
-    opacity: 0.6;
-  }
-}
-
-@keyframes juice-shake {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(1px, -1px);
-  }
-  50% {
-    transform: translate(-1px, 1px);
-  }
-  75% {
-    transform: translate(1px, 1px);
-  }
-}
+/* === Juice (0063) — regras legadas removidas na limpeza 2b (0076, C13):
+   as animacoes partem do bloco ODS (keyframes portados); abaixo restam apenas
+   os seletores vivos sem equivalente no bloco (.battle-log container, reduce). */
 
 /* Hover/active em botoes (juice fora da batalha) */
 button,
@@ -1720,38 +1711,6 @@ button:hover,
 button:active,
 .gameloop-cta:active {
   transform: translateY(1px) scale(0.98);
-}
-
-/* Banner de vitoria/derrota + news de evolucao/XP animadas (D4 C) */
-.winner--pop {
-  animation: juice-banner 0.45s ease-out both;
-}
-
-.xp-gained--pop,
-.news--pop li {
-  animation: juice-news 0.4s ease-out both;
-}
-
-@keyframes juice-banner {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes juice-news {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .winner {
