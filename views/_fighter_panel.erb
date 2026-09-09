@@ -1,37 +1,49 @@
-<div class="battle-pane">
-  <h2><%= title %></h2>
-  <% presenters.each do |fighter| %>
-    <% juice_data = juice.fighter_juice(side, fighter.name) %>
-    <% max_hp = fighter.hp_label.split("/").last.to_i %>
-    <% initial_percent = max_hp.positive? ? ((juice_data[:initial_hp].to_f / max_hp) * 100).round : 0 %>
-    <p class="fighter<%= " fighter--flash" if juice_data[:damaged] %><%= " fighter--ko" if juice_data[:ko] %><%= " fighter--shooting" if juice_data[:shooting] %>"
-       data-hp-initial="<%= juice_data[:initial_hp] %>"
-       data-damage="<%= juice_data[:damage_taken] %>">
-      <% if juice_data[:shooting] %><span class="projectile" aria-hidden="true"></span><% end %>
-      <img src="<%= fighter.sprite %>" alt="<%= fighter.alt %>">
-      <span class="fighter-name"><%= fighter.name %></span> — Nível <%= fighter.level %>
-      <span class="bar hp-bar hp-bar--<%= fighter.hp_tier %>" role="progressbar"
-            aria-valuenow="<%= fighter.hp_label %>" aria-valuemin="0"
-            style="--hp-initial-percent: <%= initial_percent %>%">
-        <span class="bar-fill" style="width: <%= fighter.hp_percent %>%"></span>
-      </span>
-      <span class="hp-text">HP <%= fighter.hp_label %></span>
-      <% unless fighter.item_used_badge.nil? %><span class="item-used-badge"><%= fighter.item_used_badge %></span><% end %>
-      <% unless fighter.assigned_item_label.nil? %> — carrega: <%= fighter.assigned_item_label %><% end %>
-      <% unless fighter.held_item_label.nil? %> — segura: <%= fighter.held_item_label %><% end %>
-    </p>
+<% presenters.each do |fighter| %>
+  <% juice_data = juice.fighter_juice(side, fighter.name) %>
+  <% max_hp = fighter.hp_label.split("/").last.to_i %>
+  <% initial_percent = max_hp.positive? ? ((juice_data[:initial_hp].to_f / max_hp) * 100).round : 0 %>
+  <% hp_fill = { high: "ok", medium: "mid", low: "low" }.fetch(fighter.hp_tier, "ok") %>
+  <li class="fighter<%= " is-hit" if juice_data[:damaged] %><%= " fainted" if juice_data[:ko] %><%= " is-attacking" if juice_data[:shooting] %>"
+     data-hp-initial="<%= juice_data[:initial_hp] %>"
+     data-damage="<%= juice_data[:damage_taken] %>">
+    <% if juice_data[:shooting] %><span class="shot" aria-hidden="true"></span><% end %>
+    <div class="fighter-head">
+      <span class="sprite-tile"><img src="<%= fighter.sprite %>" alt="<%= fighter.alt %>"></span>
+      <div class="fighter-id">
+        <span class="fname"><%= fighter.name %></span>
+        <div class="fmeta">
+          <span class="lvl num">Nível <%= fighter.level %></span>
+          <% badges = [] %>
+          <% badges << fighter.item_used_badge unless fighter.item_used_badge.nil? %>
+          <% badges << "carrega: #{fighter.assigned_item_label}" unless fighter.assigned_item_label.nil? %>
+          <% badges << "segura: #{fighter.held_item_label}" unless fighter.held_item_label.nil? %>
+          <% unless badges.empty? %>
+            <span class="ftags">
+              <% badges.each do |badge| %><span class="ftag"><%= badge %></span><% end %>
+            </span>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="hp">
+      <span class="hp-label">HP</span>
+      <div class="bar" role="progressbar"
+           aria-valuenow="<%= fighter.hp_label %>" aria-valuemin="0"
+           style="--hp-initial-percent: <%= initial_percent %>%">
+        <span class="bar-fill <%= hp_fill %>" style="width: <%= fighter.hp_percent %>%"></span>
+      </div>
+      <span class="num hp-val">HP <%= fighter.hp_label %></span>
+    </div>
     <% unless fighter.moves.empty? %>
       <ul class="moves">
         <% fighter.moves.each do |move| %>
-          <li>
-            <%= move.name %> — <span class="pp">PP <%= move.pp_current %></span>
-            <span class="bar pp-bar pp-bar--<%= move.pp_tier %>" role="progressbar"
-                  aria-valuenow="<%= move.pp_current %>" aria-valuemin="0">
-              <span class="bar-fill" style="width: <%= move.pp_percent %>%"></span>
-            </span>
+          <% pp_dot = { high: "ok", medium: "mid", low: "low" }.fetch(move.pp_tier, "ok") %>
+          <li class="move">
+            <span class="dot <%= pp_dot %>" aria-hidden="true"></span>
+            <%= move.name %> · <span class="ppnum">PP <%= move.pp_current %>/<%= move.pp_max %></span>
           </li>
         <% end %>
       </ul>
     <% end %>
-  <% end %>
-</div>
+  </li>
+<% end %>

@@ -128,9 +128,9 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, 'class="bar hp-bar hp-bar--high"',
+    assert_includes last_response.body, 'class="bar-fill ok"',
                     "barra de HP presente no painel do jogador"
-    assert_includes last_response.body, 'class="bar hp-bar hp-bar--high"',
+    assert_includes last_response.body, 'class="bar-fill ok"',
                     "barra de HP presente no painel do oponente"
   end
 
@@ -155,8 +155,8 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, 'class="bar pp-bar pp-bar--high"',
-                    "barra de PP por golpe"
+    assert_includes last_response.body, 'class="move"',
+                    "golpe como pill .move no card do lutador"
     assert_includes last_response.body, "PP 30",
                     "texto de PP preservado"
   end
@@ -260,10 +260,10 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     # painéis: HP inicial + flash de dano + KO + projétil
     assert_match(/data-hp-initial="\d+"/, body, "painel marca o HP inicial do lutador")
     assert_match(/data-damage="\d+"/, body, "painel marca o dano para o numero flutuante")
-    assert_match(/fighter--flash/, body, "painel do alvo marca flash de dano")
-    assert_match(/fighter--ko/, body, "lutador derrotado marca KO fade/grayscale")
-    assert_match(/fighter--shooting/, body, "painel do atacante marca o projetil")
-    assert_match(/class="projectile"/, body, "elemento do projetil presente no atacante")
+    assert_match(/is-hit/, body, "painel do alvo marca flash de dano")
+    assert_match(/fainted/, body, "lutador derrotado marca KO fade/grayscale")
+    assert_match(/is-attacking/, body, "painel do atacante marca o projetil")
+    assert_match(/class="shot"/, body, "elemento do projetil presente no atacante")
 
     # banner vitória/derrota + news com classes de animacao (D4 C, markup 0074)
     assert_includes body, 'class="winner-badge"', "banner de vitoria animado"

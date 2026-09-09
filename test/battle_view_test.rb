@@ -29,6 +29,24 @@ class BattleViewTest < Minitest::Test
     assert_match(/data-side="1"/, body, "opponent column keeps data-side=1 (juice direction)")
   end
 
+  def test_battle_fighter_card_shows_identity_hp_pp_moves
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/<li class="fighter[ "]/, body, "expected li.fighter cards in ul.fighters")
+    assert_match(/class="fighter-head"/, body, "expected .fighter-head with sprite + identity")
+    assert_match(/class="fighter-id"/, body, "expected .fighter-id with name")
+    assert_match(/class="fmeta"/, body, "expected .fmeta with level")
+    assert_match(/class="hp"/, body, "expected .hp row with the HP bar")
+    assert_match(/class="bar"/, body, "expected .bar reused from the design system")
+    assert_match(/class="[^"]*\bhp-val"/, body, "expected .hp-val with real HP numbers")
+    assert_includes body, "202/202", "card shows the presenter HP label"
+    assert_match(/class="moves"/, body, "expected .moves with the fighter moves")
+    assert_match(/class="move"/, body, "expected .move pills per move")
+    assert_includes body, "PP 30", "move shows the presenter PP value"
+  end
+
   def test_battle_keeps_htmx_contract_on_play_button
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 
