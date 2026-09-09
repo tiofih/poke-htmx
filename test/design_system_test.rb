@@ -120,6 +120,41 @@ class DesignSystemTest < Minitest::Test
     end
   end
 
+  def test_design_system_modal_screen_classes
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    # Overlay hibrido da sessao 0076 (2a, C2): :target abre, htmx preenche — sem JS.
+    %w[
+      overlay modal modal-head modal-close modal-sub modal-foot
+    ].each do |klass|
+      assert_match(/\.#{Regexp.escape(klass)}\b/, block,
+                   "expected design system block to define .#{klass}")
+    end
+    assert_match(/\.overlay:target/, block,
+                 "expected overlay to open via :target without JS")
+  end
+
+  def test_design_system_juice_safety_net_in_block
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    # Rede tecnica 0076 (2a, C10/D86-D88): projectile + toast partem do bloco
+    # (duplicacao temporaria intencional — o legado permanece integro).
+    assert_match(/@keyframes juice-projectile/, block,
+                 "expected design system block to carry its own juice-projectile keyframes")
+    assert_match(/\.add-toast\b/, block,
+                 "expected design system block to define .add-toast")
+    assert_match(/@keyframes juice-toast-in/, block,
+                 "expected design system block to carry juice-toast-in keyframes")
+    assert_match(/@keyframes juice-toast-out/, block,
+                 "expected design system block to carry juice-toast-out keyframes")
+  end
+
   def test_layout_uses_topnav_footer_shell
     layout = File.read(File.join(__dir__, "../views/layout.erb"))
 
