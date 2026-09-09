@@ -219,6 +219,19 @@ class DesignSystemTest < Minitest::Test
                  "podium unstickies on narrow battle screens")
   end
 
+  def test_design_system_history_curation_classes
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    # Curadoria fina 0079 (C2): ex-inline dos cards vira classe do bloco.
+    assert_match(/History 1:1 \(0079\)/, block,
+                 "expected the 0079 curation delimiter inside the block")
+    assert_match(/\.card--tight\b/, block,
+                 "expected design system block to define .card--tight")
+  end
+
   def test_layout_uses_topnav_footer_shell
     layout = File.read(File.join(__dir__, "../views/layout.erb"))
 
