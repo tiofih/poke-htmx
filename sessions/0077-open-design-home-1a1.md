@@ -112,3 +112,29 @@ Portar o **resíduo da home** do protótipo `open-design/home-team.html` (50KB, 
 - **Fila:** 0077 home → **0078 battle** → 0079 history → 0080 escritas atômicas → 0081 CSRF → 0082 respiro.
 
 ## 9. Gotchas / Lições (memória — S6, preencher na 3)
+
+### Fase 2 (implementação — 2026-09-09)
+
+- **Suíte total só em one-off sem Puma:** `exec` no container `web` com o app rodando
+  → OOM (137) e flakes; CI sobe só o `db`. Com `web` parado o script usa one-off
+  (`docker compose run --rm`) e a total passa (1075/5204 verde).
+- **Paralelismo 0078/0079 polui o banco de teste:** 2+ runners simultâneos no mesmo
+  `pokedex_test` geram `TeamFullError`/`DuplicateError`, saldos dobrados e até
+  `PG::TRDeadlockDetected`. Mitigações usadas: nunca `| head` em run de teste
+  (orfana o rake e polui a próxima janela), sondar `ps` antes de rodar, testes novos
+  com usuário próprio (`user-home-77`), verificação arquivo-a-arquivo, total só em
+  janela quieta (2 totais: 1 falha ordem-dependente, depois 0).
+- **`team.erb` embute `_center`/`_mart` inline:** as parciais carregavam os `h2`
+  ("Poke Center"/"Poke Mart") que o `GET /team` exige; ao tirar os `h2` das parciais
+  (p/ não duplicar nos modais) foi preciso pôr os títulos no `team.erb`.
+- **Texto contíguo vira estrutura:** `HP 100/200` e `nome — Nível X` quebram ao separar
+  label/valor em spans — 3 asserts do `team_routes_test` viraram estrutura nova;
+  nos golpes manteve-se o rótulo plano (menos churn que reescrever asserts).
+- **`form=` externo não é serializado pelo htmx:** select de item/segurável precisa
+  ficar DENTRO do form (classe `equip-row` foi para o form).
+- **`style.css` não commitado:** reformat alheio (1129+/1003-, neutro) + bloco 0077 +
+  remoção do legado `evolution-*` (0068) seguem no working tree; commits da sessão
+  cobrem só views/testes/server.rb. Decisão de commit do CSS é do usuário (fase 3).
+- **Baseline medido (one-off, sem Puma):** 1068/5033 + 1 falha (`battle_end_states`,
+  escopo 0078 em progresso paralelo); fim da fase 2: **1075/5204, 0 falhas**.
+  (+7 runs: C4, C1, C2, catalog_cards, catalog_detail + 2 home_view).
