@@ -32,7 +32,7 @@
 
     <section data-od-id="ranking" class="gap-after">
       <h2 class="section-title">Ranking global</h2>
-      <div class="card" style="padding: 8px 10px;">
+      <div class="card card--tight">
         <ul class="rank-list">
           <% @rank.each_with_index do |row, index| %>
             <% share = row[:total].positive? ? (100.0 * row[:wins] / row[:total]).round : 0 %>
@@ -49,7 +49,7 @@
 
     <section data-od-id="recent">
       <h2 class="section-title">Últimas batalhas</h2>
-      <div class="card" style="padding: 8px 10px;">
+      <div class="card card--tight">
         <ul class="history-list">
           <% @recent.each do |record| %>
             <% badge = { "win" => "win", "lose" => "loss", "draw" => "draw" }.fetch(record[:result], "draw") %>
