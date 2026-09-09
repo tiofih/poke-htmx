@@ -175,6 +175,31 @@ class DesignSystemTest < Minitest::Test
                  "expected design system block to carry juice-toast-out keyframes")
   end
 
+  def test_design_system_home_residue_classes
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    # Residuo home 0077 (home-team.html 1:1): miolo center/mart,
+    # manage/evolucao, catalogo/detalhe — C4.
+    %w[
+      heal-list heal-item
+      tabs tab
+      mart mart-name item-icon price
+      mg-head section-label stat-grid stat-row
+      mv-row mv-sel
+      equip-row equip-current
+      evo-row evo-info evo-item evo-arrow
+      tag-row
+    ].each do |klass|
+      assert_match(/\.#{Regexp.escape(klass)}\b/, block,
+                   "expected design system block to define .#{klass}")
+    end
+    assert_match(/Home 1:1 \(0077\)/, block,
+                 "expected the 0077 delimiter inside the block")
+  end
+
   def test_design_system_filter_dress_in_block
     content = style_content
     block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
