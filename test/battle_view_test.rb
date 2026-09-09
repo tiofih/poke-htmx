@@ -72,6 +72,15 @@ class BattleViewTest < Minitest::Test
     assert_match(/--log-delay:/, body, "log keeps --log-delay stagger (resolver 0069)")
   end
 
+  def test_battle_side_heads_count_active_fighters
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(%r{<p class="meta">\d+ ativos</p>}, body,
+                 "expected side heads to count the active fighters")
+  end
+
   def test_battle_result_uses_winner_badge_and_ctas
     start_battle_for("user-a")
     post "/battle/play", {}, user_session("user-a")

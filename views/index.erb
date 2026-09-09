@@ -4,10 +4,11 @@
       <div>
         <p class="eyebrow">Seu time · Jornada</p>
         <h1>Monte o esquadrão, batalhe, avance.</h1>
+        <p class="lead">Seis vagas, um orçamento de <%= @team_budget %> e um loop de cura e itens para manter a equipe de pé.</p>
       </div>
       <div class="budget-summary">
         <div class="budget-meta row">Custo do time <strong class="num"><%= @team_cost %>/<%= @team_budget %></strong></div>
-        <div class="meter"><span class="meter-fill" style="width:<%= (@team_cost.to_f / @team_budget * 100) %>%"></span></div>
+        <div class="meter" role="progressbar" aria-label="Orçamento do time"><span class="meter-fill" style="width:<%= (@team_cost.to_f / @team_budget * 100) %>%"></span></div>
         <a class="btn btn-secondary" href="#manage-modal" data-od-id="open-modal-manage" hx-get="/team/manage" hx-target="body" hx-swap="beforeend">Gerenciar time</a>
       </div>
     </div>
@@ -33,7 +34,6 @@
             <%= erb :_filter_controls, layout: false %>
           </div>
         </div>
-        <div class="row-between"><span class="meta">Arquivo</span><a class="btn btn-ghost btn-sm" href="#" hx-get="/pokemons?offset=0&amp;q=&amp;type=&amp;generation=&amp;tier=&amp;cost=&amp;cost_max=&amp;sort=&amp;team=" hx-target="#pokemon-list" hx-swap="innerHTML">Limpar filtros</a></div>
         <div id="pokemon-list" class="catalog" data-od-id="catalog">
           <%= erb :pokemon_list, layout: false %>
         </div>

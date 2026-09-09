@@ -445,7 +445,7 @@ class PokemonListFilterTest < Minitest::Test
       # next_offset must be PAGE_SIZE (36) not FIRST_PAGE_COMMONS (9) when filter active
       refute_includes last_response.body, 'offset=9"'
       assert_includes last_response.body, "offset=36"
-      next_offset = last_response.body[%r{hx-get="/pokemons\?offset=(\d+)}, 1]
+      next_offset = last_response.body[%r{hx-get="/pokemons\?offset=(\d+)[^"]*"[^>]*>Próxima}, 1]
       assert_equal "36", next_offset
       get "/pokemons", type: "fire", offset: next_offset
       assert last_response.ok?
@@ -457,7 +457,7 @@ class PokemonListFilterTest < Minitest::Test
       get "/pokemons", sort: "cost_desc", offset: "0"
       assert last_response.ok?
       assert_includes last_response.body, "Página 1"
-      next_sorted = last_response.body[%r{hx-get="/pokemons\?offset=(\d+)}, 1]
+      next_sorted = last_response.body[%r{hx-get="/pokemons\?offset=(\d+)[^"]*"[^>]*>Próxima}, 1]
       assert_equal "36", next_sorted
       get "/pokemons", sort: "cost_desc", offset: next_sorted
       assert last_response.ok?
@@ -467,7 +467,7 @@ class PokemonListFilterTest < Minitest::Test
       get "/pokemons", type: "", generation: "", tier: "", cost_max: "", cost: "", sort: "", q: "", offset: "0"
       get "/pokemons", offset: "0"
       assert last_response.ok?
-      first_next = last_response.body[%r{hx-get="/pokemons\?offset=(\d+)}, 1]
+      first_next = last_response.body[%r{hx-get="/pokemons\?offset=(\d+)[^"]*"[^>]*>Próxima}, 1]
       assert_equal "9", first_next
     end
   end

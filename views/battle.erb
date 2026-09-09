@@ -22,7 +22,7 @@
 
   <div class="arena">
     <div class="battle-column" data-side="0" data-od-id="side-team">
-      <div class="side-head"><h2>Seu Time</h2></div>
+      <div class="side-head"><h2>Seu Time</h2><p class="meta"><%= @engine.teams[0].count { |fighter| !fighter.fainted? } %> ativos</p></div>
       <ul class="fighters">
         <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", side: 0, juice: juice, presenters: @engine.teams[0].each_with_index.map { |poke, index| FighterPresenter.new(poke, item_used: @engine.member_used_item?(0, index)) } } %>
       </ul>
@@ -119,7 +119,7 @@
     </div>
 
     <div class="battle-column" data-side="1" data-od-id="side-opponent">
-      <div class="side-head"><h2>Oponente</h2></div>
+      <div class="side-head"><h2>Oponente</h2><p class="meta"><%= @engine.teams[1].count { |fighter| !fighter.fainted? } %> ativos</p></div>
       <ul class="fighters">
         <%= erb :_fighter_panel, layout: false, locals: { title: "Oponente", side: 1, juice: juice, presenters: @engine.teams[1].map { |poke| FighterPresenter.new(poke) } } %>
       </ul>

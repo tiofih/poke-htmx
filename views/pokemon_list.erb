@@ -9,6 +9,7 @@
   <input type="hidden" name="sort" value="<%= @sort %>">
   <input type="hidden" name="team" value="<%= @team_filter %>">
 </div>
+<div class="row-between"><span class="meta">Arquivo · <%= @starters.size + @items.size %></span><a class="btn btn-ghost btn-sm" href="#" hx-get="/pokemons?offset=0&amp;q=&amp;type=&amp;generation=&amp;tier=&amp;cost=&amp;cost_max=&amp;sort=&amp;team=" hx-target="#pokemon-list" hx-swap="innerHTML">Limpar filtros</a></div>
 <% if @notice %>
   <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
 <% end %>

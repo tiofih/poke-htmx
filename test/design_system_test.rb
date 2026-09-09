@@ -170,6 +170,55 @@ class DesignSystemTest < Minitest::Test
     end
   end
 
+  def test_design_system_curation_tokens
+    content = style_content
+    root = content[/:root\s*\{.*?\n\}/m]
+
+    refute_nil root, "expected style.css to define a :root block"
+
+    # Curadoria 0076 (2a, C8): escala de tipos + espacamentos do prototipo.
+    %w[fs-h1 fs-h2 fs-h3 fs-lead fs-body fs-meta].each do |token|
+      assert_match(/--#{token}:/, root, "expected :root to define --#{token}")
+    end
+    %w[gap-xs gap-sm gap-md gap-lg gap-xl gap-2xl].each do |token|
+      assert_match(/--#{token}:/, root, "expected :root to define --#{token}")
+    end
+  end
+
+  def test_design_system_curation_base_faithful
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    assert_match(/\.topnav\s*\{[^}]*position:\s*sticky/m, block, "topnav sticks")
+    assert_match(/\.topnav\s*\{[^}]*backdrop-filter:\s*blur/m, block, "topnav blurs")
+    assert_match(/\.topnav nav a\.active/, block, "nav marks the active link")
+    assert_match(/\.nav-badge/, block, "nav renders the team badge")
+    assert_match(/\.btn-lg/, block, "buttons scale up")
+    assert_match(/\.btn:disabled/, block, "buttons show the disabled state")
+    assert_match(/\.card\s*\{[^}]*border-radius:\s*var\(--radius-lg\)/m, block, "card uses radius-lg")
+    assert_match(/\.lead\s*\{[^}]*color:\s*var\(--muted\)/m, block, "lead reads muted")
+    assert_match(/\.meta\s*\{[^}]*font-family:\s*var\(--font-mono\)/m, block, "meta reads mono")
+    assert_match(/\.sprite-tile\s*\{[^}]*place-items:\s*center/m, block, "sprite-tile tiles the sprite")
+    assert_match(/\.stock-items/, block, "battle stocks its items with a rule")
+    assert_match(/\.evolution-news/, block, "end states list evolution news")
+    assert_match(/\.learned-news/, block, "end states list learned news")
+  end
+
+  def test_design_system_curation_spacing_and_battle_narrow
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    assert_match(/\.section\s*\{[^}]*var\(--gap-xl\)/m, block, "section breathes with gap-xl")
+    assert_match(/\.grid-2-1\s*\{[^}]*var\(--gap-xl\)/m, block, "home grid gaps with gap-xl")
+    assert_match(/\.arena\s*\{[^}]*var\(--gap-lg\)/m, block, "arena gaps with gap-lg")
+    assert_match(/@media\s*\(max-width:\s*700px\)[^}]*\.podium[^}]*position:\s*static/m, block,
+                 "podium unstickies on narrow battle screens")
+  end
+
   def test_layout_uses_topnav_footer_shell
     layout = File.read(File.join(__dir__, "../views/layout.erb"))
 

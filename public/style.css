@@ -30,11 +30,20 @@
   --font-mono:    ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
   --radius: 12px; --radius-lg: 18px; --gutter: 32px;
   --container: 1180px;
+  /* escala do prototipo (curadoria 0076 2a, C8) */
+  --fs-h1: clamp(28px, 3vw, 40px);
+  --fs-h2: clamp(22px, 2.4vw, 30px);
+  --fs-h3: 18px; --fs-lead: 17px; --fs-body: 15px; --fs-meta: 12.5px;
+  --gap-xs: 8px; --gap-sm: 12px; --gap-md: 20px; --gap-lg: 32px; --gap-xl: 56px; --gap-2xl: 96px;
 }
 
 /* Shell — topnav + footer */
 .topnav {
-  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in oklch, var(--bg) 92%, transparent);
+  backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   color: var(--fg);
 }
@@ -57,6 +66,20 @@
 .topnav a {
   color: var(--fg);
   text-decoration: none;
+}
+
+.topnav nav a.active {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.nav-badge {
+  background: var(--fg-soft);
+  color: var(--fg);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 1px 7px;
 }
 
 .logo {
@@ -118,43 +141,58 @@
   transform: translateY(1px) scale(0.98);
 }
 
+.btn-lg {
+  padding: 13px 26px;
+  font-size: 16px;
+  border-radius: 14px;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* Superfícies */
 .container {
   width: 100%;
   max-width: var(--container);
   margin-inline: auto;
-  padding-inline: var(--gutter);
+  padding-inline: var(--gap-lg);
 }
 
 .section {
-  padding: 2em 0;
+  padding-block: clamp(32px, 4vw, var(--gap-xl));
 }
 
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 1.5em;
+  gap: var(--gap-md);
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: 1em;
+  gap: var(--gap-md);
 }
 
 .row-between {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1em;
+  gap: var(--gap-md);
 }
 
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25em 1.5em;
+  border-radius: var(--radius-lg);
+  padding: 24px;
   color: var(--fg);
+}
+
+.catalog-pane .card {
+  padding: 16px;
 }
 
 /* Tipo */
@@ -168,12 +206,16 @@
 }
 
 .lead {
-  font-size: 1.1em;
-  color: var(--fg);
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 60ch;
+  margin: 8px 0 0;
 }
 
 .meta {
-  font-size: 0.85em;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
   color: var(--muted);
 }
 
@@ -190,7 +232,7 @@
 
 /* Cabeçalho da home: título + resumo de orçamento, na mesma linha */
 .app-head {
-  margin-bottom: 2em;
+  margin-bottom: var(--gap-lg);
 }
 
 .app-head h1 {
@@ -244,7 +286,7 @@
 .grid-2-1 {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: var(--gutter);
+  gap: var(--gap-xl);
   align-items: start;
 }
 
@@ -397,9 +439,21 @@
   gap: 0.8em;
 }
 
+.sprite-tile {
+  width: 60px;
+  height: 60px;
+  flex: 0 0 60px;
+  border-radius: var(--radius);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
 .sprite-tile img {
-  width: 72px;
-  height: 72px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   display: block;
 }
@@ -501,13 +555,19 @@
 .arena {
   display: grid;
   grid-template-columns: 1fr 1.06fr 1fr;
-  gap: 2em;
+  gap: var(--gap-lg);
   align-items: start;
 }
 
 @media (max-width: 980px) {
   .arena {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .podium {
+    position: static;
   }
 }
 
@@ -790,6 +850,24 @@
 
 .log .txt {
   color: var(--fg);
+}
+
+/* Estoque em batalha: linha mono discreta sob os lutadores */
+.stock-items {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  color: var(--muted);
+  margin-top: 0.75em;
+}
+
+/* Estados finais: listas de novidades de evolucao/golpes */
+.evolution-news,
+.learned-news {
+  list-style: none;
+  margin: 0.65em 0 0;
+  padding: 0;
+  color: var(--muted);
+  font-size: 0.85em;
 }
 
 /* === Juice da batalha portado para os seletores novos (0074 B1b) ===
