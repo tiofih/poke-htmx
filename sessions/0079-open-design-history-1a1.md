@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — escolhas do usuário em 2026-09-09 (fatiamento por tela, deslizamento 0077-0079→resíduo / 0080-0082→estabilidade, fidelidade híbrida, backend thin listado, S1 com 1 teste novo + extensões — ver seção 5) |
-| Implementação (fase 2, TDD) | Pendente |
+| Implementação (fase 2, TDD) | **TDD concluído** — Passos 1-2 verdes (escopo 35/565, lint 0 no escopo) + docs; **aguardando Revisor S7. PARAR — sem Done, sem §7, sem commit de conclusão** |
 | Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
 
 ---
@@ -102,5 +102,10 @@ Aplicar a **curadoria fina 1:1** do protótipo `open-design/history.html` (13KB)
 - **`public/style.css` DIRTY (~1129+/1003-):** conferir/stash antes de editar; nunca commitar junto sem revisar (Passo 1).
 - **Menor sessão do resíduo:** base 0075 pronta — o trabalho é diffar 1:1 e portar só o faltante; se nada faltar, C1 vira teste de trava (contrato) + registro explícito.
 - **Fila:** 0077 home → 0078 battle → 0079 history → **0080 escritas atômicas** → 0081 CSRF → 0082 respiro.
+- **Fase 2 executada (2026-09-09, TDD red→green):** Passo 1 (C2 — bloco `History 1:1 (0079)` + `.card--tight` ANTES da linha `fim`, teste em `design_system_test.rb`) e Passo 2 (C1 — `history.erb` sem inline, `test/history_curation_test.rb` novo + `history_view_test.rb` estendido; `server.rb` intacto — backend já supria tudo). Escopo: 35 runs/565 asserts verdes; lint 0 no escopo (19 offenses pré-existentes em `scripts/sweep-balance.rb`, fora do escopo, intocadas).
+- **Paralelismo 0077/0078:** o dirty do `style.css` era reformat geral (spaces→tabs), não revertido; o commit `9b421c4` (Passo 1 da 0078) levou o arquivo com o bloco 0079 intacto dentro — nada perdido. `SESSIONS.md`/`REQUIREMENTS.md` e arquivos da 0077/0078 intocados.
+- **G1 parcial por WIP alheio:** suíte completa em 2026-09-09 deu 1068/4496 com 72F+64E — tudo fora do escopo (team_manage/journey/battle), com WIP não-commitado da 0078 na árvore (`views/battle.erb`, `test/battle_view_test.rb`, `test/battle_end_states_test.rb` untracked) durante as runs; `team_manage_test.rb` sozinho já erra (7E) sem interseção com este diff. Re-verificar suíte cheia com árvore limpa antes da validação.
 
 ## 9. Gotchas / Lições (memória — S6, preencher na 3)
+
+- **Implementador (fase 2):** `./scripts/test -n /regex/` funciona, mas o `tail` mostra só o trace do rake — usar `grep -E "runs,"` para o placar. RuboCop `Style/RegexpLiteral` exige `%r{}` quando a regex contém `"` (padrão local já usa `%r` em `history_view_test.rb` — seguir o arquivo vizinho). `style.css` com reformat inteiro no diff: anexar o bloco e **não** dar `git add` nele (o commit alheio posterior carrega o bloco junto — conferir com `grep -c` depois). Suíte cheia sob sessões paralelas na mesma árvore/DB mente: travar o veredito no escopo (arquivos tocados) + `check_docs` + `checar-sessao`, e registrar o ruído alheio com prova (diff não-commitado, teste alheio isolado).
