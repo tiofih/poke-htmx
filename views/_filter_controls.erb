@@ -49,4 +49,10 @@
   <option value="tier_asc" <%= "selected" if @sort == "tier_asc" %>>Tier F→S</option>
 </select>
 
-<a href="#" hx-get="/pokemons?offset=0&amp;q=&amp;type=&amp;generation=&amp;tier=&amp;cost=&amp;cost_max=&amp;sort=" hx-target="#pokemon-list" hx-swap="innerHTML">Limpar filtros</a>
+<select name="team" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+  <option value="" <%= "selected" if @team_filter.nil? %>>Todos</option>
+  <option value="in" <%= "selected" if @team_filter == "in" %>>No time</option>
+  <option value="out" <%= "selected" if @team_filter == "out" %>>Fora do time</option>
+</select>
+
+<a href="#" hx-get="/pokemons?offset=0&amp;q=&amp;type=&amp;generation=&amp;tier=&amp;cost=&amp;cost_max=&amp;sort=&amp;team=" hx-target="#pokemon-list" hx-swap="innerHTML">Limpar filtros</a>

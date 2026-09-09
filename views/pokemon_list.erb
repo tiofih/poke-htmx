@@ -7,6 +7,7 @@
   <input type="hidden" name="cost_max" value="<%= @cost_max %>">
   <input type="hidden" name="cost" value="<%= @cost_max %>">
   <input type="hidden" name="sort" value="<%= @sort %>">
+  <input type="hidden" name="team" value="<%= @team_filter %>">
 </div>
 <% if @notice %>
   <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
@@ -38,10 +39,10 @@
 </div>
 <div class="pagination">
   <% if @prev_offset %>
-    <a href="#" hx-get="/pokemons?offset=<%= @prev_offset %>&q=<%= @q %>&type=<%= @type %>&generation=<%= @generation %>&tier=<%= @tier %>&cost_max=<%= @cost_max %>&cost=<%= @cost_max %>&sort=<%= @sort %>" hx-target="#pokemon-list" hx-swap="innerHTML">Anterior</a>
+    <a href="#" hx-get="/pokemons?offset=<%= @prev_offset %>&q=<%= @q %>&type=<%= @type %>&generation=<%= @generation %>&tier=<%= @tier %>&cost_max=<%= @cost_max %>&cost=<%= @cost_max %>&sort=<%= @sort %>&team=<%= @team_filter %>" hx-target="#pokemon-list" hx-swap="innerHTML">Anterior</a>
   <% end %>
   Página <%= @current_page %>
   <% if @next_offset %>
-    <a href="#" hx-get="/pokemons?offset=<%= @next_offset %>&q=<%= @q %>&type=<%= @type %>&generation=<%= @generation %>&tier=<%= @tier %>&cost_max=<%= @cost_max %>&cost=<%= @cost_max %>&sort=<%= @sort %>" hx-target="#pokemon-list" hx-swap="innerHTML">Próxima</a>
+    <a href="#" hx-get="/pokemons?offset=<%= @next_offset %>&q=<%= @q %>&type=<%= @type %>&generation=<%= @generation %>&tier=<%= @tier %>&cost_max=<%= @cost_max %>&cost=<%= @cost_max %>&sort=<%= @sort %>&team=<%= @team_filter %>" hx-target="#pokemon-list" hx-swap="innerHTML">Próxima</a>
   <% end %>
 </div>

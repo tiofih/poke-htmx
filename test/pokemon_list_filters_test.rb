@@ -647,6 +647,69 @@ class PokemonListFilterTest < Minitest::Test
     end
   end
 
+  def test_team_in_shows_only_members
+    fill_team("user-a")
+    names = %w[pikachu bulbasaur charmander squirtle pidgey rattata eevee mew]
+    find_map = names.to_h { |n| [n, build_record(n, 1)] }
+    stub_list(names, find_map: find_map) do
+      get "/pokemons", { team: "in" }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    %w[pikachu bulbasaur charmander squirtle pidgey rattata].each do |member|
+      assert_includes last_response.body, "value=\"#{member}\""
+    end
+    refute_includes last_response.body, 'value="eevee"'
+    refute_includes last_response.body, 'value="mew"'
+  end
+
+  def test_team_out_excludes_members
+    fill_team("user-a")
+    names = %w[pikachu bulbasaur charmander squirtle pidgey rattata eevee mew]
+    find_map = names.to_h { |n| [n, build_record(n, 1)] }
+    stub_list(names, find_map: find_map) do
+      get "/pokemons", { team: "out" }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'value="eevee"'
+    assert_includes last_response.body, 'value="mew"'
+    %w[pikachu bulbasaur charmander squirtle pidgey rattata].each do |member|
+      refute_includes last_response.body, "value=\"#{member}\""
+    end
+  end
+
+  def test_team_invalid_falls_back_to_all
+    fill_team("user-a")
+    names = %w[pikachu bulbasaur eevee]
+    find_map = names.to_h { |n| [n, build_record(n, 1)] }
+    stub_list(names, find_map: find_map) do
+      get "/pokemons", { team: "maybe" }, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'value="pikachu"'
+    assert_includes last_response.body, 'value="eevee"'
+  end
+
+  def test_team_filter_persists_in_session
+    fill_team("user-a")
+    names = %w[pikachu bulbasaur charmander squirtle pidgey rattata eevee mew]
+    find_map = names.to_h { |n| [n, build_record(n, 1)] }
+    stub_list(names, find_map: find_map) do
+      get "/pokemons", { team: "in" }, user_session("user-a")
+      assert_includes last_response.body, 'value="pikachu"'
+      refute_includes last_response.body, 'value="eevee"'
+      get "/pokemons", {}, user_session("user-a")
+      assert last_response.ok?
+      assert_includes last_response.body, 'value="pikachu"'
+      refute_includes last_response.body, 'value="eevee"'
+      get "/pokemons", { team: "", offset: "0" }, user_session("user-a")
+      assert last_response.ok?
+      assert_includes last_response.body, 'value="eevee"'
+    end
+  end
+
   def test_typing_q_does_not_swap_filter_controls
     names = %w[pikachu pichu bulbasaur]
     find_map = names.to_h { |n| [n, build_record(n, 1)] }

@@ -119,7 +119,7 @@ module ServerListActions
   end
 
   def filter_controls_needs_sync?
-    %w[type generation tier cost cost_max sort].any? { |k| filter_param_present?(k) }
+    %w[type generation tier cost cost_max sort team].any? { |k| filter_param_present?(k) }
   end
 
   # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
@@ -132,6 +132,7 @@ module ServerListActions
       @cost_max = normalized_cost_max(params[:cost_max] || params[:cost])
     end
     @sort = normalized_sort(params[:sort]) if filter_param_present?("sort")
+    @team_filter = normalized_team(params[:team]) if filter_param_present?("team")
     # restore from session when no explicit filter param
     restore_filters_from_session unless any_filter_param_present?
     # persist when explicit filter params were sent
@@ -142,6 +143,8 @@ module ServerListActions
     @tier ||= nil
     @cost_max ||= nil
     @sort ||= nil
+    @team_filter ||= nil
+    load_team_names
     @starters = starters_visible? ? load_starters : []
     build_page
     @items = Parallelizer.map(@page_names) { |name| [name, settings.api.find(name)] }
@@ -149,7 +152,6 @@ module ServerListActions
     if @page_names.empty? && @q.empty? && !filter_active? && !sort_active?
       @notice = "Não foi possível carregar a lista de Pokémon."
     end
-    load_team_names
     build_pokemon_costs
   end
   # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
@@ -202,8 +204,16 @@ module ServerListActions
     v
   end
 
+  def normalized_team(value)
+    v = value.to_s.strip.downcase
+    return nil if v.empty?
+    return nil unless %w[in out].include?(v)
+
+    v
+  end
+
   def filter_active?
-    !@type.nil? || !@generation.nil? || !@tier.nil? || !@cost_max.nil?
+    !@type.nil? || !@generation.nil? || !@tier.nil? || !@cost_max.nil? || !@team_filter.nil?
   end
 
   def sort_active?
@@ -215,25 +225,28 @@ module ServerListActions
   end
 
   def any_filter_param_present?
-    %w[type generation tier cost cost_max sort].any? { |k| filter_param_present?(k) }
+    %w[type generation tier cost cost_max sort team].any? { |k| filter_param_present?(k) }
   end
 
-  # rubocop:disable Metrics/MethodLength
   def persist_filters_to_session
-    if @type.nil? && @generation.nil? && @tier.nil? && @cost_max.nil? && @sort.nil?
+    filters = current_filter_params
+    if filters.empty?
       session.delete(:list_filters)
     else
-      session[:list_filters] = {
-        "type" => @type,
-        "generation" => @generation,
-        "tier" => @tier,
-        "cost_max" => @cost_max,
-        "sort" => @sort
-      }.compact
-      session.delete(:list_filters) if session[:list_filters].empty?
+      session[:list_filters] = filters
     end
   end
-  # rubocop:enable Metrics/MethodLength
+
+  def current_filter_params
+    {
+      "type" => @type,
+      "generation" => @generation,
+      "tier" => @tier,
+      "cost_max" => @cost_max,
+      "sort" => @sort,
+      "team" => @team_filter
+    }.compact
+  end
 
   # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
   def restore_filters_from_session
@@ -249,6 +262,8 @@ module ServerListActions
     @cost_max = normalized_cost_max(cost_val) if cost_val
     s = stored["sort"] || stored[:sort]
     @sort = normalized_sort(s) if s
+    team_val = stored["team"] || stored[:team]
+    @team_filter = normalized_team(team_val) if team_val
   end
   # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
 
@@ -367,6 +382,7 @@ module ServerListActions
       tier_cost = tier_cost.select { |_name, _t, cost| cost && cost <= @cost_max } if @cost_max
       filtered = tier_cost.map(&:first)
     end
+    filtered = filter_by_team(filtered) if @team_filter
     filtered
   end
   # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
@@ -374,6 +390,15 @@ module ServerListActions
   def base_form_names(batch)
     forms = Parallelizer.map(batch) { |name| [name, settings.api.base_form?(name)] }
     forms.select { |_name, is_base| is_base }.map(&:first)
+  end
+
+  def filter_by_team(names)
+    member_set = Set.new(@team_names)
+    if @team_filter == "in"
+      names.select { |name| member_set.include?(name) }
+    else
+      names.reject { |name| member_set.include?(name) }
+    end
   end
 
   def common_candidates
