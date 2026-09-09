@@ -1,12 +1,16 @@
-<h2>Poke Center</h2>
-<ul class="team-hp">
+<p class="modal-sub">Recupere o HP de todo o time de uma vez.</p>
+<ul class="heal-list">
   <% @team.each do |poke| %>
-    <% if poke.hp_max.to_i > 0 %>
-      <li><strong><%= poke.name %></strong> — HP <%= poke.hp_current %>/<%= poke.hp_max %></li>
-    <% end %>
+    <li class="heal-item">
+      <span class="th"><img src="<%= poke.sprite %>" alt="<%= poke.name %>" loading="lazy"></span>
+      <span class="n"><%= poke.name %></span>
+      <span class="hp"><span class="hp-label">HP</span><span class="bar"><span class="bar-fill" style="width:<%= poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f * 100).round : 0 %>%"></span></span><span class="num hp-val"><%= poke.hp_current %>/<%= poke.hp_max %></span></span>
+    </li>
   <% end %>
 </ul>
-<p class="heal-cost">Custo total: <%= @heal_cost %></p>
-<form hx-post="/team/heal" hx-target="#team-view" hx-swap="innerHTML">
-  <button type="submit" class="btn"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar</button>
-</form>
+<div class="modal-foot">
+  <span class="meta num">Saldo <%= @balance %> · Custo total: <%= @heal_cost %></span>
+  <form hx-post="/team/heal" hx-target="#team-view" hx-swap="innerHTML">
+    <button type="submit" class="btn btn-primary"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar time</button>
+  </form>
+</div>

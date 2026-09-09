@@ -569,7 +569,7 @@ class ServerTeamTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
-    assert_includes last_response.body, "HP 100/200"
+    assert_includes last_response.body, "100/200"
     assert_includes last_response.body, %(hx-post="/team/heal")
   end
 
@@ -590,7 +590,7 @@ class ServerTeamTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
-    assert_includes last_response.body, "HP 100/200"
+    assert_includes last_response.body, "100/200"
     assert_match(/Custo[^:]*:\s*50/, last_response.body)
     heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
     refute_nil heal_form
@@ -1318,7 +1318,7 @@ class TeamHealRoutesTest < Minitest::Test
     assert_equal 0, @progression.get("user-a", target.id)[:hp_current], "nada curado"
     assert_equal 10, @wallet.balance("user-a")
     # team-view ainda mostra HP 0/200 e custo
-    assert_match(%r{HP 0/200}, last_response.body)
+    assert_match(%r{>0/200<}, last_response.body)
     assert_match(/Custo total: 100/, last_response.body)
   end
 

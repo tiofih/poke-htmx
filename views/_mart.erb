@@ -1,28 +1,47 @@
-<h2>Poke Mart</h2>
-<p class="balance">Saldo: <%= @balance %></p>
-<% @catalog.each do |item| %>
-  <% next if item.category == "stone" && !@rotation.include?(item.name) %>
-  <% affordable = @balance / item.price %>
-  <form hx-post="/mart/buy" hx-target="#team-view" hx-swap="innerHTML">
-    <input type="hidden" name="item_name" value="<%= item.name %>">
-    <input type="hidden" name="quantity" value="1">
-    <button type="submit" class="btn"<%= " disabled" if affordable.zero? %>><%= item.display_name %> — <%= item.price %> ×<%= affordable %></button>
-  </form>
-<% end %>
-<% sellable = @inventory.select { |entry| entry[:quantity].positive? } %>
-<% if sellable.any? %>
-  <ul class="inventory">
-    <% sellable.each do |entry| %>
+<p class="modal-sub">Compre itens ou venda do seu estoque. <span class="num">Saldo: <%= @balance %></span></p>
+<input class="mart-tab-input" type="radio" name="mart-tab" id="mart-tab-buy" checked>
+<input class="mart-tab-input" type="radio" name="mart-tab" id="mart-tab-sell">
+<div class="tabs" role="tablist">
+  <label class="tab tab-buy" for="mart-tab-buy" role="tab">Comprar</label>
+  <label class="tab tab-sell" for="mart-tab-sell" role="tab">Vender</label>
+</div>
+<div class="tab-panel" id="tab-buy" role="tabpanel">
+  <ul class="mart">
+    <% @catalog.each do |item| %>
+      <% next if item.category == "stone" && !@rotation.include?(item.name) %>
+      <% affordable = @balance / item.price %>
       <li>
-        <strong><%= entry[:name] %></strong> — <%= entry[:quantity] %>×
-        <form hx-post="/mart/sell" hx-target="#team-view" hx-swap="innerHTML">
-          <input type="hidden" name="item_name" value="<%= entry[:name] %>">
-          <input type="hidden" name="quantity" value="1">
-          <button type="submit" class="btn">Vender</button>
-        </form>
+        <span class="mart-name"><span class="item-icon" aria-hidden="true"><%= item.display_name[0] %></span><span><%= item.display_name %></span></span>
+        <span class="row"><span class="num price"><%= item.price %></span>
+          <form hx-post="/mart/buy" hx-target="#team-view" hx-swap="innerHTML">
+            <input type="hidden" name="item_name" value="<%= item.name %>">
+            <input type="hidden" name="quantity" value="1">
+            <button type="submit" class="btn btn-secondary btn-sm"<%= " disabled" if affordable.zero? %>><%= item.display_name %> — <%= item.price %> ×<%= affordable %></button>
+          </form>
+        </span>
       </li>
     <% end %>
   </ul>
-<% else %>
-  <p class="inventory-empty">Nenhum item no estoque para vender.</p>
-<% end %>
+</div>
+<div class="tab-panel" id="tab-sell" role="tabpanel">
+  <% sellable = @inventory.select { |entry| entry[:quantity].positive? } %>
+  <% if sellable.any? %>
+    <ul class="mart">
+      <% sellable.each do |entry| %>
+        <% sell_item = ItemCatalog.find(entry[:name]) %>
+        <li>
+          <span class="mart-name"><span class="item-icon" aria-hidden="true"><%= (sell_item&.display_name || entry[:name])[0] %></span><span><strong><%= entry[:name] %></strong> <span class="meta">×<%= entry[:quantity] %></span></span></span>
+          <span class="row"><span class="num price"><%= sell_item ? sell_item.price / 2 : "—" %></span>
+            <form hx-post="/mart/sell" hx-target="#team-view" hx-swap="innerHTML">
+              <input type="hidden" name="item_name" value="<%= entry[:name] %>">
+              <input type="hidden" name="quantity" value="1">
+              <button type="submit" class="btn btn-ghost btn-sm">Vender</button>
+            </form>
+          </span>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="inventory-empty">Nenhum item no estoque para vender.</p>
+  <% end %>
+</div>
