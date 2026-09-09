@@ -58,6 +58,26 @@ class DesignSystemTest < Minitest::Test
     end
   end
 
+  def test_design_system_battle_end_states_classes
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    # Classes do fim de batalha (sessão 0078, C3): res-screen/res-top do
+    # battle-results-desktop.html + state-card/mini-arena/result-card do
+    # battle-end-states.html — aditivas, antes da linha fim.
+    %w[
+      res-screen res-top res-top-left state-title
+      state-card state-head state-pill
+      mini-arena mini-side-title fighter-rows frow
+      result-card
+    ].each do |klass|
+      assert_match(/\.#{Regexp.escape(klass)}\b/, block,
+                   "expected design system block to define .#{klass}")
+    end
+  end
+
   def test_design_system_battle_screen_classes
     content = style_content
     block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]

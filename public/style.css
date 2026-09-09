@@ -5,384 +5,414 @@
 
 /* === Open Design System (0072): inicio — base aditiva (A1) === */
 :root {
-  --bg:      oklch(21% 0.05 165);
-  --surface: oklch(27% 0.045 165);
-  --fg:      oklch(95% 0.012 165);
-  --muted:   oklch(74% 0.02 165);
-  --border:  oklch(40% 0.04 165);
-  --accent:  oklch(66% 0.17 150);
-  --ink:     oklch(15% 0.01 165);
-  --ok:     oklch(58% 0.14 150);
-  --warn:   oklch(64% 0.15 85);
-  --danger: oklch(58% 0.18 25);
-  /* tipos (badges) */
-  --t-fire: oklch(60% 0.19 30); --t-water: oklch(55% 0.10 250); --t-electric: oklch(70% 0.15 95);
-  --t-grass: oklch(60% 0.15 150); --t-poison: oklch(55% 0.14 330); --t-normal: oklch(60% 0.01 260);
-  --t-dragon: oklch(52% 0.12 285); --t-bug: oklch(58% 0.13 100); --t-flying: oklch(62% 0.09 250);
-  --t-psychic: oklch(60% 0.15 350); --t-fighting: oklch(56% 0.14 30); --t-ghost: oklch(52% 0.10 290);
-  --t-fairy: oklch(64% 0.12 330);
-  --t-ice: oklch(72% 0.08 230); --t-ground: oklch(58% 0.12 85); --t-rock: oklch(55% 0.10 80);
-  --t-dark: oklch(45% 0.05 260); --t-steel: oklch(62% 0.03 250);
-  --accent-soft: color-mix(in oklch, var(--accent) 16%, transparent);
-  --fg-soft:     color-mix(in oklch, var(--fg) 10%, transparent);
-  --font-display: 'Avenir Next Rounded', 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-body:    -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
-  --font-mono:    ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
-  --radius: 12px; --radius-lg: 18px; --gutter: 32px;
-  --container: 1180px;
-  /* escala do prototipo (curadoria 0076 2a, C8) */
-  --fs-h1: clamp(28px, 3vw, 40px);
-  --fs-h2: clamp(22px, 2.4vw, 30px);
-  --fs-h3: 18px; --fs-lead: 17px; --fs-body: 15px; --fs-meta: 12.5px;
-  --gap-xs: 8px; --gap-sm: 12px; --gap-md: 20px; --gap-lg: 32px; --gap-xl: 56px; --gap-2xl: 96px;
+	--bg: oklch(21% 0.05 165);
+	--surface: oklch(27% 0.045 165);
+	--fg: oklch(95% 0.012 165);
+	--muted: oklch(74% 0.02 165);
+	--border: oklch(40% 0.04 165);
+	--accent: oklch(66% 0.17 150);
+	--ink: oklch(15% 0.01 165);
+	--ok: oklch(58% 0.14 150);
+	--warn: oklch(64% 0.15 85);
+	--danger: oklch(58% 0.18 25);
+	/* tipos (badges) */
+	--t-fire: oklch(60% 0.19 30);
+	--t-water: oklch(55% 0.1 250);
+	--t-electric: oklch(70% 0.15 95);
+	--t-grass: oklch(60% 0.15 150);
+	--t-poison: oklch(55% 0.14 330);
+	--t-normal: oklch(60% 0.01 260);
+	--t-dragon: oklch(52% 0.12 285);
+	--t-bug: oklch(58% 0.13 100);
+	--t-flying: oklch(62% 0.09 250);
+	--t-psychic: oklch(60% 0.15 350);
+	--t-fighting: oklch(56% 0.14 30);
+	--t-ghost: oklch(52% 0.1 290);
+	--t-fairy: oklch(64% 0.12 330);
+	--t-ice: oklch(72% 0.08 230);
+	--t-ground: oklch(58% 0.12 85);
+	--t-rock: oklch(55% 0.1 80);
+	--t-dark: oklch(45% 0.05 260);
+	--t-steel: oklch(62% 0.03 250);
+	--accent-soft: color-mix(in oklch, var(--accent) 16%, transparent);
+	--fg-soft: color-mix(in oklch, var(--fg) 10%, transparent);
+	--font-display:
+		"Avenir Next Rounded", "Avenir Next", -apple-system, BlinkMacSystemFont,
+		"Segoe UI", sans-serif;
+	--font-body:
+		-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+	--font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+	--radius: 12px;
+	--radius-lg: 18px;
+	--gutter: 32px;
+	--container: 1180px;
+	/* escala do prototipo (curadoria 0076 2a, C8) */
+	--fs-h1: clamp(28px, 3vw, 40px);
+	--fs-h2: clamp(22px, 2.4vw, 30px);
+	--fs-h3: 18px;
+	--fs-lead: 17px;
+	--fs-body: 15px;
+	--fs-meta: 12.5px;
+	--gap-xs: 8px;
+	--gap-sm: 12px;
+	--gap-md: 20px;
+	--gap-lg: 32px;
+	--gap-xl: 56px;
+	--gap-2xl: 96px;
 }
 
 /* Shell — topnav + footer */
 .topnav {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: color-mix(in oklch, var(--bg) 92%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  color: var(--fg);
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: color-mix(in oklch, var(--bg) 92%, transparent);
+	backdrop-filter: blur(12px);
+	border-bottom: 1px solid var(--border);
+	color: var(--fg);
 }
 
 .topnav-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--gutter);
-  min-height: 64px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--gutter);
+	min-height: 64px;
 }
 
 .topnav nav {
-  display: flex;
-  gap: 1.25em;
-  align-items: center;
-  flex-wrap: wrap;
+	display: flex;
+	gap: 1.25em;
+	align-items: center;
+	flex-wrap: wrap;
 }
 
 /* Alvo de toque nos links da nav (0076 2b: port do legado `header nav a`) */
 .topnav nav a {
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
+	min-height: 44px;
+	display: inline-flex;
+	align-items: center;
 }
 
 .topnav a {
-  color: var(--fg);
-  text-decoration: none;
+	color: var(--fg);
+	text-decoration: none;
 }
 
 .topnav nav a.active {
-  color: var(--fg);
-  font-weight: 700;
+	color: var(--fg);
+	font-weight: 700;
 }
 
 .nav-badge {
-  background: var(--fg-soft);
-  color: var(--fg);
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 1px 7px;
+	background: var(--fg-soft);
+	color: var(--fg);
+	border-radius: 999px;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	padding: 1px 7px;
 }
 
 .logo {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.15em;
-  letter-spacing: 0.01em;
+	font-family: var(--font-display);
+	font-weight: 700;
+	font-size: 1.15em;
+	letter-spacing: 0.01em;
 }
 
 .pagefoot {
-  background: var(--bg);
-  border-top: 1px solid var(--border);
-  color: var(--muted);
-  padding: 1em 0;
+	background: var(--bg);
+	border-top: 1px solid var(--border);
+	color: var(--muted);
+	padding: 1em 0;
 }
 
 /* Botões */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4em;
-  padding: 0.55em 1em;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-family: var(--font-body);
-  font-size: 0.95em;
-  line-height: 1.2;
-  cursor: pointer;
-  text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease,
-              background 0.15s ease, border-color 0.15s ease;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4em;
+	padding: 0.55em 1em;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	font-family: var(--font-body);
+	font-size: 0.95em;
+	line-height: 1.2;
+	cursor: pointer;
+	text-decoration: none;
+	transition:
+		transform 0.15s ease,
+		box-shadow 0.15s ease,
+		background 0.15s ease,
+		border-color 0.15s ease;
 }
 
 .btn-primary {
-  background: var(--accent);
-  color: var(--ink);
-  border-color: var(--accent);
+	background: var(--accent);
+	color: var(--ink);
+	border-color: var(--accent);
 }
 
 .btn-secondary {
-  background: var(--surface);
-  color: var(--fg);
-  border-color: var(--border);
+	background: var(--surface);
+	color: var(--fg);
+	border-color: var(--border);
 }
 
 .btn-ghost {
-  background: transparent;
-  color: var(--fg);
-  border-color: transparent;
+	background: transparent;
+	color: var(--fg);
+	border-color: transparent;
 }
 
 .btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+	transform: translateY(-1px);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 .btn:active {
-  transform: translateY(1px) scale(0.98);
+	transform: translateY(1px) scale(0.98);
 }
 
 .btn-lg {
-  padding: 13px 26px;
-  font-size: 16px;
-  border-radius: 14px;
+	padding: 13px 26px;
+	font-size: 16px;
+	border-radius: 14px;
 }
 
 .btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+	opacity: 0.45;
+	cursor: not-allowed;
 }
 
 /* Superfícies */
 .container {
-  width: 100%;
-  max-width: var(--container);
-  margin-inline: auto;
-  padding-inline: var(--gap-lg);
+	width: 100%;
+	max-width: var(--container);
+	margin-inline: auto;
+	padding-inline: var(--gap-lg);
 }
 
 .section {
-  padding-block: clamp(32px, 4vw, var(--gap-xl));
+	padding-block: clamp(32px, 4vw, var(--gap-xl));
 }
 
 .stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gap-md);
+	display: flex;
+	flex-direction: column;
+	gap: var(--gap-md);
 }
 
 .row {
-  display: flex;
-  align-items: center;
-  gap: var(--gap-md);
+	display: flex;
+	align-items: center;
+	gap: var(--gap-md);
 }
 
 .row-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--gap-md);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--gap-md);
 }
 
 .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  color: var(--fg);
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	padding: 24px;
+	color: var(--fg);
 }
 
 .catalog-pane .card {
-  padding: 16px;
+	padding: 16px;
 }
 
 /* Tipo */
 .eyebrow {
-  font-family: var(--font-display);
-  font-size: 0.8em;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
+	font-family: var(--font-display);
+	font-size: 0.8em;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--muted);
 }
 
 .lead {
-  font-size: var(--fs-lead);
-  line-height: 1.5;
-  color: var(--muted);
-  max-width: 60ch;
-  margin: 8px 0 0;
+	font-size: var(--fs-lead);
+	line-height: 1.5;
+	color: var(--muted);
+	max-width: 60ch;
+	margin: 8px 0 0;
 }
 
 .meta {
-  font-family: var(--font-mono);
-  font-size: var(--fs-meta);
-  color: var(--muted);
+	font-family: var(--font-mono);
+	font-size: var(--fs-meta);
+	color: var(--muted);
 }
 
 .num {
-  font-family: var(--font-mono);
-  font-feature-settings: "tnum";
+	font-family: var(--font-mono);
+	font-feature-settings: "tnum";
 }
 
 .muted {
-  color: var(--muted);
+	color: var(--muted);
 }
 
 /* === Home (0073) — index/team adaptativos, catálogo .pcard, roster === */
 
 /* Cabeçalho da home: título + resumo de orçamento, na mesma linha */
 .app-head {
-  margin-bottom: var(--gap-lg);
+	margin-bottom: var(--gap-lg);
 }
 
 .app-head h1 {
-  font-family: var(--font-display);
-  font-size: clamp(1.5em, 3vw, 2.1em);
-  line-height: 1.15;
-  margin: 0.2em 0 0;
+	font-family: var(--font-display);
+	font-size: clamp(1.5em, 3vw, 2.1em);
+	line-height: 1.15;
+	margin: 0.2em 0 0;
 }
 
 /* Resumo de orçamento (custo do time + barra + Gerenciar time) */
 .budget-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6em;
-  max-width: 20em;
-  min-width: 16em;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6em;
+	max-width: 20em;
+	min-width: 16em;
 }
 
 .budget-meta {
-  flex-wrap: wrap;
+	flex-wrap: wrap;
 }
 
 .budget-meta .num {
-  font-weight: 700;
+	font-weight: 700;
 }
 
 /* Barra de progresso do orçamento */
 .meter {
-  height: 8px;
-  border-radius: 999px;
-  background: var(--fg-soft);
-  overflow: hidden;
+	height: 8px;
+	border-radius: 999px;
+	background: var(--fg-soft);
+	overflow: hidden;
 }
 
 .meter-fill {
-  display: block;
-  height: 100%;
-  border-radius: 999px;
-  background: var(--accent);
+	display: block;
+	height: 100%;
+	border-radius: 999px;
+	background: var(--accent);
 }
 
 .meter-fill.over {
-  background: var(--danger);
+	background: var(--danger);
 }
 
 .meter-fill.near {
-  background: var(--warn);
+	background: var(--warn);
 }
 
 /* Grid home: time (2 partes) + catálogo (1 parte); colapsa <=920px */
 .grid-2-1 {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: var(--gap-xl);
-  align-items: start;
+	display: grid;
+	grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+	gap: var(--gap-xl);
+	align-items: start;
 }
 
 @media (max-width: 920px) {
-  .grid-2-1 {
-    grid-template-columns: 1fr;
-  }
+	.grid-2-1 {
+		grid-template-columns: 1fr;
+	}
 }
 
 /* Painel do catálogo (filtros + lista) */
 .catalog-pane {
-  min-width: 0;
+	min-width: 0;
 }
 
 /* Grade do catálogo visual.
    `#pokemon-list` recebe o .pokemon-grid de pokemon_list.erb via hx-swap="innerHTML",
    entao .catalog e um recipiente (block); a grade em si e .pokemon-grid. */
 .catalog {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+	list-style: none;
+	margin: 0;
+	padding: 0;
 }
 
 /* Cartão de Pokémon do catálogo */
 .pcard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5em;
-  padding: 0.8em;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  color: var(--fg);
-  text-align: center;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5em;
+	padding: 0.8em;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
+	color: var(--fg);
+	text-align: center;
+	transition:
+		transform 0.15s ease,
+		box-shadow 0.15s ease,
+		border-color 0.15s ease;
 }
 
 .pcard:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  border-color: var(--accent);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+	border-color: var(--accent);
 }
 
 .pcard a {
-  color: var(--fg);
-  text-decoration: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3em;
+	color: var(--fg);
+	text-decoration: none;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.3em;
 }
 
 .pcard .sprite-tile,
 .pcard img {
-  width: 96px;
-  height: 96px;
-  object-fit: contain;
-  display: block;
+	width: 96px;
+	height: 96px;
+	object-fit: contain;
+	display: block;
 }
 
 .pcard-name {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 0.95em;
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 0.95em;
 }
 
 .pcard-meta {
-  font-size: 0.8em;
-  color: var(--muted);
+	font-size: 0.8em;
+	color: var(--muted);
 }
 
 /* Botão adicionar (+/Adicionar), no rodapé do .pcard */
 .pcard-add {
-  margin-top: auto;
-  font-size: 0.85em;
+	margin-top: auto;
+	font-size: 0.85em;
 }
 
 /* Filtros do catálogo */
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4em;
-  margin-bottom: 1em;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4em;
+	margin-bottom: 1em;
 }
 
 .field label {
-  font-size: 0.85em;
-  color: var(--muted);
+	font-size: 0.85em;
+	color: var(--muted);
 }
 
 .input,
@@ -390,168 +420,168 @@
 .field select,
 .filter-grid input,
 .filter-grid select {
-  min-height: 44px;
-  padding: 0.5em 0.75em;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--font-body);
+	min-height: 44px;
+	padding: 0.5em 0.75em;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--bg);
+	color: var(--fg);
+	font-family: var(--font-body);
 }
 
 .filter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 0.75em;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+	gap: 0.75em;
 }
 
 /* Hook dos filtros (hx-include): alvo de toque + largura cheia na grade */
 .filter-state {
-  min-height: 44px;
-  width: 100%;
-  min-width: 0;
-  font-family: var(--font-body);
-  font-size: 0.9em;
+	min-height: 44px;
+	width: 100%;
+	min-width: 0;
+	font-family: var(--font-body);
+	font-size: 0.9em;
 }
 
 /* Botao pequeno (ex.: Limpar filtros na linha Arquivo) */
 .btn-sm {
-  padding: 0.35em 0.7em;
-  font-size: 0.8em;
+	padding: 0.35em 0.7em;
+	font-size: 0.8em;
 }
 
 /* Time (roster) */
 .roster {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75em;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75em;
 }
 
 .member {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6em;
-  padding: 0.8em 1em;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
+	display: flex;
+	flex-direction: column;
+	gap: 0.6em;
+	padding: 0.8em 1em;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
 }
 
 .member-top {
-  display: flex;
-  align-items: center;
-  gap: 0.8em;
+	display: flex;
+	align-items: center;
+	gap: 0.8em;
 }
 
 .sprite-tile {
-  width: 60px;
-  height: 60px;
-  flex: 0 0 60px;
-  border-radius: var(--radius);
-  background: var(--bg);
-  border: 1px solid var(--border);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
+	width: 60px;
+	height: 60px;
+	flex: 0 0 60px;
+	border-radius: var(--radius);
+	background: var(--bg);
+	border: 1px solid var(--border);
+	display: grid;
+	place-items: center;
+	overflow: hidden;
 }
 
 .sprite-tile img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	display: block;
 }
 
 .member-name {
-  font-family: var(--font-display);
-  font-weight: 600;
-  display: block;
+	font-family: var(--font-display);
+	font-weight: 600;
+	display: block;
 }
 
 .member-lvl {
-  font-size: 0.8em;
-  color: var(--muted);
+	font-size: 0.8em;
+	color: var(--muted);
 }
 
 .hp {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-  font-size: 0.85em;
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	font-size: 0.85em;
 }
 
 .hp-label {
-  color: var(--muted);
-  flex-shrink: 0;
+	color: var(--muted);
+	flex-shrink: 0;
 }
 
 .bar {
-  flex: 1 1 auto;
-  min-width: 0;
+	flex: 1 1 auto;
+	min-width: 0;
 }
 
 .hp-val {
-  flex-shrink: 0;
-  font-weight: 700;
+	flex-shrink: 0;
+	font-weight: 700;
 }
 
 .member-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5em;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5em;
 }
 
 /* Barra de HP do membro do roster (enchimento) */
 .bar-fill {
-  display: block;
-  height: 100%;
-  border-radius: var(--radius);
-  background: var(--ok);
-  transition: width 0.2s ease;
+	display: block;
+	height: 100%;
+	border-radius: var(--radius);
+	background: var(--ok);
+	transition: width 0.2s ease;
 }
 
 .bar {
-  background: var(--fg-soft);
-  border-radius: var(--radius);
-  height: 10px;
-  overflow: hidden;
+	background: var(--fg-soft);
+	border-radius: var(--radius);
+	height: 10px;
+	overflow: hidden;
 }
 
 /* Prontidão do time (Pronto p/ batalhar / Precisa de cura / Game over) */
 .pill {
-  display: inline-block;
-  padding: 0.25em 0.75em;
-  border-radius: 999px;
-  font-size: 0.8em;
-  font-weight: 700;
-  background: var(--ok);
-  color: var(--ink);
+	display: inline-block;
+	padding: 0.25em 0.75em;
+	border-radius: 999px;
+	font-size: 0.8em;
+	font-weight: 700;
+	background: var(--ok);
+	color: var(--ink);
 }
 
 .pill.warn {
-  background: var(--warn);
+	background: var(--warn);
 }
 
 .pill.danger {
-  background: var(--danger);
-  color: var(--ink);
+	background: var(--danger);
+	color: var(--ink);
 }
 
 /* Serviços (Poke Center / Poke Mart) com saldo */
 .services {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75em;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75em;
 }
 
 .services-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75em;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75em;
 }
 
 /* === Batalha (0074) — arena/podium/log/result, traduzido do prototipo open-design/battle.html ===
@@ -560,321 +590,321 @@
 
 /* Arena de 3 colunas; colapsa para 1 coluna <=980px (breakpoint do prototipo) */
 .arena {
-  display: grid;
-  grid-template-columns: 1fr 1.06fr 1fr;
-  gap: var(--gap-lg);
-  align-items: start;
+	display: grid;
+	grid-template-columns: 1fr 1.06fr 1fr;
+	gap: var(--gap-lg);
+	align-items: start;
 }
 
 @media (max-width: 980px) {
-  .arena {
-    grid-template-columns: 1fr;
-  }
+	.arena {
+		grid-template-columns: 1fr;
+	}
 }
 
 @media (max-width: 700px) {
-  .podium {
-    position: static;
-  }
+	.podium {
+		position: static;
+	}
 }
 
 /* Cabecalho lateral do time/oponente */
 .side-head {
-  margin-bottom: 1em;
+	margin-bottom: 1em;
 }
 
 .side-head h2 {
-  margin: 0;
+	margin: 0;
 }
 
 .side-head .meta {
-  margin-top: 0.25em;
+	margin-top: 0.25em;
 }
 
 /* Lista de lutadores */
 .fighters {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.75em;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 0.75em;
 }
 
 /* Card do lutador (li.fighter) */
 .fighter {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.75em;
-  background: var(--surface);
-  color: var(--fg);
-  position: relative;
-  min-width: 0;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	padding: 0.75em;
+	background: var(--surface);
+	color: var(--fg);
+	position: relative;
+	min-width: 0;
 }
 
 .fighter.engaged {
-  border-color: var(--accent);
+	border-color: var(--accent);
 }
 
 .fighter-head {
-  display: flex;
-  gap: 0.65em;
-  align-items: center;
+	display: flex;
+	gap: 0.65em;
+	align-items: center;
 }
 
 .fighter .sprite-tile {
-  width: 46px;
-  height: 46px;
-  flex: 0 0 46px;
-  border-radius: 10px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
+	width: 46px;
+	height: 46px;
+	flex: 0 0 46px;
+	border-radius: 10px;
+	background: var(--bg);
+	border: 1px solid var(--border);
+	display: grid;
+	place-items: center;
+	overflow: hidden;
 }
 
 .fighter .sprite-tile img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
 }
 
 .fighter-id {
-  min-width: 0;
-  flex: 1;
+	min-width: 0;
+	flex: 1;
 }
 
 .fname {
-  font-weight: 700;
-  font-size: 0.9em;
-  line-height: 1.15;
+	font-weight: 700;
+	font-size: 0.9em;
+	line-height: 1.15;
 }
 
 .fmeta {
-  display: flex;
-  align-items: center;
-  gap: 0.4em;
-  margin-top: 0.2em;
-  flex-wrap: wrap;
+	display: flex;
+	align-items: center;
+	gap: 0.4em;
+	margin-top: 0.2em;
+	flex-wrap: wrap;
 }
 
 .fmeta .lvl {
-  font-size: 0.75em;
-  color: var(--muted);
+	font-size: 0.75em;
+	color: var(--muted);
 }
 
 .ftags {
-  display: inline-flex;
-  gap: 0.25em;
-  flex-wrap: wrap;
+	display: inline-flex;
+	gap: 0.25em;
+	flex-wrap: wrap;
 }
 
 .ftag {
-  padding: 0.1em 0.5em;
-  border-radius: 999px;
-  background: var(--fg-soft);
-  color: var(--fg);
-  font-size: 0.7em;
-  font-weight: 700;
-  line-height: 1.4;
+	padding: 0.1em 0.5em;
+	border-radius: 999px;
+	background: var(--fg-soft);
+	color: var(--fg);
+	font-size: 0.7em;
+	font-weight: 700;
+	line-height: 1.4;
 }
 
 /* Tiers do HP no card (presenter expoe high/medium/low; prototipo usa ok/mid/low) */
 .bar-fill.ok,
 .bar-fill.high {
-  background: var(--ok);
+	background: var(--ok);
 }
 
 .bar-fill.mid,
 .bar-fill.medium {
-  background: var(--warn);
+	background: var(--warn);
 }
 
 .bar-fill.low {
-  background: var(--danger);
+	background: var(--danger);
 }
 
 /* Golpes do lutador */
 .moves {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4em;
-  margin-top: 0.65em;
-  list-style: none;
-  padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4em;
+	margin-top: 0.65em;
+	list-style: none;
+	padding: 0;
 }
 
 .move {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4em;
-  padding: 0.2em 0.5em;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: 0.75em;
-  color: var(--muted);
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+	padding: 0.2em 0.5em;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	font-size: 0.75em;
+	color: var(--muted);
 }
 
 .move .ppnum {
-  font-family: var(--font-mono);
-  color: var(--fg);
+	font-family: var(--font-mono);
+	color: var(--fg);
 }
 
 .move .dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--muted);
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--muted);
 }
 
 .move .dot.ok,
 .move .dot.high {
-  background: var(--ok);
+	background: var(--ok);
 }
 
 .move .dot.mid,
 .move .dot.medium {
-  background: var(--warn);
+	background: var(--warn);
 }
 
 .move .dot.low {
-  background: var(--danger);
+	background: var(--danger);
 }
 
 /* Centro: round-banner + controles + resultado + log */
 .podium {
-  position: sticky;
-  top: 84px;
-  min-width: 0;
+	position: sticky;
+	top: 84px;
+	min-width: 0;
 }
 
 .round-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75em;
-  margin-bottom: 0.9em;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75em;
+	margin-bottom: 0.9em;
 }
 
 .turn-status {
-  font-size: 1.25em;
-  font-weight: 800;
-  font-family: var(--font-display);
+	font-size: 1.25em;
+	font-weight: 800;
+	font-family: var(--font-display);
 }
 
 .controls {
-  margin-bottom: 1.1em;
+	margin-bottom: 1.1em;
 }
 
 /* Resultado do fim de batalha */
 .result {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1em;
-  background: var(--fg-soft);
-  margin-top: 0.9em;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	padding: 1em;
+	background: var(--fg-soft);
+	margin-top: 0.9em;
 }
 
 .result .winner-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  font-weight: 800;
-  font-size: 0.95em;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5em;
+	font-weight: 800;
+	font-size: 0.95em;
 }
 
 .result .rewards {
-  margin: 0.65em 0 0;
-  color: var(--muted);
-  font-size: 0.85em;
+	margin: 0.65em 0 0;
+	color: var(--muted);
+	font-size: 0.85em;
 }
 
 .result .rewards strong {
-  color: var(--ok);
+	color: var(--ok);
 }
 
 .result .ctas {
-  display: flex;
-  gap: 0.65em;
-  margin-top: 0.9em;
-  flex-wrap: wrap;
+	display: flex;
+	gap: 0.65em;
+	margin-top: 0.9em;
+	flex-wrap: wrap;
 }
 
 /* Log da batalha */
 .battle-log {
-  max-height: 380px;
-  overflow-y: auto;
+	max-height: 380px;
+	overflow-y: auto;
 }
 
 .log-title {
-  font-family: var(--font-mono);
-  font-size: 0.7em;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.5em;
+	font-family: var(--font-mono);
+	font-size: 0.7em;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--muted);
+	margin-bottom: 0.5em;
 }
 
 .log {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+	list-style: none;
+	margin: 0;
+	padding: 0;
 }
 
 .log li {
-  display: flex;
-  gap: 0.65em;
-  padding: 0.45em 0;
-  border-top: 1px solid var(--border);
-  font-size: 0.85em;
-  line-height: 1.45;
+	display: flex;
+	gap: 0.65em;
+	padding: 0.45em 0;
+	border-top: 1px solid var(--border);
+	font-size: 0.85em;
+	line-height: 1.45;
 }
 
 .log li:first-child {
-  border-top: 0;
+	border-top: 0;
 }
 
 .log .lside {
-  flex: 0 0 auto;
-  font-weight: 700;
-  font-size: 0.75em;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  padding: 0.15em 0.5em;
-  border-radius: 999px;
-  height: fit-content;
+	flex: 0 0 auto;
+	font-weight: 700;
+	font-size: 0.75em;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	padding: 0.15em 0.5em;
+	border-radius: 999px;
+	height: fit-content;
 }
 
 .log .lside.team {
-  color: var(--ink);
-  background: var(--accent);
+	color: var(--ink);
+	background: var(--accent);
 }
 
 .log .lside.opp {
-  color: var(--muted);
-  background: var(--fg-soft);
+	color: var(--muted);
+	background: var(--fg-soft);
 }
 
 .log .txt {
-  color: var(--fg);
+	color: var(--fg);
 }
 
 /* Estoque em batalha: linha mono discreta sob os lutadores */
 .stock-items {
-  font-family: var(--font-mono);
-  font-size: 0.8em;
-  color: var(--muted);
-  margin-top: 0.75em;
+	font-family: var(--font-mono);
+	font-size: 0.8em;
+	color: var(--muted);
+	margin-top: 0.75em;
 }
 
 /* Estados finais: listas de novidades de evolucao/golpes */
 .evolution-news,
 .learned-news {
-  list-style: none;
-  margin: 0.65em 0 0;
-  padding: 0;
-  color: var(--muted);
-  font-size: 0.85em;
+	list-style: none;
+	margin: 0.65em 0 0;
+	padding: 0;
+	color: var(--muted);
+	font-size: 0.85em;
 }
 
 /* === Juice da batalha portado para os seletores novos (0074 B1b) ===
@@ -884,87 +914,87 @@
 
 /* Entrada do log: fade/slide escalonado via --log-delay (stagger 0069) */
 .log__entry {
-  animation: battle-log-in 0.35s ease-out both;
-  animation-delay: var(--log-delay, 0s);
+	animation: battle-log-in 0.35s ease-out both;
+	animation-delay: var(--log-delay, 0s);
 }
 
 /* HP animado: parte do HP inicial (var do servidor) ate o atual */
 .fighters .bar-fill {
-  animation: juice-hp 0.5s ease-out both;
+	animation: juice-hp 0.5s ease-out both;
 }
 
 /* Flash de dano no card do alvo */
 .fighter.is-hit {
-  animation: juice-flash 0.4s ease-out;
+	animation: juice-flash 0.4s ease-out;
 }
 
 /* Numero de dano flutuante — pseudo-elemento do card danificado */
 .fighter.is-hit::after {
-  content: attr(data-damage);
-  position: absolute;
-  top: -6px;
-  right: 8px;
-  font-weight: bold;
-  color: var(--danger);
-  pointer-events: none;
-  animation: juice-damage-number 0.5s ease-out both;
+	content: attr(data-damage);
+	position: absolute;
+	top: -6px;
+	right: 8px;
+	font-weight: bold;
+	color: var(--danger);
+	pointer-events: none;
+	animation: juice-damage-number 0.5s ease-out both;
 }
 
 /* KO fade/grayscale no lutador derrotado */
 .fighter.fainted img,
 .fighter.fainted .fname {
-  filter: grayscale(1);
-  opacity: 0.6;
-  animation: juice-ko 0.5s ease-out both;
+	filter: grayscale(1);
+	opacity: 0.6;
+	animation: juice-ko 0.5s ease-out both;
 }
 
 .fighter.fainted {
-  opacity: 0.75;
+	opacity: 0.75;
 }
 
 /* Screenshake leve na arena */
 .arena {
-  animation: juice-shake 0.3s ease-out;
+	animation: juice-shake 0.3s ease-out;
 }
 
 /* Projetil — so em viewport >= 900px; abaixo disso so flash no alvo */
 .shot {
-  display: none;
-  position: absolute;
-  top: 40%;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffd54f, #f57c00);
-  box-shadow: 0 0 6px rgba(245, 124, 0, 0.8);
-  z-index: 2;
+	display: none;
+	position: absolute;
+	top: 40%;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: radial-gradient(circle, #ffd54f, #f57c00);
+	box-shadow: 0 0 6px rgba(245, 124, 0, 0.8);
+	z-index: 2;
 }
 
 @media (min-width: 900px) {
-  .fighter.is-attacking .shot {
-    display: block;
-    animation: juice-projectile 0.4s ease-out 0.15s both;
-  }
+	.fighter.is-attacking .shot {
+		display: block;
+		animation: juice-projectile 0.4s ease-out 0.15s both;
+	}
 
-  .arena [data-side="0"] .fighter.is-attacking .shot {
-    --fly: 1;
-    right: -6px;
-  }
+	.arena [data-side="0"] .fighter.is-attacking .shot {
+		--fly: 1;
+		right: -6px;
+	}
 
-  .arena [data-side="1"] .fighter.is-attacking .shot {
-    --fly: -1;
-    left: -6px;
-  }
+	.arena [data-side="1"] .fighter.is-attacking .shot {
+		--fly: -1;
+		left: -6px;
+	}
 }
 
 /* Banner de vitoria + recompensas/XP animados */
 .winner-badge {
-  animation: juice-banner 0.45s ease-out both;
+	animation: juice-banner 0.45s ease-out both;
 }
 
 .rewards,
 .result .news--pop li {
-  animation: juice-news 0.4s ease-out both;
+	animation: juice-news 0.4s ease-out both;
 }
 
 /* Reduced-motion NOVO do ODS: cobre os seletores novos (nao regredir a11y).
@@ -974,19 +1004,19 @@
    style_responsive_test (que extrai o bloco reduce ANTIGO do fim do arquivo —
    mantido integro para as regras legadas; remocao e 0076). */
 @media screen and (prefers-reduced-motion: reduce) {
-  .log__entry,
-  .fighter.is-hit,
-  .fighter.is-hit::after,
-  .fighter.fainted img,
-  .fighter.fainted .fname,
-  .fighter.is-attacking .shot,
-  .arena,
-  .fighters .bar-fill,
-  .winner-badge,
-  .rewards,
-  .result .news--pop li {
-    animation: none;
-  }
+	.log__entry,
+	.fighter.is-hit,
+	.fighter.is-hit::after,
+	.fighter.fainted img,
+	.fighter.fainted .fname,
+	.fighter.is-attacking .shot,
+	.arena,
+	.fighters .bar-fill,
+	.winner-badge,
+	.rewards,
+	.result .news--pop li {
+		animation: none;
+	}
 }
 
 /* === History (0075) — pos-card/rank-list/history-list, traduzido do prototipo open-design/history.html ===
@@ -995,701 +1025,841 @@
 
 /* Cabecalho da pagina de historico */
 .pagehead {
-  margin: 40px 0 34px;
+	margin: 40px 0 34px;
 }
 
 /* Cartao da posicao atual */
 .pos-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 26px 28px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-  margin-bottom: 40px;
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	padding: 26px 28px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+	flex-wrap: wrap;
+	margin-bottom: 40px;
 }
 
 .pos-left {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+	display: flex;
+	align-items: center;
+	gap: 20px;
 }
 
 .pos-badge {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
+	width: 64px;
+	height: 64px;
+	border-radius: 16px;
+	background: var(--accent-soft);
+	color: var(--accent);
+	display: grid;
+	place-items: center;
+	flex-shrink: 0;
 }
 
 .pos-badge .num {
-  font-size: 22px;
-  font-weight: 700;
+	font-size: 22px;
+	font-weight: 700;
 }
 
 .pos-title h2 {
-  font-size: 21px;
-  margin: 0;
+	font-size: 21px;
+	margin: 0;
 }
 
 .pos-title .meta {
-  margin-top: 4px;
+	margin-top: 4px;
 }
 
 .pos-stats {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
 }
 
 .stat-chip {
-  background: var(--fg-soft);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 10px 16px;
-  text-align: center;
-  min-width: 78px;
+	background: var(--fg-soft);
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	padding: 10px 16px;
+	text-align: center;
+	min-width: 78px;
 }
 
 .stat-chip .n {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  line-height: 1;
+	font-family: var(--font-display);
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1;
 }
 
 .stat-chip .l {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-top: 4px;
+	font-family: var(--font-mono);
+	font-size: 10.5px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--muted);
+	margin-top: 4px;
 }
 
 .stat-chip.win .n {
-  color: var(--ok);
+	color: var(--ok);
 }
 
 .stat-chip.loss .n {
-  color: var(--danger);
+	color: var(--danger);
 }
 
 .stat-chip.draw .n {
-  color: var(--warn);
+	color: var(--warn);
 }
 
 /* Titulo de secao (ranking / ultimas batalhas) */
 .section-title {
-  margin: 0 0 16px;
+	margin: 0 0 16px;
 }
 
 /* Respiro entre blocos do historico (0076 2b, D80: ex-inline de history.erb) */
 .gap-after {
-  margin-bottom: 40px;
+	margin-bottom: 40px;
 }
 
 /* Ranking global */
 .rank-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+	list-style: none;
+	margin: 0;
+	padding: 0;
 }
 
 .rank-row {
-  display: grid;
-  grid-template-columns: 44px 1fr auto auto;
-  align-items: center;
-  gap: 16px;
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--border);
+	display: grid;
+	grid-template-columns: 44px 1fr auto auto;
+	align-items: center;
+	gap: 16px;
+	padding: 13px 16px;
+	border-bottom: 1px solid var(--border);
 }
 
 .rank-row:last-child {
-  border-bottom: 0;
+	border-bottom: 0;
 }
 
 .rank-row.you {
-  background: var(--accent-soft);
-  border-radius: var(--radius);
-  border: 1px solid var(--accent);
+	background: var(--accent-soft);
+	border-radius: var(--radius);
+	border: 1px solid var(--accent);
 }
 
 .rank-pos {
-  font-family: var(--font-mono);
-  color: var(--muted);
-  font-size: 13px;
-  width: 26px;
+	font-family: var(--font-mono);
+	color: var(--muted);
+	font-size: 13px;
+	width: 26px;
 }
 
 .rank-row.you .rank-pos {
-  color: var(--accent);
+	color: var(--accent);
 }
 
 .rank-name {
-  font-weight: 700;
-  font-size: 14px;
+	font-weight: 700;
+	font-size: 14px;
 }
 
 .rank-name .meta {
-  margin-left: 8px;
-  font-weight: 500;
+	margin-left: 8px;
+	font-weight: 500;
 }
 
 .rank-bar {
-  width: 90px;
-  height: 6px;
-  background: var(--fg-soft);
-  border-radius: 999px;
-  overflow: hidden;
+	width: 90px;
+	height: 6px;
+	background: var(--fg-soft);
+	border-radius: 999px;
+	overflow: hidden;
 }
 
 .rank-bar span {
-  display: block;
-  height: 100%;
-  background: var(--accent);
-  border-radius: 999px;
+	display: block;
+	height: 100%;
+	background: var(--accent);
+	border-radius: 999px;
 }
 
 .rank-wins {
-  font-family: var(--font-mono);
-  font-size: 12.5px;
-  color: var(--muted);
-  text-align: right;
+	font-family: var(--font-mono);
+	font-size: 12.5px;
+	color: var(--muted);
+	text-align: right;
 }
 
 .rank-wins strong {
-  color: var(--fg);
+	color: var(--fg);
 }
 
 /* Ultimas batalhas */
 .history-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+	list-style: none;
+	margin: 0;
+	padding: 0;
 }
 
 .history-row {
-  display: grid;
-  grid-template-columns: 96px 1fr auto;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--border);
+	display: grid;
+	grid-template-columns: 96px 1fr auto;
+	align-items: center;
+	gap: 16px;
+	padding: 14px 16px;
+	border-bottom: 1px solid var(--border);
 }
 
 .history-row:last-child {
-  border-bottom: 0;
+	border-bottom: 0;
 }
 
 .result-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 11px;
-  border-radius: 999px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--ink);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 4px 11px;
+	border-radius: 999px;
+	font-family: var(--font-mono);
+	font-size: 11px;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	font-weight: 700;
+	color: var(--ink);
 }
 
 .result-badge.win {
-  background: var(--ok);
+	background: var(--ok);
 }
 
 .result-badge.loss {
-  background: var(--danger);
+	background: var(--danger);
 }
 
 .result-badge.draw {
-  background: var(--warn);
+	background: var(--warn);
 }
 
 .history-main {
-  min-width: 0;
+	min-width: 0;
 }
 
 .history-main .h-title {
-  font-weight: 700;
-  font-size: 13.5px;
+	font-weight: 700;
+	font-size: 13.5px;
 }
 
 .history-main .h-sub {
-  color: var(--muted);
-  font-size: 12.5px;
-  margin-top: 2px;
+	color: var(--muted);
+	font-size: 12.5px;
+	margin-top: 2px;
 }
 
 .history-date {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
+	font-family: var(--font-mono);
+	font-size: 12px;
+	color: var(--muted);
+	white-space: nowrap;
 }
 
 /* History empilha em coluna <=920px (C8) */
 @media (max-width: 920px) {
-  .pos-card {
-    flex-direction: column;
-    align-items: stretch;
-  }
+	.pos-card {
+		flex-direction: column;
+		align-items: stretch;
+	}
 
-  .history-row {
-    grid-template-columns: 1fr;
-    justify-items: start;
-  }
+	.history-row {
+		grid-template-columns: 1fr;
+		justify-items: start;
+	}
 }
 
 /* === Modais overlay hibrido (0076 2a, C2) — :target abre, htmx preenche, sem JS ===
    As rotas GET /team/center|/team/mart devolvem `.overlay:target > .modal[role=dialog]`
    envolvendo as parciais _center/_mart intactas; fechar = link href="#". */
 .overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5em;
-  background: rgba(0, 0, 0, 0.55);
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 50;
+	align-items: center;
+	justify-content: center;
+	padding: 1.5em;
+	background: rgba(0, 0, 0, 0.55);
 }
 
 .overlay:target {
-  display: flex;
+	display: flex;
 }
 
 /* Htmx-append: o fragmento chega com .open e mostra de imediato (sem JS);
    fechar = rota close que troca o no pelo slot vazio (mesmo id). */
 .overlay.open {
-  display: flex;
+	display: flex;
 }
 
 /* === Tags cor por tipo (0076 2a, C5) — dado real: pcard via api.find,
    membro via enrichment, fighter via FighterPresenter#types === */
 .ptags,
 .mtags {
-  display: inline-flex;
-  gap: 0.25em;
-  flex-wrap: wrap;
-  margin-top: 0.3em;
+	display: inline-flex;
+	gap: 0.25em;
+	flex-wrap: wrap;
+	margin-top: 0.3em;
 }
 
 .ptag,
 .mtag {
-  padding: 0.1em 0.5em;
-  border-radius: 999px;
-  background: var(--fg-soft);
-  color: var(--fg);
-  font-size: 0.7em;
-  font-weight: 700;
-  line-height: 1.4;
+	padding: 0.1em 0.5em;
+	border-radius: 999px;
+	background: var(--fg-soft);
+	color: var(--fg);
+	font-size: 0.7em;
+	font-weight: 700;
+	line-height: 1.4;
 }
 
-.ptag--normal, .mtag--normal, .ftag--normal { background: var(--t-normal); color: var(--ink); }
-.ptag--fire, .mtag--fire, .ftag--fire { background: var(--t-fire); color: var(--ink); }
-.ptag--water, .mtag--water, .ftag--water { background: var(--t-water); color: var(--ink); }
-.ptag--electric, .mtag--electric, .ftag--electric { background: var(--t-electric); color: var(--ink); }
-.ptag--grass, .mtag--grass, .ftag--grass { background: var(--t-grass); color: var(--ink); }
-.ptag--ice, .mtag--ice, .ftag--ice { background: var(--t-ice); color: var(--ink); }
-.ptag--fighting, .mtag--fighting, .ftag--fighting { background: var(--t-fighting); color: var(--ink); }
-.ptag--poison, .mtag--poison, .ftag--poison { background: var(--t-poison); color: var(--ink); }
-.ptag--ground, .mtag--ground, .ftag--ground { background: var(--t-ground); color: var(--ink); }
-.ptag--flying, .mtag--flying, .ftag--flying { background: var(--t-flying); color: var(--ink); }
-.ptag--psychic, .mtag--psychic, .ftag--psychic { background: var(--t-psychic); color: var(--ink); }
-.ptag--bug, .mtag--bug, .ftag--bug { background: var(--t-bug); color: var(--ink); }
-.ptag--rock, .mtag--rock, .ftag--rock { background: var(--t-rock); color: var(--ink); }
-.ptag--ghost, .mtag--ghost, .ftag--ghost { background: var(--t-ghost); color: var(--ink); }
-.ptag--dark, .mtag--dark, .ftag--dark { background: var(--t-dark); color: var(--ink); }
-.ptag--dragon, .mtag--dragon, .ftag--dragon { background: var(--t-dragon); color: var(--ink); }
-.ptag--steel, .mtag--steel, .ftag--steel { background: var(--t-steel); color: var(--ink); }
-.ptag--fairy, .mtag--fairy, .ftag--fairy { background: var(--t-fairy); color: var(--ink); }
+.ptag--normal,
+.mtag--normal,
+.ftag--normal {
+	background: var(--t-normal);
+	color: var(--ink);
+}
+.ptag--fire,
+.mtag--fire,
+.ftag--fire {
+	background: var(--t-fire);
+	color: var(--ink);
+}
+.ptag--water,
+.mtag--water,
+.ftag--water {
+	background: var(--t-water);
+	color: var(--ink);
+}
+.ptag--electric,
+.mtag--electric,
+.ftag--electric {
+	background: var(--t-electric);
+	color: var(--ink);
+}
+.ptag--grass,
+.mtag--grass,
+.ftag--grass {
+	background: var(--t-grass);
+	color: var(--ink);
+}
+.ptag--ice,
+.mtag--ice,
+.ftag--ice {
+	background: var(--t-ice);
+	color: var(--ink);
+}
+.ptag--fighting,
+.mtag--fighting,
+.ftag--fighting {
+	background: var(--t-fighting);
+	color: var(--ink);
+}
+.ptag--poison,
+.mtag--poison,
+.ftag--poison {
+	background: var(--t-poison);
+	color: var(--ink);
+}
+.ptag--ground,
+.mtag--ground,
+.ftag--ground {
+	background: var(--t-ground);
+	color: var(--ink);
+}
+.ptag--flying,
+.mtag--flying,
+.ftag--flying {
+	background: var(--t-flying);
+	color: var(--ink);
+}
+.ptag--psychic,
+.mtag--psychic,
+.ftag--psychic {
+	background: var(--t-psychic);
+	color: var(--ink);
+}
+.ptag--bug,
+.mtag--bug,
+.ftag--bug {
+	background: var(--t-bug);
+	color: var(--ink);
+}
+.ptag--rock,
+.mtag--rock,
+.ftag--rock {
+	background: var(--t-rock);
+	color: var(--ink);
+}
+.ptag--ghost,
+.mtag--ghost,
+.ftag--ghost {
+	background: var(--t-ghost);
+	color: var(--ink);
+}
+.ptag--dark,
+.mtag--dark,
+.ftag--dark {
+	background: var(--t-dark);
+	color: var(--ink);
+}
+.ptag--dragon,
+.mtag--dragon,
+.ftag--dragon {
+	background: var(--t-dragon);
+	color: var(--ink);
+}
+.ptag--steel,
+.mtag--steel,
+.ftag--steel {
+	background: var(--t-steel);
+	color: var(--ink);
+}
+.ptag--fairy,
+.mtag--fairy,
+.ftag--fairy {
+	background: var(--t-fairy);
+	color: var(--ink);
+}
 
 .modal {
-  background: var(--surface);
-  color: var(--fg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 1.5em;
-  max-width: 32em;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
+	background: var(--surface);
+	color: var(--fg);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	padding: 1.5em;
+	max-width: 32em;
+	width: 100%;
+	max-height: 85vh;
+	overflow-y: auto;
 }
 
 .modal-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1em;
-  margin-bottom: 1em;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1em;
+	margin-bottom: 1em;
 }
 
 .modal-head h2 {
-  margin: 0;
+	margin: 0;
 }
 
 .modal-close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 44px;
-  min-height: 44px;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
-  background: transparent;
-  color: var(--fg);
-  font-size: 1.25em;
-  line-height: 1;
-  text-decoration: none;
-  cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 44px;
+	min-height: 44px;
+	border: 1px solid transparent;
+	border-radius: var(--radius);
+	background: transparent;
+	color: var(--fg);
+	font-size: 1.25em;
+	line-height: 1;
+	text-decoration: none;
+	cursor: pointer;
 }
 
 .modal-close:hover {
-  border-color: var(--border);
+	border-color: var(--border);
 }
 
 .modal-sub {
-  color: var(--muted);
-  font-size: 0.85em;
-  margin-bottom: 1em;
+	color: var(--muted);
+	font-size: 0.85em;
+	margin-bottom: 1em;
 }
 
 .modal-foot {
-  display: flex;
-  gap: 0.65em;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-  margin-top: 1.25em;
+	display: flex;
+	gap: 0.65em;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	margin-top: 1.25em;
 }
 
 /* === Rede juice no bloco (0076 2a, C10/D86-D88) — duplicacao temporaria intencional ===
    projectile + toast partem do bloco para sobreviver a limpeza 2b;
    o legado permanece integro fora do bloco. */
 @keyframes juice-projectile {
-  from {
-    transform: translateX(0) scale(1);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(calc(var(--fly, 1) * (100% + 18em))) scale(0.35);
-    opacity: 0.85;
-  }
+	from {
+		transform: translateX(0) scale(1);
+		opacity: 1;
+	}
+	to {
+		transform: translateX(calc(var(--fly, 1) * (100% + 18em))) scale(0.35);
+		opacity: 0.85;
+	}
 }
 
 .add-toast {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-  margin-bottom: 0.6em;
-  padding: 0.5em 0.8em;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  animation: juice-toast-in 0.35s ease-out both, juice-toast-out 0.35s ease-in 3s both;
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	margin-bottom: 0.6em;
+	padding: 0.5em 0.8em;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	background: #fff;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+	animation:
+		juice-toast-in 0.35s ease-out both,
+		juice-toast-out 0.35s ease-in 3s both;
 }
 
 .add-toast__sprite {
-  width: 40px;
-  height: 40px;
+	width: 40px;
+	height: 40px;
 }
 
 @keyframes juice-toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 @keyframes juice-toast-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-8px);
+	}
 }
 
 /* === Keyframes do juice no bloco (0076 2b, C13/D86-D88 fechamento) ===
    Port do juice 0063 referenciado acima (log/hp/flash/dano/ko/shake/banner/news);
    os originais legados saem — o bloco vira a unica fonte das animacoes. */
 @keyframes battle-log-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 @keyframes juice-hp {
-  from {
-    width: var(--hp-initial-percent, 100%);
-  }
+	from {
+		width: var(--hp-initial-percent, 100%);
+	}
 }
 
 @keyframes juice-flash {
-  0% {
-    box-shadow: inset 0 0 0 9999px rgba(255, 0, 0, 0.28);
-  }
-  100% {
-    box-shadow: inset 0 0 0 9999px rgba(255, 0, 0, 0);
-  }
+	0% {
+		box-shadow: inset 0 0 0 9999px rgba(255, 0, 0, 0.28);
+	}
+	100% {
+		box-shadow: inset 0 0 0 9999px rgba(255, 0, 0, 0);
+	}
 }
 
 @keyframes juice-damage-number {
-  0% {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-16px);
-  }
+	0% {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	20% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(-16px);
+	}
 }
 
 @keyframes juice-ko {
-  from {
-    filter: grayscale(0);
-    opacity: 1;
-  }
-  to {
-    filter: grayscale(1);
-    opacity: 0.6;
-  }
+	from {
+		filter: grayscale(0);
+		opacity: 1;
+	}
+	to {
+		filter: grayscale(1);
+		opacity: 0.6;
+	}
 }
 
 @keyframes juice-shake {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(1px, -1px);
-  }
-  50% {
-    transform: translate(-1px, 1px);
-  }
-  75% {
-    transform: translate(1px, 1px);
-  }
+	0%,
+	100% {
+		transform: translate(0, 0);
+	}
+	25% {
+		transform: translate(1px, -1px);
+	}
+	50% {
+		transform: translate(-1px, 1px);
+	}
+	75% {
+		transform: translate(1px, 1px);
+	}
 }
 
 @keyframes juice-banner {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
 }
 
 @keyframes juice-news {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
+
+/* === History 1:1 (0079) — curadoria fina do prototipo open-design/history.html ===
+   Ex-inline `padding: 8px 10px` dos cards de ranking/recentes vira classe;
+   a largura da barra (.rank-bar > span) continua inline por ser dado, nao veste. */
+.card--tight {
+	padding: 8px 10px;
+}
+
+/* === Battle 1:1 (0078) — fim de batalha: res-screen/res-top do prototipo
+   open-design/battle-results-desktop.html + state-card/mini-arena/result-card do
+   open-design/battle-end-states.html. Aditivo; .arena/.fighters/.result/.ctas
+   existentes (0074) nao sao redefinidos. === */
+.res-screen { padding: 26px 0 40px; border-top: 1px solid var(--border); }
+.res-screen:first-of-type { border-top: 0; padding-top: 0; }
+.res-top { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px 24px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.res-top-left { display: flex; align-items: center; gap: 16px; }
+.res-top .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+.state-title h2 { font-size: 19px; }
+.state-title .rewards { margin: 5px 0 0; color: var(--muted); font-size: 13.5px; }
+.state-title .rewards strong { color: var(--ok); }
+.state-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+.state-head { display: flex; align-items: center; gap: 12px; margin-bottom: 2px; order: 0; }
+.state-head h2 { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; }
+.state-pill { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 700; color: var(--ink); padding: 4px 11px; border-radius: 999px; }
+.state-pill.win { background: var(--ok); }
+.state-pill.loss { background: var(--warn); }
+.state-pill.over { background: var(--danger); }
+.state-pill.draw { background: var(--muted); }
+.mini-arena { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-md); order: 2; }
+@media (max-width: 600px) { .mini-arena { grid-template-columns: 1fr; } }
+.mini-side-title { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.side-title { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+.fighter-rows { list-style: none; margin: 0; padding: 0; }
+.frow { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-top: 1px solid var(--border); }
+.frow:first-child { border-top: 0; }
+.frow .th { width: 32px; height: 32px; flex: 0 0 32px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); display: grid; place-items: center; overflow: hidden; }
+.frow .th img { width: 100%; height: 100%; object-fit: contain; }
+.frow .fid { flex: 1; min-width: 0; }
+.frow .fn { font-weight: 700; font-size: 12px; line-height: 1.1; }
+.frow .ft { display: inline-flex; gap: 3px; margin-top: 2px; }
+.frow .ftg { font-size: 8.5px; font-weight: 700; color: var(--ink); padding: 0 5px; border-radius: 999px; line-height: 1.5; }
+.frow .hp { display: flex; align-items: center; gap: 5px; width: 76px; }
+.frow .hp .bg { flex: 1; height: 6px; background: var(--fg-soft); border-radius: 999px; overflow: hidden; }
+.frow .hp .fill { display: block; height: 100%; border-radius: 999px; }
+.frow .lbl { font-size: 9.5px; font-family: var(--font-mono); color: var(--muted); white-space: nowrap; }
+.frow.lost { opacity: 0.38; }
+.frow.lost .fn::after { content: ' · derrotado'; font-size: 9.5px; color: var(--danger); font-weight: 600; }
+.result-card { margin-top: 0; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; background: var(--fg-soft); order: 1; }
 
 /* === Open Design System (0072): fim === */
 
 /* Layout interno das seções da página única */
 #pokemon-list {
-  margin-bottom: 1.5em;
+	margin-bottom: 1.5em;
 }
 
 #pokemon,
 #team,
 #battle {
-  margin-bottom: 1.5em;
+	margin-bottom: 1.5em;
 }
 
 /* Listagem / paginação */
 .pagination a {
-  margin: 0 0.5em;
+	margin: 0 0.5em;
 }
 
 /* Grid uniforme da listagem (Onda 3 + RESP-1 P0) — auto-fill responsivo:
    140px mínimo garante 6col em 1440 (154px), 4col em 1024 (85→~200px), 3col em 768,
    2col em 520 e 1col em 375; fallback graduais preservam divisão 36 sem buraco. */
 .pokemon-grid {
-  display: grid;
-  gap: 12px;
-  list-style: none;
-  padding-left: 0;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	display: grid;
+	gap: 12px;
+	list-style: none;
+	padding-left: 0;
+	grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
 }
 
 .pokemon-list {
-  display: contents;
+	display: contents;
 }
 
 .list-item,
 .starter-item {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	padding: 12px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
 }
 
 .list-item img,
 .starter-item img {
-  display: block;
-  max-width: 100%;
+	display: block;
+	max-width: 100%;
 }
 
 .poke-cost {
-  display: inline-block;
-  font-size: 0.8em;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: #eee;
-  color: #333;
+	display: inline-block;
+	font-size: 0.8em;
+	font-weight: bold;
+	padding: 2px 6px;
+	border-radius: 4px;
+	background: #eee;
+	color: #333;
 }
 
 .poke-cost--restricted {
-  font-style: italic;
+	font-style: italic;
 }
 
 .poke-cost[data-tier="S"] {
-  background: #7c3aed;
-  color: #fff;
+	background: #7c3aed;
+	color: #fff;
 }
 
 .poke-cost[data-tier="A"] {
-  background: #ef4444;
-  color: #fff;
+	background: #ef4444;
+	color: #fff;
 }
 
 .poke-cost[data-tier="B"] {
-  background: #f59e0b;
-  color: #fff;
+	background: #f59e0b;
+	color: #fff;
 }
 
 .poke-cost[data-tier="C"] {
-  background: #10b981;
-  color: #fff;
+	background: #10b981;
+	color: #fff;
 }
 
 .poke-cost[data-tier="D"] {
-  background: #3b82f6;
-  color: #fff;
+	background: #3b82f6;
+	color: #fff;
 }
 
 .poke-cost[data-tier="F"] {
-  background: #9ca3af;
-  color: #fff;
+	background: #9ca3af;
+	color: #fff;
 }
 
 @media (max-width: 720px) {
-  .pokemon-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+	.pokemon-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
 }
 
 @media (max-width: 480px) {
-  .pokemon-grid {
-    grid-template-columns: 1fr;
-  }
+	.pokemon-grid {
+		grid-template-columns: 1fr;
+	}
 }
 
 /* Detalhe */
 .type {
-  display: inline-block;
-  border-radius: 4px;
-  padding: 2px 8px;
-  margin-right: 4px;
-  background: #eee;
-  font-size: 0.85em;
+	display: inline-block;
+	border-radius: 4px;
+	padding: 2px 8px;
+	margin-right: 4px;
+	background: #eee;
+	font-size: 0.85em;
 }
 
 .stats,
 .evolutions {
-  list-style: none;
-  padding-left: 0;
+	list-style: none;
+	padding-left: 0;
 }
 
 .evolution img {
-  vertical-align: middle;
-  margin-right: 6px;
+	vertical-align: middle;
+	margin-right: 6px;
 }
 
 /* Time */
 .slot {
-  display: inline-block;
-  border-radius: 50%;
-  padding: 2px 8px;
-  background: #ddd;
-  font-weight: bold;
+	display: inline-block;
+	border-radius: 50%;
+	padding: 2px 8px;
+	background: #ddd;
+	font-weight: bold;
 }
 
 .notice {
-  color: #5b6770;
+	color: #5b6770;
 }
 
 .notice--info {
-  color: #1f6feb;
+	color: #1f6feb;
 }
 
 .notice--success {
-  color: #1a7f37;
+	color: #1a7f37;
 }
 
 .notice--error {
-  color: #b00;
+	color: #b00;
 }
 
 /* Batalha */
 body.page-battle {
-  max-width: none;
+	max-width: none;
 }
 
 /* Histórico (largura cheia — Onda 3) */
 body.page-history {
-  max-width: none;
+	max-width: none;
 }
 
 .battle-pane {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 0.8em 1em;
-  margin-bottom: 1em;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	padding: 0.8em 1em;
+	margin-bottom: 1em;
 }
 
 .battle-log {
-  list-style-position: inside;
-  padding-left: 0;
-  font-size: 0.9em;
+	list-style-position: inside;
+	padding-left: 0;
+	font-size: 0.9em;
 }
 
 /* === Juice (0063) — regras legadas removidas na limpeza 2b (0076, C13):
@@ -1699,198 +1869,202 @@ body.page-history {
 /* Hover/active em botoes (juice fora da batalha) */
 button,
 .gameloop-cta {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+	transition:
+		transform 0.15s ease,
+		box-shadow 0.15s ease;
 }
 
 button:hover,
 .gameloop-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+	transform: translateY(-1px);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 button:active,
 .gameloop-cta:active {
-  transform: translateY(1px) scale(0.98);
+	transform: translateY(1px) scale(0.98);
 }
 
 .winner {
-  font-size: 1.1em;
+	font-size: 1.1em;
 }
 
 /* Página unificada Lista + Time (Onda 1, Caminho B) */
 body.page-list {
-  max-width: none;
+	max-width: none;
 }
 
 .list-team-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 22em);
-  gap: 1.5em;
-  align-items: start;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 22em);
+	gap: 1.5em;
+	align-items: start;
 }
 
 .list-column {
-  min-height: 420px;
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
-  padding-right: 0.2em;
-  overflow-anchor: none;
+	min-height: 420px;
+	max-height: calc(100vh - 110px);
+	overflow-y: auto;
+	padding-right: 0.2em;
+	overflow-anchor: none;
 }
 
 @media (max-width: 600px) {
-  body {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
+	body {
+		padding-left: 8px;
+		padding-right: 8px;
+	}
 }
 
 @media (max-width: 960px) {
-  .list-team-grid {
-    grid-template-columns: 1fr;
-  }
+	.list-team-grid {
+		grid-template-columns: 1fr;
+	}
 
-  .list-column,
-  .team-column {
-    max-height: none;
-    overflow-y: visible;
-    min-height: auto;
-  }
+	.list-column,
+	.team-column {
+		max-height: none;
+		overflow-y: visible;
+		min-height: auto;
+	}
 }
 
 .team-column {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 0.8em 1em;
-  overflow-anchor: none;
-  min-height: 420px;
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	padding: 0.8em 1em;
+	overflow-anchor: none;
+	min-height: 420px;
+	max-height: calc(100vh - 110px);
+	overflow-y: auto;
 }
 
 .journey-progress {
-  font-weight: bold;
-  color: #1f6feb;
+	font-weight: bold;
+	color: #1f6feb;
 }
 
 /* Estados do botão Add */
 button[disabled="disabled"] {
-  opacity: 0.6;
-  cursor: not-allowed;
+	opacity: 0.6;
+	cursor: not-allowed;
 }
 
 .log-round {
-  font-weight: bold;
+	font-weight: bold;
 }
 
 .battle-loading {
-  display: none;
-  margin-left: 0.6em;
-  color: #1f6feb;
+	display: none;
+	margin-left: 0.6em;
+	color: #1f6feb;
 }
 
 .htmx-request .battle-loading {
-  display: inline;
+	display: inline;
 }
 /* Indicador global de carregamento (htmx) */
 #global-loading {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 3px;
-  background: #1f6feb;
-  opacity: 0;
-  transition: width .2s ease, opacity .3s ease;
-  z-index: 999;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 0;
+	height: 3px;
+	background: #1f6feb;
+	opacity: 0;
+	transition:
+		width 0.2s ease,
+		opacity 0.3s ease;
+	z-index: 999;
 }
 
 #global-loading.active {
-  width: 100%;
-  opacity: 1;
+	width: 100%;
+	opacity: 1;
 }
 
 /* CTAs de fluxo do circuito (gameloop) */
 .gameloop-ctas {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5em;
-  margin-top: 0.5em;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 0.5em;
+	margin-top: 0.5em;
 }
 
 .gameloop-cta {
-  display: inline-block;
-  padding: 0.4em 0.9em;
-  border: 1px solid #1f6feb;
-  border-radius: 5px;
-  background: #1f6feb;
-  color: #fff;
-  font-size: 0.95em;
-  cursor: pointer;
-  text-decoration: none;
+	display: inline-block;
+	padding: 0.4em 0.9em;
+	border: 1px solid #1f6feb;
+	border-radius: 5px;
+	background: #1f6feb;
+	color: #fff;
+	font-size: 0.95em;
+	cursor: pointer;
+	text-decoration: none;
 }
 
 .gameloop-cta:hover {
-  background: #1658c4;
+	background: #1658c4;
 }
 
 .team-tools .gameloop-cta.battle {
-  margin-bottom: 0.6em;
+	margin-bottom: 0.6em;
 }
 
 /* Modal de evolucao (sessao 0068) — overlay htmx + CSS, a11y basica */
 .evolution-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1em;
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	background: rgba(0, 0, 0, 0.55);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1em;
 }
 
 .evolution-modal-box {
-  background: #fff;
-  color: #222;
-  border-radius: 8px;
-  max-width: 420px;
-  width: 100%;
-  padding: 1em 1.2em;
-  max-height: 85vh;
-  overflow-y: auto;
+	background: #fff;
+	color: #222;
+	border-radius: 8px;
+	max-width: 420px;
+	width: 100%;
+	padding: 1em 1.2em;
+	max-height: 85vh;
+	overflow-y: auto;
 }
 
 .evolution-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 }
 
 .evolution-modal-close {
-  background: none;
-  border: none;
-  font-size: 1.4em;
-  line-height: 1;
-  cursor: pointer;
+	background: none;
+	border: none;
+	font-size: 1.4em;
+	line-height: 1;
+	cursor: pointer;
 }
 
 .evolution-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5em;
-  padding: 0.4em 0;
-  border-bottom: 1px solid #eee;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5em;
+	padding: 0.4em 0;
+	border-bottom: 1px solid #eee;
 }
 
 .evolution-qty {
-  color: #666;
-  font-size: 0.9em;
+	color: #666;
+	font-size: 0.9em;
 }
 
 .evolution-empty {
-  color: #666;
+	color: #666;
 }
 
 /* Acessibilidade — desligar animações de juice (0063) quando o usuário pedir
@@ -1898,18 +2072,18 @@ button[disabled="disabled"] {
    depois de todos os `animation: juice-*` para vencer a cascata (mesma
    especificidade, regra posterior vence). Não mover para cima. */
 @media (prefers-reduced-motion: reduce) {
-  .battle-log__entry,
-  .fighter--flash,
-  .fighter--flash::after,
-  .fighter--ko img,
-  .fighter--ko .fighter-name,
-  .fighter--shooting .projectile,
-  .battle-layout,
-  .hp-bar .bar-fill,
-  .add-toast,
-  .winner--pop,
-  .xp-gained--pop,
-  .news--pop li {
-    animation: none;
-  }
+	.battle-log__entry,
+	.fighter--flash,
+	.fighter--flash::after,
+	.fighter--ko img,
+	.fighter--ko .fighter-name,
+	.fighter--shooting .projectile,
+	.battle-layout,
+	.hp-bar .bar-fill,
+	.add-toast,
+	.winner--pop,
+	.xp-gained--pop,
+	.news--pop li {
+		animation: none;
+	}
 }
