@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — escolhas do usuário em 2026-09-09 (fatiamento por tela, deslizamento 0077-0079→resíduo / 0080-0082→estabilidade, fidelidade híbrida, backend thin listado, S1 com 1 teste novo + extensões — ver seção 5) |
-| Implementação (fase 2, TDD) | Pendente |
+| Implementação (fase 2, TDD) | **Verde** — Passos 1-3 commitados (9b421c4, 924e5b6, 4604ee9); escopo 0078 verde, suíte com 8 falhas alheias (0077, `_center`/`_mart` dirty) — ver §8 |
 | Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
 
 ---
@@ -45,17 +45,17 @@ Portar o **resíduo da batalha** dos protótipos `open-design/battle.html` (30KB
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| C1 end-states: fim de `battle.erb` com `res-screen`/`state-card` cobrindo vitória/derrota/empate/game-over (CTAs Novo confronto/Center/Mart + restart game-over intactos) | `test/battle_end_states_test.rb` `test_battle_end_states` (novo) + `test/battle_routes_test.rb` (fim/game-over) verdes | pendente |
-| C2 results-desktop: mini-arena + `rewards` (XP/dinheiro) no padrão `battle-results-desktop.html`, juice/`data-side`/`#battle-view` preservados | `test/battle_end_states_test.rb` `test_results_desktop` (novo) + `test/battle_view_test.rb` estendido | pendente |
-| C3 CSS 0078 no bloco: classes dos 3 protótipos aplicáveis ao fim de batalha, aditivas, ANTES da linha `fim`, com delimitador próprio `0078` | `test/design_system_test.rb` `test_design_system_battle_end_states_classes` (estendido) | pendente |
+| C1 end-states: fim de `battle.erb` com `res-screen`/`state-card` cobrindo vitória/derrota/empate/game-over (CTAs Novo confronto/Center/Mart + restart game-over intactos) | `test/battle_end_states_test.rb` `test_battle_end_states` (novo) + `test/battle_routes_test.rb` (fim/game-over) verdes | verde (fase 2) |
+| C2 results-desktop: mini-arena + `rewards` (XP/dinheiro) no padrão `battle-results-desktop.html`, juice/`data-side`/`#battle-view` preservados | `test/battle_end_states_test.rb` `test_results_desktop` (novo) + `test/battle_view_test.rb` estendido | verde (fase 2) |
+| C3 CSS 0078 no bloco: classes dos 3 protótipos aplicáveis ao fim de batalha, aditivas, ANTES da linha `fim`, com delimitador próprio `0078` | `test/design_system_test.rb` `test_design_system_battle_end_states_classes` (estendido) | verde (fase 2) |
 
 ### Garantias
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| G1 sem regressão — suíte completa (baseline **1057/4900** + novos) + lint 0; `style.css` DIRTY conferido/stash antes de editar (não commitar alheio) | `./scripts/test` + `./scripts/lint` + `git status -- public/style.css` | pendente |
-| G2 backend só no listado (§3) — `resolve`/`finish_effects`/`expose_battle_result` intocados (leitura); sem migração/schema/gems/services; testes sem rede | `git diff -- lib/battle_service.rb` vazio (ou só leitura) + `git diff --stat -- db/ Gemfile*` vazio + revisão S7 confere | pendente |
-| G3 S4/S5 + revisão — `SESSIONS.md` + `check_docs` + `checar-sessao 0078` verdes; revisor S7 `Aprovado` antes da 3 | `./scripts/check_docs` + `./scripts/checar-sessao 0078` + veredito do Revisor | pendente |
+| G1 sem regressão — suíte completa (baseline **1057/4900** + novos) + lint 0; `style.css` DIRTY conferido/stash antes de editar (não commitar alheio) | `./scripts/test` + `./scripts/lint` + `git status -- public/style.css` | verde no escopo (1070/5088; 8 falhas em `team/mart_routes` vindas do `_center`/`_mart` dirty da 0077, fora de escopo) |
+| G2 backend só no listado (§3) — `resolve`/`finish_effects`/`expose_battle_result` intocados (leitura); sem migração/schema/gems/services; testes sem rede | `git diff -- lib/battle_service.rb` vazio (ou só leitura) + `git diff --stat -- db/ Gemfile*` vazio + revisão S7 confere | verde (fase 2: `git diff --stat -- db/ Gemfile*` vazio; `server.rb` intocado) |
+| G3 S4/S5 + revisão — `SESSIONS.md` + `check_docs` + `checar-sessao 0078` verdes; revisor S7 `Aprovado` antes da 3 | `./scripts/check_docs` + `./scripts/checar-sessao 0078` + veredito do Revisor | parcial (docs verdes; Revisor pendente) |
 
 ### Manual
 
@@ -103,7 +103,20 @@ Portar o **resíduo da batalha** dos protótipos `open-design/battle.html` (30KB
 ## 8. Observações
 
 - **`public/style.css` DIRTY (~1129+/1003-):** conferir/stash antes de editar; nunca commitar junto sem revisar (Passo 1).
+- **Fase 2 executada em 2026-09-09 (paralelismo com 0077/0079):** o dirty do `style.css` era reformat espaços→tabs do lint universal (sem mudança funcional) — conferido via `git diff`, bloco 0078 anexado antes da linha `fim` e commitado no Passo 1; o bloco `Home 1:1 (0077)` entrou depois no working tree (não commitado por esta sessão).
+- **Suíte total 1070/5088 com 8 falhas fora de escopo:** todas em `test/team_routes_test.rb` (7) + `test/mart_routes_test.rb` (1), que renderizam `views/_center.erb`/`views/_mart.erb` — arquivos dirty da 0077 em meio ao red dela (markup novo `heal-list`/`heal-item` vs. asserts antigos). Nenhuma falha em battle/design/history; escopo 0078 100% verde. Não tocar nesses arquivos (RNF-04, escopo 0077).
+- **DB de teste compartilhado (`pokedex_test`) + suítes paralelas = cross-talk:** durante a fase 2, duas suítes paralelas truncavam/preenchiam as mesmas tabelas — sintomas: `PG::TRDeadlockDetected` no TRUNCATE, `DuplicateError`/`TeamFullError` no `fill_team` do setup, e "battle did not finish" (time esvaziado no meio do teste). Resolveu esperando as suítes paralelas terminarem; reruns limpos passaram.
+- **`resolve` em engine já finalizada é seguro:** `BattleService.resolve` (`lib/battle_service.rb:407-420`) sai do loop imediatamente e retorna payload com news vazio — padrão para forjar derrota/empate/game-over nos testes (`battles.set` + `POST /battle/play`).
+- **`@engine.winner` pode ser `nil` (empate, ambos zerados):** o markup antigo (`winner.zero?`) estouraria; o novo deriva `end_state` com `nil` → `draw` (pill `state-pill draw` nova, única regra CSS fora dos protótipos).
+- **Fragmento battle (`layout: false`) não contém `#battle-view`:** só `hx-target="#battle-view"` — asserção corrigida no `test_results_desktop`.
+- **Lint:** 0 offenses no escopo (`test/`, `server.rb`, `lib/`); 19 offenses pré-existentes em `scripts/sweep-balance.rb` (commit `14588c4`, fora de escopo, não tocar).
 - **`resolve`/`finish_effects`/`expose_battle_result` são leitura:** qualquer necessidade de mudar o motor vira anotação (RNF-04), não escopo.
 - **Fila:** 0077 home → 0078 battle → **0079 history** → 0080 escritas atômicas → 0081 CSRF → 0082 respiro.
 
 ## 9. Gotchas / Lições (memória — S6, preencher na 3)
+
+- **Suítes paralelas no mesmo `pokedex_test` corrompem umas às outras** (deadlock no TRUNCATE, duplicatas no setup, batalha que "não termina"). Em paralelismo com outras sessões, rodar a suíte só quando as paralelas terminarem — ou aceitar reruns. (gotchas/paralelismo-suite-compartilhada)
+- **`BattleService.resolve` com engine finalizada retorna payload com news vazio** — forjar end-states em teste = `battles.set(engine finalizada)` + `POST /battle/play`. Sem backend, sem stub extra.
+- **`winner` nil = empate é real no motor** (`BattleEngine#winner` retorna nil com ambos zerados); view antiga assumia não-nil. Qualquer markup de fim de batalha precisa do ramo draw.
+- **Fragmento htmx (`layout: false`) não tem o alvo `#battle-view`** — assert de contrato htmx em fragmento usa `hx-target`, nunca `id`.
+- **VCR grava cassettes por classe de teste** (`test/cassettes/BattleEndStatesTest/`, ~570KB cada — type-effectiveness via API no `resolve`); convenção do repo é commitar.
