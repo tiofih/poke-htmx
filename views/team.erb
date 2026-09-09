@@ -28,37 +28,60 @@
     <%= erb :_mart, layout: false %>
   <% end %>
 <% end %>
-<% @team.each do |poke| %>
-  <p class="slot">#<%= poke.slot %></p>
-  <img src="<%= poke.sprite %>" alt="<%= poke.name %>"><br>
-  <strong><%= poke.name %></strong><br>
-  <button type="button" class="btn evolution-trigger"
-          hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</button>
-  <form
-      hx-post="/team/<%= poke.id %>/move"
-      hx-target="#team-view"
-      hx-swap="innerHTML">
-    <input type="hidden" name="new_slot" value="<%= poke.slot - 1 %>">
-    <button type="submit" aria-label="Mover para cima">▲</button>
-  </form>
-  <form
-      hx-post="/team/<%= poke.id %>/move"
-      hx-target="#team-view"
-      hx-swap="innerHTML">
-    <input type="hidden" name="new_slot" value="<%= poke.slot + 1 %>">
-    <button type="submit" aria-label="Mover para baixo">▼</button>
-  </form>
-  <!-- hx-params "*" garante id + list-state; hx-include ".list-state" explicita filtros (redundancia intencional) -->
-  <form
-      id='team-pokemon-<%= poke.id %>'
-      hx-delete="/team"
-      hx-target="#team-view"
-      hx-swap="innerHTML"
-      hx-include=".list-state"
-      hx-params="*"
-      hx-sync="closest form:replace"
-      hx-indicator="#team-view">
-    <input type="hidden" name="id" value="<%= poke.id %>">
-    <button type="submit" class="btn" hx-disabled-elt="this"<%= ' disabled title="Pokémon derrotado — cure antes de remover"' if poke.fainted? %>>Remover do time</button>
-  </form>
-<% end %>
+<div class="card">
+  <div class="row-between">
+    <h2>Seu time</h2>
+    <span class="pill<%= " warn" if @journey_started && @can_battle == false %><%= " danger" if @game_over %>" id="readiness-pill">
+      <%= @game_over ? "Game over" : (@can_battle ? "Pronto p/ batalhar" : "Precisa de cura") %>
+    </span>
+  </div>
+  <ul class="roster">
+    <% @team.each do |poke| %>
+      <li class="member">
+        <div class="member-top">
+          <div class="sprite-tile"><img src="<%= poke.sprite %>" alt="<%= poke.name %>" width="96" height="96"></div>
+          <div>
+            <span class="slot">#<%= poke.slot %></span>
+            <span class="member-name"><%= poke.name %></span>
+          </div>
+        </div>
+        <div class="hp">
+          <span class="hp-label">HP</span>
+          <span class="bar"><span class="bar-fill" style="width:<%= poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f * 100).round : 0 %>%"></span></span>
+          <span class="num hp-val"><%= poke.hp_current %>/<%= poke.hp_max %></span>
+        </div>
+        <div class="member-actions">
+          <button type="button" class="btn evolution-trigger"
+                  hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</button>
+          <form
+              hx-post="/team/<%= poke.id %>/move"
+              hx-target="#team-view"
+              hx-swap="innerHTML">
+            <input type="hidden" name="new_slot" value="<%= poke.slot - 1 %>">
+            <button type="submit" aria-label="Mover para cima">▲</button>
+          </form>
+          <form
+              hx-post="/team/<%= poke.id %>/move"
+              hx-target="#team-view"
+              hx-swap="innerHTML">
+            <input type="hidden" name="new_slot" value="<%= poke.slot + 1 %>">
+            <button type="submit" aria-label="Mover para baixo">▼</button>
+          </form>
+          <!-- hx-params "*" garante id + list-state; hx-include ".list-state" explícita filtros (redundância intencional) -->
+          <form
+              id='team-pokemon-<%= poke.id %>'
+              hx-delete="/team"
+              hx-target="#team-view"
+              hx-swap="innerHTML"
+              hx-include=".list-state"
+              hx-params="*"
+              hx-sync="closest form:replace"
+              hx-indicator="#team-view">
+            <input type="hidden" name="id" value="<%= poke.id %>">
+            <button type="submit" class="btn" hx-disabled-elt="this"<%= ' disabled title="Pokémon derrotado — cure antes de remover"' if poke.fainted? %>>Remover do time</button>
+          </form>
+        </div>
+      </li>
+    <% end %>
+  </ul>
+</div>

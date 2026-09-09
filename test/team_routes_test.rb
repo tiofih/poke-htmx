@@ -45,12 +45,13 @@ class ServerTeamTest < Minitest::Test
     end
 
     assert_includes session_a.last_response.body, "Adicionado ao time."
-    team_a = session_a.last_response.body[%r{<div id="team-view".*?</div>}m]
+    # o roster agora é <ul class="roster"> aninhado em .card; extrai até fechar o roster
+    team_a = session_a.last_response.body[%r{<div id="team-view".*?<ul class="roster">.*?</ul>}m]
     assert_includes team_a, "pikachu"
     refute_includes team_a, "bulbasaur"
 
     assert_includes session_b.last_response.body, "Adicionado ao time."
-    team_b = session_b.last_response.body[%r{<div id="team-view".*?</div>}m]
+    team_b = session_b.last_response.body[%r{<div id="team-view".*?<ul class="roster">.*?</ul>}m]
     assert_includes team_b, "bulbasaur"
     refute_includes team_b, "pikachu"
 

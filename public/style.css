@@ -427,6 +427,42 @@
   gap: 0.5em;
 }
 
+/* Barra de HP do membro do roster (enchimento) */
+.bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius);
+  background: var(--ok);
+  transition: width 0.2s ease;
+}
+
+.bar {
+  background: var(--fg-soft);
+  border-radius: var(--radius);
+  height: 10px;
+  overflow: hidden;
+}
+
+/* Prontidão do time (Pronto p/ batalhar / Precisa de cura / Game over) */
+.pill {
+  display: inline-block;
+  padding: 0.25em 0.75em;
+  border-radius: 999px;
+  font-size: 0.8em;
+  font-weight: 700;
+  background: var(--ok);
+  color: var(--ink);
+}
+
+.pill.warn {
+  background: var(--warn);
+}
+
+.pill.danger {
+  background: var(--danger);
+  color: var(--ink);
+}
+
 /* Serviços (Poke Center / Poke Mart) com saldo */
 .services {
   display: flex;
