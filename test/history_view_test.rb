@@ -81,6 +81,20 @@ class HistoryViewTest < Minitest::Test
                  "rank-wins shows strong wins over total")
   end
 
+  def test_history_ranking_section_wears_spacing_class
+    seed_battles
+
+    get "/history", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    # Curadoria 0076 (2b, C12/D80): sem inline — o respiro vem de classe do bloco.
+    refute_match(/data-od-id="ranking" style=/, body,
+                 "ranking section must not carry inline style")
+    assert_match(/<section data-od-id="ranking" class="gap-after">/, body,
+                 "ranking section wears the spacing class")
+  end
+
   def test_history_recent_battles_list
     seed_battles
 

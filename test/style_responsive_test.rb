@@ -38,42 +38,46 @@ class StyleResponsiveTest < Minitest::Test
                  "expected list-item images to have max-width: 100%")
   end
 
-  def test_filter_controls_has_touch_target_and_mobile_grid
+  def test_filter_grid_has_touch_target_and_fluid_grid
     content = style_content
 
-    assert_match(/@media\s*\(max-width:\s*600px\)[^}]*\.filter-controls[^}]*display:\s*grid/m, content,
-                 "expected filter-controls to use display:grid at max-width:600px")
-    media_600_grid =
-      /@media\s*\(max-width:\s*600px\)[^}]*\.filter-controls[^}]*grid-template-columns:\s*1fr\s+1fr/m
-    assert_match(media_600_grid, content,
-                 "expected filter-controls to use grid-template-columns:1fr 1fr at 600px")
-    assert_match(%r{grid-column:\s*1\s*/\s*-1}, content,
-                 "expected input[name=\"q\"] to span full width with grid-column:1 / -1")
-    assert_match(/min-height:\s*44px/, content,
-                 "expected filter-controls children to have min-height:44px")
-    # gap .75em e min-width:0 garantem fluidez em 375 sem overflow
-    assert_match(/\.filter-controls[^{]*\{[^}]*gap:\s*0\.75em/m, content,
-                 "expected filter-controls mobile grid to use gap .75em")
+    # Filtros 100% ODS (0076 2b, C12/C14): .filter-grid do bloco, sem .filter-controls.
+    assert_match(/\.filter-grid[^}]*display:\s*grid/m, content,
+                 "expected filter-grid to use display:grid")
+    assert_match(/\.filter-grid[^}]*grid-template-columns:\s*repeat\(auto-fit,\s*minmax\(140px,\s*1fr\)\)/m,
+                 content,
+                 "expected filter-grid to be fluid with auto-fit minmax(140px,1fr)")
+    assert_match(/\.filter-grid[^}]*gap:\s*0\.75em/m, content,
+                 "expected filter-grid to use gap .75em")
+    assert_match(/\.filter-grid (input|select)[^{]*,[^{]*\.filter-grid (select|input)[^}]*min-height:\s*44px/m,
+                 content,
+                 "expected filter-grid inputs to have min-height:44px")
   end
 
-  def test_battle_layout_stacks_at_900 # rubocop:disable Naming/VariableNumber
+  def test_arena_stacks_at_980 # rubocop:disable Naming/VariableNumber
     content = style_content
 
-    assert_match(/@media\s*\(max-width:\s*900px\)[^}]*\.battle-layout[^}]*grid-template-columns:\s*1fr/m,
+    # Batalha usa .arena do bloco (0076 2b, C12): sem .battle-layout legado.
+    assert_match(/@media\s*\(max-width:\s*980px\)[^}]*\.arena[^}]*grid-template-columns:\s*1fr/m,
                  content,
-                 "expected battle-layout to collapse to 1fr at max-width:900px")
+                 "expected arena to collapse to 1fr at max-width:980px")
   end
 
   def test_bars_are_fluid
     content = style_content
 
-    assert_match(/\.hp-bar[^}]*width:\s*100%[^}]*max-width:\s*120px/m, content,
-                 "expected .hp-bar to use width:100% + max-width:120px")
-    assert_match(/\.pp-bar[^}]*width:\s*100%[^}]*max-width:\s*80px/m, content,
-                 "expected .pp-bar to use width:100% + max-width:80px")
-    assert_match(/min-width:\s*0/, content,
-                 "expected .fighter or .bar to have min-width:0 to prevent overflow")
-    # Manual C4: 375/320/768/1024 misurando offsetHeight >=44, battleLayout 1fr, hpBar sem vazar.
+    # Barras do bloco ODS (0076 2b, C12): .bar flexivel + .bar-fill com ok/mid/low.
+    assert_match(/\.bar[^}]*flex:\s*1\s+1\s+auto/m, content,
+                 "expected .bar to flex inside the hp row")
+    assert_match(/\.bar[^}]*min-width:\s*0/m, content,
+                 "expected .bar to have min-width:0 to prevent overflow")
+    assert_match(/\.bar-fill\.ok/, content,
+                 "expected .bar-fill.ok tier from the block")
+    assert_match(/\.bar-fill\.mid/, content,
+                 "expected .bar-fill.mid tier from the block")
+    assert_match(/\.bar-fill\.low/, content,
+                 "expected .bar-fill.low tier from the block")
+    # Manual C4: 375/320/768/1024 misurando offsetHeight >=44, arena 1fr, barra sem vazar.
     # Este teste cobre C3 automaticamente; C4 requer CDP browser-harness manual (documentado).
     assert_match(/@media\s*\(max-width:\s*960px\)[\s\S]*?\.team-column[^}]*min-height:\s*auto/m, content,
                  "expected team-column to have min-height:auto at 960px")
@@ -88,28 +92,29 @@ class StyleResponsiveTest < Minitest::Test
                  "expected pokemon.erb not to have unquoted value=")
   end
 
-  def test_clear_filters_is_centered
+  def test_clear_filters_wears_design_system
     content = style_content
+    list = File.read(File.join(__dir__, "../views/pokemon_list.erb"))
 
-    assert_match(/\.filter-controls a[^}]*display:\s*flex/m, content,
-                 "expected .filter-controls a to use display:flex")
-    assert_match(/\.filter-controls a[^}]*align-items:\s*center/m, content,
-                 "expected .filter-controls a to use align-items:center")
-    assert_match(/\.filter-controls a[^}]*justify-content:\s*center/m, content,
-                 "expected .filter-controls a to use justify-content:center")
-    assert_match(/\.filter-controls a[^}]*min-height:\s*44px/m, content,
-                 "expected .filter-controls a to have min-height:44px")
+    # Limpar filtros veste .btn do bloco (0076 2b, C12/C14): sem .filter-controls a.
+    assert_match(/\.btn-sm\s*\{/, content,
+                 "expected the block to define .btn-sm")
+    assert_match(/class="btn btn-ghost btn-sm"/, list,
+                 "expected the clear link to wear btn btn-ghost btn-sm")
+    assert_match(/name="team"[^>]*|team=/, list,
+                 "expected the clear link to zero the team filter")
   end
 
   def test_nav_wraps_with_gap_and_touch_target
     content = style_content
 
-    assert_match(/header nav[^}]*flex-wrap:\s*wrap/m, content,
-                 "expected header nav to use flex-wrap:wrap")
-    assert_match(/header nav[^}]*gap:/m, content,
-                 "expected header nav to use gap")
-    assert_match(/header nav a[^}]*min-height:\s*44px/m, content,
-                 "expected header nav a to have min-height:44px")
+    # Shell usa .topnav nav do bloco (0076 2b, C12): sem `header nav` legado.
+    assert_match(/\.topnav nav[^}]*flex-wrap:\s*wrap/m, content,
+                 "expected topnav nav to use flex-wrap:wrap")
+    assert_match(/\.topnav nav[^}]*gap:/m, content,
+                 "expected topnav nav to use gap")
+    assert_match(/\.topnav nav a[^}]*min-height:\s*44px/m, content,
+                 "expected topnav nav a to have min-height:44px")
   end
 
   def test_body_padding_is_8px_at_600 # rubocop:disable Naming/VariableNumber
@@ -194,15 +199,18 @@ class StyleResponsiveTest < Minitest::Test
            "na cascata; hoje juice-* (linha posterior) sobrescreve o animation: none"
   end
 
-  def test_projectile_only_above_900px
+  def test_shot_only_above_900px
     content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
 
-    assert_match(/\.projectile[^}]*display:\s*none/m, content,
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    # Juice usa .shot do bloco (0076 2b, C12): sem .projectile legado.
+    assert_match(/\.shot[^}]*display:\s*none/m, block,
                  "projetil invisivel por padrao — abaixo de 900px so flash no alvo (D5 A)")
-    assert_match(/@media\s*\(min-width:\s*900px\)[\s\S]*@keyframes\s+juice-projectile/m, content,
-                 "keyframes do projetil existem apenas no bloco min-width: 900px")
-    assert_match(/@media\s*\(min-width:\s*900px\)[\s\S]*\.projectile[^}]*animation:\s*juice-projectile/m,
-                 content, "projetil anima apenas em viewport >= 900px")
+    shot_animation =
+      /@media\s*\(min-width:\s*900px\)[\s\S]*\.fighter\.is-attacking \.shot[^}]*animation:\s*juice-projectile/m
+    assert_match(shot_animation, block, "projetil anima apenas em viewport >= 900px")
   end
 
   def test_history_rows_stack_at_920 # rubocop:disable Naming/VariableNumber

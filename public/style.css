@@ -63,6 +63,13 @@
   flex-wrap: wrap;
 }
 
+/* Alvo de toque nos links da nav (0076 2b: port do legado `header nav a`) */
+.topnav nav a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
 .topnav a {
   color: var(--fg);
   text-decoration: none;
@@ -1084,6 +1091,11 @@
   margin: 0 0 16px;
 }
 
+/* Respiro entre blocos do historico (0076 2b, D80: ex-inline de history.erb) */
+.gap-after {
+  margin-bottom: 40px;
+}
+
 /* Ranking global */
 .rank-list {
   list-style: none;
@@ -1426,26 +1438,6 @@
   margin-bottom: 1.5em;
 }
 
-/* Navegação */
-header nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em 0.75em;
-  align-items: center;
-}
-
-header nav a {
-  margin-right: 1em;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3em;
-  min-height: 44px;
-}
-
-.nav-badge {
-  margin-left: 0.15em;
-}
-
 /* Listagem / paginação */
 .pagination a {
   margin: 0 0.5em;
@@ -1595,99 +1587,11 @@ body.page-history {
   max-width: none;
 }
 
-.battle-layout {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1em;
-  align-items: start;
-}
-
-@media (max-width: 900px) {
-  .battle-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .battle-column {
-    min-width: 0;
-  }
-}
-
-.battle-controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5em;
-  margin-bottom: 1em;
-}
-
 .battle-pane {
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 0.8em 1em;
   margin-bottom: 1em;
-}
-
-/* Escopo-legado morto (0074 B1): o wrapper .battle-pane some na re-marcacao,
-   entao esta regra vira orfa sem deletar nada — neutraliza a colisao com o
-   .fighter novo do ODS sem tocar no resto do CSS antigo (remocao e 0076). */
-.battle-pane .fighter {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.3em;
-  min-width: 0;
-  margin: 0.4em 0;
-}
-
-.battle-pane .fighter img {
-  vertical-align: middle;
-  margin-right: 6px;
-}
-
-/* Barras de HP/PP — fluidas: width 100% + max-width para não vazar em card estreito */
-.bar {
-  display: inline-block;
-  vertical-align: middle;
-  border-radius: 4px;
-  background: #eee;
-  overflow: hidden;
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.hp-bar {
-  width: 100%;
-  max-width: 120px;
-  height: 8px;
-  margin: 0 6px;
-}
-
-.pp-bar {
-  width: 100%;
-  max-width: 80px;
-  height: 6px;
-  margin-left: 6px;
-}
-
-.bar-fill {
-  display: block;
-  height: 100%;
-  border-radius: 4px;
-}
-
-.hp-bar--high .bar-fill,
-.pp-bar--high .bar-fill {
-  background: #2e7d32;
-}
-
-.hp-bar--medium .bar-fill,
-.pp-bar--medium .bar-fill {
-  background: #b26a00;
-}
-
-.hp-bar--low .bar-fill,
-.pp-bar--low .bar-fill {
-  background: #b00;
 }
 
 .battle-log {
@@ -1727,11 +1631,6 @@ body.page-history {
 }
 
 /* Flash de dano no painel do alvo (box-shadow inset, sem mexer no layout) */
-/* Escopo-legado morto (0074 B1) — ver nota acima; regra orfa apos a re-marcacao. */
-.battle-pane .fighter {
-  position: relative;
-}
-
 .fighter--flash {
   animation: juice-flash 0.4s ease-out;
 }
@@ -1790,11 +1689,6 @@ body.page-history {
   }
 }
 
-/* Screenshake leve no layout da batalha */
-.battle-layout {
-  animation: juice-shake 0.3s ease-out;
-}
-
 @keyframes juice-shake {
   0%,
   100% {
@@ -1808,87 +1702,6 @@ body.page-history {
   }
   75% {
     transform: translate(1px, 1px);
-  }
-}
-
-/* Projetil — so em viewport >= 900px (D5 A); abaixo disso so flash no alvo */
-.projectile {
-  display: none;
-  position: absolute;
-  top: 40%;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffd54f, #f57c00);
-  box-shadow: 0 0 6px rgba(245, 124, 0, 0.8);
-  z-index: 2;
-}
-
-@media (min-width: 900px) {
-  .fighter--shooting .projectile {
-    display: block;
-    animation: juice-projectile 0.4s ease-out 0.15s both;
-  }
-
-  .battle-column[data-side="0"] .fighter--shooting .projectile {
-    --fly: 1;
-    right: -6px;
-  }
-
-  .battle-column[data-side="1"] .fighter--shooting .projectile {
-    --fly: -1;
-    left: -6px;
-  }
-
-  @keyframes juice-projectile {
-    from {
-      transform: translateX(0) scale(1);
-      opacity: 1;
-    }
-    to {
-      transform: translateX(calc(var(--fly, 1) * (100% + 18em))) scale(0.35);
-      opacity: 0.85;
-    }
-  }
-}
-
-/* Toast do add — entrada/saida no #add-status (sprite + nome nos kinds de notice) */
-.add-toast {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-  margin-bottom: 0.6em;
-  padding: 0.5em 0.8em;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  animation: juice-toast-in 0.35s ease-out both, juice-toast-out 0.35s ease-in 3s both;
-}
-
-.add-toast__sprite {
-  width: 40px;
-  height: 40px;
-}
-
-@keyframes juice-toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes juice-toast-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-8px);
   }
 }
 
@@ -1965,45 +1778,7 @@ body.page-list {
   overflow-anchor: none;
 }
 
-.filter-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5em;
-  margin-bottom: 1em;
-  align-items: center;
-}
-
-.filter-controls select,
-.filter-controls input[type="text"] {
-  flex: 1 1 8em;
-  min-width: 8em;
-}
-
-.filter-controls a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-}
-
 @media (max-width: 600px) {
-  .filter-controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75em;
-  }
-
-  .filter-controls input[name="q"] {
-    grid-column: 1 / -1;
-  }
-
-  .filter-controls select,
-  .filter-controls input[type="text"],
-  .filter-controls a {
-    min-height: 44px;
-    min-width: 0;
-  }
-
   body {
     padding-left: 8px;
     padding-right: 8px;
@@ -2073,11 +1848,6 @@ button[disabled="disabled"] {
 #global-loading.active {
   width: 100%;
   opacity: 1;
-}
-
-nav a.active {
-  font-weight: bold;
-  text-decoration: underline;
 }
 
 /* CTAs de fluxo do circuito (gameloop) */

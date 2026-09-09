@@ -267,6 +267,32 @@ class DesignSystemTest < Minitest::Test
                  "layout.erb must not link sakura — the ODS block is autonomous")
   end
 
+  def test_legacy_collisions_removed
+    content = style_content
+    legacy = content.split("Open Design System (0072): fim", 2).last
+
+    refute_nil legacy, "expected CSS after the design system fim marker"
+
+    # Colisoes sob demanda (0076 2b, C12/D71–D76): fora do bloco nao pode
+    # restar regra colidente — o bloco ODS e a unica fonte dessas classes.
+    {
+      /\.filter-controls\b/ => ".filter-controls (filtros vestem .filter-grid)",
+      /\.battle-layout\s*\{/ => ".battle-layout (batalha usa .arena)",
+      /\.battle-pane\s+\.fighter/ => ".battle-pane .fighter (orfa desde 0074 B1)",
+      /header\s+nav\b/ => "header nav (shell usa .topnav nav)",
+      /^nav a\.active\s*\{/ => "nav a.active (bloco marca .topnav nav a.active)",
+      /\.projectile\s*\{/ => ".projectile (juice usa .shot)",
+      /\.add-toast\s*\{/ => ".add-toast (rede C10 no bloco)",
+      /\.hp-bar\s*\{/ => ".hp-bar (fluidez vem de .bar/.bar-fill do bloco)",
+      /\.pp-bar\s*\{/ => ".pp-bar (idem)",
+      /^\.bar\s*\{/ => ".bar legado (bloco define .bar)",
+      /^\.bar-fill\s*\{/ => ".bar-fill legado (bloco define .bar-fill)",
+      /\.battle-controls\s*\{/ => ".battle-controls (batalha usa .controls)"
+    }.each do |pattern, label|
+      refute_match(pattern, legacy, "legacy must not define #{label}")
+    end
+  end
+
   def test_style_css_route_serves_text_css
     get "/style.css"
 
