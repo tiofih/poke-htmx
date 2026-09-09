@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-09 (B, A, C, A×7 — ver seção 5) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário — fase 3; **PARAR na fase 2 e aguardar**) |
+| Implementação | **Concluída** — 3 commits (`aca31eb`/`25363f9`/`9e0c1ea`), suíte 1025/4402 0 falhas, lint 0, revisor 2c **Aprovado** sem S3 |
+| Validação | **Concluída** — validada pelo usuário em 2026-09-09 (**Done**; S2 C1–C8+G1–G3 ok + M1 ok, sem S3) |
 
 ---
 
@@ -55,28 +55,28 @@ Portar a tela de **histórico** (`history.erb` + `history_page.erb` re-marcado c
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| C1 `GET /history` renderiza página completa com `#history-view` + `body.page-history` — wrapper `history_page.erb` re-marcado, contrato htmx preservado | `test/history_routes_test.rb` `test_history_page_renders_full_page_with_history_view` (mantém `id="history-view"` + nav `active`; chips no lugar de `Vitórias:/Derrotas:`) + `test_history_page_uses_full_width_body_class` (mantém) | Pendente |
-| C2 fragmento novo tem `.pagehead` (eyebrow + h1 + lead) dentro de `.container` | `test/history_view_test.rb` `test_history_pagehead_and_container` (novo, estrutural) | Pendente |
-| C3 `.pos-card` com `.pos-badge>.num` + `.pos-title` + 3× `.stat-chip.win/.loss/.draw` (valores de `@stats`); `@position` nil → frase "ainda não tem vitórias" dentro do card | `test/history_view_test.rb` `test_history_position_card_with_stat_chips` + `test_history_position_nil_shows_fallback_in_card` (novos) | Pendente |
-| C4 ranking como `ul.rank-list>li.rank-row` (`.rank-pos.num` + `.rank-name` + `.rank-bar>span` + `.rank-wins`, barra ∝ `wins/total`, `.you` na linha atual) | `test/history_view_test.rb` `test_history_ranking_list_with_bars_and_current_user` (novo) + `test/history_routes_test.rb` `test_history_highlights_current_user_in_ranking` (editado p/ `.you`) | Pendente |
-| C5 batalhas como `ul.history-list>li.history-row` (`.result-badge.win/.loss/.draw` via `result_label`, `.history-main>.h-title/.h-sub`, `.history-date.num` em `dd/mm HH:MM`) | `test/history_view_test.rb` `test_history_recent_battles_list` (novo) | Pendente |
-| C6 vazio mantém `p.notice.notice--info` ("Você ainda não batalhou.") | `test/history_routes_test.rb` `test_history_shows_empty_message_without_battles` (mantém verde sem edição) | Pendente |
-| C7 CSS: classes de history presentes no bloco ODS + CSS antigo íntegro | `test/design_system_test.rb` `test_design_system_history_screen_classes` (estendido) | Pendente |
-| C8 responsivo: `.history-row` empilha em coluna ≤920px (regra nova no CSS) | `test/style_responsive_test.rb` `test_history_rows_stack_at_920` (novo, estendido) | Pendente |
+| C1 `GET /history` renderiza página completa com `#history-view` + `body.page-history` — wrapper `history_page.erb` re-marcado, contrato htmx preservado | `test/history_routes_test.rb` `test_history_page_renders_full_page_with_history_view` (mantém `id="history-view"` + nav `active`; chips no lugar de `Vitórias:/Derrotas:`) + `test_history_page_uses_full_width_body_class` (mantém) | ok |
+| C2 fragmento novo tem `.pagehead` (eyebrow + h1 + lead) dentro de `.container` | `test/history_view_test.rb` `test_history_pagehead_and_container` (novo, estrutural) | ok |
+| C3 `.pos-card` com `.pos-badge>.num` + `.pos-title` + 3× `.stat-chip.win/.loss/.draw` (valores de `@stats`); `@position` nil → frase "ainda não tem vitórias" dentro do card | `test/history_view_test.rb` `test_history_position_card_with_stat_chips` + `test_history_position_nil_shows_fallback_in_card` (novos) | ok |
+| C4 ranking como `ul.rank-list>li.rank-row` (`.rank-pos.num` + `.rank-name` + `.rank-bar>span` + `.rank-wins`, barra ∝ `wins/total`, `.you` na linha atual) | `test/history_view_test.rb` `test_history_ranking_list_with_bars_and_current_user` (novo) + `test/history_routes_test.rb` `test_history_highlights_current_user_in_ranking` (editado p/ `.you`) | ok |
+| C5 batalhas como `ul.history-list>li.history-row` (`.result-badge.win/.loss/.draw` via `result_label`, `.history-main>.h-title/.h-sub`, `.history-date.num` em `dd/mm HH:MM`) | `test/history_view_test.rb` `test_history_recent_battles_list` (novo) | ok |
+| C6 vazio mantém `p.notice.notice--info` ("Você ainda não batalhou.") | `test/history_routes_test.rb` `test_history_shows_empty_message_without_battles` (mantém verde sem edição) | ok |
+| C7 CSS: classes de history presentes no bloco ODS + CSS antigo íntegro | `test/design_system_test.rb` `test_design_system_history_screen_classes` (estendido) | ok |
+| C8 responsivo: `.history-row` empilha em coluna ≤920px (regra nova no CSS) | `test/style_responsive_test.rb` `test_history_rows_stack_at_920` (novo, estendido) | ok |
 
 ### Garantias (RNF)
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| G1 sem regressão — suíte completa (baseline **1018/4279** + novos testes) + lint 0; regras antigas íntegras | `./scripts/test` + `./scripts/lint` | Pendente |
-| G2 sem gems/schema/rede/backend — só `views/*.erb` + `public/style.css` + testes | `git diff -- Gemfile* db/ server.rb lib/` vazio; testes sem rede | Pendente |
-| G3 S4/S5 — `SESSIONS.md` (tabela linha "0075 open-design-history" + "Próxima sessão" → **0076 open-design-modals-filters**) atualizado no commit do refinamento | `./scripts/check_docs` + `./scripts/checar-sessao 0075` verdes | Pendente |
+| G1 sem regressão — suíte completa (baseline **1018/4279** + novos testes) + lint 0; regras antigas íntegras | `./scripts/test` + `./scripts/lint` | ok |
+| G2 sem gems/schema/rede/backend — só `views/*.erb` + `public/style.css` + testes | `git diff -- Gemfile* db/ server.rb lib/` vazio; testes sem rede | ok |
+| G3 S4/S5 — `SESSIONS.md` (tabela linha "0075 open-design-history" + "Próxima sessão" → **0076 open-design-modals-filters**) atualizado no commit do refinamento | `./scripts/check_docs` + `./scripts/checar-sessao 0075` verdes | ok |
 
 ### Manual
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| M1 reflow da history ≤920px no navegador (pos-card empilha, rank/history-rows legíveis, sem overflow horizontal) | `manual` (subir o app com `./scripts/run`, navegar `/history` com e sem batalhas, redimensionar ≤920px) | Pendente |
+| M1 reflow da history ≤920px no navegador (pos-card empilha, rank/history-rows legíveis, sem overflow horizontal) | `manual` (subir o app com `./scripts/run`, navegar `/history` com e sem batalhas, redimensionar ≤920px) | ok |
 
 > **S1:** cada critério acima aponta o teste que o prova (arquivo + método); o único critério **puramente manual é o M1** (visual — evidência manual explícita). **Parar ao fim da fase 2 e aguardar a validação do usuário (fase 3) — não marcar Done, não preencher a seção 7, não commitar conclusão.**
 
@@ -108,22 +108,22 @@ Portar a tela de **histórico** (`history.erb` + `history_page.erb` re-marcado c
 
 ## 7. Validação (executada pelo usuário — S2)
 
-**Pendente — validação é do usuário (fase 3). PARAR na fase 2 e aguardar.**
+**Validada pelo usuário em 2026-09-09 (resposta "validado", sem S3).**
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (`GET /history` → `#history-view` + `page-history`) | `test/history_routes_test.rb` `test_history_page_renders_full_page_with_history_view` + `test_history_page_uses_full_width_body_class` | — | Pendente |
-| C2 (`.pagehead` + `.container`) | `test/history_view_test.rb` `test_history_pagehead_and_container` | — | Pendente |
-| C3 (`.pos-card` + badge + 3 chips; fallback nil no card) | `test/history_view_test.rb` `test_history_position_card_with_stat_chips` + `test_history_position_nil_shows_fallback_in_card` | — | Pendente |
-| C4 (`ul.rank-list>li.rank-row` + barra ∝ + `.you`) | `test/history_view_test.rb` `test_history_ranking_list_with_bars_and_current_user` + `test/history_routes_test.rb` `test_history_highlights_current_user_in_ranking` | — | Pendente |
-| C5 (`ul.history-list>li.history-row` + badges + data dd/mm HH:MM) | `test/history_view_test.rb` `test_history_recent_battles_list` | — | Pendente |
-| C6 (vazio `notice--info`) | `test/history_routes_test.rb` `test_history_shows_empty_message_without_battles` | — | Pendente |
-| C7 (CSS history no bloco ODS + antigo íntegro) | `test/design_system_test.rb` `test_design_system_history_screen_classes` | — | Pendente |
-| C8 (`.history-row` empilha ≤920px) | `test/style_responsive_test.rb` `test_history_rows_stack_at_920` | — | Pendente |
-| G1 (sem regressão) | `./scripts/test` (baseline 1018/4279 + novos) + `./scripts/lint` 0 | navegação `/`, `/battle`, `/history` | Pendente |
-| G2 (sem gems/schema/rede/backend) | `git diff -- Gemfile* db/ server.rb lib/` vazio; testes com stub | — | Pendente |
-| G3 (S4/S5 docs consistentes) | `./scripts/check_docs` + `./scripts/checar-sessao 0075` verdes | — | Pendente |
-| M1 (reflow history ≤920px) | — | `manual`: `./scripts/run`, `/history` com/sem batalhas, redimensionar ≤920px (pos-card empilha, rows legíveis, sem overflow-x) | Pendente |
+| C1 (`GET /history` → `#history-view` + `page-history`) | `test/history_routes_test.rb` `test_history_page_renders_full_page_with_history_view` + `test_history_page_uses_full_width_body_class` | — | ok |
+| C2 (`.pagehead` + `.container`) | `test/history_view_test.rb` `test_history_pagehead_and_container` | — | ok |
+| C3 (`.pos-card` + badge + 3 chips; fallback nil no card) | `test/history_view_test.rb` `test_history_position_card_with_stat_chips` + `test_history_position_nil_shows_fallback_in_card` | — | ok |
+| C4 (`ul.rank-list>li.rank-row` + barra ∝ + `.you`) | `test/history_view_test.rb` `test_history_ranking_list_with_bars_and_current_user` + `test/history_routes_test.rb` `test_history_highlights_current_user_in_ranking` | — | ok |
+| C5 (`ul.history-list>li.history-row` + badges + data dd/mm HH:MM) | `test/history_view_test.rb` `test_history_recent_battles_list` | — | ok |
+| C6 (vazio `notice--info`) | `test/history_routes_test.rb` `test_history_shows_empty_message_without_battles` | — | ok |
+| C7 (CSS history no bloco ODS + antigo íntegro) | `test/design_system_test.rb` `test_design_system_history_screen_classes` | — | ok |
+| C8 (`.history-row` empilha ≤920px) | `test/style_responsive_test.rb` `test_history_rows_stack_at_920` | — | ok |
+| G1 (sem regressão) | `./scripts/test` (baseline 1018/4279 + novos) + `./scripts/lint` 0 | navegação `/`, `/battle`, `/history` | ok |
+| G2 (sem gems/schema/rede/backend) | `git diff -- Gemfile* db/ server.rb lib/` vazio; testes com stub | — | ok |
+| G3 (S4/S5 docs consistentes) | `./scripts/check_docs` + `./scripts/checar-sessao 0075` verdes | — | ok |
+| M1 (reflow history ≤920px) | — | `manual`: `./scripts/run`, `/history` com/sem batalhas, redimensionar ≤920px (pos-card empilha, rows legíveis, sem overflow-x) | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
