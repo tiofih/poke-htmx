@@ -99,6 +99,27 @@ class DesignSystemTest < Minitest::Test
     end
   end
 
+  def test_design_system_history_screen_classes
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+
+    # Classes de history anexadas na sessão 0075 (pos-card/rank-list/history-list — C7).
+    %w[
+      pagehead
+      pos-card pos-left pos-badge pos-title pos-stats
+      stat-chip
+      section-title
+      rank-list rank-row rank-pos rank-name rank-bar rank-wins
+      history-list history-row
+      result-badge history-main h-title h-sub history-date
+    ].each do |klass|
+      assert_match(/\.#{Regexp.escape(klass)}\b/, block,
+                   "expected design system block to define .#{klass}")
+    end
+  end
+
   def test_layout_uses_topnav_footer_shell
     layout = File.read(File.join(__dir__, "../views/layout.erb"))
 
