@@ -7,7 +7,7 @@
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-09 (B, B, C, B, C, A, B, B — ver seção 5) |
 | Implementação fase 2a (0076a — visível/funcional, legado intacto) | **Concluída** — 9 commits (`9867114`…`540d110`), suíte 1054/4847 0 falhas, lint 0, revisor 2c-2a **Aprovado** sem S3 |
 | Validação fase 3a (0076a) | **Concluída** — validada pelo usuário em 2026-09-09 (**Done 3a**; S2 C1–C10+G1–G3 ok + M1 ok, sem S3) |
-| Implementação fase 2b (0076b — limpeza/fechamento da onda) | **Pendente** — só inicia após a 3a validada; ao concluir → **PARAR** e aguardar validação 3b |
+| Implementação fase 2b (0076b — limpeza/fechamento da onda) | **Implementação concluída** — 3 commits (`43404b3`…`4049381`), suíte 1057/4900 0 falhas, lint 0, `check_docs` + `checar-sessao 0076` verdes; aguarda **Revisor (2c-2b)** e depois **validação 3b** — **PARAR**, não marcar Done, não preencher §7 3b |
 | Validação fase 3b (0076b) | **Pendente** — executada pelo usuário (S2, tabela da seção 7); fecha a onda |
 
 ---
@@ -87,17 +87,17 @@ Portar os **modais** (center/mart/membro + evolução) para **overlay híbrido**
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| C11 sem sakura: `<link sakura>` removido (`layout.erb:7`), página só com `/style.css`, autonomia do bloco ancorada | `test/design_system_test.rb` (`test_design_system_does_not_depend_on_sakura` estendido + assert sem link sakura) + `test/layout_test.rb` (editar só se ancorar sakura — listar) | pendente |
-| C12 colisões sob demanda (D71–D76 + D80): legadas colidentes removidas/escopadas (lista explícita no passo), inline `history.erb:33` → classe; o que quebrar é re-adicionado/corrigido | `test/design_system_test.rb` `test_legacy_collisions_removed` (novo: refute das regras listadas fora do bloco) + suíte verde com reconciliações listadas | pendente |
-| C13 juice do bloco (D86/D88 fechamento): projectile/toast/animations partem só do bloco após a remoção | `test/design_system_test.rb` juice asserts (C10, sem edição — provam a portabilidade) + suíte verde | pendente |
-| C14 filtros 100% ODS (D94 fechamento): contrato + dress verdes após a limpeza | `test/open_design_contract_test.rb` + `test/home_view_test.rb` verdes (mínima listada ou sem edição) | pendente |
+| C11 sem sakura: `<link sakura>` removido (`layout.erb:7`), página só com `/style.css`, autonomia do bloco ancorada | `test/design_system_test.rb` (`test_design_system_does_not_depend_on_sakura` estendido + assert sem link sakura no layout) + `test/layout_test.rb` (sem edição — não ancorava sakura) | ok |
+| C12 colisões sob demanda (D71–D76 + D80): legadas colidentes removidas/escopadas (lista explícita no passo), inline `history.erb:33` → classe; o que quebrar é re-adicionado/corrigido | `test/design_system_test.rb` `test_legacy_collisions_removed` (novo: refute das 12 regras listadas fora do bloco) + `test/history_view_test.rb` `test_history_ranking_section_wears_spacing_class` (novo, D80) + reconciliação listada em `style_responsive_test.rb` (6 métodos re-apontados) + suíte verde | ok |
+| C13 juice do bloco (D86/D88 fechamento): projectile/toast/animations partem só do bloco após a remoção | `test/design_system_test.rb` `test_block_carries_all_juice_keyframes` (novo) + juice asserts (C10, sem edição — provam a portabilidade) + suíte verde | ok |
+| C14 filtros 100% ODS (D94 fechamento): contrato + dress verdes após a limpeza | `test/open_design_contract_test.rb` + `test/home_view_test.rb` + `test/style_responsive_test.rb` verdes (re-apontados no Passo 12, sem edição no 13) | ok |
 
 ### Garantias + manual fase 2b
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| G4 sem regressão final — suíte + lint 0; onda fecha (bloco único, legado removido) | `./scripts/test` + `./scripts/lint` | pendente |
-| G5 docs fechamento — `SESSIONS.md` 0076 Done após a 3b + `check_docs`/`checar-sessao` verdes; handoff + gotchas (S6) | `./scripts/check_docs` + `./scripts/checar-sessao 0076` + `memory_handoff_begin` + `gotchas/` | pendente |
+| G4 sem regressão final — suíte + lint 0; onda fecha (bloco único, legado removido) | `./scripts/test` (1057/4900 0 falhas) + `./scripts/lint` (0 nos rastreados) | ok |
+| G5 docs fechamento — `SESSIONS.md` 0076 Done após a 3b + `check_docs`/`checar-sessao` verdes; handoff + gotchas (S6) | `./scripts/check_docs` + `./scripts/checar-sessao 0076` verdes na 2b; Done + handoff + gotchas de memória só após a 3b | pendente (aguarda 3b) |
 | M2 passada visual completa pós-limpeza (modais, filtros, battle, history, ≤920px, sem flash sem-estilo) | `manual` (`./scripts/run`, todas as telas) | pendente |
 
 > **S1:** cada critério acima aponta o teste que o prova (arquivo + método); os únicos critérios puramente manuais são **M1** (fase 2a) e **M2** (fase 2b). **Cada fase PARA ao fim da sua implementação (suíte + lint verdes, revisor S7 `Aprovado`) e aguarda a validação do usuário — não marcar Done, não preencher a seção 7, não commitar conclusão.**
@@ -183,3 +183,8 @@ Portar os **modais** (center/mart/membro + evolução) para **overlay híbrido**
 - **`check_docs` não enxerga sufixo de letra:** glob `[0-9]{4}-*.md` exige `-` como 5º char — `0076a-*.md` seria invisível à S5 (motivo do arquivo único com fases 2a/2b).
 - **`oob_filter_controls` já existe:** o select `team` entra no partial e ganha sincronização OOB de graça — não duplicar.
 - **`Pokemon#types` já vem do parse (`poke_api_parsing.rb:148`):** tags do catálogo (`pcard`) não precisam de backend; só o time (DB sem coluna) precisa do enrichment — é por isso que o toque backend é mínimo e listado.
+- **Limpeza sob demanda (5c-C) funciona se a lista for explícita (0076 2b):** cada remoção legada foi decidida por uso vivo nas views (`gameloop-cta` em `team.erb:20` e `.evolution-*` no modal ficaram) vs. morto (`.filter-controls`, `.battle-layout`, `.projectile`, `.hp-bar/.pp-bar`, orfãs `.battle-pane .fighter`); nada quebrou — zero re-adicionados, só 1 port (toque 44px da nav → `.topnav nav a`).
+- **Keyframes são dependência invisível da suíte:** o bloco referenciava 8 keyframes que só existiam no legado (`juice-hp/flash/damage-number/ko/shake/banner/news`, `battle-log-in`) — nenhum teste acusaria o dangling; o `test_block_carries_all_juice_keyframes` (todo `animation:` do bloco exige `@keyframes` no bloco) virou a rede do port.
+- **Regex de teste precisa de âncora de linha em CSS:** `/\.bar-fill\s*\{/` casa `.hp-bar .bar-fill {` — em `test_legacy_collisions_removed` os asserts de classe base usam `/^\.bar\s*\{/` para não vazar para seletores compostos (que saíram no passo seguinte).
+- **Reapontar teste responsivo = trocar o seletor, não a intenção:** 6 métodos do `style_responsive_test.rb` migraram de seletor legado para equivalente do bloco (`.filter-grid`/`.arena`/`.bar`/`.btn-sm`/`.topnav nav`/`.shot`); `test_juice_reduced_motion_disables` e `test_juice_keyframes_present` ficaram intactos (reduce legado no fim + keyframes portados mantêm presença/ordem).
+- **`scripts/sweep-balance.rb` untracked polui o lint:** 19 offenses fora do repo quebram o "lint 0" do `./scripts/lint`; gate da sessão = 0 offenses nos rastreados (verificado por exclusão).
