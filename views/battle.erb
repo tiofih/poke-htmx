@@ -52,9 +52,43 @@
 
       <div id="result-box">
         <% if @engine.finished? %>
-          <% winner_name = @engine.winner.zero? ? "Seu Time" : "Oponente" %>
+          <% end_state = @game_over ? "over" : (@engine.winner.nil? ? "draw" : (@engine.winner.zero? ? "win" : "loss")) %>
+          <% end_slug, end_label, end_title = { "win" => ["victory", "Vitória", "Seu Time venceu"], "loss" => ["defeat", "Derrota", "Oponente venceu"], "draw" => ["draw", "Empate", "Empate — ninguém venceu"], "over" => ["gameover", "Game Over", "Sem dinheiro para curar"] }.fetch(end_state) %>
+          <% winner_name = @engine.winner.nil? ? nil : (@engine.winner.zero? ? "Seu Time" : "Oponente") %>
+          <div class="res-screen" data-od-id="res-<%= end_slug %>">
+            <div class="res-top">
+              <div class="res-top-left">
+                <span class="state-pill <%= end_state %>"><%= end_label %></span>
+                <div class="state-title"><h2><%= winner_name ? "Vencedor: #{winner_name}" : end_title %></h2></div>
+              </div>
+            </div>
+            <section class="state-card" data-od-id="end-<%= end_slug %>">
+              <div class="state-head"><span class="state-pill <%= end_state %>"><%= end_label %></span><h2><%= end_title %></h2></div>
+              <div class="mini-arena">
+                <% [["Seu Time", 0], ["Oponente", 1]].each do |side_name, side| %>
+                  <div>
+                    <div class="mini-side-title"><%= side_name %><%= " · derrotado" if @engine.teams[side].none? { |fighter| !fighter.fainted? } %></div>
+                    <ul class="fighter-rows">
+                      <% @engine.teams[side].each do |poke| %>
+                        <% fighter = FighterPresenter.new(poke) %>
+                        <% hp_fill = { high: "ok", medium: "warn", low: "danger" }.fetch(fighter.hp_tier, "ok") %>
+                        <li class="frow<%= " lost" if fighter.hp_percent.zero? %>">
+                          <span class="th"><img src="<%= fighter.sprite %>" alt="<%= fighter.alt %>"></span>
+                          <span class="fid"><span class="fn"><%= fighter.name %><span class="ft"><% fighter.types.each do |tag| %><span class="ftg" style="background:var(--t-<%= tag %>)"><%= tag %></span><% end %></span></span></span>
+                          <span class="hp"><span class="bg"><span class="fill" style="width:<%= fighter.hp_percent %>%;background:var(--<%= hp_fill %>)"></span></span><span class="lbl"><%= fighter.hp_label %></span></span>
+                        </li>
+                      <% end %>
+                    </ul>
+                  </div>
+                <% end %>
+              </div>
+              <div class="result-card">
           <div class="result">
-            <p class="winner-badge"><strong>Vencedor: <%= winner_name %></strong></p>
+            <% if winner_name %>
+              <p class="winner-badge"><strong>Vencedor: <%= winner_name %></strong></p>
+            <% else %>
+              <p class="winner-badge"><strong><%= end_title %></strong></p>
+            <% end %>
             <% if @xp_gained %>
               <p class="rewards"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e #{@money_gained} de dinheiro." : "." %></strong></p>
             <% end %>
@@ -91,6 +125,8 @@
                 <% end %>
               </div>
             <% end %>
+              </div>
+            </section>
           </div>
         <% end %>
       </div>
