@@ -141,17 +141,17 @@ Portar a tela de **batalha** (`battle.erb` + `_fighter_panel.erb`; wrapper `batt
 
 ## 9. Gotchas / Lições (memória — S6)
 
-- *(A preencher pelo implementador ao longo da fase 2 — expectativas registradas no refinamento:)*
-- **Re-marcação do `battle.erb`/`_fighter_panel.erb` colapsa os seletores de juice no `battle_routes_test.rb`** (~8 asserts de classe: hp-bar/pp-bar, battle-log__entry, fighter--flash/ko/shooting, projectile, winner--pop/xp-gained--pop). Reconciliar **todos** os asserts de classe antes do green do Passo 3/4 — `style_responsive_test.rb` continua verde porque afirma as **regras CSS antigas** (mantê-las íntegras).
-- **`style_responsive_test.rb` amarra o CSS antigo, não o HTML:** `test_juice_reduced_motion_disables` exige que o bloco `prefers-reduced-motion` contenha `.battle-log__entry`/`.fighter--flash`/`.fighter--ko`/`.projectile`/`.battle-layout`/`.hp-bar`/`.winner--pop`/`.xp-gained--pop` — **não** editar nem remover o bloco reduce antigo; o reduced-motion **novo** do ODS é aditivo (cobre os seletores novos).
-- **Escopo-legado morto para o `.fighter` antigo:** `.fighter{...}` → `.battle-pane .fighter{...}` neutraliza a colisão sem deletar regra (o `.battle-pane` some na re-marcação). É a única edição fora do bloco ODS; o resto do CSS de batalha antigo permanece íntegro até a 0076.
-- **Gates `@message` são contrato de teste:** os asserts `gameloop-cta disabled`/`title="Recupere seus pokémons…"` (defeated gate e fim) compartilham o mesmo título — ao re-marcar o fim, manter o título/label ou o assert do gate cruza/quebra.
-- **`data-side`/`data-round`/`--log-delay`/`data-hp-initial`/`data-damage` são contratos do juice e do teste `test_battle_fragment_marks_juice_targets`** — preservar os atributos exatos no novo markup (só as **classes** mudam).
+- **Re-marcação do `battle.erb`/`_fighter_panel.erb` colapsa os seletores de juice no `battle_routes_test.rb`** (~8 asserts de classe: hp-bar/pp-bar, battle-log__entry, fighter--flash/ko/shooting, projectile, winner--pop/xp-gained--pop). Reconciliar **todos** os asserts de classe antes do green do Passo 3/4 — `style_responsive_test.rb` continua verde porque afirma as **regras CSS antigas** (mantê-las íntegras). *(Confirmado no green: edits em `:131-134`, `:158`, `:178`, `:263-266`, `:269-270`, `:346-347`; `:125-149` valores reais `HP 50/202`/`width: 25%`/`PP 30` intactos.)*
+- **`style_responsive_test.rb` amarra o CSS antigo, não o HTML:** `test_juice_reduced_motion_disables` exige que o bloco `prefers-reduced-motion` contenha `.battle-log__entry`/`.fighter--flash`/`.fighter--ko`/`.projectile`/`.battle-layout`/`.hp-bar`/`.winner--pop`/`.xp-gained--pop` — **não** editar nem remover o bloco reduce antigo; o reduced-motion **novo** do ODS é aditivo (cobre os seletores novos). *(Confirmado: teste extrai o PRIMEIRO bloco reduce por regex — por isso o reduce novo do ODS usa `@media screen and (...)`, que não casa o primeiro-match nem o `index` literal do teste legado; CSS válido, escopo correto p/ screen. Ver CSS comentado.)*
+- **Escopo-legado morto para o `.fighter` antigo:** `.fighter{...}` → `.battle-pane .fighter{...}` neutraliza a colisão sem deletar regra (o `.battle-pane` some na re-marcação). É a única edição fora do bloco ODS; o resto do CSS de batalha antigo permanece íntegro até a 0076. *(Confirmado: 3 regras escopadas — `display:flex`, `img`, `position:relative`. `.bar`/`.bar-fill` antigos convivem com o reuso do roster 0073, sem escopo extra.)*
+- **Gates `@message` são contrato de teste:** os asserts `gameloop-cta disabled`/`title="Recupere seus pokémons…"` (defeated gate e fim) compartilham o mesmo título — ao re-marcar o fim, manter o título/label ou o assert do gate cruza/quebra. *(Confirmado: título `disabled` mantido no botão `.btn` do fim; gates `:848/:861` verdes sem edição.)*
+- **`data-side`/`data-round`/`--log-delay`/`data-hp-initial`/`data-damage` são contratos do juice e do teste `test_battle_fragment_marks_juice_targets`** — preservar os atributos exatos no novo markup (só as **classes** mudam). *(Confirmado: todos preservados; mapeamento de classes B1b: `hp-bar hp-bar--*`→`.bar-fill ok|mid|low`, `pp-bar`→`.move/.ppnum/.dot`, `battle-log__entry`→`.log__entry`, `fighter--flash/ko/shooting`→`is-hit/fainted/is-attacking`, `projectile`→`.shot`, `winner--pop`→`.winner-badge`, `xp-gained--pop`→`.rewards`, `gameloop-cta(s)` do fim→`.btn/.ctas`.)*
+- **RuboCop em teste novo:** `Style/RedundantRegexpArgument` (scan com string) e `Layout/ArgumentAlignment` (extrair local `lists` antes do `assert_equal`) — seguir o padrão local.
 
-### Confirmações no green (a preencher pelo implementador)
+### Confirmações no green (preenchido pelo implementador — fase 2, 2026-09-09)
 
-- [ ] Passo 1 (C7+B1b) — commit `Passo 1: ...`
-- [ ] Passo 2 (C1+C2+C6) — commit `Passo 2: ...`
-- [ ] Passo 3 (C3+B1b) — commit `Passo 3: ...`
-- [ ] Passo 4 (C4+C5) — commit `Passo 4: ...`
-- [ ] Passo 5 (G1) — suíte **1011/4124+**, lint 0, docs verdes
+- [x] Passo 1 (C7+B1b) — commit `05d0a40 Passo 1: classes de batalha do §1.2 + juice portado para os seletores novos no bloco ODS (aditivo; .fighter antigo por escopo-legado)`
+- [x] Passo 2 (C1+C2+C6) — commit `693ebad Passo 2: battle.erb como arena (2x ul.fighters + podium com controles/log/result), gates e contrato htmx preservados`
+- [x] Passo 3 (C3+B1b) — commit `16d287d Passo 3: _fighter_panel como card do arena (fighter-id/fmeta/ftags/hp/moves) com juice renomeado no ODS`
+- [x] Passo 4 (C4+C5) — **verificado sem edição nova**: re-marcação do log/fim + todos os edits de `battle_routes_test.rb` (`:178`, `:263-270`, `:337`, `:346-347`) foram antecipados nos Passos 2-3 (mesmo green, fatiado p/ revisão); gates `:848/:861` verdes sem edição (A1). Sem commit vazio (regra do projeto).
+- [x] Passo 5 (G1) — suíte **1018/4279** (baseline 1011/4124 + 7 testes/asserts novos), lint 0, `check_docs` + `checar-sessao 0074` verdes
