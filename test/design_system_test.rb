@@ -260,6 +260,11 @@ class DesignSystemTest < Minitest::Test
                  "design system must not depend on sakura resets")
     refute_match(/@import/, block,
                  "design system must not @import external stylesheets")
+
+    # Autonomia do bloco (0076 2b, C11): nenhuma pagina carrega o sakura.
+    layout = File.read(File.join(__dir__, "../views/layout.erb"))
+    refute_match(/sakura/i, layout,
+                 "layout.erb must not link sakura — the ODS block is autonomous")
   end
 
   def test_style_css_route_serves_text_css
