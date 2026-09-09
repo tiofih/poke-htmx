@@ -40,6 +40,12 @@
           <div>
             <span class="slot">#<%= poke.slot %></span>
             <span class="member-name"><%= poke.name %></span>
+            <% member_types = @team_types && @team_types[poke.id] %>
+            <% unless member_types.nil? || member_types.empty? %>
+              <span class="mtags">
+                <% member_types.each do |tag| %><span class="mtag mtag--<%= tag %>"><%= tag %></span><% end %>
+              </span>
+            <% end %>
           </div>
         </div>
         <div class="hp">

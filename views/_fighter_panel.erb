@@ -17,9 +17,11 @@
           <% badges << fighter.item_used_badge unless fighter.item_used_badge.nil? %>
           <% badges << "carrega: #{fighter.assigned_item_label}" unless fighter.assigned_item_label.nil? %>
           <% badges << "segura: #{fighter.held_item_label}" unless fighter.held_item_label.nil? %>
-          <% unless badges.empty? %>
+          <% fighter_types = fighter.types.to_a %>
+          <% unless badges.empty? && fighter_types.empty? %>
             <span class="ftags">
               <% badges.each do |badge| %><span class="ftag"><%= badge %></span><% end %>
+              <% fighter_types.each do |tag| %><span class="ftag ftag--<%= tag %>"><%= tag %></span><% end %>
             </span>
           <% end %>
         </div>

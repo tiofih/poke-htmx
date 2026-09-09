@@ -8,6 +8,11 @@
     <% if info %>
       <span class="poke-cost<%= ' poke-cost--restricted' if info[:restricted] %>" data-tier="<%= info[:tier] %>"><%= info[:tier] %> · <%= info[:cost] %><%= ' ◆' if info[:restricted] %></span>
     <% end %>
+    <% unless pokemon.types.to_a.empty? %>
+      <span class="ptags">
+        <% pokemon.types.each do |tag| %><span class="ptag ptag--<%= tag %>"><%= tag %></span><% end %>
+      </span>
+    <% end %>
   <% else %>
     <span><%= name %></span>
   <% end %>

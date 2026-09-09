@@ -51,6 +51,26 @@ module ServerCommon
     @team = data[:members]
     @available_moves = data[:available_moves]
     @inventory = data[:inventory]
+    @team_types = team_types_map(@team)
+  end
+
+  # Enrichment 0076 2a (C5): o schema team_pokemons nao tem coluna de tipos —
+  # resolve via api.find com memo por nome; fail-closed [] (sem rede em teste).
+  def team_types_map(members)
+    cache = {}
+    Array(members).to_h { |member| [member.id, member_types_from_api(cache, member)] }
+  end
+
+  def member_types_from_api(cache, member)
+    stored = member.types.to_a
+    return stored unless stored.empty?
+
+    cache.fetch(member.name) do
+      found = settings.api.find(member.name)
+      cache[member.name] = found ? found.types.to_a : []
+    rescue StandardError
+      []
+    end
   end
 
   def reload_manage_state
@@ -915,6 +935,7 @@ module ServerBattleActions
     @team_cost = team_total_cost(@team)
     @team_budget = TeamBudget::BUDGET
     @team_s_count = team_s_count(@team)
+    @team_types = team_types_map(@team)
     center_data
     mart_data
   end

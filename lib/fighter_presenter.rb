@@ -42,6 +42,10 @@ class FighterPresenter
     @pokemon.moves.map { |move| MovePresenter.new(move) }
   end
 
+  def types
+    @pokemon.types.to_a
+  end
+
   def assigned_item_label
     item_label(@pokemon.assigned_item)
   end

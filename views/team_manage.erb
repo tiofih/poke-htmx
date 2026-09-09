@@ -7,6 +7,12 @@
     <p class="slot">#<%= poke.slot %></p>
     <img src="<%= poke.sprite %>" alt="<%= poke.name %>"><br>
     <strong><%= poke.name %></strong><br>
+    <% manage_types = @team_types && @team_types[poke.id] %>
+    <% unless manage_types.nil? || manage_types.empty? %>
+      <span class="mtags">
+        <% manage_types.each do |tag| %><span class="mtag mtag--<%= tag %>"><%= tag %></span><% end %>
+      </span><br>
+    <% end %>
     <a class="btn evolution-trigger" href="#evolution-modal"
        hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</a>
     <% current_moves = @draft_moves&.[](poke.id) || poke.moves.to_a %>

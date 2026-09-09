@@ -21,6 +21,8 @@
   --t-dragon: oklch(52% 0.12 285); --t-bug: oklch(58% 0.13 100); --t-flying: oklch(62% 0.09 250);
   --t-psychic: oklch(60% 0.15 350); --t-fighting: oklch(56% 0.14 30); --t-ghost: oklch(52% 0.10 290);
   --t-fairy: oklch(64% 0.12 330);
+  --t-ice: oklch(72% 0.08 230); --t-ground: oklch(58% 0.12 85); --t-rock: oklch(55% 0.10 80);
+  --t-dark: oklch(45% 0.05 260); --t-steel: oklch(62% 0.03 250);
   --accent-soft: color-mix(in oklch, var(--accent) 16%, transparent);
   --fg-soft:     color-mix(in oklch, var(--fg) 10%, transparent);
   --font-display: 'Avenir Next Rounded', 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -1166,6 +1168,46 @@
 .overlay.open {
   display: flex;
 }
+
+/* === Tags cor por tipo (0076 2a, C5) — dado real: pcard via api.find,
+   membro via enrichment, fighter via FighterPresenter#types === */
+.ptags,
+.mtags {
+  display: inline-flex;
+  gap: 0.25em;
+  flex-wrap: wrap;
+  margin-top: 0.3em;
+}
+
+.ptag,
+.mtag {
+  padding: 0.1em 0.5em;
+  border-radius: 999px;
+  background: var(--fg-soft);
+  color: var(--fg);
+  font-size: 0.7em;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.ptag--normal, .mtag--normal, .ftag--normal { background: var(--t-normal); color: var(--ink); }
+.ptag--fire, .mtag--fire, .ftag--fire { background: var(--t-fire); color: var(--ink); }
+.ptag--water, .mtag--water, .ftag--water { background: var(--t-water); color: var(--ink); }
+.ptag--electric, .mtag--electric, .ftag--electric { background: var(--t-electric); color: var(--ink); }
+.ptag--grass, .mtag--grass, .ftag--grass { background: var(--t-grass); color: var(--ink); }
+.ptag--ice, .mtag--ice, .ftag--ice { background: var(--t-ice); color: var(--ink); }
+.ptag--fighting, .mtag--fighting, .ftag--fighting { background: var(--t-fighting); color: var(--ink); }
+.ptag--poison, .mtag--poison, .ftag--poison { background: var(--t-poison); color: var(--ink); }
+.ptag--ground, .mtag--ground, .ftag--ground { background: var(--t-ground); color: var(--ink); }
+.ptag--flying, .mtag--flying, .ftag--flying { background: var(--t-flying); color: var(--ink); }
+.ptag--psychic, .mtag--psychic, .ftag--psychic { background: var(--t-psychic); color: var(--ink); }
+.ptag--bug, .mtag--bug, .ftag--bug { background: var(--t-bug); color: var(--ink); }
+.ptag--rock, .mtag--rock, .ftag--rock { background: var(--t-rock); color: var(--ink); }
+.ptag--ghost, .mtag--ghost, .ftag--ghost { background: var(--t-ghost); color: var(--ink); }
+.ptag--dark, .mtag--dark, .ftag--dark { background: var(--t-dark); color: var(--ink); }
+.ptag--dragon, .mtag--dragon, .ftag--dragon { background: var(--t-dragon); color: var(--ink); }
+.ptag--steel, .mtag--steel, .ftag--steel { background: var(--t-steel); color: var(--ink); }
+.ptag--fairy, .mtag--fairy, .ftag--fairy { background: var(--t-fairy); color: var(--ink); }
 
 .modal {
   background: var(--surface);
