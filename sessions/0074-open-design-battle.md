@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-09 (A1+A1a(i), B1+B1b, C1, `.ftags`, C1–C7+G1+1 manual) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação | **Concluída** — 4 commits (05d0a40/693ebad/16d287d + Passo 5), suíte 1018/4279 0 falhas, lint 0, Revisor 2c **Aprovado** |
+| Validação | **Concluída** — validada pelo usuário em 2026-09-09 (**Done**; S2 C1–C7+G1–G3 ok + M1 manual ok, sem S3) |
 
 ---
 
@@ -109,21 +109,21 @@ Portar a tela de **batalha** (`battle.erb` + `_fighter_panel.erb`; wrapper `batt
 
 ## 7. Validação (executada pelo usuário — S2)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único; o critério **M1 é `manual`** — evidência via navegação.)*
+**Validada pelo usuário em 2026-09-09 — "validado" (todos os critérios ok, sem S3).** *(S2: uma linha por critério, nunca bloco único; o critério **M1 é `manual`** — evidência via navegação.)*
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (`GET /battle` → `page-battle` + `#battle-view`) | `test/battle_routes_test.rb` `test_battle_page_renders_full_page_with_battle_view` | navegação `/battle` — página completa com arena | |
-| C2 (`.arena` + 2× `ul.fighters` + `.podium`) | `test/battle_view_test.rb` (novo, estrutural) | navegação `/battle` — layout 3 colunas | |
-| C3 (card fighter identidade + HP/PP reais) | `test/battle_view_test.rb` + `test/battle_routes_test.rb` `:125-163` (editado) | navegação `/battle` — cards com HP/PP reais | |
-| C4 (log `.log`/`.lside`/`data-round`/`--log-delay`) | `test/battle_view_test.rb` + `test/battle_routes_test.rb` `:178,256` (editado) | jogar até o fim — log escalonado | |
-| C5 (fim `.result`/`.winner-badge`/`.rewards`/`.ctas` + `hx-post="/battle/new"` disabled) | `test/battle_routes_test.rb` `:337,346-347,269-270` (editado); `:848,861` verificado | jogar até o fim — resultado + CTAs; derrota → Novo confronto disabled | |
-| C6 (contrato htmx `hx-post="/battle/play"`/`hx-target="#battle-view"`/`hx-indicator`) | `test/battle_routes_test.rb` `:21,122,171-172` (mantidos) + `test_battle_play_resolves_entire_battle_in_one_request` | clique em Batalhar — swap no `#battle-view` | |
-| C7 (CSS classes de batalha no bloco ODS + antigo intocado) | `test/design_system_test.rb` `test_design_system_battle_screen_classes` (estendido) | inspeção visual do arena | |
-| G1 (sem regressão) | `./scripts/test` + `./scripts/lint`; `style_responsive_test.rb` sem edição verde | navegação `/`, `/battle`, `/history` | |
-| G2 (sem gems/schema/rede/presenters) | `git diff -- Gemfile* db/ server.rb lib/` vazio; testes com stub | — | |
-| G3 (S4/S5 docs consistentes) | `./scripts/check_docs` + `./scripts/checar-sessao 0074` verdes | — | |
-| M1 (visual arena/podium/juice) | — | `manual`: stagger do log, KO fade, projectile ≥900px, reduced-motion, colapso ≤~900px, estados preparado/andamento/fim/game-over + gates | |
+| C1 (`GET /battle` → `page-battle` + `#battle-view`) | `test/battle_routes_test.rb` `test_battle_page_renders_full_page_with_battle_view` | validação do usuário em 2026-09-09 — navegação `/battle`, página completa com arena | ok |
+| C2 (`.arena` + 2× `ul.fighters` + `.podium`) | `test/battle_view_test.rb` `test_battle_arena_two_fighter_lists_and_podium` | validação do usuário em 2026-09-09 — layout arena/podium | ok |
+| C3 (card fighter identidade + HP/PP reais) | `test/battle_view_test.rb` `test_battle_fighter_card_shows_identity_hp_pp_moves` + `test/battle_routes_test.rb` `:125-163` (editado) | validação do usuário em 2026-09-09 — cards com HP/PP reais | ok |
+| C4 (log `.log`/`.lside`/`data-round`/`--log-delay`) | `test/battle_view_test.rb` + `test/battle_routes_test.rb` `:178,256` (editado) | validação do usuário em 2026-09-09 — log escalonado (stagger) | ok |
+| C5 (fim `.result`/`.winner-badge`/`.rewards`/`.ctas` + `hx-post="/battle/new"` disabled) | `test/battle_routes_test.rb` `:337,346-347,269-270` (editado); `:848,861` verificado | validação do usuário em 2026-09-09 — resultado + CTAs; derrota → Novo confronto disabled | ok |
+| C6 (contrato htmx `hx-post="/battle/play"`/`hx-target="#battle-view"`/`hx-indicator`) | `test/battle_routes_test.rb` `:21,122,171-172` (mantidos) + `test_battle_play_resolves_entire_battle_in_one_request` | validação do usuário em 2026-09-09 — swap no `#battle-view` ao Batalhar | ok |
+| C7 (CSS classes de batalha no bloco ODS + antigo intocado) | `test/design_system_test.rb` `test_design_system_battle_screen_classes` (estendido) | validação do usuário em 2026-09-09 — inspeção visual do arena | ok |
+| G1 (sem regressão) | `./scripts/test` (1018/4279, 0 falhas) + `./scripts/lint` (0); `style_responsive_test.rb` sem edição verde | validação do usuário em 2026-09-09 — navegação `/`, `/battle`, `/history` | ok |
+| G2 (sem gems/schema/rede/presenters) | `git diff -- Gemfile* db/ server.rb lib/` vazio; testes com stub | — | ok |
+| G3 (S4/S5 docs consistentes) | `./scripts/check_docs` + `./scripts/checar-sessao 0074` verdes | — | ok |
+| M1 (visual arena/podium/juice) | — | validação do usuário em 2026-09-09 (`manual`): stagger do log, KO fade, projectile ≥900px, reduced-motion, colapso ≤~900px, estados preparado/andamento/fim/game-over + gates | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
