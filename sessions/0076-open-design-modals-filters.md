@@ -7,8 +7,8 @@
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-09 (B, B, C, B, C, A, B, B — ver seção 5) |
 | Implementação fase 2a (0076a — visível/funcional, legado intacto) | **Concluída** — 9 commits (`9867114`…`540d110`), suíte 1054/4847 0 falhas, lint 0, revisor 2c-2a **Aprovado** sem S3 |
 | Validação fase 3a (0076a) | **Concluída** — validada pelo usuário em 2026-09-09 (**Done 3a**; S2 C1–C10+G1–G3 ok + M1 ok, sem S3) |
-| Implementação fase 2b (0076b — limpeza/fechamento da onda) | **Implementação concluída** — 3 commits (`43404b3`…`4049381`), suíte 1057/4900 0 falhas, lint 0, `check_docs` + `checar-sessao 0076` verdes; aguarda **Revisor (2c-2b)** e depois **validação 3b** — **PARAR**, não marcar Done, não preencher §7 3b |
-| Validação fase 3b (0076b) | **Pendente** — executada pelo usuário (S2, tabela da seção 7); fecha a onda |
+| Implementação fase 2b (0076b — limpeza/fechamento da onda) | **Concluída** — 4 commits (`43404b3`/`83ee284`/`4049381`/`b9453aa`), suíte 1057/4900 0 falhas, lint 0 nos rastreados, revisor 2c-2b **Aprovado** sem S3 (zero re-adicionados) |
+| Validação fase 3b (0076b) | **Concluída** — validada pelo usuário em 2026-09-09 (**Done**; S2 C11–C14+G4–G5 ok + M2 ok, sem S3 — **onda open-design fechada**) |
 
 ---
 
@@ -97,8 +97,8 @@ Portar os **modais** (center/mart/membro + evolução) para **overlay híbrido**
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
 | G4 sem regressão final — suíte + lint 0; onda fecha (bloco único, legado removido) | `./scripts/test` (1057/4900 0 falhas) + `./scripts/lint` (0 nos rastreados) | ok |
-| G5 docs fechamento — `SESSIONS.md` 0076 Done após a 3b + `check_docs`/`checar-sessao` verdes; handoff + gotchas (S6) | `./scripts/check_docs` + `./scripts/checar-sessao 0076` verdes na 2b; Done + handoff + gotchas de memória só após a 3b | pendente (aguarda 3b) |
-| M2 passada visual completa pós-limpeza (modais, filtros, battle, history, ≤920px, sem flash sem-estilo) | `manual` (`./scripts/run`, todas as telas) | pendente |
+| G5 docs fechamento — `SESSIONS.md` 0076 Done após a 3b + `check_docs`/`checar-sessao` verdes; handoff + gotchas (S6) | `./scripts/check_docs` + `./scripts/checar-sessao 0076` verdes na 2b; Done + handoff + gotchas de memória só após a 3b | ok |
+| M2 passada visual completa pós-limpeza (modais, filtros, battle, history, ≤920px, sem flash sem-estilo) | `manual` (`./scripts/run`, todas as telas) | ok |
 
 > **S1:** cada critério acima aponta o teste que o prova (arquivo + método); os únicos critérios puramente manuais são **M1** (fase 2a) e **M2** (fase 2b). **Cada fase PARA ao fim da sua implementação (suíte + lint verdes, revisor S7 `Aprovado`) e aguarda a validação do usuário — não marcar Done, não preencher a seção 7, não commitar conclusão.**
 
@@ -165,7 +165,17 @@ Portar os **modais** (center/mart/membro + evolução) para **overlay híbrido**
 | G3 (docs + revisão) | check_docs + checar-sessao + Aprovado | — | ok |
 | M1 (confete visual) | — | `./scripts/run`, modais sem JS, reflow ≤920px | ok |
 
-**Fase 3b (0076b) — pendente (só após a 3a).** | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) | C11–C14+G4–G5: (a preencher) | M2: (a preencher) |
+**Fase 3b (0076b) — validada pelo usuário em 2026-09-09 (resposta "validado", sem S3).**
+
+| Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
+| --- | --- | --- | --- |
+| C11 (sem sakura) | autonomia (sem link no layout) + layout_test sem edição | página só com `/style.css` | ok |
+| C12 (colisões removidas) | `test_legacy_collisions_removed` (12 regras) + 6 responsive re-apontados | barras/nav/log sem regressão | ok |
+| C13 (juice do bloco) | C10 intactos + `test_block_carries_all_juice_keyframes` | projétil, toast, shake, flash, KO | ok |
+| C14 (filtros 100% ODS) | contract + home_view verdes | team=in/out | ok |
+| G4 (sem regressão final) | suíte 1057/4900 + lint 0 rastreados | — | ok |
+| G5 (docs fechamento) | check_docs + checar-sessao + handoff + gotchas | — | ok |
+| M2 (confete final) | — | `./scripts/run`, todas as telas, ≤920px | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
