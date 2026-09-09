@@ -356,6 +356,21 @@
   gap: 0.75em;
 }
 
+/* Hook dos filtros (hx-include): alvo de toque + largura cheia na grade */
+.filter-state {
+  min-height: 44px;
+  width: 100%;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: 0.9em;
+}
+
+/* Botao pequeno (ex.: Limpar filtros na linha Arquivo) */
+.btn-sm {
+  padding: 0.35em 0.7em;
+  font-size: 0.8em;
+}
+
 /* Time (roster) */
 .roster {
   list-style: none;

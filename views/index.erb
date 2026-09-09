@@ -29,10 +29,11 @@
       </div>
       <aside class="catalog-pane stack">
         <div class="card">
-          <div id="filter-controls">
+          <div id="filter-controls" class="filter-grid">
             <%= erb :_filter_controls, layout: false %>
           </div>
         </div>
+        <div class="row-between"><span class="meta">Arquivo</span><a class="btn btn-ghost btn-sm" href="#" hx-get="/pokemons?offset=0&amp;q=&amp;type=&amp;generation=&amp;tier=&amp;cost=&amp;cost_max=&amp;sort=&amp;team=" hx-target="#pokemon-list" hx-swap="innerHTML">Limpar filtros</a></div>
         <div id="pokemon-list" class="catalog" data-od-id="catalog">
           <%= erb :pokemon_list, layout: false %>
         </div>

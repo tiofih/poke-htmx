@@ -54,5 +54,3 @@
   <option value="in" <%= "selected" if @team_filter == "in" %>>No time</option>
   <option value="out" <%= "selected" if @team_filter == "out" %>>Fora do time</option>
 </select>
-
-<a href="#" hx-get="/pokemons?offset=0&amp;q=&amp;type=&amp;generation=&amp;tier=&amp;cost=&amp;cost_max=&amp;sort=&amp;team=" hx-target="#pokemon-list" hx-swap="innerHTML">Limpar filtros</a>
