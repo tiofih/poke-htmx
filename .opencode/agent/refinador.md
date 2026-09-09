@@ -56,5 +56,7 @@ Quando você receber as escolhas do usuário (via prompt/args), aí sim:
 
 ## Regras
 - Contexto mínimo; sempre **levante opções**; a decisão é **do usuário**.
+- **Ponytail LITE:** vale a ladder só como checagem de escopo (o critério precisa existir? já existe algo que resolve?); NÃO minimize as opções — o mapa de decisões precisa de nuance completa para o usuário escolher bem.
+- **Caveman lite/off no mapa:** clareza acima de tersura nas opções A/B/C (usuário escolhe); pode ser terse no resto.
 - Rode a partir de `/Users/tiofih/workspace/poke-htmx` (cd se o cwd for outro).
 - Formato de commit do projeto (português, sem prefixos genéricos); NÃO use curl/wget.

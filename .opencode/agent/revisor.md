@@ -32,6 +32,9 @@ problemas de qualidade. **Somente leitura — você NÃO edita código.**
 3. **Qualidade:** RuboCop 0 offenses (padrão local), sem gems nova desnecessária, schema com migração
    idempotente, testes sem rede, sem `rubocop:disable` injustificado.
 4. **Riscos:** complexidade, edge cases, regressão ao baseline.
+5. **Over-engineering (lente ponytail FULL):** o diff faz só o que o critério pede? Há wrapper/componente/gem onde stdlib/nativo do codebase bastava? Liste como achado (`sugestão` ou `ajuste`) com a alternativa mínima.
+
+**Estilo (caveman full):** achados em uma linha acionável cada (arquivo:linha + critério/RF + correção esperada); sem throat-clearing. O veredito continua formal.
 
 **Entregável:** parecer objetivo — lista de **achados** (bloqueante / ajuste / sugestão), cada um
 apontando arquivo/linha e o critério/RF afetado. Não "corrija": aponte para o Implementador.

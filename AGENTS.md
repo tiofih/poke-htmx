@@ -11,20 +11,24 @@
 - Ao receber o feedback, registrar a validação no arquivo da sessão e só então
   atualizar `REQUIREMENTS.md`/`SESSIONS.md` e commitar a validação.
 
-## Graphify + codebase-memory-mcp — consulta obrigatória antes de ler arquivos
+## Graphify + codebase-memory-mcp + zvec-grep — consulta obrigatória antes de ler arquivos
 
-**NUNCA use `read`/`grep`/`glob` para explorar código quando o grafo está disponível.** Para análise, investigação ou responder perguntas sobre o código, use o grafo — `read` é só para **editar** (precisa do byte exato para `edit` casar).
+**NUNCA use `read`/`grep`/`glob` para explorar código quando grafo ou índice estão disponíveis.** Para análise, investigação ou responder perguntas sobre o código, use o grafo ou o índice — `read` é só para **editar** (precisa do byte exato para `edit` casar).
 
 Quando `graphify-out/` existe no projeto, **use o graphify** em vez de ler arquivos brutos. O grafo já foi construído com tree-sitter AST e contém todos os nós e arestas (índice `Users-tiofih-workspace-poke-htmx` 5196 nodes). `graph.json` = 4MB (~1M tokens) — nunca ler bruto.
 
-**Prioridade (codebase-memory-mcp):**
+**Prioridade (codebase-memory-mcp + zvec-grep):**
 1. `search_graph` — achar funções/classes/rotas (BM25+RRF, `limit 10` para fluxo)
 2. `trace_path` — quem chama / o que chama (`direction inbound/outbound/both`)
 3. `get_code_snippet` — fonte exata por `qualified_name`
-4. `check_index_coverage` — validar todo `path` citado e todo `scope` de afirmação negativa/exaustiva (antes de confiar no grafo; `parse_partial`/`skipped` → grep nos ranges)
+4. `check_index_coverage` — validar todo `path` citado e todo `scope` de afirmação negativa/exaustiva (antes de confiar no grafo; `parse_partial`/`skipped` → zvec rg nos ranges)
 5. `query_graph` (Cypher) — padrões multi-hop; `get_architecture` — visão de alto nível
+6. **zvec-grep** (`root: /Users/tiofih/workspace/poke-htmx`, índice `local/potion-code-16m-v2` pronto):
+   - literal/erro/config/ocorrência exaustiva → `zg query --rg` / `zvec_grep_zvec_grep_rg` (~193 tokens) **antes** do grep nativo
+   - conceito difuso / docs / `sessions/` ("onde discutimos X?") → `zg query` / `zvec_grep_zvec_grep_search` (~500 tokens CLI)
+   - símbolo exato / fluxo / impacto → CBM primeiro (zvec não devolve definição canônica)
 
-**Grep só para:** literais/mensagens de erro/valores de config, arquivos não-código (Dockerfile, shell, configs) ou quando MCP retorna insuficiente.
+**Grep nativo só para:** arquivos não-código fora do índice, ou quando CBM + zvec retornam insuficiente.
 
 **Sempre que possível**, antes de usar busca/arquivo:
 - `graphify query "<pergunta>"` — BFS/DFS no grafo
@@ -32,9 +36,9 @@ Quando `graphify-out/` existe no projeto, **use o graphify** em vez de ler arqui
 - `graphify explain "Nó"` — conexões do nó
 - `skill(name: "graphify")` e `skill(name: "codebase-memory")` para guias completos
 
-**Orquestrador → subagent (obrigatório):** antes de `task(subagent_type: refinador|implementador-teste|revisor)`, rode **no parent** `search_graph limit10 + get_code_snippet + trace_path + check_index_coverage` e injete no `prompt` do filho: `tier/pagination/qualified_name/paths/coverage/scopes`. Subagents **não** herdam MCP automaticamente — sem esse contexto eles recaem em `read/grep`. Ver `.opencode/skills/sdd/SKILL.md` (seção Grafo obrigatório).
+**Orquestrador → subagent (obrigatório):** antes de `task(subagent_type: refinador|implementador-teste|revisor)`, rode **no parent** `search_graph limit10 + get_code_snippet + trace_path + check_index_coverage` e, quando a tarefa tocar docs/sessões ou ocorrências exaustivas, some `zg query` / `zg query --rg`; injete no `prompt` do filho: `tier/pagination/qualified_name/paths/coverage/scopes` + trechos zvec. Subagents **não** herdam MCP automaticamente — sem esse contexto eles recaem em `read/grep`. Ver `.opencode/skills/sdd/SKILL.md` (seção Grafo obrigatório).
 
-**Regra de economia (medido 2026-08-28, fluxo POST /team → TeamRepository.add:171):** `CBM Scout` (`search limit10 + snippet + trace inbound1`) ~875 tokens com prova em `lib/team_repository.rb:171-179` + `server.rb:905`; `graphify query --budget 1500` ~1,2k tokens; `grep brute` ~9,8k tokens com ruído; `graph.json` bruto ~1M tokens. Para fluxo/impacto → **CBM Scout**; navegação ampla/arquitetura → `graphify`; literais→ `grep` cirúrgico; `ruby-mcp` só para transformar o já encontrado. Sempre `check_index_coverage` após CBM.
+**Regra de economia (medido 2026-08-28, fluxo POST /team → TeamRepository.add:171; zvec re-medido 2026-09-09):** `CBM Scout` (`search limit10 + snippet + trace inbound1`) ~875 tokens com prova em `lib/team_repository.rb:171-179` + `server.rb:905`; `graphify query --budget 1500` ~1,2k tokens; `zvec rg` ~193 tokens (padrão p/ literal); `zvec hybrid` ~500 tokens CLI (docs+sessões); `grep brute` ~9,8k tokens com ruído; `graph.json` bruto ~1M tokens. Para fluxo/impacto → **CBM Scout**; navegação ampla/arquitetura → `graphify`; literais→ `zvec rg`; conceito difuso/docs→ `zvec hybrid`; `ruby-mcp` só para transformar o já encontrado. Sempre `check_index_coverage` após CBM; no zvec passe `root` absoluto e respeite `freshness`/`background_refresh`.
 
 ## SDD — robustez do fluxo (regras do processo)
 
@@ -158,6 +162,7 @@ apenas grep/awk e rodam **no host**) — **não** rodar `rake`/`rubocop` no host
 | `test/test_helper.rb` | `TestDatabase` (setup + `TRUNCATE`) e `PokeApiStub` (hoje só `with_find` — criar `with_all` se precisar). |
 | `test/server_test.rb` | Rotas: injeta sessão via `user_session(user_id)`; isolamento com `Rack::Test::Session` próprios. |
 | `test/team_repository_test.rb` | Persistência/isolamento por usuário. |
+| `PRODUCT.md` / `DESIGN.md` | Verdade durável do produto + tokens/componentes visuais canônicos — ler antes de qualquer sessão com UX/UI; skills `impeccable audit`, `stark`, `normalize` auditam contra eles. |
 
 ## Armadilhas conhecidas (lições da sessão 0003)
 
@@ -346,3 +351,74 @@ latest binary's recommended copy:
 Both are idempotent: re-runs replace the block delimited by the ai-memory
 start/end HTML-comment markers, without disturbing the rest of the file.
 <!-- ai-memory:end -->
+
+## Context Engine (CCE)
+
+This project uses Code Context Engine for intelligent code retrieval and
+cross-session memory.
+
+### Searching the codebase
+
+**Use `context_search` instead of reading files directly** when exploring
+the codebase, answering questions about code, or understanding how things
+work. `context_search` returns the most relevant code chunks with
+confidence scores instead of whole files.
+
+When to use `context_search`:
+- Answering questions about the codebase ("how does X work?", "where is Y?")
+- Exploring structure or architecture
+- Finding related code, functions, or patterns
+
+Other tools:
+- `expand_chunk` for full source of a compressed result
+- `related_context` for what calls/imports a function
+- `session_recall` to recall past decisions
+
+### Cross-session memory
+
+Call `session_recall("topic phrase")` before answering non-trivial questions.
+Call `record_decision(decision="...", reason="...")` after making choices.
+Call `record_code_area(file_path="...", description="...")` after meaningful work.
+
+### Output style
+
+Respond in compressed style. Drop articles (a, an, the) in prose. Use
+sentence fragments over full sentences. Use short synonyms (fix not resolve,
+check not investigate). Pattern: [thing] [action] [reason]. [next step].
+No filler, hedging, pleasantries, trailing summaries, or restating what
+the user said. One sentence if one sentence is enough.
+
+When suggesting code changes, show only the changed lines with 3 lines of
+context. Never rewrite entire files. Multiple changes in one file: show each
+change separately. Never echo back unchanged code the user already has.
+
+Code blocks, file paths, commands, error messages: always written in full.
+Security warnings and destructive action confirmations: use full clarity.
+
+
+<!-- ai-context:managed:start -->
+## AI Context Engine — Navigation
+
+Vor Datei-Suche/-Erstellung bei Bug-Beschreibungen, "wo ist X"-Fragen oder
+Code-Aufgaben zuerst ausfuehren:
+
+    bash _ai_context/scripts/ai-symptom-router.sh "<beschreibung>"
+
+Routet ueber Interaction Map, Symbol Map, Gotchas/Debug-Patterns (mit
+Frische-Status), Invarianten und Impact-Graph zu den wahrscheinlichsten
+Dateien — statt die Codebase blind zu durchsuchen. Kein Treffer? Normal
+grep/lesen.
+
+Nach Aufgaben-Abschluss neue Erkenntnisse eintragen — welche Datei
+zustaendig ist, steht in `_ai_context/knowledge.manifest.yaml` (Format-
+Beispiele: `_ai_context/_gotchas.md`).
+
+Unterstuetzt dein Tool MCP (z.B. Cursor)? `.mcp.json` im Projekt-Root
+registriert den `ai-context`-Server mit den Werkzeugen `locate`,
+`memory_search`, `memory_save`, `session_context`, `capture_from_diff` —
+dann direkt diese nutzen statt der Bash-Route.
+<!-- ai-context:managed:end -->
+
+# Agent Rules <!-- tessl-managed -->
+
+@.tessl/RULES.md follow the [instructions](.tessl/RULES.md)

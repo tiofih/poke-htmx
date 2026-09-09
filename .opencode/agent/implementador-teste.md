@@ -26,6 +26,8 @@ com suíte verde e lint 0 em todo passo, e commits por green. Você é responsá
 
 **Regras obrigatórias:**
 - **TDD estrito:** `red` (teste falha) → `green` (implementação mínima) → `refactor`.
+- **Ponytail ULTRA (agressivo):** antes de escrever, suba a ladder — precisa existir? (YAGNI) → já existe no codebase? → stdlib? → nativo da plataforma? → dependência instalada? → one-liner? Só então o mínimo que funciona. **Nunca** corte validação, error handling, segurança ou acessibilidade — e **nunca** corte testes (S1 é inegociável).
+- **Caveman full na prosa:** respostas e relatórios tersos (código, paths e erros intactos); arquivo da sessão, commits e gotchas em prosa completa.
 - **1 commit por green** (`Passo N:` ou `Passos N-M:`), formato do projeto.
 - Suíte **completa** verde + lint **0** em **todo** green; baseline (N runs/M asserts) preservado.
 - Atualize `REQUIREMENTS.md`/`SESSIONS.md` no mesmo escopo quando o comportamento mudar.
