@@ -179,3 +179,27 @@ Os registros de playtest (experiência, achados, evidências) ficam nos arquivos
 - `docs/playtest-02-responsividade.md` — responsividade (viewport/grid/breakpoints) → base da 0060 (RESP-1).
 - `docs/playtest-03-gameplay.md` — rodada completa de gameplay (design/bugs) → base de RESP-1/M2b/ECO rebalance.
 - `docs/playtest-0063-juice.md` — playtest advisory da sessão 0063 (juice), perfis novato/casual/hardcore.
+
+## Curadoria 0076 (decidida pelo usuário em 2026-09-09, pós-validação da 0075)
+
+Auditoria read-only (markup + CSS) do implementado 0072–0075 vs protótipos
+`open-design/*.html` levantou ~60 divergências **novas** (não mapeadas).
+O usuário mandou **todas** para o escopo da 0076 (última da onda),
+somando ao escopo original (modais center/mart/membro, filtros `team=in|out`,
+remoção sakura/CSS antigo, gates `@message`). Atenção no refinamento:
+escopo grande — considerar fatiar (ex.: 0076a filiais visuais + 0076b limpeza).
+
+- **data-od-id (adotar como contrato):** shell+nav, home/team, battle, history.
+- **Base visual fiel:** topnav (sticky/blur), botões (base/secondary/hover/sm/lg/disabled),
+  card (radius/padding), tipografia (mono eyebrow/meta, lead), espaçamentos
+  (section/row/grid-2-1/arena/container por tela), componentes (meter ok, pill,
+  roster grid), tokens de escala `--fs-*/--gap-*`.
+- **Ausentes:** tags de tipo, sprite-tile base, pcard-meta/add, nav-badge,
+  end-states (state-pill/cards), battle responsivo (podium 700px, transition/engaged).
+- **Conteúdo battle:** cabeçalho + contadores, CTAs fiéis, log fiel, moves com
+  cor de tipo, stock-items com regra.
+- **Home/history:** título+lead, meter acessível, catalog count/clear, pcard fiel, footer.
+- **Técnicos (junto à limpeza):** keyframes projectile p/ o bloco ODS (D86 —
+  quebra se remover o legado), toast no ODS (D88), colisões .bar/nav/log (D71–D76),
+  filtros vs CSS (D94), inline do history (D80).
+- Relatório completo nos resultados das auditorias da sessão (ver handoff 2026-09-09).
