@@ -16,8 +16,8 @@ class ServerHistoryTest < Minitest::Test
     assert_includes last_response.body, 'href="/history" class="active"'
     assert_includes last_response.body, 'id="history-view"'
     assert_match(/Ranking global/, last_response.body)
-    assert_match(/Vitórias: 1/, last_response.body)
-    assert_match(/Derrotas: 1/, last_response.body)
+    assert_match(/class="stat-chip win"/, last_response.body)
+    assert_match(/class="stat-chip loss"/, last_response.body)
   end
 
   def test_history_highlights_current_user_in_ranking
