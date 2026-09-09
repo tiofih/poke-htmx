@@ -203,3 +203,15 @@ escopo grande — considerar fatiar (ex.: 0076a filiais visuais + 0076b limpeza)
   quebra se remover o legado), toast no ODS (D88), colisões .bar/nav/log (D71–D76),
   filtros vs CSS (D94), inline do history (D80).
 - Relatório completo nos resultados das auditorias da sessão (ver handoff 2026-09-09).
+
+## Paridade 1:1 open-design (análise exaustiva 2026-09-09, decisão: fatiar por tela)
+
+Inventário programático (classes/ids/odid/roles/copy/CSS por seletor/vars/JS/media)
++ grafo (presenters, record, moves) + leituras diretas. 1:1 confirmado: shell/topnav,
+tokens :root completos, history CSS, modal shell, odid, tags, filtros, juice no bloco.
+Gaps numerados HOME-1–4, BATTLE-5–9, HISTORY-10 (só dados), MODAIS-11 no relatório da
+sessão (ver handoff). Decisão do usuário: **fatiar por tela** — 0077 parity-home,
+0078 parity-battle, 0079 parity-history (migração só se confirmada); fila de
+estabilidade (atomicidade/CSRF/respiro) desliza 3 posições. Decisões pendentes no
+refinamento: tabs vs empilhado, podium vs res-top, formato do log, dot-por-tipo
+(custo backend), h-sub rico (migração).
