@@ -112,13 +112,21 @@ class ServerTeamTest < Minitest::Test
     assert_includes last_response.body, 'disabled="disabled"'
   end
 
+  # C7/ITEM 3 — "Gerenciar time" migra para o budget-summary do index (GET /),
+  # sem duplicar no fragmento do team
   def test_team_fragment_manage_link_is_on_its_own_line
     @repository.add("user-a", pikachu_pokemon)
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
-    assert_match(%r{<p class="team-tools">\s*<a href="#" hx-get="/team/manage"}, last_response.body)
+    before_team_view = last_response.body.split('id="team-view"').first
+    assert_match(%r{<div class="budget-summary">.*?hx-get="/team/manage"}m, before_team_view)
+
+    get "/team", {}, htmx_session("user-a")
+    refute_includes last_response.body, "Gerenciar time"
   end
 
   def test_team_panel_shows_battle_cta_after_journey

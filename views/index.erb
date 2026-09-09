@@ -8,6 +8,7 @@
       <div class="budget-summary">
         <div class="budget-meta row">Custo do time <strong class="num"><%= @team_cost %>/<%= @team_budget %></strong></div>
         <div class="meter"><span class="meter-fill" style="width:<%= (@team_cost.to_f / @team_budget * 100) %>%"></span></div>
+        <a class="btn btn-secondary" href="#" hx-get="/team/manage" hx-target="#team-view" hx-swap="innerHTML">Gerenciar time</a>
       </div>
     </div>
 
