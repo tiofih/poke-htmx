@@ -204,4 +204,12 @@ class StyleResponsiveTest < Minitest::Test
     assert_match(/@media\s*\(min-width:\s*900px\)[\s\S]*\.projectile[^}]*animation:\s*juice-projectile/m,
                  content, "projetil anima apenas em viewport >= 900px")
   end
+
+  def test_history_rows_stack_at_920 # rubocop:disable Naming/VariableNumber
+    content = style_content
+
+    assert_match(/@media\s*\(max-width:\s*920px\)[\s\S]*?\.history-row[^}]*grid-template-columns:\s*1fr/m,
+                 content,
+                 "expected history-row to stack to 1fr at max-width:920px")
+  end
 end

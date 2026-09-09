@@ -28,6 +28,7 @@ class ServerHistoryTest < Minitest::Test
 
     assert last_response.ok?
     assert_match(/user-a/, last_response.body)
+    assert_match(/<li class="rank-row you">/, last_response.body)
   end
 
   def test_history_shows_empty_message_without_battles

@@ -30,23 +30,40 @@
       </div>
     </section>
 
-    <h2>Ranking global</h2>
-    <% @rank.each_with_index do |row, index| %>
-      <p class="rank-entry <%= "current" if row[:user_id] == @current_user %>">
-        <%= index + 1 %>. <%= row[:user_id] %> — <%= row[:wins] %> vitória<%= "s" unless row[:wins] == 1 %>
-        (<%= row[:total] %> batalha<%= "s" unless row[:total] == 1 %>)
-      </p>
-    <% end %>
+    <section data-od-id="ranking" style="margin-bottom: 40px;">
+      <h2 class="section-title">Ranking global</h2>
+      <div class="card" style="padding: 8px 10px;">
+        <ul class="rank-list">
+          <% @rank.each_with_index do |row, index| %>
+            <% share = row[:total].positive? ? (100.0 * row[:wins] / row[:total]).round : 0 %>
+            <li class="rank-row<%= " you" if row[:user_id] == @current_user %>">
+              <span class="rank-pos num"><%= index + 1 %></span>
+              <span class="rank-name"><%= row[:user_id] %></span>
+              <div class="rank-bar"><span style="width:<%= share %>%"></span></div>
+              <span class="rank-wins"><strong class="num"><%= row[:wins] %></strong> / <%= row[:total] %></span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </section>
 
-    <h2>Últimas batalhas</h2>
-    <ul class="battle-history">
-      <% @recent.each do |record| %>
-        <li>
-          <strong><%= result_label(record[:result]) %></strong> contra
-          <%= opponent_names(record[:opponent_team]) %>
-          em <%= Time.parse(record[:created_at].to_s).strftime("%d/%m/%Y %H:%M") %>
-        </li>
-      <% end %>
-    </ul>
+    <section data-od-id="recent">
+      <h2 class="section-title">Últimas batalhas</h2>
+      <div class="card" style="padding: 8px 10px;">
+        <ul class="history-list">
+          <% @recent.each do |record| %>
+            <% badge = { "win" => "win", "lose" => "loss", "draw" => "draw" }.fetch(record[:result], "draw") %>
+            <li class="history-row">
+              <span class="result-badge <%= badge %>"><%= result_label(record[:result]) %></span>
+              <div class="history-main">
+                <div class="h-title">Contra <%= opponent_names(record[:opponent_team]) %></div>
+                <div class="h-sub"><%= record[:opponent_team].size %> oponentes</div>
+              </div>
+              <span class="history-date num"><%= Time.parse(record[:created_at].to_s).strftime("%d/%m %H:%M") %></span>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </section>
   <% end %>
 </div>
