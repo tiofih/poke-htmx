@@ -52,6 +52,18 @@ module ServerCommon
     @available_moves = data[:available_moves]
     @inventory = data[:inventory]
     @team_types = team_types_map(@team)
+    @member_levels = member_levels_map(@team)
+  end
+
+  # Niveis 0077 (C2): progressao local por membro, fail-closed 1 (sem rede).
+  def member_levels_map(members)
+    Array(members).to_h { |member| [member.id, member_level_for(member)] }
+  end
+
+  def member_level_for(member)
+    settings.progression.get(current_user, member.id)&.fetch(:level, 1) || 1
+  rescue StandardError
+    1
   end
 
   # Enrichment 0076 2a (C5): o schema team_pokemons nao tem coluna de tipos —

@@ -51,4 +51,51 @@ class HomeResidueTest < Minitest::Test
     assert_includes mart, "Saldo: 100"
     refute_includes mart, "onclick"
   end
+
+  def test_manage_evolution
+    pikachu_id = TestDatabase.team_id("pikachu", HOME_USER)
+    @repository.set_moves(HOME_USER, pikachu_id.to_i, ["growl"])
+    @inventory.add(HOME_USER, "thunder-stone", 2)
+    find_map = {
+      "pikachu" => Pokemon.new(name: "pikachu", sprite: "s", number: 25, types: %w[electric])
+    }
+
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" }, { level: 1, name: "quick-attack" }]
+    ) do
+      PokeApiStub.with_find(find_map) do
+        get "/team/manage", {}, user_session(HOME_USER)
+      end
+    end
+
+    assert last_response.ok?
+    manage = last_response.body
+    assert_includes manage, 'id="manage-modal"'
+    assert_match(/class="stat-grid"/, manage)
+    assert_match(/class="mv-row marked"/, manage)
+    assert_match(/class="evo-row"/, manage)
+    assert_match(/class="equip-row"/, manage)
+    assert_match(/class="tag-row"/, manage)
+    assert_includes manage, "Nível 5"
+    assert_includes manage, "Voltar"
+    refute_includes manage, "onclick"
+
+    PokeApiStub.with_stone_evolutions([
+                                        { number: 26, name: "raichu", item: "thunder-stone" },
+                                        { number: 134, name: "vaporeon", item: "water-stone" }
+                                      ]) do
+      get "/team/#{pikachu_id}/evolution", {}, user_session(HOME_USER)
+    end
+
+    assert last_response.ok?
+    modal = last_response.body
+    assert_includes modal, 'id="evolution-modal"'
+    assert_match(/class="[^"]*\bmodal\b/, modal)
+    assert_match(/class="evo-row"/, modal)
+    assert_includes modal, "raichu"
+    assert_includes modal, "Inventário: 2"
+    assert_includes modal, %(hx-post="/team/#{pikachu_id}/evolve")
+    refute_includes modal, "evolution-modal-box"
+    refute_includes modal, "onclick"
+  end
 end

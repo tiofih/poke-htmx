@@ -35,8 +35,8 @@ class ServerTeamManageTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_match(/class="move-row marked"\s+data-move="thunder-shock"/, last_response.body)
-    refute_match(/class="move-row marked"\s+data-move="growl"/, last_response.body)
+    assert_match(/class="mv-row marked"\s+data-move="thunder-shock"/, last_response.body)
+    refute_match(/class="mv-row marked"\s+data-move="growl"/, last_response.body)
   end
 
   def test_team_manage_gates_available_moves_by_member_level
@@ -111,7 +111,7 @@ class ServerTeamManageTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, 'data-move="growl"'
-    assert_match(/class="move-row marked"\s+data-move="tackle"/, last_response.body,
+    assert_match(/class="mv-row marked"\s+data-move="tackle"/, last_response.body,
                  "golpe salvo fora do learnable permanece visível/marcado")
     refute_includes last_response.body, "tackle — Nível", "golpe sem aprendizado por nível não ganha rótulo"
   end
@@ -128,7 +128,7 @@ class ServerTeamManageTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_match(/class="move-row marked"\s+data-move="quick-attack"/, last_response.body,
+    assert_match(/class="mv-row marked"\s+data-move="quick-attack"/, last_response.body,
                  "golpe salvo acima do nível permanece visível/marcado para permitir remoção")
     assert_includes last_response.body, "quick-attack — Nível 5"
   end
@@ -203,7 +203,7 @@ class ServerTeamManageTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_match(/class="move-row marked"\s+data-move="growl"/, last_response.body)
+    assert_match(/class="mv-row marked"\s+data-move="growl"/, last_response.body)
     assert_empty @repository.all("user-a").first.moves, "rascunho não persiste"
   end
 
@@ -217,7 +217,7 @@ class ServerTeamManageTest < Minitest::Test
     end
 
     assert last_response.ok?
-    refute_match(/class="move-row marked"\s+data-move="growl"/, last_response.body)
+    refute_match(/class="mv-row marked"\s+data-move="growl"/, last_response.body)
     assert_equal %w[growl], @repository.all("user-a").first.moves, "rascunho não persiste"
   end
 
@@ -236,7 +236,7 @@ class ServerTeamManageTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "máximo"
     assert_includes last_response.body, "notice--error"
-    refute_match(/class="move-row marked"\s+data-move="e"/, last_response.body)
+    refute_match(/class="mv-row marked"\s+data-move="e"/, last_response.body)
     assert_empty @repository.all("user-a").first.moves, "rascunho não persiste"
   end
 
@@ -266,7 +266,7 @@ class ServerTeamManageTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, 'name="toggle"'
-    assert_match(/class="move-row marked"\s+data-move="thunder-shock"/, last_response.body)
+    assert_match(/class="mv-row marked"\s+data-move="thunder-shock"/, last_response.body)
     refute_includes last_response.body, "<html"
   end
 

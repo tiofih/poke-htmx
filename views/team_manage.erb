@@ -1,23 +1,32 @@
 <% if @notice %>
   <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
 <% end %>
-<h1>Gerenciar time</h1>
 <% @team.each do |poke| %>
+  <% level = @member_levels && @member_levels[poke.id] || 1 %>
   <div class="manage-member">
-    <p class="slot">#<%= poke.slot %></p>
-    <img src="<%= poke.sprite %>" alt="<%= poke.name %>"><br>
-    <strong><%= poke.name %></strong><br>
-    <% manage_types = @team_types && @team_types[poke.id] %>
-    <% unless manage_types.nil? || manage_types.empty? %>
-      <span class="mtags">
-        <% manage_types.each do |tag| %><span class="mtag mtag--<%= tag %>"><%= tag %></span><% end %>
-      </span><br>
-    <% end %>
-    <a class="btn evolution-trigger" href="#evolution-modal"
-       hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</a>
+    <div class="mg-head">
+      <div class="sprite-tile"><img src="<%= poke.sprite %>" alt="<%= poke.name %>" width="96" height="96"></div>
+      <div>
+        <h2><%= poke.name %></h2>
+        <p class="meta num">Nível <%= level %> · #<%= poke.slot %></p>
+        <% manage_types = @team_types && @team_types[poke.id] %>
+        <% unless manage_types.nil? || manage_types.empty? %>
+          <div class="tag-row">
+            <% manage_types.each do |tag| %><span class="mtag mtag--<%= tag %>"><%= tag %></span><% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    <p class="section-label">Status</p>
+    <div class="stat-grid">
+      <div class="stat-row"><span class="lab">HP</span><div class="stat-bar"><span style="width:<%= poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f * 100).round : 0 %>%"></span></div><span class="val"><%= poke.hp_current %>/<%= poke.hp_max %></span></div>
+      <div class="stat-row"><span class="lab">Nível</span><div class="stat-bar"><span style="width:<%= [level.to_i, 100].min %>%"></span></div><span class="val"><%= level %></span></div>
+      <div class="stat-row"><span class="lab">Golpes</span><div class="stat-bar"><span style="width:<%= ((@draft_moves&.[](poke.id) || poke.moves.to_a).size / 4.0 * 100).round %>%"></span></div><span class="val"><%= (@draft_moves&.[](poke.id) || poke.moves.to_a).size %>/4</span></div>
+    </div>
+    <p class="section-label">Golpes <span class="meta">· selecione até 4</span></p>
     <% current_moves = @draft_moves&.[](poke.id) || poke.moves.to_a %>
     <% @available_moves[poke.id].to_a.each do |move| %>
-      <form class="move-row<%= " marked" if current_moves.include?(move[:name]) %>"
+      <form class="mv-row<%= " marked" if current_moves.include?(move[:name]) %>"
             data-move="<%= move[:name] %>"
             hx-post="/team/<%= poke.id %>/moves"
             hx-target="#team-view"
@@ -27,7 +36,7 @@
         <% current_moves.each do |name| %>
           <input type="hidden" name="moves[]" value="<%= name %>">
         <% end %>
-        <button type="submit"><%= move[:name] %><%= " — Nível #{move[:level]}" if move[:level] %></button>
+        <button type="submit"><span class="mv-name"><%= move[:name] %><%= " — Nível #{move[:level]}" if move[:level] %></span><span class="mv-sel"><%= "✓" if current_moves.include?(move[:name]) %></span></button>
       </form>
     <% end %>
     <form class="save-moves"
@@ -39,13 +48,13 @@
       <% end %>
       <button type="submit">Salvar golpes</button>
     </form>
-    <form
+    <p class="section-label">Item</p>
+    <form class="equip-row"
         hx-post="/team/<%= poke.id %>/item"
         hx-target="#team-view"
         hx-swap="innerHTML">
-      <label>
-        Item:
-        <select name="item_name">
+      <label>Item:
+        <select class="select" name="item_name">
           <option value=""<%= poke.assigned_item.to_s.empty? ? " selected" : "" %>>Nenhum</option>
           <% @inventory.to_a.each do |entry| %>
             <% item = ItemCatalog.find(entry[:name]) %>
@@ -58,13 +67,16 @@
       </label>
       <button type="submit">Salvar item</button>
     </form>
-    <form
+    <% if poke.assigned_item && !poke.assigned_item.empty? %>
+      <p class="meta equip-current">Equipado: <strong><%= poke.assigned_item %></strong></p>
+    <% end %>
+    <p class="section-label">Segurável</p>
+    <form class="equip-row"
         hx-post="/team/<%= poke.id %>/held-item"
         hx-target="#team-view"
         hx-swap="innerHTML">
-      <label>
-        Segurável:
-        <select name="item_name">
+      <label>Segurável:
+        <select class="select" name="item_name">
           <option value=""<%= poke.held_item.to_s.empty? ? " selected" : "" %>>Nenhum</option>
           <% @inventory.to_a.each do |entry| %>
             <% item = ItemCatalog.find(entry[:name]) %>
@@ -77,6 +89,15 @@
       </label>
       <button type="submit">Salvar segurável</button>
     </form>
+    <% if poke.held_item && !poke.held_item.empty? %>
+      <p class="meta equip-current">Segurando: <strong><%= poke.held_item %></strong></p>
+    <% end %>
+    <p class="section-label">Evolução</p>
+    <div class="evo-row">
+      <span class="evo-info"><span class="evo-item">Evolução por pedra</span><span class="evo-arrow">→</span><span class="meta">abre o modal</span></span>
+      <a class="btn btn-secondary btn-sm evolution-trigger" href="#evolution-modal"
+         hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</a>
+    </div>
     <form
         hx-post="/team/<%= poke.id %>/move"
         hx-target="#team-view"
