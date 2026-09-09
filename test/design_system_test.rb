@@ -72,4 +72,23 @@ class DesignSystemTest < Minitest::Test
     assert_match(/class="[^"]*page-list[^"]*"/, last_response.body,
                  "expected / body to keep page-list class")
   end
+
+  def test_design_system_does_not_depend_on_sakura
+    content = style_content
+    block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
+
+    refute_nil block, "expected a delimited Open Design System block in style.css"
+    refute_match(/sakura/i, block,
+                 "design system must not depend on sakura resets")
+    refute_match(/@import/, block,
+                 "design system must not @import external stylesheets")
+  end
+
+  def test_style_css_route_serves_text_css
+    get "/style.css"
+
+    assert last_response.ok?, "expected GET /style.css to be 200"
+    assert_match(%r{\Atext/css}, last_response.content_type,
+                 "expected /style.css to respond with text/css")
+  end
 end
