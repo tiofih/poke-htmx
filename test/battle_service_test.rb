@@ -440,7 +440,7 @@ class BattleServiceTest < Minitest::Test
     assert_equal 9, service.send(:generation_for_level, 42)
 
     # nivel medio alto => opponent level escalado aumenta HP/level
-    # bypass D3 B: grant_levels coerente com RewardRule levels_for, sem recalcular xp
+    # caminho real: xp_for -> grant (curva deriva nivel); grant_levels fora do reward path
     @team.all("user-1").each { |member| @progression.grant_levels("user-1", member.id, 5) } # 1 -> 6
     assert_equal 6, service.send(:average_player_level, "user-1", @team.all("user-1"))
     service_high = build_service(TieredApi.new)
@@ -765,7 +765,7 @@ class BattleServiceGrantLevelsTest < Minitest::Test
     end
   end
 
-  def test_grant_finished_xp_increments_one_on_lose
+  def test_grant_finished_xp_grants_lose_xp
     api = TieredApi.new
     add_team_for("user-1")
     counting = CountingProgression.new(@progression)
@@ -782,7 +782,7 @@ class BattleServiceGrantLevelsTest < Minitest::Test
     end
   end
 
-  def test_grant_finished_xp_increments_one_on_draw
+  def test_grant_finished_xp_grants_draw_xp
     api = TieredApi.new
     add_team_for("user-1")
     counting = CountingProgression.new(@progression)

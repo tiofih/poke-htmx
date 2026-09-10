@@ -42,6 +42,7 @@ class ProgressionRepository
     { level: level, xp: total }
   end
 
+  # Seed/test helper — fora do caminho de recompensa (reward usa xp_for -> grant).
   def grant_levels(user_id, team_pokemon_id, delta) # rubocop:disable Metrics/MethodLength
     current = get(user_id, team_pokemon_id)
     return unless current
