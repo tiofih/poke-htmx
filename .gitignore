@@ -39,6 +39,7 @@ graphify-out/
 refs/
 landing
 open-design/
+test-results/
 
 # Cassette VCR gigante — recording bug (>100MB, excede limite do GitHub)
 test/cassettes/ServerTeamRemoveQ5Test/test_oob_conditional_skips_starters_when_filtered_or_paginated.yml
