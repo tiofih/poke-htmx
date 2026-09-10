@@ -12,8 +12,6 @@ coverage/
 
 # Node / opencode tooling
 node_modules/
-package.json
-package-lock.json
 .tool-versions
 
 # IDE / editors
