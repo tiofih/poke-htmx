@@ -42,6 +42,7 @@ description: Fluxo de papéis do SDD do Poke-HTMX — Refinador → Implementado
 - **Delegação com grafo (orquestrador → subagent):** antes de `task(subagent_type)`, o orquestrador **deve** rodar `search_graph + get_code_snippet + trace_path + check_index_coverage` no parent e injetar no `prompt` do filho: `tier` (Verify por padrão), `project`, `qualified_name`, `paths`, `coverage` (`no_recorded_issue` vs `parse_partial` com ranges), `scopes` e perguntas em aberto. O filho **não** herda MCP automaticamente — sem esse contexto ele volta ao `read`.
 - **Economia por papel (ponytail + caveman):** `implementador-teste` = ponytail ULTRA + caveman full na prosa (testes/S1 intocáveis); `revisor` = lente ponytail FULL (item 5 de over-engineering) + caveman full nos achados; `refinador` = ponytail LITE + caveman lite/off no mapa (nuance p/ o usuário); `playtester` = ambos OFF.
 - **Especialistas por área (fase 2):** o `implementador-teste` pode delegar fatias a `frontend` / `backend` (genéricos, especializam via `STACK.md` do repo); só o `implementador-teste` commita.
+- **Roteamento coder/frontend/backend por escopo:** só views+public→frontend; só lib+server.rb+db+config→backend; ambos ou desconhecido→coder (triage); teste segue o código que trava; scripts/docker/CI→devops; visual→design-review; números→game-design; QA→qa-e2e.
 - **Comandos de projeto:** `./scripts/test`, `./scripts/lint`, `./scripts/check_docs` (+ `scripts/medir-uso-grafo` para taxa read:mcp).
   NUNCA `rake`/`rubocop` no host.
 
