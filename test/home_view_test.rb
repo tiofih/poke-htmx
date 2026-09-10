@@ -79,6 +79,21 @@ class HomeViewTest < Minitest::Test
                  "expected catalog cards to wrap cost in .pcard-meta")
   end
 
+  def test_roster_members_show_level_and_manage
+    fill_team("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/class="roster"/, body, "expected the team roster")
+    assert_match(/Nível \d+/, body, "expected each member to show Nível")
+    assert_match(%r{hx-get="/team/manage"[^>]*hx-target="body"}, body,
+                 "expected a Gerenciar link opening the manage modal")
+    assert_includes body, 'name="new_slot"', "expected reorder forms preserved"
+  end
+
   def test_pokemon_detail_wears_tag_row_stat_grid_evo_row
     chain = {
       charmander: build_pokemon_record("charmander", 4),

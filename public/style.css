@@ -1692,6 +1692,10 @@
    (.btn/.card/.roster/.member/.pcard) existentes — nao redefinidos. */
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: var(--fs-body); line-height: 1.55; }
 
+/* Roster em grid 2-col (prototipo home-team.html); colapsa em 1-col <=920px. */
+.roster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 920px) { .roster { grid-template-columns: 1fr; } }
+
 /* === Open Design System (0072): fim === */
 
 /* Layout interno das seções da página única */

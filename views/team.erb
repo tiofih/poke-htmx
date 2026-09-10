@@ -42,6 +42,7 @@
           <div>
             <span class="slot">#<%= poke.slot %></span>
             <span class="member-name"><%= poke.name %></span>
+            <span class="member-lvl num">Nível <%= @member_levels.fetch(poke.id, 1) %></span>
             <% member_types = @team_types && @team_types[poke.id] %>
             <% unless member_types.nil? || member_types.empty? %>
               <span class="mtags">
@@ -58,6 +59,8 @@
         <div class="member-actions">
           <a class="btn evolution-trigger" href="#evolution-modal"
              hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</a>
+          <a class="btn btn-ghost btn-sm" href="#manage-modal"
+             hx-get="/team/manage" hx-target="body" hx-swap="beforeend">Gerenciar</a>
           <form
               hx-post="/team/<%= poke.id %>/move"
               hx-target="#team-view"

@@ -973,6 +973,7 @@ module ServerBattleActions
     @team_budget = TeamBudget::BUDGET
     @team_s_count = team_s_count(@team)
     @team_types = team_types_map(@team)
+    @member_levels = member_levels_map(@team)
     center_data
     mart_data
   end
