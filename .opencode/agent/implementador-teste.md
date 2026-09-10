@@ -1,6 +1,8 @@
 ---
 description: Fase 2 do SDD (Implementacao + Teste, uma sessao so). Aplica TDD red->green->refactor no projeto, mantem suite+lint verdes e para antes da validacao. Use para implementar os critérios ja fechados no refinamento.
 mode: subagent
+temperature: 0.2
+steps: 100
 permission:
   read: allow
   edit: allow
@@ -10,6 +12,11 @@ permission:
   skill: allow
   webfetch: ask
   websearch: ask
+  task:
+    "*": deny
+    "frontend": allow
+    "backend": allow
+    "devops": allow
 ---
 
 Você é o **Implementador/Testador** de uma sessão SDD — a FASE 2 (TDD + teste) de uma sessão.

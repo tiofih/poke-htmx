@@ -1,6 +1,8 @@
 ---
 description: Playtest (Fase 3 pre-validacao, OPCIONAL). Sobe o app e faz um playtest manual/advisory: UX, fluxos e bugs de comportamento. NAO e a validacao formal (essa e do usuário). Use apenas quando o usuario pedir.
 mode: subagent
+temperature: 0.4
+steps: 50
 permission:
   read: allow
   glob: allow
@@ -11,6 +13,8 @@ permission:
   skill: allow
   webfetch: ask
   websearch: ask
+  task:
+    "*": deny
 ---
 
 Você é o **Playtester** de uma sessão SDD — papel **opcional/advisory**.

@@ -10,7 +10,8 @@ description: Fluxo de papéis do SDD do Poke-HTMX — Refinador → Implementado
 | Fase | Papel (subagent_type) | Entregável | Quando disparar |
 |---|---|---|---|
 | 1 — Refinamento (CONVERSA) | `refinador` (investigação → finalize) | **investigação**: mapa de decisões (opções A/B/C, recomendada). **finalize**: sessão `sessions/NNNN-*.md` + `SESSIONS.md` (S4) | sessão nova / refinamento pendente |
-| 2 — TDD | `implementador-teste` | código + testes, commits `Passo N:`, suíte+lint verdes | refinamento aprovado |
+| 1b — Desenho técnico | `arquiteto` (read-only) | fatias (frontend/backend/devops), contratos, riscos de acoplamento | refinamento aprovado, antes de implementar |
+| 2 — TDD | `implementador-teste` (+ `frontend`/`backend` como fatias) | código + testes, commits `Passo N:`, suíte+lint verdes | desenho pronto (ou refinamento, se trivial) |
 | 2c — Revisão | `revisor` | diff revisado + `VEREDITO: Aprovado` \| `Requer ajuste` | implementação feita |
 | 3 — pré-validação | `playtester` (OPCIONAL) | achados de UX/comportamento no app rodando | só se o usuário pedir / tiver valor |
 | 3 — Validação | **usuário** | tabela por critério (S2) / S3 | **nunca a IA** |
@@ -40,6 +41,7 @@ description: Fluxo de papéis do SDD do Poke-HTMX — Refinador → Implementado
 - **Grafo obrigatório (antes de qualquer read/grep):** quando `graphify-out/` existe (índice `Users-tiofih-workspace-poke-htmx` 5196 nodes), **NUNCA** usar `read`/`grep`/`glob` para explorar — use `codebase-memory-mcp` (`search_graph limit10` → `get_code_snippet` → `trace_path` → `check_index_coverage`) ou `graphify query/explain/path`. `read` é só para **editar** (precisa do byte exato p/ `edit` casar). `grep` só para literais/mensagens de erro/configs ou quando MCP retorna insuficiente (e então cite o gap).
 - **Delegação com grafo (orquestrador → subagent):** antes de `task(subagent_type)`, o orquestrador **deve** rodar `search_graph + get_code_snippet + trace_path + check_index_coverage` no parent e injetar no `prompt` do filho: `tier` (Verify por padrão), `project`, `qualified_name`, `paths`, `coverage` (`no_recorded_issue` vs `parse_partial` com ranges), `scopes` e perguntas em aberto. O filho **não** herda MCP automaticamente — sem esse contexto ele volta ao `read`.
 - **Economia por papel (ponytail + caveman):** `implementador-teste` = ponytail ULTRA + caveman full na prosa (testes/S1 intocáveis); `revisor` = lente ponytail FULL (item 5 de over-engineering) + caveman full nos achados; `refinador` = ponytail LITE + caveman lite/off no mapa (nuance p/ o usuário); `playtester` = ambos OFF.
+- **Especialistas por área (fase 2):** o `implementador-teste` pode delegar fatias a `frontend` / `backend` (genéricos, especializam via `STACK.md` do repo); só o `implementador-teste` commita.
 - **Comandos de projeto:** `./scripts/test`, `./scripts/lint`, `./scripts/check_docs` (+ `scripts/medir-uso-grafo` para taxa read:mcp).
   NUNCA `rake`/`rubocop` no host.
 

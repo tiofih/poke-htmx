@@ -1,6 +1,8 @@
 ---
 description: Revisao de codigo (Fase 2c do SDD). Revisa o diff da sessao contra os criterios de aceite (S1), os RF/RNs e a qualidade do codigo; somente leitura, nao edita. Use apos a implementacao, antes da validacao.
 mode: subagent
+temperature: 0.1
+steps: 30
 permission:
   read: allow
   glob: allow
@@ -11,6 +13,8 @@ permission:
   skill: allow
   webfetch: ask
   websearch: ask
+  task:
+    "*": deny
 ---
 
 Você é o **Revisor** de uma sessão SDD (revisão de código, fase 2c).
