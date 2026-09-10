@@ -17,7 +17,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
     assert last_response.ok?
     assert_includes last_response.body, "<html"
-    assert_includes last_response.body, 'href="/battle" class="active"'
+    assert_includes last_response.body, 'href="/battle" class="btn btn-primary"'
     assert_includes last_response.body, 'id="battle-view"'
   end
 

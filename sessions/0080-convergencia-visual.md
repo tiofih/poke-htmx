@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — escolhas do usuário em 2026-09-10 (escopo B: 0080 = itens 1-4+6, item 5 center/mart vira 0081 própria; item 5 = B modal-only; roster = A; pcard = B; demais = recomendadas do mapa — ver seção 5) |
-| Implementação (fase 2, TDD) | Pendente |
+| Implementação (fase 2, TDD) | **TDD concluída** — passos 1-4 verdes + regressão (1085/5291) + lint (0 no escopo); **aguardando Revisor S7** |
 | Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
 
 ---
@@ -46,19 +46,19 @@ Fechar a **convergência visual** entre os protótipos `open-design/` e as views
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| C1 body global: regra base do `body` no bloco ODS (delimitador `0080`), aditiva, ANTES da linha `fim` | `test/convergence_0080_test.rb` `test_body_has_global_base_rule` (novo) + `test/design_system_test.rb` estendido + `test/layout_test.rb` estendido | pendente |
-| C2 topnav: CTA sempre `.btn` em toda rota (fim do `active`-texto em `/battle`) + "Voltar ao time" em `/battle` | `test/convergence_0080_test.rb` `test_topnav_ctas_are_buttons_and_battle_has_back_link` (novo) + `test/layout_test.rb` estendido | pendente |
-| C3 roster: `team.erb` em grid 2-col com nível do membro + Gerenciar, ▲▼ (`new_slot`) preservados | `test/convergence_0080_test.rb` `test_roster_grid_with_level_manage_and_reorder` (novo) + `test/home_view_test.rb` estendido | pendente |
-| C4 pcard: `pokemon_list_item.erb` re-marcado por completo espelhando `home-team.html` (tier·custo + botão no conteúdo) | `test/convergence_0080_test.rb` `test_pcard_full_remarkup_mirrors_prototype` (novo) + `test/home_view_test.rb` estendido | pendente |
-| C5 podium: meio do `.podium` (round-banner + controles + `#result-box`) envolvido em `.card` | `test/convergence_0080_test.rb` `test_podium_middle_wrapped_in_card` (novo) + `test/battle_view_test.rb` estendido | pendente |
+| C1 body global: regra base do `body` no bloco ODS (delimitador `0080`), aditiva, ANTES da linha `fim` | `test/convergence_0080_test.rb` `test_body_has_global_base_rule` (novo) + `test/design_system_test.rb` estendido + `test/layout_test.rb` estendido | verde (passo 1) |
+| C2 topnav: CTA sempre `.btn` em toda rota (fim do `active`-texto em `/battle`) + "Voltar ao time" em `/battle` | `test/convergence_0080_test.rb` `test_topnav_ctas_are_buttons_and_battle_has_back_link` (novo) + `test/layout_test.rb` estendido | verde (passo 1) |
+| C3 roster: `team.erb` em grid 2-col com nível do membro + Gerenciar, ▲▼ (`new_slot`) preservados | `test/convergence_0080_test.rb` `test_roster_grid_with_level_manage_and_reorder` (novo) + `test/home_view_test.rb` estendido | verde (passo 2) |
+| C4 pcard: `pokemon_list_item.erb` re-marcado por completo espelhando `home-team.html` (tier·custo + botão no conteúdo) | `test/convergence_0080_test.rb` `test_pcard_full_remarkup_mirrors_prototype` (novo) + `test/home_view_test.rb` estendido | verde (passo 3) |
+| C5 podium: meio do `.podium` (round-banner + controles + `#result-box`) envolvido em `.card` | `test/convergence_0080_test.rb` `test_podium_middle_wrapped_in_card` (novo) + `test/battle_view_test.rb` estendido | verde (passo 4) |
 
 ### Garantias
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| G1 sem regressão — suíte completa (baseline **1057/4900** + novos) + lint 0 | `./scripts/test` + `./scripts/lint` | pendente |
-| G2 só visual — sem migração/schema/gems; motor/economia intocados; `open_design_contract` intacto | `git diff --stat -- db/ Gemfile* test/open_design_contract_test.rb` vazio + revisão S7 confere | pendente |
-| G3 S4/S5 + revisão — `SESSIONS.md` + `check_docs` + `checar-sessao 0080` verdes; revisor S7 `Aprovado` antes da 3 | `./scripts/check_docs` + `./scripts/checar-sessao 0080` + veredito do Revisor | pendente |
+| G1 sem regressão — suíte completa (baseline **1057/4900** + novos) + lint 0 | `./scripts/test` + `./scripts/lint` | verde passo 5 (**1085/5291**, 0 falhas; lint 0 no escopo — 19 ofensas preexistentes em `scripts/sweep-balance.rb`, fora do escopo) |
+| G2 só visual — sem migração/schema/gems; motor/economia intocados; `open_design_contract` intacto | `git diff --stat -- db/ Gemfile* test/open_design_contract_test.rb` vazio + revisão S7 confere | verde (diff vazio nos 4 commits; +1 linha view-data `@member_levels` em `prepare_team_fragment_data` via helper existente) |
+| G3 S4/S5 + revisão — `SESSIONS.md` + `check_docs` + `checar-sessao 0080` verdes; revisor S7 `Aprovado` antes da 3 | `./scripts/check_docs` + `./scripts/checar-sessao 0080` + veredito do Revisor | parcial (checks verdes; S7 pendente) |
 
 ### Manual
 
@@ -116,6 +116,7 @@ Fechar a **convergência visual** entre os protótipos `open-design/` e as views
 - **Fila (novo deslizamento, seção 5):** 0077 home → 0078 battle → 0079 history → **0080 convergência visual** → **0081 center-mart-modal-only** → 0082 escritas atômicas → 0083 CSRF → 0084 respiro.
 - **Referência stale:** `REQUIREMENTS.md:716-717` ainda aponta "0080 escritas atômicas → 0081 CSRF → 0082 respiro" — atualizar no refinamento da 0082 (fora desta sessão, RNF-04).
 - **Leitura exata antes de editar:** ERB `not_tracked` no grafo — confirmar `layout.erb:19`, `team.erb:37-58`, `pokemon_list_item.erb:1-25`, `battle.erb:40` no arquivo antes do Passo 1.
+- **Fase 2 executada (2026-09-10, TDD red→green):** C1-C5 verdes nos passos 1-4 (`3fb5532`, `a37fee0`, `68f94c2`, `26ada4f`); `test/battle_routes_test.rb:20` atualizado no passo 5 (codificava o `active`-texto que C2 remove — `pokemon_routes_test.rb:368` já refutava o antigo); suíte **1085/5291** verde; `check_docs` + `checar-sessao 0080` verdes. **PARADO antes da fase 3** — sem Done, sem §7, sem commit de conclusão.
 
 ## 9. Gotchas / Lições (memória — S6, preencher na 3)
 
