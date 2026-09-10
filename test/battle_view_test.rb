@@ -29,6 +29,17 @@ class BattleViewTest < Minitest::Test
     assert_match(/data-side="1"/, body, "opponent column keeps data-side=1 (juice direction)")
   end
 
+  def test_battle_podium_middle_wrapped_in_card
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/<div class="podium"[^>]*>\s*<div class="card">/m, body,
+                 "expected a .card opening the .podium")
+    assert_match(/<div class="round-banner">.*?<div class="controls">.*?id="result-box"/m, body,
+                 "expected round-banner + controls + #result-box in the card")
+  end
+
   def test_battle_fighter_card_shows_identity_hp_pp_moves
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 

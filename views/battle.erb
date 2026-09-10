@@ -38,6 +38,7 @@
     </div>
 
     <div class="podium" data-od-id="controls">
+      <div class="card">
       <div class="round-banner">
         <span class="turn-status">Rodada <%= @engine.rounds %><% if @engine.finished? %> — Fim de batalha<% end %></span>
       </div>
@@ -129,6 +130,7 @@
             </section>
           </div>
         <% end %>
+      </div>
       </div>
 
       <% log_entries = BattleLogPresenter.new(@engine.log).entries_all %>
