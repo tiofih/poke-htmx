@@ -40,4 +40,10 @@ class HealCostPolicyTest < Minitest::Test
     assert_equal 20, policy.cost(10)
     assert_equal 0, policy.cost(0)
   end
+
+  def test_cost_scales_with_average_level
+    assert_equal 5, @policy.cost(10, 5), "nivel medio base mantem o custo"
+    assert_equal 10, @policy.cost(10, 10), "nivel medio dobrado dobra o custo"
+    assert_equal 1, @policy.cost(10, 1), "nivel medio menor reduz o custo"
+  end
 end

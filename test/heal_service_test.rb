@@ -129,6 +129,23 @@ class HealServiceTest < Minitest::Test
     assert_equal 35, @progression.get("user-a", TestDatabase.team_id("pikachu", "user-a"))[:hp_current],
                  "preview não cura"
   end
+
+  def test_heal_charges_scaled_cost
+    pika = add_pokemon("user-a", "pikachu", 25, hp_max: 45, hp_current: 35)
+    bulba = add_pokemon("user-a", "bulbasaur", 1, hp_max: 50, hp_current: 40)
+    @progression.grant_levels("user-a", pika, 5)
+    @progression.grant_levels("user-a", bulba, 5)
+    @wallet.grant("user-a", 100)
+
+    assert_equal 20, @service.preview_cost("user-a"), "preview acompanha o custo escalado"
+
+    result = @service.heal("user-a")
+
+    assert_equal true, result[:healed]
+    assert_equal 20, result[:cost], "20 HP faltante * 0.5 * nivel medio 10/5 = 20"
+    assert_equal 80, result[:balance]
+    assert_equal 80, @wallet.balance("user-a")
+  end
 end
 
 # Sessao 0065 — C1 heal suficiente cura tudo (bloqueio total, sem parcial)

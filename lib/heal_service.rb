@@ -15,7 +15,7 @@ class HealService
     missing = missing_hp(members)
     return full_notice if missing.zero?
 
-    cost = @policy.cost(missing)
+    cost = @policy.cost(missing, average_level(user_id, members))
     balance = @wallet.balance(user_id)
     return insufficient_notice(cost, balance) if balance < cost
 
@@ -23,13 +23,21 @@ class HealService
   end
 
   def preview_cost(user_id)
-    @policy.cost(missing_hp(@team.all(user_id)))
+    members = @team.all(user_id)
+    @policy.cost(missing_hp(members), average_level(user_id, members))
   end
 
   private
 
   def missing_hp(members)
     members.sum { |member| @policy.missing_hp(member.hp_max, member.hp_current) }
+  end
+
+  def average_level(user_id, members)
+    return HealCostPolicy::BASE_LEVEL if members.empty?
+
+    levels = members.map { |member| @progression.get(user_id, member.id)&.fetch(:level) || HealCostPolicy::BASE_LEVEL }
+    (levels.sum / levels.size.to_f).round
   end
 
   def heal_result(user_id, members, cost)
