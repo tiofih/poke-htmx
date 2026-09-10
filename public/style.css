@@ -1687,6 +1687,11 @@
 .frow.lost .fn::after { content: ' · derrotado'; font-size: 9.5px; color: var(--danger); font-weight: 600; }
 .result-card { margin-top: 0; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; background: var(--fg-soft); order: 1; }
 
+/* === Convergencia 1:1 (0080) === */
+/* Base global do body (prototipo home-team.html). Aditivo; reusa tokens
+   (.btn/.card/.roster/.member/.pcard) existentes — nao redefinidos. */
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: var(--fs-body); line-height: 1.55; }
+
 /* === Open Design System (0072): fim === */
 
 /* Layout interno das seções da página única */

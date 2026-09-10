@@ -367,6 +367,19 @@ class DesignSystemTest < Minitest::Test
     end
   end
 
+  def test_design_system_convergence_body_base
+    content = style_content
+    block = content[%r{/\* === Convergencia 1:1 \(0080\) === \*/.*?Open Design System \(0072\): fim}m]
+
+    refute_nil block, "expected a delimited Convergencia 0080 block before the ODS fim marker"
+    assert_match(/body\s*\{[^}]*background:\s*var\(--bg\)/m, block,
+                 "expected the 0080 block to set body background from --bg")
+    assert_match(/body\s*\{[^}]*color:\s*var\(--fg\)/m, block,
+                 "expected the 0080 block to set body color from --fg")
+    assert_match(/body\s*\{[^}]*font-family:\s*var\(--font-body\)/m, block,
+                 "expected the 0080 block to set body font from --font-body")
+  end
+
   def test_style_css_route_serves_text_css
     get "/style.css"
 

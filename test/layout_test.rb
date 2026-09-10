@@ -51,4 +51,21 @@ class LayoutViewportTest < Minitest::Test
     assert_match(%r{0/6|1/6|2/6|3/6|4/6|5/6|6/6}, last_response.body,
                  "expected GET / to contain badge n/6")
   end
+
+  def test_topnav_cta_always_btn_and_back_link_only_on_battle
+    layout = File.read(File.join(__dir__, "../views/layout.erb"))
+
+    assert_match(%r{href="/battle" class="btn}, layout,
+                 "expected the /battle CTA to always wear .btn (no active-text)")
+    assert_match(/Voltar ao time/, layout,
+                 "expected a Voltar ao time link in the topnav")
+
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/"
+    end
+
+    assert last_response.ok?
+    refute_includes last_response.body, "Voltar ao time",
+                    "expected the back link only on /battle, not on /"
+  end
 end
