@@ -1,9 +1,9 @@
-<div id="center-modal" class="overlay open" data-od-id="modal-center">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="center-modal-title">
+<div id="center-modal" class="overlay open">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Poke Center" data-od-id="modal-center">
     <div class="modal-head">
-      <h2 id="center-modal-title">Poke Center</h2>
-      <a href="#" class="modal-close" aria-label="Fechar" data-od-id="modal-center-close"
-         hx-get="/team/center/close" hx-target="#center-modal" hx-swap="outerHTML">×</a>
+      <h2>Poke Center</h2>
+      <button type="button" class="modal-close" aria-label="Fechar" data-od-id="modal-center-close"
+         hx-get="/team/center/close" hx-target="#center-overlay" hx-swap="outerHTML">×</button>
     </div>
     <%= erb :_center, layout: false %>
   </div>

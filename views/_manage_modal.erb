@@ -1,9 +1,9 @@
-<div id="manage-modal" class="overlay open" data-od-id="modal-manage">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="manage-modal-title">
+<div id="manage-modal" class="overlay open">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Gerenciar Pokémon" data-od-id="modal-manage">
     <div class="modal-head">
-      <h2 id="manage-modal-title">Gerenciar time</h2>
-      <a href="#" class="modal-close" aria-label="Fechar" data-od-id="modal-manage-close"
-         hx-get="/team/manage/close" hx-target="#manage-modal" hx-swap="outerHTML">×</a>
+      <h2>Gerenciar time</h2>
+      <button type="button" class="modal-close" aria-label="Fechar" data-od-id="modal-manage-close"
+         hx-get="/team/manage/close" hx-target="#manage-overlay" hx-swap="outerHTML">×</button>
     </div>
     <%= erb :team_manage, layout: false %>
   </div>

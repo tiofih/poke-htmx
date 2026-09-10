@@ -45,7 +45,7 @@
       <div class="controls">
         <% if @engine.finished? %>
         <% else %>
-          <button class="btn btn-primary" hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML"
+          <button class="btn btn-primary btn-lg" id="play-btn" data-od-id="cta-play" hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML"
             hx-indicator="#battle-loading">Batalhar</button>
           <span id="battle-loading" class="battle-loading" aria-hidden="true">Carregando…</span>
         <% end %>
@@ -115,6 +115,19 @@
                   <button type="submit" class="btn btn-secondary">Recomeçar jornada</button>
                 </form>
               </div>
+            <% elsif end_state == "loss" %>
+              <p class="rewards">Seu time foi derrotado. <strong>Cure no Poke Center</strong> ou recomece.</p>
+              <div class="ctas">
+                <a class="btn btn-primary" href="/">Poke Center</a>
+                <% if @can_new_confront %>
+                  <button class="btn btn-primary" hx-post="/battle/new" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
+                <% else %>
+                  <button class="btn btn-secondary" disabled title="Recupere seus pokémons no Poke Center para batalhar.">Novo confronto</button>
+                <% end %>
+                <form method="post" action="/journey/restart">
+                  <button type="submit" class="btn btn-ghost">Recomeçar jornada</button>
+                </form>
+              </div>
             <% else %>
               <div class="ctas">
                 <a class="btn btn-secondary" href="/">Poke Center</a>
@@ -136,9 +149,9 @@
       <% log_entries = BattleLogPresenter.new(@engine.log).entries_all %>
       <% unless log_entries.empty? %>
         <% round_order = log_entries.map { |entry| entry[:round] }.uniq.each_with_index.to_h %>
-        <p class="log-title">Registro da batalha</p>
+        <div class="log-title">Registro da batalha</div>
         <div class="battle-log">
-          <ul class="log">
+          <ul class="log" id="battle-log">
             <% log_entries.each do |entry| %>
               <% side_class = entry[:side] == "Seu Time" ? "team" : "opp" %>
               <li class="log__entry"

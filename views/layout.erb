@@ -14,10 +14,10 @@
       <div class="container topnav-inner">
         <a href="/" class="logo">Poké-HTMX</a>
         <nav data-od-id="nav">
-          <a href="/" class="<%= "active" if request.path == "/" %>">Time <span class="nav-badge num" id="nav-badge"><%= @team_size || 0 %>/6</span></a>
-          <a href="/history" class="<%= "active" if request.path == "/history" %>">Histórico</a>
+          <a href="/" class="<%= "active" if request.path == "/" %>"<%= ' aria-current="page"' if request.path == "/" %>>Time <span class="nav-badge num" id="nav-badge"><%= @team_size || 0 %>/6</span></a>
+          <a href="/history" class="<%= "active" if request.path == "/history" %>"<%= ' aria-current="page"' if request.path == "/history" %>>Histórico</a>
         </nav>
-        <a href="/battle" class="btn btn-primary">Batalhar</a>
+        <a href="/battle" class="btn btn-primary" data-od-id="cta-battle">Batalhar</a>
         <% if request.path == "/battle" %>
           <a href="/" class="btn btn-secondary">◀ Voltar ao time</a>
         <% end %>

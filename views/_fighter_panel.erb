@@ -1,14 +1,16 @@
-<% presenters.each do |fighter| %>
-  <% juice_data = juice.fighter_juice(side, fighter.name) %>
-  <% max_hp = fighter.hp_label.split("/").last.to_i %>
-  <% initial_percent = max_hp.positive? ? ((juice_data[:initial_hp].to_f / max_hp) * 100).round : 0 %>
-  <% hp_fill = { high: "ok", medium: "mid", low: "low" }.fetch(fighter.hp_tier, "ok") %>
-  <li class="fighter<%= " is-hit" if juice_data[:damaged] %><%= " fainted" if juice_data[:ko] %><%= " is-attacking" if juice_data[:shooting] %>"
+<% lead_index = presenters.index { |f| !juice.fighter_juice(side, f.name)[:ko] } %>
+<% presenters.each_with_index do |fighter, idx| %>
+<% juice_data = juice.fighter_juice(side, fighter.name) %>
+<% max_hp = fighter.hp_label.split("/").last.to_i %>
+<% initial_percent = max_hp.positive? ? ((juice_data[:initial_hp].to_f / max_hp) * 100).round : 0 %>
+<% hp_fill = { high: "ok", medium: "mid", low: "low" }.fetch(fighter.hp_tier, "ok") %>
+  <li class="fighter<%= " is-hit" if juice_data[:damaged] %><%= " fainted" if juice_data[:ko] %><%= " engaged" if idx == lead_index && !juice_data[:ko] %><%= " is-attacking" if juice_data[:shooting] %>"
+     data-od-id="fighter-<%= fighter.name.downcase %>"
      data-hp-initial="<%= juice_data[:initial_hp] %>"
      data-damage="<%= juice_data[:damage_taken] %>">
     <% if juice_data[:shooting] %><span class="shot" aria-hidden="true"></span><% end %>
     <div class="fighter-head">
-      <span class="sprite-tile"><img src="<%= fighter.sprite %>" alt="<%= fighter.alt %>"></span>
+      <span class="sprite-tile"><img src="<%= fighter.sprite %>" alt="<%= fighter.alt %>" width="96" height="96"></span>
       <div class="fighter-id">
         <span class="fname"><%= fighter.name %></span>
         <div class="fmeta">
@@ -30,7 +32,8 @@
     <div class="hp">
       <span class="hp-label">HP</span>
       <div class="bar" role="progressbar"
-           aria-valuenow="<%= fighter.hp_label %>" aria-valuemin="0"
+           aria-valuenow="<%= fighter.hp_label.split("/").first.to_i %>" aria-valuemin="0" aria-valuemax="<%= max_hp %>"
+           aria-valuetext="HP <%= fighter.hp_label %>"
            style="--hp-initial-percent: <%= initial_percent %>%">
         <span class="bar-fill <%= hp_fill %>" style="width: <%= fighter.hp_percent %>%"></span>
       </div>

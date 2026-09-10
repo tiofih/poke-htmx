@@ -1,7 +1,8 @@
 <input
   type="text"
   name="q"
-  class="filter-state"
+  class="filter-state input"
+  aria-label="Buscar no arquivo"
   placeholder="Filtrar por nome"
   value="<%= @q %>"
   hx-target="#pokemon-list"
@@ -10,28 +11,28 @@
   hx-swap="innerHTML"
   hx-include=".filter-state">
 
-<select name="type" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+<select name="type" class="filter-state input" aria-label="Tipo" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
   <option value="" <%= "selected" if @type.nil? %>>Todos os tipos</option>
   <% PokeApiTypes::TYPE_NAMES.each do |t| %>
     <option value="<%= t %>" <%= "selected" if @type == t %>><%= t.capitalize %></option>
   <% end %>
 </select>
 
-<select name="generation" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+<select name="generation" class="filter-state input" aria-label="Geração" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
   <option value="" <%= "selected" if @generation.nil? %>>Todas as gerações</option>
   <% (1..9).each do |g| %>
     <option value="<%= g %>" <%= "selected" if @generation == g %>>Geração <%= g %></option>
   <% end %>
 </select>
 
-<select name="tier" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+<select name="tier" class="filter-state input" aria-label="Tier" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
   <option value="" <%= "selected" if @tier.nil? %>>Todos os tiers</option>
   <% %w[S A B C D F].each do |t| %>
     <option value="<%= t %>" <%= "selected" if @tier == t %>><%= t %></option>
   <% end %>
 </select>
 
-<select name="cost_max" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+<select name="cost_max" class="filter-state input" aria-label="Custo máx" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
   <option value="" <%= "selected" if @cost_max.nil? %>>Qualquer custo</option>
   <option value="20" <%= "selected" if @cost_max == 20 %>>≤ 20</option>
   <option value="30" <%= "selected" if @cost_max == 30 %>>≤ 30</option>
@@ -41,7 +42,7 @@
   <option value="120" <%= "selected" if @cost_max == 120 %>>≤ 120</option>
 </select>
 
-<select name="sort" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+<select name="sort" class="filter-state input" aria-label="Ordenação" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
   <option value="" <%= "selected" if @sort.nil? %>>Padrão</option>
   <option value="cost_asc" <%= "selected" if @sort == "cost_asc" %>>Custo ↑</option>
   <option value="cost_desc" <%= "selected" if @sort == "cost_desc" %>>Custo ↓</option>
@@ -49,7 +50,7 @@
   <option value="tier_asc" <%= "selected" if @sort == "tier_asc" %>>Tier F→S</option>
 </select>
 
-<select name="team" class="filter-state" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
+<select name="team" class="filter-state input" aria-label="Disponibilidade" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
   <option value="" <%= "selected" if @team_filter.nil? %>>Todos</option>
   <option value="in" <%= "selected" if @team_filter == "in" %>>No time</option>
   <option value="out" <%= "selected" if @team_filter == "out" %>>Fora do time</option>

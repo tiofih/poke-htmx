@@ -6,11 +6,11 @@
   <p class="notice notice--info">Monte seu time inicial de 6 Pokémon para iniciar a jornada.</p>
 <% end %>
 <% if @team_cost && @team_budget %>
-  <p class="team-budget">Custo do time: <%= @team_cost %>/<%= @team_budget %></p>
+  <p class="meta num">Custo do time: <%= @team_cost %>/<%= @team_budget %></p>
 <% end %>
 <% if @game_over %>
   <p class="notice notice--error">Game Over — seu time está derrotado e você não tem dinheiro para curar. Venda itens no Poke Mart ou recomece a jornada.</p>
-  <form hx-post="/journey/restart" hx-target="#team-view" hx-swap="innerHTML" hx-include=".list-state">
+    <form hx-post="/journey/restart" hx-target="#team-view" hx-swap="innerHTML">
     <button type="submit" class="btn btn-secondary">Recomeçar jornada</button>
   </form>
 <% end %>
@@ -34,46 +34,46 @@
       <%= @game_over ? "Game over" : (@can_battle ? "Pronto p/ batalhar" : "Precisa de cura") %>
     </span>
   </div>
-  <ul class="roster" data-od-id="members">
+  <ul class="roster" id="roster" data-od-id="members">
     <% @team.each do |poke| %>
-      <li class="member">
+      <% pct = poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f * 100).round : 0 %>
+      <% ratio = poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f) : 0 %>
+      <% hp_cls = ratio < 0.35 ? " low" : (ratio < 0.7 ? " mid" : "") %>
+      <% member_types = @team_types && @team_types[poke.id] %>
+      <li class="member" data-od-id="member-<%= poke.name.downcase %>">
         <div class="member-top">
           <div class="sprite-tile"><img src="<%= poke.sprite %>" alt="<%= poke.name %>" width="96" height="96"></div>
-          <div>
-            <span class="slot">#<%= poke.slot %></span>
-            <span class="member-name"><%= poke.name %></span>
-            <span class="member-lvl num">Nível <%= @member_levels.fetch(poke.id, 1) %></span>
-            <% member_types = @team_types && @team_types[poke.id] %>
-            <% unless member_types.nil? || member_types.empty? %>
-              <span class="mtags">
-                <% member_types.each do |tag| %><span class="mtag mtag--<%= tag %>"><%= tag %></span><% end %>
-              </span>
-            <% end %>
-          </div>
+          <div><span class="slot">#<%= poke.slot %></span><span class="member-name"><%= poke.name %></span><span class="member-lvl num">Nível <%= @member_levels.fetch(poke.id, 1) %></span></div>
         </div>
         <div class="hp">
           <span class="hp-label">HP</span>
-          <span class="bar"><span class="bar-fill" style="width:<%= poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f * 100).round : 0 %>%"></span></span>
+           <div class="bar"><span class="bar-fill<%= hp_cls %>" style="width:<%= pct %>%"></span></div>
           <span class="num hp-val"><%= poke.hp_current %>/<%= poke.hp_max %></span>
         </div>
+        <% unless member_types.nil? || member_types.empty? %>
+          <div class="tag-row">
+            <% member_types.each do |tag| %><span class="mtag mtag--<%= tag.downcase %>"><%= tag %></span><% end %>
+          </div>
+        <% end %>
         <div class="member-actions">
           <a class="btn evolution-trigger" href="#evolution-modal"
-             hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</a>
+             hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled aria-disabled="true" title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</a>
           <a class="btn btn-ghost btn-sm" href="#manage-modal"
-             hx-get="/team/manage" hx-target="body" hx-swap="beforeend">Gerenciar</a>
+             hx-get="/team/manage" hx-target="body" hx-swap="beforeend"
+             data-od-id="<%= poke.name.downcase %>-manage">Gerenciar</a>
           <form
               hx-post="/team/<%= poke.id %>/move"
               hx-target="#team-view"
               hx-swap="innerHTML">
             <input type="hidden" name="new_slot" value="<%= poke.slot - 1 %>">
-            <button type="submit" aria-label="Mover para cima">▲</button>
+            <button type="submit" class="btn btn-ghost btn-sm" aria-label="Mover para cima">▲</button>
           </form>
           <form
               hx-post="/team/<%= poke.id %>/move"
               hx-target="#team-view"
               hx-swap="innerHTML">
             <input type="hidden" name="new_slot" value="<%= poke.slot + 1 %>">
-            <button type="submit" aria-label="Mover para baixo">▼</button>
+            <button type="submit" class="btn btn-ghost btn-sm" aria-label="Mover para baixo">▼</button>
           </form>
           <!-- hx-params "*" garante id + list-state; hx-include ".list-state" explícita filtros (redundância intencional) -->
           <form
@@ -86,7 +86,7 @@
               hx-sync="closest form:replace"
               hx-indicator="#team-view">
             <input type="hidden" name="id" value="<%= poke.id %>">
-            <button type="submit" class="btn" hx-disabled-elt="this"<%= ' disabled title="Pokémon derrotado — cure antes de remover"' if poke.fainted? %>>Remover do time</button>
+            <button type="submit" class="btn btn-ghost btn-sm" hx-disabled-elt="this" data-od-id="<%= poke.name.downcase %>-remove"<%= ' disabled title="Pokémon derrotado — cure antes de remover"' if poke.fainted? %>>Remover do time</button>
           </form>
         </div>
       </li>

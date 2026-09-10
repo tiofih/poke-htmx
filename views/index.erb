@@ -3,13 +3,14 @@
     <div class="app-head row-between">
       <div>
         <p class="eyebrow">Seu time · Jornada</p>
-        <h1>Monte o esquadrão, batalhe, avance.</h1>
+        <h1 class="app-title">Monte o esquadrão, batalhe, avance.</h1>
         <p class="lead">Seis vagas, um orçamento de <%= @team_budget %> e um loop de cura e itens para manter a equipe de pé.</p>
       </div>
       <div class="budget-summary">
-        <div class="budget-meta row">Custo do time <strong class="num"><%= @team_cost %>/<%= @team_budget %></strong></div>
-        <div class="meter" role="progressbar" aria-label="Orçamento do time"><span class="meter-fill" style="width:<%= (@team_cost.to_f / @team_budget * 100) %>%"></span></div>
-        <a class="btn btn-secondary" href="#manage-modal" data-od-id="open-modal-manage" hx-get="/team/manage" hx-target="body" hx-swap="beforeend">Gerenciar time</a>
+        <div class="budget-meta row">Custo do time <strong class="num" id="budget-text"><%= @team_cost %>/<%= @team_budget %></strong></div>
+        <div class="meter" role="progressbar" aria-label="Orçamento do time"><span class="meter-fill<%= @team_cost > @team_budget ? ' over' : (@team_cost >= @team_budget * 0.9 ? ' near' : '') %>" id="budget-fill" style="width:<%= (@team_cost.to_f / @team_budget * 100) %>%"></span></div>
+        <a class="btn btn-primary btn-sm" href="#battle" data-od-id="cta-battle">Batalhar</a>
+        <a class="btn btn-secondary btn-sm" href="#manage-modal" data-od-id="open-modal-manage" hx-get="/team/manage" hx-target="body" hx-swap="beforeend">Gerenciar time</a>
       </div>
     </div>
 
@@ -19,11 +20,13 @@
           <%= erb :team, layout: false %>
         </div>
         <div class="card services" data-od-id="services">
-          <div class="row-between"><h2>Serviços</h2><span class="meta num">Saldo <%= @balance %></span></div>
+          <div class="row-between" style="flex-wrap: wrap; gap: 12px;"><h2>Serviços</h2><span class="meta num">Saldo <strong><%= @balance %></strong></span></div>
+          <p class="muted" style="margin: 8px 0 0;">Cure o time no Poke Center ou compre/venda itens no Poke Mart.</p>
           <div class="services-row">
-            <a class="btn btn-secondary" href="#center-modal" data-od-id="open-modal-center" hx-get="/team/center" hx-target="#center-modal" hx-swap="outerHTML">Poke Center</a>
+            <a class="btn btn-secondary" href="#center-modal" data-od-id="open-modal-center" hx-get="/team/center" hx-target="#center-modal" hx-swap="outerHTML">Curar no Poke Center</a>
             <a class="btn btn-secondary" href="#mart-modal" data-od-id="open-modal-mart" hx-get="/team/mart" hx-target="#mart-modal" hx-swap="outerHTML">Poke Mart</a>
           </div>
+          <p class="notice" id="team-notice" style="margin-top: 12px;"></p>
           <%= erb :_center_slot, layout: false %>
           <%= erb :_mart_slot, layout: false %>
         </div>

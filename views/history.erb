@@ -20,9 +20,9 @@
           </div>
         </div>
         <div class="pos-stats">
-          <div class="stat-chip win"><div class="n num"><%= @stats[:wins] %></div><div class="l">Vitórias</div></div>
-          <div class="stat-chip loss"><div class="n num"><%= @stats[:losses] %></div><div class="l">Derrotas</div></div>
-          <div class="stat-chip draw"><div class="n num"><%= @stats[:draws] %></div><div class="l">Empates</div></div>
+          <div class="stat-chip win"><div class="n"><%= @stats[:wins] %></div><div class="l">Vitórias</div></div>
+          <div class="stat-chip loss"><div class="n"><%= @stats[:losses] %></div><div class="l">Derrotas</div></div>
+          <div class="stat-chip draw"><div class="n"><%= @stats[:draws] %></div><div class="l">Empates</div></div>
         </div>
         <% unless @position %>
           <p class="meta">Você ainda não tem vitórias.</p>
@@ -38,7 +38,7 @@
             <% share = row[:total].positive? ? (100.0 * row[:wins] / row[:total]).round : 0 %>
             <li class="rank-row<%= " you" if row[:user_id] == @current_user %>">
               <span class="rank-pos num"><%= index + 1 %></span>
-              <span class="rank-name"><%= row[:user_id] %></span>
+              <span class="rank-name"><%= row[:user_id] %><% if row[:user_id] == @current_user %><span class="meta">· seu time</span><% end %></span>
               <div class="rank-bar"><span style="width:<%= share %>%"></span></div>
               <span class="rank-wins"><strong class="num"><%= row[:wins] %></strong> / <%= row[:total] %></span>
             </li>
