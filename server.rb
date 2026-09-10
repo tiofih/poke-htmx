@@ -57,7 +57,7 @@ module ServerCommon
 
   # Niveis 0077 (C2): progressao local por membro, fail-closed 1 (sem rede).
   def member_levels_map(members)
-    Array(members).to_h { |member| [member.id, member_level_for(member)] }
+    Array(members).to_h { |member| [member.id.to_s, member_level_for(member)] }
   end
 
   def member_level_for(member)

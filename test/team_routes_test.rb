@@ -9,7 +9,7 @@ class DefaultFakeRating
   end
 end
 
-class ServerTeamTest < Minitest::Test
+class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   include ServerTestHelpers
   include TestSupport
 
@@ -312,6 +312,19 @@ class ServerTeamTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, "pikachu"
     assert_includes last_response.body, "hx-delete=\"/team\""
+  end
+
+  def test_get_team_shows_member_level
+    @repository.add("user-a", pikachu_pokemon)
+    member_id = @repository.all("user-a").first.id
+    @progression.grant_levels("user-a", member_id, 2)
+    level = @progression.get("user-a", member_id)[:level]
+
+    get "/team", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_operator level, :>, 1
+    assert_includes last_response.body, "Nível #{level}"
   end
 
   def test_get_team_is_isolated_per_session
