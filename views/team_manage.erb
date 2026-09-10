@@ -2,7 +2,7 @@
   <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
 <% end %>
 <% @team.each do |poke| %>
-  <% level = @member_levels && @member_levels[poke.id] || 1 %>
+  <% level = @member_levels && @member_levels[poke.id.to_s] || 1 %>
   <div class="manage-member">
     <div class="mg-head">
       <div class="sprite-tile"><img src="<%= poke.sprite %>" alt="<%= poke.name %>" width="96" height="96"></div>
