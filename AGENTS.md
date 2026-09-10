@@ -163,6 +163,7 @@ apenas grep/awk e rodam **no host**) — **não** rodar `rake`/`rubocop` no host
 | `test/server_test.rb` | Rotas: injeta sessão via `user_session(user_id)`; isolamento com `Rack::Test::Session` próprios. |
 | `test/team_repository_test.rb` | Persistência/isolamento por usuário. |
 | `PRODUCT.md` / `DESIGN.md` | Verdade durável do produto + tokens/componentes visuais canônicos — ler antes de qualquer sessão com UX/UI; skills `impeccable audit`, `stark`, `normalize` auditam contra eles. |
+| `STACK.md` | Especialização dos agentes genéricos `frontend`/`backend` (stack, paths, comandos por área). |
 
 ## Armadilhas conhecidas (lições da sessão 0003)
 
