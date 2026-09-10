@@ -30,6 +30,18 @@ class LayoutViewportTest < Minitest::Test
     assert_match(/<meta name="viewport"[^>]*content="width=device-width,\s*initial-scale=1"/, last_response.body)
   end
 
+  def test_full_page_starts_with_doctype
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/"
+    end
+
+    assert last_response.ok?
+    assert_match(/\A<!DOCTYPE html>/i, last_response.body,
+                 "expected GET / to start with <!DOCTYPE html> (standards mode, S3 0080 C1b)")
+    assert_match(/<html lang="pt-BR"/, last_response.body,
+                 "expected <html lang=\"pt-BR\"> like the open-design prototypes")
+  end
+
   def test_nav_shows_team_badge
     server_content = File.read(File.join(__dir__, "../server.rb"))
     layout_content = File.read(File.join(__dir__, "../views/layout.erb"))
