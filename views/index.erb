@@ -30,6 +30,15 @@
           <%= erb :_center_slot, layout: false %>
           <%= erb :_mart_slot, layout: false %>
         </div>
+        <% if @journey_started %>
+          <% unless @team.empty? %>
+            <h2>Poke Center</h2>
+            <%= erb :_center, layout: false %>
+
+            <h2>Poke Mart</h2>
+            <%= erb :_mart, layout: false %>
+          <% end %>
+        <% end %>
       </div>
       <aside class="catalog-pane stack">
         <div class="card">

@@ -427,11 +427,18 @@ class ServerTeamTest < Minitest::Test
     get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
-    assert_equal 13, last_response.body.scan("hx-post=\"/team/").size
+    assert_equal 12, last_response.body.scan("hx-post=\"/team/").size
     assert_includes last_response.body, ">▲</button>"
     assert_includes last_response.body, ">▼</button>"
     assert_includes last_response.body, 'name="new_slot"'
     assert_includes last_response.body, 'hx-target="#team-view"'
+    # heal form mudou para a home (full page), fora do fragmento
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_includes last_response.body, %(hx-post="/team/heal")
   end
 
   def test_team_member_sprite_has_alt_text
@@ -521,6 +528,11 @@ class ServerTeamTest < Minitest::Test
     assert_match(/curado por 50/i, last_response.body.strip)
     assert_equal 150, @wallet.balance("user-a")
     assert_equal 200, @progression.get("user-a", pokemon_id)[:hp_current]
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
   end
 
@@ -565,7 +577,9 @@ class ServerTeamTest < Minitest::Test
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
@@ -586,7 +600,9 @@ class ServerTeamTest < Minitest::Test
     @progression.update_hp("user-a", pokemon_id, 200, 100)
     @wallet.grant("user-a", 200)
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
@@ -603,7 +619,9 @@ class ServerTeamTest < Minitest::Test
     @progression.update_hp("user-a", pokemon_id, 200, 200)
     @wallet.grant("user-a", 100)
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
@@ -617,7 +635,9 @@ class ServerTeamTest < Minitest::Test
     @progression.update_hp("user-a", pokemon_id, 200, 100)
     @wallet.grant("user-a", 10)
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
@@ -703,6 +723,12 @@ class ServerTeamHpGateTest < Minitest::Test
 
     assert last_response.ok?
     refute_match(/gameloop-cta battle/, last_response.body)
+
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
     assert_includes last_response.body, "Poke Mart"
   end
@@ -729,7 +755,9 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
     fill_team("user-a")
     @wallet.grant("user-a", 100)
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
@@ -1317,7 +1345,12 @@ class TeamHealRoutesTest < Minitest::Test
     assert_includes last_response.body, "notice--error"
     assert_equal 0, @progression.get("user-a", target.id)[:hp_current], "nada curado"
     assert_equal 10, @wallet.balance("user-a")
-    # team-view ainda mostra HP 0/200 e custo
+    # strips agora na home (full page), nao no fragmento
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
     assert_match(%r{>0/200<}, last_response.body)
     assert_match(/Custo total: 100/, last_response.body)
   end
@@ -1328,7 +1361,9 @@ class TeamHealRoutesTest < Minitest::Test
     @progression.update_hp("user-a", target.id, 200, 100)
     @wallet.grant("user-a", 10) # cost 50 > 10
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"

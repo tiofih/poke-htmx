@@ -50,7 +50,9 @@ class ServerMartTest < Minitest::Test
   def test_mart_fragment_shows_catalog_inventory_and_balance
     @wallet.grant("user-a", 100)
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Mart"
@@ -62,7 +64,9 @@ class ServerMartTest < Minitest::Test
   def test_mart_fragment_shows_affordable_quantity
     @wallet.grant("user-a", 100)
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     assert_includes last_response.body, "Pocao — 20 ×5"
@@ -76,7 +80,9 @@ class ServerMartTest < Minitest::Test
   def test_mart_fragment_disables_buy_when_insufficient_balance
     @wallet.grant("user-a", 10)
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     mart_form = last_response.body[%r{<form[^>]*hx-post="/mart/buy".*?</form>}m]
@@ -88,6 +94,11 @@ class ServerMartTest < Minitest::Test
     @wallet.grant("user-a", 100)
 
     post "/mart/buy", { item_name: "potion", quantity: "1" }, user_session("user-a")
+
+    assert last_response.ok?
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert_includes last_response.body, "potion"
   end
@@ -122,7 +133,9 @@ class ServerMartTest < Minitest::Test
     @wallet.grant("user-a", 100)
     @inventory.add("user-a", "potion", 2)
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     assert_includes last_response.body, %(hx-post="/mart/sell")
@@ -136,7 +149,9 @@ class ServerMartTest < Minitest::Test
     @inventory.use("user-a", "potion", 1)
     @inventory.add("user-a", "hyper-potion", 2)
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     assert_includes last_response.body, "hyper-potion"
@@ -175,7 +190,9 @@ class ServerMartTest < Minitest::Test
     offered = StoneRotation.new("user-a", 0).stones
     not_offered = ItemCatalog.all.select { |item| item.category == "stone" }.map(&:name) - offered
 
-    get "/team", {}, htmx_session("user-a")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
 
     assert last_response.ok?
     offered.each { |name| assert_includes last_response.body, name }
