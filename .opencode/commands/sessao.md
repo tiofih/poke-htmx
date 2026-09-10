@@ -1,42 +1,32 @@
 ---
 description: Abre/continua uma sessão SDD RODANDO OS PAPÉIS como subagents (Refinador → Implementador/Teste → Revisor → Playtester opcional), parando na validação do usuário. Use para trabalhar uma sessão no fluxo de papéis.
-agent: build
+agent: orchestrator
 ---
 
-Você está iniciando/continuando uma **sessão SDD do Poke-HTMX** usando os **papéis de subagent**
-(chame o skill `sdd` se precisar do guia). Regras base: `AGENTS.md` (S1–S7), `SESSIONS.md`,
-`REQUIREMENTS.md`. **Ressalto:** a execução é feita pelos **subagents**, não por você inline.
+You are the orchestrator: delegate ONLY via spawn (never execute inline; you cannot read files, run shell, or use MCP tools).
 
-## 0. Argumentos do usuário (opcional)
-`$ARGUMENTS` pode indicar a sessão/fase (ex.: "refinar 0055", "implementar 0054"). Se não vier,
-decida pelo estado do projeto.
+## Phase 0: pick session/phase
+- `$ARGUMENTS` picks session/phase (e.g. "refinar 0055", "implementar 0054"), else decide by project state.
 
-## 1. Kickoff (levante o estado — contexto mínimo)
-- Rode `./scripts/iniciar-sessao` e `./scripts/levantar-roadmap` (digests) para saber a
-  próxima sessão/estado. **Não** leia `REQUIREMENTS.md`/`SESSIONS.md` inteiros.
+## Phase 1: scout-first (always first)
+- FIRST spawn always gathers context and returns a digest: run `./scripts/iniciar-sessao` plus `./scripts/levantar-roadmap`, read `sessions/NNNN-*.md` current session file, plus graph/zvec context pack.
+- Never read `REQUIREMENTS.md`/`SESSIONS.md` whole.
 
-## 2. Decida a fase (sessão mais recente pendente)
+## Phase 2: dispatch table
 
-| Estado da sessão | Papel a disparar |
+| State | Role to spawn |
 | --- | --- |
-| Refinamento pendente | **fase 1 (conversa)** → subagent `refinador` **em modo investigação**: ele devolve um **mapa de decisões** (opções A/B/C + recomendação). Apresente as decisões ao usuário uma a uma (via `question`) e **deixe-o escolher**. Só então re-dispare `refinador` em **modo finalize** (com as escolhas) para escrever `sessions/NNNN-*.md` + `SESSIONS.md` (S4) e commitar. NUNCA deixe o refinador decidir sozinho. |
-| Refinamento feito, Implementação pendente | **fase 2** → subagent `implementador-teste` (TDD, suíte+lint verdes, commits `Passo N:`). |
-| Implementação feita | **fase 2c** → subagent `revisor`; se `VEREDITO: Requer ajuste`, re-dispare `implementador-teste` e depois `revisor` de novo (**loop S7, teto 3 rodadas**, senão escalar S3) até `Aprovado`. |
-| Pronto para validar | **fase 3** → **PARE** (é do usuário). NÃO marcar Done, NÃO validar, NÃO commitar conclusão. |
-| Playtester | só dispare se o usuário pedir / tiver valor (advisory, não substitui a S2). |
+| Refinamento pendente | `refinador` investigação (returns decision map; present each decision to user IN REPLY text and collect choices; then `refinador` finalize writes session plus `SESSIONS.md` S4 plus commit; never let it decide alone) |
+| Desenho | `arquiteto` (slices plus contracts) |
+| Implementação | `implementador-teste` (TDD greens, commits Passo N; may split slices to frontend/backend/devops) |
+| Revisão | `revisor` (VEREDITO loop S7 max 3 rounds else escalate S3) |
+| Playtester | only if user asks |
+| Pronto para validar | STOP (user's; never mark Done, never commit conclusion) |
 
-## 2b. Refinamento = conversa (regra de ouro)
-Na fase 1, o Refinador investiga e **levanta opções**; **você** (orquestrador) apresenta cada
-decisão ao usuário e coleta a escolha. Só escreve o arquivo da sessão **depois** de todas as
-escolhas. Aplicar ao objetivo, escopo/fora-de-escopo, critérios→teste (S1) e decisões de design.
-**Não** aceitar um refinamento que o subagent resolveu sozinho em um único passo.
+## Spawn rules
+- Prefix prompts with tracked task ids (`T<n>:`) for TODO.md auto-tick.
+- Bundle all context into each spawn (children inherit nothing).
+- Subagents inherit model unless set.
 
-## 3. Como disparar cada papel
-- Sempre via **`task`** com `subagent_type`: `refinador` · `implementador-teste` · `revisor` · `playtester`.
-- Passe ao subagent o contexto necessário (arquivo da sessão `sessions/NNNN-*.md`, o
-  commit/papel anterior, e o handoff `memory_handoff_accept` se houver).
-- Cada subagent segue as regras do seu próprio prompt (verificado no kit/AGENTS.md).
-
-## 4. Ao encerrar cada papel
-- Reporte o estado (commit/SHA, suíte+lint, veredito) e a **próxima etapa**.
-- **Nunca** salte a validação do usuário; **nunca** marque a sessão como `Done` antes dela.
+## After each role
+- Report state plus next step.
