@@ -45,7 +45,8 @@ class HomeResidueTest < Minitest::Test
     assert_match(/class="mart-name"/, mart)
     assert_match(/class="item-icon"/, mart)
     assert_match(/class="[^"]*\bprice\b[^"]*"/, mart)
-    assert_includes mart, "Pocao — 20 ×5"
+    assert_includes mart, "Comprar ×5"
+    assert_includes mart, "+20 HP"
     assert_includes mart, %(hx-post="/mart/buy")
     assert_includes mart, %(hx-post="/mart/sell")
     assert_includes mart, "Saldo: 100"

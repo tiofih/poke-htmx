@@ -13,15 +13,22 @@
       <li>
         <span class="mart-name"><span class="item-icon" aria-hidden="true"><%= item.display_name[0] %></span><span><%= item.display_name %></span></span>
         <span class="row"><span class="num price"><%= item.price %></span>
+          <% if item.heal_amount.to_i.positive? %>
+            <span class="meta">+<%= item.heal_amount %> HP · <%= format("%.1f", item.price.to_f / item.heal_amount) %> ¥/HP</span>
+          <% end %>
           <form hx-post="/mart/buy" hx-target="#team-view" hx-swap="innerHTML">
             <input type="hidden" name="item_name" value="<%= item.name %>">
             <input type="hidden" name="quantity" value="1">
-            <button type="submit" class="btn btn-secondary btn-sm"<%= " disabled" if affordable.zero? %>><%= item.display_name %> — <%= item.price %> ×<%= affordable %></button>
+            <button type="submit" class="btn btn-secondary btn-sm"<%= " disabled" if affordable.zero? %>>Comprar ×<%= affordable %></button>
           </form>
         </span>
       </li>
     <% end %>
   </ul>
+  <% out_rotation = @catalog.select { |item| item.category == "stone" && !@rotation.include?(item.name) } %>
+  <% if out_rotation.any? %>
+    <p class="meta">Fora da oferta desta rodada: <%= out_rotation.map(&:display_name).join(", ") %></p>
+  <% end %>
 </div>
 <div class="tab-panel" id="tab-sell" role="tabpanel">
   <% sellable = @inventory.select { |entry| entry[:quantity].positive? } %>
@@ -30,7 +37,7 @@
       <% sellable.each do |entry| %>
         <% sell_item = ItemCatalog.find(entry[:name]) %>
         <li>
-          <span class="mart-name"><span class="item-icon" aria-hidden="true"><%= (sell_item&.display_name || entry[:name])[0] %></span><span><strong><%= entry[:name] %></strong> <span class="meta">×<%= entry[:quantity] %></span></span></span>
+          <span class="mart-name"><span class="item-icon" aria-hidden="true"><%= (sell_item&.display_name || entry[:name])[0] %></span><span><strong><%= sell_item&.display_name || entry[:name] %></strong> <span class="meta">×<%= entry[:quantity] %></span></span></span>
           <span class="row"><span class="num price"><%= sell_item ? sell_item.price / 2 : "—" %></span>
             <form hx-post="/mart/sell" hx-target="#team-view" hx-swap="innerHTML">
               <input type="hidden" name="item_name" value="<%= entry[:name] %>">

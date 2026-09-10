@@ -72,12 +72,27 @@ class ServerMartTest < Minitest::Test
     get "/team/mart", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, "Pocao — 20 ×5"
-    assert_includes last_response.body, "Super Pocao — 50 ×2"
-    assert_includes last_response.body, "Hiper Pocao — 100 ×1"
+    assert_includes last_response.body, "Comprar ×5"
+    assert_includes last_response.body, "+20 HP"
+    assert_includes last_response.body, "+50 HP"
+    assert_includes last_response.body, "+100 HP"
     mart_form = last_response.body[%r{<form[^>]*hx-post="/mart/buy".*?</form>}m]
     refute_nil mart_form
     refute_includes mart_form, "disabled"
+  end
+
+  def test_mart_modal_usability_labels_sell_display_name_and_out_of_rotation
+    @wallet.grant("user-a", 100)
+    @inventory.add("user-a", "potion", 2)
+
+    get "/team/mart", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, "1.0 ¥/HP"
+    sell_row = last_response.body[%r{<strong>.*?</strong>.*?<form[^>]*hx-post="/mart/sell".*?</form>}m]
+    refute_nil sell_row
+    assert_includes sell_row, "<strong>Pocao</strong>"
+    assert_includes last_response.body, "Fora da oferta desta rodada:"
   end
 
   def test_mart_modal_disables_buy_when_insufficient_balance
