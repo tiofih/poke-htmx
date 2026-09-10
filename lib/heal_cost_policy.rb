@@ -3,6 +3,7 @@
 class HealCostPolicy
   DEFAULT_COST_PER_HP = 0.5
   BASE_LEVEL = 5
+  MAX_LEVEL_MULTIPLIER = 1.5
 
   def initialize(cost_per_hp: DEFAULT_COST_PER_HP)
     @cost_per_hp = cost_per_hp
@@ -17,6 +18,7 @@ class HealCostPolicy
   def cost(missing_hp, average_level = BASE_LEVEL)
     missing = [missing_hp.to_i, 0].max
     level = [average_level.to_i, 1].max
-    (missing * @cost_per_hp * level / BASE_LEVEL.to_f).round
+    multiplier = [level / BASE_LEVEL.to_f, MAX_LEVEL_MULTIPLIER].min
+    (missing * @cost_per_hp * multiplier).round
   end
 end

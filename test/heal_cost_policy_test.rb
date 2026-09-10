@@ -43,12 +43,22 @@ class HealCostPolicyTest < Minitest::Test
 
   def test_cost_scales_with_average_level
     assert_equal 5, @policy.cost(10, 5), "nivel medio base mantem o custo"
-    assert_equal 10, @policy.cost(10, 10), "nivel medio dobrado dobra o custo"
+    assert_equal 8, @policy.cost(10, 10), "nivel medio alto capa em 1.5x"
     assert_equal 1, @policy.cost(10, 1), "nivel medio menor reduz o custo"
   end
 
   def test_cost_clamps_negative_missing_hp_to_zero
     assert_equal 0, @policy.cost(-5)
     assert_equal 0, @policy.cost(-5, 10)
+  end
+
+  def test_cost_caps_level_multiplier_at_1_5x
+    assert_equal 8, @policy.cost(10, 100), "multiplicador de nivel limitado a 1.5x"
+    assert_equal 8, @policy.cost(10, 8), "nivel 8 (1.6x) ja capa em 1.5x"
+    assert_equal 7, @policy.cost(10, 7), "nivel 7 (1.4x) abaixo do teto, sem capa"
+  end
+
+  def test_capped_cost_per_hp_never_exceeds_potion_rate
+    assert_operator @policy.cost(20, 100) / 20.0, :<=, 1.0, "center <= pocao por HP"
   end
 end

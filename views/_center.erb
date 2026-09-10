@@ -1,15 +1,22 @@
 <p class="modal-sub">Recupere o HP de todo o time de uma vez.</p>
+<% levels = @member_levels || {} %>
+<% avg_lvl = @team.empty? ? HealCostPolicy::BASE_LEVEL : (@team.sum { |m| levels.fetch(m.id, HealCostPolicy::BASE_LEVEL) } / @team.size.to_f).round %>
+<% mult = [avg_lvl / HealCostPolicy::BASE_LEVEL.to_f, HealCostPolicy::MAX_LEVEL_MULTIPLIER].min %>
+<% rate = HealCostPolicy::DEFAULT_COST_PER_HP * mult %>
 <ul class="heal-list">
   <% @team.each do |poke| %>
+    <% missing = poke.hp_max.to_i <= 0 ? 0 : [poke.hp_max.to_i - poke.hp_current.to_i, 0].max %>
     <li class="heal-item">
       <span class="th"><img src="<%= poke.sprite %>" alt="<%= poke.name %>" loading="lazy"></span>
       <span class="n"><%= poke.name %></span>
       <span class="hp"><span class="hp-label">HP</span><span class="bar"><span class="bar-fill" style="width:<%= poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f * 100).round : 0 %>%"></span></span><span class="num hp-val"><%= poke.hp_current %>/<%= poke.hp_max %></span></span>
+      <span class="cost-hint num">~<%= (missing * rate).round %></span>
     </li>
   <% end %>
 </ul>
 <div class="modal-foot">
   <span class="meta num">Saldo <%= @balance %> · Custo total: <%= @heal_cost %></span>
+  <span class="meta num">Nível médio <%= avg_lvl %> · base <%= HealCostPolicy::DEFAULT_COST_PER_HP %>/HP · ×<%= mult %> (máx ×<%= HealCostPolicy::MAX_LEVEL_MULTIPLIER %>)</span>
   <form hx-post="/team/heal" hx-target="#team-view" hx-swap="innerHTML">
     <button type="submit" class="btn btn-primary"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar time</button>
   </form>

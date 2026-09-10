@@ -137,14 +137,14 @@ class HealServiceTest < Minitest::Test
     @progression.grant_levels("user-a", bulba, 5)
     @wallet.grant("user-a", 100)
 
-    assert_equal 20, @service.preview_cost("user-a"), "preview acompanha o custo escalado"
+    assert_equal 15, @service.preview_cost("user-a"), "preview acompanha o custo escalado com teto 1.5x"
 
     result = @service.heal("user-a")
 
     assert_equal true, result[:healed]
-    assert_equal 20, result[:cost], "20 HP faltante * 0.5 * nivel medio 10/5 = 20"
-    assert_equal 80, result[:balance]
-    assert_equal 80, @wallet.balance("user-a")
+    assert_equal 15, result[:cost], "20 HP faltante * 0.5 * teto 1.5x = 15"
+    assert_equal 85, result[:balance]
+    assert_equal 85, @wallet.balance("user-a")
   end
 end
 
