@@ -143,6 +143,8 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **Painel do time com scroll interno** — `window.scrollTo` não rola a página.
 - **Nav minimalista** — oculta Mart/Center/Jornada até time 6/6; novato não sabe que existem.
 - **Manage sem paginação/busca** — O(n) forms por poke (180 forms no mobile).
+- **-1hp persist** — `battle_engine` 119-126, mecânica TP-17/TP-10.
+- **LOG-juice** — aparência do log + animações CSS + reduced-motion.
 
 ### Playtest / QA / Ferramentas
 - **TP-1** — playbook de playtest reutilizável (helpers no harness).
