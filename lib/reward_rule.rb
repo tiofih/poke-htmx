@@ -10,7 +10,7 @@ class RewardRule
     lose_money: 40,
     win_levels: 2,
     draw_levels: 1,
-    lose_levels: 1
+    lose_levels: 0
   }.freeze
 
   def initialize(options = {})

@@ -58,8 +58,8 @@ class RewardRuleTest < Minitest::Test
     assert_equal 2, RewardRule.new.levels_for(:win)
   end
 
-  def test_levels_for_lose_is_one
-    assert_equal 1, RewardRule.new.levels_for(:lose)
+  def test_levels_for_lose_is_zero
+    assert_equal 0, RewardRule.new.levels_for(:lose)
   end
 
   def test_levels_for_draw_is_one
