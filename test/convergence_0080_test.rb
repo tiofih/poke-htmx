@@ -59,7 +59,7 @@ class Convergence0080Test < Minitest::Test
 
     assert last_response.ok?
     body = last_response.body
-    assert_match(/class="roster"/, body, "expected the team roster")
+    assert_match(/class="roster[^"]*"/, body, "expected the team roster")
     assert_match(/Nível \d+/, body, "expected the roster to show each member level")
     assert_match(%r{hx-get="/team/manage"}, body, "expected a Gerenciar link per member")
     moves = body.scan('name="new_slot"').size

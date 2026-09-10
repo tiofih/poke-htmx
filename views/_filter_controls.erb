@@ -1,15 +1,21 @@
-<input
-  type="text"
-  name="q"
-  class="filter-state input"
-  aria-label="Buscar no arquivo"
-  placeholder="Filtrar por nome"
-  value="<%= @q %>"
-  hx-target="#pokemon-list"
-  hx-trigger="keyup changed delay:300ms"
-  hx-get="/pokemons?offset=0"
-  hx-swap="innerHTML"
-  hx-include=".filter-state">
+<div class="field">
+  <label for="fsearch">Buscar no arquivo</label>
+  <input
+    id="fsearch"
+    type="text"
+    name="q"
+    class="filter-state input"
+    aria-label="Buscar no arquivo"
+    placeholder="Filtrar por nome"
+    value="<%= @q %>"
+    hx-target="#pokemon-list"
+    hx-trigger="keyup changed delay:300ms"
+    hx-get="/pokemons?offset=0"
+    hx-swap="innerHTML"
+    hx-include=".filter-state">
+</div>
+
+<div class="filter-grid">
 
 <select name="type" class="filter-state input" aria-label="Tipo" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
   <option value="" <%= "selected" if @type.nil? %>>Todos os tipos</option>
@@ -55,3 +61,4 @@
   <option value="in" <%= "selected" if @team_filter == "in" %>>No time</option>
   <option value="out" <%= "selected" if @team_filter == "out" %>>Fora do time</option>
 </select>
+</div>

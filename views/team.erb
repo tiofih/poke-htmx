@@ -5,9 +5,6 @@
   <p class="journey-progress">Time: <%= @team.size %>/6</p>
   <p class="notice notice--info">Monte seu time inicial de 6 Pokémon para iniciar a jornada.</p>
 <% end %>
-<% if @team_cost && @team_budget %>
-  <p class="meta num">Custo do time: <%= @team_cost %>/<%= @team_budget %></p>
-<% end %>
 <% if @game_over %>
   <p class="notice notice--error">Game Over — seu time está derrotado e você não tem dinheiro para curar. Venda itens no Poke Mart ou recomece a jornada.</p>
     <form hx-post="/journey/restart" hx-target="#team-view" hx-swap="innerHTML">
@@ -28,7 +25,7 @@
       <%= @game_over ? "Game over" : (@can_battle ? "Pronto p/ batalhar" : "Precisa de cura") %>
     </span>
   </div>
-  <ul class="roster" id="roster" data-od-id="members">
+  <ul class="roster roster-grid" id="roster" data-od-id="members">
     <% @team.each do |poke| %>
       <% pct = poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f * 100).round : 0 %>
       <% ratio = poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f) : 0 %>

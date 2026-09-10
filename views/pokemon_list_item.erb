@@ -20,8 +20,6 @@
       in_team = Array(@team_names).include?(name)
       disabled = in_team || @team_full
     %>
-    <button type="submit" class="btn pcard-add" <%= 'disabled="disabled"' if disabled %>>
-      <%= in_team ? "No time ✓" : "Adicionar ao time" %>
-    </button>
+    <button type="submit" class="pcard-add" aria-label="<%= in_team ? "#{name} já está no time" : "Adicionar #{name} ao time" %>" <%= 'disabled="disabled"' if disabled %>>+</button>
   </form>
 </li>

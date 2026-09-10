@@ -28,8 +28,14 @@ class HomeViewTest < Minitest::Test
 
     assert last_response.ok?
     body = last_response.body
-    assert_match(/<div id="filter-controls" class="filter-grid">/, body,
-                 "expected filter card to dress controls in .filter-grid")
+    assert_match(/<div id="filter-controls">/, body,
+                 "expected the filter card to keep the #filter-controls hook")
+    assert_match(%r{<div class="field">\s*<label for="fsearch">Buscar no arquivo</label>}m, body,
+                 "expected the search textfield on its own full row above the grid")
+    assert_match(%r{<div class="filter-grid">.*?<select}m, body,
+                  "expected filter dropdowns on the row(s) below the search")
+    assert body.index('id="fsearch"') < body.index('class="filter-grid"'),
+           "expected search to come before the filter grid"
     assert_match(/<span class="meta">Arquivo/, body,
                  "expected the Arquivo/clear row from the guide")
     assert_match(%r{class="btn btn-ghost btn-sm"[^>]*>Limpar filtros</a>}, body,
@@ -87,7 +93,7 @@ class HomeViewTest < Minitest::Test
 
     assert last_response.ok?
     body = last_response.body
-    assert_match(/class="roster"/, body, "expected the team roster")
+    assert_match(/class="roster[^"]*"/, body, "expected the team roster")
     assert_match(/Nível \d+/, body, "expected each member to show Nível")
     assert_match(%r{hx-get="/team/manage"[^>]*hx-target="body"}, body,
                  "expected a Gerenciar link opening the manage modal")

@@ -47,12 +47,17 @@ class ServerMartTest < Minitest::Test
     assert_equal 100, @wallet.balance("user-a")
   end
 
-  def test_mart_fragment_shows_catalog_inventory_and_balance
+  def test_mart_buy_opens_from_modal_trigger_with_catalog_inventory_and_balance
     @wallet.grant("user-a", 100)
 
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/", {}, user_session("user-a")
     end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'data-od-id="open-modal-mart"'
+
+    get "/team/mart", {}, user_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Mart"
@@ -61,12 +66,10 @@ class ServerMartTest < Minitest::Test
     assert_includes last_response.body, "Saldo: 100"
   end
 
-  def test_mart_fragment_shows_affordable_quantity
+  def test_mart_modal_shows_affordable_quantity
     @wallet.grant("user-a", 100)
 
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/", {}, user_session("user-a")
-    end
+    get "/team/mart", {}, user_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "Pocao — 20 ×5"
@@ -77,12 +80,10 @@ class ServerMartTest < Minitest::Test
     refute_includes mart_form, "disabled"
   end
 
-  def test_mart_fragment_disables_buy_when_insufficient_balance
+  def test_mart_modal_disables_buy_when_insufficient_balance
     @wallet.grant("user-a", 10)
 
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/", {}, user_session("user-a")
-    end
+    get "/team/mart", {}, user_session("user-a")
 
     assert last_response.ok?
     mart_form = last_response.body[%r{<form[^>]*hx-post="/mart/buy".*?</form>}m]
@@ -90,15 +91,13 @@ class ServerMartTest < Minitest::Test
     assert_includes mart_form, "disabled"
   end
 
-  def test_mart_buy_adds_row_visible_in_fragment_inventory
+  def test_mart_buy_adds_row_visible_in_modal_inventory
     @wallet.grant("user-a", 100)
 
     post "/mart/buy", { item_name: "potion", quantity: "1" }, user_session("user-a")
 
     assert last_response.ok?
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/", {}, user_session("user-a")
-    end
+    get "/team/mart", {}, user_session("user-a")
 
     assert_includes last_response.body, "potion"
   end
@@ -129,13 +128,11 @@ class ServerMartTest < Minitest::Test
     assert_equal 100, @wallet.balance("user-a")
   end
 
-  def test_mart_fragment_shows_sell_button_per_inventory_item
+  def test_mart_modal_shows_sell_button_per_inventory_item
     @wallet.grant("user-a", 100)
     @inventory.add("user-a", "potion", 2)
 
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/", {}, user_session("user-a")
-    end
+    get "/team/mart", {}, user_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, %(hx-post="/mart/sell")
@@ -143,15 +140,13 @@ class ServerMartTest < Minitest::Test
     refute_nil sell_form
   end
 
-  def test_mart_fragment_hides_zero_quantity_inventory_from_sell
+  def test_mart_modal_hides_zero_quantity_inventory_from_sell
     @wallet.grant("user-a", 100)
     @inventory.add("user-a", "potion", 1)
     @inventory.use("user-a", "potion", 1)
     @inventory.add("user-a", "hyper-potion", 2)
 
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/", {}, user_session("user-a")
-    end
+    get "/team/mart", {}, user_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "hyper-potion"
@@ -185,14 +180,12 @@ class ServerMartTest < Minitest::Test
     assert_equal 20, @wallet.balance("user-a")
   end
 
-  def test_mart_fragment_shows_only_offered_stones
+  def test_mart_modal_shows_only_offered_stones
     @wallet.grant("user-a", 100)
     offered = StoneRotation.new("user-a", 0).stones
     not_offered = ItemCatalog.all.select { |item| item.category == "stone" }.map(&:name) - offered
 
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/", {}, user_session("user-a")
-    end
+    get "/team/mart", {}, user_session("user-a")
 
     assert last_response.ok?
     offered.each { |name| assert_includes last_response.body, name }

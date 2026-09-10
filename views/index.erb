@@ -9,7 +9,6 @@
       <div class="budget-summary">
         <div class="budget-meta row">Custo do time <strong class="num" id="budget-text"><%= @team_cost %>/<%= @team_budget %></strong></div>
         <div class="meter" role="progressbar" aria-label="Orçamento do time"><span class="meter-fill<%= @team_cost > @team_budget ? ' over' : (@team_cost >= @team_budget * 0.9 ? ' near' : '') %>" id="budget-fill" style="width:<%= (@team_cost.to_f / @team_budget * 100) %>%"></span></div>
-        <a class="btn btn-primary btn-sm" href="#battle" data-od-id="cta-battle">Batalhar</a>
         <a class="btn btn-secondary btn-sm" href="#manage-modal" data-od-id="open-modal-manage" hx-get="/team/manage" hx-target="body" hx-swap="beforeend">Gerenciar time</a>
       </div>
     </div>
@@ -30,19 +29,10 @@
           <%= erb :_center_slot, layout: false %>
           <%= erb :_mart_slot, layout: false %>
         </div>
-        <% if @journey_started %>
-          <% unless @team.empty? %>
-            <h2>Poke Center</h2>
-            <%= erb :_center, layout: false %>
-
-            <h2>Poke Mart</h2>
-            <%= erb :_mart, layout: false %>
-          <% end %>
-        <% end %>
       </div>
       <aside class="catalog-pane stack">
         <div class="card">
-          <div id="filter-controls" class="filter-grid">
+          <div id="filter-controls">
             <%= erb :_filter_controls, layout: false %>
           </div>
         </div>

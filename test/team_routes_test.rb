@@ -46,12 +46,12 @@ class ServerTeamTest < Minitest::Test
 
     assert_includes session_a.last_response.body, "Adicionado ao time."
     # o roster agora é <ul class="roster"> aninhado em .card; extrai até fechar o roster
-    team_a = session_a.last_response.body[%r{<div id="team-view".*?<ul class="roster"[^>]*>.*?</ul>}m]
+    team_a = session_a.last_response.body[%r{<div id="team-view".*?<ul class="roster[^"]*"[^>]*>.*?</ul>}m]
     assert_includes team_a, "pikachu"
     refute_includes team_a, "bulbasaur"
 
     assert_includes session_b.last_response.body, "Adicionado ao time."
-    team_b = session_b.last_response.body[%r{<div id="team-view".*?<ul class="roster"[^>]*>.*?</ul>}m]
+    team_b = session_b.last_response.body[%r{<div id="team-view".*?<ul class="roster[^"]*"[^>]*>.*?</ul>}m]
     assert_includes team_b, "bulbasaur"
     refute_includes team_b, "pikachu"
 
@@ -432,10 +432,15 @@ class ServerTeamTest < Minitest::Test
     assert_includes last_response.body, ">▼</button>"
     assert_includes last_response.body, 'name="new_slot"'
     assert_includes last_response.body, 'hx-target="#team-view"'
-    # heal form mudou para a home (full page), fora do fragmento
+    # heal form mudou para o modal do Poke Center, fora do fragmento
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/", {}, user_session("user-a")
     end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'data-od-id="open-modal-center"'
+
+    get "/team/center", {}, user_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, %(hx-post="/team/heal")
@@ -582,6 +587,11 @@ class ServerTeamTest < Minitest::Test
     end
 
     assert last_response.ok?
+    assert_includes last_response.body, 'data-od-id="open-modal-center"'
+
+    get "/team/center", {}, user_session("user-a")
+
+    assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
     assert_includes last_response.body, "100/200"
     assert_includes last_response.body, %(hx-post="/team/heal")
@@ -600,9 +610,7 @@ class ServerTeamTest < Minitest::Test
     @progression.update_hp("user-a", pokemon_id, 200, 100)
     @wallet.grant("user-a", 200)
 
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/", {}, user_session("user-a")
-    end
+    get "/team/center", {}, user_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
@@ -619,9 +627,7 @@ class ServerTeamTest < Minitest::Test
     @progression.update_hp("user-a", pokemon_id, 200, 200)
     @wallet.grant("user-a", 100)
 
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/", {}, user_session("user-a")
-    end
+    get "/team/center", {}, user_session("user-a")
 
     assert last_response.ok?
     heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
@@ -635,9 +641,7 @@ class ServerTeamTest < Minitest::Test
     @progression.update_hp("user-a", pokemon_id, 200, 100)
     @wallet.grant("user-a", 10)
 
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/", {}, user_session("user-a")
-    end
+    get "/team/center", {}, user_session("user-a")
 
     assert last_response.ok?
     heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
@@ -1078,8 +1082,15 @@ class TeamBudgetRoutesTest < Minitest::Test
     assert last_response.ok?
     team = @repository.all("user-a")
     assert_equal 1, team.size
-    assert_match(%r{Custo do time: 20/450}, last_response.body)
+    # custo sem duplicar no fragmento: vive uma vez no head da home (budget-text)
+    refute_match(/Custo do time:/, last_response.body)
     refute_match(/S no time:/, last_response.body)
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_match(%r{budget-text">20/450}, last_response.body)
   end
 
   # C9 — remoção libera orçamento e teto de S
@@ -1269,13 +1280,18 @@ class TeamBudgetRoutesTest < Minitest::Test
     assert_includes @repository.all("user-a").map(&:name), "s-rest-new"
   end
 
-  # C10 — painel mostra custo/orçamento sem contador S
+  # C10 — custo/orçamento vive uma vez no head da home, sem contador S
   def test_team_panel_shows_cost_budget_and_s_count
-    # Time vazio — apenas custo, sem S no time
+    # Time vazio — fragmento sem custo duplicado, sem S no time
     get "/team", {}, htmx_session("user-c")
     assert last_response.ok?
-    assert_match(%r{Custo do time: 0/450}, last_response.body)
+    refute_match(/Custo do time:/, last_response.body)
     refute_match(/S no time:/, last_response.body)
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-c")
+    end
+    assert last_response.ok?
+    assert_match(%r{budget-text">0/450}, last_response.body)
 
     # Adiciona um Pokémon F barato
     poke = Pokemon.new(name: "cheap", sprite: "s", number: 600,
@@ -1287,11 +1303,16 @@ class TeamBudgetRoutesTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_match(%r{Custo do time: 20/450}, last_response.body)
+    refute_match(/Custo do time:/, last_response.body)
     refute_match(/S no time:/, last_response.body)
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-c")
+    end
+    assert last_response.ok?
+    assert_match(%r{budget-text">20/450}, last_response.body)
   end
 
-  # C5 — painel sem contador S, só custo (S removido do front)
+  # C5 — home sem contador S, só custo (S removido do front)
   def test_team_panel_shows_s_count_without_limit
     s_poke = Pokemon.new(name: "solo-s", sprite: "s", number: 700,
                          evolutions: [build_pokemon_record("solo-s", 700)])
@@ -1299,12 +1320,16 @@ class TeamBudgetRoutesTest < Minitest::Test
       with_budget_rating({ "solo-s" => "S" }) do
         post "/team", { pokeName: "solo-s" }, user_session("user-c")
         assert last_response.ok?
-        assert_match(%r{Custo do time: 120/450}, last_response.body)
+        refute_match(/Custo do time:/, last_response.body)
         refute_match(/S no time:/, last_response.body)
         # GET dentro do mesmo stub para rating consistente
         get "/team", {}, htmx_session("user-c")
-        assert_match(%r{Custo do time: 120/450}, last_response.body)
+        refute_match(/Custo do time:/, last_response.body)
         refute_match(/S no time:/, last_response.body)
+        PokeApiStub.with_all_names(two_hundred_fifty_names) do
+          get "/", {}, user_session("user-c")
+        end
+        assert_match(%r{budget-text">120/450}, last_response.body)
       end
     end
   end
@@ -1320,8 +1345,19 @@ class TeamBudgetRoutesTest < Minitest::Test
       end
     end
     assert last_response.ok?
-    assert_match(%r{Custo do time: 110/450}, last_response.body)
+    refute_match(/Custo do time:/, last_response.body)
     refute_match(/S no time:/, last_response.body)
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      with_budget_rating({ "s-rest-panel" => "S" }) do
+        PokeApiStub.with_find(s_rest) do
+          PokeApiStub.with_gateway(evolution_restricted: { "s-rest-panel" => true }) do
+            get "/", {}, user_session("user-d")
+          end
+        end
+      end
+    end
+    assert last_response.ok?
+    assert_match(%r{budget-text">110/450}, last_response.body)
     # OOB #pokemon-list preservado com badge? verificado em pokemon_list_cost_test
   end
 end
@@ -1345,10 +1381,8 @@ class TeamHealRoutesTest < Minitest::Test
     assert_includes last_response.body, "notice--error"
     assert_equal 0, @progression.get("user-a", target.id)[:hp_current], "nada curado"
     assert_equal 10, @wallet.balance("user-a")
-    # strips agora na home (full page), nao no fragmento
-    PokeApiStub.with_all_names(two_hundred_fifty_names) do
-      get "/", {}, user_session("user-a")
-    end
+    # center vive só no modal, nao na home inline
+    get "/team/center", {}, user_session("user-a")
 
     assert last_response.ok?
     assert_match(%r{>0/200<}, last_response.body)
@@ -1364,6 +1398,11 @@ class TeamHealRoutesTest < Minitest::Test
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/", {}, user_session("user-a")
     end
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'data-od-id="open-modal-center"'
+
+    get "/team/center", {}, user_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
