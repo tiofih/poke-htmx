@@ -96,17 +96,20 @@ Fechar a **convergência visual** entre os protótipos `open-design/` e as views
 
 ## 7. Validação (executada pelo usuário — S2)
 
+> **Validação fase 3 — usuário VALIDADO em 2026-09-10 (all ok, sem S3).**
+
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (body global) | | | pendente |
-| C2 (topnav) | | | pendente |
-| C3 (roster) | | | pendente |
-| C4 (pcard) | | | pendente |
-| C5 (podium) | | | pendente |
-| G1 (sem regressão) | | | pendente |
-| G2 (só visual) | | | pendente |
-| G3 (docs + revisão) | | | pendente |
-| M1 (screenshots 1440px) | — | | pendente |
+| C1 (body global) | `test/convergence_0080_test.rb` `test_body_has_global_base_rule` verde + `design_system`/`layout` estendidos | usuário validado 2026-09-10 — fundo/fontes ODS aplicados, sem Quirks Mode | ok |
+| C1b (doctype, S3 2026-09-10) | `test/layout_test.rb` `test_full_page_starts_with_doctype` verde (`GET /` começa com `<!DOCTYPE html>` + `<html lang="pt-BR">`) | usuário validado 2026-09-10 — ausência do aviso de Quirks Mode | ok |
+| C2 (topnav) | `test_topnav_ctas_are_buttons_and_battle_has_back_link` verde + `layout_test` estendido | usuário validado 2026-09-10 — CTA sempre `.btn` + "Voltar ao time" em `/battle` | ok |
+| C3 (roster) | `test_roster_grid_with_level_manage_and_reorder` verde + `home_view_test` estendido | usuário validado 2026-09-10 — grid 2-col + nível + Gerenciar, ▲▼ preservados | ok |
+| C4 (pcard) | `test_pcard_full_remarkup_mirrors_prototype` verde + `home_view_test` estendido | usuário validado 2026-09-10 — marcação espelha `home-team.html` | ok |
+| C5 (podium) | `test_podium_middle_wrapped_in_card` verde + `battle_view_test` estendido | usuário validado 2026-09-10 — meio do `.podium` em `.card` | ok |
+| G1 (sem regressão) | suíte **1085/5291** verde + lint 0 no escopo (passo 5) | — | ok |
+| G2 (só visual) | `git diff --stat -- db/ Gemfile* test/open_design_contract_test.rb` vazio | usuário validado 2026-09-10 — sem mudança de comportamento | ok |
+| G3 (docs + revisão) | `check_docs` + `checar-sessao 0080` verdes + revisor S7 `Aprovado` (`reviews/review-2026-09-10T17-35-00.md`) | — | ok |
+| M1 (screenshots 1440px) | — | usuário validado 2026-09-10 — `tmp/comp-home\|battle\|history.png` vs `tmp/proto-home\|battle\|history.png`, sem overflow-x | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário. **Ao fim da fase 2, PARAR na fase 2 — não preencher esta seção, não marcar Done, não commitar conclusão sem a validação do usuário (fase 3).**
 
