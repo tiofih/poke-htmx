@@ -37,11 +37,11 @@ class TeamDuelo
     { name: "garchomp", number: 445, moves: %w[dragon-claw earthquake crunch],
       level: 30, experience: 45_000 },
     { name: "salamence", number: 373, moves: %w[fly dragon-claw fire-fang],
-      level: 25, experience: 29_500 },
+      level: 25, experience: 30_000 },
     { name: "metagross", number: 376, moves: %w[metal-claw earthquake bullet-punch],
-      level: 20, experience: 18_000 },
+      level: 20, experience: 19_000 },
     { name: "charizard", number: 6, moves: %w[flamethrower wing-attack slash],
-      level: 15, experience: 9_500 }
+      level: 15, experience: 10_500 }
   ].freeze
 
   WEAK_TEAM = [
