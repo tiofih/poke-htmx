@@ -27,7 +27,7 @@
       <li class="member" data-od-id="member-<%= poke.name.downcase %>">
         <div class="member-top">
           <div class="sprite-tile"><img src="<%= poke.sprite %>" alt="<%= poke.name %>" width="96" height="96"></div>
-          <div><span class="slot">#<%= poke.slot %></span><span class="member-name"><%= poke.name %></span><span class="member-lvl num">Nível <%= @member_levels.fetch(poke.id, 1) %></span></div>
+          <div><span class="slot">#<%= poke.slot %></span><span class="member-name"><%= poke.name %></span><span class="member-lvl num">Nível <%= @member_levels.fetch(poke.id.to_s, 1) %></span></div>
         </div>
         <div class="hp">
           <span class="hp-label">HP</span>

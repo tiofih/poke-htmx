@@ -92,8 +92,6 @@
             <% end %>
             <% if @xp_gained.to_i.positive? %>
               <p class="rewards"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e #{@money_gained} de dinheiro." : "." %></strong></p>
-            <% elsif end_state == "loss" %>
-              <p class="rewards">Derrota — sem XP desta vez, mas +<%= @money_gained %> de consolo.</p>
             <% end %>
             <% if defined?(@evolution_news) && !@evolution_news&.empty? %>
               <ul class="evolution-news news--pop">
