@@ -11,13 +11,6 @@
     <button type="submit" class="btn btn-secondary">Recomeçar jornada</button>
   </form>
 <% end %>
-<% if @journey_started %>
-  <% unless @team.empty? %>
-    <% if @can_battle %>
-      <a class="gameloop-cta battle" href="/battle">Batalhar</a>
-    <% end %>
-  <% end %>
-<% end %>
 <div class="card">
   <div class="row-between">
     <h2>Seu time</h2>
@@ -25,7 +18,7 @@
       <%= @game_over ? "Game over" : (@can_battle ? "Pronto p/ batalhar" : "Precisa de cura") %>
     </span>
   </div>
-  <ul class="roster roster-grid" id="roster" data-od-id="members">
+  <ul class="roster" id="roster" data-od-id="members">
     <% @team.each do |poke| %>
       <% pct = poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f * 100).round : 0 %>
       <% ratio = poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f) : 0 %>

@@ -132,10 +132,18 @@ class ServerTeamTest < Minitest::Test
   def test_team_panel_shows_battle_cta_after_journey
     fill_team("user-a")
 
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    assert_match(%r{<a href="/battle" class="btn btn-primary" data-od-id="cta-battle">Batalhar</a>},
+                 last_response.body)
+
     get "/team", {}, htmx_session("user-a")
 
     assert last_response.ok?
-    assert_match(%r{<a class="gameloop-cta battle" href="/battle">Batalhar</a>}, last_response.body)
+    refute_match(/gameloop-cta battle/, last_response.body)
   end
 
   def test_team_panel_omits_battle_cta_before_journey

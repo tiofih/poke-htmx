@@ -89,7 +89,7 @@ class PokemonListCostTest < Minitest::Test
     assert_includes last_response.body, "B · 55"
     assert_includes last_response.body, 'data-tier="A"'
     assert_includes last_response.body, "A · 70"
-    assert_includes last_response.body, 'class="poke-cost"'
+    assert_includes last_response.body, 'class="poke-cost num"'
   end
 
   def test_index_shows_cost_and_tier
@@ -217,7 +217,7 @@ class PokemonListCostTest < Minitest::Test
     assert_includes last_response.body, "Página 2"
     assert_equal 36, last_response.body.scan('<li class="pcard">').size
     # badge ainda presente sem quebrar paginação
-    assert_includes last_response.body, 'class="poke-cost"'
+    assert_includes last_response.body, 'class="poke-cost num"'
 
     stub_list(filtered_names, rating_map: { "pikachu" => "B" }) do
       get "/pokemons", q: "pik"
