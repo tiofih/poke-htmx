@@ -731,9 +731,9 @@ class BattleServiceGrantLevelsTest < Minitest::Test
       @real.get(user_id, id)
     end
 
-    def grant_levels(user_id, id, delta)
-      @calls << [user_id, id, delta]
-      @real.grant_levels(user_id, id, delta)
+    def grant(user_id, id, amount)
+      @calls << [user_id, id, amount]
+      @real.grant(user_id, id, amount)
     end
 
     # rubocop:disable Style/ArgumentsForwarding, Naming/BlockForwarding
@@ -747,7 +747,7 @@ class BattleServiceGrantLevelsTest < Minitest::Test
     end
   end
 
-  def test_grant_finished_xp_increments_two_on_win_once
+  def test_finished_win_grants_curve_xp
     api = TieredApi.new
     add_team_for("user-1")
     counting = CountingProgression.new(@progression)
@@ -757,9 +757,11 @@ class BattleServiceGrantLevelsTest < Minitest::Test
     service.send(:grant_finished_xp, "user-1", engine)
 
     assert_equal 3, counting.calls.size
-    assert(counting.calls.all? { |_, _, d| d == 2 })
+    assert(counting.calls.all? { |_, _, d| d == 50 })
     @team.all("user-1").each do |member|
-      assert_equal 7, @progression.get("user-1", member.id)[:level]
+      entry = @progression.get("user-1", member.id)
+      assert_equal 1050, entry[:xp]
+      assert_equal 5, entry[:level]
     end
   end
 
@@ -773,9 +775,11 @@ class BattleServiceGrantLevelsTest < Minitest::Test
     service.send(:grant_finished_xp, "user-1", engine)
 
     assert_equal 3, counting.calls.size
-    assert(counting.calls.all? { |_, _, d| d == 1 })
+    assert(counting.calls.all? { |_, _, d| d == 20 })
     @team.all("user-1").each do |member|
-      assert_equal 6, @progression.get("user-1", member.id)[:level]
+      entry = @progression.get("user-1", member.id)
+      assert_equal 1020, entry[:xp]
+      assert_equal 5, entry[:level]
     end
   end
 
@@ -789,7 +793,7 @@ class BattleServiceGrantLevelsTest < Minitest::Test
     service.send(:grant_finished_xp, "user-1", engine)
 
     assert_equal 3, counting.calls.size
-    assert(counting.calls.all? { |_, _, d| d == 1 })
+    assert(counting.calls.all? { |_, _, d| d == 25 })
   end
 
   def test_grant_finished_xp_guard_prevents_double_grant
@@ -803,9 +807,9 @@ class BattleServiceGrantLevelsTest < Minitest::Test
     service.send(:grant_finished_xp, "user-1", engine)
     # guard interno (@granted_xp_engines) + externo finish_effects (advance:397)
     # garante 1x por :finished mesmo se chamado 2x isolado
-    assert_equal 7, @progression.get("user-1", @team.all("user-1").first.id)[:level],
-                 "segunda chamada nao duplica win +2 (7 nao 9)"
-    assert_equal 3, counting.calls.size, "apenas 3 grant_levels na primeira chamada"
+    assert_equal 1050, @progression.get("user-1", @team.all("user-1").first.id)[:xp],
+                 "segunda chamada nao duplica win +50 (1050 nao 1100)"
+    assert_equal 3, counting.calls.size, "apenas 3 grant na primeira chamada"
   end
 
   def test_grant_finished_xp_does_nothing_when_not_finished

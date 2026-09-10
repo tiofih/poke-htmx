@@ -237,12 +237,12 @@ module BattleServiceFinalization # rubocop:disable Metrics/ModuleLength
     return unless engine.finished? && engine.result
     return if @granted_xp_engines.include?(engine.object_id)
 
-    delta = RewardRule.new.levels_for(engine.result)
+    delta = RewardRule.new.xp_for(engine.result)
     return if delta.zero?
 
     @granted_xp_engines.add(engine.object_id)
     @team.all(user_id).each do |member|
-      @progression.grant_levels(user_id, member.id, delta)
+      @progression.grant(user_id, member.id, delta)
     end
   end
 
