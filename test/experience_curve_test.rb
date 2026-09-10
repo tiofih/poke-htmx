@@ -4,9 +4,11 @@ require "minitest/autorun"
 require_relative "../lib/experience_curve"
 
 class ExperienceCurveTest < Minitest::Test
-  def test_xp_needed_is_linear_level_times_hundred
-    assert_equal 100, ExperienceCurve.xp_needed(1)
-    assert_equal 200, ExperienceCurve.xp_needed(2)
+  def test_xp_needed_discounts_early_levels
+    assert_equal 60, ExperienceCurve.xp_needed(1)
+    assert_equal 60, ExperienceCurve.xp_needed(2)
+    assert_equal 60, ExperienceCurve.xp_needed(3)
+    assert_equal 400, ExperienceCurve.xp_needed(4)
     assert_equal 500, ExperienceCurve.xp_needed(5)
   end
 

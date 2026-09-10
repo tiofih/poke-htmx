@@ -3,6 +3,8 @@
 class ExperienceCurve
   class << self
     def xp_needed(level)
+      return 60 if level <= 3
+
       level * 100
     end
 
