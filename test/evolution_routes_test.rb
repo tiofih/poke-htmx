@@ -110,16 +110,18 @@ class EvolutionRoutesTest < Minitest::Test
     assert_includes last_response.body, %(hx-post="/team/#{pikachu_id}/evolve")
   end
 
-  def test_team_fragment_shows_evolve_button_but_manage_does_not
+  def test_manage_shows_evolve_button_but_team_fragment_does_not
     fill_team("user-a")
     pikachu_id = TestDatabase.team_id("pikachu", "user-a")
     evolve_trigger = %(hx-get="/team/#{pikachu_id}/evolution")
 
     get "/team", {}, htmx_session("user-a")
-    assert_includes last_response.body, evolve_trigger
-
-    get "/team/manage", {}, user_session("user-a")
     refute_includes last_response.body, evolve_trigger
+
+    PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+    assert_includes last_response.body, evolve_trigger
   end
 
   def test_evolve_response_rerenders_the_modal

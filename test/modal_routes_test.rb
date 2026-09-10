@@ -153,8 +153,19 @@ class ModalRoutesTest < Minitest::Test
 
     assert last_response.ok?
     body = last_response.body
-    assert_includes body, 'href="#evolution-modal"'
-    assert_includes body, "/evolution\""
-    refute_includes body, "onclick"
+    refute_includes body, 'href="#evolution-modal"'
+    refute_includes body, "/evolution\""
+
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" }, { level: 1, name: "quick-attack" }]
+    ) do
+      get "/team/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    manage = last_response.body
+    assert_includes manage, 'href="#evolution-modal"'
+    assert_includes manage, "/evolution\""
+    refute_includes manage, "onclick"
   end
 end

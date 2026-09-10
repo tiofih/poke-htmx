@@ -40,11 +40,22 @@
           </div>
         <% end %>
         <div class="member-actions">
-          <a class="btn evolution-trigger" href="#evolution-modal"
-             hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled aria-disabled="true" title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</a>
           <a class="btn btn-ghost btn-sm" href="#manage-modal"
              hx-get="/team/<%= poke.id %>/manage" hx-target="body" hx-swap="beforeend"
              data-od-id="<%= poke.name.downcase %>-manage">Gerenciar</a>
+          <!-- hx-params "*" garante id + list-state; hx-include ".list-state" explícita filtros (redundância intencional) -->
+          <form
+              id='team-pokemon-<%= poke.id %>'
+              hx-delete="/team"
+              hx-target="#team-view"
+              hx-swap="innerHTML"
+              hx-include=".list-state"
+              hx-params="*"
+              hx-sync="closest form:replace"
+              hx-indicator="#team-view">
+            <input type="hidden" name="id" value="<%= poke.id %>">
+            <button type="submit" class="btn btn-ghost btn-sm" hx-disabled-elt="this" data-od-id="<%= poke.name.downcase %>-remove"<%= ' disabled title="Pokémon derrotado — cure antes de remover"' if poke.fainted? %>>Remover do time</button>
+          </form>
           <form
               hx-post="/team/<%= poke.id %>/move"
               hx-target="#team-view"
@@ -58,19 +69,6 @@
               hx-swap="innerHTML">
             <input type="hidden" name="new_slot" value="<%= poke.slot + 1 %>">
             <button type="submit" class="btn btn-ghost btn-sm" aria-label="Mover para baixo">▼</button>
-          </form>
-          <!-- hx-params "*" garante id + list-state; hx-include ".list-state" explícita filtros (redundância intencional) -->
-          <form
-              id='team-pokemon-<%= poke.id %>'
-              hx-delete="/team"
-              hx-target="#team-view"
-              hx-swap="innerHTML"
-              hx-include=".list-state"
-              hx-params="*"
-              hx-sync="closest form:replace"
-              hx-indicator="#team-view">
-            <input type="hidden" name="id" value="<%= poke.id %>">
-            <button type="submit" class="btn btn-ghost btn-sm" hx-disabled-elt="this" data-od-id="<%= poke.name.downcase %>-remove"<%= ' disabled title="Pokémon derrotado — cure antes de remover"' if poke.fainted? %>>Remover do time</button>
           </form>
         </div>
       </li>

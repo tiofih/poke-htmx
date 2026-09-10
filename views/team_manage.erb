@@ -17,6 +17,8 @@
         <% end %>
       </div>
     </div>
+    <a class="btn evolution-trigger" href="#evolution-modal"
+       hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled aria-disabled="true" title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</a>
     <p class="section-label">Status</p>
     <div class="stat-grid">
       <div class="stat-row"><span class="lab">HP</span><div class="stat-bar"><span style="width:<%= poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f * 100).round : 0 %>%"></span></div><span class="val"><%= poke.hp_current %>/<%= poke.hp_max %></span></div>
