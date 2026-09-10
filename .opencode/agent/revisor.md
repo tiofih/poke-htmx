@@ -50,5 +50,4 @@ apontando arquivo/linha e o critério/RF afetado. Não "corrija": aponte para o 
   Se após **3 rodadas** ainda não convergir, marque que deve **escalar ao usuário (S3)**.
 - Você é read-only: nunca edita código nem docs; só aponta.
 
-**Gotchas/handoff:** registre lições duráveis na memória (`memory_write_page` em `gotchas/`) e
-grave o handoff (`memory_handoff_begin`) para o próximo papel.
+**Gotchas/handoff (S6 — provisional, SEM validação, SEM commit):** ao dar veredito `Aprovado` (fim da fase 2), registre lições na memória (`memory_write_page` em `gotchas/`, `provisional:true`) e grave o handoff (`memory_handoff_begin`, `provisional:true`) para o próximo papel — sem aguardar a validação do usuário (fase 3) e sem commitar. A fase 3 só confirma/enriquece, nunca bloqueia o save.

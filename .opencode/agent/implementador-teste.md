@@ -52,6 +52,4 @@ com suíte verde e lint 0 em todo passo, e commits por green. Você é responsá
   `REQUIREMENTS.md`/`SESSIONS.md`, **NÃO** commite a conclusão.
 - **PARE** e sinalize ao usuário que a implementação terminou e aguarda a **validação (fase 3, do usuário)**.
 
-**Gotchas:** ao fim, registre na sessão (seção "Gotchas / Lições") e na memória
-(`memory_write_page` em `gotchas/`) as armadilhas/lições que encontrou (comportamento de lib,
-schema, concorrência, stub). Grave o handoff (`memory_handoff_begin`) para o Revisor/Playtester.
+**Gotchas/handoff (S6 — provisional, SEM validação, SEM commit):** ao veredito `Aprovado` do Revisor (fim da fase 2), registre na sessão (seção "Gotchas / Lições") e grave na memória o handoff (`memory_handoff_begin`, `provisional:true`) e os gotchas (`memory_write_page` em `gotchas/`, `provisional:true`) — sem aguardar a validação do usuário (fase 3) e sem commitar a conclusão. A fase 3 só confirma/enriquece, nunca bloqueia o save.

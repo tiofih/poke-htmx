@@ -30,3 +30,4 @@ You are the orchestrator: delegate ONLY via spawn (never execute inline; you can
 
 ## After each role
 - Report state plus next step.
+- Veredito `Aprovado` (fim da fase 2) dispara handoff+gotchas provisionais (`provisional:true`), SEM validação do usuário e SEM commit; a fase 3 só confirma/enriquece.
