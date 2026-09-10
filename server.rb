@@ -67,7 +67,7 @@ module ServerCommon
   end
 
   # Enrichment 0076 2a (C5): o schema team_pokemons nao tem coluna de tipos —
-  # resolve via api.find com memo por nome; fail-closed [] (sem rede em teste).
+  # resolve via api.detail (com tipos) com fallback api.find, memo por nome; fail-closed [] (sem rede em teste).
   def team_types_map(members)
     cache = {}
     Array(members).to_h { |member| [member.id, member_types_from_api(cache, member)] }
@@ -78,7 +78,7 @@ module ServerCommon
     return stored unless stored.empty?
 
     cache.fetch(member.name) do
-      found = settings.api.find(member.name)
+      found = settings.api.detail(member.name) || settings.api.find(member.name)
       cache[member.name] = found ? found.types.to_a : []
     rescue StandardError
       []
