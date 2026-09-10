@@ -732,14 +732,24 @@ module ServerTeamActions
     return journey_gate_notice unless settings.journey.started?(current_user)
 
     @result = settings.mart.buy(current_user, params[:item_name], params[:quantity].to_i)
-    render_result_notice(@result)
+    render_mart_result_notice(@result)
   end
 
   def sell_from_mart
     return journey_gate_notice unless settings.journey.started?(current_user)
 
     @result = settings.mart.sell(current_user, params[:item_name], params[:quantity].to_i)
-    render_result_notice(@result)
+    render_mart_result_notice(@result)
+  end
+
+  def render_mart_result_notice(result)
+    @notice = result[:notice]
+    @notice_kind = result[:kind]
+    "#{render_team_fragment_with_notice}#{oob_mart_modal}"
+  end
+
+  def oob_mart_modal
+    erb(:_mart_modal, layout: false).sub('id="mart-modal"', 'id="mart-modal" hx-swap-oob="outerHTML"')
   end
 
   def render_result_notice(result)

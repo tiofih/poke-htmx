@@ -58,7 +58,7 @@
 
 <select name="team" class="filter-state input" aria-label="Disponibilidade" hx-get="/pokemons?offset=0" hx-target="#pokemon-list" hx-swap="innerHTML" hx-include=".filter-state" hx-trigger="change">
   <option value="" <%= "selected" if @team_filter.nil? %>>Todos</option>
-  <option value="in" <%= "selected" if @team_filter == "in" %>>No time</option>
   <option value="out" <%= "selected" if @team_filter == "out" %>>Fora do time</option>
+  <option value="in" <%= "selected" if @team_filter == "in" %>>No time</option>
 </select>
 </div>

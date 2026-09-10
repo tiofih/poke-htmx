@@ -3,8 +3,11 @@
     <div class="modal-head">
       <h2>Poke Mart</h2>
       <button type="button" class="modal-close" aria-label="Fechar" data-od-id="modal-mart-close"
-         hx-get="/team/mart/close" hx-target="#mart-overlay" hx-swap="outerHTML">×</button>
+         hx-get="/team/mart/close" hx-target="#mart-modal" hx-swap="outerHTML">×</button>
     </div>
+    <% if @notice %>
+      <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
+    <% end %>
     <%= erb :_mart, layout: false %>
   </div>
 </div>

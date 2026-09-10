@@ -343,8 +343,8 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     play_until_finish(fallback_plays: 300)
 
     assert last_response.ok?
-    assert_match(%r{<a class="btn btn-secondary" href="/">Poke Center</a>}, last_response.body)
-    assert_match(%r{<a class="btn btn-secondary" href="/">Poke Mart</a>}, last_response.body)
+    assert_match(%r{hx-get="/team/center"[^>]*>Poke Center</a>}, last_response.body)
+    assert_match(%r{hx-get="/team/mart"[^>]*>Poke Mart</a>}, last_response.body)
     assert_includes last_response.body, "Novo confronto"
   end
 

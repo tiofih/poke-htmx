@@ -110,7 +110,7 @@
             <% if @game_over %>
               <p class="notice notice--error">Game Over — seu time está derrotado e você não tem dinheiro para curar no Poke Center.</p>
               <div class="ctas">
-                <a class="btn btn-secondary" href="/">Vender itens no Poke Mart</a>
+                <a class="btn btn-secondary" href="#mart-modal" data-od-id="open-modal-mart" hx-get="/team/mart" hx-target="body" hx-swap="beforeend">Vender itens no Poke Mart</a>
                 <form method="post" action="/journey/restart">
                   <button type="submit" class="btn btn-secondary">Recomeçar jornada</button>
                 </form>
@@ -118,7 +118,7 @@
             <% elsif end_state == "loss" %>
               <p class="rewards">Seu time foi derrotado. <strong>Cure no Poke Center</strong> ou recomece.</p>
               <div class="ctas">
-                <a class="btn btn-primary" href="/">Poke Center</a>
+                <a class="btn btn-primary" href="#center-modal" data-od-id="open-modal-center" hx-get="/team/center" hx-target="body" hx-swap="beforeend">Poke Center</a>
                 <% if @can_new_confront %>
                   <button class="btn btn-primary" hx-post="/battle/new" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
                 <% else %>
@@ -130,8 +130,8 @@
               </div>
             <% else %>
               <div class="ctas">
-                <a class="btn btn-secondary" href="/">Poke Center</a>
-                <a class="btn btn-secondary" href="/">Poke Mart</a>
+                <a class="btn btn-secondary" href="#center-modal" data-od-id="open-modal-center" hx-get="/team/center" hx-target="body" hx-swap="beforeend">Poke Center</a>
+                <a class="btn btn-secondary" href="#mart-modal" data-od-id="open-modal-mart" hx-get="/team/mart" hx-target="body" hx-swap="beforeend">Poke Mart</a>
                 <% if @can_new_confront %>
                   <button class="btn btn-primary" hx-post="/battle/new" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
                 <% else %>
