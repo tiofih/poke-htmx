@@ -1696,6 +1696,12 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 .roster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (max-width: 920px) { .roster { grid-template-columns: 1fr; } }
 
+/* Pcard espelhando o prototipo home-team.html: painel de sprite em cima,
+   nome, meta tier/custo + botao; contrato POST /team preservado. */
+.pcard .sprite-tile { width: 100%; height: 84px; flex: none; margin-bottom: 8px; }
+.pcard .sprite-tile a { display: block; width: 100%; height: 100%; padding: 0; }
+.pcard .sprite-tile img { width: 100%; height: 100%; object-fit: contain; }
+
 /* === Open Design System (0072): fim === */
 
 /* Layout interno das seções da página única */

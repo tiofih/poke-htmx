@@ -94,6 +94,30 @@ class HomeViewTest < Minitest::Test
     assert_includes body, 'name="new_slot"', "expected reorder forms preserved"
   end
 
+  def test_catalog_cards_mirror_prototype_sprite_panel
+    names = %w[charmander]
+    find_map = {
+      "charmander" => Pokemon.new(name: "charmander", sprite: "s", number: 4, types: %w[fire])
+    }
+    forms = names.to_h { |name| [name, true] }
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_find(find_map) do
+        PokeApiStub.with_base_forms(forms) do
+          get "/pokemons"
+        end
+      end
+    end
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(%r{<div class="sprite-tile">.*?</div>}m, body,
+                 "expected a sprite-tile panel per card (prototype)")
+    assert_match(%r{hx-get="/pokemon/4"[^>]*hx-target="#pokemon-detail"}, body,
+                 "expected the detail link preserved in the panel")
+    assert_includes body, 'hx-post="/team"',
+                    "expected the POST /team contract preserved"
+  end
+
   def test_pokemon_detail_wears_tag_row_stat_grid_evo_row
     chain = {
       charmander: build_pokemon_record("charmander", 4),
