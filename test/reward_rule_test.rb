@@ -9,7 +9,7 @@ class RewardRuleTest < Minitest::Test
 
     assert_equal 50, rule.xp_for(:win)
     assert_equal 25, rule.xp_for(:draw)
-    assert_equal 20, rule.xp_for(:lose)
+    assert_equal 0, rule.xp_for(:lose)
   end
 
   def test_custom_rewards_are_injectable

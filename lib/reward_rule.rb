@@ -4,7 +4,7 @@ class RewardRule
   DEFAULT_REWARDS = {
     win_xp: 50,
     draw_xp: 25,
-    lose_xp: 20,
+    lose_xp: 0,
     win_money: 100,
     draw_money: 50,
     lose_money: 40,
