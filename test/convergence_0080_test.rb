@@ -61,7 +61,7 @@ class Convergence0080Test < Minitest::Test
     body = last_response.body
     assert_match(/class="roster[^"]*"/, body, "expected the team roster")
     assert_match(/Nível \d+/, body, "expected the roster to show each member level")
-    assert_match(%r{hx-get="/team/manage"}, body, "expected a Gerenciar link per member")
+    assert_match(%r{hx-get="/team/\d+/manage"}, body, "expected a Gerenciar link per member")
     moves = body.scan('name="new_slot"').size
     assert_operator moves, :>=, 2, "expected reorder forms (new_slot) preserved"
     assert_includes body, 'hx-post="/team/', "expected reorder posts to /team/:id/move"

@@ -549,6 +549,14 @@ module ServerTeamActions
     erb :_manage_modal, layout: false
   end
 
+  def render_team_manage_member
+    member = team_manage_context(params[:id])
+    return member_not_found_notice unless member
+
+    @team = [member]
+    erb :_manage_modal, layout: false
+  end
+
   def close_team_manage
     ""
   end
@@ -1103,6 +1111,7 @@ module TeamRoutes
 
   def self.register_team_manage(app)
     app.get("/team/manage") { render_team_manage }
+    app.get("/team/:id/manage") { render_team_manage_member }
     app.get("/team/manage/close") { close_team_manage }
   end
 

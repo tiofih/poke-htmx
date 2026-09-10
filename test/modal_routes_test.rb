@@ -104,6 +104,22 @@ class ModalRoutesTest < Minitest::Test
     refute_includes body, "onclick"
   end
 
+  def test_manage_member_renders_single_member_overlay
+    pikachu_id = TestDatabase.team_id("pikachu", "user-a")
+    PokeApiStub.with_learnable_moves(
+      [{ level: 1, name: "growl" }, { level: 1, name: "quick-attack" }]
+    ) do
+      get "/team/#{pikachu_id}/manage", {}, user_session("user-a")
+    end
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_includes body, 'id="manage-modal"'
+    assert_includes body, "pikachu"
+    refute_includes body, "bulbasaur"
+    refute_includes body, "onclick"
+  end
+
   def test_manage_close_removes_the_overlay_node
     get "/team/manage/close", {}, user_session("user-a")
 

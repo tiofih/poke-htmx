@@ -43,7 +43,7 @@
           <a class="btn evolution-trigger" href="#evolution-modal"
              hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled aria-disabled="true" title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</a>
           <a class="btn btn-ghost btn-sm" href="#manage-modal"
-             hx-get="/team/manage" hx-target="body" hx-swap="beforeend"
+             hx-get="/team/<%= poke.id %>/manage" hx-target="body" hx-swap="beforeend"
              data-od-id="<%= poke.name.downcase %>-manage">Gerenciar</a>
           <form
               hx-post="/team/<%= poke.id %>/move"

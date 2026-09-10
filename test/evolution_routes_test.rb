@@ -110,7 +110,7 @@ class EvolutionRoutesTest < Minitest::Test
     assert_includes last_response.body, %(hx-post="/team/#{pikachu_id}/evolve")
   end
 
-  def test_team_fragment_and_manage_show_evolve_button_per_member
+  def test_team_fragment_shows_evolve_button_but_manage_does_not
     fill_team("user-a")
     pikachu_id = TestDatabase.team_id("pikachu", "user-a")
     evolve_trigger = %(hx-get="/team/#{pikachu_id}/evolution")
@@ -119,7 +119,7 @@ class EvolutionRoutesTest < Minitest::Test
     assert_includes last_response.body, evolve_trigger
 
     get "/team/manage", {}, user_session("user-a")
-    assert_includes last_response.body, evolve_trigger
+    refute_includes last_response.body, evolve_trigger
   end
 
   def test_evolve_response_rerenders_the_modal

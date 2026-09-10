@@ -92,12 +92,6 @@
     <% if poke.held_item && !poke.held_item.empty? %>
       <p class="meta equip-current">Segurando: <strong><%= poke.held_item %></strong></p>
     <% end %>
-    <p class="section-label">Evolução</p>
-    <div class="evo-row">
-      <span class="evo-info"><span class="evo-item">Evolução por pedra</span><span class="evo-arrow">→</span><span class="meta">abre o modal</span></span>
-      <a class="btn btn-secondary btn-sm evolution-trigger" href="#evolution-modal"
-         hx-get="/team/<%= poke.id %>/evolution" hx-target="body" hx-swap="beforeend"<%= ' disabled title="Pokémon derrotado — cure antes de evoluir"' if poke.fainted? %>>Evoluir</a>
-    </div>
     <form
         hx-post="/team/<%= poke.id %>/move"
         hx-target="#team-view"

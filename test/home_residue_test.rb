@@ -73,7 +73,7 @@ class HomeResidueTest < Minitest::Test
     assert_includes manage, 'id="manage-modal"'
     assert_match(/class="stat-grid"/, manage)
     assert_match(/class="mv-row marked"/, manage)
-    assert_match(/class="evo-row"/, manage)
+    refute_match(/class="evo-row"/, manage)
     assert_match(/class="equip-row"/, manage)
     assert_match(/class="tag-row"/, manage)
     assert_includes manage, "Nível 5"
