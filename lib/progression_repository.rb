@@ -17,6 +17,22 @@ class ProgressionRepository
              hp_max: row["hp_max"].to_i, hp_current: row["hp_current"].to_i }
   end
 
+  # Batch lookup — 1 query for N members (evita N+1 em HealService#average_level).
+  LEVELS_FOR_SQL = <<~SQL
+    SELECT p.team_pokemon_id, p.level
+    FROM team_pokemon_progress p
+    JOIN team_pokemons t ON t.id = p.team_pokemon_id
+    WHERE t.user_id = $1 AND p.team_pokemon_id = ANY($2::int[])
+  SQL
+
+  def levels_for(user_id, team_pokemon_ids)
+    ids = Array(team_pokemon_ids).map(&:to_i)
+    return {} if ids.empty?
+
+    rows = connection.exec_params(LEVELS_FOR_SQL, [user_id, "{#{ids.join(',')}}"])
+    rows.to_h { |row| [row["team_pokemon_id"], row["level"].to_i] }
+  end
+
   def update_hp(user_id, team_pokemon_id, hp_max, hp_current)
     return unless progress_row(user_id, team_pokemon_id)
 

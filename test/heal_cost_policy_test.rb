@@ -46,4 +46,9 @@ class HealCostPolicyTest < Minitest::Test
     assert_equal 10, @policy.cost(10, 10), "nivel medio dobrado dobra o custo"
     assert_equal 1, @policy.cost(10, 1), "nivel medio menor reduz o custo"
   end
+
+  def test_cost_clamps_negative_missing_hp_to_zero
+    assert_equal 0, @policy.cost(-5)
+    assert_equal 0, @policy.cost(-5, 10)
+  end
 end

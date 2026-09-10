@@ -36,8 +36,11 @@ class HealService
   def average_level(user_id, members)
     return HealCostPolicy::BASE_LEVEL if members.empty?
 
-    levels = members.map { |member| @progression.get(user_id, member.id)&.fetch(:level) || HealCostPolicy::BASE_LEVEL }
-    (levels.sum / levels.size.to_f).round
+    levels = @progression.levels_for(user_id, members.map(&:id))
+    # Fallback explícito: membro sem linha de progresso (nunca batalhou)
+    # conta como BASE_LEVEL — só vale para linha ausente, nunca mascara nil inesperado.
+    known = members.map { |member| levels.fetch(member.id.to_s, HealCostPolicy::BASE_LEVEL) }
+    (known.sum / known.size.to_f).round
   end
 
   def heal_result(user_id, members, cost)

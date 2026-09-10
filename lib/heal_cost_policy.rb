@@ -15,7 +15,8 @@ class HealCostPolicy
   end
 
   def cost(missing_hp, average_level = BASE_LEVEL)
+    missing = [missing_hp.to_i, 0].max
     level = [average_level.to_i, 1].max
-    (missing_hp.to_i * @cost_per_hp * level / BASE_LEVEL.to_f).round
+    (missing * @cost_per_hp * level / BASE_LEVEL.to_f).round
   end
 end
