@@ -26,6 +26,7 @@ class RewardRule
     reward_for(result, :win_money, :draw_money, :lose_money)
   end
 
+  # Legacy/test-seed helper — fora do caminho de recompensa (só xp_for/money_for usados).
   def levels_for(result)
     reward_for(result, :win_levels, :draw_levels, :lose_levels)
   end

@@ -7,7 +7,7 @@
         <p class="lead">Seis vagas, um orçamento de <%= @team_budget %> e um loop de cura e itens para manter a equipe de pé.</p>
       </div>
       <div class="budget-summary">
-        <div class="budget-meta row">Custo do time <strong class="num" id="budget-text"><%= @team_cost %>/<%= @team_budget %></strong></div>
+        <div class="budget-meta row">Pontos de montagem <strong class="num" id="budget-text"><%= @team_cost %>/<%= @team_budget %></strong> <span class="muted">(não é dinheiro)</span></div>
         <div class="meter" role="progressbar" aria-label="Orçamento do time"><span class="meter-fill<%= @team_cost > @team_budget ? ' over' : (@team_cost >= @team_budget * 0.9 ? ' near' : '') %>" id="budget-fill" style="width:<%= (@team_cost.to_f / @team_budget * 100) %>%"></span></div>
         <a class="btn btn-secondary btn-sm" href="#manage-modal" data-od-id="open-modal-manage" hx-get="/team/manage" hx-target="body" hx-swap="beforeend">Gerenciar time</a>
       </div>
