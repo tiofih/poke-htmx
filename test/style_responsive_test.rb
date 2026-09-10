@@ -41,14 +41,16 @@ class StyleResponsiveTest < Minitest::Test
   def test_filter_grid_has_touch_target_and_fluid_grid
     content = style_content
 
-    # Filtros 100% ODS (0076 2b, C12/C14): .filter-grid do bloco, sem .filter-controls.
+    # Baseline-absolute (home-team.html:138): .filter-grid 2-col estrito, sem .filter-controls.
     assert_match(/\.filter-grid[^}]*display:\s*grid/m, content,
                  "expected filter-grid to use display:grid")
-    assert_match(/\.filter-grid[^}]*grid-template-columns:\s*repeat\(auto-fit,\s*minmax\(140px,\s*1fr\)\)/m,
+    assert_match(/\.filter-grid[^}]*grid-template-columns:\s*1fr\s+1fr/m,
                  content,
-                 "expected filter-grid to be fluid with auto-fit minmax(140px,1fr)")
-    assert_match(/\.filter-grid[^}]*gap:\s*0\.75em/m, content,
-                 "expected filter-grid to use gap .75em")
+                 "expected filter-grid to be strict 2-col 1fr 1fr (baseline home-team.html:138)")
+    assert_match(/\.filter-grid[^}]*gap:\s*8px/m, content,
+                 "expected filter-grid to use gap 8px")
+    assert_match(/\.filter-grid[^}]*margin-top:\s*10px/m, content,
+                 "expected filter-grid to use margin-top 10px")
     assert_match(/\.filter-grid (input|select)[^{]*,[^{]*\.filter-grid (select|input)[^}]*min-height:\s*44px/m,
                  content,
                  "expected filter-grid inputs to have min-height:44px")
