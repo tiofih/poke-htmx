@@ -581,7 +581,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     play_until_finish(fallback_plays: 300)
 
     assert last_response.ok?
-    assert_match(/Seu Time ganhou \d+ XP|Derrota — consolo \+\d+ XP/, last_response.body)
+    assert_match(/Seu Time ganhou \d+ XP|Derrota — \+\d+ XP/, last_response.body)
   end
 
   def test_battle_play_grants_xp_once_on_transition_to_finished
@@ -644,8 +644,8 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_match(/¥\d+/, last_response.body)
     body = last_response.body
     assert(body.match?(/ganhou \d+ XP por Pokémon e \+¥\d+/) ||
-           body.match?(/consolo \+\d+ XP por Pokémon \+¥\d+/),
-           "XP de vitoria ou consolo de derrota")
+           body.match?(/Derrota — \+\d+ XP por Pokémon e \+¥\d+/),
+           "XP de vitoria ou derrota")
   end
 
   def test_battle_finish_evolves_member_when_level_reaches_min_level

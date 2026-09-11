@@ -92,7 +92,7 @@
             <% end %>
             <% if @xp_gained.to_i.positive? %>
               <% if end_state == "loss" %>
-                <p class="rewards"><strong>Derrota — consolo +<%= @xp_gained %> XP por Pokémon<%= @money_gained ? " +¥#{@money_gained}." : "." %></strong></p>
+                <p class="rewards"><strong>Derrota — +<%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
               <% else %>
                 <p class="rewards"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
               <% end %>
