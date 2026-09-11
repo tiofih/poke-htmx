@@ -16,12 +16,14 @@
 <div class="modal-foot">
   <span class="meta num">Saldo ¥<%= @balance %> · Custo total: ¥<%= @heal_cost %></span>
   <span class="meta num">Nível médio <%= avg_lvl %> · base <%= HealCostPolicy::DEFAULT_COST_PER_HP %>/HP · ×<%= mult %> (máx ×<%= HealCostPolicy::MAX_LEVEL_MULTIPLIER %>)</span>
-  <form hx-post="/team/heal" hx-swap="none">
-    <% if @heal_cost.zero? %><p class="notice notice--error heal-disabled-reason" role="status"><strong>Time já curado</strong></p><% elsif @balance < @heal_cost %><p class="notice notice--error heal-disabled-reason" role="status"><strong>Saldo insuficiente</strong></p><% end %>
-    <button type="submit" class="btn btn-primary"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar time</button>
-  </form>
-  <form hx-post="/team/heal" hx-swap="none">
-    <input type="hidden" name="heal_and_battle" value="1">
-    <button type="submit" class="btn btn-secondary"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar e batalhar</button>
-  </form>
+  <div class="heal-actions">
+    <form hx-post="/team/heal" hx-swap="none">
+      <% if @heal_cost.zero? %><p class="notice notice--error heal-disabled-reason" role="status"><strong>Time já curado</strong></p><% elsif @balance < @heal_cost %><p class="notice notice--error heal-disabled-reason" role="status"><strong>Saldo insuficiente</strong></p><% end %>
+      <button type="submit" class="btn btn-ghost"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar time</button>
+    </form>
+    <form hx-post="/team/heal" hx-swap="none">
+      <input type="hidden" name="heal_and_battle" value="1">
+      <button type="submit" class="btn btn-primary"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar e batalhar</button>
+    </form>
+  </div>
 </div>
