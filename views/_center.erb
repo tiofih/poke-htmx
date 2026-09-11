@@ -1,6 +1,5 @@
 <p class="modal-sub">Recupere o HP de todo o time de uma vez.</p>
-<% levels = @member_levels || {} %>
-<% avg_lvl = @team.empty? ? HealCostPolicy::BASE_LEVEL : (@team.sum { |m| levels.fetch(m.id.to_s, HealCostPolicy::BASE_LEVEL) } / @team.size.to_f).round %>
+<% avg_lvl = @avg_level || HealCostPolicy::BASE_LEVEL %>
 <% mult = [avg_lvl / HealCostPolicy::BASE_LEVEL.to_f, HealCostPolicy::MAX_LEVEL_MULTIPLIER].min %>
 <% policy = HealCostPolicy.new %>
 <ul class="heal-list">

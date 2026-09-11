@@ -542,6 +542,7 @@ module ServerTeamActions
   def center_data
     @heal_cost = settings.heal.preview_cost(current_user)
     @balance = settings.wallet.balance(current_user)
+    @avg_level = settings.heal.average_level(current_user, @team)
   end
 
   def render_team_manage

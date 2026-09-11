@@ -27,13 +27,8 @@ class HealService
     @policy.cost(missing_hp(members), average_level(user_id, members))
   end
 
-  private
-
-  def missing_hp(members)
-    members.sum { |member| @policy.missing_hp(member.hp_max, member.hp_current) }
-  end
-
-  def average_level(user_id, members)
+  def average_level(user_id, members = nil)
+    members ||= @team.all(user_id)
     return HealCostPolicy::BASE_LEVEL if members.empty?
 
     levels = @progression.levels_for(user_id, members.map(&:id))
@@ -41,6 +36,12 @@ class HealService
     # conta como BASE_LEVEL — só vale para linha ausente, nunca mascara nil inesperado.
     known = members.map { |member| levels.fetch(member.id.to_s, HealCostPolicy::BASE_LEVEL) }
     (known.sum / known.size.to_f).round
+  end
+
+  private
+
+  def missing_hp(members)
+    members.sum { |member| @policy.missing_hp(member.hp_max, member.hp_current) }
   end
 
   def heal_result(user_id, members, cost)
