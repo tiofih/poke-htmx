@@ -122,7 +122,7 @@
             <% elsif end_state == "loss" %>
               <p class="rewards">Seu time foi derrotado. <strong>Cure no Poke Center</strong> ou recomece.</p>
               <div class="ctas">
-                <a class="btn btn-primary" href="#center-modal" data-od-id="open-modal-center" hx-get="/team/center" hx-target="#center-modal" hx-swap="outerHTML" hx-push-url="false">Poke Center</a>
+                <button type="button" class="btn btn-primary" data-od-id="open-modal-center" hx-get="/team/center" hx-target="#center-modal" hx-swap="outerHTML" hx-push-url="false">Poke Center</button>
                 <% if @can_new_confront %>
                   <button class="btn btn-primary" hx-post="/battle/new" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
                 <% else %>
@@ -134,7 +134,7 @@
               </div>
             <% else %>
               <div class="ctas">
-                <a class="btn btn-secondary" href="#center-modal" data-od-id="open-modal-center" hx-get="/team/center" hx-target="#center-modal" hx-swap="outerHTML" hx-push-url="false">Poke Center</a>
+                <button type="button" class="btn btn-secondary" data-od-id="open-modal-center" hx-get="/team/center" hx-target="#center-modal" hx-swap="outerHTML" hx-push-url="false">Poke Center</button>
                 <a class="btn btn-secondary" href="#mart-modal" data-od-id="open-modal-mart" hx-get="/team/mart" hx-target="body" hx-swap="beforeend">Poke Mart</a>
                 <% if @can_new_confront %>
                   <button class="btn btn-primary" hx-post="/battle/new" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>

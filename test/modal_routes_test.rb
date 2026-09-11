@@ -55,7 +55,7 @@ class ModalRoutesTest < Minitest::Test
     end
     home = last_response.body
 
-    assert_includes home, 'href="#center-modal"'
+    refute_includes home, 'href="#center-modal"'
     assert_includes home, 'hx-get="/team/center"'
     assert_includes home, 'hx-target="#center-modal"'
     assert_includes home, 'href="#mart-modal"'
@@ -187,6 +187,7 @@ class ModalRoutesTest < Minitest::Test
     assert_match(%r{hx-get="/team/center"[^>]*hx-target="#center-modal"}, last_response.body)
     assert_match(%r{hx-get="/team/center"[^>]*hx-push-url="false"}, last_response.body)
     refute_match(%r{hx-get="/team/center"[^>]*hx-target="body"}, last_response.body)
+    refute_includes last_response.body, 'href="#center-modal"'
   end
 
   def test_heal_via_modal_closes_and_rerenders
