@@ -198,8 +198,11 @@ class ModalRoutesTest < Minitest::Test
     assert last_response.ok?
     body = last_response.body
     assert_match(/curado por/i, body)
-    assert_includes body, 'id="center-modal" hx-swap-oob="outerHTML"'
-    assert_includes body, "Time já curado"
+    assert_includes body, '<div id="center-modal" hx-swap-oob="outerHTML"></div>'
+    refute_includes body, "Poke Center"
+    refute_includes body, "Custo total"
+    assert_includes body, 'id="team-view" hx-swap-oob="innerHTML"'
+    assert_includes body, 'id="nav-badge" hx-swap-oob="innerHTML"'
 
     @progression.update_hp("user-a", pokemon_id, 200, 100)
     @wallet.set("user-a", 10)
@@ -232,11 +235,15 @@ class ModalRoutesTest < Minitest::Test
 
   def test_center_healed_reason_is_prominent
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
-    @progression.update_hp("user-a", pokemon_id, 200, 100)
+    @progression.update_hp("user-a", pokemon_id, 200, 200)
 
     post "/team/heal", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_match(%r{<strong>Time já curado</strong>}, last_response.body)
+    body = last_response.body
+    assert_includes body, "Poke Center"
+    assert_includes body, 'id="center-modal" hx-swap-oob="outerHTML"'
+    assert_match(/já está curado/i, body)
+    assert_match(%r{<strong>Time já curado</strong>}, body)
   end
 end

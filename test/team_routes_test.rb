@@ -1426,8 +1426,10 @@ class TeamHealRoutesTest < Minitest::Test
     assert_equal 150, @wallet.balance("user-a")
     assert_includes last_response.body, 'id="team-view" hx-swap-oob="innerHTML"'
     assert_includes last_response.body, 'id="nav-badge" hx-swap-oob="innerHTML"'
-    assert_includes last_response.body, "Saldo ¥150"
-    assert_match(/Custo total: ¥0/, last_response.body)
+    assert_includes last_response.body, 'id="center-modal" hx-swap-oob="outerHTML"'
+    refute_includes last_response.body, "Poke Center"
+    assert_match(/Saldo: 150/, last_response.body)
+    refute_match(/Custo total/, last_response.body)
   end
 
   def test_center_shows_preview_cost_and_disables_heal_when_unaffordable

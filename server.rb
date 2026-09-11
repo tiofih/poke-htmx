@@ -734,6 +734,8 @@ module ServerTeamActions
     return "#{journey_gate_notice}#{oob_center_modal}" unless settings.journey.started?(current_user)
 
     @result = settings.heal.heal(current_user)
+    return render_heal_success_notice(@result) if @result[:healed]
+
     render_result_notice(@result)
   end
 
@@ -765,6 +767,16 @@ module ServerTeamActions
     @notice = result[:notice]
     @notice_kind = result[:kind]
     "#{render_team_fragment_with_notice}#{oob_center_modal}#{oob_team_view}#{oob_nav_badge}"
+  end
+
+  def render_heal_success_notice(result)
+    @notice = result[:notice]
+    @notice_kind = result[:kind]
+    "#{render_team_fragment_with_notice}#{oob_close_center_modal}#{oob_team_view}#{oob_nav_badge}"
+  end
+
+  def oob_close_center_modal
+    erb(:_center_slot, layout: false).sub('id="center-modal"', 'id="center-modal" hx-swap-oob="outerHTML"')
   end
 
   def oob_center_modal
