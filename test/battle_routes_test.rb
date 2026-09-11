@@ -641,10 +641,10 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     play_until_finish(fallback_plays: 300)
 
     assert last_response.ok?
-    assert_match(/\d+ de dinheiro/, last_response.body)
+    assert_match(/¥\d+/, last_response.body)
     body = last_response.body
-    assert(body.match?(/ganhou \d+ XP por Pokémon e \d+ de dinheiro/) ||
-           body.match?(/consolo \+\d+ XP por Pokémon \+\d+ de dinheiro/),
+    assert(body.match?(/ganhou \d+ XP por Pokémon e \+¥\d+/) ||
+           body.match?(/consolo \+\d+ XP por Pokémon \+¥\d+/),
            "XP de vitoria ou consolo de derrota")
   end
 

@@ -636,7 +636,7 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
     assert_includes last_response.body, "100/200"
-    assert_match(/Custo[^:]*:\s*50/, last_response.body)
+    assert_match(/Custo[^:]*:\s*¥50/, last_response.body)
     heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
     refute_nil heal_form
     refute_includes heal_form, "disabled"
@@ -1104,7 +1104,7 @@ class TeamBudgetRoutesTest < Minitest::Test
     team = @repository.all("user-a")
     assert_equal 1, team.size
     # custo sem duplicar no fragmento: vive uma vez no head da home (budget-text)
-    refute_match(/Pontos de montagem/, last_response.body)
+    refute_match(/Custo do time/, last_response.body)
     refute_match(/S no time:/, last_response.body)
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/", {}, user_session("user-a")
@@ -1307,15 +1307,15 @@ class TeamBudgetRoutesTest < Minitest::Test
     # Time vazio — fragmento sem custo duplicado, sem S no time
     get "/team", {}, htmx_session("user-c")
     assert last_response.ok?
-    refute_match(/Pontos de montagem/, last_response.body)
+    refute_match(/Custo do time/, last_response.body)
     refute_match(/S no time:/, last_response.body)
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/", {}, user_session("user-c")
     end
     assert last_response.ok?
     assert_match(%r{budget-text">0/450}, last_response.body)
-    assert_includes last_response.body, "Pontos de montagem"
-    assert_includes last_response.body, "não é dinheiro"
+    assert_includes last_response.body, "Custo do time"
+    assert_match(%r{budget-text">0/450 pts}, last_response.body)
 
     # Adiciona um Pokémon F barato
     poke = Pokemon.new(name: "cheap", sprite: "s", number: 600,
@@ -1327,7 +1327,7 @@ class TeamBudgetRoutesTest < Minitest::Test
     end
 
     assert last_response.ok?
-    refute_match(/Pontos de montagem/, last_response.body)
+    refute_match(/Custo do time/, last_response.body)
     refute_match(/S no time:/, last_response.body)
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/", {}, user_session("user-c")
@@ -1345,11 +1345,11 @@ class TeamBudgetRoutesTest < Minitest::Test
       with_budget_rating({ "solo-s" => "S" }) do
         post "/team", { pokeName: "solo-s" }, user_session("user-c")
         assert last_response.ok?
-        refute_match(/Pontos de montagem/, last_response.body)
+        refute_match(/Custo do time/, last_response.body)
         refute_match(/S no time:/, last_response.body)
         # GET dentro do mesmo stub para rating consistente
         get "/team", {}, htmx_session("user-c")
-        refute_match(/Pontos de montagem/, last_response.body)
+        refute_match(/Custo do time/, last_response.body)
         refute_match(/S no time:/, last_response.body)
         PokeApiStub.with_all_names(two_hundred_fifty_names) do
           get "/", {}, user_session("user-c")
@@ -1370,7 +1370,7 @@ class TeamBudgetRoutesTest < Minitest::Test
       end
     end
     assert last_response.ok?
-    refute_match(/Pontos de montagem/, last_response.body)
+    refute_match(/Custo do time/, last_response.body)
     refute_match(/S no time:/, last_response.body)
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       with_budget_rating({ "s-rest-panel" => "S" }) do
@@ -1411,7 +1411,7 @@ class TeamHealRoutesTest < Minitest::Test
 
     assert last_response.ok?
     assert_match(%r{>0/200<}, last_response.body)
-    assert_match(/Custo total: 100/, last_response.body)
+    assert_match(/Custo total: ¥100/, last_response.body)
   end
 
   def test_center_shows_preview_cost_and_disables_heal_when_unaffordable
@@ -1431,7 +1431,7 @@ class TeamHealRoutesTest < Minitest::Test
 
     assert last_response.ok?
     assert_includes last_response.body, "Poke Center"
-    assert_match(/Custo total: 50/, last_response.body)
+    assert_match(/Custo total: ¥50/, last_response.body)
     heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
     refute_nil heal_form
     assert_includes heal_form, "disabled"

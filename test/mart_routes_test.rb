@@ -63,7 +63,7 @@ class ServerMartTest < Minitest::Test
     assert_includes last_response.body, "Poke Mart"
     assert_includes last_response.body, "Pocao"
     assert_includes last_response.body, %(hx-post="/mart/buy")
-    assert_includes last_response.body, "Saldo: 100"
+    assert_includes last_response.body, "Saldo: ¥100"
   end
 
   def test_mart_modal_shows_affordable_quantity

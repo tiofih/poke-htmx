@@ -44,7 +44,7 @@ class ModalRoutesTest < Minitest::Test
     assert_includes body, 'role="dialog"'
     assert_includes body, "Poke Mart"
     assert_includes body, %(hx-post="/mart/buy")
-    assert_includes body, "Saldo: 100"
+    assert_includes body, "Saldo: ¥100"
   end
 
   def test_overlay_opens_via_target_without_js

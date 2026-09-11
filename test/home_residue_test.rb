@@ -49,7 +49,7 @@ class HomeResidueTest < Minitest::Test
     assert_includes mart, "+20 HP"
     assert_includes mart, %(hx-post="/mart/buy")
     assert_includes mart, %(hx-post="/mart/sell")
-    assert_includes mart, "Saldo: 100"
+    assert_includes mart, "Saldo: ¥100"
     refute_includes mart, "onclick"
   end
 

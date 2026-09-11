@@ -1,4 +1,4 @@
-<p class="modal-sub">Compre itens ou venda do seu estoque. <span class="num">Saldo: <%= @balance %></span></p>
+<p class="modal-sub">Compre itens ou venda do seu estoque. <span class="num">Saldo: ¥<%= @balance %></span></p>
 <input class="mart-tab-input" type="radio" name="mart-tab" id="mart-tab-buy" checked>
 <input class="mart-tab-input" type="radio" name="mart-tab" id="mart-tab-sell">
 <div class="tabs" role="tablist">
@@ -12,7 +12,7 @@
       <% affordable = @balance / item.price %>
       <li>
         <span class="mart-name"><span class="item-icon" aria-hidden="true"><%= item.display_name[0] %></span><span><%= item.display_name %></span></span>
-        <span class="row"><span class="num price"><%= item.price %></span>
+        <span class="row"><span class="num price">¥<%= item.price %></span>
           <% if item.heal_amount.to_i.positive? %>
             <span class="meta">+<%= item.heal_amount %> HP · <%= format("%.1f", item.price.to_f / item.heal_amount) %> ¥/HP</span>
           <% end %>
@@ -38,7 +38,7 @@
         <% sell_item = ItemCatalog.find(entry[:name]) %>
         <li>
           <span class="mart-name"><span class="item-icon" aria-hidden="true"><%= (sell_item&.display_name || entry[:name])[0] %></span><span><strong><%= sell_item&.display_name || entry[:name] %></strong> <span class="meta">×<%= entry[:quantity] %></span></span></span>
-          <span class="row"><span class="num price"><%= sell_item ? sell_item.price / 2 : "—" %></span>
+          <span class="row"><span class="num price"><%= sell_item ? "¥#{sell_item.price / 2}" : "—" %></span>
             <form hx-post="/mart/sell" hx-target="#team-view" hx-swap="innerHTML">
               <input type="hidden" name="item_name" value="<%= entry[:name] %>">
               <input type="hidden" name="quantity" value="1">
