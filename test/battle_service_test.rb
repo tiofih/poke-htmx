@@ -775,10 +775,10 @@ class BattleServiceGrantLevelsTest < Minitest::Test
     service.send(:grant_finished_xp, "user-1", engine)
 
     assert_equal 3, counting.calls.size
-    assert(counting.calls.all? { |_, _, d| d == 5 })
+    assert(counting.calls.all? { |_, _, d| d == 10 })
     @team.all("user-1").each do |member|
       entry = @progression.get("user-1", member.id)
-      assert_equal 1005, entry[:xp]
+      assert_equal 1010, entry[:xp]
       assert_equal 5, entry[:level]
     end
   end

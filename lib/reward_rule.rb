@@ -4,8 +4,9 @@ class RewardRule
   DEFAULT_REWARDS = {
     win_xp: 50,
     draw_xp: 25,
-    # Consolo de derrota: 5 XP evita "ganhou 0 XP" sem virar farm (10% da vitoria).
-    lose_xp: 5,
+    # Consolo de derrota: 10 XP suaviza espiral perde->cura (lose+heal era -80
+    # liquido); 20% da vitoria, ainda sem virar farm.
+    lose_xp: 10,
     win_money: 100,
     draw_money: 50,
     lose_money: 40,
