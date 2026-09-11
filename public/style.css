@@ -931,10 +931,10 @@
 	animation: juice-hp 0.5s ease-out both;
 }
 
-/* Flash de dano no card do alvo (0086 Passo 6: atrasa junto do log via --step-delay) */
+/* Flash de dano no card do alvo (0086 Passo 9: estado final only — o
+   escalonado por linha vive no .fx dentro da .log__entry via --log-delay) */
 .fighter.is-hit {
 	animation: juice-flash 0.4s ease-out;
-	animation-delay: var(--step-delay, 0s);
 }
 
 /* Numero de dano flutuante — pseudo-elemento do card danificado */
@@ -947,7 +947,6 @@
 	color: var(--danger);
 	pointer-events: none;
 	animation: juice-damage-number 0.5s ease-out both;
-	animation-delay: var(--step-delay, 0s);
 }
 
 /* KO fade/grayscale no lutador derrotado */
@@ -956,14 +955,14 @@
 	filter: grayscale(1);
 	opacity: 0.6;
 	animation: juice-ko 0.5s ease-out both;
-	animation-delay: var(--step-delay, 0s);
 }
 
 .fighter.fainted {
 	opacity: 0.75;
 }
 
-/* Screenshake leve na arena (0086 Passo 6: atrasa junto do log via --step-delay) */
+/* Screenshake leve na arena (0086 Passo 9: --step-delay mora na .arena,
+   max do pacing — antes caia no fallback 0s pois a var so existia no li) */
 .arena {
 	animation: juice-shake 0.3s ease-out;
 	animation-delay: var(--step-delay, 0s);
@@ -986,7 +985,6 @@
 	.fighter.is-attacking .shot {
 		display: block;
 		animation: juice-projectile 0.4s ease-out 0.15s both;
-		animation-delay: var(--step-delay, 0.15s);
 	}
 
 	.arena [data-side="0"] .fighter.is-attacking .shot {
@@ -1890,6 +1888,41 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 	opacity: 1;
 	visibility: visible;
 }
+
+/* Efeito por linha (0086 Passo 9, CSS-only): .fx mora dentro da
+   .log__entry e carrega o proprio --log-delay — flash/damage sincronizado
+   a sua linha, sem max-por-lado; fighter li segue so estado final. */
+.log__entry .fx {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: radial-gradient(circle, #ffd54f, #f57c00);
+	animation: juice-flash 0.4s ease-out both;
+	animation-delay: var(--log-delay, 0s);
+}
+
+.log__entry .fx--ko {
+	animation: juice-ko 0.5s ease-out both;
+	animation-delay: var(--log-delay, 0s);
+}
+
+.log__entry .fx--heal {
+	background: radial-gradient(circle, #a5d6a7, #2e7d32);
+	animation: juice-news 0.4s ease-out both;
+	animation-delay: var(--log-delay, 0s);
+}
+
+.log__entry .chip--dmg {
+	animation: juice-banner 0.45s ease-out both;
+	animation-delay: var(--log-delay, 0s);
+}
+
+.arena:has(.log-skip-input:checked) .log__entry .fx,
+.arena:has(.log-skip-input:checked) .log__entry .chip {
+	animation: none !important;
+	animation-delay: 0s !important;
+}
 /* === Juice polish + reduced-motion (0086 C2, fim) === */
 
 /* === Open Design System (0072): fim === */
@@ -2278,6 +2311,8 @@ button[disabled="disabled"] {
    legados. Nao mover para cima; CSS-only. === */
 @media (prefers-reduced-motion: reduce) {
 	.log__entry,
+	.log__entry .fx,
+	.log__entry .chip,
 	.log-round-head,
 	.log__entry--defeat,
 	.fighter,

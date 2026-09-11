@@ -246,6 +246,23 @@ class BattleViewTest < Minitest::Test
                  "fighter li exposes --step-delay synced to log pacing (0086 Passo 6)")
   end
 
+  def test_battle_arena_carries_step_delay_and_per_line_fx
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/<div class="arena"[^>]*--step-delay: [\d.]+s/, body,
+                 "arena exposes --step-delay for the shake (0086 Passo 9)")
+    fx_pattern = /<li class="log__entry"[^>]*>\s*<span class="fx fx--(hit|ko|heal|tick)"[^>]*--log-delay: [\d.]+s/
+    assert_match(fx_pattern, body,
+                 "each log line carries its own fx token with --log-delay (0086 Passo 9)")
+    entry_delay = body[/<li class="log__entry"[^>]*style="--log-delay: ([\d.]+)s"/, 1]
+    fx_delay = body[/<span class="fx[^>]*style="--log-delay: ([\d.]+)s"/, 1]
+    assert_equal entry_delay, fx_delay,
+                 "fx token reuses its line delay so flash fires with its line"
+  end
+
   def test_battle_end_uses_results_desktop_markup
     start_battle_for("user-a")
     post "/battle/play", {}, user_session("user-a")

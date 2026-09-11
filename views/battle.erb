@@ -41,7 +41,7 @@
   <% end %>
   <% log_total = [acc, 3.0].min %>
 
-  <div class="arena" style="--log-total: <%= log_total %>s; --log-total-full: <%= acc %>s">
+  <div class="arena" style="--log-total: <%= log_total %>s; --log-total-full: <%= acc %>s; --step-delay: <%= acc.round(2) %>s">
     <div class="battle-column" data-side="0" data-od-id="side-team">
       <div class="side-head"><h2>Seu Time</h2><p class="meta"><%= @engine.teams[0].count { |fighter| !fighter.fainted? } %> ativos</p></div>
       <ul class="fighters">
@@ -188,11 +188,14 @@
               <li class="log-round-head" data-round="<%= group[:round] %>" id="round-<%= group[:round] %>">Rodada <%= group[:round] %></li>
               <% group[:entries].each do |entry| %>
                 <% side_class = entry[:side] == "Seu Time" ? "team" : "opp" %>
+                <% line_delay = (group_index * 0.25 + step_delay[entry.object_id]).round(2) %>
+                <% fx_class = entry[:ko] ? "fx--ko" : (entry[:damage] ? "fx--hit" : (entry[:healed] ? "fx--heal" : "fx--tick")) %>
                 <li class="log__entry"
                     data-round="<%= entry[:round] %>"
                     data-from-side="<%= entry[:from_side] %>"
                     data-to-side="<%= entry[:to_side] %>"
-                    style="--log-delay: <%= (group_index * 0.25 + step_delay[entry.object_id]).round(2) %>s">
+                    style="--log-delay: <%= line_delay %>s">
+                  <span class="fx <%= fx_class %>" style="--log-delay: <%= line_delay %>s" aria-hidden="true"></span>
                   <span class="lside <%= side_class %>"><%= entry[:side] %></span>
                   <span class="txt"><strong><%= entry[:text] %></strong>
                     <% if entry[:damage] %><span class="chip chip--dmg"><%= entry[:damage] %> de dano</span><% end %>

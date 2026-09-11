@@ -237,6 +237,8 @@ class StyleResponsiveTest < Minitest::Test
     ].each do |selector|
       assert_includes tail, selector, "rede final deve desligar #{selector}"
     end
+    assert_includes tail, ".log__entry .fx", "rede final deve desligar o token por linha"
+    assert_includes tail, ".log__entry .chip", "rede final deve desligar o chip por linha"
   end
 
   def test_log_skip_disables_pacing_before_final_reduce
@@ -269,22 +271,25 @@ class StyleResponsiveTest < Minitest::Test
     assert_match(shot_animation, block, "projetil anima apenas em viewport >= 900px")
   end
 
-  def test_juice_effects_sync_to_step_delay
+  def test_juice_effects_sync_per_line
     content = style_content
 
-    # Passo 6 (0086): os 5 efeitos de juice atrasam junto do log via
-    # --step-delay (max por lado no li.fighter) — CSS-only, sem JS.
-    assert_match(/\.fighter\.is-hit\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
-                 "flash is-hit deve atrasar via --step-delay")
-    assert_match(/\.fighter\.is-hit::after\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
-                 "numero de dano deve atrasar via --step-delay")
-    ko_synced =
-      /\.fighter\.fainted img,\s*\.fighter\.fainted \.fname\s*\{[^}]*animation-delay:\s*var\(--step-delay/m
-    assert_match(ko_synced, content, "KO deve atrasar via --step-delay")
+    # Passo 9 (0086): efeito por linha via --log-delay no .fx dentro da
+    # .log__entry (sem max-por-lado); shake da arena via --step-delay na
+    # .arena; fighter li segue so estado final, sem staging.
+    assert_match(/\.log__entry \.fx\s*\{[^}]*animation-delay:\s*var\(--log-delay/m, content,
+                 "fx token deve atrasar via --log-delay da propria linha")
+    assert_match(/\.log__entry \.fx--ko\s*\{[^}]*animation-delay:\s*var\(--log-delay/m, content,
+                 "fx KO deve atrasar via --log-delay da propria linha")
+    assert_match(/\.log__entry \.chip--dmg\s*\{[^}]*animation-delay:\s*var\(--log-delay/m, content,
+                 "chip de dano deve atrasar via --log-delay da propria linha")
     assert_match(/\.arena\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
-                 "shake da arena deve atrasar via --step-delay")
-    assert_match(/\.fighter\.is-attacking \.shot\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
-                 "projetil deve atrasar via --step-delay")
+                 "shake da arena deve atrasar via --step-delay na .arena")
+    refute_match(/\.fighter\.is-hit\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
+                 "fighter li e estado final only — sem staging por --step-delay")
+    refute_match(/\.fighter\.is-attacking \.shot\s*\{[^}]*animation-delay:\s*var\(--step-delay/m,
+                 content,
+                 "projetil no li e estado final only — sem staging por --step-delay")
   end
 
   def test_skip_and_reduce_cover_step_delay
@@ -292,12 +297,16 @@ class StyleResponsiveTest < Minitest::Test
 
     skip_index = content.index(".arena:has(.log-skip-input:checked)")
     refute_nil skip_index, "Pular deve zerar o juice sincronizado via :has na .arena (0086 Passo 6)"
+    assert_includes content, ".log__entry .fx",
+                    "Pular cobre o token por linha .fx (0086 Passo 9)"
     reduce_index = content.rindex("@media (prefers-reduced-motion: reduce)")
     refute_nil reduce_index, "rede final prefers-reduced-motion deve existir"
     assert skip_index < reduce_index,
            "Pular vem antes da rede final reduce, que continua por ultimo"
     assert_match(/--step-delay:\s*0s/, content[reduce_index..],
                  "rede final deve zerar --step-delay")
+    assert_includes content[reduce_index..], ".log__entry .fx",
+                    "rede final cobre o token por linha .fx (0086 Passo 9)"
   end
 
   def test_result_gated_on_log_total_as_modal
