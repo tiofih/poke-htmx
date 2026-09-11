@@ -142,6 +142,39 @@ class BattleLogPresenterTest < Minitest::Test
     assert all.all? { |entry| [0, 1].include?(entry[:to_side]) },
            "toda entrada tem to_side 0/1"
     assert_equal({ round: 1, side: "Seu Time", text: "a usou m1 em b, 5 de dano", from_side: 0, to_side: 1 },
-                 all.last, "contrato completo preservado em entries_all")
+                 all.last.slice(:round, :side, :text, :from_side, :to_side),
+                 "contrato completo preservado em entries_all")
+  end
+
+  def test_entries_grouped_by_round_newest_first
+    log = [
+      attack_entry(round: 1, side: 0, attacker: "a", target: "b", move: "m1", damage: 5),
+      attack_entry(round: 2, side: 1, attacker: "b", target: "a", move: "m2", damage: 7),
+      attack_entry(round: 2, side: 0, attacker: "a", target: "b", move: "m3", damage: 9)
+    ]
+    presenter = BattleLogPresenter.new(log)
+
+    groups = presenter.groups_all
+
+    assert_equal [2, 1], groups.map { |group| group[:round] }, "newest-first por rodada"
+    assert_equal 2, groups.first[:entries].size, "entradas da rodada 2 agrupadas"
+    assert_equal 1, groups.last[:entries].size, "entradas da rodada 1 agrupadas"
+    assert groups.first[:entries].all? { |entry| entry[:round] == 2 },
+           "cada entrada associada a sua rodada"
+  end
+
+  def test_entries_expose_damage_and_ko_for_chips
+    log = [
+      attack_entry(round: 1, side: 0, attacker: "a", target: "b", move: "m1", damage: 42, ko: true),
+      item_entry(round: 1, attacker: "a", item: "potion", healed: 20)
+    ]
+    presenter = BattleLogPresenter.new(log)
+
+    entries = presenter.entries
+
+    assert_equal 42, entries[0][:damage], "chip de dano le do presenter"
+    assert_equal true, entries[0][:ko], "chip de KO le do presenter"
+    assert_nil entries[1][:damage], "item nao tem dano"
+    assert_equal 20, entries[1][:healed], "item expoe cura"
   end
 end

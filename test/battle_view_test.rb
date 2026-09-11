@@ -83,6 +83,29 @@ class BattleViewTest < Minitest::Test
     assert_match(/--log-delay:/, body, "log keeps --log-delay stagger (resolver 0069)")
   end
 
+  def test_battle_log_groups_entries_by_round_newest_first
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/class="log-round-head"[^>]*data-round="\d+"/, body,
+                 "expected a round header carrying data-round (0086 C1)")
+    rounds = body.scan(/data-round="(\d+)"/).flatten.map(&:to_i)
+    assert_equal rounds.sort.reverse, rounds, "newest-first mantido no log"
+    assert_match(/id="round-\d+"/, body, "expected round anchors (0086 C1)")
+  end
+
+  def test_battle_log_entries_carry_damage_and_ko_chips
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/class="[^"]*\bchip--dmg\b[^"]*"[^>]*>\s*\d+ de dano/, body,
+                 "expected a per-entry damage chip (0086 C1)")
+  end
+
   def test_battle_side_heads_count_active_fighters
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 

@@ -18,6 +18,16 @@ class BattleLogPresenter
     @log.map { |entry| entry[:round] }.uniq.sort.reverse.flat_map { |round| entries_for_round(round) }
   end
 
+  def groups
+    recent_rounds.map { |round| { round: round, entries: entries_for_round(round) } }
+  end
+
+  def groups_all
+    @log.map { |entry| entry[:round] }.uniq.sort.reverse.map do |round|
+      { round: round, entries: entries_for_round(round) }
+    end
+  end
+
   private
 
   def recent_rounds
@@ -34,7 +44,10 @@ class BattleLogPresenter
       side: side_label(entry),
       text: entry[:action] == :item ? format_item(entry) : format_attack(entry),
       from_side: from_side(entry),
-      to_side: to_side(entry)
+      to_side: to_side(entry),
+      damage: entry[:damage],
+      ko: entry[:ko] || false,
+      healed: entry[:healed]
     }
   end
 

@@ -150,23 +150,27 @@
       </div>
       </div>
 
-      <% log_entries = BattleLogPresenter.new(@engine.log).entries_all %>
-      <% unless log_entries.empty? %>
-        <% round_order = log_entries.map { |entry| entry[:round] }.uniq.each_with_index.to_h %>
+      <% groups = BattleLogPresenter.new(@engine.log).groups_all %>
+      <% unless groups.empty? %>
         <div class="log-title">Registro da batalha</div>
         <div class="battle-log">
           <ul class="log" id="battle-log">
-            <% log_entries.each do |entry| %>
-              <% side_class = entry[:side] == "Seu Time" ? "team" : "opp" %>
-              <li class="log__entry"
-                  data-round="<%= entry[:round] %>"
-                  data-from-side="<%= entry[:from_side] %>"
-                  data-to-side="<%= entry[:to_side] %>"
-                  style="--log-delay: <%= (round_order.size - 1 - round_order.fetch(entry[:round])) * 0.25 %>s">
-                <span class="log-round">Rodada <%= entry[:round] %>:</span>
-                <span class="lside <%= side_class %>"><%= entry[:side] %></span>
-                <span class="txt"><strong><%= entry[:text] %></strong></span>
-              </li>
+            <% groups.each_with_index do |group, group_index| %>
+              <li class="log-round-head" data-round="<%= group[:round] %>" id="round-<%= group[:round] %>">Rodada <%= group[:round] %></li>
+              <% group[:entries].each do |entry| %>
+                <% side_class = entry[:side] == "Seu Time" ? "team" : "opp" %>
+                <li class="log__entry"
+                    data-round="<%= entry[:round] %>"
+                    data-from-side="<%= entry[:from_side] %>"
+                    data-to-side="<%= entry[:to_side] %>"
+                    style="--log-delay: <%= (groups.size - 1 - group_index) * 0.25 %>s">
+                  <span class="lside <%= side_class %>"><%= entry[:side] %></span>
+                  <span class="txt"><strong><%= entry[:text] %></strong>
+                    <% if entry[:damage] %><span class="chip chip--dmg"><%= entry[:damage] %> de dano</span><% end %>
+                    <% if entry[:ko] %><span class="chip chip--ko">KO!</span><% end %>
+                  </span>
+                </li>
+              <% end %>
             <% end %>
           </ul>
         </div>
