@@ -731,7 +731,7 @@ module ServerTeamActions
   end
 
   def heal_team
-    return journey_gate_notice unless settings.journey.started?(current_user)
+    return "#{journey_gate_notice}#{oob_center_modal}" unless settings.journey.started?(current_user)
 
     @result = settings.heal.heal(current_user)
     render_result_notice(@result)
