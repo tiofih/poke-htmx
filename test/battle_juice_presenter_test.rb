@@ -79,4 +79,19 @@ class BattleJuicePresenterTest < Minitest::Test
     assert_empty presenter.css_classes(0, "pidgey"),
                  "sem flags, sem classes de juice"
   end
+
+  def test_css_classes_carry_no_timing_hooks
+    log = [
+      attack_entry(round: 1, side: 0, attacker: "pikachu", target: "squirtle",
+                   move: "thunder-shock", damage: 100, ko: true)
+    ]
+    final_hp = { 0 => { "pikachu" => 202 }, 1 => { "squirtle" => 0 } }
+    presenter = BattleJuicePresenter.new(log: log, final_hp: final_hp)
+
+    # Passo 6 (0086): sincronia com o log vive no --step-delay do li
+    # (view, max por lado) — classes seguem só booleanas, sem timing.
+    all = presenter.css_classes(0, "pikachu") + presenter.css_classes(1, "squirtle")
+    assert((all - %w[is-hit fainted is-attacking]).empty?,
+           "juice veste só is-hit/fainted/is-attacking; --step-delay sincroniza o quando")
+  end
 end

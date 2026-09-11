@@ -20,11 +20,31 @@
                    1 => @engine.teams[1].to_h { |poke| [poke.name, poke.hp_current] } }
      ) %>
 
+  <% log_groups = BattleLogPresenter.new(@engine.log, stock: @engine.items).groups_all %>
+  <% step_of = ->(round) { r = round.to_i; r >= 10 ? 0.2 : r >= 4 ? 0.5 : 1.0 } %>
+  <% step_delay = {} %>
+  <% acc = 0.0 %>
+  <% log_groups.reverse_each do |group| %>
+    <% group[:entries].each do |entry| %>
+      <% acc = (acc + step_of.(entry[:round])).round(2) %>
+      <% step_delay[entry.object_id] = acc %>
+    <% end %>
+  <% end %>
+  <% side_delay = { 0 => 0.0, 1 => 0.0 } %>
+  <% log_groups.each do |group| %>
+    <% group[:entries].each do |entry| %>
+      <% d = step_delay[entry.object_id] %>
+      <% side_delay[entry[:from_side]] = [side_delay.fetch(entry[:from_side], 0.0), d].max %>
+      <% side_delay[entry[:to_side]] = [side_delay.fetch(entry[:to_side], 0.0), d].max %>
+    <% end %>
+  <% end %>
+  <% groups = log_groups %>
+
   <div class="arena">
     <div class="battle-column" data-side="0" data-od-id="side-team">
       <div class="side-head"><h2>Seu Time</h2><p class="meta"><%= @engine.teams[0].count { |fighter| !fighter.fainted? } %> ativos</p></div>
       <ul class="fighters">
-        <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", side: 0, juice: juice, presenters: @engine.teams[0].each_with_index.map { |poke, index| FighterPresenter.new(poke, item_used: @engine.member_used_item?(0, index)) } } %>
+        <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", side: 0, juice: juice, side_delay: side_delay, presenters: @engine.teams[0].each_with_index.map { |poke, index| FighterPresenter.new(poke, item_used: @engine.member_used_item?(0, index)) } } %>
       </ul>
 
       <% unless @engine.items.empty? %>
@@ -150,17 +170,8 @@
       </div>
       </div>
 
-      <% groups = BattleLogPresenter.new(@engine.log, stock: @engine.items).groups_all %>
+      <% groups = log_groups %>
       <% unless groups.empty? %>
-        <% step_of = ->(round) { r = round.to_i; r >= 10 ? 0.2 : r >= 4 ? 0.5 : 1.0 } %>
-        <% step_delay = {} %>
-        <% acc = 0.0 %>
-        <% groups.reverse_each do |group| %>
-          <% group[:entries].each do |entry| %>
-            <% acc = (acc + step_of.(entry[:round])).round(2) %>
-            <% step_delay[entry.object_id] = acc %>
-          <% end %>
-        <% end %>
         <div class="log-title">Registro da batalha</div>
         <input type="checkbox" id="log-skip" class="log-skip-input">
         <label for="log-skip" class="btn btn-ghost btn-sm log-skip-btn">Pular</label>
@@ -199,7 +210,7 @@
     <div class="battle-column" data-side="1" data-od-id="side-opponent">
       <div class="side-head"><h2>Oponente</h2><p class="meta"><%= @engine.teams[1].count { |fighter| !fighter.fainted? } %> ativos</p></div>
       <ul class="fighters">
-        <%= erb :_fighter_panel, layout: false, locals: { title: "Oponente", side: 1, juice: juice, presenters: @engine.teams[1].map { |poke| FighterPresenter.new(poke) } } %>
+        <%= erb :_fighter_panel, layout: false, locals: { title: "Oponente", side: 1, juice: juice, side_delay: side_delay, presenters: @engine.teams[1].map { |poke| FighterPresenter.new(poke) } } %>
       </ul>
     </div>
   </div>

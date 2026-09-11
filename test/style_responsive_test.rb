@@ -269,6 +269,37 @@ class StyleResponsiveTest < Minitest::Test
     assert_match(shot_animation, block, "projetil anima apenas em viewport >= 900px")
   end
 
+  def test_juice_effects_sync_to_step_delay
+    content = style_content
+
+    # Passo 6 (0086): os 5 efeitos de juice atrasam junto do log via
+    # --step-delay (max por lado no li.fighter) — CSS-only, sem JS.
+    assert_match(/\.fighter\.is-hit\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
+                 "flash is-hit deve atrasar via --step-delay")
+    assert_match(/\.fighter\.is-hit::after\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
+                 "numero de dano deve atrasar via --step-delay")
+    ko_synced =
+      /\.fighter\.fainted img,\s*\.fighter\.fainted \.fname\s*\{[^}]*animation-delay:\s*var\(--step-delay/m
+    assert_match(ko_synced, content, "KO deve atrasar via --step-delay")
+    assert_match(/\.arena\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
+                 "shake da arena deve atrasar via --step-delay")
+    assert_match(/\.fighter\.is-attacking \.shot\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
+                 "projetil deve atrasar via --step-delay")
+  end
+
+  def test_skip_and_reduce_cover_step_delay
+    content = style_content
+
+    skip_index = content.index(".arena:has(.log-skip-input:checked)")
+    refute_nil skip_index, "Pular deve zerar o juice sincronizado via :has na .arena (0086 Passo 6)"
+    reduce_index = content.rindex("@media (prefers-reduced-motion: reduce)")
+    refute_nil reduce_index, "rede final prefers-reduced-motion deve existir"
+    assert skip_index < reduce_index,
+           "Pular vem antes da rede final reduce, que continua por ultimo"
+    assert_match(/--step-delay:\s*0s/, content[reduce_index..],
+                 "rede final deve zerar --step-delay")
+  end
+
   def test_history_rows_stack_at_920 # rubocop:disable Naming/VariableNumber
     content = style_content
 

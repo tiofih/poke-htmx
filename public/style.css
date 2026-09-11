@@ -431,8 +431,9 @@
 
 .filter-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-	gap: 0.75em;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+	margin-top: 10px;
 }
 
 /* Hook dos filtros (hx-include): alvo de toque + largura cheia na grade */
@@ -458,6 +459,13 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.75em;
+}
+
+/* Roster 2-col (home-team.html baseline); stays 2-col at all widths. */
+.roster-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 20px;
 }
 
 .member {
@@ -923,9 +931,10 @@
 	animation: juice-hp 0.5s ease-out both;
 }
 
-/* Flash de dano no card do alvo */
+/* Flash de dano no card do alvo (0086 Passo 6: atrasa junto do log via --step-delay) */
 .fighter.is-hit {
 	animation: juice-flash 0.4s ease-out;
+	animation-delay: var(--step-delay, 0s);
 }
 
 /* Numero de dano flutuante — pseudo-elemento do card danificado */
@@ -938,6 +947,7 @@
 	color: var(--danger);
 	pointer-events: none;
 	animation: juice-damage-number 0.5s ease-out both;
+	animation-delay: var(--step-delay, 0s);
 }
 
 /* KO fade/grayscale no lutador derrotado */
@@ -946,15 +956,17 @@
 	filter: grayscale(1);
 	opacity: 0.6;
 	animation: juice-ko 0.5s ease-out both;
+	animation-delay: var(--step-delay, 0s);
 }
 
 .fighter.fainted {
 	opacity: 0.75;
 }
 
-/* Screenshake leve na arena */
+/* Screenshake leve na arena (0086 Passo 6: atrasa junto do log via --step-delay) */
 .arena {
 	animation: juice-shake 0.3s ease-out;
+	animation-delay: var(--step-delay, 0s);
 }
 
 /* Projetil — so em viewport >= 900px; abaixo disso so flash no alvo */
@@ -974,6 +986,7 @@
 	.fighter.is-attacking .shot {
 		display: block;
 		animation: juice-projectile 0.4s ease-out 0.15s both;
+		animation-delay: var(--step-delay, 0.15s);
 	}
 
 	.arena [data-side="0"] .fighter.is-attacking .shot {
@@ -1005,6 +1018,7 @@
    mantido integro para as regras legadas; remocao e 0076). */
 @media screen and (prefers-reduced-motion: reduce) {
 	.log__entry,
+	.fighter,
 	.fighter.is-hit,
 	.fighter.is-hit::after,
 	.fighter.fainted img,
@@ -1016,6 +1030,7 @@
 	.rewards,
 	.result .news--pop li {
 		animation: none;
+		--step-delay: 0s;
 	}
 }
 
@@ -1724,6 +1739,61 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 .heal-actions form { flex: 1; display: flex; }
 .heal-actions .btn { flex: 1; justify-content: center; }
 
+.roster-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* === Home 1:1 (0077) — residuo home-team.html: miolo center/mart, manage/evolucao, catalogo/detalhe.
+   Aditivo; reusa .modal/.modal-sub/.modal-foot/.hp/.bar/.bar-fill/.hp-label/.hp-val/.meta/.num/.row/.btn/.ptag/.mtag/.pcard-name existentes — nao redefinidos. === */
+.heal-list { list-style: none; margin: 0; padding: 0; }
+.heal-item { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid var(--border); }
+.heal-item:first-child { border-top: 0; }
+.heal-item .th { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); display: grid; place-items: center; overflow: hidden; }
+.heal-item .th img { width: 100%; height: 100%; object-fit: contain; }
+.heal-item .n { font-weight: 700; font-size: 13px; min-width: 110px; }
+.heal-item .hp { flex: 1; margin-top: 0; }
+
+.tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+.tab { padding: 7px 15px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; }
+.mart-tab-input { position: absolute; opacity: 0; pointer-events: none; }
+.tab-panel { display: none; }
+#mart-tab-buy:checked ~ #tab-buy { display: block; }
+#mart-tab-sell:checked ~ #tab-sell { display: block; }
+#mart-tab-buy:checked ~ .tabs .tab-buy { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+#mart-tab-sell:checked ~ .tabs .tab-sell { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+
+.mart { list-style: none; margin: 0; padding: 0; }
+.mart li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+.mart li:first-child { border-top: 0; }
+.mart .price { color: var(--fg); font-weight: 700; }
+.mart .muted-row { color: var(--muted); }
+.item-icon { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--fg); display: grid; place-items: center; font-weight: 800; font-size: 15px; }
+.mart-name { display: flex; align-items: center; gap: 10px; }
+
+.mg-head { display: flex; gap: 14px; align-items: center; margin-bottom: 4px; }
+.mg-head .sprite-tile { width: 72px; height: 72px; flex: 0 0 72px; }
+.mg-head h2 { font-size: 20px; }
+.section-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin: 20px 0 10px; }
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; }
+.stat-row { display: grid; grid-template-columns: 52px 1fr 38px; align-items: center; gap: 8px; }
+.stat-row .lab { font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.stat-row .stat-bar { height: 6px; background: var(--fg-soft); border-radius: 999px; overflow: hidden; }
+.stat-row .stat-bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+.stat-row .val { font-family: var(--font-mono); font-size: 11px; text-align: right; }
+.mv-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 6px; }
+.mv-row.marked { border-color: var(--accent); background: var(--accent-soft); }
+.mv-row .mv-name { font-weight: 700; font-size: 13px; flex: 1; }
+.mv-row button { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; flex: 1; cursor: pointer; }
+.mv-sel { width: 20px; height: 20px; border-radius: 6px; border: 1px solid var(--border); display: grid; place-items: center; color: var(--ink); flex: 0 0 20px; }
+.mv-row.marked .mv-sel { background: var(--accent); border-color: var(--accent); }
+.equip-row { display: flex; gap: 10px; align-items: center; }
+.equip-row label { flex: 1; }
+.equip-row .select { width: 100%; min-height: 44px; padding: 0.5em 0.75em; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg); color: var(--fg); font-family: var(--font-body); }
+.equip-current { margin-top: 8px; }
+.evo-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-top: 1px solid var(--border); }
+.evo-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.evo-item { font-weight: 700; font-size: 13px; }
+.evo-arrow { color: var(--muted); }
+.tag-row { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+
 /* === Juice polish + reduced-motion (0086 C2, inicio) ===
    Veste a marcacao nova da 0086 (C1 cabecalho de rodada, C3 linha de
    derrota) com o vocabulario de juice existente — CSS-only, sem JS, sem
@@ -1760,6 +1830,20 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 
 .log-skip-input:checked ~ .battle-log .log__entry {
 	animation: none !important;
+	animation-delay: 0s !important;
+}
+
+/* Pular tambem zera o juice sincronizado (0086 Passo 6, CSS-only): o
+   checkbox mora no .podium, fora do alcance do irmao ~ — :has() na
+   .arena alcanca os cards dos dois lados. */
+.arena:has(.log-skip-input:checked) .fighter.is-hit,
+.arena:has(.log-skip-input:checked) .fighter.is-hit::after,
+.arena:has(.log-skip-input:checked) .fighter.fainted img,
+.arena:has(.log-skip-input:checked) .fighter.fainted .fname,
+.arena:has(.log-skip-input:checked) .fighter.is-attacking .shot,
+.arena:has(.log-skip-input:checked) {
+	animation: none !important;
+	animation-delay: 0s !important;
 }
 /* === Juice polish + reduced-motion (0086 C2, fim) === */
 
@@ -2151,6 +2235,7 @@ button[disabled="disabled"] {
 	.log__entry,
 	.log-round-head,
 	.log__entry--defeat,
+	.fighter,
 	.fighter.is-hit,
 	.fighter.is-hit::after,
 	.fighter.fainted img,
@@ -2177,5 +2262,6 @@ button[disabled="disabled"] {
 	.overlay.open {
 		animation: none !important;
 		transition: none !important;
+		--step-delay: 0s !important;
 	}
 }

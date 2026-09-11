@@ -1,13 +1,16 @@
 <% lead_index = presenters.index { |f| !juice.fighter_juice(side, f.name)[:ko] } %>
+<% step_pause = (defined?(side_delay) && side_delay ? side_delay.fetch(side, 0).to_f : 0.0).round(2) %>
 <% presenters.each_with_index do |fighter, idx| %>
 <% juice_data = juice.fighter_juice(side, fighter.name) %>
 <% max_hp = fighter.hp_label.split("/").last.to_i %>
 <% initial_percent = max_hp.positive? ? ((juice_data[:initial_hp].to_f / max_hp) * 100).round : 0 %>
 <% hp_fill = { high: "ok", medium: "mid", low: "low" }.fetch(fighter.hp_tier, "ok") %>
   <li class="fighter<% juice.css_classes(side, fighter.name).each do |klass| %> <%= klass %><% end %><%= " engaged" if idx == lead_index && !juice_data[:ko] %>"
+     data-side="<%= side %>"
      data-od-id="fighter-<%= fighter.name.downcase %>"
      data-hp-initial="<%= juice_data[:initial_hp] %>"
-     data-damage="<%= juice_data[:damage_taken] %>">
+     data-damage="<%= juice_data[:damage_taken] %>"
+     style="--step-delay: <%= step_pause %>s">
     <% if juice_data[:shooting] %><span class="shot" aria-hidden="true"></span><% end %>
     <div class="fighter-head">
       <span class="sprite-tile"><img src="<%= fighter.sprite %>" alt="<%= fighter.alt %>" width="96" height="96"></span>

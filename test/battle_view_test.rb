@@ -232,6 +232,20 @@ class BattleViewTest < Minitest::Test
                  "expected a Pular label toggling the skip checkbox")
   end
 
+  def test_battle_fighter_cards_carry_side_and_step_delay
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/<li class="fighter[^"]*"[^>]*data-side="0"/, body,
+                 "fighter li carries data-side=0 (0086 Passo 6)")
+    assert_match(/<li class="fighter[^"]*"[^>]*data-side="1"/, body,
+                 "fighter li carries data-side=1 (0086 Passo 6)")
+    assert_match(/<li class="fighter[^"]*"[^>]*--step-delay: [\d.]+s/, body,
+                 "fighter li exposes --step-delay synced to log pacing (0086 Passo 6)")
+  end
+
   def test_battle_end_uses_results_desktop_markup
     start_battle_for("user-a")
     post "/battle/play", {}, user_session("user-a")
