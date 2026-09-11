@@ -212,4 +212,31 @@ class ModalRoutesTest < Minitest::Test
     assert_includes heal_form, "disabled"
     assert_includes last_response.body, "Saldo insuficiente"
   end
+
+  def test_center_insufficient_reason_is_prominent_before_button
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+    @wallet.set("user-a", 10)
+
+    get "/team/center", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_includes body, "heal-disabled-reason"
+    assert_includes body, "notice--error"
+    assert_match(%r{<strong>Saldo insuficiente</strong>}, body)
+    assert_match(/role="status"/, body)
+    assert body.index("heal-disabled-reason") < body.index("Curar time")
+    refute_match(/class="meta heal-disabled-reason"/, body)
+  end
+
+  def test_center_healed_reason_is_prominent
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+
+    post "/team/heal", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_match(%r{<strong>Time já curado</strong>}, last_response.body)
+  end
 end
