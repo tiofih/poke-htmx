@@ -41,7 +41,7 @@
   <% end %>
   <% log_total = [acc, 3.0].min %>
 
-  <div class="arena" style="--log-total: <%= log_total %>s; --log-total-full: <%= acc %>s; --step-delay: <%= acc.round(2) %>s">
+  <div class="arena" data-jx-log="on" data-jx-fx="on" data-jx-chip="on" data-jx-hit="off" data-jx-dmg="off" data-jx-ko="off" data-jx-shot="off" data-jx-hp="off" data-jx-shake="off" data-jx-modal="on" style="--log-total: <%= log_total %>s; --log-total-full: <%= acc %>s; --step-delay: <%= acc.round(2) %>s">
     <div class="battle-column" data-side="0" data-od-id="side-team">
       <div class="side-head"><h2>Seu Time</h2><p class="meta"><%= @engine.teams[0].count { |fighter| !fighter.fainted? } %> ativos</p></div>
       <ul class="fighters">

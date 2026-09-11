@@ -263,6 +263,24 @@ class BattleViewTest < Minitest::Test
                  "fx token reuses its line delay so flash fires with its line"
   end
 
+  def test_battle_arena_carries_jx_toggles_per_aspect
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    arena = body[/<div class="arena"[^>]*>/]
+    refute_nil arena, "expected an .arena div"
+    %w[log fx chip modal].each do |aspect|
+      assert_includes arena, %(data-jx-#{aspect}="on"),
+                      "arena keeps per-line/modal aspect #{aspect} ON (0086 Passo 11)"
+    end
+    %w[hit dmg ko shot hp shake].each do |aspect|
+      assert_includes arena, %(data-jx-#{aspect}="off"),
+                      "arena mutes aggregate aspect #{aspect} OFF ate stepping por linha (0086 Passo 11)"
+    end
+  end
+
   def test_battle_end_uses_results_desktop_markup
     start_battle_for("user-a")
     post "/battle/play", {}, user_session("user-a")

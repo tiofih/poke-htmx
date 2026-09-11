@@ -920,25 +920,47 @@
    (keyframes juice-* reutilizados — globais no arquivo; o CSS antigo permanece
    integro fora do bloco para o style_responsive_test). */
 
-/* Entrada do log: fade/slide escalonado via --log-delay (stagger 0069) */
+/* Entrada do log: fade/slide escalonado via --log-delay (stagger 0069).
+   Passo 11 (0086): modular por aspecto — --jx-log no .log__entry (timed ON),
+   agregado no li.fighter/shake default OFF ate stepping por linha. */
+.arena {
+	--jx-shake: 0;
+}
 .log__entry {
+	--jx-log: 1;
+	--jx-fx: 1;
+	--jx-chip: 1;
+}
+li.fighter {
+	--jx-hit: 0;
+	--jx-dmg: 0;
+	--jx-ko: 0;
+	--jx-shot: 0;
+	--jx-hp: 0;
+}
+.res-overlay {
+	--jx-modal: 1;
+}
+.arena[data-jx-log="on"] .log__entry {
 	animation: battle-log-in 0.35s ease-out both;
 	animation-delay: var(--log-delay, 0s);
 }
 
-/* HP animado: parte do HP inicial (var do servidor) ate o atual */
-.fighters .bar-fill {
+/* HP animado: parte do HP inicial (var do servidor) ate o atual.
+   Passo 11: agregado — so com data-jx-hp="on" (default OFF). */
+.arena[data-jx-hp="on"] .fighters .bar-fill {
 	animation: juice-hp 0.5s ease-out both;
 }
 
 /* Flash de dano no card do alvo (0086 Passo 9: estado final only — o
-   escalonado por linha vive no .fx dentro da .log__entry via --log-delay) */
-.fighter.is-hit {
+   escalonado por linha vive no .fx dentro da .log__entry via --log-delay).
+   Passo 11: agregado — so com data-jx-hit="on" (default OFF). */
+.arena[data-jx-hit="on"] .fighter.is-hit {
 	animation: juice-flash 0.4s ease-out;
 }
 
-/* Numero de dano flutuante — pseudo-elemento do card danificado */
-.fighter.is-hit::after {
+/* Numero de dano flutuante — Passo 11: agregado, so com data-jx-dmg="on". */
+.arena[data-jx-dmg="on"] .fighter.is-hit::after {
 	content: attr(data-damage);
 	position: absolute;
 	top: -6px;
@@ -949,9 +971,9 @@
 	animation: juice-damage-number 0.5s ease-out both;
 }
 
-/* KO fade/grayscale no lutador derrotado */
-.fighter.fainted img,
-.fighter.fainted .fname {
+/* KO fade/grayscale — Passo 11: agregado, so com data-jx-ko="on" (default OFF). */
+.arena[data-jx-ko="on"] .fighter.fainted img,
+.arena[data-jx-ko="on"] .fighter.fainted .fname {
 	filter: grayscale(1);
 	opacity: 0.6;
 	animation: juice-ko 0.5s ease-out both;
@@ -962,8 +984,9 @@
 }
 
 /* Screenshake leve na arena (0086 Passo 9: --step-delay mora na .arena,
-   max do pacing — antes caia no fallback 0s pois a var so existia no li) */
-.arena {
+   max do pacing — antes caia no fallback 0s pois a var so existia no li).
+   Passo 11: agregado — so com data-jx-shake="on" (default OFF). */
+.arena[data-jx-shake="on"] {
 	animation: juice-shake 0.3s ease-out;
 	animation-delay: var(--step-delay, 0s);
 }
@@ -982,7 +1005,7 @@
 }
 
 @media (min-width: 900px) {
-	.fighter.is-attacking .shot {
+	.arena[data-jx-shot="on"] .fighter.is-attacking .shot {
 		display: block;
 		animation: juice-projectile 0.4s ease-out 0.15s both;
 	}
@@ -1871,7 +1894,7 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 	pointer-events: none;
 }
 
-.res-overlay {
+.arena[data-jx-modal="on"] .res-overlay {
 	opacity: 0;
 	visibility: hidden;
 	animation: res-reveal 0.3s ease-out both;
@@ -1891,8 +1914,9 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 
 /* Efeito por linha (0086 Passo 9, CSS-only): .fx mora dentro da
    .log__entry e carrega o proprio --log-delay — flash/damage sincronizado
-   a sua linha, sem max-por-lado; fighter li segue so estado final. */
-.log__entry .fx {
+   a sua linha, sem max-por-lado; fighter li segue so estado final.
+   Passo 11: --jx-fx/--jx-chip por aspecto (timed ON), um bloco por toggle. */
+.arena[data-jx-fx="on"] .log__entry .fx {
 	display: inline-block;
 	width: 8px;
 	height: 8px;
@@ -1902,18 +1926,18 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 	animation-delay: var(--log-delay, 0s);
 }
 
-.log__entry .fx--ko {
+.arena[data-jx-fx="on"] .log__entry .fx--ko {
 	animation: juice-ko 0.5s ease-out both;
 	animation-delay: var(--log-delay, 0s);
 }
 
-.log__entry .fx--heal {
+.arena[data-jx-fx="on"] .log__entry .fx--heal {
 	background: radial-gradient(circle, #a5d6a7, #2e7d32);
 	animation: juice-news 0.4s ease-out both;
 	animation-delay: var(--log-delay, 0s);
 }
 
-.log__entry .chip--dmg {
+.arena[data-jx-chip="on"] .log__entry .chip--dmg {
 	animation: juice-banner 0.45s ease-out both;
 	animation-delay: var(--log-delay, 0s);
 }
@@ -2343,6 +2367,15 @@ button[disabled="disabled"] {
 		animation: none !important;
 		transition: none !important;
 		--step-delay: 0s !important;
+		--jx-log: 0 !important;
+		--jx-fx: 0 !important;
+		--jx-chip: 0 !important;
+		--jx-hit: 0 !important;
+		--jx-dmg: 0 !important;
+		--jx-ko: 0 !important;
+		--jx-shot: 0 !important;
+		--jx-hp: 0 !important;
+		--jx-shake: 0 !important;
 	}
 	.res-overlay {
 		animation: none !important;

@@ -274,22 +274,50 @@ class StyleResponsiveTest < Minitest::Test
   def test_juice_effects_sync_per_line
     content = style_content
 
-    # Passo 9 (0086): efeito por linha via --log-delay no .fx dentro da
-    # .log__entry (sem max-por-lado); shake da arena via --step-delay na
-    # .arena; fighter li segue so estado final, sem staging.
-    assert_match(/\.log__entry \.fx\s*\{[^}]*animation-delay:\s*var\(--log-delay/m, content,
-                 "fx token deve atrasar via --log-delay da propria linha")
-    assert_match(/\.log__entry \.fx--ko\s*\{[^}]*animation-delay:\s*var\(--log-delay/m, content,
-                 "fx KO deve atrasar via --log-delay da propria linha")
-    assert_match(/\.log__entry \.chip--dmg\s*\{[^}]*animation-delay:\s*var\(--log-delay/m, content,
-                 "chip de dano deve atrasar via --log-delay da propria linha")
-    assert_match(/\.arena\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
-                 "shake da arena deve atrasar via --step-delay na .arena")
-    refute_match(/\.fighter\.is-hit\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
+    # Passo 9 (0086) + Passo 11 (0086): efeito por linha via --log-delay no .fx
+    # dentro da .log__entry, um bloco por toggle data-jx-*; shake da arena via
+    # --step-delay gated por data-jx-shake; fighter li e estado final only.
+    assert_match(/data-jx-log="on"\] \.log__entry\s*\{[^}]*--log-delay/m, content,
+                 "log entry deve atrasar via --log-delay sob data-jx-log")
+    assert_match(/data-jx-fx="on"\] \.log__entry \.fx\s*\{[^}]*--log-delay/m, content,
+                 "fx token deve atrasar via --log-delay sob data-jx-fx")
+    assert_match(/data-jx-fx="on"\] \.log__entry \.fx--ko\s*\{[^}]*--log-delay/m, content,
+                 "fx KO deve atrasar via --log-delay sob data-jx-fx")
+    assert_match(/data-jx-chip="on"\] \.log__entry \.chip--dmg\s*\{[^}]*--log-delay/m, content,
+                 "chip de dano deve atrasar via --log-delay sob data-jx-chip")
+    assert_match(/data-jx-shake="on"\]\s*\{[^}]*--step-delay/m, content,
+                 "shake da arena deve atrasar via --step-delay sob data-jx-shake")
+    refute_match(/\.fighter\.is-hit\s*\{[^}]*--step-delay/m, content,
                  "fighter li e estado final only — sem staging por --step-delay")
-    refute_match(/\.fighter\.is-attacking \.shot\s*\{[^}]*animation-delay:\s*var\(--step-delay/m,
-                 content,
+    refute_match(/data-jx-shot="on"\] \.fighter\.is-attacking \.shot[^}]*--step-delay/m, content,
                  "projetil no li e estado final only — sem staging por --step-delay")
+  end
+
+  def test_juice_aspects_modular_with_off_defaults
+    content = style_content
+
+    # Passo 11 (0086): agregado default OFF (mute ate stepping por linha),
+    # per-line timed ON, modal gated com gate capado; um bloco por toggle.
+    assert_match(/li\.fighter\s*\{[^}]*--jx-hit:\s*0/m, content,
+                 "li.fighter deve desligar --jx-hit por padrao")
+    assert_match(/li\.fighter\s*\{[^}]*--jx-dmg:\s*0/m, content,
+                 "li.fighter deve desligar --jx-dmg por padrao")
+    assert_match(/li\.fighter\s*\{[^}]*--jx-ko:\s*0/m, content,
+                 "li.fighter deve desligar --jx-ko por padrao")
+    assert_match(/li\.fighter\s*\{[^}]*--jx-shot:\s*0/m, content,
+                 "li.fighter deve desligar --jx-shot por padrao")
+    assert_match(/li\.fighter\s*\{[^}]*--jx-hp:\s*0/m, content,
+                 "li.fighter deve desligar --jx-hp por padrao")
+    assert_match(/\.arena\s*\{[^}]*--jx-shake:\s*0/m, content,
+                 "arena deve desligar --jx-shake por padrao")
+    %w[hit dmg ko shot hp shake log fx chip modal].each do |aspect|
+      assert_match(/data-jx-#{aspect}="on"/, content,
+                   "aspecto #{aspect} deve ter um bloco gated por data-jx-#{aspect}")
+    end
+    assert_match(/\.arena\[data-jx-hit="on"\] \.fighter\.is-hit\s*\{[^}]*animation:\s*juice-flash/m, content,
+                 "hit agregado so anima sob data-jx-hit=on")
+    assert_match(/\.arena\[data-jx-modal="on"\] \.res-overlay\s*\{[^}]*animation-delay:\s*var\(--log-total/m, content,
+                 "modal revela sob data-jx-modal via --log-total")
   end
 
   def test_skip_and_reduce_cover_step_delay
@@ -312,8 +340,8 @@ class StyleResponsiveTest < Minitest::Test
   def test_result_gated_on_log_total_as_modal
     content = style_content
 
-    assert_match(/\.res-overlay\s*\{[^}]*animation-delay:\s*var\(--log-total/m, content,
-                 "result reveals only after the log via --log-total (0086 Passo 7)")
+    assert_match(/\.arena\[data-jx-modal="on"\] \.res-overlay\s*\{[^}]*animation-delay:\s*var\(--log-total/m, content,
+                 "result reveals only after the log via --log-total sob data-jx-modal (0086 Passo 7+11)")
     assert_match(/@keyframes res-reveal/, content,
                  "res-reveal keyframes drive the gated reveal")
     assert_match(/\.res-dismiss-input:checked ~ \.res-overlay\s*\{[^}]*display:\s*none/m, content,
