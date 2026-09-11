@@ -21,26 +21,27 @@
      ) %>
 
   <% log_groups = BattleLogPresenter.new(@engine.log, stock: @engine.items).groups_all %>
+  <% groups = log_groups.reverse %>
   <% step_of = ->(round) { r = round.to_i; r >= 10 ? 0.2 : r >= 4 ? 0.5 : 1.0 } %>
   <% step_delay = {} %>
   <% acc = 0.0 %>
-  <% log_groups.reverse_each do |group| %>
+  <% groups.each do |group| %>
     <% group[:entries].each do |entry| %>
       <% acc = (acc + step_of.(entry[:round])).round(2) %>
       <% step_delay[entry.object_id] = acc %>
     <% end %>
   <% end %>
   <% side_delay = { 0 => 0.0, 1 => 0.0 } %>
-  <% log_groups.each do |group| %>
+  <% groups.each do |group| %>
     <% group[:entries].each do |entry| %>
       <% d = step_delay[entry.object_id] %>
       <% side_delay[entry[:from_side]] = [side_delay.fetch(entry[:from_side], 0.0), d].max %>
       <% side_delay[entry[:to_side]] = [side_delay.fetch(entry[:to_side], 0.0), d].max %>
     <% end %>
   <% end %>
-  <% groups = log_groups %>
+  <% log_total = [acc, 3.0].min %>
 
-  <div class="arena" style="--log-total: <%= acc %>s">
+  <div class="arena" style="--log-total: <%= log_total %>s; --log-total-full: <%= acc %>s">
     <div class="battle-column" data-side="0" data-od-id="side-team">
       <div class="side-head"><h2>Seu Time</h2><p class="meta"><%= @engine.teams[0].count { |fighter| !fighter.fainted? } %> ativos</p></div>
       <ul class="fighters">
@@ -177,7 +178,6 @@
       </div>
       </div>
 
-      <% groups = log_groups %>
       <% unless groups.empty? %>
         <div class="log-title">Registro da batalha</div>
         <input type="checkbox" id="log-skip" class="log-skip-input">
@@ -192,7 +192,7 @@
                     data-round="<%= entry[:round] %>"
                     data-from-side="<%= entry[:from_side] %>"
                     data-to-side="<%= entry[:to_side] %>"
-                    style="--log-delay: <%= ((groups.size - 1 - group_index) * 0.25 + step_delay[entry.object_id]).round(2) %>s">
+                    style="--log-delay: <%= (group_index * 0.25 + step_delay[entry.object_id]).round(2) %>s">
                   <span class="lside <%= side_class %>"><%= entry[:side] %></span>
                   <span class="txt"><strong><%= entry[:text] %></strong>
                     <% if entry[:damage] %><span class="chip chip--dmg"><%= entry[:damage] %> de dano</span><% end %>

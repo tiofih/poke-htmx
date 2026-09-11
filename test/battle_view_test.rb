@@ -83,7 +83,7 @@ class BattleViewTest < Minitest::Test
     assert_match(/--log-delay:/, body, "log keeps --log-delay stagger (resolver 0069)")
   end
 
-  def test_battle_log_groups_entries_by_round_newest_first
+  def test_battle_log_groups_entries_by_round_chronological
     start_battle_for("user-a")
     post "/battle/play", {}, user_session("user-a")
 
@@ -92,7 +92,7 @@ class BattleViewTest < Minitest::Test
     assert_match(/class="log-round-head"[^>]*data-round="\d+"/, body,
                  "expected a round header carrying data-round (0086 C1)")
     rounds = body.scan(/class="log-round-head"[^>]*data-round="(\d+)"/).flatten.map(&:to_i)
-    assert_equal rounds.sort.reverse, rounds, "newest-first mantido no log"
+    assert_equal rounds.sort, rounds, "chronological mantido no log (S3 0086: round 1 no topo)"
     assert_match(/id="round-\d+"/, body, "expected round anchors (0086 C1)")
   end
 
@@ -269,6 +269,11 @@ class BattleViewTest < Minitest::Test
     body = last_response.body
     assert_match(/<div class="arena"[^>]*--log-total: [\d.]+s/, body,
                  "arena exposes --log-total gating the result (0086 Passo 7)")
+    log_total = body[/--log-total: ([\d.]+)s/, 1].to_f
+    assert_operator log_total, :<=, 3.0,
+                    "modal gate capped at 3s so long logs still reveal (0086 T114)"
+    assert_match(/--log-total-full: [\d.]+s/, body,
+                 "arena keeps full pacing in --log-total-full (0086 T114)")
     assert_match(/<div class="overlay open res-screen res-overlay"[^>]*id="result-modal"/, body,
                  "result reuses Center .overlay.open modal pattern (0086 Passo 7)")
     assert_match(/role="dialog"[^>]*aria-modal="true"/, body,
