@@ -1744,6 +1744,23 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 .log__entry--defeat .txt strong {
 	color: var(--danger);
 }
+
+/* Pular o pacing do log (0086 Passo 5, CSS-only): checkbox irmao do
+   .battle-log zera os delays linha a linha; a rede final de
+   reduced-motion continua cobrindo a11y por ultimo. */
+.log-skip-input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.log-skip-btn {
+	margin: 0.4em 0 0;
+}
+
+.log-skip-input:checked ~ .battle-log .log__entry {
+	animation: none !important;
+}
 /* === Juice polish + reduced-motion (0086 C2, fim) === */
 
 /* === Open Design System (0072): fim === */

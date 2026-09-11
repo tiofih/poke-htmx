@@ -168,6 +168,70 @@ class BattleViewTest < Minitest::Test
                  "defeat copy distinguishes participation from victory")
   end
 
+  def pace_step_for(round)
+    return 0.2 if round >= 10
+    return 0.5 if round >= 4
+
+    1.0
+  end
+
+  def log_chunks_with_entries(body)
+    chunks = body.split('class="log-round-head"').drop(1)
+    chunks.map do |chunk|
+      head_round = chunk[/data-round="(\d+)"/, 1].to_i
+      pairs = chunk.scan(/data-round="(\d+)"[^>]*style="--log-delay: ([\d.]+)s"/)
+                   .map { |round, delay| [round.to_i, delay.to_f] }
+      [head_round, pairs]
+    end
+  end
+
+  def test_battle_log_pacing_is_cumulative_per_entry
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    groups = log_chunks_with_entries(last_response.body).select { |_, pairs| pairs.size > 1 }
+    refute_empty groups, "expected a round with 2+ entries to prove per-entry pacing"
+    groups.each do |head_round, pairs|
+      assert_equal head_round, pairs.first.first,
+                   "entries carry the round of their header (0086 Passo 5)"
+      delays = pairs.map(&:last)
+      assert_equal delays.sort, delays,
+                   "delays grow entry by entry inside the round (cumulative pacing)"
+    end
+  end
+
+  def test_battle_log_pacing_uses_tiered_step
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    checked = 0
+    log_chunks_with_entries(last_response.body).each do |chunk|
+      pairs = chunk.last
+      pairs.each_cons(2) do |(round_a, delay_a), (round_b, delay_b)|
+        next unless round_a == round_b
+
+        assert_in_delta pace_step_for(round_a), delay_b - delay_a, 0.001,
+                        "tiered step na rodada #{round_a} (1s ate R3, 0.5s R4-9, 0.2s R10+)"
+        checked += 1
+      end
+    end
+    assert checked.positive?, "expected same-round pairs to prove the tiered step"
+  end
+
+  def test_battle_log_has_skip_control
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/<input[^>]*type="checkbox"[^>]*id="log-skip"/, body,
+                 "expected a CSS-only Pular checkbox before the log (0086 Passo 5)")
+    assert_match(%r{<label[^>]*for="log-skip"[^>]*>Pular</label>}, body,
+                 "expected a Pular label toggling the skip checkbox")
+  end
+
   def test_battle_end_uses_results_desktop_markup
     start_battle_for("user-a")
     post "/battle/play", {}, user_session("user-a")

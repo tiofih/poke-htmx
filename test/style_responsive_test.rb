@@ -239,6 +239,22 @@ class StyleResponsiveTest < Minitest::Test
     end
   end
 
+  def test_log_skip_disables_pacing_before_final_reduce
+    content = style_content
+
+    skip_index = content.index(".log-skip-input:checked")
+    refute_nil skip_index, "expected a CSS-only Pular rule (.log-skip-input:checked)"
+    skip_rule = content[skip_index, 200]
+    assert_match(/animation:\s*none\s*!important/, skip_rule,
+                 "Pular zera o pacing do log")
+    assert_includes skip_rule, ".battle-log", "Pular mira as entradas do log"
+
+    reduce_index = content.rindex("@media (prefers-reduced-motion: reduce)")
+    refute_nil reduce_index, "rede final prefers-reduced-motion deve existir"
+    assert skip_index < reduce_index,
+           "Pular vem antes da rede final reduce, que continua por ultimo"
+  end
+
   def test_shot_only_above_900px
     content = style_content
     block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]

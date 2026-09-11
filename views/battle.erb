@@ -152,7 +152,18 @@
 
       <% groups = BattleLogPresenter.new(@engine.log, stock: @engine.items).groups_all %>
       <% unless groups.empty? %>
+        <% step_of = ->(round) { r = round.to_i; r >= 10 ? 0.2 : r >= 4 ? 0.5 : 1.0 } %>
+        <% step_delay = {} %>
+        <% acc = 0.0 %>
+        <% groups.reverse_each do |group| %>
+          <% group[:entries].each do |entry| %>
+            <% acc = (acc + step_of.(entry[:round])).round(2) %>
+            <% step_delay[entry.object_id] = acc %>
+          <% end %>
+        <% end %>
         <div class="log-title">Registro da batalha</div>
+        <input type="checkbox" id="log-skip" class="log-skip-input">
+        <label for="log-skip" class="btn btn-ghost btn-sm log-skip-btn">Pular</label>
         <div class="battle-log">
           <ul class="log" id="battle-log">
             <% groups.each_with_index do |group, group_index| %>
@@ -163,7 +174,7 @@
                     data-round="<%= entry[:round] %>"
                     data-from-side="<%= entry[:from_side] %>"
                     data-to-side="<%= entry[:to_side] %>"
-                    style="--log-delay: <%= (groups.size - 1 - group_index) * 0.25 %>s">
+                    style="--log-delay: <%= ((groups.size - 1 - group_index) * 0.25 + step_delay[entry.object_id]).round(2) %>s">
                   <span class="lside <%= side_class %>"><%= entry[:side] %></span>
                   <span class="txt"><strong><%= entry[:text] %></strong>
                     <% if entry[:damage] %><span class="chip chip--dmg"><%= entry[:damage] %> de dano</span><% end %>
