@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — roteamento confirmado em 2026-09-10 (modal-only desliza da 0080 §8; diagnósticos T16 a-b; playtest T20) |
-| Implementação (fase 2, TDD) | Pendente |
-| Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
+| Implementação (fase 2, TDD) | **Concluída** — C1/C2/C3 + G1-G3 verdes, Revisor S7 `Aprovado` |
+| Validação (fase 3) | **Aprovado / Done 2026-09-11** — validação integral do usuário (C1 modal, C2 OOB, C3 dois botões + layout row); chain até `51e06d3` |
 
 ---
 
@@ -45,6 +45,7 @@ Entregar a cura do time via modal (`_center_modal` → `_center`) com motivo inl
 | --- | --- | --- |
 | C1 modal heal fecha+atualiza: `POST /team/heal` via modal fecha ou re-renderiza o modal (time curado) e re-renderiza `#team-view`; motivo inline visível quando desabilitado | `test/modal_routes_test.rb` `test_heal_via_modal_closes_and_rerenders` (novo; `test_center_modal_renders_heal_form` como regressão) | pendente |
 | C2 budget OOB atualiza: após curar, saldo re-renderiza via OOB (`team_view_oob`, layout false) com novo saldo e custo | `test/team_routes_test.rb` `test_heal_rerenders_balance_oob` (novo; `test/mart_routes_test.rb` heal existente como regressão) | pendente |
+| C3 dois botões (S3 2026-09-11): modal exibe `Curar` vs `Curar e batalhar` (sem auto-battle, ee57645); `Curar e batalhar` cura via mesmo `POST /team/heal` e navega para batalha | `test/modal_routes_test.rb` `test_heal_and_battle_button_navigates` (novo; C1 como regressão) | pendente |
 
 ### Garantias
 
@@ -79,16 +80,18 @@ Entregar a cura do time via modal (`_center_modal` → `_center`) com motivo inl
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (modal heal fecha+atualiza) | | | pendente |
-| C2 (budget OOB atualiza) | | | pendente |
-| G1 (sem regressão) | | | pendente |
-| G2 (escopo contido) | | | pendente |
-| G3 (docs + revisão) | | | pendente |
+| C1 (modal heal fecha+atualiza) | `test_heal_via_modal_closes_and_rerenders` verde | modal sem flash/fade, fecha ao curar, mensagem única, motivo proeminente | ok |
+| C2 (budget OOB atualiza) | `test_heal_rerenders_balance_oob` verde | saldo OOB confere após curar | ok |
+| C3 (Curar vs Curar e batalhar — S3 2026-09-11) | `test_heal_and_battle_button_navigates` verde | `Curar` fecha, `Curar e batalhar` inicia batalha; row ghost-esquerda/verde-direita | ok |
+| G1 (sem regressão) | suíte + lint 0 | 5 rodadas Revisor `Aprovado` | ok |
+| G2 (escopo contido) | diff custo/economia vazio | sem mudança de regra | ok |
+| G3 (docs + revisão) | `checar-sessao 0082` verde | Revisor S7 `Aprovado` ×5 | ok |
 
-> **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário. **Ao fim da fase 2, PARAR na fase 2 — não preencher esta seção, não marcar Done, não commitar conclusão sem a validação do usuário (fase 3).**
+> **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário. **S3 2026-09-11 — validação full Aprovado:** C1 + C2 + C3 (dois botões, layout row) sem novo ajuste; chain até `51e06d3`; Revisor `Aprovado` ×5 rodadas.
 
 ## 8. Observações
 
+- **S3 2026-09-11 — split dois botões:** decisão do usuário posterior a C1/C2 — heal divide-se em `Curar` vs `Curar e batalhar` (sem auto-battle, ee57645). C1/C2 intactos; C3 cobre o segundo botão + navegação pós-cura com S1 próprio. Requer nova aprovação do usuário na validação (fase 3).
 - **Não tocado nesta tarefa (por ordem):** `SESSIONS.md`, `draft-backlog`, commits.
 - **Dependência de leitura da 0081:** se a 0081 mudar `heal_cost_policy`/`preview_cost`, o motivo inline (C1) e o OOB (C2) acompanham os novos valores sem redefinir regra.
 
