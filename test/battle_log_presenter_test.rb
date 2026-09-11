@@ -177,4 +177,42 @@ class BattleLogPresenterTest < Minitest::Test
     assert_nil entries[1][:damage], "item nao tem dano"
     assert_equal 20, entries[1][:healed], "item expoe cura"
   end
+
+  def test_item_entries_with_stock_expose_remaining_and_last_unit
+    log = [
+      item_entry(round: 1, attacker: "pikachu", item: "potion", healed: 20),
+      item_entry(round: 2, attacker: "pikachu", item: "potion", healed: 20)
+    ]
+    presenter = BattleLogPresenter.new(log, stock: { "potion" => 0 })
+
+    entries = presenter.entries_all
+
+    assert_equal 1, entries.last[:remaining], "primeiro uso: resta 1"
+    assert_equal false, entries.last[:last_unit]
+    assert_includes entries.last[:text], "restam 1"
+    assert_equal 0, entries.first[:remaining], "segundo uso: estoque zerado"
+    assert_equal true, entries.first[:last_unit]
+    assert_includes entries.first[:text], "última unidade"
+  end
+
+  def test_item_entry_without_stock_keeps_legacy_copy
+    log = [item_entry(round: 1, attacker: "pikachu", item: "potion", healed: 20)]
+    presenter = BattleLogPresenter.new(log)
+
+    entry = presenter.entries.first
+
+    assert_nil entry[:remaining], "sem estoque: sem chave de restante"
+    assert_nil entry[:last_unit], "sem estoque: sem flag de ultima unidade"
+    assert_equal "pikachu usou Pocao, +20 HP", entry[:text], "copy legada preservada"
+  end
+
+  def test_attack_entries_have_no_stock_keys
+    log = [attack_entry(round: 1, side: 0, attacker: "a", target: "b", move: "m1", damage: 5)]
+    presenter = BattleLogPresenter.new(log, stock: { "potion" => 2 })
+
+    entry = presenter.entries.first
+
+    assert_nil entry[:remaining], "ataque nao carrega estoque"
+    assert_nil entry[:last_unit], "ataque nao carrega flag"
+  end
 end

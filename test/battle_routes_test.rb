@@ -58,7 +58,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
-    used = last_response.body.scan("usou Pocao").size
+    used = last_response.body.scan("usou 1 Pocao").size
     assert_operator used, :>=, 1, "pocao usada ao menos uma vez no log"
     assert_equal 2 - used, TestDatabase.inventory_quantity("user-a", "potion"),
                  "cada uso de pocao debitado do inventario"
@@ -87,7 +87,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, "usou Pocao"
+    assert_includes last_response.body, "usou 1 Pocao"
     assert_includes last_response.body, "já usou item"
   end
 

@@ -150,7 +150,7 @@
       </div>
       </div>
 
-      <% groups = BattleLogPresenter.new(@engine.log).groups_all %>
+      <% groups = BattleLogPresenter.new(@engine.log, stock: @engine.items).groups_all %>
       <% unless groups.empty? %>
         <div class="log-title">Registro da batalha</div>
         <div class="battle-log">
@@ -168,9 +168,17 @@
                   <span class="txt"><strong><%= entry[:text] %></strong>
                     <% if entry[:damage] %><span class="chip chip--dmg"><%= entry[:damage] %> de dano</span><% end %>
                     <% if entry[:ko] %><span class="chip chip--ko">KO!</span><% end %>
+                    <% unless entry[:remaining].nil? %><span class="chip chip--stock">restam <%= entry[:remaining] %></span><% end %>
+                    <% if entry[:last_unit] %><span class="chip chip--empty">última unidade</span><% end %>
                   </span>
                 </li>
               <% end %>
+            <% end %>
+            <% if @engine.finished? && @engine.winner == 1 %>
+              <li class="log__entry log__entry--defeat" data-round="<%= @engine.rounds %>">
+                <span class="lside opp">Oponente</span>
+                <span class="txt"><strong>Derrota — seu time foi derrotado. Cure no Poke Center.</strong></span>
+              </li>
             <% end %>
           </ul>
         </div>

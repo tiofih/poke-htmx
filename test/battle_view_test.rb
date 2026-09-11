@@ -131,6 +131,41 @@ class BattleViewTest < Minitest::Test
     assert_includes body, "Novo confronto", "new confront label preserved"
   end
 
+  def test_battle_log_item_rows_show_remaining_stock
+    tank_a = build_pokemon(number: 1, name: "tanka", hp: 100, attack: 10, defense: 50, speed: 50)
+    tank_b = build_pokemon(number: 2, name: "tankb", hp: 100, attack: 10, defense: 50, speed: 50)
+    engine = BattleEngine.new(team_a: [tank_a], team_b: [tank_b], items: { "potion" => 0 })
+    engine.play_round until engine.finished?
+    engine.log << { round: 1, attacker: 0, action: :item, item: "potion",
+                    healed: 20, attacker_name: "tanka" }
+    Server.settings.battles.set("user-a", engine)
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/chip--stock[^>]*>\s*restam 0/, body,
+                 "expected a remaining-stock chip on the item log row (0086 C3)")
+    assert_match(/chip--empty[^>]*>\s*última unidade/, body,
+                 "expected a last-unit chip when stock hits zero (0086 C3)")
+  end
+
+  def test_battle_log_shows_defeat_line_on_loss
+    weak_poke = build_pokemon(number: 1, name: "weak", hp: 10, attack: 1, defense: 1, speed: 1)
+    strong = build_pokemon(number: 2, name: "strong", hp: 100, attack: 50, defense: 50, speed: 50)
+    engine = BattleEngine.new(team_a: [weak_poke], team_b: [strong])
+    engine.play_round until engine.finished?
+    Server.settings.battles.set("user-a", engine)
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    log_region = body[%r{<ul class="log".*?</ul>}m]
+    assert_match(/log__entry--defeat/, log_region.to_s,
+                 "expected a defeat line inside the battle log (0086 C3)")
+    assert_match(/Derrota — seu time foi derrotado/, log_region.to_s,
+                 "defeat copy distinguishes participation from victory")
+  end
+
   def test_battle_end_uses_results_desktop_markup
     start_battle_for("user-a")
     post "/battle/play", {}, user_session("user-a")
