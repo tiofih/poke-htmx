@@ -12,10 +12,11 @@
       <% affordable = @balance / item.price %>
       <li>
         <span class="mart-name"><span class="item-icon" aria-hidden="true"><%= item.display_name[0] %></span><span><%= item.display_name %></span></span>
-        <span class="row"><span class="num price">¥<%= item.price %></span>
+        <span class="row">
           <% if item.heal_amount.to_i.positive? %>
-            <span class="meta">+<%= item.heal_amount %> HP · ¥<%= item.price %> · <%= format("%.1f", item.price.to_f / item.heal_amount) %> ¥/HP</span>
+            <span class="meta">+<%= item.heal_amount %> HP · <%= format("%.1f", item.price.to_f / item.heal_amount) %> ¥/HP</span>
           <% end %>
+          <span class="num price">¥<%= item.price %></span>
           <form hx-post="/mart/buy" hx-target="#team-view" hx-swap="innerHTML">
             <input type="hidden" name="item_name" value="<%= item.name %>">
             <input type="hidden" name="quantity" value="1">
