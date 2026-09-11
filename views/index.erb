@@ -22,7 +22,7 @@
           <div class="row-between" style="flex-wrap: wrap; gap: 12px;"><h2>Serviços</h2><span class="meta num">Saldo <strong>¥<%= @balance %></strong></span></div>
           <p class="muted" style="margin: 8px 0 0;">Cure o time no Poke Center ou compre/venda itens no Poke Mart.</p>
           <div class="services-row">
-            <a class="btn btn-secondary" href="#center-modal" data-od-id="open-modal-center" hx-get="/team/center" hx-target="#center-modal" hx-swap="outerHTML">Curar no Poke Center</a>
+            <a class="btn btn-secondary" href="#center-modal" data-od-id="open-modal-center" hx-get="/team/center" hx-target="#center-modal" hx-swap="outerHTML" hx-push-url="false">Curar no Poke Center</a>
             <a class="btn btn-secondary" href="#mart-modal" data-od-id="open-modal-mart" hx-get="/team/mart" hx-target="#mart-modal" hx-swap="outerHTML">Poke Mart</a>
           </div>
           <p class="notice" id="team-notice" style="margin-top: 12px;"></p>

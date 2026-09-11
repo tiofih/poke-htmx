@@ -169,6 +169,26 @@ class ModalRoutesTest < Minitest::Test
     refute_includes manage, "onclick"
   end
 
+  def test_battle_center_cta_targets_slot_without_hash_push
+    TestDatabase.clear_team!
+    fill_team("user-a")
+    @repository.all("user-a").each { |member| @progression.update_hp("user-a", member.id, 200, 0) }
+    @wallet.grant("user-a", 1000)
+
+    weak = build_pokemon(number: 1, name: "weak", hp: 10, attack: 1, defense: 1, speed: 1)
+    strong = build_pokemon(number: 2, name: "strong", hp: 100, attack: 50, defense: 50, speed: 50)
+    engine = BattleEngine.new(team_a: [weak], team_b: [strong])
+    engine.play_round until engine.finished?
+    Server.settings.battles.set("user-a", engine)
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_match(%r{hx-get="/team/center"[^>]*hx-target="#center-modal"}, last_response.body)
+    assert_match(%r{hx-get="/team/center"[^>]*hx-push-url="false"}, last_response.body)
+    refute_match(%r{hx-get="/team/center"[^>]*hx-target="body"}, last_response.body)
+  end
+
   def test_heal_via_modal_closes_and_rerenders
     pokemon_id = TestDatabase.team_id("pikachu", "user-a")
     @progression.update_hp("user-a", pokemon_id, 200, 100)
