@@ -222,4 +222,18 @@ class StyleResponsiveTest < Minitest::Test
                  content,
                  "expected history-row to stack to 1fr at max-width:920px")
   end
+
+  def test_overlay_open_fades_instead_of_flashing
+    content = style_content
+
+    # T68: overlay alterna display:none->flex (sem transicao possivel), entao o
+    # fade-in via keyframes mascara o flash do outerHTML swap; overflow-y:auto
+    # mantem o modal alto rolando dentro do overlay (layout estavel).
+    assert_match(/@keyframes\s+overlay-fade\b/, content,
+                 "expected overlay-fade keyframes to mask the open flash")
+    assert_match(/\.overlay:target,\s*\.overlay\.open[^}]*animation:\s*overlay-fade/m, content,
+                 "expected :target/.open to animate overlay-fade on open")
+    assert_match(/\.overlay[^}]*overflow-y:\s*auto/m, content,
+                 "expected .overlay to scroll internally for layout stability")
+  end
 end

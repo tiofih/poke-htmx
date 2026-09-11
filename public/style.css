@@ -1292,6 +1292,7 @@
 	justify-content: center;
 	padding: 1.5em;
 	background: rgba(0, 0, 0, 0.55);
+	overflow-y: auto;
 }
 
 .overlay:target {
@@ -1300,8 +1301,24 @@
 
 /* Htmx-append: o fragmento chega com .open e mostra de imediato (sem JS);
    fechar = rota close que troca o no pelo slot vazio (mesmo id). */
+/* T68: fade-in curto mascara o flash do outerHTML swap (pintura instantanea
+   do backdrop); display nao transiciona, opacity via keyframes sim. */
+@keyframes overlay-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
 .overlay.open {
 	display: flex;
+}
+
+.overlay:target,
+.overlay.open {
+	animation: overlay-fade 0.15s ease-out;
 }
 
 /* === Tags cor por tipo (0076 2a, C5) — dado real: pcard via api.find,
@@ -2098,7 +2115,9 @@ button[disabled="disabled"] {
 	.add-toast,
 	.winner--pop,
 	.xp-gained--pop,
-	.news--pop li {
+	.news--pop li,
+	.overlay:target,
+	.overlay.open {
 		animation: none;
 	}
 }
