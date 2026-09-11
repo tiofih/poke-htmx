@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — escolhas do usuário em 2026-09-10 (objetivo B, escopo B, critérios A, P1-A, P2-A, P3-A, esteira oponente A, tamanho A — ver seção 5) |
 | Implementação (fase 2, TDD) | Pendente |
-| Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
+| Validação (fase 3) | **Concluída — Aprovado pelo usuário em 2026-09-11** |
 
 ---
 
@@ -29,14 +29,15 @@ Reconciliar a progressão (XP real via `xp_for`/`level_for_xp`, fim do bypass `g
 - **`lib/heal_cost_policy.rb` + `lib/heal_service.rb`** — custo da cura escala com o nível médio do time (P2-A).
 - **`lib/progression_repository.rb` + `lib/battle_service.rb`** — reconciliação real via `xp_for`/`level_for_xp` (P3-A; fim do bypass `grant_levels` no caminho de recompensa).
 - **`scripts/sweep-balance.rb`** — mede o caminho real reconciliado (fim da ilusão 25x).
+- **`views/` (só copy de tuning, sem layout — S3 2026-09-10)** — textos/números de tuning nas 6 views (`_center`/`_mart`/`battle`/`index`/`team`/`team_manage`), sem mudar estrutura/CSS/layout.
 
 ### Testes
 
-- `test/reward_rule_test.rb` (C1), `test/heal_cost_policy_test.rb` + `test/heal_service_test.rb` (C2), `test/progression_repository_test.rb` + `test/battle_service_test.rb` (C3) + saída do sweep como evidência.
+- `test/reward_rule_test.rb` (C1 + C1b), `test/heal_cost_policy_test.rb` + `test/heal_service_test.rb` (C2), `test/progression_repository_test.rb` + `test/battle_service_test.rb` (C3) + saída do sweep como evidência.
 
 ### Fora de escopo (não abrir — RNF-04)
 
-- Visual (views/CSS/juice); oponente (`OpponentGenerator`, banda, pool — só documentar); `TeamBudget`/orçamento 450; migrações destrutivas (sem reescrever XP/nível histórico); cura parcial (0065 mantém bloqueio total); CSRF/escritas atômicas/respiro.
+- Visual/layout (estrutura views/CSS/juice) intocados — exceto copy de tuning sem mudança de layout nas 6 views (§3 Produção); oponente (`OpponentGenerator`, banda, pool — só documentar); `TeamBudget`/orçamento 450; migrações destrutivas (sem reescrever XP/nível histórico); cura parcial (0065 mantém bloqueio total); CSRF/escritas atômicas/respiro.
 
 ## 4. Critérios de aceite
 
@@ -45,6 +46,7 @@ Reconciliar a progressão (XP real via `xp_for`/`level_for_xp`, fim do bypass `g
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
 | C1 derrota sem nível: `RewardRule#levels_for(:lose)` = 0 (draw segue +1, win +2) | `test/reward_rule_test.rb` `test_levels_for_lose_is_zero` (novo; `test_levels_for_draw_is_one`/`test_levels_for_win_is_two` como regressão) | pendente |
+| C1b consolo XP (S3 2026-09-10 — aprovado 1a, retune 5→10): `RewardRule.xp_for(:lose)` = 10 (win/draw inalterados) | `test/reward_rule_test.rb` `test_xp_for_lose_is_ten` (novo) | pendente |
 | C2 cura escala com nível: custo total = `policy.cost(missing_hp, average_level)` — time de nível médio maior paga mais pelo mesmo HP faltante; `preview_cost` acompanha; bloqueio total mantido | `test/heal_cost_policy_test.rb` `test_cost_scales_with_average_level` (novo) + `test/heal_service_test.rb` `test_heal_charges_scaled_cost` (novo) | pendente |
 | C3 reconciliação real: `grant_finished_xp` concede XP via `xp_for`/`level_for_xp` (nível derivado da curva, sem `grant_levels` no caminho de recompensa); nv1→5 exige o nº real de vitórias; sweep mede o caminho real | `test/progression_repository_test.rb` `test_grant_recalculates_level_when_crossing_curves` (existente, regressão) + `test/battle_service_test.rb` `test_finished_win_grants_curve_xp` (novo) + saída de `scripts/sweep-balance.rb` como evidência | pendente |
 
@@ -53,7 +55,7 @@ Reconciliar a progressão (XP real via `xp_for`/`level_for_xp`, fim do bypass `g
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
 | G1 sem regressão — suíte completa + lint 0 | `./scripts/test` + `./scripts/lint` | pendente |
-| G2 escopo contido — sem migração destrutiva; visual/oponente/TeamBudget intocados | `git diff --stat -- db/ views/ public/ lib/opponent_generator.rb lib/team_budget.rb` vazio + revisão S7 confere | pendente |
+| G2 escopo contido — sem migração destrutiva; layout visual/oponente/TeamBudget intocados; copy de tuning nas 6 views permitida sem mudança de layout (S3 2026-09-10 — aprovado 2a) | `git diff --stat -- db/ lib/opponent_generator.rb lib/team_budget.rb` vazio + `git diff -- views/ public/` só copy (sem layout) + revisão S7 confere | pendente |
 | G3 S4/S5 + revisão — `SESSIONS.md` + `check_docs` + `checar-sessao 0081` verdes; revisor S7 `Aprovado` antes da 3 | `./scripts/check_docs` + `./scripts/checar-sessao 0081` + veredito do Revisor | pendente |
 
 > **S1:** cada critério acima aponta o teste que o prova (arquivo + método). Não há critério puramente manual nesta sessão. **Ao fim da fase 2 (suíte + lint verdes, revisor S7 `Aprovado`), PARAR e aguardar a validação do usuário — não marcar Done, não preencher a seção 7, não commitar conclusão.**
@@ -76,27 +78,29 @@ Reconciliar a progressão (XP real via `xp_for`/`level_for_xp`, fim do bypass `g
 | Passo | Escopo (red → green) | Verificação |
 | --- | --- | --- |
 | 0 | **Refinamento** — este arquivo + `SESSIONS.md` (linha 0081 + "Próxima sessão") | commit `Sessao 0081: refinamento concluido — ...` |
-| 1 | **red→green — C1 (derrota sem nível)** — `lose_levels` 0 em `lib/reward_rule.rb`; novo `test_levels_for_lose_is_zero` em `test/reward_rule_test.rb` | `./scripts/test test/reward_rule_test.rb` + suíte + lint 0; commit `Passo 1: derrota sem nivel (lose_levels 0)` |
+| 1 | **red→green — C1 (derrota sem nível) + C1b (consolo XP)** — `lose_levels` 0 e `xp_for(:lose)` 10 em `lib/reward_rule.rb`; novos `test_levels_for_lose_is_zero` + `test_xp_for_lose_is_ten` em `test/reward_rule_test.rb` | `./scripts/test test/reward_rule_test.rb` + suíte + lint 0; commit `Passo 1: derrota sem nivel (lose_levels 0) + consolo XP (lose 10)` |
 | 2 | **red→green — C2 (cura escala com nível médio)** — `cost(missing_hp, average_level)` em `lib/heal_cost_policy.rb` + `heal_service`/`preview_cost` acompanham, bloqueio total mantido; novos `test_cost_scales_with_average_level` + `test_heal_charges_scaled_cost` | `./scripts/test test/heal_cost_policy_test.rb test/heal_service_test.rb` + suíte + lint 0; commit `Passo 2: custo da cura escala com o nivel medio` |
 | 3 | **red→green — C3 (reconciliação real)** — `grant_finished_xp` via `xp_for`/`level_for_xp` (fora `grant_levels` do caminho de recompensa) em `lib/progression_repository.rb` + `lib/battle_service.rb`; novo `test_finished_win_grants_curve_xp`; `scripts/sweep-balance.rb` mede o caminho real | `./scripts/test test/progression_repository_test.rb test/battle_service_test.rb` + sweep + suíte + lint 0; commit `Passo 3: recompensa via curva real, fim do bypass` |
 | 4 | **red→green — G1/G2/G3 (regressão + docs)** — suíte + lint 0 + `check_docs` + `checar-sessao 0081` | `./scripts/test` + `./scripts/lint` + `./scripts/check_docs` + `./scripts/checar-sessao 0081`; commit `Passo 4: regressao e docs — tuning de economia e progressao` |
 | — | **Fase 2 concluída** → **Revisor (2c)** até `Aprovado` (teto 3, senão S3) → **PARAR**, aguardar **validação 3**. Não marcar Done, não preencher §7, não commitar conclusão. | — |
 
-## 7. Validação (executada pelo usuário — S2)
+## 7. Validação (executada pelo usuário — S2, 2026-09-11 — Aprovado)
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (derrota sem nível) | | | pendente |
-| C2 (cura escala com nível) | | | pendente |
-| C3 (reconciliação real) | | | pendente |
-| G1 (sem regressão) | | | pendente |
-| G2 (escopo contido) | | | pendente |
-| G3 (docs + revisão) | | | pendente |
+| C1 (derrota sem nível — `lose` 0 níveis) | `test/reward_rule_test.rb` `test_levels_for_lose_is_zero` verde (draw +1, win +2 regressão) | validado pelo usuário 2026-09-11 | ok |
+| C1b (consolo XP lose=10) | `test/reward_rule_test.rb` `test_xp_for_lose_is_ten` verde | validado pelo usuário 2026-09-11 | ok |
+| C2 (cura escala com nível — cap 1.5x + breakdown) | `test/heal_cost_policy_test.rb` + `test/heal_service_test.rb` verdes | validado pelo usuário 2026-09-11 | ok |
+| C3 (reconciliação real — curva `EARLY_XP` 60) | `test/progression_repository_test.rb` + `test/battle_service_test.rb` verdes + `scripts/sweep-balance.rb` caminho real | validado pelo usuário 2026-09-11 | ok |
+| G1 (sem regressão) | `./scripts/test` + `./scripts/lint` 0 | — | ok |
+| G2 (escopo contido — copy-only 6 views) | `git diff --stat -- db/ lib/opponent_generator.rb lib/team_budget.rb` vazio + `git diff -- views/ public/` só copy | validado pelo usuário 2026-09-11 | ok |
+| G3 (docs + revisão) | `./scripts/check_docs` + `./scripts/checar-sessao 0081` verdes + Revisor S7 `Aprovado` 2026-09-11 | validado pelo usuário 2026-09-11 | ok |
 
-> **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário. **Ao fim da fase 2, PARAR na fase 2 — não preencher esta seção, não marcar Done, não commitar conclusão sem a validação do usuário (fase 3).**
+> **S2 2026-09-11:** todos os critérios ok — validação do usuário `Aprovado`. Copy decidida: Yen `¥`, `Custo pts`, mart heal-first, defeat line sem `consolo` (T53).
 
 ## 8. Observações
 
 - **Impacto no oponente (esteira A — só documentado, sem código):** ritmo real mais lento (nv1→5 em mais vitórias) atrasa `average_player_level` → banda e `opponent level` sobem mais devagar; dreno maior da cura escala o custo do ciclo batalha→center. O `OpponentGenerator` não é tocado — reavaliar a banda só depois da validação desta sessão.
 - **Colisão de numeração:** a sessão 0080 §8 reservava informalmente a 0081 para `center-mart-modal-only` (item 5) — **esta 0081 (tuning) prevalece por decisão do usuário**; o modal-only desliza para a 0082 (a registrar no refinamento dela; fila: 0077 home → 0078 battle → 0079 history → 0080 convergência → **0081 tuning** → 0082 center-mart-modal → 0083 escritas atômicas → 0084 CSRF → 0085 respiro).
+- **S3 tuning chain 2026-09-10→11 (fechado, aprovado na S2 2026-09-11):** C1b `xp_for(:lose)` 0→5→10 consolo; G2 widen p/ copy-only nas 6 views (sem layout); C2 heal cap 1.5x + breakdown; C3 curva `EARLY_XP` 60; copy Yen `¥` / `Custo pts` / mart heal-first / defeat sem `consolo` (T53).
 - **Sem migração destrutiva:** times/XP existentes preservados; a curva reconciliada vale para ganhos futuros (migração retroativa segue fora).
