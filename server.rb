@@ -772,7 +772,21 @@ module ServerTeamActions
   def render_heal_success_notice(result)
     @notice = result[:notice]
     @notice_kind = result[:kind]
-    "#{render_team_fragment_with_notice}#{oob_close_center_modal}#{oob_team_view}#{oob_nav_badge}"
+    settings.battle.invalidate(current_user)
+    "#{render_team_fragment_with_notice}#{oob_close_center_modal}#{oob_team_view}#{oob_nav_badge}#{oob_battle_view}"
+  end
+
+  def oob_battle_view
+    return "" unless battle_view_requested?
+
+    %(<div id="battle-view" hx-swap-oob="innerHTML">#{prepare_battle_fragment}</div>)
+  end
+
+  def battle_view_requested?
+    current = request.env["HTTP_HX_CURRENT_URL"].to_s
+    return true if current.include?("/battle")
+
+    request.referer.to_s.include?("/battle")
   end
 
   def oob_close_center_modal

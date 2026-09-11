@@ -320,6 +320,44 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_match(/disabled title="Recupere seus pok[ée]mons/, last_response.body)
   end
 
+  def test_heal_from_battle_refreshes_battle_view_with_new_confront_enabled
+    TestDatabase.clear_team!
+    fill_team("user-a")
+    @repository.all("user-a").each { |member| @progression.update_hp("user-a", member.id, 200, 0) }
+    @wallet.grant("user-a", 1000)
+
+    weak = build_pokemon(number: 1, name: "weak", hp: 10, attack: 1, defense: 1, speed: 1)
+    strong = build_pokemon(number: 2, name: "strong", hp: 100, attack: 50, defense: 50, speed: 50)
+    engine = BattleEngine.new(team_a: [weak], team_b: [strong])
+    engine.play_round until engine.finished?
+    Server.settings.battles.set("user-a", engine)
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert_match(/disabled title="Recupere seus pok[ée]mons/, last_response.body)
+
+    env = user_session("user-a").merge("HTTP_HX_CURRENT_URL" => "http://example.org/battle")
+    stub_battle_start { post "/team/heal", {}, env }
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="battle-view" hx-swap-oob="innerHTML"'
+    assert_includes last_response.body, 'hx-post="/battle/play"'
+    refute_match(/disabled title="Recupere seus pok/, last_response.body)
+  end
+
+  def test_heal_outside_battle_omits_battle_view_oob
+    TestDatabase.clear_team!
+    fill_team("user-a")
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+    @wallet.grant("user-a", 200)
+
+    post "/team/heal", {}, user_session("user-a")
+
+    assert last_response.ok?
+    refute_includes last_response.body, 'id="battle-view"'
+  end
+
   def test_finish_screen_keeps_new_confront_active_when_team_has_hp
     TestDatabase.clear_team!
     fill_team("user-a")
