@@ -764,7 +764,11 @@ module ServerTeamActions
   def render_result_notice(result)
     @notice = result[:notice]
     @notice_kind = result[:kind]
-    render_team_fragment_with_notice
+    "#{render_team_fragment_with_notice}#{oob_center_modal}"
+  end
+
+  def oob_center_modal
+    erb(:_center_modal, layout: false).sub('id="center-modal"', 'id="center-modal" hx-swap-oob="outerHTML"')
   end
 
   def save_team_moves

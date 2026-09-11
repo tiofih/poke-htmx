@@ -18,5 +18,6 @@
   <span class="meta num">Nível médio <%= avg_lvl %> · base <%= HealCostPolicy::DEFAULT_COST_PER_HP %>/HP · ×<%= mult %> (máx ×<%= HealCostPolicy::MAX_LEVEL_MULTIPLIER %>)</span>
   <form hx-post="/team/heal" hx-target="#team-view" hx-swap="innerHTML">
     <button type="submit" class="btn btn-primary"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar time</button>
+    <% if @heal_cost.zero? %><span class="meta heal-disabled-reason">Time já curado</span><% elsif @balance < @heal_cost %><span class="meta heal-disabled-reason">Saldo insuficiente</span><% end %>
   </form>
 </div>

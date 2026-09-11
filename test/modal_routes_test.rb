@@ -168,4 +168,28 @@ class ModalRoutesTest < Minitest::Test
     assert_includes manage, "/evolution\""
     refute_includes manage, "onclick"
   end
+
+  def test_heal_via_modal_closes_and_rerenders
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+
+    post "/team/heal", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/curado por/i, body)
+    assert_includes body, 'id="center-modal" hx-swap-oob="outerHTML"'
+    assert_includes body, "Time já curado"
+
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+    @wallet.set("user-a", 10)
+
+    get "/team/center", {}, user_session("user-a")
+
+    assert last_response.ok?
+    heal_form = last_response.body[%r{<form[^>]*hx-post="/team/heal".*?</form>}m]
+    refute_nil heal_form
+    assert_includes heal_form, "disabled"
+    assert_includes last_response.body, "Saldo insuficiente"
+  end
 end
