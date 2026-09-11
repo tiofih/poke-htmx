@@ -2126,29 +2126,6 @@ button[disabled="disabled"] {
 	color: #666;
 }
 
-/* Acessibilidade — desligar animações de juice (0063) quando o usuário pedir
-   movimento reduzido. Este bloco fica no FIM do arquivo de propósito: precisa vir
-   depois de todos os `animation: juice-*` para vencer a cascata (mesma
-   especificidade, regra posterior vence). Não mover para cima. */
-@media (prefers-reduced-motion: reduce) {
-	.battle-log__entry,
-	.fighter--flash,
-	.fighter--flash::after,
-	.fighter--ko img,
-	.fighter--ko .fighter-name,
-	.fighter--shooting .projectile,
-	.battle-layout,
-	.hp-bar .bar-fill,
-	.add-toast,
-	.winner--pop,
-	.xp-gained--pop,
-	.news--pop li,
-	.overlay:target,
-	.overlay.open {
-		animation: none;
-	}
-}
-
 /* === Reduced-motion final (0086 C2, rede) — ULTIMA regra do arquivo de
    proposito (T20 a11y): desliga TODO o juice com !important, cobrindo os
    seletores novos (.log__entry/.log-round-head/.log__entry--defeat) e os

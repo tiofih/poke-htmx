@@ -91,7 +91,7 @@ class BattleViewTest < Minitest::Test
     body = last_response.body
     assert_match(/class="log-round-head"[^>]*data-round="\d+"/, body,
                  "expected a round header carrying data-round (0086 C1)")
-    rounds = body.scan(/data-round="(\d+)"/).flatten.map(&:to_i)
+    rounds = body.scan(/class="log-round-head"[^>]*data-round="(\d+)"/).flatten.map(&:to_i)
     assert_equal rounds.sort.reverse, rounds, "newest-first mantido no log"
     assert_match(/id="round-\d+"/, body, "expected round anchors (0086 C1)")
   end
@@ -162,6 +162,8 @@ class BattleViewTest < Minitest::Test
     log_region = body[%r{<ul class="log".*?</ul>}m]
     assert_match(/log__entry--defeat/, log_region.to_s,
                  "expected a defeat line inside the battle log (0086 C3)")
+    refute_match(/log__entry--defeat"[^>]*data-round="\d+"/, log_region.to_s,
+                 "defeat line is a summary, not a round — no numeric data-round")
     assert_match(/Derrota — seu time foi derrotado/, log_region.to_s,
                  "defeat copy distinguishes participation from victory")
   end

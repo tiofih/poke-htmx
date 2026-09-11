@@ -46,7 +46,7 @@ Log de batalha legível por rodada (newest-first mantido, cabeçalho de round + 
 | --- | --- | --- |
 | C1 log legível por rodada: cabeçalho de round + `data-round`, newest-first mantido, cada entrada associada à sua rodada | `test/battle_log_presenter_test.rb` `test_entries_grouped_by_round_newest_first` (novo) + `e2e/specs/battle-log.spec.ts` `round headers newest-first` (novo) | pendente |
 | C2 juice CSS-only + reduced-motion: keyframes/polish só em CSS; `prefers-reduced-motion: reduce` desliga **todos** os juice (media query por último) | `test/style_responsive_test.rb` `test_juice_reduced_motion_disables_all` (novo; lê CSS) + e2e `reduced-motion disables juice` | pendente |
-| C3 consumo/recompensa visível: texto "usou 1 X (restam N)" + distinção participação vs vitória, sem mudar valores | `test/battle_juice_presenter_test.rb` `test_consumption_reward_text` (novo) + `e2e/specs/battle-log.spec.ts` `consumption and reward copy` | pendente |
+| C3 consumo/recompensa visível: texto "usou 1 X (restam N)" + distinção participação vs vitória, sem mudar valores | `test/battle_log_presenter_test.rb` `test_item_entries_with_stock_expose_remaining_and_last_unit` + `test_item_entry_without_stock_keeps_legacy_copy` + `e2e/specs/battle-log.spec.ts` `consumption and reward copy` | pendente |
 
 ### Garantias
 
