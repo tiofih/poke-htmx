@@ -88,7 +88,7 @@ class ServerMartTest < Minitest::Test
     get "/team/mart", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, "1.0 ¥/HP"
+    assert_includes last_response.body, "+20 HP · ¥20 · 1.0 ¥/HP"
     sell_row = last_response.body[%r{<strong>.*?</strong>.*?<form[^>]*hx-post="/mart/sell".*?</form>}m]
     refute_nil sell_row
     assert_includes sell_row, "<strong>Pocao</strong>"
