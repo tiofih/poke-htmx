@@ -20,4 +20,8 @@
     <% if @heal_cost.zero? %><p class="notice notice--error heal-disabled-reason" role="status"><strong>Time já curado</strong></p><% elsif @balance < @heal_cost %><p class="notice notice--error heal-disabled-reason" role="status"><strong>Saldo insuficiente</strong></p><% end %>
     <button type="submit" class="btn btn-primary"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar time</button>
   </form>
+  <form hx-post="/team/heal" hx-swap="none">
+    <input type="hidden" name="heal_and_battle" value="1">
+    <button type="submit" class="btn btn-secondary"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar e batalhar</button>
+  </form>
 </div>

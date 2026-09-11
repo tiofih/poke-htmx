@@ -734,7 +734,7 @@ module ServerTeamActions
     return "#{journey_gate_notice}#{oob_center_modal}" unless settings.journey.started?(current_user)
 
     @result = settings.heal.heal(current_user)
-    return render_heal_success_notice(@result) if @result[:healed]
+    return render_heal_success_notice(@result, heal_and_battle: heal_and_battle_requested?) if @result[:healed]
 
     render_result_notice(@result)
   end
@@ -769,16 +769,25 @@ module ServerTeamActions
     "#{render_team_fragment_with_notice}#{oob_center_modal}#{oob_team_view}#{oob_nav_badge}"
   end
 
-  def render_heal_success_notice(result)
+  def render_heal_success_notice(result, heal_and_battle: false)
     @notice = result[:notice]
     @notice_kind = result[:kind]
     settings.battle.invalidate(current_user)
-    "#{render_team_fragment_with_notice}#{oob_close_center_modal}#{oob_team_view}#{oob_nav_badge}#{oob_battle_view}"
+    battle_oob = heal_and_battle ? oob_battle_view_forced : ""
+    "#{render_team_fragment_with_notice}#{oob_close_center_modal}#{oob_team_view}#{oob_nav_badge}#{battle_oob}"
+  end
+
+  def heal_and_battle_requested?
+    params[:heal_and_battle].to_s == "1"
   end
 
   def oob_battle_view
     return "" unless battle_view_requested?
 
+    oob_battle_view_forced
+  end
+
+  def oob_battle_view_forced
     %(<div id="battle-view" hx-swap-oob="innerHTML">#{prepare_battle_fragment}</div>)
   end
 
