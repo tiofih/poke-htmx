@@ -764,7 +764,7 @@ module ServerTeamActions
   def render_result_notice(result)
     @notice = result[:notice]
     @notice_kind = result[:kind]
-    "#{render_team_fragment_with_notice}#{oob_center_modal}"
+    "#{render_team_fragment_with_notice}#{oob_center_modal}#{oob_team_view}#{oob_nav_badge}"
   end
 
   def oob_center_modal

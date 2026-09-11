@@ -1414,6 +1414,22 @@ class TeamHealRoutesTest < Minitest::Test
     assert_match(/Custo total: ¥100/, last_response.body)
   end
 
+  def test_heal_rerenders_balance_oob
+    fill_team("user-a")
+    target = @repository.all("user-a").first
+    @progression.update_hp("user-a", target.id, 200, 100)
+    @wallet.grant("user-a", 200)
+
+    post "/team/heal", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_equal 150, @wallet.balance("user-a")
+    assert_includes last_response.body, 'id="team-view" hx-swap-oob="innerHTML"'
+    assert_includes last_response.body, 'id="nav-badge" hx-swap-oob="innerHTML"'
+    assert_includes last_response.body, "Saldo ¥150"
+    assert_match(/Custo total: ¥0/, last_response.body)
+  end
+
   def test_center_shows_preview_cost_and_disables_heal_when_unaffordable
     fill_team("user-a")
     target = @repository.all("user-a").first
