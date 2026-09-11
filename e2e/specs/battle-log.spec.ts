@@ -32,8 +32,8 @@ async function playUntilDone(page: Page) {
   }
 }
 
-// C1: log legivel por rodada — headers + data-round, newest-first, chips.
-test('round headers newest-first with data-round and damage/KO chips', async ({ page }) => {
+// C1: log legivel por rodada — headers + data-round, chronological, chips.
+test('round headers chronological with data-round and damage/KO chips', async ({ page }) => {
   await buildTeamOfSix(page);
   await page.goto('/battle');
   await expect(page.locator('#battle-view')).toBeVisible();
@@ -51,7 +51,7 @@ test('round headers newest-first with data-round and damage/KO chips', async ({ 
     rounds.push(Number(attr));
     await expect(headers.nth(i)).toContainText(`Rodada ${attr}`);
   }
-  expect([...rounds].sort((a, b) => b - a)).toEqual(rounds);
+  expect([...rounds].sort((a, b) => a - b)).toEqual(rounds);
 
   const entries = page.locator('#battle-log .log__entry[data-round]');
   expect(await entries.count()).toBeGreaterThan(0);
