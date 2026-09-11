@@ -201,6 +201,44 @@ class StyleResponsiveTest < Minitest::Test
            "na cascata; hoje juice-* (linha posterior) sobrescreve o animation: none"
   end
 
+  def test_juice_reduced_motion_disables_all
+    content = style_content
+    block0086 = content[/0086 C2, inicio.*?0086 C2, fim/m]
+
+    refute_nil block0086, "expected a delimited 0086 juice block in style.css"
+    assert_match(/\.log-round-head/, block0086,
+                 "0086 veste o cabecalho de rodada (C1) com polish contido")
+    assert_match(/\.log__entry--defeat/, block0086,
+                 "0086 veste a linha de derrota (C3) com polish contido")
+
+    # Rede final (T20 a11y): o ultimo reduce desliga TODO o juice com
+    # !important, depois de todas as animacoes, para vencer a cascata.
+    reduce_index = content.rindex("@media (prefers-reduced-motion: reduce)")
+    last_juice = content.rindex(/animation:\s*(juice-|battle-log-in)/)
+    refute_nil reduce_index, "rede final prefers-reduced-motion deve existir"
+    refute_nil last_juice, "deve haver animacoes de juice"
+    assert reduce_index > last_juice,
+           "a rede final reduce deve vir depois de todas as animacoes de juice"
+    tail = content[reduce_index..]
+    assert_match(/animation:\s*none\s*!important/, tail,
+                 "rede final desliga com !important para vencer a cascata")
+    %w[
+      .log__entry
+      .log-round-head
+      .log__entry--defeat
+      .is-hit
+      .fainted
+      .is-attacking
+      .shot
+      .arena
+      .bar-fill
+      .winner-badge
+      .rewards
+    ].each do |selector|
+      assert_includes tail, selector, "rede final deve desligar #{selector}"
+    end
+  end
+
   def test_shot_only_above_900px
     content = style_content
     block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]

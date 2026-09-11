@@ -27,6 +27,17 @@ class BattleJuicePresenter
     }
   end
 
+  # Classes CSS de juice para o painel (0086 C2): 1:1 com os hooks do
+  # style.css — is-hit (flash), fainted (KO), is-attacking (.shot/projetil).
+  def css_classes(side, name)
+    juice = fighter_juice(side, name)
+    classes = []
+    classes << "is-hit" if juice[:damaged]
+    classes << "fainted" if juice[:ko]
+    classes << "is-attacking" if juice[:shooting]
+    classes
+  end
+
   def from_side(entry)
     entry[:from_side] || entry[:attacker].to_i
   end

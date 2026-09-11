@@ -1724,6 +1724,28 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 .heal-actions form { flex: 1; display: flex; }
 .heal-actions .btn { flex: 1; justify-content: center; }
 
+/* === Juice polish + reduced-motion (0086 C2, inicio) ===
+   Veste a marcacao nova da 0086 (C1 cabecalho de rodada, C3 linha de
+   derrota) com o vocabulario de juice existente — CSS-only, sem JS, sem
+   keyframes novos (reusa juice-banner). Contido: sem layout. */
+.log-round-head {
+	font-family: var(--font-mono);
+	font-size: 0.7em;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--muted);
+	padding: 0.45em 0 0.1em;
+}
+
+.log__entry--defeat {
+	animation: juice-banner 0.45s ease-out both;
+}
+
+.log__entry--defeat .txt strong {
+	color: var(--danger);
+}
+/* === Juice polish + reduced-motion (0086 C2, fim) === */
+
 /* === Open Design System (0072): fim === */
 
 /* Layout interno das seções da página única */
@@ -2124,5 +2146,42 @@ button[disabled="disabled"] {
 	.overlay:target,
 	.overlay.open {
 		animation: none;
+	}
+}
+
+/* === Reduced-motion final (0086 C2, rede) — ULTIMA regra do arquivo de
+   proposito (T20 a11y): desliga TODO o juice com !important, cobrindo os
+   seletores novos (.log__entry/.log-round-head/.log__entry--defeat) e os
+   legados. Nao mover para cima; CSS-only. === */
+@media (prefers-reduced-motion: reduce) {
+	.log__entry,
+	.log-round-head,
+	.log__entry--defeat,
+	.fighter.is-hit,
+	.fighter.is-hit::after,
+	.fighter.fainted img,
+	.fighter.fainted .fname,
+	.fighter.is-attacking .shot,
+	.arena,
+	.fighters .bar-fill,
+	.winner-badge,
+	.rewards,
+	.result .news--pop li,
+	.battle-log__entry,
+	.fighter--flash,
+	.fighter--flash::after,
+	.fighter--ko img,
+	.fighter--ko .fighter-name,
+	.fighter--shooting .projectile,
+	.battle-layout,
+	.hp-bar .bar-fill,
+	.add-toast,
+	.winner--pop,
+	.xp-gained--pop,
+	.news--pop li,
+	.overlay:target,
+	.overlay.open {
+		animation: none !important;
+		transition: none !important;
 	}
 }

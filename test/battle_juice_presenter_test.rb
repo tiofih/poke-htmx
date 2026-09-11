@@ -63,4 +63,20 @@ class BattleJuicePresenterTest < Minitest::Test
     assert target[:ko], "squirtle desmaiou — KO fade/grayscale"
     refute target[:shooting], "squirtle nao atacou — sem projétil"
   end
+
+  def test_css_classes_map_juice_flags_to_style_hooks
+    log = [
+      attack_entry(round: 1, side: 0, attacker: "pikachu", target: "squirtle",
+                   move: "thunder-shock", damage: 100, ko: true)
+    ]
+    final_hp = { 0 => { "pikachu" => 202, "pidgey" => 100 }, 1 => { "squirtle" => 0 } }
+    presenter = BattleJuicePresenter.new(log: log, final_hp: final_hp)
+
+    assert_equal ["is-attacking"], presenter.css_classes(0, "pikachu"),
+                 "atacante veste o projetil (.shot via is-attacking)"
+    assert_equal %w[fainted is-hit], presenter.css_classes(1, "squirtle").sort,
+                 "alvo veste flash (is-hit) + KO (fainted)"
+    assert_empty presenter.css_classes(0, "pidgey"),
+                 "sem flags, sem classes de juice"
+  end
 end

@@ -4,7 +4,7 @@
 <% max_hp = fighter.hp_label.split("/").last.to_i %>
 <% initial_percent = max_hp.positive? ? ((juice_data[:initial_hp].to_f / max_hp) * 100).round : 0 %>
 <% hp_fill = { high: "ok", medium: "mid", low: "low" }.fetch(fighter.hp_tier, "ok") %>
-  <li class="fighter<%= " is-hit" if juice_data[:damaged] %><%= " fainted" if juice_data[:ko] %><%= " engaged" if idx == lead_index && !juice_data[:ko] %><%= " is-attacking" if juice_data[:shooting] %>"
+  <li class="fighter<% juice.css_classes(side, fighter.name).each do |klass| %> <%= klass %><% end %><%= " engaged" if idx == lead_index && !juice_data[:ko] %>"
      data-od-id="fighter-<%= fighter.name.downcase %>"
      data-hp-initial="<%= juice_data[:initial_hp] %>"
      data-damage="<%= juice_data[:damage_taken] %>">
