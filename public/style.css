@@ -1028,9 +1028,15 @@
 	.fighters .bar-fill,
 	.winner-badge,
 	.rewards,
-	.result .news--pop li {
+ 	.result .news--pop li {
 		animation: none;
 		--step-delay: 0s;
+	}
+	.res-overlay {
+		animation: none;
+		opacity: 1;
+		visibility: visible;
+		--log-total: 0s;
 	}
 }
 
@@ -1845,6 +1851,45 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 	animation: none !important;
 	animation-delay: 0s !important;
 }
+
+/* Resultado so apos o log, como modal (0086 Passo 7, CSS-only): .arena
+   expoe --log-total (acc final do pacing); .res-overlay reusa
+   .overlay.open do Center e revela com delay var(--log-total). Pular
+   mostra na hora; fechar e CSS-only via checkbox irmao. */
+@keyframes res-reveal {
+	from {
+		opacity: 0;
+		visibility: hidden;
+	}
+	to {
+		opacity: 1;
+		visibility: visible;
+	}
+}
+
+.res-dismiss-input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.res-overlay {
+	opacity: 0;
+	visibility: hidden;
+	animation: res-reveal 0.3s ease-out both;
+	animation-delay: var(--log-total, 0s);
+}
+
+.res-dismiss-input:checked ~ .res-overlay {
+	display: none !important;
+}
+
+.arena:has(.log-skip-input:checked) .res-overlay {
+	animation: none !important;
+	animation-delay: 0s !important;
+	opacity: 1;
+	visibility: visible;
+}
 /* === Juice polish + reduced-motion (0086 C2, fim) === */
 
 /* === Open Design System (0072): fim === */
@@ -2258,10 +2303,16 @@ button[disabled="disabled"] {
 	.winner--pop,
 	.xp-gained--pop,
 	.news--pop li,
-	.overlay:target,
+ 	.overlay:target,
 	.overlay.open {
 		animation: none !important;
 		transition: none !important;
 		--step-delay: 0s !important;
+	}
+	.res-overlay {
+		animation: none !important;
+		opacity: 1 !important;
+		visibility: visible !important;
+		--log-total: 0s !important;
 	}
 }

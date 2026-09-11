@@ -40,7 +40,7 @@
   <% end %>
   <% groups = log_groups %>
 
-  <div class="arena">
+  <div class="arena" style="--log-total: <%= acc %>s">
     <div class="battle-column" data-side="0" data-od-id="side-team">
       <div class="side-head"><h2>Seu Time</h2><p class="meta"><%= @engine.teams[0].count { |fighter| !fighter.fainted? } %> ativos</p></div>
       <ul class="fighters">
@@ -76,7 +76,13 @@
           <% end_state = @game_over ? "over" : (@engine.winner.nil? ? "draw" : (@engine.winner.zero? ? "win" : "loss")) %>
           <% end_slug, end_label, end_title = { "win" => ["victory", "Vitória", "Seu Time venceu"], "loss" => ["defeat", "Derrota", "Oponente venceu"], "draw" => ["draw", "Empate", "Empate — ninguém venceu"], "over" => ["gameover", "Game Over", "Sem dinheiro para curar"] }.fetch(end_state) %>
           <% winner_name = @engine.winner.nil? ? nil : (@engine.winner.zero? ? "Seu Time" : "Oponente") %>
-          <div class="res-screen" data-od-id="res-<%= end_slug %>">
+          <input type="checkbox" id="res-dismiss" class="res-dismiss-input">
+          <div class="overlay open res-screen res-overlay" id="result-modal" data-od-id="res-<%= end_slug %>">
+            <div class="modal" role="dialog" aria-modal="true" aria-label="<%= end_title %>">
+              <div class="modal-head">
+                <h2><%= end_title %></h2>
+                <label for="res-dismiss" class="modal-close" data-od-id="res-close" aria-label="Fechar">×</label>
+              </div>
             <div class="res-top">
               <div class="res-top-left">
                 <span class="state-pill <%= end_state %>"><%= end_label %></span>
@@ -165,6 +171,7 @@
             <% end %>
               </div>
             </section>
+            </div>
           </div>
         <% end %>
       </div>

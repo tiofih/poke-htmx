@@ -252,12 +252,30 @@ class BattleViewTest < Minitest::Test
 
     assert last_response.ok?
     body = last_response.body
-    assert_match(/class="res-screen"/, body, "expected .res-screen wrapping the battle end")
+    assert_match(/class="[^"]*res-screen[^"]*"/, body, "expected .res-screen wrapping the battle end")
     assert_match(/class="res-top"/, body, "expected .res-top result bar (desktop)")
     assert_match(/class="state-title"/, body, "expected .state-title with winner")
     assert_match(/class="state-card"/, body, "expected .state-card for the end state")
     assert_match(/class="mini-arena"/, body, "expected .mini-arena with both sides")
     assert_match(/<li class="frow[ "]/, body, "expected li.frow rows per fighter")
     assert_match(/class="result-card"/, body, "expected .result-card with winner + rewards")
+  end
+
+  def test_battle_result_gated_modal_after_log
+    start_battle_for("user-a")
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/<div class="arena"[^>]*--log-total: [\d.]+s/, body,
+                 "arena exposes --log-total gating the result (0086 Passo 7)")
+    assert_match(/<div class="overlay open res-screen res-overlay"[^>]*id="result-modal"/, body,
+                 "result reuses Center .overlay.open modal pattern (0086 Passo 7)")
+    assert_match(/role="dialog"[^>]*aria-modal="true"/, body,
+                 "result modal is a dialog")
+    assert_match(/<input[^>]*type="checkbox"[^>]*id="res-dismiss"/, body,
+                 "result has a CSS-only dismiss checkbox")
+    assert_match(%r{<label[^>]*for="res-dismiss"[^>]*>×</label>}, body,
+                 "result has a close button")
   end
 end

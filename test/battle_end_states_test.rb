@@ -22,7 +22,7 @@ class BattleEndStatesTest < Minitest::Test
     finish_battle
 
     body = last_response.body
-    assert_match(/class="res-screen"/, body, "expected .res-screen wrapping the battle end")
+    assert_match(/class="[^"]*res-screen[^"]*"/, body, "expected .res-screen wrapping the battle end")
     assert_match(/class="state-card"/, body, "expected .state-card for the end state")
     assert_match(/class="state-pill win"/, body, "expected victory .state-pill")
     assert_match(/class="mini-arena"/, body, "expected .mini-arena with both sides")
@@ -37,7 +37,7 @@ class BattleEndStatesTest < Minitest::Test
     body = finish_with(weak: true)
 
     assert_match(/class="state-pill loss"/, body, "expected defeat .state-pill")
-    assert_match(/class="res-screen"/, body, "defeat keeps .res-screen")
+    assert_match(/class="[^"]*res-screen[^"]*"/, body, "defeat keeps .res-screen")
     assert_match(/class="state-card"/, body, "defeat keeps .state-card")
     assert_match(/<li class="frow lost[ "]/, body, "defeated fighters mark li.frow.lost")
     assert_match(/class="mini-arena"/, body, "defeat keeps .mini-arena")
@@ -49,7 +49,7 @@ class BattleEndStatesTest < Minitest::Test
 
     assert_match(/class="state-pill draw"/, body, "expected draw .state-pill")
     assert_match(/Empate/, body, "draw labels the tied battle")
-    assert_match(/class="res-screen"/, body, "draw keeps .res-screen")
+    assert_match(/class="[^"]*res-screen[^"]*"/, body, "draw keeps .res-screen")
     assert_match(/class="mini-arena"/, body, "draw keeps .mini-arena")
   end
 

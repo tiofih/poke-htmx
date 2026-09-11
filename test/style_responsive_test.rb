@@ -300,6 +300,32 @@ class StyleResponsiveTest < Minitest::Test
                  "rede final deve zerar --step-delay")
   end
 
+  def test_result_gated_on_log_total_as_modal
+    content = style_content
+
+    assert_match(/\.res-overlay\s*\{[^}]*animation-delay:\s*var\(--log-total/m, content,
+                 "result reveals only after the log via --log-total (0086 Passo 7)")
+    assert_match(/@keyframes res-reveal/, content,
+                 "res-reveal keyframes drive the gated reveal")
+    assert_match(/\.res-dismiss-input:checked ~ \.res-overlay\s*\{[^}]*display:\s*none/m, content,
+                 "dismiss checkbox closes the result modal CSS-only")
+    assert_match(/\.arena:has\(\.log-skip-input:checked\) \.res-overlay\s*\{[^}]*visibility:\s*visible/m, content,
+                 "Pular reveals the result immediately")
+  end
+
+  def test_result_modal_reduced_motion_last
+    content = style_content
+
+    res_index = content.index(".res-overlay")
+    refute_nil res_index, "expected .res-overlay rules (0086 Passo 7)"
+    reduce_index = content.rindex("@media (prefers-reduced-motion: reduce)")
+    refute_nil reduce_index, "rede final prefers-reduced-motion deve existir"
+    assert res_index < reduce_index,
+           "result gate comes before the final reduce net, which stays last"
+    assert_match(/--log-total:\s*0s/, content[reduce_index..],
+                 "rede final deve zerar --log-total e mostrar o resultado")
+  end
+
   def test_history_rows_stack_at_920 # rubocop:disable Naming/VariableNumber
     content = style_content
 
