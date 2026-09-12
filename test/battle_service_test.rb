@@ -301,6 +301,27 @@ class BattleServiceTest < Minitest::Test
     assert second.finished?
   end
 
+  def test_advance_strike_returns_entry_hp_and_finished
+    service = build_service(TieredApi.new)
+    add_team_for("user-1")
+    service.prepare("user-1")
+
+    before_hp = service.prepare("user-1")[:engine].teams.flatten.sum(&:hp_current)
+    result = service.advance_strike("user-1")
+
+    assert_kind_of Hash, result[:entry]
+    assert result[:entry].key?(:round)
+    refute result[:finished]
+    after_hp = result[:engine].teams.flatten.sum(&:hp_current)
+    assert_operator after_hp, :<, before_hp, "golpe aplica dano"
+  end
+
+  def test_advance_strike_without_battle_returns_nil
+    service = build_service(TieredApi.new)
+
+    assert_nil service.advance_strike("ghost")
+  end
+
   def test_invalidate_clears_active_battle
     seed = 0
     service = build_service(TieredApi.new, opponent_rng: -> { Random.new(seed += 1) })

@@ -138,7 +138,7 @@ module BattleItemActions
   end
 end
 
-class BattleEngine
+class BattleEngine # rubocop:disable Metrics/ClassLength
   include BattleActions
   include BattleItemActions
 
@@ -168,7 +168,23 @@ class BattleEngine
     return @rounds if finished?
 
     @rounds += 1
+    @strike_queue = nil
     play_round!(@rounds)
+  end
+
+  def play_next_strike
+    return nil if finished?
+
+    loop do
+      refill_strikes
+      return nil if finished?
+
+      team_index, index = @strike_queue.shift
+      next unless @teams[team_index][index].alive?
+
+      act(team_index, index, rounds)
+      return @log.last
+    end
   end
 
   def rounds
@@ -227,6 +243,14 @@ class BattleEngine
     entries.sort_by do |team_index, index|
       [-@teams[team_index][index].stat("Speed"), team_index, index]
     end
+  end
+
+  def refill_strikes
+    return unless @strike_queue.nil? || @strike_queue.empty?
+    return if finished?
+
+    @rounds = rounds + 1
+    @strike_queue = alive_and_actionable
   end
 
   def act(attacker_team_index, attacker_index, round)

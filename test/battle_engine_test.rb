@@ -588,3 +588,76 @@ class BattleEngineHeldItemTest < Minitest::Test
     assert_equal({ "choice-band" => 1 }, engine.items)
   end
 end
+
+class BattleEngineStrikeTest < Minitest::Test
+  include BattleEngineTestHelpers
+
+  def test_play_next_strike_follows_speed_order
+    slow = fire_pokemon(name: "slow", speed: 10)
+    fast = grass_pokemon(name: "fast", speed: 100)
+
+    engine = battle_engine(team_a: [slow], team_b: [fast])
+
+    entry = engine.play_next_strike
+
+    assert_equal 1, entry[:attacker], "mais rapido golpeia primeiro"
+    assert_equal 1, engine.rounds
+  end
+
+  def test_play_next_strike_freezes_queue_and_increments_round_on_exhaust
+    engine = battle_engine(team_a: [fire_pokemon], team_b: [grass_pokemon])
+
+    engine.play_next_strike
+    engine.play_next_strike
+
+    assert_equal 1, engine.rounds
+    assert_equal 2, engine.log.size
+
+    engine.play_next_strike
+
+    assert_equal 2, engine.rounds
+    assert_equal 3, engine.log.size
+  end
+
+  def test_play_next_strike_skips_fainted_attacker
+    killer = build_pokemon(number: 1, name: "killer", types: [], hp: 200, speed: 100, attack: 200, defense: 10)
+    victim = build_pokemon(number: 2, name: "victim", types: [], hp: 30, speed: 50, attack: 1, defense: 10)
+    watcher = build_pokemon(number: 3, name: "watcher", types: [], hp: 200, speed: 10, attack: 1, defense: 10)
+
+    engine = battle_engine(team_a: [killer], team_b: [victim, watcher])
+
+    engine.play_next_strike
+    assert_predicate engine.teams[1][0], :fainted?
+
+    entry = engine.play_next_strike
+
+    assert_equal "watcher", entry[:attacker_name], "desmaiado nao golpeia"
+    assert_equal 2, engine.log.size
+  end
+
+  def test_play_next_strike_noop_when_finished
+    killer = build_pokemon(number: 1, name: "killer", types: [], hp: 200, speed: 100, attack: 200, defense: 10)
+    victim = build_pokemon(number: 2, name: "victim", types: [], hp: 30, speed: 10, attack: 1, defense: 10)
+
+    engine = battle_engine(team_a: [killer], team_b: [victim])
+    engine.play_next_strike until engine.finished?
+    log_size = engine.log.size
+    rounds = engine.rounds
+
+    assert_nil engine.play_next_strike
+    assert_equal log_size, engine.log.size
+    assert_equal rounds, engine.rounds
+  end
+
+  def test_play_next_strike_damage_matches_bulk_formula
+    teams = {
+      team_a: [fire_pokemon],
+      team_b: [grass_pokemon]
+    }
+
+    strike_damage = battle_engine(**teams).play_next_strike[:damage]
+    bulk_damage = battle_engine(team_a: [fire_pokemon], team_b: [grass_pokemon]).tap(&:play_round).log.first[:damage]
+
+    assert_equal bulk_damage, strike_damage, "stepper nao muda formula"
+  end
+end

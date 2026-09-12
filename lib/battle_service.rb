@@ -223,6 +223,12 @@ module BattleServiceFinalization # rubocop:disable Metrics/ModuleLength
     end
   end
 
+  def debit_strike_item(user_id, entry)
+    return unless entry && entry[:action] == :item
+
+    consume_used_item(user_id, @team.all(user_id), entry)
+  end
+
   def record_finished_battle(user_id, engine)
     return unless engine.result
 
@@ -355,7 +361,7 @@ module BattleServiceFinalization # rubocop:disable Metrics/ModuleLength
   end
 end
 
-class BattleService
+class BattleService # rubocop:disable Metrics/ClassLength
   include BattleServicePreparation
   include BattleServiceFinalization
 
@@ -402,6 +408,17 @@ class BattleService
     debit_used_items(user_id, engine)
     news = finish_effects(user_id, engine) if finishing && engine.finished?
     battle_payload(engine, news || empty_news)
+  end
+
+  def advance_strike(user_id)
+    engine = @battles.fetch(user_id)
+    return nil unless engine
+
+    finishing = !engine.finished?
+    entry = engine.play_next_strike
+    debit_strike_item(user_id, entry)
+    news = finish_effects(user_id, engine) if finishing && engine.finished?
+    battle_payload(engine, news || empty_news).merge(entry: entry, finished: engine.finished?)
   end
 
   def resolve(user_id)
