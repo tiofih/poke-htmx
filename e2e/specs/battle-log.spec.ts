@@ -16,7 +16,7 @@ async function buildTeamOfSix(page: Page) {
 }
 
 async function playOneRound(page: Page) {
-  await page.getByRole('button', { name: 'Batalhar', exact: true }).click();
+  await page.getByRole('button', { name: 'Próxima rodada', exact: true }).click();
   await expect(page.locator('#battle-log')).toBeVisible();
 }
 
@@ -24,7 +24,7 @@ async function playOneRound(page: Page) {
 // re-renders #battle-view via htmx, so wait on the round banner flipping.
 async function playUntilDone(page: Page) {
   for (let i = 0; i < 40; i++) {
-    const play = page.getByRole('button', { name: 'Batalhar', exact: true });
+    const play = page.getByRole('button', { name: 'Próxima rodada', exact: true });
     if ((await play.count()) === 0) return;
     const before = (await page.locator('.turn-status').first().textContent()) ?? '';
     await play.first().click();

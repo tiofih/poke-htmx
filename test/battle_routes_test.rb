@@ -167,10 +167,11 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, ">Batalhar</button>"
+    assert_includes last_response.body, ">Próxima rodada</button>"
     assert_includes last_response.body, "hx-post=\"/battle/play\""
     assert_includes last_response.body, "hx-indicator=\"#battle-loading\""
-    refute_includes last_response.body, ">Jogar<", "botao manual por rodada removido"
+    assert_includes last_response.body, 'hx-target="#battle-view"'
+    refute_includes last_response.body, ">Batalhar</button>", "botao avanca uma rodada por vez"
 
     post "/battle/play", {}, user_session("user-a")
 
@@ -201,8 +202,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_battle_play_after_resolve_keeps_final_state
     start_battle_for("user-a")
-
-    post "/battle/play", {}, user_session("user-a")
+    play_until_finish(fallback_plays: 300)
     final_round = last_response.body[/Rodada (\d+) — Fim de batalha/, 1]
     final_hp = last_response.body[%r{HP \d+/\d+}]
 
@@ -220,37 +220,41 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert last_response.ok?
   end
 
-  def test_battle_play_resolves_entire_battle_in_one_request
+  def test_battle_play_advances_single_round_per_request
     start_battle_for("user-a")
 
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, "Fim de batalha", "um unico play resolve a batalha inteira"
-    assert_includes last_response.body, "Vencedor:"
-    assert_includes last_response.body, "Novo confronto"
+    assert_includes last_response.body, "Rodada 1", "um play avanca exatamente uma rodada"
+    refute_includes last_response.body, "Fim de batalha", "um unico play nao resolve a batalha inteira"
+    assert_includes last_response.body, ">Próxima rodada</button>"
   end
 
-  def test_battle_log_shows_all_rounds_after_resolve
+  def test_battle_log_grows_round_by_round_until_finish
     start_battle_for("user-a")
 
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
     assert_includes last_response.body, "Rodada 1",
-                    "log completo mostra a primeira rodada apos resolver"
+                    "primeiro play mostra a primeira rodada"
+
+    play_until_finish(fallback_plays: 300)
+
+    assert last_response.ok?
     assert_match(/Fim de batalha/, last_response.body,
-                 "resolver leva a batalha ao fim")
+                 "plays sucessivos levam a batalha ao fim")
   end
 
   def test_battle_fragment_marks_juice_targets
     start_battle_for("user-a")
 
-    post "/battle/play", {}, user_session("user-a")
+    play_until_finish(fallback_plays: 300)
 
     assert last_response.ok?
     body = last_response.body
-    assert_includes body, "Fim de batalha", "precondition: um play resolve a batalha"
+    assert_includes body, "Fim de batalha", "precondition: plays ate o fim resolvem a batalha"
 
     # log: origem/alvo por entrada (juice C2)
     assert_match(/data-round="\d+"/, body, "entrada do log marca a rodada")
@@ -413,7 +417,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     play_until_finish(fallback_plays: 300)
 
     assert last_response.ok?
-    assert_match(%r{hx-get="/team/center"[^>]*>Poke Center</a>}, last_response.body)
+    assert_match(%r{hx-get="/team/center"[^>]*>Poke Center</(a|button)>}, last_response.body)
     assert_match(%r{hx-get="/team/mart"[^>]*>Poke Mart</a>}, last_response.body)
     assert_includes last_response.body, "Novo confronto"
   end
@@ -702,8 +706,9 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
     post "/battle/play", {}, user_session("user-a")
 
-    assert_includes last_response.body, "Fim de batalha", "um play resolve a batalha inteira"
-    assert_includes [40, 50, 100], @wallet.balance("user-a"), "moeda concedida ao resolver"
+    assert_includes last_response.body, "Rodada 1", "primeiro play avanca uma rodada"
+    refute_includes last_response.body, "Fim de batalha", "batalha 6v6 nao termina em 1 rodada"
+    assert_equal 0, @wallet.balance("user-a"), "sem moeda antes do fim"
   end
 
   def test_battle_finish_shows_money_gained_message

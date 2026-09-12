@@ -67,7 +67,7 @@ class BattleViewTest < Minitest::Test
     assert_includes body, 'hx-target="#battle-view"', "fragment swaps into #battle-view"
     assert_includes body, 'hx-swap="innerHTML"', "fragment swaps innerHTML"
     assert_includes body, 'hx-indicator="#battle-loading"', "loading indicator preserved"
-    assert_includes body, ">Batalhar</button>", "play button label preserved"
+    assert_includes body, ">Próxima rodada</button>", "play advances one round per click"
   end
 
   def test_battle_log_uses_new_markup_with_round_metadata
@@ -115,13 +115,20 @@ class BattleViewTest < Minitest::Test
                  "expected side heads to count the active fighters")
   end
 
+  def play_until_finish(fallback_plays: 300)
+    fallback_plays.times do
+      post "/battle/play", {}, user_session("user-a")
+      return if last_response.body.include?("Fim de batalha")
+    end
+  end
+
   def test_battle_result_uses_winner_badge_and_ctas
     start_battle_for("user-a")
-    post "/battle/play", {}, user_session("user-a")
+    play_until_finish
 
     assert last_response.ok?
     body = last_response.body
-    assert_includes body, "Fim de batalha", "a single play still resolves the battle"
+    assert_includes body, "Fim de batalha", "plays sucessivos resolvem a batalha"
     assert_match(/class="result"/, body, "expected .result at the end of battle")
     assert_match(/class="winner-badge"/, body, "expected .winner-badge with the winner")
     assert_includes body, "Vencedor:", "winner banner text preserved"
@@ -283,7 +290,7 @@ class BattleViewTest < Minitest::Test
 
   def test_battle_end_uses_results_desktop_markup
     start_battle_for("user-a")
-    post "/battle/play", {}, user_session("user-a")
+    play_until_finish
 
     assert last_response.ok?
     body = last_response.body
@@ -298,7 +305,7 @@ class BattleViewTest < Minitest::Test
 
   def test_battle_result_gated_modal_after_log
     start_battle_for("user-a")
-    post "/battle/play", {}, user_session("user-a")
+    play_until_finish
 
     assert last_response.ok?
     body = last_response.body
