@@ -3,6 +3,8 @@ description: Fase 1 do SDD (Refinamento) — modo INVESTIGAÇÃO/CONVERSA. Levan
 mode: subagent
 permission:
   read: allow
+  glob: allow
+  grep: allow
   edit: allow
   bash: allow
   todowrite: allow
@@ -27,8 +29,8 @@ da sessão quando receber as escolhas.
    - **Objetivo** da sessão (1 frase).
    - **Escopo**: produção / testes / **fora de escopo** (explícito).
    - **Critérios de aceite** e o **teste que prova cada um** (S1) — ou a opção `manual`.
-   - **Decisões de design** relevantes (ex.: como ramificar por `htmx_request?`, estratégia de
-     status, contenção).
+   - **Decisões de design** relevantes (ex.: como variar a resposta por tipo de
+     requisição, estratégia de status, contenção).
    - **Tamanho/contenção** (o que entra e o que fica de fora desta sessão).
 3. **NÃO** escreva o arquivo da sessão, **NÃO** commite, **NÃO** feche decisões. Entregue apenas o mapa.
 
@@ -49,12 +51,15 @@ Termine com: `AGUARDANDO ESCOLHA DO USUÁRIO`.
 Quando você receber as escolhas do usuário (via prompt/args), aí sim:
 - Escreva `sessions/NNNN-<slug>.md` com objetivo/contexto/escopo/critérios (S1)/decisões/
   plano TDD **refletindo as escolhas feitas** (não reintroduza outras opções).
-- Registre gotchas/lições que durem (para a S6).
+- Registre gotchas/lições na seção da sessão; o save em memória (handoff +
+  gotchas `provisional:true`) acontece no Revisor APROVADO, fim da fase 2 (S6) —
+  SEM validação, SEM commit — não aqui.
 - Atualize `SESSIONS.md` (tabela + "Próxima sessão" — S4), rode `./scripts/checar-sessao NNNN`
   e `./scripts/check_docs`, e commite `Sessao NNNN: refinamento concluido — ...`.
-- Grave handoff (`memory_handoff_begin`) para o Implementador.
+- Grave handoff (`memory_handoff_begin`) de fase para o Implementador (não é a
+  memória S6 — essa só acontece no Revisor APROVADO, fim da fase 2, SEM validação, SEM commit).
 
 ## Regras
 - Contexto mínimo; sempre **levante opções**; a decisão é **do usuário**.
-- Rode a partir de `/Users/tiofih/workspace/poke-htmx` (cd se o cwd for outro).
+- Rode a partir de `{{ROOT}}` (cd se o cwd for outro).
 - Formato de commit do projeto (português, sem prefixos genéricos); NÃO use curl/wget.

@@ -23,9 +23,11 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
 
 ### 1. Refinamento (preparação)
 
-- Abertura: rodar `./scripts/iniciar-sessao` (digest do estado) + `./scripts/levantar-roadmap`
-  (backlog/limitações abertas) e ler **na íntegra apenas o arquivo da sessão corrente**;
-  consultar `REQUIREMENTS.md`/`SESSIONS.md` por **busca** (grep/índice), não ler inteiros.
+- Abertura (digest-first, obrigatório): rodar `./scripts/iniciar-sessao` (digest do
+  estado) + `./scripts/levantar-roadmap` (backlog/limitações abertas) e ler **na íntegra
+  apenas o arquivo da sessão corrente**; todo o resto via **digests** (`levantar-sessao`,
+  `levantar-requisito`, `levantar-testes` — providos em `scripts/`) ou **busca**
+  (grep/índice) em `REQUIREMENTS.md`/`SESSIONS.md`, nunca lendo-os inteiros.
 - Fechar: **objetivo**, **escopo** ("fora de escopo" explícito), **critérios de
   aceite** e **plano TDD**.
 - **Cada critério de aceite referencia o teste que o prova** (S1) — critério sem
@@ -44,6 +46,11 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
   dos requisitos mudar.
 - **PARADA obrigatória ao fim da fase 2:** aguardar a validação do usuário. Não marcar
   status de validação, não atualizar docs de validação, não commitar a conclusão.
+- **Memória da sessão (S6) no Revisor APROVADO, ainda na fase 2:** com veredito
+  `Aprovado` (S7), gravar **handoff** (`memory_handoff_begin` — o que foi entregue,
+  perguntas em aberto, próximos passos, marcado `provisional:true`) e **gotchas**
+  (`memory_write_page` em `gotchas/`, marcados `provisional:true`), escopados ao
+  projeto corrente — **SEM aguardar a fase 3 e SEM commitar a conclusão**.
 
 ### 3. Validação (verificação) — executada pelo USUÁRIO
 
@@ -56,10 +63,9 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
   obter nova aprovação do usuário. Nunca aplicar "ajuste" sem esse registro.
 - Só então atualizar `REQUIREMENTS.md` (status) e `SESSIONS.md` (progresso + próxima)
   e commitar a validação.
-- **Memória fechada (S6):** ao finalizar a validação, gravar na memória do projeto
-  o **handoff** (`memory_handoff_begin` — o que a sessão entregou, perguntas em aberto,
-  próximos passos) e os **gotchas** levantados na sessão (`memory_write_page` em
-  `gotchas/`), sempre escopados ao projeto corrente. Nunca encerrar sem esse registro.
+- **Memória (S6) só confirma/enriquece:** o handoff + gotchas já foram gravados como
+  `provisional:true` no Revisor APROVADO (fim da fase 2); a validação apenas confirma
+  ou enriquece o registro, nunca bloqueia o save.
 
 ## Regras do processo (S1–S7)
 
@@ -74,10 +80,12 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
   atualizados **no commit do refinamento** de toda sessão (inclusive fora de fila).
 - **S5 — `scripts/check_docs` valida a consistência.** Confere `sessions/` ↔ tabela de
   progresso ↔ "Próxima sessão". Rodar ao fechar refinamento e validação.
-- **S6 — Memória da sessão (handoff + gotchas) na validação.** Ao fechar a fase 3,
-  o implementador grava **handoff** (`memory_handoff_begin`) e **gotchas** levantados na
-  sessão (`memory_write_page` em `gotchas/`), escopados ao projeto corrente — para o
-  próximo agente partir com contexto e as lições virarem conhecimento duradouro.
+- **S6 — Memória da sessão (handoff + gotchas) no Revisor APROVADO (fim da fase 2),
+  SEM validação do usuário, SEM commit.** Com veredito `Aprovado` (S7), o implementador
+  grava **handoff** (`memory_handoff_begin`) e **gotchas** (`memory_write_page` em
+  `gotchas/`), marcados `provisional:true` e escopados ao projeto corrente — sem aguardar
+  a fase 3 e sem commitar a conclusão. A validação (fase 3) só confirma/enriquece a
+  memória, nunca bloqueia o save.
 - **S7 — Loop Implementador↔Revisor na fase 2c.** Ao fim da fase 2 (TDD), o **Revisor**
   revisa o diff e devolve um **veredito fechado**: `Aprovado` ou `Requer ajuste` (com
   severidade Bloqueante/Ajuste). Se não aprovado, volta ao **Implementador**, que resolve
@@ -92,8 +100,12 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
   sessão), mas **não** são refinados nem viram sessão **enquanto a sessão atual não
   for concluída e validada**.
 - Após a validação, a anotação pode virar **nova sessão** (refinamento → TDD → validação).
-- Drafts de decisões de arquitetura/refatorações grandes vivem em arquivos `draft-*.md`,
-  fora do fluxo — revisados apenas ao concluir as fases agendadas.
+- Drafts de decisões de arquitetura/refatorações grandes vivem no draft único e
+  consolidado em `{{DRAFT_PATH}}` (padrão: `{{ROOT}}/docs/draft-backlog.md` — catálogo
+  de feito/pendente), fora do fluxo — revisados apenas ao concluir as fases agendadas
+  (o que entra vira sessão, o que não se aplica é descartado — decisão do usuário).
+  Registrar no draft **não** abre escopo nem atrasa a sessão em curso.
+- Convenção de commit para anotações do tipo: `Draft: <resumo do que foi anotado>`.
 
 ## Convenções de commit
 
@@ -111,6 +123,7 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
 | `Sessao 00NN concluida: ...` | sessão fechada | `Sessao 0001 concluida: validacao integrada, proxima sessao 0002` |
 | `Regra: ...` | mudança de convenção/regra | `Regra: validacao e feita pelo usuario — parar na fase 3` |
 | `Draft: ...` | anotação de ideia/draft | `Draft: performance da gateway anotada` |
+| `Atualizar progresso da sessão 00NN (...)` | checkpoint de progresso | `Atualizar progresso da sessão 0001 (passo 4 verde e validado)` |
 
 ## Estrutura do arquivo de sessão
 

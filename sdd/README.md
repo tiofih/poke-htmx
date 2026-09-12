@@ -23,6 +23,11 @@ Projetos adotam o kit por `git subtree` (veja "Adicionar via git" abaixo).
 | `skeleton/commands/` | Comando orquestrador `/sessao` — abre/continua a sessão despachando os papéis. |
 | `skeleton/skills/sdd/` | Skill `sdd` — guia do ciclo de papéis (fases, S7 loop, parada na validação). |
 | `skeleton/scripts/check_docs` | Verificação de consistência (roda no host, só grep). |
+| `skeleton/tooling/INDEX-FIRST.md` | Disciplina tool-agnostic (definitions-before-grep) — instalado só com `--with-indexing`. |
+| `skeleton/tooling/adapters/*` | Adaptadores (`graphify-cbm-zvec.md`, `context-mode.md`, `ai-memory.md`) — instalados só com `--with-indexing` / `--with-context-mode` (ver tabela de perfis). |
+| `skeleton/STACK.md` | Template de especialização por área (tokens `{{AREAS}}`) — instalado só com `--with-stack`. |
+| `skeleton/commands/iniciar-sessao.md` + `levantar-roadmap.md` | Comandos extras de abertura/digest — instalados só com `--with-extra-commands`. |
+| `skeleton/agents/optional/debugger.md` | Agente opcional de diagnóstico (read-only) — agrupamento provisório com `--with-extra-commands` (ver tabela de perfis). |
 
 ## Instalação (recomendada — `install.sh`)
 
@@ -38,7 +43,18 @@ e anexa as regras de workflow no `AGENTS.md` do alvo
 rodando o `check_docs` (instalação só é "sucesso" com docs consistentes).
 
 Opções: `--proxima "texto"` (seção "Próxima sessão"), `--primeira "nome"` (nome da 1ª
-sessão), `--no-agents`, `--force`. _Um diretório posicional primeiro (o alvo)._
+sessão), `--no-agents`, `--force` — mais os perfis opt-in `--with-*` (ver tabela abaixo).
+_Um diretório posicional primeiro (o alvo)._
+
+Perfis opt-in (default off = comportamento atual):
+
+| Flag | Instala (origem → destino no projeto) |
+| --- | --- |
+| `--with-indexing` | `skeleton/tooling/INDEX-FIRST.md` → `tooling/INDEX-FIRST.md` + `skeleton/tooling/adapters/graphify-cbm-zvec.md` → `tooling/adapters/` |
+| `--with-context-mode` | `skeleton/tooling/adapters/context-mode.md` + `ai-memory.md` → `tooling/adapters/` |
+| `--with-stack` | `skeleton/STACK.md` (template, tokens `{{AREAS}}`) → `STACK.md` |
+| `--with-extra-commands` | `skeleton/commands/iniciar-sessao.md` + `levantar-roadmap.md` → `.opencode/commands/` |
+| `--with-extra-commands` (+ debugger, agrupamento provisório — plano §2.6/§2.7 separam, §2.8 sem flag própria) | `skeleton/agents/optional/debugger.md` → `.opencode/agent/` |
 
 ## Adicionar o SDD a outro projeto via git (subtree)
 

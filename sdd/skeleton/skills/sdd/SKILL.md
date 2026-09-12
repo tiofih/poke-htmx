@@ -40,6 +40,26 @@ description: Fluxo de papéis do SDD do Poke-HTMX — Refinador → Implementado
 - **Comandos de projeto:** `./scripts/test`, `./scripts/lint`, `./scripts/check_docs`.
   NUNCA `rake`/`rubocop` no host.
 
+## Economia de tokens (hábitos)
+- **Digest antes de leitura integral:** prefira o resumo/digest da sessão, do requisito
+  e do roadmap ao arquivo inteiro; leia na íntegra só o arquivo da sessão corrente.
+- **Snippet escopado antes de busca ampla:** parta da definição/símbolo exato
+  (arquivo + linhas) antes de varrer a base; amplie o escopo só se o snippet não bastar.
+- **Orquestrador injeta contexto nos filhos:** o filho não redescobre — recebe no
+  `prompt` os `paths`/`qualified_names`/trechos já levantados.
+
+## Papéis SDD → fallback no harness
+
+| Papel SDD | `subagent_type` preferido | Se indisponível |
+|---|---|---|
+| `refinador` | `planner` | executar a fase inline seguindo `skeleton/agents/refinador.md` |
+| `implementador-teste` | `coder` | executar a fase inline seguindo `skeleton/agents/implementador-teste.md` |
+| `revisor` | `reviewer` | executar a fase inline seguindo `skeleton/agents/revisor.md` |
+| `playtester` (opcional) | sem fallback — pule a fase | só existe se o usuário pedir |
+
+Sem contraparte SDD (advisory, usáveis dentro de qualquer fase, nunca donos de
+transição de fase): `researcher`, `designer`, `gitter`.
+
 ## Regra de ouro para o agente
 Ao receber um pedido de sessão SDD, **decida a fase pelo estado** (session file `## Status`)
 e **dispache o papel certo**, em vez de fazer tudo inline. Confirme cada transição de papel

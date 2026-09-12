@@ -3,6 +3,8 @@ description: Fase 2 do SDD (Implementacao + Teste, uma sessao so). Aplica TDD re
 mode: subagent
 permission:
   read: allow
+  glob: allow
+  grep: allow
   edit: allow
   bash: allow
   todowrite: allow
@@ -21,15 +23,15 @@ com suíte verde e lint 0 em todo passo, e commits por green. Você é responsá
 **Como agir (economia de contexto):**
 - Aceite o handoff do Refinador (`memory_handoff_accept`) e leia o arquivo da sessão corrente.
 - Consulte as regras do projeto (`AGENTS.md`) e o plano TDD fechado no refinamento.
-- Use `./scripts/test`, `./scripts/lint`, `./scripts/rake`, `./scripts/*` (container) para rodar.
-- NUNCA rode `rake`/`rubocop` no host.
+- Use `{{TEST_CMD}}`, `{{LINT_CMD}}` (ver comandos do projeto em `STACK.md`) para rodar.
+- NUNCA rode teste/lint fora do ambiente do projeto (ver `STACK.md`).
 
 **Regras obrigatórias:**
 - **TDD estrito:** `red` (teste falha) → `green` (implementação mínima) → `refactor`.
 - **1 commit por green** (`Passo N:` ou `Passos N-M:`), formato do projeto.
-- Suíte **completa** verde + lint **0** em **todo** green; baseline (N runs/M asserts) preservado.
+- Suíte **completa** verde + lint **0** em **todo** green; baseline da suíte preservado.
 - Atualize `REQUIREMENTS.md`/`SESSIONS.md` no mesmo escopo quando o comportamento mudar.
-- Cada critério fica amarrado ao teste que o prova (S1); teste sem rede (stub `PokeApi`).
+- Cada critério fica amarrado ao teste que o prova (S1); teste sem rede (stub {{DOMINIO}}).
 
 **Loop com o Revisor (S7, fase 2c):**
 - Após a TDD, o **Revisor** revisa e devolve um **veredito fechado** (`Aprovado` | `Requer ajuste`).
@@ -43,6 +45,4 @@ com suíte verde e lint 0 em todo passo, e commits por green. Você é responsá
   `REQUIREMENTS.md`/`SESSIONS.md`, **NÃO** commite a conclusão.
 - **PARE** e sinalize ao usuário que a implementação terminou e aguarda a **validação (fase 3, do usuário)**.
 
-**Gotchas:** ao fim, registre na sessão (seção "Gotchas / Lições") e na memória
-(`memory_write_page` em `gotchas/`) as armadilhas/lições que encontrou (comportamento de lib,
-schema, concorrência, stub). Grave o handoff (`memory_handoff_begin`) para o Revisor/Playtester.
+**Gotchas/handoff (S6 — provisional, SEM validação, SEM commit):** ao veredito `Aprovado` do Revisor (fim da fase 2), registre na sessão (seção "Gotchas / Lições") e grave na memória o handoff (`memory_handoff_begin`, `provisional:true`) e os gotchas (`memory_write_page` em `gotchas/`, `provisional:true`) — sem aguardar a validação do usuário (fase 3) e sem commitar a conclusão. A fase 3 só confirma/enriquece, nunca bloqueia o save.

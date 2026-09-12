@@ -26,6 +26,10 @@ Opções:
   --primeira "nome"   nome da 1ª sessão (default: "Incremento inicial")
   --force             sobrescreve arquivos existentes
   --no-agents         não altera o AGENTS.md
+  --with-indexing     instala tooling/INDEX-FIRST.md + adapters/graphify-cbm-zvec.md (opt-in)
+  --with-context-mode instala tooling/adapters/context-mode.md + adapters/ai-memory.md (opt-in)
+  --with-stack        instala o template STACK.md (opt-in)
+  --with-extra-commands instala commands/iniciar-sessao.md + levantar-roadmap.md e agents/optional/debugger.md (opt-in)
   -h, --help          mostra esta ajuda
 EOF
 }
@@ -36,12 +40,20 @@ PROXIMA=""
 PRIMEIRA=""
 FORCE=0
 DO_AGENTS=1
+WITH_INDEXING=0
+WITH_CONTEXT_MODE=0
+WITH_STACK=0
+WITH_EXTRA_COMMANDS=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
     -h|--help) usage; exit 0 ;;
     --force) FORCE=1 ;;
     --no-agents) DO_AGENTS=0 ;;
+    --with-indexing) WITH_INDEXING=1 ;;
+    --with-context-mode) WITH_CONTEXT_MODE=1 ;;
+    --with-stack) WITH_STACK=1 ;;
+    --with-extra-commands) WITH_EXTRA_COMMANDS=1 ;;
     --projeto) PROJETO="${2:-}"; shift ;;
     --proxima) PROXIMA="${2:-}"; shift ;;
     --primeira) PRIMEIRA="${2:-}"; shift ;;
@@ -148,6 +160,30 @@ done
 mkdir -p "$TARGET/.opencode/commands" "$TARGET/.opencode/skills/sdd"
 install_file "$SKELETON_DIR/commands/sessao.md" "$TARGET/.opencode/commands/sessao.md"
 install_file "$SKELETON_DIR/skills/sdd/SKILL.md" "$TARGET/.opencode/skills/sdd/SKILL.md"
+
+# --- perfis opt-in (default off = comportamento atual) ---
+if [ "$WITH_INDEXING" -eq 1 ]; then
+  mkdir -p "$TARGET/tooling/adapters"
+  install_file "$SKELETON_DIR/tooling/INDEX-FIRST.md" "$TARGET/tooling/INDEX-FIRST.md"
+  install_file "$SKELETON_DIR/tooling/adapters/graphify-cbm-zvec.md" "$TARGET/tooling/adapters/graphify-cbm-zvec.md"
+fi
+
+if [ "$WITH_CONTEXT_MODE" -eq 1 ]; then
+  mkdir -p "$TARGET/tooling/adapters"
+  install_file "$SKELETON_DIR/tooling/adapters/context-mode.md" "$TARGET/tooling/adapters/context-mode.md"
+  install_file "$SKELETON_DIR/tooling/adapters/ai-memory.md" "$TARGET/tooling/adapters/ai-memory.md"
+fi
+
+if [ "$WITH_STACK" -eq 1 ]; then
+  install_file "$SKELETON_DIR/STACK.md" "$TARGET/STACK.md"
+fi
+
+if [ "$WITH_EXTRA_COMMANDS" -eq 1 ]; then
+  install_file "$SKELETON_DIR/commands/iniciar-sessao.md" "$TARGET/.opencode/commands/iniciar-sessao.md"
+  install_file "$SKELETON_DIR/commands/levantar-roadmap.md" "$TARGET/.opencode/commands/levantar-roadmap.md"
+  mkdir -p "$TARGET/.opencode/agent/optional"
+  install_file "$SKELETON_DIR/agents/optional/debugger.md" "$TARGET/.opencode/agent/optional/debugger.md"
+fi
 
 # --- AGENTS.md: anexa as regras de workflow (idempotente) ---
 if [ "$DO_AGENTS" -eq 1 ]; then
