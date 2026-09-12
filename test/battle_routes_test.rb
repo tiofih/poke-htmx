@@ -211,6 +211,16 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_includes last_response.body, ">Próxima rodada</button>"
   end
 
+  def test_battle_auto_stays_checked_across_swaps
+    start_battle_for("user-a")
+
+    post "/battle/play", { "auto" => "1" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_match(/<input[^>]*id="auto-play"[^>]*checked/, last_response.body,
+                 "auto=1 re-renderiza o toggle marcado para o chain continuar")
+  end
+
   def test_battle_play_button_wires_auto_chain
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 

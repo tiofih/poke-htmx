@@ -66,7 +66,7 @@
       <div class="controls">
         <% if @engine.finished? %>
         <% else %>
-          <label class="auto-play" for="auto-play"><input type="checkbox" id="auto-play" name="auto" value="1"> JOGAR-AUTO</label>
+          <label class="auto-play" for="auto-play"><input type="checkbox" id="auto-play" name="auto" value="1"<%= " checked" if auto_play_requested? %>> JOGAR-AUTO</label>
           <button class="btn btn-primary btn-lg" id="play-btn" data-od-id="cta-play" hx-post="/battle/play" hx-target="#battle-view" hx-swap="innerHTML"
             hx-include="#auto-play" hx-trigger="click, next-round from:body"
             hx-indicator="#battle-loading">Próxima rodada</button>

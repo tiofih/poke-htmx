@@ -88,6 +88,16 @@ test('reduced-motion disables juice', async ({ page }) => {
   }
 });
 
+// C7 auto-chain: check JOGAR-AUTO once, single click drives to finish.
+test('auto toggle chains to finish without further clicks', async ({ page }) => {
+  await buildTeamOfSix(page);
+  await page.goto('/battle');
+  await expect(page.locator('#battle-view')).toBeVisible();
+  await page.locator('#auto-play').check();
+  await page.getByRole('button', { name: 'Próxima rodada', exact: true }).click();
+  await expect(page.locator('.turn-status').first()).toContainText(/Fim de batalha/, { timeout: 15000 });
+  await expect(page.locator('#auto-play').first()).toHaveCount(0);
+});
 // C3: consumo/recompensa visivel — stock chips when items were used, defeat
 // copy iff the opponent won, participation (Derrota) vs win (ganhou) rewards.
 test('consumption and reward copy', async ({ page }) => {
