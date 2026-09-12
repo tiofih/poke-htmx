@@ -180,6 +180,51 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
                     "entradas do log com classe de animacao escalonada"
   end
 
+  def test_battle_auto_toggle_chains_advance_until_finished
+    start_battle_for("user-a")
+
+    post "/battle/play", { "auto" => "1" }, user_session("user-a")
+
+    assert last_response.ok?
+    assert_equal "next-round", last_response.headers["HX-Trigger"],
+                 "auto ligado e batalha aberta: servidor emite next-round para encadear"
+
+    300.times do
+      break if last_response.body.include?("Fim de batalha")
+
+      post "/battle/play", { "auto" => "1" }, user_session("user-a")
+    end
+
+    assert_includes last_response.body, "Fim de batalha", "cadeia auto resolve a batalha"
+    assert_nil last_response.headers["HX-Trigger"],
+               "batalha terminada: sem header, cadeia para e modal de resultado aparece"
+  end
+
+  def test_battle_auto_off_stops_chain
+    start_battle_for("user-a")
+
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    assert_nil last_response.headers["HX-Trigger"],
+               "toggle desligado: sem header, sem encadeamento"
+    assert_includes last_response.body, ">Próxima rodada</button>"
+  end
+
+  def test_battle_play_button_wires_auto_chain
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/<input[^>]*id="auto-play"[^>]*name="auto"[^>]*value="1"/, body,
+                 "toggle JOGAR-AUTO opt-in presente")
+    assert_includes body, "JOGAR-AUTO"
+    assert_includes body, 'hx-trigger="click, next-round from:body"',
+                    "botao ouve click + next-round vindo do body"
+    assert_includes body, 'hx-include="#auto-play"', "botao propaga o toggle no chain"
+    assert_includes body, 'hx-indicator="#battle-loading"', "indicador de loading preservado"
+  end
+
   def test_battle_with_empty_team_shows_journey_gate
     get "/battle", {}, user_session("user-novo")
 

@@ -1067,7 +1067,12 @@ module ServerBattleActions
     return erb :battle, layout: false unless result
 
     expose_battle_result(result)
+    response.headers["HX-Trigger"] = "next-round" if auto_play_requested? && !result[:engine].finished?
     erb :battle, layout: false
+  end
+
+  def auto_play_requested?
+    params["auto"] == "1"
   end
 
   def new_confront_battle
