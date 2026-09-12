@@ -58,16 +58,15 @@ class BattleViewTest < Minitest::Test
     assert_includes body, "PP 30", "move shows the presenter PP value"
   end
 
-  def test_battle_keeps_htmx_contract_on_play_button
+  def test_battle_keeps_htmx_contract_on_strike_button
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 
     assert last_response.ok?
     body = last_response.body
-    assert_includes body, 'hx-post="/battle/play"', "play posts to /battle/play"
-    assert_includes body, 'hx-target="#battle-view"', "fragment swaps into #battle-view"
-    assert_includes body, 'hx-swap="innerHTML"', "fragment swaps innerHTML"
+    assert_includes body, 'hx-post="/battle/strike"', "batalhar posta um golpe em /battle/strike"
+    assert_includes body, 'hx-swap="none"', "strike responde so OOB (append log + HP + modal no fim)"
     assert_includes body, 'hx-indicator="#battle-loading"', "loading indicator preserved"
-    assert_includes body, ">Próxima rodada</button>", "play advances one round per click"
+    assert_includes body, ">Batalhar</button>", "1 clique = 1 golpe"
   end
 
   def test_battle_log_uses_new_markup_with_round_metadata

@@ -15,6 +15,17 @@ class BattleStrikeRoutesTest < Minitest::Test
     fill_team("user-a")
   end
 
+  def test_strike_button_posts_strike_oob_only
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_includes body, 'hx-post="/battle/strike"', "botao primario posta golpe"
+    assert_includes body, 'hx-swap="none"', "strike responde so OOB"
+    assert_includes body, "next-strike from:body", "auto encadeia golpe a golpe"
+    assert_includes body, ">Batalhar</button>", "1 clique = 1 golpe"
+  end
+
   def test_strike_appends_exactly_one_log_line
     start_battle_for("user-a")
 

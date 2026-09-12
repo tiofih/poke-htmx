@@ -119,7 +119,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_includes last_response.body, "Oponente"
     assert_includes last_response.body, "pikachu"
     assert_includes last_response.body, "202/202"
-    assert_includes last_response.body, 'hx-target="#battle-view"'
+    assert_includes last_response.body, 'hx-post="/battle/strike"'
   end
 
   def test_battle_panels_render_hp_bars_for_player_and_opponent
@@ -161,17 +161,17 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
                     "texto de PP preservado"
   end
 
-  def test_battle_fragment_has_battle_button_and_no_play_button
+  def test_battle_fragment_has_strike_button_oob_only
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, ">Próxima rodada</button>"
-    assert_includes last_response.body, "hx-post=\"/battle/play\""
+    assert_includes last_response.body, ">Batalhar</button>"
+    assert_includes last_response.body, "hx-post=\"/battle/strike\""
+    assert_includes last_response.body, "hx-swap=\"none\""
     assert_includes last_response.body, "hx-indicator=\"#battle-loading\""
-    assert_includes last_response.body, 'hx-target="#battle-view"'
-    refute_includes last_response.body, ">Batalhar</button>", "botao avanca uma rodada por vez"
+    refute_includes last_response.body, ">Próxima rodada</button>", "botao primario avanca um golpe por vez"
 
     post "/battle/play", {}, user_session("user-a")
 
@@ -208,7 +208,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert last_response.ok?
     assert_nil last_response.headers["HX-Trigger"],
                "toggle desligado: sem header, sem encadeamento"
-    assert_includes last_response.body, ">Próxima rodada</button>"
+    assert_includes last_response.body, ">Batalhar</button>"
   end
 
   def test_battle_auto_stays_checked_across_swaps
@@ -221,7 +221,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
                  "auto=1 re-renderiza o toggle marcado para o chain continuar")
   end
 
-  def test_battle_play_button_wires_auto_chain
+  def test_battle_strike_button_wires_auto_chain
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 
     assert last_response.ok?
@@ -229,8 +229,10 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_match(/<input[^>]*id="auto-play"[^>]*name="auto"[^>]*value="1"/, body,
                  "toggle JOGAR-AUTO opt-in presente")
     assert_includes body, "JOGAR-AUTO"
-    assert_includes body, 'hx-trigger="click, next-round from:body"',
-                    "botao ouve click + next-round vindo do body"
+    assert_includes body, 'hx-post="/battle/strike"', "botao primario posta um golpe por clique"
+    assert_includes body, 'hx-swap="none"', "resposta strike e so OOB, sem re-render"
+    assert_includes body, 'hx-trigger="click, next-strike from:body, next-round from:body"',
+                    "botao ouve click + next-strike (next-round mantido p/ fallback /play)"
     assert_includes body, 'hx-include="#auto-play"', "botao propaga o toggle no chain"
     assert_includes body, 'hx-indicator="#battle-loading"', "indicador de loading preservado"
   end
@@ -283,7 +285,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert last_response.ok?
     assert_includes last_response.body, "Rodada 1", "um play avanca exatamente uma rodada"
     refute_includes last_response.body, "Fim de batalha", "um unico play nao resolve a batalha inteira"
-    assert_includes last_response.body, ">Próxima rodada</button>"
+    assert_includes last_response.body, ">Batalhar</button>", "play (fallback) re-renderiza a view com o botao strike"
   end
 
   def test_battle_log_grows_round_by_round_until_finish
@@ -424,7 +426,7 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
     assert last_response.ok?
     assert_includes last_response.body, 'id="battle-view" hx-swap-oob="innerHTML"'
-    assert_includes last_response.body, 'hx-post="/battle/play"'
+    assert_includes last_response.body, 'hx-post="/battle/strike"'
     refute_match(/disabled title="Recupere seus pok/, last_response.body)
   end
 
