@@ -962,7 +962,7 @@ module ServerJourneyActions
   end
 end
 
-module ServerBattleActions
+module ServerBattleActions # rubocop:disable Metrics/ModuleLength
   private
 
   def render_battle
@@ -1073,6 +1073,52 @@ module ServerBattleActions
 
   def auto_play_requested?
     params["auto"] == "1"
+  end
+
+  # Per-strike append (0086 pedra fundamental): 1 strike = 1 linha via OOB
+  # beforeend em #battle-log + HP OOB por lado + modal OOB só no fim.
+  # /battle/play segue intacto (full fragment) até a refiação do botão.
+  def strike_battle
+    result = settings.battle.advance_strike(current_user)
+    return "" unless result && result[:entry]
+
+    expose_battle_result(result)
+    response.headers["HX-Trigger"] = "next-strike" if auto_play_requested? && !result[:finished]
+    strike_oob(result)
+  end
+
+  def strike_oob(result)
+    engine = result[:engine]
+    formatted = BattleLogPresenter.new(engine.log, stock: engine.items).format_single(result[:entry])
+    log_line = erb :_strike_log_entry, layout: false, locals: { entry: formatted }
+    modal = result[:finished] ? erb(:_strike_result, layout: false) : ""
+    "#{log_line}#{strike_hp_oob(engine)}#{modal}"
+  end
+
+  def strike_hp_oob(engine)
+    juice = strike_juice(engine)
+    [0, 1].map { |side| strike_side_oob(engine, juice, side) }.join
+  end
+
+  def strike_juice(engine)
+    BattleJuicePresenter.new(
+      log: engine.log,
+      final_hp: {
+        0 => engine.teams[0].to_h { |poke| [poke.name, poke.hp_current] },
+        1 => engine.teams[1].to_h { |poke| [poke.name, poke.hp_current] }
+      }
+    )
+  end
+
+  def strike_side_oob(engine, juice, side)
+    presenters = engine.teams[side].each_with_index.map do |poke, index|
+      used = side.zero? && engine.member_used_item?(0, index)
+      FighterPresenter.new(poke, item_used: used)
+    end
+    erb :_strike_fighters, layout: false,
+                           locals: { side: side, title: side.zero? ? "Seu Time" : "Oponente",
+                                     juice: juice, side_delay: { 0 => 0.0, 1 => 0.0 },
+                                     presenters: presenters }
   end
 
   def new_confront_battle
@@ -1254,6 +1300,7 @@ module BattleRoutes
   def self.registered(app)
     register_open(app)
     register_play(app)
+    register_strike(app)
     register_new_confront(app)
   end
 
@@ -1263,6 +1310,10 @@ module BattleRoutes
 
   def self.register_play(app)
     app.post("/battle/play") { advance_battle }
+  end
+
+  def self.register_strike(app)
+    app.post("/battle/strike") { strike_battle }
   end
 
   def self.register_new_confront(app)

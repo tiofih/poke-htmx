@@ -1,0 +1,50 @@
+<div id="result-box" hx-swap-oob="innerHTML">
+  <% end_state = @game_over ? "over" : (@engine.winner.nil? ? "draw" : (@engine.winner.zero? ? "win" : "loss")) %>
+  <% end_slug, end_label, end_title = { "win" => ["victory", "Vitória", "Seu Time venceu"], "loss" => ["defeat", "Derrota", "Oponente venceu"], "draw" => ["draw", "Empate", "Empate — ninguém venceu"], "over" => ["gameover", "Game Over", "Sem dinheiro para curar"] }.fetch(end_state) %>
+  <% winner_name = @engine.winner.nil? ? nil : (@engine.winner.zero? ? "Seu Time" : "Oponente") %>
+  <input type="checkbox" id="res-dismiss" class="res-dismiss-input">
+  <div class="overlay open res-screen res-overlay" id="result-modal" data-od-id="res-<%= end_slug %>">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="<%= end_title %>">
+      <div class="modal-head">
+        <h2><%= end_title %></h2>
+        <label for="res-dismiss" class="modal-close" data-od-id="res-close" aria-label="Fechar">×</label>
+      </div>
+      <div class="result">
+        <% if winner_name %>
+          <p class="winner-badge"><strong>Vencedor: <%= winner_name %></strong></p>
+        <% else %>
+          <p class="winner-badge"><strong><%= end_title %></strong></p>
+        <% end %>
+        <% if @xp_gained.to_i.positive? %>
+          <% if end_state == "loss" %>
+            <p class="rewards"><strong>Derrota — +<%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
+          <% else %>
+            <p class="rewards"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
+          <% end %>
+        <% end %>
+        <% if defined?(@evolution_news) && !@evolution_news&.empty? %>
+          <ul class="evolution-news news--pop">
+            <% @evolution_news.each do |news| %>
+              <li><%= news %></li>
+            <% end %>
+          </ul>
+        <% end %>
+        <% if defined?(@learned_news) && !@learned_news&.empty? %>
+          <ul class="learned-news news--pop">
+            <% @learned_news.each do |news| %>
+              <li><%= news %></li>
+            <% end %>
+          </ul>
+        <% end %>
+        <div class="ctas">
+          <button type="button" class="btn btn-secondary" data-od-id="open-modal-center" hx-get="/team/center" hx-target="#center-modal" hx-swap="outerHTML" hx-push-url="false">Poke Center</button>
+          <% if @can_new_confront %>
+            <button class="btn btn-primary" hx-post="/battle/new" hx-target="#battle-view" hx-swap="innerHTML">Novo confronto</button>
+          <% else %>
+            <button class="btn btn-secondary" disabled title="Recupere seus pokémons no Poke Center para batalhar.">Novo confronto</button>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

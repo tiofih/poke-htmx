@@ -2,7 +2,7 @@
 
 require_relative "item_catalog"
 
-class BattleLogPresenter
+class BattleLogPresenter # rubocop:disable Metrics/ClassLength
   DEFAULT_LIMIT = 3
 
   def initialize(log, limit: DEFAULT_LIMIT, stock: nil)
@@ -28,6 +28,13 @@ class BattleLogPresenter
     @log.map { |entry| entry[:round] }.uniq.sort.reverse.map do |round|
       { round: round, entries: entries_for_round(round) }
     end
+  end
+
+  # Single-entry render for per-strike append (0086 pedra fundamental:
+  # 1 strike = 1 linha). Locates the entry's index for stock copy.
+  def format_single(entry)
+    index = @log.rindex { |item| item.equal?(entry) } || @log.rindex(entry)
+    format_entry(entry, index)
   end
 
   private
