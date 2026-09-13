@@ -105,19 +105,17 @@ class BattleStrikeRoutesTest < Minitest::Test
     assert_empty last_response.body
   end
 
-  def test_strike_log_entry_wrapped_in_template_oob
+  def test_strike_log_entry_carries_direct_oob
     start_battle_for("user-a")
 
     post "/battle/strike", {}, user_session("user-a")
 
     assert last_response.ok?
     body = last_response.body
-    assert_includes body, '<template hx-swap-oob="beforeend:#battle-log">',
-                    "li embrulhado em template (htmx 2.0.3 nao desmembra)"
-    assert_match(/<template[^>]*>\s*<li class="log__entry"/, body,
-                 "template carrega a linha do golpe")
-    refute_match(/<li class="log__entry" hx-swap-oob/, body,
-                 "li nao carrega mais o OOB direto")
+    assert_match(/<li class="log__entry" hx-swap-oob="beforeend:#battle-log"/, body,
+                 "li carrega o OOB direto (htmx 2.0.3 nao desmembra template)")
+    refute_includes body, "<template",
+                    "sem embrulho em template (conteudo nunca seria inserido)"
   end
 
   def test_strike_oob_flips_arena_gates_for_current_entry
@@ -182,7 +180,7 @@ class BattleStrikeRoutesTest < Minitest::Test
   end
 
   def strike_parties(body)
-    li = body[/<template[^>]*>\s*<li class="log__entry"[^>]*>/]
+    li = body[/<li class="log__entry"[^>]*>/]
     from = li[/data-from-side="(\d)"/, 1].to_i
     to = li[/data-to-side="(\d)"/, 1].to_i
     text = body[%r{<strong>([^<]+)</strong>}, 1]

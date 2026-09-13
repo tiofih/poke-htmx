@@ -1,7 +1,6 @@
 <% side_class = entry[:side] == "Seu Time" ? "team" : "opp" %>
 <% fx_class = entry[:ko] ? "fx--ko" : (entry[:damage] ? "fx--hit" : (entry[:healed] ? "fx--heal" : "fx--tick")) %>
-<template hx-swap-oob="beforeend:#battle-log">
-<li class="log__entry"
+<li class="log__entry" hx-swap-oob="beforeend:#battle-log"
     data-round="<%= entry[:round] %>"
     data-from-side="<%= entry[:from_side] %>"
     data-to-side="<%= entry[:to_side] %>">
@@ -14,4 +13,4 @@
     <% if entry[:last_unit] %><span class="chip chip--empty">última unidade</span><% end %>
   </span>
 </li>
-</template>
+
