@@ -402,7 +402,7 @@ técnicas (escritas não atômicas, race no add, identidade/CSRF) — a critéri
 
 **Tuning de economia/progressão refinado em 2026-09-10 (decisão do usuário — objetivo B reconciliar + conter inflação, escopo B médio, critérios A granulares, P1-A lose 0, P2-A cura escala com nível médio, P3-A reconciliação real, oponente fora, 1 sessão):** **0081 tuning-economia-progressao** (C1 lose→`reward_rule_test`, C2 cura→heal tests, C3 XP/sweep→progression+battle tests) → **deslizamento:** center-mart-modal-only→**0082**, escritas atômicas→**0083**, CSRF→**0084**, respiro→**0085**. **Próxima sessão:** **0081** → 0082 → 0083 → 0084 → 0085 (0080 validada em 2026-09-10 — RNF-04 liberada para a 0081 implementação; 0077/0078/0079 seguem com fase 2 pendente).
 
-**Próxima sessão (2026-09-11):** **0086-battle-log-juice implementação** → 0083-ui-polish na sequência (0082 Done em 2026-09-11; merge B->D->C).
+**Próxima sessão (2026-09-12):** **0086-battle-log-juice implementação (fase 2 em voo — critérios C9–C15 reabertos em S3: efeito atacante→alvo, shake no alvo, cor por tipo; plano em Passos 23–28)** → 0083-ui-polish na sequência (0082 Done em 2026-09-11; merge B->D->C).
 
 > **Fase Eco concluída (Eco-1..4 — sessões 0027..0032).** Respiro 2 concluído e validado
 > (0033). D1 parcial concluído e validado (0034). **P1 concluído e validado (0035,
@@ -509,7 +509,7 @@ técnicas (escritas não atômicas, race no add, identidade/CSRF) — a critéri
 | 0081 | tuning-economia-progressao — Reconciliar progressão (XP real via `xp_for`/`level_for_xp`, fim do bypass `grant_levels` e da ilusão 25x do sweep) + conter inflação (`lose_levels` 0, cura escala com nível médio); escopo `reward_rule`, `heal_cost_policy`/`heal_service`, `progression_repository`/`battle_service`, sweep + testes; fora visual/oponente/TeamBudget/migrações destrutivas; critérios C1→`reward_rule_test`, C2→heal tests, C3→progression+battle tests | Concluída | Done (validada em 2026-09-11, tuning chain) |
 | 0082 | center-modal-heal — cura via modal (`_center_modal`→`_center`, motivo inline + OOB de saldo; sem economia/migrações) | Concluída | Done (validada em 2026-09-11) |
 | 0083 | ui-polish — polimento visual home/team/battle (header gate, filtros, pills, pcard; visual-only, sem backend/regras/rotas) | Refinada | Refinada em 2026-09-10 (fase 2 pendente) |
-| 0086 | battle-log-juice — log por rodada legível + juice CSS-only + consumo/recompensa visível (newest-first, sem engine/economia/rotas) | Refinada | Refinada em 2026-09-10 (fase 2 pendente) |
+| 0086 | battle-log-juice — log por rodada legível + juice CSS-only + consumo/recompensa visível (newest-first, sem engine/economia/rotas) + S3 C4–C8 (pacing, effect-sync, módulos, stepper/strike-flow) + S3 2026-09-12 C9–C15 (efeito atacante→alvo, shake no alvo, cor por tipo; presenter touch aprovado) | Implementação | Fase 2 em voo (S3 2026-09-12 C9–C15 reabertos e aprovados; plano em Passos 23–28; Passo 22 em paralelo) |
 
 ## Estrutura do arquivo de sessão
 
