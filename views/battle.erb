@@ -194,6 +194,7 @@
                 <% fx_class = entry[:ko] ? "fx--ko" : (entry[:damage] ? "fx--hit" : (entry[:healed] ? "fx--heal" : "fx--tick")) %>
                 <li class="log__entry"
                     data-round="<%= entry[:round] %>"
+                    data-strategy="strike"
                     data-from-side="<%= entry[:from_side] %>"
                     data-to-side="<%= entry[:to_side] %>"<% if entry[:move_type] %>
                     data-move-type="<%= entry[:move_type] %>"<% end %>

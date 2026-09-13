@@ -925,11 +925,18 @@
    agregado no li.fighter/shake default OFF ate stepping por linha. */
 .arena {
 	--jx-shake: 0;
+	/* Contrato de fx (0086 C12): tokens config-only (cor/travel/shake)
+	   definidos no ancestral comum do .shot e do .fighter.is-hit; keyframes
+	   permanecem genericos. A cor default cai no tipo normal (C11 fallback). */
+	--fx-color: var(--t-normal);
+	--fx-travel: 40vw;
+	--fx-shake: 0s;
 }
 .log__entry {
 	--jx-log: 1;
 	--jx-fx: 1;
 	--jx-chip: 1;
+	--fx-color: var(--t-normal);
 }
 li.fighter {
 	--jx-hit: 0;
@@ -990,6 +997,7 @@ li.fighter {
 	animation:
 		juice-flash 0.4s ease-out,
 		juice-shake 0.3s ease-out;
+	animation-delay: var(--fx-shake, 0s);
 }
 
 /* Projetil — so em viewport >= 900px; abaixo disso so flash no alvo */
@@ -1576,7 +1584,7 @@ li.fighter {
 		opacity: 1;
 	}
 	to {
-		transform: translateX(calc(100% + 40vw)) scale(0.35);
+		transform: translateX(calc(100% + var(--fx-travel, 40vw))) scale(0.35);
 		opacity: 0;
 	}
 }
@@ -1587,7 +1595,7 @@ li.fighter {
 		opacity: 1;
 	}
 	to {
-		transform: translateX(calc(-100% - 40vw)) scale(0.35);
+		transform: translateX(calc(-100% - var(--fx-travel, 40vw))) scale(0.35);
 		opacity: 0;
 	}
 }
@@ -1939,6 +1947,35 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 	visibility: visible;
 }
 
+/* Cor do efeito por tipo de golpe (0086 C11, Passo 26): os 18 tipos reusam a
+   paleta --t-* das tags (sem hex novo); entrada sem data-move-type herda o
+   fallback normal do .log__entry. data-strategy e o gancho de extensibilidade
+   (C12): default "strike"; futuras estrategias trocam so a config de tokens
+   --fx-*, sem keyframes novos. */
+.log__entry[data-strategy="strike"] {
+	--fx-travel: 40vw;
+	--fx-shake: 0s;
+}
+
+.log__entry[data-move-type="normal"] { --fx-color: var(--t-normal); }
+.log__entry[data-move-type="fire"] { --fx-color: var(--t-fire); }
+.log__entry[data-move-type="water"] { --fx-color: var(--t-water); }
+.log__entry[data-move-type="electric"] { --fx-color: var(--t-electric); }
+.log__entry[data-move-type="grass"] { --fx-color: var(--t-grass); }
+.log__entry[data-move-type="ice"] { --fx-color: var(--t-ice); }
+.log__entry[data-move-type="fighting"] { --fx-color: var(--t-fighting); }
+.log__entry[data-move-type="poison"] { --fx-color: var(--t-poison); }
+.log__entry[data-move-type="ground"] { --fx-color: var(--t-ground); }
+.log__entry[data-move-type="flying"] { --fx-color: var(--t-flying); }
+.log__entry[data-move-type="psychic"] { --fx-color: var(--t-psychic); }
+.log__entry[data-move-type="bug"] { --fx-color: var(--t-bug); }
+.log__entry[data-move-type="rock"] { --fx-color: var(--t-rock); }
+.log__entry[data-move-type="ghost"] { --fx-color: var(--t-ghost); }
+.log__entry[data-move-type="dragon"] { --fx-color: var(--t-dragon); }
+.log__entry[data-move-type="dark"] { --fx-color: var(--t-dark); }
+.log__entry[data-move-type="steel"] { --fx-color: var(--t-steel); }
+.log__entry[data-move-type="fairy"] { --fx-color: var(--t-fairy); }
+
 /* Efeito por linha (0086 Passo 9, CSS-only): .fx mora dentro da
    .log__entry e carrega o proprio --log-delay — flash/damage sincronizado
    a sua linha, sem max-por-lado; fighter li segue so estado final.
@@ -1948,7 +1985,7 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 	width: 8px;
 	height: 8px;
 	border-radius: 50%;
-	background: radial-gradient(circle, #ffd54f, #f57c00);
+	background: radial-gradient(circle, var(--fx-color), transparent);
 	animation: juice-flash 0.4s ease-out both;
 	animation-delay: var(--log-delay, 0s);
 }
@@ -2390,6 +2427,7 @@ button[disabled="disabled"] {
 	animation:
 		juice-flash 0.4s ease-out,
 		juice-shake 0.3s ease-out;
+	animation-delay: var(--fx-shake, 0s);
 }
 @media (min-width: 900px) {
 	.arena:has(> #jx-gates[data-jx-shot="on"]) .fighter.is-attacking .shot {

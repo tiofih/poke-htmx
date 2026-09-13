@@ -317,6 +317,73 @@ class StyleResponsiveTest < Minitest::Test
                  "arena inteira nao pode tremer (C10): sem regra arena-wide de shake")
   end
 
+  # C11 (0086 Passo 26): os 18 tipos mapeiam --fx-color para a paleta --t-*
+  # existente das tags (sem hex novo); entrada sem tipo cai no fallback normal.
+  def test_move_type_colors_map_to_type_palette
+    content = style_content
+
+    {
+      "normal" => "--t-normal", "fire" => "--t-fire", "water" => "--t-water",
+      "electric" => "--t-electric", "grass" => "--t-grass", "ice" => "--t-ice",
+      "fighting" => "--t-fighting", "poison" => "--t-poison", "ground" => "--t-ground",
+      "flying" => "--t-flying", "psychic" => "--t-psychic", "bug" => "--t-bug",
+      "rock" => "--t-rock", "ghost" => "--t-ghost", "dragon" => "--t-dragon",
+      "dark" => "--t-dark", "steel" => "--t-steel", "fairy" => "--t-fairy"
+    }.each do |type, var|
+      assert_match(/\[data-move-type="#{type}"\][^{]*\{[^}]*--fx-color:\s*var\(#{Regexp.escape(var)}\)/m,
+                   content, "tipo #{type} deve mapear --fx-color para #{var} (C11)")
+    end
+
+    assert_match(/\.log__entry\s*\{[^}]*--fx-color:\s*var\(--t-normal\)/m, content,
+                 "entrada sem data-move-type cai no fallback normal (C11)")
+    assert_match(/\.log__entry \.fx\s*\{[^}]*background:\s*radial-gradient\(circle,\s*var\(--fx-color\)/m,
+                 content, "efeito .fx pinta o radial com --fx-color (C11)")
+  end
+
+  # C12 (0086 Passo 26): contrato de extensibilidade — os tokens --fx-* sao a
+  # unica config (cor/travel/shake); keyframes seguem genericos (config-only).
+  def test_fx_contract_vars_declared
+    content = style_content
+
+    assert_match(/\.arena\s*\{[^}]*--fx-color:\s*var\(--t-normal\)/m, content,
+                 "cor default do efeito no contrato (--fx-color)")
+    assert_match(/--fx-travel:\s*40vw/, content, "token de travel do contrato (--fx-travel)")
+    assert_match(/--fx-shake:\s*0s/, content, "token de shake do contrato (--fx-shake)")
+    assert_match(/@keyframes\s+juice-shot-ltr\b[^@]*var\(--fx-travel/m, content,
+                 "keyframe de travel le --fx-travel, sem distancia hardcoded (C12)")
+  end
+
+  # C13 (0086 Passo 27): shake no card do alvo atrasa no instante do impacto
+  # via --fx-shake, nunca no --step-delay acumulado da arena (bug Passo 25).
+  def test_shake_synced_to_impact_instant
+    content = style_content
+
+    assert_match(/data-jx-shake="on"\]\)\s*\.fighter\.is-hit\s*\{[^}]*animation-delay:\s*var\(--fx-shake/m,
+                 content, "shake do alvo atrasa no impacto via --fx-shake (C13)")
+    refute_match(/data-jx-shake="on"\]\)?\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
+                 "arena nao le o --step-delay acumulado (regressao Passo 25)")
+    refute_match(/data-jx-shake="on"\]\)?\s*\{[^}]*animation:\s*juice-shake/m, content,
+                 "arena inteira nao treme (C10/C13)")
+  end
+
+  # C14 (0086 Passo 27): o bloco final !important segue ULTIMO no arquivo e
+  # cobre os seletores de fx novos (efeito por tipo e shake no card do alvo).
+  def test_reduce_covers_new_fx_selectors_last
+    content = style_content
+
+    reduce_index = content.rindex("@media (prefers-reduced-motion: reduce)")
+    refute_nil reduce_index, "rede final prefers-reduced-motion deve existir"
+    tail = content[reduce_index..]
+    assert tail.strip.end_with?("}"), "rede final deve ser a ULTIMA regra do arquivo (C14)"
+    refute_includes content[(reduce_index + 10)..], "@media",
+                    "nada de @media depois da rede final reduce (C14)"
+
+    assert_includes tail, ".log__entry .fx", "rede final cobre o efeito por tipo (C14)"
+    assert_includes tail, ".fighter.is-hit", "rede final cobre o shake do alvo (C14)"
+    assert_match(/animation:\s*none\s*!important/, tail,
+                 "rede final desliga as animacoes com !important (C14)")
+  end
+
   def test_juice_effects_sync_per_line
     content = style_content
 

@@ -139,6 +139,8 @@ class BattleStrikeRoutesTest < Minitest::Test
     refute_nil li, "li do strike presente"
     assert_match(/data-move-type="[^"]+"/, li,
                  "strike de ataque expoe data-move-type (0086 C11)")
+    assert_includes li, 'data-strategy="strike"',
+                    "strike OOB declara a estrategia default strike (0086 C12)"
   end
 
   def test_strike_oob_flips_arena_gates_for_current_entry
