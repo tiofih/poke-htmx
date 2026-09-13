@@ -105,7 +105,104 @@ class BattleStrikeRoutesTest < Minitest::Test
     assert_empty last_response.body
   end
 
+  def test_strike_log_entry_wrapped_in_template_oob
+    start_battle_for("user-a")
+
+    post "/battle/strike", {}, user_session("user-a")
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_includes body, '<template hx-swap-oob="beforeend:#battle-log">',
+                    "li embrulhado em template (htmx 2.0.3 nao desmembra)"
+    assert_match(/<template[^>]*>\s*<li class="log__entry"/, body,
+                 "template carrega a linha do golpe")
+    refute_match(/<li class="log__entry" hx-swap-oob/, body,
+                 "li nao carrega mais o OOB direto")
+  end
+
+  def test_strike_oob_flips_arena_gates_for_current_entry
+    start_battle_for("user-a")
+    body = strike_until_damaging
+
+    assert_includes body, 'id="jx-gates" hx-swap-oob="outerHTML"',
+                    "gates via OOB sem re-render da arena"
+    assert_includes body, 'data-jx-hit="on"', "golpe com dano acende hit"
+    assert_includes body, 'data-jx-dmg="on"', "golpe com dano acende numero"
+    assert_includes body, 'data-jx-shot="on"', "atacante acende projetil"
+    assert_includes body, 'data-jx-hp="on"', "HP anima no golpe atual"
+    if body.include?("KO!")
+      assert_includes body, 'data-jx-ko="on"', "KO acende ko"
+    else
+      assert_includes body, 'data-jx-ko="off"', "sem KO, ko apagado"
+    end
+  end
+
+  def test_strike_juice_scoped_to_current_entry_only
+    start_battle_for("user-a")
+    prev = nil
+    20.times do
+      post "/battle/strike", {}, user_session("user-a")
+      body = last_response.body
+      next unless body.include?("chip--dmg")
+
+      cur = strike_parties(body)
+      if prev && prev[:attacker] != cur[:attacker] && prev[:target] != cur[:target]
+        assert_fighter_class(body, cur[:attacker], "is-attacking", present: true)
+        assert_fighter_class(body, cur[:target], "is-hit", present: true)
+        assert_fighter_class(body, prev[:attacker], "is-attacking", present: false)
+        assert_fighter_class(body, prev[:target], "is-hit", present: false)
+        return
+      end
+      prev = cur
+      return if body.include?('id="result-modal"')
+    end
+    flunk "sem dois golpes com dano e pares distintos"
+  end
+
+  def test_battle_arena_ships_jx_gates_carrier_off
+    start_battle_for("user-a")
+
+    assert last_response.ok?
+    carrier = last_response.body[/<span id="jx-gates"[^>]*>/]
+    refute_nil carrier, "arena carrega #jx-gates"
+    %w[hit dmg ko shot hp shake].each do |aspect|
+      assert_includes carrier, %(data-jx-#{aspect}="off"),
+                      "gate #{aspect} comeca apagado no render full"
+    end
+  end
+
   private
+
+  def strike_until_damaging(cap: 10)
+    cap.times do
+      post "/battle/strike", {}, user_session("user-a")
+      return last_response.body if last_response.body.include?("chip--dmg")
+    end
+    flunk "nenhum golpe com dano em #{cap} strikes"
+  end
+
+  def strike_parties(body)
+    li = body[/<template[^>]*>\s*<li class="log__entry"[^>]*>/]
+    from = li[/data-from-side="(\d)"/, 1].to_i
+    to = li[/data-to-side="(\d)"/, 1].to_i
+    text = body[%r{<strong>([^<]+)</strong>}, 1]
+    attacker = text.split(" usou ").first
+    target = text.split(" em ").last.split(",").first
+    { attacker: [from, attacker], target: [to, target] }
+  end
+
+  def assert_fighter_class(body, (side, name), klass, present:)
+    slug = Regexp.escape(name.downcase)
+    lis = body.scan(/<li class="([^"]*)"[^>]*data-side="#{side}"[^>]*data-od-id="fighter-#{slug}"/)
+    refute_empty lis, "lutador #{name} do lado #{side} renderizado"
+    lis.each do |(classes)|
+      if present
+        assert_includes classes.split, klass, "#{name} veste #{klass} no golpe atual"
+      else
+        refute_includes classes.split, klass, "#{name} nao veste #{klass} de golpe anterior"
+      end
+    end
+  end
 
   def strike_until_finish(auto: false, cap: 2000)
     params = auto ? { "auto" => "1" } : {}
