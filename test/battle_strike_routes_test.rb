@@ -158,6 +158,18 @@ class BattleStrikeRoutesTest < Minitest::Test
     end
   end
 
+  # C10 (0086 Passo 25): o gate de shake ja e emitido no dano (server.rb:1125);
+  # esta rota nao muda — o teste trava o contrato de que o card do alvo acende.
+  def test_strike_shake_gate_emitted_on_damage
+    start_battle_for("user-a")
+    body = strike_until_damaging
+
+    gates = body[/<span id="jx-gates"[^>]*>/]
+    refute_nil gates, "gate carrier presente no strike"
+    assert_includes gates, 'data-jx-shake="on"',
+                    "dano acende shake no card do alvo (C10; gate ja emitido em server.rb:1125)"
+  end
+
   def test_strike_juice_scoped_to_current_entry_only
     start_battle_for("user-a")
     prev = nil

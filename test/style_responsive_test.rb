@@ -271,6 +271,52 @@ class StyleResponsiveTest < Minitest::Test
     assert_match(shot_animation, block, "projetil anima apenas em viewport >= 900px")
   end
 
+  # C9 (0086 Passo 24): projetil direcional atacante->alvo. Dois keyframes
+  # (ltr/rtl) escolhidos pelo data-side do ATACANTE; teto direcional aceito.
+  def test_shot_travels_attacker_to_target_directional
+    content = style_content
+
+    assert_match(/@keyframes\s+juice-shot-ltr\b/, content,
+                 "passo 24: keyframe de travel para o atacante da coluna esquerda")
+    assert_match(/@keyframes\s+juice-shot-rtl\b/, content,
+                 "passo 24: keyframe de travel para o atacante da coluna direita")
+    assert_match(/@keyframes\s+juice-shot-ltr\b[^@]*translateX/m, content,
+                 "travel alonga o translateX (D1: reusa o .shot do atacante)")
+
+    assert_match(/data-jx-shot="on"\]\)\s*\[data-side="0"\][^}]*animation-name:\s*juice-shot-ltr/m, content,
+                 "data-side=0 (coluna esquerda) viaja ltr sob data-jx-shot (C9)")
+    assert_match(/data-jx-shot="on"\]\)\s*\[data-side="1"\][^}]*animation-name:\s*juice-shot-rtl/m, content,
+                 "data-side=1 (coluna direita) viaja rtl sob data-jx-shot (C9)")
+  end
+
+  # C15 (0086 Passo 24): abaixo de 900px o efeito fica flash-only (sem travel).
+  def test_shot_travel_disabled_below_900px
+    content = style_content
+
+    media_index = content.rindex(/@media\s*\(min-width:\s*900px\)/)
+    refute_nil media_index, "breakpoint de travel >= 900px deve existir"
+
+    %w[juice-shot-ltr juice-shot-rtl].each do |keyframe|
+      use_index = content.index("animation-name: #{keyframe}")
+      refute_nil use_index, "travel #{keyframe} deve ser aplicado em algum lugar"
+      assert use_index > media_index,
+             "travel #{keyframe} so dentro de @media (min-width:900px) — <900px flash-only (C15)"
+    end
+  end
+
+  # C10 (0086 Passo 25): shake no card do alvo (is-hit), nunca na arena inteira.
+  def test_shake_hits_target_card_not_arena
+    content = style_content
+
+    assert_match(/data-jx-shake="on"\]\)\s*\.fighter\.is-hit\s*\{[^}]*juice-shake/m, content,
+                 "shake gateado por data-jx-shake no .fighter.is-hit (C10)")
+    assert_match(/data-jx-shake="on"\]\)\s*\.fighter\.is-hit\s*\{[^}]*juice-flash/m, content,
+                 "shake do alvo compoe com o flash, nao troca a animacao (C10)")
+
+    refute_match(/data-jx-shake="on"\]\s*\{[^}]*animation:\s*juice-shake/m, content,
+                 "arena inteira nao pode tremer (C10): sem regra arena-wide de shake")
+  end
+
   def test_juice_effects_sync_per_line
     content = style_content
 
@@ -285,8 +331,8 @@ class StyleResponsiveTest < Minitest::Test
                  "fx KO deve atrasar via --log-delay sob data-jx-fx")
     assert_match(/data-jx-chip="on"\] \.log__entry \.chip--dmg\s*\{[^}]*--log-delay/m, content,
                  "chip de dano deve atrasar via --log-delay sob data-jx-chip")
-    assert_match(/data-jx-shake="on"\]\s*\{[^}]*--step-delay/m, content,
-                 "shake da arena deve atrasar via --step-delay sob data-jx-shake")
+    assert_match(/data-jx-shake="on"\]\)\s*\.fighter\.is-hit\s*\{[^}]*juice-shake/m, content,
+                 "shake mora no card do alvo sob data-jx-shake (C10: arena fora)")
     refute_match(/\.fighter\.is-hit\s*\{[^}]*--step-delay/m, content,
                  "fighter li e estado final only — sem staging por --step-delay")
     refute_match(/data-jx-shot="on"\] \.fighter\.is-attacking \.shot[^}]*--step-delay/m, content,

@@ -983,12 +983,13 @@ li.fighter {
 	opacity: 0.75;
 }
 
-/* Screenshake leve na arena (0086 Passo 9: --step-delay mora na .arena,
-   max do pacing — antes caia no fallback 0s pois a var so existia no li).
+/* Screenshake leve NO CARD DO ALVO (0086 C10/Passo 25 — arena fora): o gate
+   data-jx-shake acende so no .fighter.is-hit, compondo com o flash.
    Passo 11: agregado — so com data-jx-shake="on" (default OFF). */
-.arena[data-jx-shake="on"] {
-	animation: juice-shake 0.3s ease-out;
-	animation-delay: var(--step-delay, 0s);
+.arena[data-jx-shake="on"] .fighter.is-hit {
+	animation:
+		juice-flash 0.4s ease-out,
+		juice-shake 0.3s ease-out;
 }
 
 /* Projetil — so em viewport >= 900px; abaixo disso so flash no alvo */
@@ -1562,6 +1563,32 @@ li.fighter {
 	to {
 		transform: translateX(calc(var(--fly, 1) * (100% + 18em))) scale(0.35);
 		opacity: 0.85;
+	}
+}
+
+/* Travel direcional atacante->alvo (0086 C9/Passo 24): dois keyframes
+   escolhidos pelo data-side do ATACANTE (D2); alonga o translateX do
+   juice-projectile para cruzar a arena. Teto direcional (sem ponto-a-ponto)
+   e so >= 900px (C15 — abaixo disso fica flash-only). */
+@keyframes juice-shot-ltr {
+	from {
+		transform: translateX(0) scale(1);
+		opacity: 1;
+	}
+	to {
+		transform: translateX(calc(100% + 40vw)) scale(0.35);
+		opacity: 0;
+	}
+}
+
+@keyframes juice-shot-rtl {
+	from {
+		transform: translateX(0) scale(1);
+		opacity: 1;
+	}
+	to {
+		transform: translateX(calc(-100% - 40vw)) scale(0.35);
+		opacity: 0;
 	}
 }
 
@@ -2359,14 +2386,23 @@ button[disabled="disabled"] {
 .arena:has(> #jx-gates[data-jx-hp="on"]) .fighters .bar-fill {
 	animation: juice-hp 0.5s ease-out both;
 }
-.arena:has(> #jx-gates[data-jx-shake="on"]) {
-	animation: juice-shake 0.3s ease-out;
-	animation-delay: var(--step-delay, 0s);
+.arena:has(> #jx-gates[data-jx-shake="on"]) .fighter.is-hit {
+	animation:
+		juice-flash 0.4s ease-out,
+		juice-shake 0.3s ease-out;
 }
 @media (min-width: 900px) {
 	.arena:has(> #jx-gates[data-jx-shot="on"]) .fighter.is-attacking .shot {
 		display: block;
 		animation: juice-projectile 0.4s ease-out 0.15s both;
+	}
+	/* Direcao pelo data-side do atacante (C9/D2): 0 = coluna esquerda -> ltr,
+	   1 = coluna direita -> rtl. C15: travel so >= 900px. */
+	.arena:has(> #jx-gates[data-jx-shot="on"]) [data-side="0"] .fighter.is-attacking .shot {
+		animation-name: juice-shot-ltr;
+	}
+	.arena:has(> #jx-gates[data-jx-shot="on"]) [data-side="1"] .fighter.is-attacking .shot {
+		animation-name: juice-shot-rtl;
 	}
 }
 @media (prefers-reduced-motion: reduce) {
