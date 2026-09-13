@@ -131,6 +131,16 @@ class BattleStrikeRoutesTest < Minitest::Test
                     "sem embrulho em template (conteudo nunca seria inserido)"
   end
 
+  def test_strike_entry_carries_move_type
+    start_battle_for("user-a")
+    body = strike_until_damaging
+
+    li = body[/<li class="log__entry"[^>]*>/]
+    refute_nil li, "li do strike presente"
+    assert_match(/data-move-type="[^"]+"/, li,
+                 "strike de ataque expoe data-move-type (0086 C11)")
+  end
+
   def test_strike_oob_flips_arena_gates_for_current_entry
     start_battle_for("user-a")
     body = strike_until_damaging

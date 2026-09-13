@@ -117,6 +117,30 @@ class BattleViewTest < Minitest::Test
                  "expected a per-entry damage chip (0086 C1)")
   end
 
+  def test_battle_log_entries_carry_move_type
+    tank_a = build_pokemon(number: 1, name: "tanka", hp: 100, attack: 10, defense: 50, speed: 50)
+    tank_b = build_pokemon(number: 2, name: "tankb", hp: 100, attack: 10, defense: 50, speed: 50)
+    engine = BattleEngine.new(team_a: [tank_a], team_b: [tank_b], items: { "potion" => 0 })
+    engine.play_round until engine.finished?
+    engine.log << { round: 1, attacker: 0, move_type: "electric", move: "thunder-shock",
+                    damage: 5, ko: false, attacker_name: "tanka", target_name: "tankb" }
+    engine.log << { round: 1, attacker: 0, action: :item, item: "potion",
+                    healed: 20, attacker_name: "tanka" }
+    Server.settings.battles.set("user-a", engine)
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    entries = last_response.body.scan(%r{<li class="log__entry".*?</li>}m)
+    typed_line = entries.find { |li| li.include?("thunder-shock") }
+    refute_nil typed_line, "linha de ataque tipado presente"
+    assert_match(/data-move-type="electric"/, typed_line,
+                 "ataque expoe data-move-type no render full (0086 C11)")
+    item_line = entries.find { |li| li.include?("chip--stock") }
+    refute_nil item_line, "linha de item presente"
+    refute_includes item_line, "data-move-type",
+                    "linha sem golpe omite data-move-type (nao emite vazio/nil)"
+  end
+
   def test_battle_side_heads_count_active_fighters
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 

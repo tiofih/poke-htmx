@@ -60,7 +60,8 @@ class BattleLogPresenter # rubocop:disable Metrics/ClassLength
   end
 
   def outcome_fields(entry)
-    { damage: entry[:damage], ko: entry[:ko] || false, healed: entry[:healed] }
+    { damage: entry[:damage], ko: entry[:ko] || false, healed: entry[:healed],
+      move_type: entry[:move_type] }
   end
 
   def entry_text(entry, index)

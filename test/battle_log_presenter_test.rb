@@ -178,6 +178,22 @@ class BattleLogPresenterTest < Minitest::Test
     assert_equal 20, entries[1][:healed], "item expoe cura"
   end
 
+  def test_outcome_fields_exposes_move_type
+    log = [
+      attack_entry(round: 1, side: 0, attacker: "pikachu", target: "squirtle",
+                   move: "thunder-shock", damage: 42),
+      item_entry(round: 1, attacker: "pikachu", item: "potion", healed: 20)
+    ]
+    presenter = BattleLogPresenter.new(log)
+
+    entries = presenter.entries
+
+    assert_equal "electric", entries[0][:move_type],
+                 "outcome_fields preserva o tipo do golpe (0086 C11)"
+    assert_nil entries[1][:move_type],
+               "linha sem golpe (item) nao carrega tipo — render omite o atributo"
+  end
+
   def test_item_entries_with_stock_expose_remaining_and_last_unit
     log = [
       item_entry(round: 1, attacker: "pikachu", item: "potion", healed: 20),
