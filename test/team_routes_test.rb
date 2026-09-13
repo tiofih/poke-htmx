@@ -442,7 +442,7 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_includes last_response.body, "Remover do time"
   end
 
-  def test_team_fragment_renders_move_buttons
+  def test_team_fragment_renders_move_buttons # rubocop:disable Metrics/AbcSize
     fill_team("user-a")
 
     get "/team", {}, htmx_session("user-a")

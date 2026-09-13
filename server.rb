@@ -73,7 +73,7 @@ module ServerCommon
     Array(members).to_h { |member| [member.id, member_types_from_api(cache, member)] }
   end
 
-  def member_types_from_api(cache, member)
+  def member_types_from_api(cache, member) # rubocop:disable Metrics/AbcSize
     stored = member.types.to_a
     return stored unless stored.empty?
 
