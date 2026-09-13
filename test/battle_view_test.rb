@@ -69,6 +69,15 @@ class BattleViewTest < Minitest::Test
     assert_includes body, ">Batalhar</button>", "1 clique = 1 golpe"
   end
 
+  def test_battle_renders_empty_log_container_before_first_strike
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    assert last_response.ok?
+    body = last_response.body
+    assert_match(/<ul class="log"[^>]*id="battle-log"/, body,
+                 "expected empty #battle-log so strike OOB appends land from strike 1")
+  end
+
   def test_battle_log_uses_new_markup_with_round_metadata
     start_battle_for("user-a")
     post "/battle/play", {}, user_session("user-a")
