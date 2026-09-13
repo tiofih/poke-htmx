@@ -64,7 +64,10 @@ class BattleViewTest < Minitest::Test
     assert last_response.ok?
     body = last_response.body
     assert_includes body, 'hx-post="/battle/strike"', "batalhar posta um golpe em /battle/strike"
-    assert_includes body, 'hx-swap="none"', "strike responde so OOB (append log + HP + modal no fim)"
+    button = body[/<button[^>]*id="play-btn"[^>]*>/]
+    refute_nil button, "botao primario presente"
+    assert_includes button, 'hx-target="#battle-log"', "swap principal anexa no #battle-log"
+    assert_includes button, 'hx-swap="beforeend"', "swap principal preserva o <li> intacto"
     assert_includes body, 'hx-indicator="#battle-loading"', "loading indicator preserved"
     assert_includes body, ">Batalhar</button>", "1 clique = 1 golpe"
   end

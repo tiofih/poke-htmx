@@ -15,29 +15,35 @@ class BattleStrikeRoutesTest < Minitest::Test
     fill_team("user-a")
   end
 
-  def test_strike_button_posts_strike_oob_only
+  def test_strike_button_swaps_log_beforeend
     stub_battle_start { get "/battle", {}, user_session("user-a") }
 
     assert last_response.ok?
     body = last_response.body
-    assert_includes body, 'hx-post="/battle/strike"', "botao primario posta golpe"
-    assert_includes body, 'hx-swap="none"', "strike responde so OOB"
-    assert_includes body, "next-strike from:body", "auto encadeia golpe a golpe"
+    button = body[/<button[^>]*id="play-btn"[^>]*>/]
+    refute_nil button, "botao primario presente"
+    assert_includes button, 'hx-post="/battle/strike"', "botao primario posta golpe"
+    assert_includes button, 'hx-target="#battle-log"', "swap principal anexa no #battle-log"
+    assert_includes button, 'hx-swap="beforeend"', "swap principal preserva o <li> intacto"
+    assert_includes button, "next-strike from:body", "auto encadeia golpe a golpe"
     assert_includes body, ">Batalhar</button>", "1 clique = 1 golpe"
   end
 
-  def test_strike_appends_exactly_one_log_line
+  def test_strike_appends_exactly_one_log_line_as_main_content
     start_battle_for("user-a")
 
     post "/battle/strike", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, 'hx-swap-oob="beforeend:#battle-log"',
-                    "linha anexada ao #battle-log sem re-render"
-    assert_equal 1, last_response.body.scan("log__entry").size,
-                 "1 strike = 1 linha"
-    assert_match(/data-from-side="[01]"/, last_response.body)
-    assert_match(/data-to-side="[01]"/, last_response.body)
+    body = last_response.body
+    assert_match(/<li class="log__entry"[^>]*data-round="\d+"/, body,
+                 "li viaja no swap principal (beforeend no #battle-log)")
+    assert_equal 1, body.scan("log__entry").size, "1 strike = 1 linha"
+    assert_match(/data-from-side="[01]"/, body)
+    assert_match(/data-to-side="[01]"/, body)
+    refute_includes body, 'hx-swap-oob="beforeend:#battle-log"',
+                    "OOB do htmx 2.0.3 insere so os filhos e descarta o <li>"
+    assert_includes body, 'hx-swap-oob="innerHTML"', "demais fragmentos seguem OOB"
   end
 
   def test_strike_updates_hp_oob_per_side
@@ -105,15 +111,22 @@ class BattleStrikeRoutesTest < Minitest::Test
     assert_empty last_response.body
   end
 
-  def test_strike_log_entry_carries_direct_oob
+  def test_strike_log_entry_travels_as_main_content
     start_battle_for("user-a")
 
     post "/battle/strike", {}, user_session("user-a")
 
     assert last_response.ok?
     body = last_response.body
-    assert_match(/<li class="log__entry" hx-swap-oob="beforeend:#battle-log"/, body,
-                 "li carrega o OOB direto (htmx 2.0.3 nao desmembra template)")
+    li = body[/<li class="log__entry"[^>]*>/]
+    refute_nil li, "li intacto no body (swap principal beforeend em #battle-log)"
+    refute_includes li, "hx-swap-oob",
+                    "OOB do htmx 2.0.3 descarta o wrapper e achata os <span>"
+    assert_includes li, "data-round=", "li carrega data-round"
+    assert_includes li, "--log-delay: 0s", "li carrega o proprio --log-delay"
+    fx = body[/<span class="fx[^>]*>/]
+    refute_nil fx, "fx presente dentro do li"
+    assert_includes fx, "--log-delay: 0s", "fx espelha o --log-delay da linha"
     refute_includes body, "<template",
                     "sem embrulho em template (conteudo nunca seria inserido)"
   end

@@ -161,15 +161,18 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
                     "texto de PP preservado"
   end
 
-  def test_battle_fragment_has_strike_button_oob_only
+  def test_battle_fragment_has_strike_button_appending_to_log
     stub_battle_start do
       get "/battle", {}, user_session("user-a")
     end
 
     assert last_response.ok?
     assert_includes last_response.body, ">Batalhar</button>"
-    assert_includes last_response.body, "hx-post=\"/battle/strike\""
-    assert_includes last_response.body, "hx-swap=\"none\""
+    body = last_response.body
+    button = body[/<button[^>]*id="play-btn"[^>]*>/]
+    assert_includes button, 'hx-post="/battle/strike"'
+    assert_includes button, 'hx-target="#battle-log"'
+    assert_includes button, 'hx-swap="beforeend"'
     assert_includes last_response.body, "hx-indicator=\"#battle-loading\""
     refute_includes last_response.body, ">Próxima rodada</button>", "botao primario avanca um golpe por vez"
 
@@ -230,7 +233,9 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
                  "toggle JOGAR-AUTO opt-in presente")
     assert_includes body, "JOGAR-AUTO"
     assert_includes body, 'hx-post="/battle/strike"', "botao primario posta um golpe por clique"
-    assert_includes body, 'hx-swap="none"', "resposta strike e so OOB, sem re-render"
+    button = body[/<button[^>]*id="play-btn"[^>]*>/]
+    assert_includes button, 'hx-target="#battle-log"', "swap principal anexa no #battle-log"
+    assert_includes button, 'hx-swap="beforeend"', "resposta anexa o <li> intacto sem re-render"
     assert_includes body, 'hx-trigger="click, next-strike from:body, next-round from:body"',
                     "botao ouve click + next-strike (next-round mantido p/ fallback /play)"
     assert_includes body, 'hx-include="#auto-play"', "botao propaga o toggle no chain"
