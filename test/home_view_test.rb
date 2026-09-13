@@ -32,8 +32,8 @@ class HomeViewTest < Minitest::Test
                  "expected the filter card to keep the #filter-controls hook")
     assert_match(%r{<div class="field">\s*<label for="fsearch">Buscar no arquivo</label>}m, body,
                  "expected the search textfield on its own full row above the grid")
-    assert_match(%r{<div class="filter-grid">.*?<select}m, body,
-                  "expected filter dropdowns on the row(s) below the search")
+    assert_match(/<div class="filter-grid">.*?<select/m, body,
+                 "expected filter dropdowns on the row(s) below the search")
     assert body.index('id="fsearch"') < body.index('class="filter-grid"'),
            "expected search to come before the filter grid"
     assert_match(/<span class="meta">Arquivo/, body,
