@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# rubocop:disable Style/FormatStringToken, Naming/VariableNumber
+
 # sweep-balance.rb — estilo RuleSmith, sem chave e sem DB: varia os parâmetros
 # de RewardRule + taxa de vitória e projeta a economia (XP/nível/dinheiro).
 # Roda no HOST: ruby scripts/sweep-balance.rb (puro, sem gems, seed fixa).
@@ -18,14 +20,20 @@ VARIANTS = {
   "rich-xp" => { win_xp: 75, draw_xp: 35, lose_xp: 30 }
 }.freeze
 
-def simulate(rule, win_rate, rng)
+def simulate(rule, win_rate, rng) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/PerceivedComplexity
   xp = 0
   money = 0
   to_lvl5 = nil
   to_lvl10 = nil
   BATTLES.times do |i|
     r = rng.rand
-    result = r < win_rate ? :win : (r < win_rate + 0.15 ? :draw : :lose)
+    result = if r < win_rate
+               :win
+             elsif r < win_rate + 0.15
+               :draw
+             else
+               :lose
+             end
     xp += rule.xp_for(result)
     money += rule.money_for(result)
     lvl = ExperienceCurve.level_for_xp(xp)
@@ -45,7 +53,8 @@ VARIANTS.each do |name, opts|
   rule = RewardRule.new(opts)
   WIN_RATES.each do |p|
     s = simulate(rule, p, Random.new(SEED))
-    puts format("%-12s | %.1f | %12s | %13s | %8d | %9s", name, p, s[:battles_to_5], s[:battles_to_10], s[:money], s[:money_per_battle])
+    puts format("%-12s | %.1f | %12s | %13s | %8d | %9s",
+                name, p, s[:battles_to_5], s[:battles_to_10], s[:money], s[:money_per_battle])
   end
 end
 
@@ -56,3 +65,5 @@ win_xp = rr.xp_for(:win)
 puts "\nloser-farming: derrota rende #{lose_xp} XP vs #{win_xp} da vitoria " \
      "(#{(lose_xp * 100.0 / win_xp).round(0)}%). Se batalha durar o mesmo tempo, vencer domina " \
      "#{(win_xp.to_f / lose_xp).round(1)}x — sem exploit aqui."
+
+# rubocop:enable Style/FormatStringToken, Naming/VariableNumber
