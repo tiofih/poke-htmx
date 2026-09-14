@@ -1008,7 +1008,7 @@ li.fighter {
 	width: 10px;
 	height: 10px;
 	border-radius: 50%;
-	background: radial-gradient(circle, #ffd54f, #f57c00);
+	background: radial-gradient(circle, var(--fx-color, var(--t-normal)), transparent);
 	box-shadow: 0 0 6px rgba(245, 124, 0, 0.8);
 	z-index: 2;
 }
@@ -1947,34 +1947,36 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 	visibility: visible;
 }
 
-/* Cor do efeito por tipo de golpe (0086 C11, Passo 26): os 18 tipos reusam a
-   paleta --t-* das tags (sem hex novo); entrada sem data-move-type herda o
-   fallback normal do .log__entry. data-strategy e o gancho de extensibilidade
-   (C12): default "strike"; futuras estrategias trocam so a config de tokens
-   --fx-*, sem keyframes novos. */
+/* Cor do efeito por tipo de golpe (0086 C11, Passos 26/29): os 18 tipos
+   reusam a paleta --t-* das tags (sem hex novo); entrada sem data-move-type
+   herda o fallback normal do .log__entry. Passo 29: o mapeamento mora no
+   carrier #jx-gates e propaga --fx-color ao .arena via :has — unico ancestral
+   comum com o .shot (o log nao e ancestral da arena). data-strategy e o
+   gancho de extensibilidade (C12): default "strike"; futuras estrategias
+   trocam so a config de tokens --fx-*, sem keyframes novos. */
 .log__entry[data-strategy="strike"] {
 	--fx-travel: 40vw;
 	--fx-shake: 0s;
 }
 
-.log__entry[data-move-type="normal"] { --fx-color: var(--t-normal); }
-.log__entry[data-move-type="fire"] { --fx-color: var(--t-fire); }
-.log__entry[data-move-type="water"] { --fx-color: var(--t-water); }
-.log__entry[data-move-type="electric"] { --fx-color: var(--t-electric); }
-.log__entry[data-move-type="grass"] { --fx-color: var(--t-grass); }
-.log__entry[data-move-type="ice"] { --fx-color: var(--t-ice); }
-.log__entry[data-move-type="fighting"] { --fx-color: var(--t-fighting); }
-.log__entry[data-move-type="poison"] { --fx-color: var(--t-poison); }
-.log__entry[data-move-type="ground"] { --fx-color: var(--t-ground); }
-.log__entry[data-move-type="flying"] { --fx-color: var(--t-flying); }
-.log__entry[data-move-type="psychic"] { --fx-color: var(--t-psychic); }
-.log__entry[data-move-type="bug"] { --fx-color: var(--t-bug); }
-.log__entry[data-move-type="rock"] { --fx-color: var(--t-rock); }
-.log__entry[data-move-type="ghost"] { --fx-color: var(--t-ghost); }
-.log__entry[data-move-type="dragon"] { --fx-color: var(--t-dragon); }
-.log__entry[data-move-type="dark"] { --fx-color: var(--t-dark); }
-.log__entry[data-move-type="steel"] { --fx-color: var(--t-steel); }
-.log__entry[data-move-type="fairy"] { --fx-color: var(--t-fairy); }
+.arena:has(> #jx-gates[data-move-type="normal"]) { --fx-color: var(--t-normal); }
+.arena:has(> #jx-gates[data-move-type="fire"]) { --fx-color: var(--t-fire); }
+.arena:has(> #jx-gates[data-move-type="water"]) { --fx-color: var(--t-water); }
+.arena:has(> #jx-gates[data-move-type="electric"]) { --fx-color: var(--t-electric); }
+.arena:has(> #jx-gates[data-move-type="grass"]) { --fx-color: var(--t-grass); }
+.arena:has(> #jx-gates[data-move-type="ice"]) { --fx-color: var(--t-ice); }
+.arena:has(> #jx-gates[data-move-type="fighting"]) { --fx-color: var(--t-fighting); }
+.arena:has(> #jx-gates[data-move-type="poison"]) { --fx-color: var(--t-poison); }
+.arena:has(> #jx-gates[data-move-type="ground"]) { --fx-color: var(--t-ground); }
+.arena:has(> #jx-gates[data-move-type="flying"]) { --fx-color: var(--t-flying); }
+.arena:has(> #jx-gates[data-move-type="psychic"]) { --fx-color: var(--t-psychic); }
+.arena:has(> #jx-gates[data-move-type="bug"]) { --fx-color: var(--t-bug); }
+.arena:has(> #jx-gates[data-move-type="rock"]) { --fx-color: var(--t-rock); }
+.arena:has(> #jx-gates[data-move-type="ghost"]) { --fx-color: var(--t-ghost); }
+.arena:has(> #jx-gates[data-move-type="dragon"]) { --fx-color: var(--t-dragon); }
+.arena:has(> #jx-gates[data-move-type="dark"]) { --fx-color: var(--t-dark); }
+.arena:has(> #jx-gates[data-move-type="steel"]) { --fx-color: var(--t-steel); }
+.arena:has(> #jx-gates[data-move-type="fairy"]) { --fx-color: var(--t-fairy); }
 
 /* Efeito por linha (0086 Passo 9, CSS-only): .fx mora dentro da
    .log__entry e carrega o proprio --log-delay — flash/damage sincronizado

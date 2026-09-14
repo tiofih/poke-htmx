@@ -1126,8 +1126,11 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     }
   end
 
+  # Passo 29 (0086 C11): o carrier leva o tipo do golpe atual para o
+  # .arena propagar --fx-color ate o .shot; item (sem golpe) omite.
   def strike_gates_oob(entry)
-    erb :_jx_gates, layout: false, locals: { gates: strike_gates(entry) }
+    move_type = entry[:move_type] unless entry[:action] == :item
+    erb :_jx_gates, layout: false, locals: { gates: strike_gates(entry), move_type: move_type }
   end
 
   # Delay por golpe (0086 Passo 20): o strike joga agora (0s); escopado aos

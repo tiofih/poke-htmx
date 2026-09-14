@@ -340,6 +340,29 @@ class StyleResponsiveTest < Minitest::Test
                  content, "efeito .fx pinta o radial com --fx-color (C11)")
   end
 
+  # C11 (0086 Passo 29): o projetil herda a cor do tipo. O mapeamento dos 18
+  # tipos deixa de ser preso ao .log__entry (seletor generico por atributo) e o
+  # carrier #jx-gates propaga --fx-color ao .arena via :has — unico ancestral
+  # comum com o .shot (o log nao e ancestral da arena).
+  def test_move_type_color_reaches_shot_from_arena
+    content = style_content
+
+    assert_match(/\.shot\s*\{[^}]*var\(--fx-color,\s*var\(--t-normal\)\)/m, content,
+                 "projetil pinta com --fx-color e cai no normal se ausente, nunca transparente (Passo 29)")
+
+    refute_match(/\.log__entry\[data-move-type=/, content,
+                 "mapeamento de tipo deixa de ser preso ao .log__entry (Passo 29)")
+
+    %w[normal fire water electric grass ice fighting poison ground flying
+       psychic bug rock ghost dragon dark steel fairy].each do |type|
+      assert_match(
+        /\.arena:has\(>\s*#jx-gates\[data-move-type="#{type}"\]\)[^{]*\{[^}]*--fx-color:\s*var\(--t-#{type}\)/m,
+        content,
+        "carrier #jx-gates propaga --fx-color do tipo #{type} ao .arena (Passo 29)"
+      )
+    end
+  end
+
   # C12 (0086 Passo 26): contrato de extensibilidade — os tokens --fx-* sao a
   # unica config (cor/travel/shake); keyframes seguem genericos (config-only).
   def test_fx_contract_vars_declared

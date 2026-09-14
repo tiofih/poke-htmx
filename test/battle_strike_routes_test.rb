@@ -160,6 +160,43 @@ class BattleStrikeRoutesTest < Minitest::Test
     end
   end
 
+  # Passo 29 (0086 C11): o carrier de gates leva o tipo do golpe atual para o
+  # .arena propagar --fx-color ate o .shot do atacante.
+  def test_strike_gates_carrier_carries_move_type
+    start_battle_for("user-a")
+    body = strike_until_damaging
+
+    gates = body[/<span id="jx-gates"[^>]*>/]
+    refute_nil gates, "gate carrier presente no strike"
+    assert_match(/data-move-type="[a-z]+"/, gates,
+                 "golpe de ataque carrega data-move-type nos gates (Passo 29)")
+  end
+
+  # Passo 29: entradas sem golpe (item/cura) nao emitem data-move-type no
+  # carrier — mesmo contrato do log entry.
+  def test_strike_gates_carrier_omits_move_type_on_item_entry
+    member_id = @repository.all("user-a").first.id
+    @inventory.add("user-a", "potion", 1)
+    post "/team/#{member_id}/item", { item_name: "potion" }, user_session("user-a")
+    @progression.update_hp("user-a", member_id, 200, 90)
+    stub_battle_start { get "/battle", {}, user_session("user-a") }
+
+    gates = nil
+    12.times do
+      post "/battle/strike", {}, user_session("user-a")
+      body = last_response.body
+      # NB: o copy do item tem bug pre-existente ("1 Pocao", fora do escopo deste
+      # passo) — casa pelo nome do item, nao pela frase exata.
+      if body.include?("Pocao")
+        gates = body[/<span id="jx-gates"[^>]*>/]
+        break
+      end
+    end
+    refute_nil gates, "entrada de item (sem golpe) presente em ate 12 golpes"
+    refute_includes gates, "data-move-type",
+                    "entrada sem golpe omite data-move-type nos gates (Passo 29)"
+  end
+
   # C10 (0086 Passo 25): o gate de shake ja e emitido no dano (server.rb:1125);
   # esta rota nao muda — o teste trava o contrato de que o card do alvo acende.
   def test_strike_shake_gate_emitted_on_damage

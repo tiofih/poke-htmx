@@ -343,6 +343,19 @@ class BattleViewTest < Minitest::Test
     end
   end
 
+  # Passo 29 (0086 C11): o render full nao tem golpe corrente; o carrier de
+  # gates omite data-move-type (mesma regra do log entry) e o .arena mantem o
+  # fallback normal.
+  def test_battle_arena_gates_carrier_omits_move_type_at_rest
+    start_battle_for("user-a")
+
+    assert last_response.ok?
+    carrier = last_response.body[/<span id="jx-gates"[^>]*>/]
+    refute_nil carrier, "arena carrega #jx-gates"
+    refute_includes carrier, "data-move-type",
+                    "render full sem golpe corrente omite data-move-type (Passo 29)"
+  end
+
   def test_battle_end_uses_results_desktop_markup
     start_battle_for("user-a")
     play_until_finish
