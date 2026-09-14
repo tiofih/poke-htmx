@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — roteamento confirmado em 2026-09-10 (CSS-only + texto; sem engine/economia; base T18 sketch + T20 playtest a11y: newest-first inicial, flip p/ chronological em S3 2026-09-11, reduced-motion por último) |
-| Implementação (fase 2, TDD) | **Concluída** — Passos 1–32 verdes (suíte 1171 runs / 0 failures; lint 0 offenses); aguardando validação do usuário |
-| Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
+| Implementação (fase 2, TDD) | **Concluída** — Passos 1–32 verdes (suíte 1171 runs / 0 failures; lint 0 offenses); validada em 2026-09-14 |
+| Validação (fase 3) | **Concluída** — fase 3 (usuário) em 2026-09-14: aprovação em bloco ("mas está validado"), nenhum critério `nok`; C1–C15 + G1 → `ok` (§7) |
 
 ---
 
@@ -121,22 +121,24 @@ Log de batalha legível por rodada (chronological R1 no topo, cabeçalho de roun
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (log por rodada) | | | pendente |
-| C2 (juice + reduced-motion) | | | pendente |
-| C3 (consumo/recompensa) | | | pendente |
-| C4 (pacing tiered + Pular) | | | pendente |
-| C5 (effect-sync + result-modal) | | | pendente |
-| C6 (módulos por aspecto + toggles) | | | pendente |
-| C7 (rounds servidor + AUTO) | | | pendente |
-| C8 (strike-flow append-only) | | | pendente |
-| C9 (projétil direcional) | | | pendente |
-| C10 (shake no alvo) | | | pendente |
-| C11 (cor por tipo) | | | pendente |
-| C12 (contrato extensível) | | | pendente |
-| C13 (sync efeito/pacing) | | | pendente |
-| C14 (reduced-motion novos seletores) | | | pendente |
-| C15 (<900px flash-only) | | | pendente |
-| G1 (sem regressão) | | | pendente |
+| C1 (log por rodada) | `battle_log_presenter_test.rb` `test_entries_grouped_by_round_chronological` + e2e `battle-log.spec.ts` `round headers chronological` | Validação do usuário em 2026-09-14 | ok |
+| C2 (juice + reduced-motion) | `style_responsive_test.rb` `test_juice_reduced_motion_disables_all` + e2e `reduced-motion disables juice` | Validação do usuário em 2026-09-14 | ok |
+| C3 (consumo/recompensa) | `battle_log_presenter_test.rb` `test_item_entries_with_stock_expose_remaining_and_last_unit` + `test_item_entry_without_stock_keeps_legacy_copy` + e2e `consumption and reward copy` | Validação do usuário em 2026-09-14 | ok |
+| C4 (pacing tiered + Pular) | `style_responsive_test.rb` `test_log_tiered_pacing_delays` + view `data-log-index`/botão Pular + e2e `tiered pacing + skip` | Validação do usuário em 2026-09-14 | ok |
+| C5 (effect-sync + result-modal) | `style_responsive_test.rb` `test_effect_sync_step_delay` + view `result modal gated --log-total` + e2e `effect sync + result modal` | Validação do usuário em 2026-09-14 | ok |
+| C6 (módulos por aspecto + toggles) | `battle_log_presenter_test.rb` `test_per_aspect_modules_with_toggles` + `style_responsive_test.rb` `test_aggregates_off_per_aspect_timed` + view `data-jx` + e2e `per-aspect toggles` | Validação do usuário em 2026-09-14 | ok |
+| C7 (rounds servidor + AUTO) | `battle_advance_test.rb` `test_advance_steps_single_round_until_finished` + `test_auto_toggle_chains_advance_via_hx_trigger` + e2e `stepped rounds + auto toggle` | Validação do usuário em 2026-09-14 | ok |
+| C8 (strike-flow append-only) | `battle_advance_test.rb` `test_strike_appends_single_line_in_order` + view `#battle-log` presente e vazio + e2e `strike flow append-only` | Validação do usuário em 2026-09-14 | ok |
+| C9 (projétil direcional) | `style_responsive_test.rb` `test_shot_travels_attacker_to_target_directional` + e2e `shot direction matches attacker side` | Validação do usuário em 2026-09-14 | ok |
+| C10 (shake no alvo) | `style_responsive_test.rb` `test_shake_hits_target_card_not_arena` + `battle_strike_routes_test.rb` `test_strike_shake_gate_emitted_on_damage` | Validação do usuário em 2026-09-14 | ok |
+| C11 (cor por tipo) | `battle_log_presenter_test.rb` `test_outcome_fields_exposes_move_type` + `battle_view_test.rb` `test_battle_log_entries_carry_move_type` + `style_responsive_test.rb` `test_move_type_colors_map_to_type_palette` | Validação do usuário em 2026-09-14 | ok |
+| C12 (contrato extensível) | `battle_view_test.rb` `test_battle_log_entries_carry_strategy_default_strike` + `style_responsive_test.rb` `test_fx_contract_vars_declared` | Validação do usuário em 2026-09-14 | ok |
+| C13 (sync efeito/pacing) | `style_responsive_test.rb` `test_shake_synced_to_impact_instant` + e2e `battle-log.spec.ts` (ordem chronological) | Validação do usuário em 2026-09-14 | ok |
+| C14 (reduced-motion novos seletores) | `style_responsive_test.rb` `test_reduce_covers_new_fx_selectors_last` + e2e `reduced-motion disables juice` (probe `animationName === 'none'`) | Validação do usuário em 2026-09-14 | ok |
+| C15 (<900px flash-only) | `style_responsive_test.rb` `test_shot_travel_disabled_below_900px` | Validação do usuário em 2026-09-14 | ok |
+| G1 (sem regressão) | `./scripts/test` (1171 runs / 6107 assertions / 0 failures) + `./scripts/lint` (136 files / 0 offenses) + `git diff --stat HEAD -- lib/battle_engine.rb lib/battle_service.rb db/` vazio | Validação do usuário em 2026-09-14 | ok |
+
+> **Nota (2026-09-14):** a coluna **automatizada** reproduz o mapeamento critério→teste declarado em §4; a coluna **manual** registra a validação do usuário em 2026-09-14 (aprovação em bloco). Não há execução manual registrada critério a critério — os 16 resultados `ok` refletem essa aprovação única, sem evidência inventada.
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 >
@@ -158,9 +160,16 @@ Log de batalha legível por rodada (chronological R1 no topo, cabeçalho de roun
 
 > **S3 2026-09-14 — C11 (cor por tipo) volta ao `.log__entry .fx` + Passos 29–32 registrados:** a cor por tipo deixou o seletor de entrada e passou a ser propagada pelo carrier `#jx-gates` (`.arena:has(> #jx-gates[data-move-type=…])`, Passo 29); como `.log__entry` seguia declarando `--fx-color: var(--t-normal)`, o valor do arena ficava sombreado e o flash por linha perdia a cor — o Passo 32 devolve `--fx-color` a `.log__entry .fx` via seletor de atributo `[data-move-type="…"]`, com asserção do token por tipo. Passos 29 (projétil), 30 (copy C3 — nota acima), 31 (#play-btn desabilitado pós-modal via OOB) e 32 (fix do major) verdes. **G1 (HEAD `147ad98`):** `git diff --stat a93bdb3..HEAD -- lib/battle_engine.rb lib/battle_service.rb db/` → **vazio**; `./scripts/test` 1171 runs / 0 failures; `./scripts/lint` 0 offenses. **Revisor (2c) round 12** (`reviews/review-2026-09-14T10-08-24.md`): **Requer ajuste** — 1 major (`--fx-color` sombreado, corrigido no Passo 32 `147ad98`) + 3 minors (registro C11/Passos 29–31 e sync do doc; comentário falso do `delete` em `views/_strike_result.erb:3`), corrigidos neste commit de doc/comentário. C1–C15 e G1 intactos.
 
+> **Validação 2026-09-14 (fase 3 — executada pelo usuário, S2):** o usuário **validou a sessão 0086 em 2026-09-14** com **aprovação em bloco** ("mas está validado"); **nenhum critério marcado `nok`**. Todos os 16 critérios (**C1–C15 + G1**) → **`ok`** (§7). **Implicitamente aceitos nesta validação:** (1) a mudança de asserção do **C3** — `"usou 1 Pocao"` + `"restam 0"` passando a prevalecer sobre a asserção legada (S3 2026-09-14, nota preservada acima) — e (2) a mudança de caminho do **C11** — cor por tipo propagada pelo carrier `#jx-gates` (Passos 29→32). Evidência de suporte: `./scripts/test` **1171 runs / 6107 assertions / 0 failures**; `./scripts/lint` **136 files / 0 offenses**; G1 diff (`lib/battle_engine.rb`, `lib/battle_service.rb`, `db/`) **vazio**; review `reviews/review-2026-09-14T10-24-59.md` **Aprovado**; commits `9254ba4`/`287743f`/`6fb9322`/`147ad98` (+ doc `39b42eb`, draft `d7a7c1e`).
+
 ## 8. Observações
 
 - **Não tocado nesta tarefa (por ordem):** demais arquivos, commits.
+- **Pendências registradas na validação de 2026-09-14 (não silenciadas):**
+  - **Cobertura de review dos Passos 21–28** — não há arquivo em `reviews/` cobrindo `8542a33..5cf6c4a`; a decisão de escopo (revisar ou registrar a dispensa) segue em aberto no `TODO.md` (T2).
+  - **§6 deste arquivo** — a tabela do plano lista só os Passos 0–4 e 23–32, enquanto o Status fala em 1–32; completar a tabela ou registrar a lacuna explicitamente (aberto no `TODO.md`).
+  - **Working tree sujo (fora deste commit)** — churn de cassettes VCR (incl. cassette novo de ~8900 linhas), `e2e/playwright.config.ts`, `test/pokemon_routes_test.rb` e documentos untracked na raiz (`ARCHITECTURE.md`/`GDD.md`/`PROJECT.md`), `reviews/`, `gotchas/`, `public/type-effects-lab.html` — triagem pendente.
+  - **§9 Gotchas** — segue "a preencher na validação (fase 3)"; as lições do ciclo foram registradas em `gotchas/0086-round7-gotchas.md` (untracked), ainda não consolidadas aqui.
 - **Leitura exata antes de editar:** ERB `not_tracked` — confirmar `battle.erb`, `_fighter_panel.erb`, bloco reduced-motion em `style.css:301-316` vs juice L328+ no arquivo antes do Passo 1.
 - **CSS:** só dentro do bloco ODS, ANTES da linha `fim`, com delimitador próprio `0086`; media query de reduced-motion vai **após** todas as regras de juice.
 - **Metodologia reduced-motion:** validar via `getComputedStyle(...).animationName` (`none` esperado) — `document.getAnimations()` não serve (animações 0.3–0.5s terminam e voltam `[]`).
