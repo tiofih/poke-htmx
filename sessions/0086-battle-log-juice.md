@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — roteamento confirmado em 2026-09-10 (CSS-only + texto; sem engine/economia; base T18 sketch + T20 playtest a11y: newest-first inicial, flip p/ chronological em S3 2026-09-11, reduced-motion por último) |
-| Implementação (fase 2, TDD) | Pendente |
+| Implementação (fase 2, TDD) | **Concluída** — Passos 1–32 verdes (suíte 1171 runs / 0 failures; lint 0 offenses); aguardando validação do usuário |
 | Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
 
 ---
@@ -111,7 +111,11 @@ Log de batalha legível por rodada (chronological R1 no topo, cabeçalho de roun
 | 26 | **red→green — C11/C12 (cor + contrato)** — 18 tipos → paleta `--t-*` + fallback, vars `--fx-color`/`--fx-travel`/`--fx-shake`; novos style tests | `./scripts/test test/style_responsive_test.rb` + lint 0; commit `Passo 26: cor por tipo e vars de fx` |
 | 27 | **red→green — C13/C14 (sync + reduce)** — shake no instante do impacto (`--log-delay`); reduce final `!important` ÚLTIMA regra cobrindo os novos seletores; novos style tests + probe e2e | `./scripts/test test/style_responsive_test.rb` + e2e + lint 0; commit `Passo 27: sync de impacto e reduce final` |
 | 28 | **red→green — G1 (regressão)** — suíte + lint 0 + diff de engine/service/db vazio | `./scripts/test` + `./scripts/lint`; commit `Passo 28: regressao — fx sem tocar engine` |
-| — | **Fase 2 concluída** → **Revisor (2c)** até `Aprovado` (teto 3, senão S3) → **PARAR**, aguardar **validação 3**. | — |
+| 29 | **red→green — C11 (cor do tipo no projétil)** — `data-move-type` alcança o `.shot` pelo carrier `#jx-gates` (`.arena:has(> #jx-gates[data-move-type=…])`) | `./scripts/test test/style_responsive_test.rb test/battle_strike_routes_test.rb test/battle_view_test.rb` + lint 0; commit `9254ba4 Passo 29` |
+| 30 | **red→green — C3 (copy de consumo)** — copy `"usou 1 X — restam N"` prevalece sobre a asserção legada (S3 2026-09-14, §7); doc + 2 asserções | `./scripts/test test/battle_strategy_routes_test.rb` + lint 0; commit `287743f Passo 30` |
+| 31 | **red→green — #play-btn pós-modal** — fim de batalha re-troca o botão por cópia `disabled` via `hx-swap-oob="outerHTML"` | `./scripts/test test/battle_strike_routes_test.rb` + lint 0; commit `6fb9322 Passo 31` |
+| 32 | **red→green — C11 (major do review round 12)** — `--fx-color` do carrier volta a vencer em `.log__entry .fx` via seletor de atributo | `./scripts/test test/style_responsive_test.rb` + lint 0; commit `147ad98 Passo 32` |
+| — | **Fase 2 concluída** — Revisor (2c) até o **round 12** (`Requer ajuste`: 1 major + 3 minors, ver §7); major corrigido no Passo 32, minors no commit de doc/comentário → **PARAR**, aguardar **validação do usuário**. | — |
 
 ## 7. Validação (executada pelo usuário — S2)
 
@@ -151,6 +155,8 @@ Log de batalha legível por rodada (chronological R1 no topo, cabeçalho de roun
 > **S3 2026-09-14 — C3 (copy de consumo) prevalesce sobre assert legado (autorizado pelo usuário, opção (a)):** a asserção `test/battle_strategy_routes_test.rb` `test_battle_consumes_assigned_item_and_clears_member_without_debit` esperava `"usou Pocao"` (copy legada sem o restante); alinhada à forma C3 `"usou 1 Pocao"` + `"restam 0"`. Nenhum valor/regra mudou — só a asserção (doc-only) e o texto passou a ser o do C3. C1–C15 e G1 intactos.
 >
 > **S3 2026-09-12 — C9–C15 adicionados (efeito atacante→alvo, shake no alvo, cor por tipo — aprovados pelo usuário):** projétil viaja do atacante em direção à coluna inimiga (teto direcional por `data-side`, sem ponto-a-ponto; D1/D2 §5) + shake SÓ no card do alvo gated `data-jx-shake` (arena fora; gate já emitido, D3) + cor por tipo (18 tipos → paleta `--t-*` + fallback; toque aprovado em `lib/battle_log_presenter.rb` p/ expor `move_type`, D4) + gancho `data-strategy` default `"strike"` + vars `--fx-color`/`--fx-travel`/`--fx-shake` + sync no impacto + reduce final segue ÚLTIMO + <900px flash-only; plano estendido em Passos 23–28 (Passo 22 em voo em paralelo, não reutilizar o número); C1–C8 intactos, G1 estendido (`battle_engine.rb`/`battle_service.rb`/`db/` proibidos).
+
+> **S3 2026-09-14 — C11 (cor por tipo) volta ao `.log__entry .fx` + Passos 29–32 registrados:** a cor por tipo deixou o seletor de entrada e passou a ser propagada pelo carrier `#jx-gates` (`.arena:has(> #jx-gates[data-move-type=…])`, Passo 29); como `.log__entry` seguia declarando `--fx-color: var(--t-normal)`, o valor do arena ficava sombreado e o flash por linha perdia a cor — o Passo 32 devolve `--fx-color` a `.log__entry .fx` via seletor de atributo `[data-move-type="…"]`, com asserção do token por tipo. Passos 29 (projétil), 30 (copy C3 — nota acima), 31 (#play-btn desabilitado pós-modal via OOB) e 32 (fix do major) verdes. **G1 (HEAD `147ad98`):** `git diff --stat a93bdb3..HEAD -- lib/battle_engine.rb lib/battle_service.rb db/` → **vazio**; `./scripts/test` 1171 runs / 0 failures; `./scripts/lint` 0 offenses. **Revisor (2c) round 12** (`reviews/review-2026-09-14T10-08-24.md`): **Requer ajuste** — 1 major (`--fx-color` sombreado, corrigido no Passo 32 `147ad98`) + 3 minors (registro C11/Passos 29–31 e sync do doc; comentário falso do `delete` em `views/_strike_result.erb:3`), corrigidos neste commit de doc/comentário. C1–C15 e G1 intactos.
 
 ## 8. Observações
 
