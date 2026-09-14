@@ -7,6 +7,35 @@ class StyleResponsiveTest < Minitest::Test
     File.read(File.join(__dir__, "../public/style.css"))
   end
 
+  # T6a (0086): a linha do tempo do turno vira contrato nomeado. Estes dois
+  # helpers resolvem var/calc -> segundos para os testes provarem a ARITMETICA
+  # (nao a mera presenca do token) e falharem se qualquer relacao sair de sincronia.
+  def css_time_vars(content)
+    vars = {}
+    content.scan(/--(beat|t-[a-z-]+)\s*:\s*([^;]+);/) do |name, value|
+      vars["--#{name}"] = value.strip
+    end
+    vars
+  end
+
+  def resolve_css_time(expr, vars, seen = [])
+    expr = expr.to_s.strip.sub(/\Acalc\((.*)\)\z/m, '\1').strip
+    raise ArgumentError, "ciclo na linha do tempo: #{seen.inspect}" if seen.length > 12
+
+    expr.split("+").sum do |term|
+      term = term.strip
+      if (ref = term[/\Avar\((--[\w-]+)/, 1])
+        raise ArgumentError, "var ausente na linha do tempo: #{ref}" unless vars.key?(ref)
+
+        resolve_css_time(vars.fetch(ref), vars, seen + [ref])
+      elsif (secs = term[/\A([\d.]+)s\z/, 1])
+        secs.to_f
+      else
+        raise ArgumentError, "termo nao resolvivel: #{term.inspect}"
+      end
+    end
+  end
+
   def test_pokemon_grid_is_responsive
     content = style_content
 
@@ -379,26 +408,48 @@ class StyleResponsiveTest < Minitest::Test
                  "keyframe de travel le --fx-travel, sem distancia hardcoded (C12)")
   end
 
-  # C13 (0086 Passo 27 / Passo 33): shake no card do alvo atrasa no instante do
-  # impacto via --fx-shake — o VALOR tem que bater com a chegada do projetil
-  # (delay 0.15s + travel 0.4s), nunca no --step-delay acumulado (bug Passo 25).
+  # C13 (0086 Passo 27 / Passo 33 / T6a): a linha do tempo do turno e um
+  # contrato nomeado — o shake atrasa no instante do impacto e o VALOR tem que
+  # bater com a chegada do projetil, nunca no --step-delay acumulado (bug Passo
+  # 25). T6a resolve os tokens (var/calc) e prova a ARITMETICA das relacoes:
+  # impacto == approach + travel, shake == impacto, hp >= impacto.
   def test_shake_synced_to_impact_instant
     content = style_content
+    vars = css_time_vars(content)
+
+    %w[--beat --t-approach --t-travel --t-impact --t-log --t-hp].each do |name|
+      assert vars.key?(name), "instante nomeado #{name} deve existir na linha do tempo (T6a)"
+    end
+
+    approach = resolve_css_time(vars.fetch("--t-approach"), vars)
+    travel = resolve_css_time(vars.fetch("--t-travel"), vars)
+    impact = resolve_css_time(vars.fetch("--t-impact"), vars)
+    hp = resolve_css_time(vars.fetch("--t-hp"), vars)
+
+    assert_in_delta approach + travel, impact, 0.001,
+                    "impacto = approach + travel (--t-impact, T6a)"
+    assert hp >= impact, "HP baixa depois (ou no) impacto: --t-hp >= --t-impact (T6a)"
+
+    shot_block = content[/#jx-gates\[data-jx-shot="on"\]\)\s*\.fighter\.is-attacking \.shot\s*\{([^}]*)\}/m, 1]
+    refute_nil shot_block, "regra viva do projetil (#jx-gates, >= 900px) deve existir"
+    assert_match(/animation:\s*juice-projectile\s+var\(--t-travel\)\s+ease-out\s+var\(--t-approach\)/, shot_block,
+                 "projetil usa --t-travel (duracao) e --t-approach (delay), sem literal (T6a)")
+    shot_travel = resolve_css_time(shot_block[/var\(--t-travel\)/, 0], vars)
+    shot_delay = resolve_css_time(shot_block[/var\(--t-approach\)/, 0], vars)
+    assert_in_delta impact, shot_delay + shot_travel, 0.001,
+                    "impacto == delay + duracao do projetil (T6a)"
 
     shake_block = content[/#jx-gates\[data-jx-shake="on"\]\)\s*\.fighter\.is-hit\s*\{([^}]*)\}/m, 1]
     refute_nil shake_block, "regra de shake no card do alvo via #jx-gates deve existir (C10/C13)"
     assert_match(/animation-delay:\s*var\(--fx-shake,\s*0s\)/, shake_block,
                  "shake do alvo atrasa no impacto via --fx-shake (C13)")
 
-    shake = shake_block[/--fx-shake:\s*([\d.]+)s/, 1]
-    refute_nil shake, "o card do alvo carrega --fx-shake com valor real, nao so o token (C13)"
+    shake_expr = shake_block[/--fx-shake:\s*([^;]+);/, 1]
+    refute_nil shake_expr, "o card do alvo carrega --fx-shake derivado do instante de impacto (C13/T6a)"
+    shake = resolve_css_time(shake_expr, vars)
 
-    projectile = content.scan(/animation:\s*juice-projectile\s+([\d.]+)s\s+ease-out\s+([\d.]+)s/).last
-    refute_nil projectile, "regra do projetil (>= 900px) declara travel + delay de chegada"
-    travel, delay = projectile.map(&:to_f)
-
-    assert_in_delta travel + delay, shake.to_f, 0.001,
-                    "o shake dispara no instante do impacto: --fx-shake = travel + delay do projetil (C13)"
+    assert_in_delta impact, shake, 0.001,
+                    "o shake dispara no instante do impacto: --fx-shake == --t-impact (C13/T6a)"
 
     refute_match(/data-jx-shake="on"\]\)?\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
                  "arena nao le o --step-delay acumulado (regressao Passo 25)")

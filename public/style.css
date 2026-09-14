@@ -925,6 +925,16 @@
    agregado no li.fighter/shake default OFF ate stepping por linha. */
 .arena {
 	--jx-shake: 0;
+	/* Linha do tempo do turno (0086 T6a): um beat base + instantes nomeados.
+	   A coreografia (approach -> travel -> impacto -> shake -> HP) deriva daqui;
+	   antes eram literais espalhados. O escalonamento por linha (C4) segue no
+	   --log-delay por indice (Ruby) — o --beat e so a base da linha do tempo. */
+	--beat: 0.2s;
+	--t-approach: 0.15s;
+	--t-travel: 0.4s;
+	--t-impact: calc(var(--t-approach) + var(--t-travel));
+	--t-log: var(--beat);
+	--t-hp: calc(var(--t-impact) + var(--beat));
 	/* Contrato de fx (0086 C12): tokens config-only (cor/travel/shake)
 	   definidos no ancestral comum do .shot e do .fighter.is-hit; keyframes
 	   permanecem genericos. A cor default cai no tipo normal (C11 fallback). */
@@ -950,7 +960,7 @@ li.fighter {
 }
 .arena[data-jx-log="on"] .log__entry {
 	animation: battle-log-in 0.35s ease-out both;
-	animation-delay: var(--log-delay, 0s);
+	animation-delay: calc(var(--t-log) + var(--log-delay, 0s));
 }
 
 /* HP animado: parte do HP inicial (var do servidor) ate o atual.
@@ -1016,7 +1026,7 @@ li.fighter {
 @media (min-width: 900px) {
 	.arena[data-jx-shot="on"] .fighter.is-attacking .shot {
 		display: block;
-		animation: juice-projectile 0.4s ease-out 0.15s both;
+		animation: juice-projectile var(--t-travel) ease-out var(--t-approach) both;
 	}
 
 	.arena [data-side="0"] .fighter.is-attacking .shot {
@@ -1903,6 +1913,7 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 .arena:has(.log-skip-input:checked) .fighter.fainted img,
 .arena:has(.log-skip-input:checked) .fighter.fainted .fname,
 .arena:has(.log-skip-input:checked) .fighter.is-attacking .shot,
+.arena:has(.log-skip-input:checked) .fighters .bar-fill,
 .arena:has(.log-skip-input:checked) {
 	animation: none !important;
 	animation-delay: 0s !important;
@@ -2015,23 +2026,23 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 	border-radius: 50%;
 	background: radial-gradient(circle, var(--fx-color), transparent);
 	animation: juice-flash 0.4s ease-out both;
-	animation-delay: var(--log-delay, 0s);
+	animation-delay: calc(var(--t-log) + var(--log-delay, 0s));
 }
 
 .arena[data-jx-fx="on"] .log__entry .fx--ko {
 	animation: juice-ko 0.5s ease-out both;
-	animation-delay: var(--log-delay, 0s);
+	animation-delay: calc(var(--t-log) + var(--log-delay, 0s));
 }
 
 .arena[data-jx-fx="on"] .log__entry .fx--heal {
 	background: radial-gradient(circle, #a5d6a7, #2e7d32);
 	animation: juice-news 0.4s ease-out both;
-	animation-delay: var(--log-delay, 0s);
+	animation-delay: calc(var(--t-log) + var(--log-delay, 0s));
 }
 
 .arena[data-jx-chip="on"] .log__entry .chip--dmg {
 	animation: juice-banner 0.45s ease-out both;
-	animation-delay: var(--log-delay, 0s);
+	animation-delay: calc(var(--t-log) + var(--log-delay, 0s));
 }
 
 .arena:has(.log-skip-input:checked) .log__entry .fx,
@@ -2450,12 +2461,14 @@ button[disabled="disabled"] {
 }
 .arena:has(> #jx-gates[data-jx-hp="on"]) .fighters .bar-fill {
 	animation: juice-hp 0.5s ease-out both;
+	/* T6a: o HP so baixa depois do impacto (--t-hp >= --t-impact). */
+	animation-delay: var(--t-hp);
 }
 .arena:has(> #jx-gates[data-jx-shake="on"]) .fighter.is-hit {
-	/* 0086 C13/Passo 33: o shake dispara no instante do impacto. O token fica
-	   onde a animacao e aplicada (herdar do .arena so daria 0s) e carrega a
-	   chegada do projetil: 0.15s de delay + 0.4s de travel (regra .shot >= 900px). */
-	--fx-shake: 0.55s;
+	/* 0086 C13/T6a: o shake dispara no instante nomeado do impacto
+	   (--t-impact = --t-approach + --t-travel do projetil, regra .shot >= 900px).
+	   O token fica onde a animacao e aplicada (herdar do .arena so daria 0s). */
+	--fx-shake: var(--t-impact);
 	animation:
 		juice-flash 0.4s ease-out,
 		juice-shake 0.3s ease-out;
@@ -2464,7 +2477,7 @@ button[disabled="disabled"] {
 @media (min-width: 900px) {
 	.arena:has(> #jx-gates[data-jx-shot="on"]) .fighter.is-attacking .shot {
 		display: block;
-		animation: juice-projectile 0.4s ease-out 0.15s both;
+		animation: juice-projectile var(--t-travel) ease-out var(--t-approach) both;
 	}
 	/* Direcao pelo data-side do atacante (C9/D2): 0 = coluna esquerda -> ltr,
 	   1 = coluna direita -> rtl. C15: travel so >= 900px. */
