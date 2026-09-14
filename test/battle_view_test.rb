@@ -316,13 +316,13 @@ class BattleViewTest < Minitest::Test
     body = last_response.body
     assert_match(/<div class="arena"[^>]*--step-delay: [\d.]+s/, body,
                  "arena exposes --step-delay for the shake (0086 Passo 9)")
-    fx_pattern = /<li class="log__entry"[^>]*>\s*<span class="fx fx--(hit|ko|heal|tick)"[^>]*--log-delay: [\d.]+s/
+    fx_pattern = /<li class="log__entry"[^>]*>\s*<span class="fx fx--(hit|ko|heal|tick)"[^>]*>/
     assert_match(fx_pattern, body,
-                 "each log line carries its own fx token with --log-delay (0086 Passo 9)")
-    entry_delay = body[/<li class="log__entry"[^>]*style="--log-delay: ([\d.]+)s"/, 1]
-    fx_delay = body[/<span class="fx[^>]*style="--log-delay: ([\d.]+)s"/, 1]
-    assert_equal entry_delay, fx_delay,
-                 "fx token reuses its line delay so flash fires with its line"
+                 "each log line carries its own fx token (0086 Passo 9)")
+    assert_match(/<li class="log__entry"[^>]*style="--log-delay: [\d.]+s"/, body,
+                 "the line (ancestor) declares --log-delay")
+    refute_match(/<span class="fx[^>]*--log-delay/, body,
+                 "fx inherits --log-delay from its line (Passo 36: sem declaracao duplicada)")
   end
 
   def test_battle_arena_carries_jx_toggles_per_aspect

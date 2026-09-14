@@ -151,7 +151,8 @@ class BattleStrikeRoutesTest < Minitest::Test
     assert_includes li, "--log-delay: 0s", "li carrega o proprio --log-delay"
     fx = body[/<span class="fx[^>]*>/]
     refute_nil fx, "fx presente dentro do li"
-    assert_includes fx, "--log-delay: 0s", "fx espelha o --log-delay da linha"
+    refute_includes fx, "--log-delay",
+                    "fx herda o --log-delay da linha (Passo 36: sem declaracao duplicada)"
     refute_includes body, "<template",
                     "sem embrulho em template (conteudo nunca seria inserido)"
   end

@@ -7,7 +7,7 @@
     data-from-side="<%= entry[:from_side] %>"
     data-to-side="<%= entry[:to_side] %>"<% if entry[:move_type] %>
     data-move-type="<%= entry[:move_type] %>"<% end %>>
-  <span class="fx <%= fx_class %>" style="--log-delay: 0s" aria-hidden="true"></span>
+  <span class="fx <%= fx_class %>" aria-hidden="true"></span>
   <span class="lside <%= side_class %>"><%= entry[:side] %></span>
   <span class="txt"><strong><%= entry[:text] %></strong>
     <% if entry[:damage] %><span class="chip chip--dmg"><%= entry[:damage] %> de dano</span><% end %>

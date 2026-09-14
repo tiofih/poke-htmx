@@ -1097,7 +1097,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
   def strike_hp_oob(engine, entry = nil)
     juice = strike_juice(engine, entry)
-    [0, 1].map { |side| strike_side_oob(engine, juice, side, entry) }.join
+    [0, 1].map { |side| strike_side_oob(engine, juice, side) }.join
   end
 
   # Juice por golpe (0086 Passo 20): replay só da entrada atual — classes e
@@ -1133,23 +1133,16 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     erb :_jx_gates, layout: false, locals: { gates: strike_gates(entry), move_type: move_type }
   end
 
-  # Delay por golpe (0086 Passo 20): o strike joga agora (0s); escopado aos
-  # lados da entrada atual, sem o max cumulativo do render full.
-  def strike_side_delay(entry)
-    from = entry[:from_side] || entry[:attacker].to_i
-    to = entry[:to_side] || (entry[:action] == :item ? from : 1 - from)
-    { 0 => 0.0, 1 => 0.0 }.merge(from => 0.0, to => 0.0)
-  end
-
-  def strike_side_oob(engine, juice, side, entry = nil)
+  # Delay por golpe (0086 Passo 20/36): o strike joga agora — sem o max
+  # cumulativo do render full, entao o `--step-delay` sai fixo em 0s.
+  def strike_side_oob(engine, juice, side)
     presenters = engine.teams[side].each_with_index.map do |poke, index|
       used = side.zero? && engine.member_used_item?(0, index)
       FighterPresenter.new(poke, item_used: used)
     end
-    delay = entry.nil? ? { 0 => 0.0, 1 => 0.0 } : strike_side_delay(entry)
     erb :_strike_fighters, layout: false,
                            locals: { side: side, title: side.zero? ? "Seu Time" : "Oponente",
-                                     juice: juice, side_delay: delay,
+                                     juice: juice, side_delay: { 0 => 0.0, 1 => 0.0 },
                                      presenters: presenters }
   end
 
