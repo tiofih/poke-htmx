@@ -160,7 +160,7 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
   - Esforço: **M** CSS-only com `container-type: inline-size` + `--fx-travel: 67cqi` derivado do grid `1fr/1.06fr/1fr` + 2 gaps de 32px (aproximado, erro de dezenas de px); **L** se pouso fiel ponto-a-ponto — exige medição em runtime = JS, hard-out do escopo (`sessions/0086-battle-log-juice.md §3:39`).
   - Requer: mover o markup do `.shot` do card para o track da arena (CSS não move elemento entre colunas; o servidor já sabe `data-from-side`/`data-to-side`), elemento de impacto por-linha no card alvo no instante da chegada (C13 postergou de propósito), keyframes `juice-shot-ltr/rtl` (`public/style.css:1581-1601`), rede reduced-motion (C14), 6 caudas do lab para o look de "saída", testes `test/style_responsive_test.rb:275-289,322-428` + e2e.
   - Risco: abaixo de 900px a arena colapsa para 1 coluna (`public/style.css:607-611`) mas o travel é horizontal em `min-width:900px` → projétil voa pelo vazio (hoje mascarado pelo fade em 40vw).
-- **Convergência de paleta de tipos com o lab (`public/type-effects-lab.html`)** — o lab define head claro + 6 tails saturadas em HEX CRU por tipo; 7/18 já casam (grass, water, electric, fighting, steel, ghost, dragon — alguns limítrofes) e 11 divergem: fire→#f97316, normal→#a8a29e, ice→#22d3ee, poison→#9333ea, ground→#92400e, flying→#38bdf8, psychic→#db2777, bug→#65a30d, rock→#78716c, dark→#1f2937, fairy→#f472b6.
+- **Convergência de paleta de tipos com o lab (`docs/type-effects-lab.html`)** — o lab define head claro + 6 tails saturadas em HEX CRU por tipo; 7/18 já casam (grass, water, electric, fighting, steel, ghost, dragon — alguns limítrofes) e 11 divergem: fire→#f97316, normal→#a8a29e, ice→#22d3ee, poison→#9333ea, ground→#92400e, flying→#38bdf8, psychic→#db2777, bug→#65a30d, rock→#78716c, dark→#1f2937, fairy→#f472b6.
   - Esforço S: ~20 LOC em `public/style.css:19-36` (18 tokens `--t-*`), 1 linha em `DESIGN.md:14`, revisão visual dos badges `.ftag--*` (`public/style.css:1399-1501`).
   - Bloqueios: `DESIGN.md:3-4` proíbe hex hardcoded (tokens só via DESIGN.md) e C11 (`sessions/0086-battle-log-juice.md §4:57`) exige "paleta `--t-*` existente + fallback" → exige S3 no C11; `--t-*` é global (pinta badges em roster/team/battle), não só o projétil.
 - **Remover o toggle JOGAR-AUTO e disparar os tempos no clique de "Batalhar"** — eliminar o checkbox `#auto-play`/`name="auto"` e o chain por `HX-Trigger`, de modo que um unico clique em `#play-btn` rode a batalha inteira com o pacing ajustado.
@@ -193,6 +193,7 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **L2** — suite Grafana de observabilidade (Prometheus/Grafana/Loki/Tempo; Mimir recomendado cortar).
 - **L3** — botão "reportar bug" (Nível A: link pré-preenchido recomendado; Nível C: `POST /feedback` só com auth).
 - **Cassettes VCR gigantes** — `record: :once`/`PokeApiStub` (recomendado A), Git LFS (B) ou limpar (C).
+- **Stub de `load_starters`/`STARTER_SLUGS` no `ServerTeamRemoveQ5Test`** — o DELETE re-renderiza `pokemon_list` e busca 27 starters × (`/pokemon` + `/pokemon-species` + `/evolution-chain`) + `?limit=100000`, gerando um cassette de 20 MB (27536 linhas); o stub elimina a necessidade dele (hoje gitignored, replay offline local).
 
 ---
 
