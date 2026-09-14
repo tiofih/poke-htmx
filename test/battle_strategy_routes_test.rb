@@ -33,7 +33,8 @@ class ServerBattleItemTest < Minitest::Test
     post "/battle/play", {}, user_session("user-a")
 
     assert last_response.ok?
-    assert_includes last_response.body, "usou Pocao"
+    assert_includes last_response.body, "usou 1 Pocao", "copy C3: uso conta a unidade consumida"
+    assert_includes last_response.body, "restam 0", "copy C3: uso informa o estoque restante"
     assert_equal 0, TestDatabase.inventory_quantity("user-a", "potion"),
                  "item atribuido consumido nao debita de novo (ja saiu na equipacao)"
     assert_nil @repository.all("user-a").first.assigned_item, "poke fica sem item apos consumir em batalha"

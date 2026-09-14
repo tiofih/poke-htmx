@@ -148,6 +148,8 @@ Log de batalha legível por rodada (chronological R1 no topo, cabeçalho de roun
 >
 > **S3 2026-09-12 — C8 adicionado (pedra fundamental + engine touch mínimo aprovados):** strike-flow Batalhar>golpe>linha>efeito>HP>modal, append-only (§5), base T140 stepper (bb22c53) + T142 strike route (59f9f4e) + T143 botão (f83d67d) + T144 e2e (a759ff3) + T145 container sempre renderizado (041d9ed); C1–C7 intactos.
 >
+> **S3 2026-09-14 — C3 (copy de consumo) prevalesce sobre assert legado (autorizado pelo usuário, opção (a)):** a asserção `test/battle_strategy_routes_test.rb` `test_battle_consumes_assigned_item_and_clears_member_without_debit` esperava `"usou Pocao"` (copy legada sem o restante); alinhada à forma C3 `"usou 1 Pocao"` + `"restam 0"`. Nenhum valor/regra mudou — só a asserção (doc-only) e o texto passou a ser o do C3. C1–C15 e G1 intactos.
+>
 > **S3 2026-09-12 — C9–C15 adicionados (efeito atacante→alvo, shake no alvo, cor por tipo — aprovados pelo usuário):** projétil viaja do atacante em direção à coluna inimiga (teto direcional por `data-side`, sem ponto-a-ponto; D1/D2 §5) + shake SÓ no card do alvo gated `data-jx-shake` (arena fora; gate já emitido, D3) + cor por tipo (18 tipos → paleta `--t-*` + fallback; toque aprovado em `lib/battle_log_presenter.rb` p/ expor `move_type`, D4) + gancho `data-strategy` default `"strike"` + vars `--fx-color`/`--fx-travel`/`--fx-shake` + sync no impacto + reduce final segue ÚLTIMO + <900px flash-only; plano estendido em Passos 23–28 (Passo 22 em voo em paralelo, não reutilizar o número); C1–C8 intactos, G1 estendido (`battle_engine.rb`/`battle_service.rb`/`db/` proibidos).
 
 ## 8. Observações
