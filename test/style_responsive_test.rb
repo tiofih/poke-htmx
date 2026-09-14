@@ -546,8 +546,11 @@ class StyleResponsiveTest < Minitest::Test
       assert_match(/data-jx-#{aspect}="on"/, content,
                    "aspecto #{aspect} deve ter um bloco gated por data-jx-#{aspect}")
     end
-    assert_match(/\.arena\[data-jx-hit="on"\] \.fighter\.is-hit\s*\{[^}]*animation:\s*juice-flash/m, content,
-                 "hit agregado so anima sob data-jx-hit=on")
+    live_hit = /\.arena:has\(>\s*#jx-gates\[data-jx-hit="on"\]\)\s*\.fighter\.is-hit\s*\{[^}]*animation:\s*juice-flash/m
+    assert_match(live_hit, content,
+                 "hit agregado so anima sob o carrier vivo #jx-gates[data-jx-hit=on]")
+    refute_match(/\.arena\[data-jx-(?:hp|hit|dmg|ko)="on"\]/, content,
+                 "Passo 38: regras legadas no .arena nao voltam — atributos estaticos off, gate vivo e #jx-gates")
     assert_match(/\.arena\[data-jx-modal="on"\] \.res-overlay\s*\{[^}]*animation-delay:\s*var\(--log-total/m, content,
                  "modal revela sob data-jx-modal via --log-total")
   end

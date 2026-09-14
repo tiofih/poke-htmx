@@ -963,38 +963,11 @@ li.fighter {
 	animation-delay: calc(var(--t-log) + var(--log-delay, 0s));
 }
 
-/* HP animado: parte do HP inicial (var do servidor) ate o atual.
-   Passo 11: agregado — so com data-jx-hp="on" (default OFF). */
-.arena[data-jx-hp="on"] .fighters .bar-fill {
-	animation: juice-hp 0.5s ease-out both;
-}
-
-/* Flash de dano no card do alvo (0086 Passo 9: estado final only — o
-   escalonado por linha vive no .fx dentro da .log__entry via --log-delay).
-   Passo 11: agregado — so com data-jx-hit="on" (default OFF). */
-.arena[data-jx-hit="on"] .fighter.is-hit {
-	animation: juice-flash 0.4s ease-out;
-}
-
-/* Numero de dano flutuante — Passo 11: agregado, so com data-jx-dmg="on". */
-.arena[data-jx-dmg="on"] .fighter.is-hit::after {
-	content: attr(data-damage);
-	position: absolute;
-	top: -6px;
-	right: 8px;
-	font-weight: bold;
-	color: var(--danger);
-	pointer-events: none;
-	animation: juice-damage-number 0.5s ease-out both;
-}
-
-/* KO fade/grayscale — Passo 11: agregado, so com data-jx-ko="on" (default OFF). */
-.arena[data-jx-ko="on"] .fighter.fainted img,
-.arena[data-jx-ko="on"] .fighter.fainted .fname {
-	filter: grayscale(1);
-	opacity: 0.6;
-	animation: juice-ko 0.5s ease-out both;
-}
+/* Passo 38: removidas as regras legadas `.arena[data-jx-hp|hit|dmg|ko="on"]`
+   — os atributos ficam estaticamente "off" no .arena (views/battle.erb:44) e
+   o gate vivo e o carrier #jx-gates (views/_jx_gates.erb:1), como no shake
+   removido no Passo 35. Os equivalentes agregados sao as regras
+   `.arena:has(> #jx-gates[data-jx-hp|hit|dmg|ko="on"])` mais abaixo (Passo 20). */
 
 .fighter.fainted {
 	opacity: 0.75;
