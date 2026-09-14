@@ -426,13 +426,16 @@ class ServerListTest < Minitest::Test
     refute_includes last_response.body, "<html"
   end # rubocop:enable Metrics/AbcSize
 
-  def test_pokemons_add_buttons_use_pt_br_copy
+  def test_pokemons_add_buttons_use_plus_affordance
     stub_list(two_hundred_fifty_names) do
       get "/pokemons", q: "pokemon"
     end
 
     assert last_response.ok?
-    assert_equal 36, last_response.body.scan("Adicionar ao time").size
+    assert_equal 36, last_response.body.scan(/class="[^"]*\bpcard-add\b"/).size
+    assert_equal 36, last_response.body.scan(%r{<button[^>]*class="[^"]*\bpcard-add\b"[^>]*>\+</button>}).size
+    assert_equal 36, last_response.body.scan(/aria-label="Adicionar .*? ao time"/).size
+    refute_includes last_response.body, "Adicionar ao time</button>"
   end
 
   def test_pokemons_add_button_shows_in_team_when_pokemon_in_team
@@ -443,9 +446,13 @@ class ServerListTest < Minitest::Test
     end
 
     assert last_response.ok?
-    assert_includes last_response.body, "No time ✓"
-    assert_match(/disabled="disabled"[^>]*>\s*No time ✓/, last_response.body)
-    assert_includes last_response.body, "Adicionar ao time"
+    in_team_pattern = Regexp.union(
+      %r{aria-label="pikachu já está no time"[^>]*disabled="disabled"[^>]*>\+</button>},
+      %r{disabled="disabled"[^>]*aria-label="pikachu já está no time"[^>]*>\+</button>}
+    )
+    assert_match(in_team_pattern, last_response.body)
+    assert_includes last_response.body, 'aria-label="Adicionar bulbasaur ao time"'
+    refute_includes last_response.body, "No time ✓"
   end
 
   def test_pokemons_add_buttons_disabled_when_team_full
