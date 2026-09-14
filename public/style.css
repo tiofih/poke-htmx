@@ -1000,15 +1000,10 @@ li.fighter {
 	opacity: 0.75;
 }
 
-/* Screenshake leve NO CARD DO ALVO (0086 C10/Passo 25 — arena fora): o gate
-   data-jx-shake acende so no .fighter.is-hit, compondo com o flash.
-   Passo 11: agregado — so com data-jx-shake="on" (default OFF). */
-.arena[data-jx-shake="on"] .fighter.is-hit {
-	animation:
-		juice-flash 0.4s ease-out,
-		juice-shake 0.3s ease-out;
-	animation-delay: var(--fx-shake, 0s);
-}
+/* Passo 35: removida a regra legada `.arena[data-jx-shake="on"] .fighter.is-hit`
+   — o atributo so existe no carrier #jx-gates (views/_jx_gates.erb:1); no
+   .arena fica estaticamente "off" (views/battle.erb:44), entao a regra nunca
+   casava. O shake ativo e o `.arena:has(> #jx-gates[data-jx-shake="on"])`. */
 
 /* Projetil — so em viewport >= 900px; abaixo disso so flash no alvo */
 .shot {
@@ -1963,14 +1958,11 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
    herda o fallback normal do .log__entry. Passo 29: o mapeamento mora no
    carrier #jx-gates e propaga --fx-color ao .arena via :has — unico ancestral
    comum com o .shot (o log nao e ancestral da arena). data-strategy e o
-   gancho de extensibilidade (C12): default "strike"; futuras estrategias
-   trocam so a config de tokens --fx-*, sem keyframes novos. */
-/* Passo 33: `--fx-shake` saiu daqui — o `.log__entry` nao e ancestral do
-   `.fighter.is-hit`, entao ali so existia o risco de resetar o token; o valor
-   efetivo (0.55s) mora na regra que aplica a animacao do shake. */
-.log__entry[data-strategy="strike"] {
-	--fx-travel: 40vw;
-}
+   gancho de extensibilidade (C12): default "strike" nas views. Passo 35: a
+   config de --fx-* que alcanca o .shot/.fighter.is-hit mora no .arena (unico
+   ancestral comum das animacoes); a regra `.log__entry[data-strategy="strike"]`
+   era inerte — o log nao e ancestral de nenhum dos dois — e foi removida como
+   redundante. O token --fx-travel: 40vw segue declarado no .arena (fonte unica). */
 
 .arena:has(> #jx-gates[data-move-type="normal"]) { --fx-color: var(--t-normal); }
 .arena:has(> #jx-gates[data-move-type="fire"]) { --fx-color: var(--t-fire); }

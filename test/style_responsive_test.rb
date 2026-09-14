@@ -318,18 +318,35 @@ class StyleResponsiveTest < Minitest::Test
                  "data-side=1 (coluna direita) viaja rtl sob data-jx-shot (C9)")
   end
 
-  # C15 (0086 Passo 24): abaixo de 900px o efeito fica flash-only (sem travel).
+  # C15 (0086 Passo 24 / Passo 35): abaixo de 900px o efeito fica flash-only
+  # (sem travel). O teste delimita o bloco @media 900px — da chave de abertura
+  # ate a chave de fechamento correspondente — e prova que as regras de travel
+  # moram DENTRO dele. Ordem textual depois da abertura nao bastava: uma regra
+  # movida para depois do bloco tambem passaria na asserção antiga.
   def test_shot_travel_disabled_below_900px
     content = style_content
 
-    media_index = content.rindex(/@media\s*\(min-width:\s*900px\)/)
-    refute_nil media_index, "breakpoint de travel >= 900px deve existir"
+    open = content.rindex(/@media\s*\(min-width:\s*900px\)\s*\{/)
+    refute_nil open, "breakpoint de travel >= 900px deve existir"
+
+    depth = 0
+    close = nil
+    content[open..].each_char.with_index do |char, index|
+      depth += 1 if char == "{"
+      depth -= 1 if char == "}"
+      next unless char == "}" && depth.zero?
+
+      close = open + index
+      break
+    end
+    refute_nil close, "o bloco @media 900px deve fechar (chaves balanceadas)"
+    media_block = content[open..close]
 
     %w[juice-shot-ltr juice-shot-rtl].each do |keyframe|
-      use_index = content.index("animation-name: #{keyframe}")
-      refute_nil use_index, "travel #{keyframe} deve ser aplicado em algum lugar"
-      assert use_index > media_index,
-             "travel #{keyframe} so dentro de @media (min-width:900px) — <900px flash-only (C15)"
+      assert content.include?("animation-name: #{keyframe}"),
+             "travel #{keyframe} deve ser aplicado em algum lugar (C15)"
+      assert media_block.include?("animation-name: #{keyframe}"),
+             "travel #{keyframe} so DENTRO do bloco @media (min-width:900px) — <900px flash-only (C15)"
     end
   end
 
