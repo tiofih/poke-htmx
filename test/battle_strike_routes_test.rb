@@ -87,7 +87,8 @@ class BattleStrikeRoutesTest < Minitest::Test
     assert last_response.ok?
     play = last_response.body[/<button[^>]*id="play-btn"[^>]*>/]
     refute_nil play, "fim de batalha re-troca #play-btn via OOB"
-    assert_includes play, 'hx-swap-oob="outerHTML"', "swap do botao e OOB (htmx 2.0.3 sem delete)"
+    assert_includes play, 'hx-swap-oob="outerHTML"',
+                    "OOB troca o botao por copia disabled (outerHTML): mantem o controle para layout/a11y, porem inerte"
     assert_includes play, " disabled", "botao Batalhar fica desabilitado apos o fim"
     refute_includes play, "hx-post", "sem acao de golpe no botao final"
   end
