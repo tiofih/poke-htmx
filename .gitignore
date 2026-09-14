@@ -42,6 +42,13 @@ test-results/
 # Cassette VCR gigante — recording bug (>100MB, excede limite do GitHub)
 test/cassettes/ServerTeamRemoveQ5Test/test_oob_conditional_skips_starters_when_filtered_or_paginated.yml
 
+# Cassette VCR grande (20MB) — gravação legítima, replay offline obrigatório; não vale a pena commitar. Fix real: stub de load_starters/STARTER_SLUGS em ServerTeamRemoveQ5Test
+test/cassettes/ServerTeamRemoveQ5Test/test_oob_includes_starters_when_visible.yml
+
+# Scaffolds não versionados, recriados automaticamente pelo tooling do agente; não devem sujar a árvore
+ARCHITECTURE.md
+PROJECT.md
+
 # CCE (code-context-engine)
 # CCE local cache (per-machine, not for version control)
 .cce/
@@ -68,6 +75,8 @@ _ai_context/
 
 # Log de benchmark (cresce a cada sonda; protocolo em docs/bench-ferramentas.md)
 docs/bench-log.csv
+# Ledger de spawns de subagent (cresce a cada execucao; mesmo tipo do bench-log acima)
+docs/spawn-ledger.csv
 _ai_context/_SESSION.md
 _ai_context/.context_hash
 _ai_context/registry.yaml
