@@ -13,6 +13,7 @@ export default defineConfig({
   reporter: 'line',
   use: {
     baseURL: 'http://localhost:3000',
+    channel: 'chrome',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     actionTimeout: 15_000,
