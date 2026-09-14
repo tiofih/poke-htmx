@@ -1978,6 +1978,30 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 .arena:has(> #jx-gates[data-move-type="steel"]) { --fx-color: var(--t-steel); }
 .arena:has(> #jx-gates[data-move-type="fairy"]) { --fx-color: var(--t-fairy); }
 
+/* Passo 32: o mapeamento tambem casa a propria entrada pelo seletor generico de
+   atributo (o .log__entry carrega data-move-type). Mesma especificidade do
+   fallback normal do .log__entry (L939), vence por ordem de fonte e devolve a
+   cor por tipo ao .log__entry .fx (Passo 26); o carrier acima segue propagando
+   --fx-color ao .arena para o projetil (.shot). */
+[data-move-type="normal"] { --fx-color: var(--t-normal); }
+[data-move-type="fire"] { --fx-color: var(--t-fire); }
+[data-move-type="water"] { --fx-color: var(--t-water); }
+[data-move-type="electric"] { --fx-color: var(--t-electric); }
+[data-move-type="grass"] { --fx-color: var(--t-grass); }
+[data-move-type="ice"] { --fx-color: var(--t-ice); }
+[data-move-type="fighting"] { --fx-color: var(--t-fighting); }
+[data-move-type="poison"] { --fx-color: var(--t-poison); }
+[data-move-type="ground"] { --fx-color: var(--t-ground); }
+[data-move-type="flying"] { --fx-color: var(--t-flying); }
+[data-move-type="psychic"] { --fx-color: var(--t-psychic); }
+[data-move-type="bug"] { --fx-color: var(--t-bug); }
+[data-move-type="rock"] { --fx-color: var(--t-rock); }
+[data-move-type="ghost"] { --fx-color: var(--t-ghost); }
+[data-move-type="dragon"] { --fx-color: var(--t-dragon); }
+[data-move-type="dark"] { --fx-color: var(--t-dark); }
+[data-move-type="steel"] { --fx-color: var(--t-steel); }
+[data-move-type="fairy"] { --fx-color: var(--t-fairy); }
+
 /* Efeito por linha (0086 Passo 9, CSS-only): .fx mora dentro da
    .log__entry e carrega o proprio --log-delay — flash/damage sincronizado
    a sua linha, sem max-por-lado; fighter li segue so estado final.

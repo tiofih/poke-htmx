@@ -317,8 +317,10 @@ class StyleResponsiveTest < Minitest::Test
                  "arena inteira nao pode tremer (C10): sem regra arena-wide de shake")
   end
 
-  # C11 (0086 Passo 26): os 18 tipos mapeiam --fx-color para a paleta --t-*
-  # existente das tags (sem hex novo); entrada sem tipo cai no fallback normal.
+  # C11 (0086 Passos 26/32): os 18 tipos mapeiam --fx-color para a paleta --t-*
+  # existente das tags (sem hex novo); a entrada mapeia pelo proprio
+  # data-move-type (seletor generico de atributo, nao so o carrier #jx-gates);
+  # entrada sem tipo cai no fallback normal.
   def test_move_type_colors_map_to_type_palette
     content = style_content
 
@@ -330,8 +332,9 @@ class StyleResponsiveTest < Minitest::Test
       "rock" => "--t-rock", "ghost" => "--t-ghost", "dragon" => "--t-dragon",
       "dark" => "--t-dark", "steel" => "--t-steel", "fairy" => "--t-fairy"
     }.each do |type, var|
-      assert_match(/\[data-move-type="#{type}"\][^{]*\{[^}]*--fx-color:\s*var\(#{Regexp.escape(var)}\)/m,
-                   content, "tipo #{type} deve mapear --fx-color para #{var} (C11)")
+      assert_match(/^[ \t]*\[data-move-type="#{type}"\][^{]*\{[^}]*--fx-color:\s*var\(#{Regexp.escape(var)}\)/m,
+                   content,
+                   "tipo #{type} deve mapear --fx-color para #{var} na propria entrada, nao so no carrier (C11)")
     end
 
     assert_match(/\.log__entry\s*\{[^}]*--fx-color:\s*var\(--t-normal\)/m, content,
