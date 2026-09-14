@@ -104,6 +104,8 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **Polling/SSE/streaming da resolução da batalha** — se o log ficar longo no futuro.
 - **Persistência do log de batalha em DB** — hoje derivado do engine em memória.
 - **Atualizar para HTMX 4.0** + **adicionar skills da atualização** (routing AGENTS/CLAUDE).
+  - T128: pinado `htmx.org@2.0.3` (`views/layout.erb:7`); breaking hits: rename de eventos (`layout.erb:38-53`), `hx-disabled-elt`→`hx-disable` (`team.erb:57`), `hx-params` removido (`team.erb:53`) + `hx-delete` form-data, flip ordem OOB, swap default 4xx/5xx (`server.rb:1296`), `HX-Trigger`→`HX-Source`.
+  - Checklist: renomear eventos/atributos, pinar 4.0.0 + upgrade-check, fallback `htmx-2-compat`, verificar OOB/indicators/modais; esforço ~M (maioria verificação); skill `htmx-upgrade-from-htmx2`; implementação futura, fora do fluxo (RNF-04).
 - **Flag `user_state` vestigial** — `JourneyService#started?` agora só usa `team>=6`; remover/redefinir papel.
 
 ### Auto-battler / Motor
@@ -121,6 +123,7 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **ECO rebalance — heal trap / death spiral** — `lose_money 40 < heal 131`; softlock na 1ª derrota (propostas: `lose 60`, `heal 0.3`, 1ª cura grátis).
 - **Ajuste da tabela de XP e dinheiro** — revisar `ExperienceCurve` (linear `level*100`) e `RewardRule#money_for` (100/50/40).
 - **Dificuldade dinâmica por desempenho da batalha anterior** — ajustar banda/nível do oponente por resultado/placar/HP restante.
+- **Oponente 6v6 garantido** — `complete_with_fallback` com mínimo 6 (relaxar banda→orçamento→pool base, sem repetir); estender TP-4 com `OPPONENT_MIN_SIZE`; ref 0066 + sessions/0081:103 out-of-scope note.
 - **Times iniciam no nível 5** — `TeamRepository#add`/`ProgressionRepository` criar progresso `level: 5`.
 - **Vitórias +2 níveis, derrotas +1** — conceder XP equivalente a 2/1 níveis.
 - **Exploits/desequilíbrios (playtest 0063)** — E1 (lendários desde nível 5 vs banda D/C), E2 (farm de derrota), E3 (custo por linha vs base = noob trap), E4 (sem cap de tier S), E5 (linha S restrita 110), E6 (gate `base_form?` só 1ª evolução).
@@ -145,6 +148,21 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **Manage sem paginação/busca** — O(n) forms por poke (180 forms no mobile).
 - **-1hp persist** — `battle_engine` 119-126, mecânica TP-17/TP-10.
 - **LOG-juice** — aparência do log + animações CSS + reduced-motion.
+- **T20 casual — feedback de add/remove** — label do botão Add + toast; remover confirm; posição do Add no card.
+- **T20 casual — custo/cura legíveis** — legenda X/450 + "Faltam N"; heal desabilitado com motivo + re-render do saldo.
+- **T20 casual — batalha/filtros/time vazio** — fundir CTAs + loading; labels de filtro + "N resultados" + empty state; pill de progresso com time vazio.
+- **T20 casual — prontidão/log** — copy do readiness pill + link; logs newest-first + respeitar reduced-motion por último.
+- **Heal-success toast pós-modal (follow-up 0082 close-on-success)** — toast/alert em battle + home após fechar modal de cura (hoje zero feedback); referenciar close-on-success da 0082.
+- **Efeitos de golpe: projétil + shake (extensível)** — a jogada deve mostrar o efeito saindo do Pokémon atacante em direção ao atacado e um shake no que recebe o golpe. Precisa ser extensível para: (a) futuras mudanças de estratégia de ataque; (b) cor do efeito derivada do tipo do golpe.
+  - Contexto: a sessão 0086 (battle-log + juice CSS-only) excluiu explicitamente "projétil <900px" do escopo; o caminho do strike já carrega `data-from-side` / `data-to-side` na entrada do log e emite gates `[data-jx-*]` OOB — usar isso como gancho de extensibilidade em vez de JS por golpe.
+  - Nota: cabe avaliação de tipo-de-golpe (o move já é conhecido no servidor; verificar se o tipo vem no payload atual ou se precisa ser exposto).
+  - Chegada real atacante→atacado (medido 2026-09-14, anotado pós-review da 0086): hoje é teto direcional, não chegada — `.shot` é filho de `li.fighter` (`views/_fighter_panel.erb:14`), absoluto sobre o card, `translateX(calc(100% + 40vw))` (`public/style.css:1587,1598`) → para no podium (~472px vs ~815px medidos centro-a-centro).
+  - Esforço: **M** CSS-only com `container-type: inline-size` + `--fx-travel: 67cqi` derivado do grid `1fr/1.06fr/1fr` + 2 gaps de 32px (aproximado, erro de dezenas de px); **L** se pouso fiel ponto-a-ponto — exige medição em runtime = JS, hard-out do escopo (`sessions/0086-battle-log-juice.md §3:39`).
+  - Requer: mover o markup do `.shot` do card para o track da arena (CSS não move elemento entre colunas; o servidor já sabe `data-from-side`/`data-to-side`), elemento de impacto por-linha no card alvo no instante da chegada (C13 postergou de propósito), keyframes `juice-shot-ltr/rtl` (`public/style.css:1581-1601`), rede reduced-motion (C14), 6 caudas do lab para o look de "saída", testes `test/style_responsive_test.rb:275-289,322-428` + e2e.
+  - Risco: abaixo de 900px a arena colapsa para 1 coluna (`public/style.css:607-611`) mas o travel é horizontal em `min-width:900px` → projétil voa pelo vazio (hoje mascarado pelo fade em 40vw).
+- **Convergência de paleta de tipos com o lab (`public/type-effects-lab.html`)** — o lab define head claro + 6 tails saturadas em HEX CRU por tipo; 7/18 já casam (grass, water, electric, fighting, steel, ghost, dragon — alguns limítrofes) e 11 divergem: fire→#f97316, normal→#a8a29e, ice→#22d3ee, poison→#9333ea, ground→#92400e, flying→#38bdf8, psychic→#db2777, bug→#65a30d, rock→#78716c, dark→#1f2937, fairy→#f472b6.
+  - Esforço S: ~20 LOC em `public/style.css:19-36` (18 tokens `--t-*`), 1 linha em `DESIGN.md:14`, revisão visual dos badges `.ftag--*` (`public/style.css:1399-1501`).
+  - Bloqueios: `DESIGN.md:3-4` proíbe hex hardcoded (tokens só via DESIGN.md) e C11 (`sessions/0086-battle-log-juice.md §4:57`) exige "paleta `--t-*` existente + fallback" → exige S3 no C11; `--t-*` é global (pinta badges em roster/team/battle), não só o projétil.
 
 ### Playtest / QA / Ferramentas
 - **TP-1** — playbook de playtest reutilizável (helpers no harness).
