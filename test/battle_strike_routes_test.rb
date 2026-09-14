@@ -78,6 +78,30 @@ class BattleStrikeRoutesTest < Minitest::Test
     assert_includes last_response.body, "Vencedor:"
   end
 
+  # Review round 11 (0086 Passo 31): o golpe final desabilita o botao primario
+  # via OOB; sem isso #play-btn fica vivo apos o fim e cliques devolvem "".
+  def test_strike_disables_play_button_when_finished
+    start_battle_for("user-a")
+    strike_until_finish
+
+    assert last_response.ok?
+    play = last_response.body[/<button[^>]*id="play-btn"[^>]*>/]
+    refute_nil play, "fim de batalha re-troca #play-btn via OOB"
+    assert_includes play, 'hx-swap-oob="outerHTML"', "swap do botao e OOB (htmx 2.0.3 sem delete)"
+    assert_includes play, " disabled", "botao Batalhar fica desabilitado apos o fim"
+    refute_includes play, "hx-post", "sem acao de golpe no botao final"
+  end
+
+  def test_strike_keeps_play_button_while_running
+    start_battle_for("user-a")
+
+    post "/battle/strike", {}, user_session("user-a")
+
+    assert last_response.ok?
+    refute_includes last_response.body, 'id="play-btn"',
+                    "em andamento o botao nao e re-renderizado nem removido"
+  end
+
   def test_strike_auto_chains_next_strike_until_finished
     start_battle_for("user-a")
 

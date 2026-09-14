@@ -1,3 +1,7 @@
+<%# Passo 31 (0086 review round 11): fim de batalha desabilita o botao primario.
+    Sem isso #play-btn continua vivo atras do modal e cada clique devolve "".
+    htmx 2.0.3 nao tem swap "delete"; outerHTML disabled e o equivalente. %>
+<button id="play-btn" class="btn btn-primary btn-lg" data-od-id="cta-play" disabled hx-swap-oob="outerHTML">Batalhar</button>
 <div id="result-box" hx-swap-oob="innerHTML">
   <% end_state = @game_over ? "over" : (@engine.winner.nil? ? "draw" : (@engine.winner.zero? ? "win" : "loss")) %>
   <% end_slug, end_label, end_title = { "win" => ["victory", "Vitória", "Seu Time venceu"], "loss" => ["defeat", "Derrota", "Oponente venceu"], "draw" => ["draw", "Empate", "Empate — ninguém venceu"], "over" => ["gameover", "Game Over", "Sem dinheiro para curar"] }.fetch(end_state) %>
