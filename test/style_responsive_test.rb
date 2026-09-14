@@ -24,7 +24,7 @@ class StyleResponsiveTest < Minitest::Test
 
     expr.split("+").sum do |term|
       term = term.strip
-      if (ref = term[/\Avar\((--[\w-]+)/, 1])
+      if (ref = term[/\Avar\((--[\w-]+)\)\z/, 1])
         raise ArgumentError, "var ausente na linha do tempo: #{ref}" unless vars.key?(ref)
 
         resolve_css_time(vars.fetch(ref), vars, seen + [ref])
@@ -33,6 +33,17 @@ class StyleResponsiveTest < Minitest::Test
       else
         raise ArgumentError, "termo nao resolvivel: #{term.inspect}"
       end
+    end
+  end
+
+  # T6a hardening (Passo 37): o helper so aceita a forma suportada `var(--x)`
+  # (soma de instantes). Forma ambigua (ex.: `calc(var(--t-impact) - 0.1s)`)
+  # deve falhar alto, em vez de devolver o valor da var ignorando a aritmetica.
+  def test_timeline_helper_rejects_unsupported_calc_form
+    vars = css_time_vars(style_content)
+
+    assert_raises(ArgumentError, "calc com '-' nao pode ser resolvido silenciosamente") do
+      resolve_css_time("calc(var(--t-impact) - 0.1s)", vars)
     end
   end
 
