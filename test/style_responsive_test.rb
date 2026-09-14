@@ -379,13 +379,27 @@ class StyleResponsiveTest < Minitest::Test
                  "keyframe de travel le --fx-travel, sem distancia hardcoded (C12)")
   end
 
-  # C13 (0086 Passo 27): shake no card do alvo atrasa no instante do impacto
-  # via --fx-shake, nunca no --step-delay acumulado da arena (bug Passo 25).
+  # C13 (0086 Passo 27 / Passo 33): shake no card do alvo atrasa no instante do
+  # impacto via --fx-shake — o VALOR tem que bater com a chegada do projetil
+  # (delay 0.15s + travel 0.4s), nunca no --step-delay acumulado (bug Passo 25).
   def test_shake_synced_to_impact_instant
     content = style_content
 
-    assert_match(/data-jx-shake="on"\]\)\s*\.fighter\.is-hit\s*\{[^}]*animation-delay:\s*var\(--fx-shake/m,
-                 content, "shake do alvo atrasa no impacto via --fx-shake (C13)")
+    shake_block = content[/#jx-gates\[data-jx-shake="on"\]\)\s*\.fighter\.is-hit\s*\{([^}]*)\}/m, 1]
+    refute_nil shake_block, "regra de shake no card do alvo via #jx-gates deve existir (C10/C13)"
+    assert_match(/animation-delay:\s*var\(--fx-shake,\s*0s\)/, shake_block,
+                 "shake do alvo atrasa no impacto via --fx-shake (C13)")
+
+    shake = shake_block[/--fx-shake:\s*([\d.]+)s/, 1]
+    refute_nil shake, "o card do alvo carrega --fx-shake com valor real, nao so o token (C13)"
+
+    projectile = content.scan(/animation:\s*juice-projectile\s+([\d.]+)s\s+ease-out\s+([\d.]+)s/).last
+    refute_nil projectile, "regra do projetil (>= 900px) declara travel + delay de chegada"
+    travel, delay = projectile.map(&:to_f)
+
+    assert_in_delta travel + delay, shake.to_f, 0.001,
+                    "o shake dispara no instante do impacto: --fx-shake = travel + delay do projetil (C13)"
+
     refute_match(/data-jx-shake="on"\]\)?\s*\{[^}]*animation-delay:\s*var\(--step-delay/m, content,
                  "arena nao le o --step-delay acumulado (regressao Passo 25)")
     refute_match(/data-jx-shake="on"\]\)?\s*\{[^}]*animation:\s*juice-shake/m, content,

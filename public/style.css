@@ -1954,9 +1954,11 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
    comum com o .shot (o log nao e ancestral da arena). data-strategy e o
    gancho de extensibilidade (C12): default "strike"; futuras estrategias
    trocam so a config de tokens --fx-*, sem keyframes novos. */
+/* Passo 33: `--fx-shake` saiu daqui — o `.log__entry` nao e ancestral do
+   `.fighter.is-hit`, entao ali so existia o risco de resetar o token; o valor
+   efetivo (0.55s) mora na regra que aplica a animacao do shake. */
 .log__entry[data-strategy="strike"] {
 	--fx-travel: 40vw;
-	--fx-shake: 0s;
 }
 
 .arena:has(> #jx-gates[data-move-type="normal"]) { --fx-color: var(--t-normal); }
@@ -2450,6 +2452,10 @@ button[disabled="disabled"] {
 	animation: juice-hp 0.5s ease-out both;
 }
 .arena:has(> #jx-gates[data-jx-shake="on"]) .fighter.is-hit {
+	/* 0086 C13/Passo 33: o shake dispara no instante do impacto. O token fica
+	   onde a animacao e aplicada (herdar do .arena so daria 0s) e carrega a
+	   chegada do projetil: 0.15s de delay + 0.4s de travel (regra .shot >= 900px). */
+	--fx-shake: 0.55s;
 	animation:
 		juice-flash 0.4s ease-out,
 		juice-shake 0.3s ease-out;
