@@ -94,8 +94,8 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 > Candidatos a sessão futura. A numeração abaixo é apenas de referência/rastreio.
 
 ### Arquitetura / Infra / Performance
-- **Escritas multi-tabela fora de transação única** — compra/batalha orquestram wallet+inventory+XP em passos separados. (limitação aberta; candidata a "escritas atômicas")
-- **Remover `pry` do runtime de produção** — `server.rb`/Gemfile; barato, respiro técnico.
+- **Escritas multi-tabela fora de transação única** — compra/batalha orquestram wallet+inventory+XP em passos separados. (limitação aberta; candidata a "escritas atômicas"; detalhe consolidado na **§4.B**, candidata a **0084**)
+- **Remover `pry` do runtime de produção** — `server.rb`/Gemfile; barato, respiro técnico. (consolidado na **§4.B**)
 - **TTLs divergentes entre as 2 camadas de cache** — memória 600s vs disco 7d; documentar/decidir.
 - **Memoização request-scoped de journey/team nos renders gated** — hoje 2× team + 2× user_state por request.
 - **Instrumentação mínima (tempo por rota/log)** — orientar otimizações com dados.
@@ -124,9 +124,9 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **Ajuste da tabela de XP e dinheiro** — revisar `ExperienceCurve` (linear `level*100`) e `RewardRule#money_for` (100/50/40).
 - **Dificuldade dinâmica por desempenho da batalha anterior** — ajustar banda/nível do oponente por resultado/placar/HP restante.
 - **Oponente 6v6 garantido** — `complete_with_fallback` com mínimo 6 (relaxar banda→orçamento→pool base, sem repetir); estender TP-4 com `OPPONENT_MIN_SIZE`; ref 0066 + sessions/0081:103 out-of-scope note.
-- **Times iniciam no nível 5** — `TeamRepository#add`/`ProgressionRepository` criar progresso `level: 5`.
-- **Vitórias +2 níveis, derrotas +1** — conceder XP equivalente a 2/1 níveis.
-- **Exploits/desequilíbrios (playtest 0063)** — E1 (lendários desde nível 5 vs banda D/C), E2 (farm de derrota), E3 (custo por linha vs base = noob trap), E4 (sem cap de tier S), E5 (linha S restrita 110), E6 (gate `base_form?` só 1ª evolução).
+- ~~**Times iniciam no nível 5**~~ — **[FEITO — 0067]** time inicial `level: 5` xp 1000 (`SESSIONS.md:379`, validada 2026-08-31). Mantido por histórico.
+- ~~**Vitórias +2 níveis, derrotas +1**~~ — **[FEITO — 0067]** `RewardRule#levels_for` win +2/draw +1/lose +1 via `grant_levels` (`SESSIONS.md:379`); o `lose→0` veio depois na 0081 (Done). Mantido por histórico.
+- **Exploits/desequilíbrios (playtest 0063)** — **E5 (linha S restrita 110) feito na 0058** (`docs/draft-backlog.md:65`); seguem abertos E1 (lendários desde nível 5 vs banda D/C), E2 (farm de derrota), E3 (custo por linha vs base = noob trap), E4 (sem cap de tier S), E6 (gate `base_form?` só 1ª evolução).
 
 ### UI/UX
 - **UX-1 — janelas flutuantes Center/Mart (modais)** + gerência de golpes no Center + itens no Mart + 4 selects para golpes (reestruturar `team_manage`). *Parte do escopo `open-design` (sessão 0076 modals).*
@@ -287,3 +287,70 @@ sessão (ver handoff). Decisão do usuário: **fatiar por tela** — 0077 parity
 estabilidade (atomicidade/CSRF/respiro) desliza 3 posições. Decisões pendentes no
 refinamento: tabs vs empilhado, podium vs res-top, formato do log, dot-por-tipo
 (custo backend), h-sub rico (migração).
+
+---
+
+## 4. Consolidação 2026-09-15 — catálogo único (fila, estabilidade, GDD, memória)
+
+> Levantamento completo das fontes (draft, `SESSIONS.md`, `sessions/`, `TODO.md`,
+> `REQUIREMENTS.md`, `GDD.md`, memória ai-memory). Onde o item já existia em §2, o
+> registro abaixo **enriquece** aquele item (não duplica). Itens stale/absorbidos mantêm
+> o histórico e o motivo.
+
+### 4.A Sessões na fila que nunca fecharam (furaram quando 0072–0086 passaram na frente)
+
+- **0079 open-design-history-1a1** — TDD concluído, **aguardando Revisor (S7)** e validação. `sessions/0079-open-design-history-1a1.md:8-9`, `SESSIONS.md:515`. **S/M**.
+- **0078 open-design-battle-1a1** — implementação verde (Passos 1-3: `9b421c4`, `924e5b6`, `4604ee9`), validação pendente. O Status antigo citava 8 falhas alheias da 0077 em `_center`/`_mart`; **não reproduzido** — a suíte está verde hoje (1180 runs / 0 failures em `d5a06dd`), então o que fica é um *check* antes de retomar, não a falha. `sessions/0078-open-design-battle-1a1.md:8-9`, `SESSIONS.md:514`. **M/L**.
+- **0077 open-design-home-1a1** — fase 2+3 pendentes. `sessions/0077-open-design-home-1a1.md:8-9`, `SESSIONS.md:513`. **M**.
+- **0083 ui-polish** — pendente, visual-only (sem backend/regras/rotas). `sessions/0083-ui-polish.md:8-9`, `SESSIONS.md:519`. **S/M**.
+
+### 4.B Fila Estabilidade/Segurança — sem número de sessão
+
+> Números **0084/0085** ficaram reservados em `SESSIONS.md:403` (escritas→0083, CSRF→0084,
+> respiro→0085), mas a numeração saltou 0083→0086 quando a 0083 virou `ui-polish`.
+> Proposta de reuso em §4.F.
+
+- **Escritas atômicas + idempotência** — transação única + idempotência por round em `BattleService#finish_effects`/`MartService#purchase_result`; double-submit de `POST /battle/play`/`POST /mart/buy`. `REQUIREMENTS.md:554-560`, `docs/draft-backlog.md:97` (§2). **M/L**. Candidata a **0084**.
+- **CSRF / identidade** — `?as=` takeover, `SESSION_SECRET` hardcoded, POSTs sem CSRF; severidade **High**. `REQUIREMENTS.md:561-565`, `GDD.md:60`, `reviews/audit-baseline-2026-09-13.md:9,11`. **M**. Candidata a **0085**.
+- **Estado transiente + migrações destrutivas** — `BattleRegistry`/cache P1 não sobrevivem a `docker compose down`; migrações 0003/0007 com `TRUNCATE`. `REQUIREMENTS.md:574-576`. **S/M**.
+- **`pry` no boot de produção** — `require "pry"`; mover para dev. `REQUIREMENTS.md:577-578`, `docs/draft-backlog.md:98` (§2). **S**.
+- **CD/deploy** — CI só roda checks; sem alvo de deploy (registry, serviço, secrets). `REQUIREMENTS.md:586-587`. **M**.
+
+### 4.C Fonte órfã `GDD.md` (itens que NÃO estão no draft)
+
+> `GDD.md` (2026-09-13) propõe a jornada Bazaar-like; a maioria dos itens não está no
+> draft. Registrar como **fila a refinar**, sem data de execução.
+
+- **Onboarding** (nome+avatar persistidos em `user_state`) + **montagem em 2 vias** (1-a-1 vs time fechado pré-montado). `GDD.md:31-33`.
+- **Escolha de oponente por 3 cartas** (fraco/médio/forte, preview honesto, re-role por confronto). `GDD.md:34`.
+- **Ginásio temático** (líder por tipo dominante, intro de chefe). `GDD.md:35`.
+- **Lojas segmentadas** (portas Pedras/Poções/Equips). `GDD.md:36,50-53`.
+- **PvP fantasma** (snapshot de time real + IA do PvE; rank por temporada/ginásio). `GDD.md:37,44`.
+- **Pós-batalha unificada** (recompensa + cura rápida inline; mata o "pedágio do Center"). `GDD.md:38`.
+- **Empty-states A–E** (history zero, filtro zero, time 0/6, erro por status, mart/center vazios). `GDD.md:59`.
+- **Sinergia L2** (bônus/proteção por par adjacente do mesmo tipo; 1 regra por temporada). `GDD.md:45-46`.
+- **IV/EV light** (chips no detalhe; fora do MVP). `GDD.md:46`.
+- **Revive-½** (Poções; traz fainted a 50%). `GDD.md:53`.
+- **Roadmap em 12 fatias** (1 tela = 1 sessão SDD). `GDD.md:65-66`.
+- Já com dono/linha no draft: "Resolver batalha"→0069 (Done), "derrota XP-only/streak"→§2 ECO rebalance (`:123`), "anti-perda devolve holds"→0052 (Done). `GDD.md:30,48`.
+
+### 4.D Itens que só existiam na memória (ai-memory) — não estavam no draft
+
+- **BUG-2 — remover Pokémon com itens equipados perde os itens** — falta `InventoryRepository#add` antes do DELETE. **M**. `gotchas/poke-htmx-team-remove-loses-equipped-items.md`.
+- **T75 — toast de sucesso do heal** — sem feedback depois que o modal da 0082 fecha. **S**. `gotchas/0082-modal-close-fade-filtered.md`. (Confirma a origem do item §2 `docs/draft-backlog.md:155`.)
+- **`@team_s_count` morto** — atribuído em `server.rb:1032` (método `:696`) e **sem consumidor** em `views/`/`test/`; a gotcha cita `:786` (drift). **XS**. `gotchas/m2b-balanceamento-s-rest-110.md`.
+- **reduced-motion não mata `transition`** e `from_side`/`to_side` sem DRY. **S**. `gotchas/juice-reduced-motion-guard.md`. (Cruza com §2 `:150` e com os achados da 0087 `:216`.)
+- **Heal parcial (`affordable_hp` + FIFO) deliberadamente adiado**. **M**. `gotchas/0065-heal-trap.md`. (Cruza com §2 ECO rebalance `:123`.)
+
+### 4.E Stale / possivelmente resolvidos (histórico mantido)
+
+- `notes/pending-spacing-replication-across-screens.md` — provavelmente **superseded** pela onda open-design 0072–0079; verificar antes de usar.
+- **BUG-1** (`gotchas/poke-htmx-battle-opponent-deterministic-by-user-id.md`) — **contradito** pela tabela de concluídos: corrigido na 0049 (`docs/draft-backlog.md:49`).
+- `gotchas/open-design-views-mockup-rotas-futuras.md` — verificar se a 0076 entregou `GET /team/center` e `/team/mart` **antes** de abrir o item (0076 Done, `SESSIONS.md:517`).
+- `docs/draft-backlog.md:127-128` (nível 5; +2/+1) — **feitos na 0067** (`SESSIONS.md:379`); `lose→0` na 0081 (Done); **E5 na 0058** (`:65`). Já anotados no próprio item.
+- `sessions/0086-battle-log-juice.md` cita itens `TODO.md T2/T3/T6b` que **não existem mais** — `TODO.md` está com **0 bytes** hoje (referência pendurada).
+- `GDD.md:69` cita `vaults/Projetos/poke-htmx/draft-futuro.md`, **ausente do repo**.
+
+### 4.F Anomalia de numeração
+
+`SESSIONS.md:403` reservava **0084** (CSRF) e **0085** (respiro) — e antes `:402` reservava 0080/0081/0082 para escritas atômicas/CSRF/respiro. Com a 0083 virando `ui-polish` e a numeração saltando para **0086**, os slots **0084/0085** seguem livres. Proposta: quando os itens de §4.B virarem sessão, usar **0084 = escritas atômicas + idempotência** e **0085 = CSRF/identidade** (o "respiro" pode absorver `pry` ou ser descartado).
