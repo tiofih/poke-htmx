@@ -186,6 +186,24 @@ class BattleStrikeRoutesTest < Minitest::Test
     end
   end
 
+  # C1/C2 (0087 Passo 1): o .shot sai do card do lutador para a track dedicada do
+  # .arena; o OOB troca o innerHTML da track com origem/alvo/tipo do golpe atual.
+  def test_strike_oob_moves_shot_into_arena_track
+    start_battle_for("user-a")
+    body = strike_until_damaging
+
+    track = body[/<span class="shot-track"[^>]*>.*?<span class="shot"[^>]*>/m]
+    refute_nil track, "shot presente dentro da track do .arena"
+    assert_includes track, 'id="jx-shot-track"', "track identificavel para o OOB"
+    assert_includes track, 'hx-swap-oob="innerHTML"', "track troca via OOB sem re-render"
+    shot = track[/<span class="shot"[^>]*>/]
+    assert_match(/data-from-side="[01]"/, shot, "shot carrega a origem do golpe")
+    assert_match(/data-to-side="[01]"/, shot, "shot carrega o alvo do golpe")
+    assert_match(/data-move-type="[a-z]+"/, shot, "shot carrega o tipo do golpe")
+    refute_match(/<li class="fighter[^>]*>\s*<span class="shot"/, body,
+                 "card do lutador nao carrega mais o projetil")
+  end
+
   # Passo 29 (0086 C11): o carrier de gates leva o tipo do golpe atual para o
   # .arena propagar --fx-color ate o .shot do atacante.
   def test_strike_gates_carrier_carries_move_type

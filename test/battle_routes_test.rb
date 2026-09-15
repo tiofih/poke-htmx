@@ -329,7 +329,15 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_match(/is-hit/, body, "painel do alvo marca flash de dano")
     assert_match(/fainted/, body, "lutador derrotado marca KO fade/grayscale")
     assert_match(/is-attacking/, body, "painel do atacante marca o projetil")
-    assert_match(/class="shot"/, body, "elemento do projetil presente no atacante")
+    # projetil (0087 C1): track dedicada do .arena, fora do card do lutador
+    track = body[/<span class="shot-track"[^>]*>.*?<span class="shot"[^>]*>/m]
+    refute_nil track, "projetil presente na track do .arena"
+    assert_includes track, 'id="jx-shot-track"', "arena carrega a track do projetil"
+    shot = track[/<span class="shot"[^>]*>/]
+    assert_match(/data-from-side="[01]"/, shot, "track carrega a origem do golpe")
+    assert_match(/data-to-side="[01]"/, shot, "track carrega o alvo do golpe")
+    refute_match(/<li class="fighter[^>]*>\s*<span class="shot"/, body,
+                 "card do lutador nao carrega mais o projetil")
 
     # banner vitória/derrota + news com classes de animacao (D4 C, markup 0074)
     assert_includes body, 'class="winner-badge"', "banner de vitoria animado"

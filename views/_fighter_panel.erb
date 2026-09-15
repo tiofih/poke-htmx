@@ -11,7 +11,6 @@
      data-hp-initial="<%= juice_data[:initial_hp] %>"
      data-damage="<%= juice_data[:damage_taken] %>"
      style="--step-delay: <%= step_pause %>s">
-    <% if juice_data[:shooting] %><span class="shot" aria-hidden="true"></span><% end %>
     <div class="fighter-head">
       <span class="sprite-tile"><img src="<%= fighter.sprite %>" alt="<%= fighter.alt %>" width="96" height="96"></span>
       <div class="fighter-id">

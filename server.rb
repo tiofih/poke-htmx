@@ -1089,10 +1089,11 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
   def strike_oob(result)
     engine = result[:engine]
-    formatted = BattleLogPresenter.new(engine.log, stock: engine.items).format_single(result[:entry])
+    entry = result[:entry]
+    formatted = BattleLogPresenter.new(engine.log, stock: engine.items).format_single(entry)
     log_line = erb :_strike_log_entry, layout: false, locals: { entry: formatted }
     modal = result[:finished] ? erb(:_strike_result, layout: false) : ""
-    "#{log_line}#{strike_gates_oob(result[:entry])}#{strike_hp_oob(engine, result[:entry])}#{modal}"
+    "#{log_line}#{strike_gates_oob(entry)}#{strike_shot_oob(engine, entry)}#{strike_hp_oob(engine, entry)}#{modal}"
   end
 
   def strike_hp_oob(engine, entry = nil)
@@ -1131,6 +1132,17 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
   def strike_gates_oob(entry)
     move_type = entry[:move_type] unless entry[:action] == :item
     erb :_jx_gates, layout: false, locals: { gates: strike_gates(entry), move_type: move_type }
+  end
+
+  # Passo 1 (0087 C1/C2): o `.shot` sai do card do lutador para a track dedicada
+  # do `.arena`; o OOB troca o innerHTML da track com origem/alvo/tipo do golpe
+  # atual — entrada sem golpe (item) limpa a track.
+  def strike_shot_oob(engine, entry)
+    juice = strike_juice(engine, entry)
+    shot = if strike_gates(entry)["shot"]
+             { from_side: juice.from_side(entry), to_side: juice.to_side(entry), move_type: entry[:move_type] }
+           end
+    erb :_jx_shot, layout: false, locals: { shot: shot, oob: true }
   end
 
   # Delay por golpe (0086 Passo 20/36): o strike joga agora — sem o max

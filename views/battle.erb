@@ -43,6 +43,9 @@
 
   <div class="arena" data-jx-log="on" data-jx-fx="on" data-jx-chip="on" data-jx-hit="off" data-jx-dmg="off" data-jx-ko="off" data-jx-shot="off" data-jx-hp="off" data-jx-shake="off" data-jx-modal="on" style="--log-total: <%= log_total %>s; --log-total-full: <%= acc %>s; --step-delay: <%= acc.round(2) %>s">
     <%= erb :_jx_gates, layout: false, locals: { gates: { "hit" => false, "dmg" => false, "ko" => false, "shot" => false, "hp" => false, "shake" => false } } %>
+    <% shot_entry = @engine.log.reverse.find { |entry| entry[:action] != :item } %>
+    <% shot = shot_entry && { from_side: juice.from_side(shot_entry), to_side: juice.to_side(shot_entry), move_type: shot_entry[:move_type] } %>
+    <%= erb :_jx_shot, layout: false, locals: { shot: shot } %>
     <div class="battle-column" data-side="0" data-od-id="side-team">
       <div class="side-head"><h2>Seu Time</h2><p class="meta"><%= @engine.teams[0].count { |fighter| !fighter.fainted? } %> ativos</p></div>
       <ul class="fighters" id="fighters-0">
