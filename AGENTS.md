@@ -58,9 +58,10 @@ Quando `graphify-out/` existe no projeto, **use o graphify** em vez de ler arqui
 - **S5 — `./scripts/check_docs` valida a consistência.** Confere `sessions/` ↔ tabela de
   progresso do `SESSIONS.md` ↔ "Próxima sessão". Rodar ao fechar refinamento e validação.
 - **S6 — Memória da sessão (handoff + gotchas) no Revisor APROVADO (fim da fase 2), SEM validação do usuário, SEM commit.** Com veredito `Aprovado`, o
-  implementador grava **handoff** (`memory_handoff_begin` — o que foi entregue, perguntas
-  em aberto, próximos passos, marcado `provisional:true`) e **gotchas** levantados na sessão
-  (`memory_write_page` em `gotchas/`, marcados `provisional:true`), sempre escopados ao projeto
+  implementador grava **handoff** (`memory_handoff_begin` — o que foi entregue; o que for
+  tentativo vai em `open_questions`/`next_steps`, pois a ferramenta não tem flag de
+  provisório) e **gotchas** levantados na sessão (`memory_write_page` em `gotchas/`, marcados
+  provisórios por **tag** `provisional` e/ou rótulo explícito no corpo), sempre escopados ao projeto
   corrente — sem aguardar a fase 3 e sem commitar a conclusão. A validação do usuário (fase 3)
   só confirma/enriquece a memória, nunca bloqueia o save.
 - **S7 — Loop Implementador↔Revisor na fase 2c.** Ao fim da fase 2 (TDD), o **Revisor**
