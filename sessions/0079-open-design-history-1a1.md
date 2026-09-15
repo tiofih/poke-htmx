@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — escolhas do usuário em 2026-09-09 (fatiamento por tela, deslizamento 0077-0079→resíduo / 0080-0082→estabilidade, fidelidade híbrida, backend thin listado, S1 com 1 teste novo + extensões — ver seção 5) |
-| Implementação (fase 2, TDD) | **TDD concluído** — Passos 1-2 verdes (escopo 35/565, lint 0 no escopo) + docs; **aguardando Revisor S7. PARAR — sem Done, sem §7, sem commit de conclusão** |
+| Implementação (fase 2, TDD) | **TDD concluído** — árvore verde no HEAD (escopo 35/565, lint 0 no escopo) + docs (Passo 3); os commits da 0079 **não** são auto-consistentes: `cad1f49`/`6e41875` estão RED no teste C2, pois o bloco CSS só entrou em `9b421c4` (commit rotulado Passo 1 da 0078) — ver §8:106; **aguardando Revisor S7. PARAR — sem Done, sem §7, sem commit de conclusão** |
 | Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
 
 ---

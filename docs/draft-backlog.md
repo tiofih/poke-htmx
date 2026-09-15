@@ -242,6 +242,17 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **Info: payload não consumido** — `lib/battle_log_presenter.rb:65-67` (`from_slot`/`to_slot`) é exigido por C3/testado, mas nenhuma view consome hoje.
 - **Info: gate `@container` duplicado** — `public/style.css:1030` vs `:2480` (pré-existente, `docs/draft-backlog.md:222`; a 0088 não agravou).
 
+### Achados não bloqueantes da revisão da 0079 (anotado 2026-09-15 para triagem)
+
+> O review da 0079 deu veredito `Aprovado`. Os itens abaixo são **NÃO bloqueadores** e **NÃO fazem parte dos critérios validados** da 0079 — a sessão 0079 ainda **aguarda a validação do usuário (fase 3)**. Ficam anotados para triagem futura.
+
+- **Média (histórico, não HEAD):** os commits da própria 0079 não são auto-consistentes — `git show cad1f49:public/style.css | grep -c card--tight` → 0 (idem em `6e41875`), então o teste C2 commitado em `cad1f49` está vermelho naquela revisão e `history.erb` em `6e41875` referencia classe indefinida; o bloco chegou em `9b421c4`, rotulado como Passo 1 da 0078. Quebra bisect/CI. Já divulgado em `sessions/0079:106`, mas `:8` afirma "Passos 1-2 verdes" (verdadeiro na árvore, não no commit).
+- **Baixa:** `sessions/0079:48` promete verificação "classe a classe" contra `history.html` (incl. `history_page.erb`); nenhum teste lê o protótipo, a superfície nomeada é provada pelos testes da 0075 (`history_view_test.rb:42-129`) e a extensão em `history_view_test.rb:98` duplica `history_curation_test.rb:27,29` verbatim.
+- **Baixa:** `.card--tight` (`public/style.css:1751`) não consta da lista de componentes do `DESIGN.md:24-29`.
+- **Baixa:** o `git stash` prescrito pela G1 (`sessions/0079:22,55,102`) não foi usado; a árvore ficou suja e foi varrida por commit alheio (substância preservada).
+- **Info:** o Status foi escrito pelo commit do Passo 3 mas omite o Passo 3.
+- **Info:** `refute_match(/class="card" style=/)` (`history_curation_test.rb:29`) não pega `class="card card--tight" style="…"` e fica mascarado no próprio teste.
+
 ---
 
 ## 3. Referências aos arquivos de playtest
