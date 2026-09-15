@@ -157,6 +157,28 @@ O projétil de golpe deixa o teto direcional (0086/C9) e passa a ter **chegada r
   `.js` novo**. Nenhum arquivo temporário de e2e restante (`e2e/specs/` limpo).
 - **PARADA:** fase 2 encerra aqui; a validação (fase 3) é do usuário — nada marcado
   como `Concluída` e nenhuma alegação de validação neste arquivo.
+- **Passo 7 (reabertura na validação — garantia estrutural + guarda de layout):**
+  a fase 3 (usuário) reproduziu ao vivo o defeito de fluxo do Passo 1: a track era
+  filho **direto** do `.arena` (grid de 3 colunas) e só o `position:absolute` do
+  Passo 5 a mantinha fora do fluxo — sem essa regra ela virava 4º item e deslocava
+  as colunas (time ao centro, podium à direita, oponente abaixo-esquerda; 4 itens em
+  fluxo, medidos ao vivo). A correção deixa de ser só estilística: a track passou
+  para dentro do `.battle-column[data-side="0"]` (static), então não pode mais ser
+  item do grid. **O `.podium` foi descartado como container**: ele é
+  `position:sticky`, logo viraria o containing block da track e a track mediria só
+  a coluna central (verificado ao vivo: `offsetParent` vira `podium` e o rect
+  encolhe ao rect do podium) — o `.battle-column` é static e mantém
+  `offsetParent === .arena`, com geometria idêntica. A guarda que faltava é um teste
+  e2e novo (`arena keeps 3 in-flow columns and an out-of-flow projectile track`) que
+  mede ao vivo, em 1600px e 900px: `.arena` com exatamente 3 filhos em fluxo
+  (2 colunas + `.podium` sticky, que é in-flow; só `absolute`/`fixed` saem) e
+  `#jx-shot-track` com `position:absolute` e fora do `.arena` como filho. Prova de
+  capacidade de vermelho: (a) `.shot-track{position:static}` → falha
+  `Expected: "absolute" / Received: "static"`; (b) track de volta como filho direto
+  → falha `Expected: false / Received: true` no `trackDirectChild`. Verde após
+  reverter. Suíte **1173 runs / 6159 assertions, 0 failures / 0 errors / 0 skips**;
+  lint **0 offenses** em 136 arquivos. Os 4 verefos pré-existentes de
+  `buildTeamOfSix` ("Orçamento insuficiente") seguem vermelhos — não tocados.
 
 ## 8. Observações
 

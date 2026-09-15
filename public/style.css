@@ -994,7 +994,11 @@ li.fighter {
    pelo carrier #jx-gates do .arena (unico ancestral comum).
    0087 Passo 5/C6: a track cobre a arena FORA do fluxo do grid (como item ela
    deslocava as 3 colunas) e ancora o .shot na borda da coluna do atacante; o
-   travel (--fx-travel) cruza ate a borda proxima do alvo. */
+   travel (--fx-travel) cruza ate a borda proxima do alvo.
+   0087 Passo 7: a garantia virou estrutural — a track mora dentro do
+   .battle-column (static), nao como filho direto do .arena, entao nao pode
+   mais ser item do grid mesmo sem esta regra; o e2e guarda as 2 condicoes
+   (3 filhos em fluxo no .arena + track `position:absolute`). */
 .shot-track {
 	position: absolute;
 	inset: 0;

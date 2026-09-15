@@ -301,3 +301,51 @@ test('container gate disables projectile travel below 981px', async ({ page }) =
     )
     .toEqual({ display: 'none', animation: 'none' });
 });
+
+// ---------------------------------------------------------------------------
+// 0087 Passo 7 — guarda estrutural que faltava ao Passo 1.
+// O defeito que escapou: a track nasceu filho DIRETO do .arena (grid de 3
+// colunas) e so o `position:absolute` do Passo 5 a mantinha fora do fluxo do
+// grid; sem essa regra ela virava o 4o item e deslocava todas as colunas
+// (time ao centro, podium a direita, oponente abaixo-esquerda). Nenhum teste
+// observava layout. Aqui a guarda mede o resultado ao vivo nas duas larguras:
+//   - .arena com exatamente 3 filhos EM FLUXO (as 2 .battle-column + o .podium
+//     sticky, que e in-flow: so absolute/fixed saem do fluxo); e
+//   - #jx-shot-track absoluta E fora do .arena como filho (garantia estrutural).
+// ---------------------------------------------------------------------------
+test('arena keeps 3 in-flow columns and an out-of-flow projectile track', async ({ page }) => {
+  await buildBudgetTeam(page);
+  await page.goto('/battle');
+  await expect(page.locator('.arena')).toBeVisible();
+
+  for (const width of [1600, 900]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(page.locator('.arena')).toBeVisible();
+
+    const state = await page.locator('.arena').evaluate((arena) => {
+      const cs = (el: Element) => getComputedStyle(el);
+      const inFlow = [...arena.children].filter((c) => {
+        const p = cs(c).position;
+        return cs(c).display !== 'none' && p !== 'absolute' && p !== 'fixed';
+      });
+      const track = document.querySelector('#jx-shot-track') as HTMLElement | null;
+      return {
+        inFlowCount: inFlow.length,
+        inFlowChildren: inFlow.map((c) => `${c.tagName}.${(c as HTMLElement).className}`),
+        trackPosition: track ? cs(track).position : null,
+        trackInArena: !!track && arena.contains(track),
+        trackDirectChild: !!track && track.parentElement === arena,
+      };
+    });
+
+    expect(
+      state.inFlowCount,
+      `em ${width}px o .arena tem ${state.inFlowCount} filhos em fluxo: ${state.inFlowChildren.join(', ')}`,
+    ).toBe(3);
+    expect(state.trackPosition, `em ${width}px a track do projetil`).toBe('absolute');
+    // A track precisa continuar DENTRO do .arena (containing block + @container),
+    // mas nunca como filho direto (senao volta a poder virar item do grid).
+    expect(state.trackInArena, `em ${width}px a track esta dentro do .arena`).toBe(true);
+    expect(state.trackDirectChild, `em ${width}px a track e filho direto do .arena`).toBe(false);
+  }
+});

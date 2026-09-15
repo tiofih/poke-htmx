@@ -43,10 +43,17 @@
 
   <div class="arena" data-jx-log="on" data-jx-fx="on" data-jx-chip="on" data-jx-hit="off" data-jx-dmg="off" data-jx-ko="off" data-jx-shot="off" data-jx-hp="off" data-jx-shake="off" data-jx-modal="on" style="--log-total: <%= log_total %>s; --log-total-full: <%= acc %>s; --step-delay: <%= acc.round(2) %>s">
     <%= erb :_jx_gates, layout: false, locals: { gates: { "hit" => false, "dmg" => false, "ko" => false, "shot" => false, "hp" => false, "shake" => false } } %>
-    <% shot_entry = @engine.log.reverse.find { |entry| entry[:action] != :item } %>
-    <% shot = shot_entry && { from_side: juice.from_side(shot_entry), to_side: juice.to_side(shot_entry), move_type: shot_entry[:move_type] } %>
-    <%= erb :_jx_shot, layout: false, locals: { shot: shot } %>
     <div class="battle-column" data-side="0" data-od-id="side-team">
+      <%# Track do projetil (0087 Passo 7): fica AQUI, nao como filho direto do
+          .arena (grid de 3 colunas) — filho direto vira 4o item do grid se o
+          `position:absolute` faltar ou perder, deslocando todas as colunas.
+          Nao vai no .podium porque ele e `position:sticky`: viraria o
+          containing block e a track mediria so a coluna central. O
+          .battle-column e static, entao o containing block segue sendo o
+          .arena (`position:relative`) e a geometria da track nao muda. %>
+      <% shot_entry = @engine.log.reverse.find { |entry| entry[:action] != :item } %>
+      <% shot = shot_entry && { from_side: juice.from_side(shot_entry), to_side: juice.to_side(shot_entry), move_type: shot_entry[:move_type] } %>
+      <%= erb :_jx_shot, layout: false, locals: { shot: shot } %>
       <div class="side-head"><h2>Seu Time</h2><p class="meta"><%= @engine.teams[0].count { |fighter| !fighter.fainted? } %> ativos</p></div>
       <ul class="fighters" id="fighters-0">
         <%= erb :_fighter_panel, layout: false, locals: { title: "Seu Time", side: 0, juice: juice, side_delay: side_delay, presenters: @engine.teams[0].each_with_index.map { |poke, index| FighterPresenter.new(poke, item_used: @engine.member_used_item?(0, index)) } } %>
