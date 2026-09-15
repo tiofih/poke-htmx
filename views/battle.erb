@@ -52,7 +52,7 @@
           .battle-column e static, entao o containing block segue sendo o
           .arena (`position:relative`) e a geometria da track nao muda. %>
       <% shot_entry = @engine.log.reverse.find { |entry| entry[:action] != :item } %>
-      <% shot = shot_entry && { from_side: juice.from_side(shot_entry), to_side: juice.to_side(shot_entry), move_type: shot_entry[:move_type] } %>
+      <% shot = shot_entry && { from_side: juice.from_side(shot_entry), to_side: juice.to_side(shot_entry), move_type: shot_entry[:move_type], from_slot: juice.from_slot(shot_entry), to_slot: juice.to_slot(shot_entry) } %>
       <%= erb :_jx_shot, layout: false, locals: { shot: shot } %>
       <div class="side-head"><h2>Seu Time</h2><p class="meta"><%= @engine.teams[0].count { |fighter| !fighter.fainted? } %> ativos</p></div>
       <ul class="fighters" id="fighters-0">

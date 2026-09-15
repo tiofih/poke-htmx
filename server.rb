@@ -1140,7 +1140,8 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
   def strike_shot_oob(engine, entry)
     juice = strike_juice(engine, entry)
     shot = if strike_gates(entry)["shot"]
-             { from_side: juice.from_side(entry), to_side: juice.to_side(entry), move_type: entry[:move_type] }
+             { from_side: juice.from_side(entry), to_side: juice.to_side(entry), move_type: entry[:move_type],
+               from_slot: juice.from_slot(entry), to_slot: juice.to_slot(entry) }
            end
     erb :_jx_shot, layout: false, locals: { shot: shot, oob: true }
   end

@@ -199,6 +199,8 @@ class BattleStrikeRoutesTest < Minitest::Test
     shot = track[/<span class="shot"[^>]*>/]
     assert_match(/data-from-side="[01]"/, shot, "shot carrega a origem do golpe")
     assert_match(/data-to-side="[01]"/, shot, "shot carrega o alvo do golpe")
+    assert_match(/data-from-slot="\d+"/, shot, "shot carrega o slot de origem (0088 C4)")
+    assert_match(/data-to-slot="\d+"/, shot, "shot carrega o slot do alvo (0088 C4)")
     assert_match(/data-move-type="[a-z]+"/, shot, "shot carrega o tipo do golpe")
     refute_match(/<li class="fighter[^>]*>\s*<span class="shot"/, body,
                  "card do lutador nao carrega mais o projetil")

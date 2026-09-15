@@ -306,6 +306,8 @@ class BattleViewTest < Minitest::Test
                  "fighter li carries data-side=1 (0086 Passo 6)")
     assert_match(/<li class="fighter[^"]*"[^>]*--step-delay: [\d.]+s/, body,
                  "fighter li exposes --step-delay synced to log pacing (0086 Passo 6)")
+    assert_match(/<li class="fighter[^"]*"[^>]*data-slot="\d+"/, body,
+                 "fighter li exposes its team slot (0088 C5)")
   end
 
   def test_battle_arena_carries_step_delay_and_per_line_fx

@@ -336,6 +336,8 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     shot = track[/<span class="shot"[^>]*>/]
     assert_match(/data-from-side="[01]"/, shot, "track carrega a origem do golpe")
     assert_match(/data-to-side="[01]"/, shot, "track carrega o alvo do golpe")
+    assert_match(/data-from-slot="\d+"/, shot, "track carrega o slot de origem (0088 C4)")
+    assert_match(/data-to-slot="\d+"/, shot, "track carrega o slot do alvo (0088 C4)")
     refute_match(/<li class="fighter[^>]*>\s*<span class="shot"/, body,
                  "card do lutador nao carrega mais o projetil")
 

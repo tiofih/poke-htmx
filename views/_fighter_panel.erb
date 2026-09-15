@@ -7,6 +7,7 @@
 <% hp_fill = { high: "ok", medium: "mid", low: "low" }.fetch(fighter.hp_tier, "ok") %>
   <li class="fighter<% juice.css_classes(side, fighter.name).each do |klass| %> <%= klass %><% end %><%= " engaged" if idx == lead_index && !juice_data[:ko] %>"
      data-side="<%= side %>"
+     data-slot="<%= idx %>"
      data-od-id="fighter-<%= fighter.name.downcase %>"
      data-hp-initial="<%= juice_data[:initial_hp] %>"
      data-damage="<%= juice_data[:damage_taken] %>"
