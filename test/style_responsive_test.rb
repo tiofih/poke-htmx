@@ -324,8 +324,8 @@ class StyleResponsiveTest < Minitest::Test
                  "passo 24: keyframe de travel para o atacante da coluna esquerda")
     assert_match(/@keyframes\s+juice-shot-rtl\b/, content,
                  "passo 24: keyframe de travel para o atacante da coluna direita")
-    assert_match(/@keyframes\s+juice-shot-ltr\b[^@]*translateX/m, content,
-                 "travel alonga o translateX (D1: reusa o .shot do atacante)")
+    assert_match(/@keyframes\s+juice-shot-ltr\b[^@]*translate\(calc\(100% \+ var\(--fx-travel\)\)/m, content,
+                 "travel alonga o eixo x (D1: reusa o .shot do atacante); 0088 Passo 4: translate 2D com --fx-dy")
 
     # 0087 Passo 4: o .shot saiu do card para a track do .arena, entao a direcao
     # vem do proprio projetil (data-from-side, C2) e nao mais do data-side do
@@ -475,8 +475,10 @@ class StyleResponsiveTest < Minitest::Test
     %w[juice-shot-ltr juice-shot-rtl].each do |keyframe|
       block = content[/@keyframes\s+#{keyframe}\b\s*\{(?:[^{}]|\{[^{}]*\})*\}/m]
       refute_nil block, "keyframe de travel #{keyframe} deve existir (C5)"
-      assert_match(/translateX\(calc\(-?100%[^;]*var\(--fx-travel\)\s*\)\s*\)/, block,
-                   "keyframe #{keyframe} le --fx-travel sem fallback duplicado (C5)")
+      assert_match(/translate\(\s*calc\(-?100%[^;]*var\(--fx-travel\)\s*\)\s*,[^;]*var\(--fx-dy/m, block,
+                   "keyframe #{keyframe} le --fx-travel no eixo x e --fx-dy no eixo y (0088 D1a)")
+      assert_match(/var\(--fx-dy\s*,\s*0\)/, block,
+                   "keyframe #{keyframe} consome --fx-dy com fallback 0 — sem JS o rail de 0087 fica intacto (D4a)")
       refute_match(/\d+(?:\.\d+)?(?:vw|px|cqi)/, block,
                    "keyframe #{keyframe} nao carrega distancia hardcoded (C5)")
     end

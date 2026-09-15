@@ -947,7 +947,9 @@
 	   0087 C5/D4: o travel mede a largura REAL da arena (container query `cqi`),
 	   nao o viewport — chegada borda->borda do alvo no grid 1fr/1.06fr/1fr com
 	   gap de 32px. A prova de geometria e o e2e (CSS estatico nao resolve
-	   cqi); aqui o token e so a forma do contrato. */
+	   cqi); aqui o token e so a forma do contrato. 0088 Passo 4 (D1a): --fx-dy
+	   (offset y medido no JS do layout.erb) e escrito inline no .shot e
+	   consumido com fallback 0 — nao declarado aqui de proposito. */
 	--fx-color: var(--t-normal);
 	--fx-travel: calc(35cqi + 42px);
 	--fx-shake: 0s;
@@ -1581,25 +1583,28 @@ li.fighter {
    juice-projectile para cruzar a arena. 0087 C5/D4: a distancia vem inteira de
    --fx-travel (35cqi + 42px, borda->borda do alvo), sem fallback duplicado —
    keyframe generico, config-only (C12). So no container de 3 colunas
-   (@container 0087 C3/C4). */
+   (@container 0087 C3/C4).
+   0088 Passo 4 (D1a/D4a): o eixo y entra por --fx-dy — offset medido no handler
+   de views/layout.erb — consumido com fallback 0; sem JS, em reduced motion ou
+   em coluna unica o travel fica EXATAMENTE o rail de 0087 (so eixo x). */
 @keyframes juice-shot-ltr {
 	from {
-		transform: translateX(0) scale(1);
+		transform: translate(0, 0) scale(1);
 		opacity: 1;
 	}
 	to {
-		transform: translateX(calc(100% + var(--fx-travel))) scale(0.35);
+		transform: translate(calc(100% + var(--fx-travel)), var(--fx-dy, 0)) scale(0.35);
 		opacity: 0;
 	}
 }
 
 @keyframes juice-shot-rtl {
 	from {
-		transform: translateX(0) scale(1);
+		transform: translate(0, 0) scale(1);
 		opacity: 1;
 	}
 	to {
-		transform: translateX(calc(-100% - var(--fx-travel))) scale(0.35);
+		transform: translate(calc(-100% - var(--fx-travel)), var(--fx-dy, 0)) scale(0.35);
 		opacity: 0;
 	}
 }

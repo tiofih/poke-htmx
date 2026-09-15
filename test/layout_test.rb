@@ -80,4 +80,31 @@ class LayoutViewportTest < Minitest::Test
     refute_includes last_response.body, "Voltar ao time",
                     "expected the back link only on /battle, not on /"
   end
+
+  # 0088 Passo 4 (D1a/D2a — excecao estreita ao RNF-01): unico handler JS do
+  # projetil slot-a-slot. Prova estatica: existe, e ligado a um evento htmx
+  # (que dispara depois do swap, OOB incluso), le o slot do alvo, escreve
+  # --fx-dy inline no .shot e mantem os no-ops (reduced motion, coluna unica)
+  # sem lib/polling/SSE. A prova de que o projetil POUSA no slot do alvo e o
+  # e2e do Passo 5 — aqui nao se afirma comportamento.
+  def test_projectile_handler_measures_target_slot_offset
+    layout = File.read(File.join(__dir__, "../views/layout.erb"))
+
+    assert_match(/document\.addEventListener\(\s*["']htmx:(?:afterSettle|afterSwap|oobAfterSwap)["'],\s*\w+\s*\)/,
+                 layout, "o medidor do projetil e ligado a um evento htmx (D2a/G2)")
+    assert_match(/getBoundingClientRect\(\)/, layout,
+                 "a medida vem da geometria real dos cards (D1a)")
+    assert_match(/data-side=.{0,40}data-slot=/, layout,
+                 "o handler encontra o card alvo por data-side + data-slot")
+    assert_match(/getAttribute\(\s*["']data-to-slot["']\)/, layout,
+                 "o slot de destino e lido do proprio .shot")
+    assert_match(/setProperty\(\s*["']--fx-dy["']/, layout,
+                 "o deslocamento vertical vai para --fx-dy inline do .shot (D1a)")
+    assert_match(/prefers-reduced-motion:\s*reduce/, layout,
+                 "reduced motion e no-op explicito no JS (D4a/C8)")
+    assert_match(/min-width:\s*981px/, layout,
+                 "coluna unica (<981px) e no-op explicito, mesmo breakpoint do CSS (D5/C9)")
+    refute_match(/setInterval|EventSource|new WebSocket/, layout,
+                 "sem polling/SSE — so o handler htmx (G2)")
+  end
 end

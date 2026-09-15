@@ -51,6 +51,32 @@
           htmxSavedScrollY = null;
         }
       });
+      // 0088 Passo 4 (D1a/D2a — excecao estreita ao RNF-01): projetil slot-a-slot.
+      // O swap do golpe troca o conteudo de #jx-shot-track e #jx-gates por OOB;
+      // "afterSettle" so dispara depois que o DOM assentou (OOB incluso), entao a
+      // medida acontece com o .shot novo e o gate ja aceso. Le o slot do alvo no
+      // proprio .shot, acha o card por data-side + data-slot e escreve o
+      // deslocamento vertical em --fx-dy; o keyframe juice-shot-ltr/rtl consome a
+      // var com fallback 0. No-op quando falta track/shot/slot, em reduced motion
+      // ou em coluna unica (<981px, mesmo breakpoint do @container do CSS) — nesses
+      // casos vale o rail de 0087 (so eixo x). Um handler, sem lib/polling/SSE.
+      function placeShot() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (!window.matchMedia("(min-width: 981px)").matches) return;
+        var shot = document.querySelector("#jx-shot-track .shot");
+        if (!shot) return;
+        var from = shot.getAttribute("data-from-slot");
+        var side = shot.getAttribute("data-to-side");
+        var slot = shot.getAttribute("data-to-slot");
+        if (from === null || side === null || slot === null) return;
+        var target = document.querySelector('.fighter[data-side="' + side + '"][data-slot="' + slot + '"]');
+        if (!target) return;
+        var shotBox = shot.getBoundingClientRect();
+        var targetBox = target.getBoundingClientRect();
+        var dy = targetBox.top + targetBox.height / 2 - (shotBox.top + shotBox.height / 2);
+        shot.style.setProperty("--fx-dy", dy + "px");
+      }
+      document.addEventListener("htmx:afterSettle", placeShot);
     </script>
   </body>
 </html>
