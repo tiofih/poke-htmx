@@ -207,6 +207,28 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **e2e `e2e/specs/battle-log.spec.ts` vermelho pré-existente (anotado 2026-09-15, NÃO faz parte da 0087)** — `buildTeamOfSix` (região `:17`) trava no 6º add com "Orçamento insuficiente", derrubando 4 testes do arquivo (incluindo a expectativa de badge). Os dois testes adicionados pela 0087 passam. Pré-existente, não é regressão da 0087; ajustar o helper (orçamento/ordem dos adds do time fixo) antes de reusar o arquivo como gate.
 - **`ConnectionRegistryTest` flaky por ordem de execução (anotado 2026-09-15, NÃO faz parte da 0087)** — falha em algumas ordens da suíte completa, passa isolado e no re-run (observado no run da suíte do Passo 3 em 2026-09-15). Investigar estado compartilhado entre testes (registry global/`MAX_CONNECTIONS`/evicção) ou fixar a ordem/isolamento.
 
+### Achados não bloqueantes das revisões da 0087 (anotado 2026-09-15 para triagem)
+
+> Ambos os reviews deram veredito `Aprovado`. Os itens abaixo são **NÃO bloqueadores** e **NÃO fazem parte dos critérios validados** da 0087 — ficam anotados para triagem futura.
+
+**CSS / contrato**
+- **Reduce-motion só mata `animation`; `display:block` persiste** → ponto estático para quem usa reduced motion. `public/style.css:2494` (+ gate `:1025`/`:2469`); C9 prova apenas presença.
+- **Família `--jx-*` inteira inerte** — 0 consumidores de `var(--jx-*)`. `public/style.css:965`, `:2517-2525`.
+- **Razão do grid hardcoded 3×** — `public/style.css:605`, `/3.06`, `35cqi` sem teste de acoplamento; um `gap` ou proporção novo quebra o travel em silêncio.
+- **`@media (max-width: 700px) .podium{position:static}` é morto** — o `sticky` posterior vence (`public/style.css:620-622` vs `:789`).
+
+**Testes / guardas**
+- **Gate `@container (min-width: 981px)` duplicado** (`public/style.css:1028` e `:2472`); o teste lê o último bloco (`gates.last`), então mutar o primeiro passa despercebido. `test/style_responsive_test.rb:359-360`.
+- **e2e com esperas que engolem timeout e medição possível de nó stale**; tolerância de chegada `-20..40px` ≈ 3–4× o erro real (~5–15px). `e2e/specs/battle-log.spec.ts:191-206`.
+- **`is-attacking` sem consumidor** em CSS/teste após a track virar o nó do projétil. `lib/battle_juice_presenter.rb:37`.
+- **Guarda de layout não assegura o invariante em que o fix se apoia** (`offsetParent === .arena`) — 1 assert resolveria. `e2e/specs/battle-log.spec.ts:330-350`.
+- **Comentário obsoleto**: o Passo 7 tornou `.battle-column` o pai da track novamente. `test/style_responsive_test.rb:332-333`.
+- **Perna de 900px da guarda reafirma os mesmos três fatos** e nunca afirma o regime de coluna única que invoca. `e2e/specs/battle-log.spec.ts:322-350`.
+
+**CI / duplicação**
+- **e2e fora do CI** — `.github/workflows/ci.yml` roda só `./scripts/test`, lint e `check_docs`, então nenhuma guarda de layout protege o merge.
+- **Duplicação do markup do shot** — `views/battle.erb:46-47` repete `server.rb:1137-1145` (risco de drift).
+
 ---
 
 ## 3. Referências aos arquivos de playtest
