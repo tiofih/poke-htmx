@@ -215,3 +215,5 @@ Log de batalha legível por rodada (chronological R1 no topo, cabeçalho de roun
 ## 9. Gotchas / Lições (memória — S6)
 
 A preencher na validação (fase 3): cascata reduced-motion vs especificidade, chronological R1-topo com cabeçalho de round, copy de participação vs vitória.
+
+> **Addendum 2026-09-15 — as referências ao `TODO.md` (T2/T3/T5/T6/T6b) neste arquivo são históricas, não trabalho pendente:** os itens citados foram **entregues/registrados** nos Passos de higiene pós-validação **33–38** (T5 → Passo 33; T6a → Passo 34; T6b → Passos 35–36; T1 → Passo 38) e o `TODO.md` foi **drenado — hoje tem 0 bytes**. As menções a T2/T3/T5/T6/T6b em §6/§7/§8 devem ser lidas como registro do ciclo, **não** como fila aberta; nenhuma célula `ok` do §7 nem o Status/validação de 2026-09-14 são alterados.

@@ -563,9 +563,16 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       `SESSION_SECRET` usa fallback hardcoded no código (cookie de sessão forjável em prod);
       POSTs sem CSRF (Sinatra modular não habilita `protect_from_csrf` por padrão).
       Restringir `?as` a dev + `fail` no boot quando o secret de prod não existir.
-- [ ] **Erros sem status real (anotado 2026-08-20):** handler global de erro devolve
+- [x] **Erros sem status real (anotado 2026-08-20):** handler global de erro devolve
       `status 200` — esconde falhas de monitoria/healthcheck; devolver o status correto +
-      fragmento htmx de erro dedicado.
+      fragmento htmx de erro dedicado. **RESOLVIDO na sessão 0054** (validado em 2026-08-26):
+      o `error 500` devolve **500 real** em requisições não-htmx (monitoria/healthcheck/
+      navegação direta) e mantém o **fragmento amigável + 200** nos swaps htmx.
+- **Numeração reservada e nunca criada (fato de documentação, não item entregue):** as
+      sessões **0084** (escritas atômicas + idempotência) e **0085** (CSRF/identidade) foram
+      reservadas no deslizamento de `SESSIONS.md:403` e **não existem** — nenhum `sessions/0084*.md`
+      ou `sessions/0085*.md` foi criado (a 0083 acabou ocupada por `ui-polish`); o buraco
+      **0084–0085** é apenas o deslocamento da fila e não representa trabalho concluído.
 - [x] **Race no `add` do time (anotado 2026-08-20; **resolvido na sessão 0070, validado em 2026-09-08**):**
       `next_free_slot` é check-then-insert; adds concorrentes lançam `PG::UniqueViolation`
       não tratado (500). **RESOLVIDO:** `TeamRepository#add` faz `rescue PG::UniqueViolation` +
