@@ -136,6 +136,23 @@ O projétil de golpe deixa de viajar de uma **caixa de time** para a outra e pas
 - **Leitura exata antes de editar:** confirmar `lib/battle_engine.rb:94-138`, `views/_fighter_panel.erb`, `views/_jx_shot.erb`, `server.rb` `strike_shot_oob`, `views/layout.erb:37-54` e o bloco ODS do projétil no arquivo antes do Passo 1.
 - **Dúvida aberta:** garantir que `--fx-dy` inline não seja sobrescrito pelo CSS do bloco ODS (ordem/especificidade) — decidir no Passo 4 com o menor seletor que prove.
 
+### Progresso Passo 5 (2026-09-15) — origem medida, gap do Passo 4 fechado
+
+- **Descoberta do duplo disparo:** `htmx:afterSettle` dispara **por nó OOB** (`#jx-shot-track` e `#jx-gates`), então `placeShot()` roda 2x por golpe. A 2ª execução media o `.shot` **já deslocado** pelo `--fx-ox` da 1ª (rect transformado), o que corrompia o cálculo. Correção: medir a base por **layout** (`shot.offsetLeft/offsetTop` + rect do pai) em vez do rect do próprio `.shot` — idempotente entre execuções.
+- **Erros medidos (e2e, arena 1200):** com o fix de origem, o centro do projetil no keyframe `from` ficou a **≈0,25px em x e ≈0,45px em y** do centro do card do atacante (era **190,6px** de erro de origem no Passo 4); o keyframe `to` pousou a **≈0,45px em y** do centro do card do alvo (era **259,6px**). Tolerância assertada: `< 2px` em x e y.
+- **Fechamento de C6:** o e2e agora mede o **par ordenado** (saída no slot do atacante **e** chegada no slot do alvo), o pin antigo `tx ≈ 472 ± 2` virou par ordenado contra os centros reais dos cards; o critério C6 deixa de ter o gap de origem declarado no Passo 4.
+- **Evidência:** 4 e2e novos verdes (`projectile leaves`, `container gate`, `reduced motion keeps`, `without JavaScript`); `./scripts/lint` 0 offenses; `./scripts/test` **1180 runs, 6219 assertions, 0 failures**; mutação de controle (remover o fallback `, 0` dos dois `from`) deixa `test_fx_contract_vars_declared` **vermelho** (1 failure, mensagem "keyframe juice-shot-ltr parte do offset de origem medido"), restaurado verde. Commit `4ede63b`.
+- **Reds pré-existentes (não tocados):** os 4 testes que usam `buildTeamOfSix` (`round headers`, `reduced-motion disables juice`, `auto toggle`, `consumption and reward copy`) falham no helper — `#nav-badge` para em `5/6` com o time caro (orçamento do seed). Fora do escopo do Passo 5.
+- **Sem** `Concluída`/validação: fase 3 é do usuário (regra do AGENTS.md); `SESSIONS.md` não foi tocado.
+
+### Progresso Passo 6 (2026-09-15) — verificação final G1/G2/G3
+
+- **G1:** `./scripts/test` → **1180 runs, 6219 assertions, 0 failures, 0 errors, 0 skips** (seed 11791, 112,5s); `./scripts/lint` → **136 files inspected, no offenses detected**; `./scripts/check_docs` → `ok> docs consistentes (SESSIONS.md <-> sessions/ <-> 'Próxima sessão')`.
+- **G2 (JS confinado):** o único `<script>` de `views/` é `views/layout.erb:37-93` — o handler inline do D2a (39 linhas adicionadas pela 0088, um `document.addEventListener("htmx:afterSettle", placeShot)`); `views/layout.erb:7` é o CDN do htmx (pré-existente). `public/` só contém `style.css` (nenhum asset `.js`). Grep por `EventSource|WebSocket|setInterval|sendBeacon|XMLHttpRequest|new Function|eval(` em `views/` + `public/` → **nenhum**; grep por `onclick=`/`onload=`/`onsubmit=` em `views/` → nenhum; diff de `views/layout.erb` sem novo `src=`/`import`/`require` (nenhuma dependência nova).
+- **G3 (DESIGN.md):** nenhuma linha adicionada em `public/style.css` na 0088 usa hex cru, `rgb()` ou `hsl()`; os offsets entram como custom properties (`--fx-ox`/`--fx-oy`/`--fx-dy`) consumidas pelos keyframes com fallback, sem componente paralelo; `test/design_system_test.rb` verde na suíte total.
+- **e2e (recorde):** `cd e2e && npx playwright test specs/battle-log.spec.ts` (chrome headless, app docker em `:3000`) → **5 verdes / 4 vermelhos**; verdes: `projectile leaves the attacker slot and reaches the target slot (measured pair)`, `container gate disables projectile travel below 981px`, `reduced motion keeps the projectile without travel`, `without JavaScript the 0087 rail remains`, `arena keeps 3 in-flow columns and an out-of-flow projectile track`. Os 4 vermelhos são os **pré-existentes** do helper `buildTeamOfSix` (`round headers`, `reduced-motion disables juice`, `auto toggle`, `consumption and reward copy` — `#nav-badge` para em `5/6`), fora do escopo e não tocados.
+- **Sem** `Concluída`/validação: fase 3 é do usuário (regra do AGENTS.md); `SESSIONS.md` não foi tocado.
+
 ## 9. Gotchas / Lições (memória — S6)
 
 Preenchido na validação (fase 3) — alimenta `memory_write_page` em `gotchas/`.
