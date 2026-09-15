@@ -122,7 +122,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 > Anotado no draft: puxar mais informações dos golpes (nível de aprendizado) e visão de
 > XP/evolução por batalha com oponente no mesmo nível do jogador (D2).
 
-### RF-16 — Logs de batalha detalhados (C1) — `Done` (sessão 0016, validado em 2026-08-09; complemento visual do atacante→alvo entregue pela 0087, validada em 2026-09-15 — projétil até a borda do card alvo; o log em si não mudou e a saída/chegada slot a slot segue pendente em `docs/draft-backlog.md`, 2026-09-15)
+### RF-16 — Logs de batalha detalhados (C1) — `Done` (sessão 0016, validado em 2026-08-09; complemento visual do atacante→alvo entregue pela 0087, validada em 2026-09-15 — projétil até a borda do card alvo; a saída/chegada slot a slot foi entregue pela 0088, validada em 2026-09-15 — o log em si não mudou)
 - Melhorar os **logs de batalha** (C1 do `docs/draft-backlog.md`, anotado na validação
   da 0015): hoje o log mostra apenas o **lado** atacante ("Seu Time"/"Oponente"), o
   golpe e o dano — não diz **qual Pokémon** bateu em **qual**. O log passa a indicar
@@ -242,7 +242,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 > `evolution_chain` ignora o estágio; `find`/`detail` mapeiam sprite `front_default`
 > nulo para `""` — commits `0cc8d81`, `e5fb57c`, `3abf7f6`.
 
-### RF-13 — Batalha na web (C1) — `Done` (sessão 0013, validado em 2026-08-09; efeito de golpe complementado pela 0087, validada em 2026-09-15 — projétil com chegada real à borda do card alvo, CSS-only; a trajetória slot-a-slot segue pendente em `docs/draft-backlog.md`, 2026-09-15)
+### RF-13 — Batalha na web (C1) — `Done` (sessão 0013, validado em 2026-08-09; efeito de golpe complementado pela 0087, validada em 2026-09-15 — projétil com chegada real à borda do card alvo, CSS-only; a trajetória slot-a-slot foi entregue e validada pela 0088 em 2026-09-15 — o projétil sai do slot do atacante e chega ao slot do alvo em x e y)
 - Expor o motor de auto-batalha (RF-11/B3) e o oponente automático (RF-12/B4) na UI
   com **100% htmx** (RNF-01): o usuário entra em uma batalha contra um time adversário
   e cada "jogar" avança **uma rodada** do `BattleEngine`, re-renderizando o fragmento
@@ -499,7 +499,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 - **Exceção datada (2026-09-15) — chegada slot→slot (sessão 0088):** **um** handler inline em `views/layout.erb`, ligado a `htmx:afterSettle` (que dispara uma vez por nó OOB, ~2× por golpe), mede a **base** do projétil por layout (`offsetLeft`/`offsetTop` + rect da track pai) — de propósito imune a `transform` e idempotente, de modo que disparos repetidos sobrescrevem em vez de acumular — e os **centros dos cards** de lutador via `getBoundingClientRect()`; escreve **três** custom properties no nó `.shot`: `--fx-ox`/`--fx-oy` (origem, slot do atacante) e `--fx-dy` (destino, slot do alvo), consumidas pelos keyframes com fallback `0`. Escopo estreito e único; nada além disso é JS customizado.
 - **Precedente factual:** `views/layout.erb:37-54` **já** embarca ~17 linhas de JS do projeto ligadas a `htmx:beforeRequest`/`afterSwap` — a exceção é uma **política explícita**, não a introdução de JS pela primeira vez.
 - **Limites que continuam valendo:** sem bibliotecas, sem polling, sem SSE, sem framework, sem JS por componente; o rail CSS permanece o fallback quando não há JS.
-- **Status da exceção:** aprovada pelo usuário em 2026-09-15 para a sessão 0088, **reaprovação pendente na validação da 0088**.
+- **Status da exceção:** aprovada pelo usuário em 2026-09-15 (refinamento) e **reaprovada na validação da sessão 0088 em 2026-09-15** — o escopo estreito descrito acima é o entregue.
 - Backend consome a PokéAPI externa via Faraday.
 
 ### RNF-02 — Estado / Persistência — `Done` (sessão 0001)

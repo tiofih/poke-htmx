@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-15 (D1a, D2a, D3a, D4a, D5, D6a, D7a, D8) |
-| Implementação (fase 2, TDD) | **Pendente** |
-| Validação (fase 3) | **Pendente** (executada pelo usuário) |
+| Implementação (fase 2, TDD) | **Concluída** — Passos 1–6 (`6e1caa3`…`d5a06dd`) + fix S3 do RNF-01 (`a9949dc`); suíte 1180/6219, lint 0; Revisor S7 `Aprovado` (1 rodada, teto 3) |
+| Validação (fase 3) | **Concluída** — validada pelo usuário em 2026-09-15 (C1–C9 + G1–G3 ok, sem `nok`); a validação é do usuário — nada foi autoproclamado |
 
 ---
 
@@ -56,25 +56,25 @@ O projétil de golpe deixa de viajar de uma **caixa de time** para a outra e pas
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| C1 o strike entry carrega os índices do atacante e do alvo | `test/battle_engine_test.rb#test_log_entries_carry_full_action_shape_and_rounds` (:133-145, hoje compara lista de chaves **e** hash exato → red esperado) + `test/move_engine_test.rb:120-130` (lista de chaves → red esperado) + espelho de `test/battle_engine_test.rb:356-372` | pendente |
-| C2 a seleção de alvo (`target_strategy`) tem teste próprio, antes de confiar no `target_index` serializado | novo teste em `test/battle_engine_test.rb` | pendente |
-| C3 o presenter expõe `from_slot`/`to_slot` e tolera a ausência da chave | `test/battle_log_presenter_test.rb` (:115-124 e :129-146, devem seguir verdes) + `test/battle_juice_presenter_test.rb` | pendente |
-| C4 o markup do shot carrega `data-from-slot`/`data-to-slot` nos dois caminhos de render | `test/battle_strike_routes_test.rb#test_strike_oob_moves_shot_into_arena_track` (:191-205, estendido) + `test/battle_routes_test.rb#test_battle_fragment_marks_juice_targets` (:312-345) | pendente |
-| C5 os cards de lutador expõem o slot | `test/battle_view_test.rb#test_battle_fighter_cards_carry_side_and_step_delay` (:297-309, estendido) | pendente |
-| C6 com JS o projétil chega ao **slot do alvo** em x **e** y | `e2e/specs/battle-log.spec.ts` (teste novo medindo o par ordenado; o pin de `tx≈472±2` vira par) | pendente |
-| C7 sem JS o rail CSS da 0087 continua funcionando (fallback) | `e2e/specs/battle-log.spec.ts` (novo teste com JavaScript desabilitado no contexto) | pendente |
-| C8 reduced motion mantém o comportamento atual (sem regressão nova) | `test/design_system_test.rb#test_design_system_battle_juice_reduced_motion` + e2e | pendente |
-| C9 coluna única (<981px) segue no-op (sem travel, sem erro de JS) | guarda e2e `arena keeps 3 in-flow columns and an out-of-flow projectile track` + `test/style_responsive_test.rb` | pendente |
+| C1 o strike entry carrega os índices do atacante e do alvo | `test/battle_engine_test.rb#test_log_entries_carry_full_action_shape_and_rounds` (:133-145, hoje compara lista de chaves **e** hash exato → red esperado) + `test/move_engine_test.rb:120-130` (lista de chaves → red esperado) + espelho de `test/battle_engine_test.rb:356-372` | ok |
+| C2 a seleção de alvo (`target_strategy`) tem teste próprio, antes de confiar no `target_index` serializado | novo teste em `test/battle_engine_test.rb` | ok |
+| C3 o presenter expõe `from_slot`/`to_slot` e tolera a ausência da chave | `test/battle_log_presenter_test.rb` (:115-124 e :129-146, devem seguir verdes) + `test/battle_juice_presenter_test.rb` | ok |
+| C4 o markup do shot carrega `data-from-slot`/`data-to-slot` nos dois caminhos de render | `test/battle_strike_routes_test.rb#test_strike_oob_moves_shot_into_arena_track` (:191-205, estendido) + `test/battle_routes_test.rb#test_battle_fragment_marks_juice_targets` (:312-345) | ok |
+| C5 os cards de lutador expõem o slot | `test/battle_view_test.rb#test_battle_fighter_cards_carry_side_and_step_delay` (:297-309, estendido) | ok |
+| C6 com JS o projétil chega ao **slot do alvo** em x **e** y | `e2e/specs/battle-log.spec.ts` (teste novo medindo o par ordenado; o pin de `tx≈472±2` vira par) | ok |
+| C7 sem JS o rail CSS da 0087 continua funcionando (fallback) | `e2e/specs/battle-log.spec.ts` (novo teste com JavaScript desabilitado no contexto) | ok |
+| C8 reduced motion mantém o comportamento atual (sem regressão nova) | `test/design_system_test.rb#test_design_system_battle_juice_reduced_motion` + e2e | ok |
+| C9 coluna única (<981px) segue no-op (sem travel, sem erro de JS) | guarda e2e `arena keeps 3 in-flow columns and an out-of-flow projectile track` + `test/style_responsive_test.rb` | ok |
 
 ### Garantias (RNF)
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| G1 suíte completa (baseline 1173+ runs) + lint 0 em todo green | `./scripts/test` + `./scripts/lint` | pendente |
-| G2 JS confinado ao handler único em `views/layout.erb` (sem lib/polling/SSE), registrado como exceção ao RNF-01 | `git diff --stat` + revisão de diff (`manual`) | pendente |
-| G3 `DESIGN.md` respeitado (sem hex cru, sem componente paralelo) | revisão de diff (`manual`) + `test/design_system_test.rb` | pendente |
+| G1 suíte completa (baseline 1173+ runs) + lint 0 em todo green | `./scripts/test` + `./scripts/lint` | ok |
+| G2 JS confinado ao handler único em `views/layout.erb` (sem lib/polling/SSE), registrado como exceção ao RNF-01 | `git diff --stat` + revisão de diff (`manual`) | ok |
+| G3 `DESIGN.md` respeitado (sem hex cru, sem componente paralelo) | revisão de diff (`manual`) + `test/design_system_test.rb` | ok |
 
-> **S1:** cada critério acima aponta o teste que o prova (arquivo + método). **Ao fim da fase 2 (suíte + lint verdes, Revisor S7 `Aprovado`), PARAR e aguardar a validação do usuário — não marcar Done, não preencher a seção 7, não commitar conclusão.**
+> **S1:** cada critério acima aponta o teste que o prova (arquivo + método). A fase 2 encerrou com suíte + lint verdes e Revisor S7 `Aprovado`; a fase 3 **aguardou a validação do usuário** (registrada na §7) — nada foi marcado Done nem commitado como conclusão antes dela.
 
 ## 5. Decisões de refinamento (fechadas com o usuário — 2026-09-15)
 
@@ -104,22 +104,28 @@ O projétil de golpe deixa de viajar de uma **caixa de time** para a outra e pas
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Validada pelo usuário em 2026-09-15** (verbatim: "maravilha, validado!"); implementação em `c54b018..3484260` (Passos 1–6 + fix S3 do RNF-01 `a9949dc` + registro no draft `3484260`); revisão `Aprovado` (`reviews/review-2026-09-15T14-00-01-passos1-6-0088.md`, 0 blocker/0 alta/1 média/5 baixa/2 info; a média foi aplicada em `a9949dc`). S2 — uma linha por critério, nunca bloco único:
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 | `./scripts/test -n /carry_full_action_shape/` | entrada de log com índices | |
-| C2 | `./scripts/test -n /target_strategy/` | — | |
-| C3 | `./scripts/test test/battle_log_presenter_test.rb` | — | |
-| C4 | `./scripts/test test/battle_strike_routes_test.rb -n /shot_into_arena_track/` | inspecionar `data-from-slot`/`data-to-slot` | |
-| C5 | `./scripts/test test/battle_view_test.rb -n /fighter_cards_carry/` | inspecionar o card | |
-| C6 | e2e `battle-log.spec.ts` (par ordenado) | observar saída/chegada nos slots | |
-| C7 | e2e com JavaScript desabilitado | desabilitar JS e repetir o golpe | |
-| C8 | `./scripts/test test/design_system_test.rb -n /reduced_motion/` | com reduced motion, sem travel | |
-| C9 | e2e guarda de coluna única + `test/style_responsive_test.rb` | redimensionar <981px | |
-| G1 | `./scripts/test` + `./scripts/lint` | — | |
-| G2 | `git diff --stat` | revisar diff por lib/polling/SSE | |
-| G3 | `test/design_system_test.rb` | revisar `DESIGN.md`/diff por hex cru | |
+| C1 | `./scripts/test -n /carry_full_action_shape/` (`test/battle_engine_test.rb#test_log_entries_carry_full_action_shape_and_rounds`, espelho de `:356-372`; `test/move_engine_test.rb:120-130`) | entrada de log com `attacker_index`/`target_index` | ok |
+| C2 | `./scripts/test -n /target_strategy/` (novo teste em `test/battle_engine_test.rb`) | — | ok |
+| C3 | `./scripts/test test/battle_log_presenter_test.rb` (:115-124, :129-146) + `test/battle_juice_presenter_test.rb` | — | ok |
+| C4 | `./scripts/test test/battle_strike_routes_test.rb -n /shot_into_arena_track/` + `test/battle_routes_test.rb#test_battle_fragment_marks_juice_targets` (:312-345) | inspecionar `data-from-slot`/`data-to-slot` (forma) | ok |
+| C5 | `./scripts/test test/battle_view_test.rb -n /fighter_cards_carry/` | inspecionar o card (`data-slot`, forma) | ok |
+| C6 | e2e `projectile leaves the attacker slot and reaches the target slot (measured pair)` (`e2e/specs/battle-log.spec.ts`) | observar a saída no slot do atacante e a chegada no slot do alvo | ok |
+| C7 | e2e `without JavaScript the 0087 rail remains` | rail de 0087 continua quando não há JS | ok |
+| C8 | `./scripts/test test/design_system_test.rb -n /reduced_motion/` + e2e `reduced motion keeps the projectile without travel` | com reduced motion, sem travel | ok |
+| C9 | e2e `container gate disables projectile travel below 981px` + `arena keeps 3 in-flow columns and an out-of-flow projectile track` + `test/style_responsive_test.rb` | redimensionar <981px | ok |
+| G1 | `./scripts/test` (1180 runs / 6219 assertions, 0 failures / 0 errors / 0 skips) + `./scripts/lint` (0 offenses em 136 arquivos) | — | ok |
+| G2 | `git diff --stat` (`c54b018..3484260`: JS confinado ao handler de `views/layout.erb:37-93`, sem lib/polling/SSE, sem `.js` novo) | revisar diff por lib/polling/SSE | ok |
+| G3 | `test/design_system_test.rb` | revisar `DESIGN.md`/diff por hex cru | ok |
+
+**Evidência medida (C6):** erro de origem **190,6px** (baseline vermelho do Passo 4) → **≈0,03–0,25px** em x e **≈0,45px** em y; destino **259,6px** → **≈0,45–0,88px**; tolerância assertada `< 2px`. Mutação de controle reproduzida pelo Revisor (remover as escritas de origem) derruba o assert estático **e** o e2e no erro exato de `190.6171875` — revertida, tudo verde. O duplo disparo de `htmx:afterSettle` (~2× por golpe) **não** compõe as escritas: a base medida por layout é idempotente.
+
+**Caveats honestos (levantados na revisão):** (a) **C4/C5 são só forma** no minitest — o pareamento real slot→slot é provado pelo lookup do card por `data-slot` no e2e de C6; (b) em **C7** a asserção `vars == {ox:'',oy:'',dy:''}` é garantida por `javaScriptEnabled:false` (o handler comprovadamente não roda) — a evidência **significativa** é a geometria do rail (`y===0`, `x ≈ 35cqi+42+10`), red-capaz.
+
+**Achados não bloqueantes:** a média do Revisor (o registro da exceção ao RNF-01 subdescrevia o handler entregue — hoje descreve a base por layout e as três vars) foi aplicada em `a9949dc`; as 5 baixa + 2 info foram registradas em `docs/draft-backlog.md:233-245` para triagem — nenhuma reabre critério nem altera o comportamento validado.
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 >
@@ -130,7 +136,7 @@ O projétil de golpe deixa de viajar de uma **caixa de time** para a outra e pas
 
 ## 8. Observações
 
-- **PARADA obrigatória (regra do AGENTS.md):** a implementação PARA na fase 2 (suíte + lint verdes, Revisor S7 `Aprovado`); a validação (fase 3) é do **usuário**. Nada marcado como `Concluída`, nenhuma alegação de validação, nenhum commit de conclusão.
+- **PARADA honrada (regra do AGENTS.md):** a implementação parou na fase 2 (suíte + lint verdes, Revisor S7 `Aprovado`); a validação (fase 3) foi do **usuário** — concluída em 2026-09-15 (S2 por critério, sem `nok`); o arquivo passa a registrar a conclusão conforme a validação recebida, nunca antes dela.
 - **Não editar nesta sessão:** `sessions/0087-*`, `REQUIREMENTS.md`, `docs/draft-backlog.md` (as reaberturas S3 são escritas por outro agente).
 - **Riscos a vigiar:** ordem dos dois fragmentos OOB (`#jx-shot-track` e `#jx-gates`) — medir **depois** do swap certo; leitura forçada de layout a cada golpe (aceitável nesta escala); reduced motion mostrando ponto estático na origem (igual a hoje); fakes de teste sem as chaves novas (é o motivo da guarda em `from_slot`/`to_slot`).
 - **Leitura exata antes de editar:** confirmar `lib/battle_engine.rb:94-138`, `views/_fighter_panel.erb`, `views/_jx_shot.erb`, `server.rb` `strike_shot_oob`, `views/layout.erb:37-54` e o bloco ODS do projétil no arquivo antes do Passo 1.
