@@ -230,6 +230,18 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **e2e fora do CI** — `.github/workflows/ci.yml` roda só `./scripts/test`, lint e `check_docs`, então nenhuma guarda de layout protege o merge.
 - **Duplicação do markup do shot** — `views/battle.erb:46-47` repete `server.rb:1137-1145` (risco de drift).
 
+### Achados não bloqueantes da revisão da 0088 (anotado 2026-09-15 para triagem)
+
+> O review da 0088 deu veredito `Aprovado`. Os itens abaixo são **NÃO bloqueadores** e **NÃO fazem parte dos critérios validados** da 0088 — ficam anotados para triagem futura. O achado **média** (exceção ao RNF-01 desatualizada em `REQUIREMENTS.md:499`) foi corrigido no commit de revisão; os demais seguem aqui.
+
+- **Base de layout sem guarda** — `views/layout.erb:81-82` assume `shot.offsetParent === shot.parentElement` e `.shot` renderizado (`offsetWidth > 0`); nenhum dos dois é guardado (uma regra futura que posicione a coluna, ou o último settle com o gate off, gera offset silencioso).
+- **Centros dos cards sensíveis a `transform`** — `views/layout.erb:87-90` usa `getBoundingClientRect()` nos centros (sensível) enquanto a base é imune por layout; hoje mascarado pelo `animation-delay` de 0,55s (`public/style.css:941`, `:2471`).
+- **e2e pode medir nó stale** — `e2e/specs/battle-log.spec.ts:186-195`: `.catch(() => undefined)` engole timeout e a medição pode comparar um `.shot` antigo (pré-existente, `docs/draft-backlog.md:223`).
+- **Comentário obsoleto** — `test/style_responsive_test.rb:332-333` (pré-existente, `docs/draft-backlog.md:226`): o texto diz que a coluna deixou de ser ancestral da track; o assert está correto, só o comentário engana.
+- **C7 com prova sintética** — `e2e/specs/battle-log.spec.ts:362-422`: com `javaScriptEnabled:false` o `vars == ''` é garantido; a prova real do fallback é a geometria do rail.
+- **Info: payload não consumido** — `lib/battle_log_presenter.rb:65-67` (`from_slot`/`to_slot`) é exigido por C3/testado, mas nenhuma view consome hoje.
+- **Info: gate `@container` duplicado** — `public/style.css:1030` vs `:2480` (pré-existente, `docs/draft-backlog.md:222`; a 0088 não agravou).
+
 ---
 
 ## 3. Referências aos arquivos de playtest
