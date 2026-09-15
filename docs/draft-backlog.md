@@ -195,6 +195,8 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **L3** — botão "reportar bug" (Nível A: link pré-preenchido recomendado; Nível C: `POST /feedback` só com auth).
 - **Cassettes VCR gigantes** — `record: :once`/`PokeApiStub` (recomendado A), Git LFS (B) ou limpar (C).
 - **Stub de `load_starters`/`STARTER_SLUGS` no `ServerTeamRemoveQ5Test`** — o DELETE re-renderiza `pokemon_list` e busca 27 starters × (`/pokemon` + `/pokemon-species` + `/evolution-chain`) + `?limit=100000`, gerando um cassette de 20 MB (27536 linhas); o stub elimina a necessidade dele (hoje gitignored, replay offline local).
+- **e2e `e2e/specs/battle-log.spec.ts` vermelho pré-existente (anotado 2026-09-15, NÃO faz parte da 0087)** — `buildTeamOfSix` (região `:17`) trava no 6º add com "Orçamento insuficiente", derrubando 4 testes do arquivo (incluindo a expectativa de badge). Os dois testes adicionados pela 0087 passam. Pré-existente, não é regressão da 0087; ajustar o helper (orçamento/ordem dos adds do time fixo) antes de reusar o arquivo como gate.
+- **`ConnectionRegistryTest` flaky por ordem de execução (anotado 2026-09-15, NÃO faz parte da 0087)** — falha em algumas ordens da suíte completa, passa isolado e no re-run (observado no run da suíte do Passo 3 em 2026-09-15). Investigar estado compartilhado entre testes (registry global/`MAX_CONNECTIONS`/evicção) ou fixar a ordem/isolamento.
 
 ---
 
