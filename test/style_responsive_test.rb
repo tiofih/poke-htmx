@@ -297,7 +297,10 @@ class StyleResponsiveTest < Minitest::Test
            "Pular vem antes da rede final reduce, que continua por ultimo"
   end
 
-  def test_shot_only_above_900px
+  # C3/C4 (0087 Passo 2): o gate do travel deixa de ser @media (min-width:900px)
+  # e passa a ser @container no .arena (container-type: inline-size) — o container
+  # mede a largura REAL da arena, nao o viewport.
+  def test_shot_only_in_three_column_container
     content = style_content
     block = content[/Open Design System \(0072\): inicio.*?Open Design System \(0072\): fim/m]
 
@@ -305,10 +308,10 @@ class StyleResponsiveTest < Minitest::Test
 
     # Juice usa .shot do bloco (0076 2b, C12): sem .projectile legado.
     assert_match(/\.shot[^}]*display:\s*none/m, block,
-                 "projetil invisivel por padrao — abaixo de 900px so flash no alvo (D5 A)")
+                 "projetil invisivel por padrao — abaixo de 3 colunas so flash no alvo (D5 A)")
     shot_animation =
-      /@media\s*\(min-width:\s*900px\)[\s\S]*\.fighter\.is-attacking \.shot[^}]*animation:\s*juice-projectile/m
-    assert_match(shot_animation, block, "projetil anima apenas em viewport >= 900px")
+      /@container\s*\(min-width:\s*\d+px\)[\s\S]*\.shot[^}]*animation:\s*juice-projectile/m
+    assert_match(shot_animation, block, "projetil anima apenas no container de 3 colunas (C3/C4)")
   end
 
   # C9 (0086 Passo 24): projetil direcional atacante->alvo. Dois keyframes
@@ -329,17 +332,29 @@ class StyleResponsiveTest < Minitest::Test
                  "data-side=1 (coluna direita) viaja rtl sob data-jx-shot (C9)")
   end
 
-  # C15 (0086 Passo 24 / Passo 35): abaixo de 900px o efeito fica flash-only
-  # (sem travel). O teste delimita o bloco @media 900px — da chave de abertura
-  # ate a chave de fechamento correspondente — e prova que as regras de travel
-  # moram DENTRO dele. Ordem textual depois da abertura nao bastava: uma regra
-  # movida para depois do bloco tambem passaria na asserção antiga.
+  # C3/C4 (0087 Passo 2): o gate do travel deixa de ser @media (min-width:900px)
+  # e passa a ser @container no .arena (container-type: inline-size). O bloco
+  # @container e delimitado da chave de abertura ate a de fechamento
+  # correspondente (chaves balanceadas) para provar que as regras de travel moram
+  # DENTRO dele. O threshold tem que passar de 980px (a .arena colapsa em 1 coluna
+  # em max-width:980px) — so assim a faixa single-column 900-980px, que o gate
+  # antigo deixava com travel ativo, fica flash-only.
   def test_shot_travel_disabled_below_900px
     content = style_content
 
-    open = content.rindex(/@media\s*\(min-width:\s*900px\)\s*\{/)
-    refute_nil open, "breakpoint de travel >= 900px deve existir"
+    assert_match(/\.arena\s*\{[^}]*container-type:\s*inline-size/m, content,
+                 "o .arena e o container de medicao do gate de travel (C3)")
+    refute_match(/@media\s*\(min-width:\s*900px\)/, content,
+                 "o gate de travel nao pode ser mais @media min-width:900px (C3)")
 
+    gates = []
+    content.scan(/@container\s*(?:[\w-]+\s+)?\(min-width:\s*(\d+)px\)\s*\{/) { gates << Regexp.last_match }
+    refute_empty gates, "gate @container de travel deve existir (C3/C4)"
+    gate = gates.last
+    assert gate[1].to_i > 980,
+           "o gate mede a arena em 3 colunas (>980px) e fecha a faixa 900-980px (C4)"
+
+    open = gate.begin(0)
     depth = 0
     close = nil
     content[open..].each_char.with_index do |char, index|
@@ -350,14 +365,14 @@ class StyleResponsiveTest < Minitest::Test
       close = open + index
       break
     end
-    refute_nil close, "o bloco @media 900px deve fechar (chaves balanceadas)"
-    media_block = content[open..close]
+    refute_nil close, "o bloco @container de travel deve fechar (chaves balanceadas)"
+    container_block = content[open..close]
 
     %w[juice-shot-ltr juice-shot-rtl].each do |keyframe|
       assert content.include?("animation-name: #{keyframe}"),
-             "travel #{keyframe} deve ser aplicado em algum lugar (C15)"
-      assert media_block.include?("animation-name: #{keyframe}"),
-             "travel #{keyframe} so DENTRO do bloco @media (min-width:900px) — <900px flash-only (C15)"
+             "travel #{keyframe} deve ser aplicado em algum lugar (C3)"
+      assert container_block.include?("animation-name: #{keyframe}"),
+             "travel #{keyframe} so DENTRO do bloco @container — abaixo de 3 colunas e flash-only (C3/C4)"
     end
   end
 
