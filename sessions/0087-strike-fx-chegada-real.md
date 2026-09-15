@@ -119,6 +119,11 @@ O projétil de golpe deixa o teto direcional (0086/C9) e passa a ter **chegada r
 > - **C15 da 0086 (gate do travel)** muda de semântica: `@media (min-width: 900px)` → `@container` no `.arena`. A garantia "flash-only abaixo do breakpoint" nunca foi verdadeira na faixa 900–980px; reaprovada na validação desta sessão.
 > - **C9 da 0086 (projétil direcional)** muda de teto direcional para **chegada real na borda do alvo** (D1b/D3b) — mesmo contrato, geometria nova.
 > - **C13 da 0086 (sync)** não muda de semântica; o teste foi reexecutado na fase 3 (C8, verde) e não precisou de reabertura.
+>
+> **S3 2026-09-15 — reaberturas para a sessão 0088 (projétil slot→slot; aprovadas pelo usuário em 2026-09-15, reaprovação pendente na validação da 0088):**
+> - **C1 (o nó do projétil / a track) e C6 (chegada real medida)** passam a significar **slot→slot** (x e y), em vez de apenas a chegada na borda do card alvo no eixo horizontal. A 0087 permaneceu válida dentro do que prometeu — chegada real na borda do card alvo, medida ao vivo — e a 0088 **estende** a semântica; a reabertura é do critério, não das evidências já coletadas.
+> - **O rail CSS de 0087** (`--fx-travel: calc(35cqi + 42px)`) passa a ser o **fallback** da nova rota (sem JS / `prefers-reduced-motion` / coluna única), não mais o mecanismo principal. A garantia de coluna única (<981px) segue no-op.
+> - **Reaprovação do usuário pendente (fase 3 da 0088).**
 
 ### Notas da validação (2026-09-15)
 

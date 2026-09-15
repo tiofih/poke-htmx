@@ -496,6 +496,10 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 
 ### RNF-01 — Arquitetura — `Executado`
 - Aplicação server-rendered; **sem JavaScript customizado** — toda interação via htmx.
+- **Exceção datada (2026-09-15) — chegada slot→slot (sessão 0088):** **um** handler inline em `views/layout.erb`, ligado a eventos htmx, mede `getBoundingClientRect()` dos slots de lutador após o swap OOB e escreve `--fx-dy` no nó do projétil, para a chegada slot→slot. Escopo estreito e único; nada além disso é JS customizado.
+- **Precedente factual:** `views/layout.erb:37-54` **já** embarca ~17 linhas de JS do projeto ligadas a `htmx:beforeRequest`/`afterSwap` — a exceção é uma **política explícita**, não a introdução de JS pela primeira vez.
+- **Limites que continuam valendo:** sem bibliotecas, sem polling, sem SSE, sem framework, sem JS por componente; o rail CSS permanece o fallback quando não há JS.
+- **Status da exceção:** aprovada pelo usuário em 2026-09-15 para a sessão 0088, **reaprovação pendente na validação da 0088**.
 - Backend consome a PokéAPI externa via Faraday.
 
 ### RNF-02 — Estado / Persistência — `Done` (sessão 0001)
