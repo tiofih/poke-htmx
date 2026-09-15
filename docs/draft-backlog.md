@@ -168,6 +168,15 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
   - Pedido do usuario na validacao da 0086 (2026-09-14); altera comportamento ja validado (C4 tiered pacing + "Pular", C7 advance-one-round + JOGAR-AUTO) → **exige S3 nos C4/C7 e sessao nova**.
   - Hooks afetados: `views/battle.erb:70` (toggle) e `views/battle.erb:71-73` (`hx-include="#auto-play"`, `hx-trigger="click, next-strike from:body, next-round from:body"`); `server.rb:1070` (`next-round` em `advance_battle`), `server.rb:1074-1075` (`auto_play_requested?`), `server.rb:1086` (`next-strike` em `strike_battle`); pacing CSS-only em `public/style.css:1880+` (`.log-skip-input`/`.log-skip-btn`).
   - Testes a remover/reescrever: `test/battle_routes_test.rb` `test_battle_auto_toggle_chains_advance_until_finished` (l.186), `test_battle_auto_off_stops_chain` (l.206), `test_battle_auto_stays_checked_across_swaps` (l.217), `test_battle_strike_button_wires_auto_chain` (l.227) + e2e `e2e/specs/battle-log.spec.ts` caso `auto toggle chains to finish without further clicks` (~l.99).
+- **Projétil deve sair do slot do pokémon atacante e chegar ao slot do pokémon alvo (anotado 2026-09-15 — NÃO faz parte da sessão 0087 e não está coberto pelos critérios daquela sessão)** — hoje o projétil sai de uma caixa de time e chega à outra: o voo é um rail horizontal na altura da linha de cards, não um trajeto de slot a slot.
+  - Evidência: a sessão 0087 (`49ffd74` e anteriores) entregou, por decisão D1b/D3b, uma track única filha do `.arena` com `--fx-travel: calc(35cqi + 42px)` — isso resolve a **chegada no eixo horizontal** (borda do card alvo), mas a origem/destino efetivos ficam na altura da linha de cards das caixas de time.
+  - Limite estrutural registrado no refinamento: uma track única dá rail horizontal; o Y do slot específico **não é derivável em CSS puro**.
+  - O markup hoje carrega só `data-from-side` / `data-to-side` / `data-move-type` (`views/_jx_shot.erb`, emitido por `server.rb` `strike_shot_oob`); **não existe** índice/identidade do pokémon atacante ou alvo chegando ao nó do projétil.
+  - Rotas técnicas a avaliar no refinamento:
+    1. **JS ponto-a-ponto** medindo os centros dos cards via `getBoundingClientRect` — fiel, mas introduz o primeiro script além do htmx no projeto (hard-out explícito da 0086).
+    2. **CSS com aritmética por índice de slot** (âncoras/`nth-child` + custom props por linha) — sem JS, aproximado, quebra se a altura da linha variar.
+    3. **CSS anchor positioning** (`anchor()` / `position-anchor`) — CSS-only e expressa "relativo ao slot alvo", mas é superfície nova no projeto e depende de suporte do navegador.
+  - Esforço: **L** — exige a identidade do slot chegando ao markup (mudança de presenter/engine) + âncoras e possivelmente JS.
 
 ### Playtest / QA / Ferramentas
 - **TP-1** — playbook de playtest reutilizável (helpers no harness).
