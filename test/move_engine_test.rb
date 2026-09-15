@@ -123,10 +123,13 @@ class MoveEngineBattleTest < Minitest::Test
 
     result = engine_with([fast], [slow]).battle
 
-    assert_equal %i[round attacker move_type damage ko move attacker_name target_name], result.log.first.keys
+    assert_equal %i[round attacker move_type damage ko move attacker_name target_name attacker_index target_index],
+                 result.log.first.keys
     assert_equal "fire-move", result.log.first[:move]
     assert_equal "flame", result.log.first[:attacker_name]
     assert_equal "leaf", result.log.first[:target_name]
+    assert_equal 0, result.log.first[:attacker_index]
+    assert_equal 0, result.log.first[:target_index]
   end
 end
 

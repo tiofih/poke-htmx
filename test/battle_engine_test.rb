@@ -103,6 +103,8 @@ class BattleEngineBattleTest < Minitest::Test
     ).battle
 
     assert_equal([0, 1, 0, 1], result.log.take(4).map { |entry| entry[:attacker] })
+    assert_equal([0, 0, 1, 1], result.log.take(4).map { |entry| entry[:attacker_index] },
+                 "indice do slot do atacante dentro do time")
   end
 
   def test_full_battle_ends_when_one_side_has_no_alive
@@ -136,12 +138,29 @@ class BattleEngineBattleTest < Minitest::Test
 
     result = battle_engine(team_a: [a], team_b: [d]).battle
 
-    assert_equal %i[round attacker move_type damage ko attacker_name target_name], result.log.first.keys
+    assert_equal %i[round attacker move_type damage ko attacker_name target_name attacker_index target_index],
+                 result.log.first.keys
     assert_equal(
-      { round: 1, attacker: 0, move_type: "fire", damage: 180, ko: true, attacker_name: "a", target_name: "d" },
+      { round: 1, attacker: 0, move_type: "fire", damage: 180, ko: true, attacker_name: "a", target_name: "d",
+        attacker_index: 0, target_index: 0 },
       result.log.first
     )
     assert_equal 1, result.rounds
+  end
+
+  def test_log_entry_carries_attacker_and_target_slots
+    a = fire_pokemon(hp: 200, attack: 100, defense: 10)
+    b1 = grass_pokemon(name: "b1", hp: 1)
+    b2 = grass_pokemon(name: "b2", hp: 200)
+
+    result = battle_engine(team_a: [a], team_b: [b1, b2]).battle
+
+    first = result.log.first
+    assert_equal 0, first[:attacker_index], "atacante e o slot 0 do time A"
+    assert_equal 0, first[:target_index], "primeiro alvo vivo do time B"
+    at_b2 = result.log.find { |entry| entry[:target_name] == "b2" }
+    assert_equal 0, at_b2[:attacker_index]
+    assert_equal 1, at_b2[:target_index], "b1 KO -> mira o slot 1"
   end
 
   def test_log_records_attacker_and_target_names

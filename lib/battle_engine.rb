@@ -91,7 +91,7 @@ module BattleActions
     damaged
   end
 
-  def log_entry(action, damaged, attacker, target)
+  def log_entry(action, damaged, attacker, target, attacker_index, target_index)
     entry = {
       round: action[:round], attacker: action[:side],
       move_type: action[:move_type], damage: action[:damage],
@@ -100,6 +100,7 @@ module BattleActions
     entry[:move] = action[:move].name if action[:move]
     entry[:attacker_name] = attacker.name
     entry[:target_name] = target.name
+    entry.merge!(attacker_index: attacker_index, target_index: target_index)
     entry
   end
 end
@@ -130,11 +131,11 @@ module BattleItemActions
 
   def attack_action_for(attacker_team_index, attacker_index, attacker, round)
     target_team_index = 1 - attacker_team_index
-    target = target_for(target_team_index)
+    target_index, target = target_for(target_team_index)
     action = attack_action(attacker, target).merge(round: round, side: attacker_team_index)
     spend_pp(attacker_team_index, attacker_index, attacker, action[:move])
     damaged = apply_damage(target_team_index, target, action[:damage])
-    @log << log_entry(action, damaged, attacker, target)
+    @log << log_entry(action, damaged, attacker, target, attacker_index, target_index)
   end
 end
 
@@ -265,7 +266,7 @@ class BattleEngine # rubocop:disable Metrics/ClassLength
 
   def target_for(target_team_index)
     target_index = @target_strategy.call(@teams[target_team_index])
-    @teams[target_team_index][target_index]
+    [target_index, @teams[target_team_index][target_index]]
   end
 
   def alive_count(team_index)
