@@ -438,17 +438,30 @@ class StyleResponsiveTest < Minitest::Test
     end
   end
 
-  # C12 (0086 Passo 26): contrato de extensibilidade — os tokens --fx-* sao a
-  # unica config (cor/travel/shake); keyframes seguem genericos (config-only).
+  # C12 (0086 Passo 26) + C5 (0087 Passo 3): contrato de extensibilidade — os
+  # tokens --fx-* sao a unica config (cor/travel/shake); keyframes seguem
+  # genericos (config-only). O travel deixa de medir o viewport (40vw): mede a
+  # largura REAL da arena pela distancia borda->borda do grid 1fr/1.06fr/1fr com
+  # gap 32px → 35cqi + 42px, e os keyframes consomem a var sem fallback
+  # duplicado. cqi nao e resolvivel estaticamente (D5): aqui provamos a forma; a
+  # medida do destino e o e2e do Passo 5.
   def test_fx_contract_vars_declared
     content = style_content
 
     assert_match(/\.arena\s*\{[^}]*--fx-color:\s*var\(--t-normal\)/m, content,
                  "cor default do efeito no contrato (--fx-color)")
-    assert_match(/--fx-travel:\s*40vw/, content, "token de travel do contrato (--fx-travel)")
+    assert_match(/--fx-travel:\s*calc\(35cqi\s*\+\s*42px\)/, content,
+                 "travel do contrato mede a arena em 3 colunas: 35cqi + 42px (C5/D4)")
     assert_match(/--fx-shake:\s*0s/, content, "token de shake do contrato (--fx-shake)")
-    assert_match(/@keyframes\s+juice-shot-ltr\b[^@]*var\(--fx-travel/m, content,
-                 "keyframe de travel le --fx-travel, sem distancia hardcoded (C12)")
+
+    %w[juice-shot-ltr juice-shot-rtl].each do |keyframe|
+      block = content[/@keyframes\s+#{keyframe}\b\s*\{(?:[^{}]|\{[^{}]*\})*\}/m]
+      refute_nil block, "keyframe de travel #{keyframe} deve existir (C5)"
+      assert_match(/translateX\(calc\(-?100%[^;]*var\(--fx-travel\)\s*\)\s*\)/, block,
+                   "keyframe #{keyframe} le --fx-travel sem fallback duplicado (C5)")
+      refute_match(/\d+(?:\.\d+)?(?:vw|px|cqi)/, block,
+                   "keyframe #{keyframe} nao carrega distancia hardcoded (C5)")
+    end
   end
 
   # C13 (0086 Passo 27 / Passo 33 / T6a): a linha do tempo do turno e um

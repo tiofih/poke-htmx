@@ -941,9 +941,13 @@
 	--t-hp: calc(var(--t-impact) + var(--beat));
 	/* Contrato de fx (0086 C12): tokens config-only (cor/travel/shake)
 	   definidos no ancestral comum do .shot e do .fighter.is-hit; keyframes
-	   permanecem genericos. A cor default cai no tipo normal (C11 fallback). */
+	   permanecem genericos. A cor default cai no tipo normal (C11 fallback).
+	   0087 C5/D4: o travel mede a largura REAL da arena (container query `cqi`),
+	   nao o viewport — chegada borda->borda do alvo no grid 1fr/1.06fr/1fr com
+	   gap de 32px. A prova de geometria e o e2e (CSS estatico nao resolve
+	   cqi); aqui o token e so a forma do contrato. */
 	--fx-color: var(--t-normal);
-	--fx-travel: 40vw;
+	--fx-travel: calc(35cqi + 42px);
 	--fx-shake: 0s;
 }
 .log__entry {
@@ -1558,15 +1562,17 @@ li.fighter {
 
 /* Travel direcional atacante->alvo (0086 C9/Passo 24): dois keyframes
    escolhidos pelo data-side do ATACANTE (D2); alonga o translateX do
-   juice-projectile para cruzar a arena. Teto direcional (sem ponto-a-ponto)
-   e so no container de 3 colunas (C15; gate @container 0087 C3/C4). */
+   juice-projectile para cruzar a arena. 0087 C5/D4: a distancia vem inteira de
+   --fx-travel (35cqi + 42px, borda->borda do alvo), sem fallback duplicado —
+   keyframe generico, config-only (C12). So no container de 3 colunas
+   (@container 0087 C3/C4). */
 @keyframes juice-shot-ltr {
 	from {
 		transform: translateX(0) scale(1);
 		opacity: 1;
 	}
 	to {
-		transform: translateX(calc(100% + var(--fx-travel, 40vw))) scale(0.35);
+		transform: translateX(calc(100% + var(--fx-travel))) scale(0.35);
 		opacity: 0;
 	}
 }
@@ -1577,7 +1583,7 @@ li.fighter {
 		opacity: 1;
 	}
 	to {
-		transform: translateX(calc(-100% - var(--fx-travel, 40vw))) scale(0.35);
+		transform: translateX(calc(-100% - var(--fx-travel))) scale(0.35);
 		opacity: 0;
 	}
 }
@@ -1939,7 +1945,8 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
    config de --fx-* que alcanca o .shot/.fighter.is-hit mora no .arena (unico
    ancestral comum das animacoes); a regra `.log__entry[data-strategy="strike"]`
    era inerte — o log nao e ancestral de nenhum dos dois — e foi removida como
-   redundante. O token --fx-travel: 40vw segue declarado no .arena (fonte unica). */
+   redundante. O token --fx-travel segue declarado no .arena (fonte unica) e
+   desde a 0087 C5 mede a arena (35cqi + 42px), nao o viewport. */
 
 .arena:has(> #jx-gates[data-move-type="normal"]) { --fx-color: var(--t-normal); }
 .arena:has(> #jx-gates[data-move-type="fire"]) { --fx-color: var(--t-fire); }
