@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-15 (D1b, D2c, D3b, D4, D5, D6a) |
-| Implementação (fase 2, TDD) | **Pendente** |
-| Validação (fase 3) | **Pendente** (executada pelo usuário) |
+| Implementação (fase 2, TDD) | **Concluída** — Passos 1–7 (`0637cb6`…`49ffd74`); suíte 1173/6159, lint 0; Revisor S7 `Aprovado` (rounds 1–2, teto 3) |
+| Validação (fase 3) | **Concluída** — validada pelo usuário em 2026-09-15 (C1–C9 + G1–G3 ok, sem `nok`); a validação é do usuário — nada foi autoproclamado |
 
 ---
 
@@ -50,23 +50,23 @@ O projétil de golpe deixa o teto direcional (0086/C9) e passa a ter **chegada r
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| C1 o `.shot` vive na track dedicada do `.arena` (filha direta) e **não** dentro do card do lutador | `test/battle_strike_routes_test.rb` (novo teste do OOB do shot) + `test/battle_routes_test.rb` `test_battle_fragment_marks_juice_targets` (:312-337, reescrito — hoje afirma `class="shot"` :332 no render completo) | pendente |
-| C2 o OOB do strike carrega `data-from-side`/`data-to-side`/`data-move-type` no shot | `test/battle_strike_routes_test.rb` (novo teste do OOB do shot) | pendente |
-| C3 o gate do travel é `@container` no `.arena` (com `container-type: inline-size`) e não `@media (min-width: 900px)` | `test/style_responsive_test.rb` `test_shot_travel_disabled_below_900px` (:337-362, reescrito) + novo assert de `container-type: inline-size` | pendente |
-| C4 a faixa 900–980px (single-column) deixa de ter travel ativo | `test/style_responsive_test.rb` (assert de presença do `@container`) + `e2e/specs/battle-log.spec.ts` (novo teste do gate por container) | pendente |
-| C5 `--fx-travel: calc(35cqi + 42px)` e nenhuma distância hardcoded nos keyframes | `test/style_responsive_test.rb` `test_fx_contract_vars_declared` (:428-437, hoje pina o literal `40vw`) | pendente |
-| C6 chegada real medida no destino (borda próxima do alvo) | `e2e/specs/battle-log.spec.ts` (novo teste medindo `getBoundingClientRect`/translate computado; hoje :84 só checa reduced motion) | pendente |
-| C7 a cor por tipo continua chegando ao `.shot` a partir do `.arena` (18 regras `#jx-gates`) | `test/style_responsive_test.rb` `test_move_type_color_reaches_shot_from_arena` (:407-424) | pendente |
-| C8 o sync shot/impacto é preservado (`impacto == approach + travel`; `shake == impacto`) | `test/style_responsive_test.rb` `test_shake_synced_to_impact_instant` (:444-486) | pendente |
-| C9 o `.shot` segue classe ODS com guard de reduced motion | `test/design_system_test.rb` `test_design_system_battle_juice_reduced_motion` (:101-120) | pendente |
+| C1 o `.shot` vive na track dedicada do `.arena` (filha direta) e **não** dentro do card do lutador | `test/battle_strike_routes_test.rb` (novo teste do OOB do shot) + `test/battle_routes_test.rb` `test_battle_fragment_marks_juice_targets` (:312-337, reescrito — hoje afirma `class="shot"` :332 no render completo) | ok |
+| C2 o OOB do strike carrega `data-from-side`/`data-to-side`/`data-move-type` no shot | `test/battle_strike_routes_test.rb` (novo teste do OOB do shot) | ok |
+| C3 o gate do travel é `@container` no `.arena` (com `container-type: inline-size`) e não `@media (min-width: 900px)` | `test/style_responsive_test.rb` `test_shot_travel_disabled_below_900px` (:337-362, reescrito) + novo assert de `container-type: inline-size` | ok |
+| C4 a faixa 900–980px (single-column) deixa de ter travel ativo | `test/style_responsive_test.rb` (assert de presença do `@container`) + `e2e/specs/battle-log.spec.ts` (novo teste do gate por container) | ok |
+| C5 `--fx-travel: calc(35cqi + 42px)` e nenhuma distância hardcoded nos keyframes | `test/style_responsive_test.rb` `test_fx_contract_vars_declared` (:428-437, hoje pina o literal `40vw`) | ok |
+| C6 chegada real medida no destino (borda próxima do alvo) | `e2e/specs/battle-log.spec.ts` (novo teste medindo `getBoundingClientRect`/translate computado; hoje :84 só checa reduced motion) | ok |
+| C7 a cor por tipo continua chegando ao `.shot` a partir do `.arena` (18 regras `#jx-gates`) | `test/style_responsive_test.rb` `test_move_type_color_reaches_shot_from_arena` (:407-424) | ok |
+| C8 o sync shot/impacto é preservado (`impacto == approach + travel`; `shake == impacto`) | `test/style_responsive_test.rb` `test_shake_synced_to_impact_instant` (:444-486) | ok |
+| C9 o `.shot` segue classe ODS com guard de reduced motion | `test/design_system_test.rb` `test_design_system_battle_juice_reduced_motion` (:101-120) | ok |
 
 ### Garantias (RNF)
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| G1 suíte completa + lint 0 em todo green (baseline preservado + novos testes) | `./scripts/test` + `./scripts/lint` | pendente |
-| G2 nenhum JS novo além do htmx (CSS-only) | `git diff --stat -- public/ views/` (sem `.js` novo) | pendente |
-| G3 `DESIGN.md` sem hex cru / sem componente paralelo | revisão de diff (`manual`) + `test/design_system_test.rb` | pendente |
+| G1 suíte completa + lint 0 em todo green (baseline preservado + novos testes) | `./scripts/test` + `./scripts/lint` | ok |
+| G2 nenhum JS novo além do htmx (CSS-only) | `git diff --stat -- public/ views/` (sem `.js` novo) | ok |
+| G3 `DESIGN.md` sem hex cru / sem componente paralelo | revisão de diff (`manual`) + `test/design_system_test.rb` | ok |
 
 > **S1:** cada critério acima aponta o teste que o prova (arquivo + método). **Ao fim da fase 2 (suíte + lint verdes, Revisor S7 `Aprovado`), PARAR e aguardar a validação do usuário — não marcar Done, não preencher a seção 7, não commitar conclusão.**
 
@@ -96,29 +96,35 @@ O projétil de golpe deixa o teto direcional (0086/C9) e passa a ter **chegada r
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Validada pelo usuário em 2026-09-15** (verbatim: "pode marcar esse como validado"), após hard reload; implementação em `0637cb6..49ffd74`; revisores `Aprovado` (`reviews/review-2026-09-15T10-57-40-passos1-6.md` e `reviews/review-2026-09-15T11-45-10-passo7.md`). S2 — uma linha por critério, nunca bloco único:
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 | `./scripts/test test/battle_strike_routes_test.rb test/battle_routes_test.rb` | inspecionar `.shot` na track do `.arena` | |
-| C2 | `./scripts/test test/battle_strike_routes_test.rb` | inspecionar os `data-*` no OOB | |
-| C3 | `./scripts/test test/style_responsive_test.rb -n /test_shot_travel_disabled_below_900px/` | inspecionar `@container`/`container-type` no CSS | |
-| C4 | `./scripts/test test/style_responsive_test.rb` + e2e | redimensionar 900–980px e observar flash-only | |
-| C5 | `./scripts/test test/style_responsive_test.rb -n /test_fx_contract_vars_declared/` | inspecionar `--fx-travel` no computed style | |
-| C6 | e2e `battle-log.spec.ts` | observar a chegada do projétil na borda do alvo | |
-| C7 | `./scripts/test test/style_responsive_test.rb -n /test_move_type_color_reaches_shot_from_arena/` | observar cor do projétil por tipo | |
-| C8 | `./scripts/test test/style_responsive_test.rb -n /test_shake_synced_to_impact_instant/` | observar shake no instante do impacto | |
-| C9 | `./scripts/test test/design_system_test.rb -n /test_design_system_battle_juice_reduced_motion/` | com reduced motion, sem travel | |
-| G1 | `./scripts/test` + `./scripts/lint` | — | |
-| G2 | `git diff --stat -- public/ views/` (sem `.js` novo) | — | |
-| G3 | `./scripts/test test/design_system_test.rb` | revisar `DESIGN.md`/diff por hex cru | |
+| C1 | `test/battle_strike_routes_test.rb` (OOB do shot na track) + `test/battle_routes_test.rb#test_battle_fragment_marks_juice_targets` (:312-337) | inspecionar `.shot` na track do `.arena` | ok |
+| C2 | `test/battle_strike_routes_test.rb#test_strike_oob_moves_shot_into_arena_track` — **só a forma** dos `data-*` (regex `[01]`/`[a-z]+`); o pareamento `from_side ≠ to_side` é provado no e2e de C6 (`expect(obs.from).toBe('1')` com `to === '0'`), **não** no minitest | inspecionar os `data-*` no OOB | ok |
+| C3 | `test/style_responsive_test.rb -n /test_shot_travel_disabled_below_900px/` + assert de `container-type: inline-size` | inspecionar `@container`/`container-type` no CSS | ok |
+| C4 | `test/style_responsive_test.rb` + e2e `container gate disables projectile travel below 981px` | redimensionar 900–980px e observar flash-only | ok |
+| C5 | `test/style_responsive_test.rb -n /test_fx_contract_vars_declared/` | inspecionar `--fx-travel: calc(35cqi + 42px)` no computed style | ok |
+| C6 | e2e `projectile reaches the target card border (cqi travel measured live)` (`e2e/specs/battle-log.spec.ts`) | observar a chegada do projétil na borda do card alvo | ok |
+| C7 | `test/style_responsive_test.rb -n /test_move_type_color_reaches_shot_from_arena/` | observar cor do projétil por tipo | ok |
+| C8 | `test/style_responsive_test.rb -n /test_shake_synced_to_impact_instant/` | observar shake no instante do impacto | ok |
+| C9 | `test/design_system_test.rb -n /test_design_system_battle_juice_reduced_motion/` | com reduced motion, sem travel | ok |
+| G1 | `./scripts/test` (1173 runs / 6159 assertions, 0 failures / 0 errors / 0 skips) + `./scripts/lint` (0 offenses em 136 arquivos) | — | ok |
+| G2 | `git diff --stat -- public/ views/` (`0637cb6..49ffd74`: só CSS + ERBs, **nenhum `.js` novo**) | — | ok |
+| G3 | `test/design_system_test.rb` | revisar `DESIGN.md`/diff por hex cru | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 >
-> **S3 2026-09-15 — reaberturas declaradas (reaprovação pendente na fase 3 da 0087):**
-> - **C15 da 0086 (gate do travel)** muda de semântica: `@media (min-width: 900px)` → `@container` no `.arena`. A garantia "flash-only abaixo do breakpoint" nunca foi verdadeira na faixa 900–980px; a reaprovação é do usuário na validação desta sessão.
+> **S3 2026-09-15 — reaberturas declaradas (reaprovadas pelo usuário na validação da 0087 em 2026-09-15, C1–C9 + G1–G3 ok):**
+> - **C15 da 0086 (gate do travel)** muda de semântica: `@media (min-width: 900px)` → `@container` no `.arena`. A garantia "flash-only abaixo do breakpoint" nunca foi verdadeira na faixa 900–980px; reaprovada na validação desta sessão.
 > - **C9 da 0086 (projétil direcional)** muda de teto direcional para **chegada real na borda do alvo** (D1b/D3b) — mesmo contrato, geometria nova.
-> - **C13 da 0086 (sync)** não muda de semântica; se a 0087 redefinir a aritmética de duração do projétil, o teste deve ser reexecutado na fase 3.
+> - **C13 da 0086 (sync)** não muda de semântica; o teste foi reexecutado na fase 3 (C8, verde) e não precisou de reabertura.
+
+### Notas da validação (2026-09-15)
+
+- **Layout da arena reportado quebrado — HEAD estava correto; era cache.** Na validação o usuário reportou a arena com o layout quebrado. O debugger provou que o HEAD estava correto — Chrome ao vivo: track `position:absolute` e `.arena` com 3 filhos em fluxo em todas as larguras — e o `/style.css` servido **byte a byte idêntico à árvore de trabalho** (o usuário via o CSS pré-Passo-5 em cache). A fragilidade de fundo (um invariante de layout apoiado numa única linha de CSS sem assert) **foi fechada no Passo 7 (`49ffd74`)** com a mudança estrutural (track dentro do `.battle-column[data-side="0"]`, static, mantendo `offsetParent === .arena`) mais uma guarda e2e ao vivo (`arena keeps 3 in-flow columns and an out-of-flow projectile track`), provada red-capaz por duas mutações (`.shot-track{position:static}` e track de volta como filho direto do `.arena`). O CSS cacheado não é defeito do código entregue.
+- **Observação movida para FORA desta sessão:** o projétil ainda sai de uma caixa de time e chega à outra, em vez de sair do slot do pokémon atacante e chegar ao do atacado. Registrado em `docs/draft-backlog.md` (2026-09-15) como item pendente separado — **não faz parte dos critérios da 0087** (a 0087 entregou a chegada real no eixo horizontal, na borda do card alvo).
+- **Validação é do usuário:** os critérios foram validados pelo usuário em 2026-09-15 (S2 por critério, sem `nok`); nada foi autoproclamado nem marcado `Concluída` antes disso.
 
 ### Progresso da implementação (fase 2 — TDD)
 
@@ -183,11 +189,17 @@ O projétil de golpe deixa o teto direcional (0086/C9) e passa a ter **chegada r
 ## 8. Observações
 
 - **Não tocado nesta tarefa (por ordem):** `sessions/0086-battle-log-juice.md`, `SESSIONS.md`, `docs/draft-backlog.md`, commits.
-- **A implementação PARA na fase 2** — a validação (fase 3) é do usuário; nada aqui deve ser marcado como Concluída antes disso.
+- **A implementação parou na fase 2 e a validação (fase 3) foi do usuário** — concluída em 2026-09-15 (S2 por critério, sem `nok`); o arquivo passa a registrar a conclusão conforme a validação recebida, nunca antes dela.
 - **Leitura exata antes de editar:** confirmar `views/_fighter_panel.erb`, `views/battle.erb:44-228`, `server.rb` `strike_oob`/`strike_side_oob` e os trechos de `public/style.css` citados em §2 no arquivo antes do Passo 1.
 - **CSS:** só dentro do bloco ODS, ANTES da linha `fim`, com delimitador próprio `0086` (a sessão reusa o bloco).
 - **Dúvida aberta:** se o `@container` exigir nome (`container-name`) para não colidir com outros containers, decidir no Passo 2 com o menor seletor que prove o gate.
 
 ## 9. Gotchas / Lições (memória — S6)
 
-A preencher na validação (fase 3): resolução de `cqi` contra o container do `.arena`, gate `@container` vs colapso em `@media (max-width: 980px)`, e medição de geometria por e2e.
+Preenchido na validação (fase 3, 2026-09-15):
+
+- **`cqi` resolve contra o container** (`container-type: inline-size` do `.arena`), não contra o viewport — a track absoluta dentro do `.battle-column` (static) mantém `offsetParent === .arena`, logo a geometria não migra para a coluna.
+- **Gate `@container` vs colapso em `@media (max-width: 980px)`:** o gate por container acompanha o estado real de 3 colunas; a faixa 900–980px (single-column) deixou de ter travel ativo.
+- **`position` do ancestral importa:** `.podium` (`position:sticky`) foi descartado como container da track — viraria o containing block e a track mediria só a coluna central; `.battle-column` (static) preserva `offsetParent === .arena`.
+- **Medição de geometria é e2e:** asserts CSS estáticos não resolvem `cqi`; a prova de pouso é `getBoundingClientRect` ao vivo, com a arena ancorada em 1200px num viewport 1600px para discriminar `cqi` de `vw`.
+- **CSS em cache engana a validação manual:** hard reload antes de concluir que um layout quebrou; comparar o `/style.css` servido com a árvore de trabalho.

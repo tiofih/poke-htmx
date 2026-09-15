@@ -122,7 +122,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 > Anotado no draft: puxar mais informações dos golpes (nível de aprendizado) e visão de
 > XP/evolução por batalha com oponente no mesmo nível do jogador (D2).
 
-### RF-16 — Logs de batalha detalhados (C1) — `Done` (sessão 0016, validado em 2026-08-09)
+### RF-16 — Logs de batalha detalhados (C1) — `Done` (sessão 0016, validado em 2026-08-09; complemento visual do atacante→alvo entregue pela 0087, validada em 2026-09-15 — projétil até a borda do card alvo; o log em si não mudou e a saída/chegada slot a slot segue pendente em `docs/draft-backlog.md`, 2026-09-15)
 - Melhorar os **logs de batalha** (C1 do `docs/draft-backlog.md`, anotado na validação
   da 0015): hoje o log mostra apenas o **lado** atacante ("Seu Time"/"Oponente"), o
   golpe e o dano — não diz **qual Pokémon** bateu em **qual**. O log passa a indicar
@@ -242,7 +242,7 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
 > `evolution_chain` ignora o estágio; `find`/`detail` mapeiam sprite `front_default`
 > nulo para `""` — commits `0cc8d81`, `e5fb57c`, `3abf7f6`.
 
-### RF-13 — Batalha na web (C1) — `Done` (sessão 0013, validado em 2026-08-09)
+### RF-13 — Batalha na web (C1) — `Done` (sessão 0013, validado em 2026-08-09; efeito de golpe complementado pela 0087, validada em 2026-09-15 — projétil com chegada real à borda do card alvo, CSS-only; a trajetória slot-a-slot segue pendente em `docs/draft-backlog.md`, 2026-09-15)
 - Expor o motor de auto-batalha (RF-11/B3) e o oponente automático (RF-12/B4) na UI
   com **100% htmx** (RNF-01): o usuário entra em uma batalha contra um time adversário
   e cada "jogar" avança **uma rodada** do `BattleEngine`, re-renderizando o fragmento

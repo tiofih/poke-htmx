@@ -422,7 +422,9 @@ técnicas (escritas não atômicas, race no add, identidade/CSRF) — a critéri
 > controles centralizados + log centro, Oponente dir, tela cheia). Próximas: ondas
 > 1–3 de UX restantes → organizar o resto (JN-3, JN-4, JN-5, J2, J4, D4).
 
-**Próxima sessão (2026-09-15):** **0087-strike-fx-chegada-real** — Efeitos de golpe: projétil com chegada real (borda→borda do alvo) e gate por container query (CSS-only, sem JS além do htmx). Status: **refinamento concluído / implementação pendente**. Próxima ação: fase 2 (TDD), Passos 0–6 do plano da sessão. A implementação para na fase 2; a validação (fase 3) é do usuário; nada é marcado Concluída antes disso.
+**Próxima sessão (2026-09-15):** **0087-strike-fx-chegada-real** — Efeitos de golpe: projétil com chegada real (borda→borda do alvo) e gate por container query (CSS-only, sem JS além do htmx). Status: **concluída e validada em 2026-09-15** (Passos 1–7 `0637cb6`…`49ffd74`, suíte 1173/6159 lint 0, revisor Aprovado rounds 1–2, S2 C1–C9+G1–G3 ok sem `nok`; S3 C9/C15 da 0086 reaprovadas; o Passo 7 fechou a fragilidade de layout com guarda e2e ao vivo).
+
+**Próxima sessão (2026-09-15):** **slot a slot (candidato a refinamento — ainda sem arquivo de sessão)** — item registrado em `docs/draft-backlog.md` (2026-09-15): o projétil deve sair do slot do pokémon atacante e chegar ao slot do alvo (hoje é um rail horizontal de caixa de time a caixa de time). Exige identidade do slot no markup/engine e decisão entre JS ponto-a-ponto, CSS por índice ou CSS anchor positioning. Sujeito à próxima sessão, mas **apenas candidato** — sem arquivo em `sessions/` e **sem linha na tabela de progresso** até o refinamento (S5b).
 
 ## Progresso das sessões
 
@@ -512,7 +514,7 @@ técnicas (escritas não atômicas, race no add, identidade/CSRF) — a critéri
 | 0082 | center-modal-heal — cura via modal (`_center_modal`→`_center`, motivo inline + OOB de saldo; sem economia/migrações) | Concluída | Done (validada em 2026-09-11) |
 | 0083 | ui-polish — polimento visual home/team/battle (header gate, filtros, pills, pcard; visual-only, sem backend/regras/rotas) | Refinada | Refinada em 2026-09-10 (fase 2 pendente) |
 | 0086 | battle-log-juice — log por rodada legível (chronological R1 no topo, flip S3 2026-09-11) + juice CSS-only + consumo/recompensa visível (sem engine/economia/rotas) + S3 C4–C8 (pacing, effect-sync, módulos, stepper/strike-flow) + S3 2026-09-12 C9–C15 (efeito atacante→alvo, shake no alvo, cor por tipo; presenter touch aprovado) | Concluída | Done (Passos 1–32 `9254ba4`…`147ad98` + doc `39b42eb`, suíte 1171/6107 lint 0, revisor Aprovado round 12 `reviews/review-2026-09-14T10-24-59.md`, validada em 2026-09-14 — S2 C1–C15+G1 ok, aprovação em bloco, sem `nok`) |
-| 0087 | strike-fx-chegada-real — efeitos de golpe CSS-only: projétil com chegada real borda→borda do alvo (D1b), gate do travel por `@container` no `.arena` com `container-type: inline-size` em vez de `@media` (D2c), nó `.shot` fora do card em track dedicada filha direta de `.arena` (D3b), `--fx-travel` em `cqi`; sem JS além do htmx, sem engine/rotas; S3 reabre C9/C15 da 0086 | Refinada | Refinada em 2026-09-15 (fase 2 pendente) |
+| 0087 | strike-fx-chegada-real — efeitos de golpe CSS-only: projétil com chegada real borda→borda do alvo (D1b), gate do travel por `@container` no `.arena` com `container-type: inline-size` em vez de `@media` (D2c), nó `.shot` fora do card em track dedicada filha direta de `.arena` (D3b), `--fx-travel` em `cqi`; sem JS além do htmx, sem engine/rotas; S3 reabre C9/C15 da 0086 | Concluída | Done (Passos 1–7 `0637cb6`…`49ffd74`, suíte 1173/6159 lint 0, revisor Aprovado round 2 `reviews/review-2026-09-15T10-57-40-passos1-6.md` + `reviews/review-2026-09-15T11-45-10-passo7.md`, validada em 2026-09-15 — S2 C1–C9+G1–G3 ok, aprovação em bloco, sem `nok`) |
 
 ## Estrutura do arquivo de sessão
 
