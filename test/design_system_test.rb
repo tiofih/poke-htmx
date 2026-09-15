@@ -105,8 +105,11 @@ class DesignSystemTest < Minitest::Test
     refute_nil block, "expected a delimited Open Design System block in style.css"
 
     # Juice 0063 portado para os seletores novos dentro do bloco ODS (B1b).
+    # 0087 Passo 4: `is-attacking` sai daqui — a classe so existia no bloco como
+    # ancestral do projetil; o .shot agora mora na track do .arena e o gate vivo
+    # e o carrier #jx-gates. A classe segue contrato do presenter (0086 C9).
     %w[
-      is-hit fainted is-attacking shot log__entry
+      is-hit fainted shot log__entry
     ].each do |klass|
       assert_match(/\.#{Regexp.escape(klass)}\b/, block,
                    "expected design system block to port juice to .#{klass}")
@@ -114,7 +117,10 @@ class DesignSystemTest < Minitest::Test
 
     reduce = block[/@media[^{]*prefers-reduced-motion:\s*reduce\)\s*\{(.*?)\n\s*\}/m, 1]
     refute_nil reduce, "design system block must carry its own reduced-motion guard"
-    %w[.log__entry .is-hit .fainted .shot .arena .winner-badge .rewards].each do |selector|
+    # 0087 Passo 4 (C9): o .shot vive na track do .arena desde o Passo 1; o guard
+    # tem que alcancar o projetil no novo lugar (nao no card do lutador).
+    [".log__entry", ".is-hit", ".fainted", "#jx-shot-track .shot", ".arena",
+     ".winner-badge", ".rewards"].each do |selector|
       assert_includes reduce, selector, "reduced-motion must cover #{selector}"
     end
   end

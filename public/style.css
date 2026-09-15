@@ -986,7 +986,10 @@ li.fighter {
    .arena fica estaticamente "off" (views/battle.erb:44), entao a regra nunca
    casava. O shake ativo e o `.arena:has(> #jx-gates[data-jx-shake="on"])`. */
 
-/* Projetil — so com a arena em 3 colunas (@container); abaixo disso so flash no alvo */
+/* Projetil — so com a arena em 3 colunas (@container); abaixo disso so flash no alvo.
+   0087 Passo 1/4: o no vive na track dedicada do .arena (nao mais dentro do card
+   do lutador), entao o gate acende o .shot DENTRO da track; a cor por tipo chega
+   pelo carrier #jx-gates do .arena (unico ancestral comum). */
 .shot {
 	display: none;
 	position: absolute;
@@ -1000,19 +1003,9 @@ li.fighter {
 }
 
 @container (min-width: 981px) {
-	.arena[data-jx-shot="on"] .fighter.is-attacking .shot {
+	.arena:has(> #jx-gates[data-jx-shot="on"]) #jx-shot-track .shot {
 		display: block;
 		animation: juice-projectile var(--t-travel) ease-out var(--t-approach) both;
-	}
-
-	.arena [data-side="0"] .fighter.is-attacking .shot {
-		--fly: 1;
-		right: -6px;
-	}
-
-	.arena [data-side="1"] .fighter.is-attacking .shot {
-		--fly: -1;
-		left: -6px;
 	}
 }
 
@@ -1039,7 +1032,7 @@ li.fighter {
 	.fighter.is-hit::after,
 	.fighter.fainted img,
 	.fighter.fainted .fname,
-	.fighter.is-attacking .shot,
+	#jx-shot-track .shot,
 	.arena,
 	.fighters .bar-fill,
 	.winner-badge,
@@ -1890,7 +1883,7 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 .arena:has(.log-skip-input:checked) .fighter.is-hit::after,
 .arena:has(.log-skip-input:checked) .fighter.fainted img,
 .arena:has(.log-skip-input:checked) .fighter.fainted .fname,
-.arena:has(.log-skip-input:checked) .fighter.is-attacking .shot,
+.arena:has(.log-skip-input:checked) #jx-shot-track .shot,
 .arena:has(.log-skip-input:checked) .fighters .bar-fill,
 .arena:has(.log-skip-input:checked) {
 	animation: none !important;
@@ -2454,16 +2447,17 @@ button[disabled="disabled"] {
    3 colunas). O antigo gate por @media de 900px deixava travel ativo na faixa
    900-980px, que ja e single-column (a .arena colapsa em max-width:980px). */
 @container (min-width: 981px) {
-	.arena:has(> #jx-gates[data-jx-shot="on"]) .fighter.is-attacking .shot {
+	.arena:has(> #jx-gates[data-jx-shot="on"]) #jx-shot-track .shot {
 		display: block;
 		animation: juice-projectile var(--t-travel) ease-out var(--t-approach) both;
 	}
-	/* Direcao pelo data-side do atacante (C9/D2): 0 = coluna esquerda -> ltr,
-	   1 = coluna direita -> rtl. C15/C4: travel so com a arena em 3 colunas. */
-	.arena:has(> #jx-gates[data-jx-shot="on"]) [data-side="0"] .fighter.is-attacking .shot {
+	/* Direcao pela origem do golpe (0087 C2: data-from-side no .shot da track):
+	   0 = coluna esquerda -> ltr, 1 = coluna direita -> rtl. C15/C4: travel so
+	   com a arena em 3 colunas. */
+	.arena:has(> #jx-gates[data-jx-shot="on"]) #jx-shot-track .shot[data-from-side="0"] {
 		animation-name: juice-shot-ltr;
 	}
-	.arena:has(> #jx-gates[data-jx-shot="on"]) [data-side="1"] .fighter.is-attacking .shot {
+	.arena:has(> #jx-gates[data-jx-shot="on"]) #jx-shot-track .shot[data-from-side="1"] {
 		animation-name: juice-shot-rtl;
 	}
 }
@@ -2478,7 +2472,7 @@ button[disabled="disabled"] {
 	.fighter.is-hit::after,
 	.fighter.fainted img,
 	.fighter.fainted .fname,
-	.fighter.is-attacking .shot,
+	#jx-shot-track .shot,
 	.arena,
 	.fighters .bar-fill,
 	.winner-badge,

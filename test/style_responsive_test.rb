@@ -262,18 +262,19 @@ class StyleResponsiveTest < Minitest::Test
     tail = content[reduce_index..]
     assert_match(/animation:\s*none\s*!important/, tail,
                  "rede final desliga com !important para vencer a cascata")
-    %w[
-      .log__entry
-      .log-round-head
-      .log__entry--defeat
-      .is-hit
-      .fainted
-      .is-attacking
-      .shot
-      .arena
-      .bar-fill
-      .winner-badge
-      .rewards
+    # 0087 Passo 4: o atacante ja e coberto por `.fighter`; a entrada que existia
+    # por causa do projetil passa a apontar para a track do .arena.
+    [
+      ".log__entry",
+      ".log-round-head",
+      ".log__entry--defeat",
+      ".is-hit",
+      ".fainted",
+      "#jx-shot-track .shot",
+      ".arena",
+      ".bar-fill",
+      ".winner-badge",
+      ".rewards"
     ].each do |selector|
       assert_includes tail, selector, "rede final deve desligar #{selector}"
     end
@@ -326,10 +327,17 @@ class StyleResponsiveTest < Minitest::Test
     assert_match(/@keyframes\s+juice-shot-ltr\b[^@]*translateX/m, content,
                  "travel alonga o translateX (D1: reusa o .shot do atacante)")
 
-    assert_match(/data-jx-shot="on"\]\)\s*\[data-side="0"\][^}]*animation-name:\s*juice-shot-ltr/m, content,
-                 "data-side=0 (coluna esquerda) viaja ltr sob data-jx-shot (C9)")
-    assert_match(/data-jx-shot="on"\]\)\s*\[data-side="1"\][^}]*animation-name:\s*juice-shot-rtl/m, content,
-                 "data-side=1 (coluna direita) viaja rtl sob data-jx-shot (C9)")
+    # 0087 Passo 4: o .shot saiu do card para a track do .arena, entao a direcao
+    # vem do proprio projetil (data-from-side, C2) e nao mais do data-side do
+    # .battle-column — que deixou de ser ancestral do no.
+    assert_match(
+      /data-jx-shot="on"\]\)\s*#jx-shot-track\s+\.shot\[data-from-side="0"\][^}]*animation-name:\s*juice-shot-ltr/m,
+      content, "origem 0 (coluna esquerda) viaja ltr sob data-jx-shot (C9/0087 C2)"
+    )
+    assert_match(
+      /data-jx-shot="on"\]\)\s*#jx-shot-track\s+\.shot\[data-from-side="1"\][^}]*animation-name:\s*juice-shot-rtl/m,
+      content, "origem 1 (coluna direita) viaja rtl sob data-jx-shot (C9/0087 C2)"
+    )
   end
 
   # C3/C4 (0087 Passo 2): o gate do travel deixa de ser @media (min-width:900px)
@@ -436,6 +444,16 @@ class StyleResponsiveTest < Minitest::Test
         "carrier #jx-gates propaga --fx-color do tipo #{type} ao .arena (Passo 29)"
       )
     end
+
+    # 0087 Passo 4 (C7/C1): o .shot mora na track dedicada do .arena — o carrier
+    # #jx-gates do .arena segue unico ancestral comum, e a regra viva acende o
+    # projetil DENTRO da track; sem sobras do gate antigo no card do lutador.
+    assert_match(
+      /#jx-gates\[data-jx-shot="on"\]\)\s*#jx-shot-track\s+\.shot\s*\{/m, content,
+      "o gate vivo acende o .shot da track do .arena (C7)"
+    )
+    refute_match(/\.fighter\.is-attacking\s+\.shot/, content,
+                 "sem seletor orfao do projetil dentro do card do lutador (C1/C7)")
   end
 
   # C12 (0086 Passo 26) + C5 (0087 Passo 3): contrato de extensibilidade — os
@@ -486,7 +504,7 @@ class StyleResponsiveTest < Minitest::Test
                     "impacto = approach + travel (--t-impact, T6a)"
     assert hp >= impact, "HP baixa depois (ou no) impacto: --t-hp >= --t-impact (T6a)"
 
-    shot_block = content[/#jx-gates\[data-jx-shot="on"\]\)\s*\.fighter\.is-attacking \.shot\s*\{([^}]*)\}/m, 1]
+    shot_block = content[/#jx-gates\[data-jx-shot="on"\]\)\s*#jx-shot-track\s+\.shot\s*\{([^}]*)\}/m, 1]
     refute_nil shot_block, "regra viva do projetil (#jx-gates, >= 900px) deve existir"
     assert_match(/animation:\s*juice-projectile\s+var\(--t-travel\)\s+ease-out\s+var\(--t-approach\)/, shot_block,
                  "projetil usa --t-travel (duracao) e --t-approach (delay), sem literal (T6a)")
