@@ -51,30 +51,43 @@
           htmxSavedScrollY = null;
         }
       });
-      // 0088 Passo 4 (D1a/D2a — excecao estreita ao RNF-01): projetil slot-a-slot.
+      // 0088 Passo 4/5 (D1a/D2a — excecao estreita ao RNF-01): projetil slot-a-slot.
       // O swap do golpe troca o conteudo de #jx-shot-track e #jx-gates por OOB;
       // "afterSettle" so dispara depois que o DOM assentou (OOB incluso), entao a
-      // medida acontece com o .shot novo e o gate ja aceso. Le o slot do alvo no
-      // proprio .shot, acha o card por data-side + data-slot e escreve o
-      // deslocamento vertical em --fx-dy; o keyframe juice-shot-ltr/rtl consome a
-      // var com fallback 0. No-op quando falta track/shot/slot, em reduced motion
-      // ou em coluna unica (<981px, mesmo breakpoint do @container do CSS) — nesses
-      // casos vale o rail de 0087 (so eixo x). Um handler, sem lib/polling/SSE.
+      // medida acontece com o .shot novo e o gate ja aceso. Le os slots do
+      // atacante e do alvo no proprio .shot, acha os cards por data-side +
+      // data-slot e escreve: --fx-dy (centro do alvo) e --fx-ox/--fx-oy (centro do
+      // atacante) — o keyframe consome as tres com fallback (0 / rail 0087). No-op
+      // quando falta track/shot/slot, em reduced motion ou em coluna unica
+      // (<981px, mesmo breakpoint do @container do CSS) — nesses casos vale o rail
+      // de 0087 (so eixo x). Um handler, sem lib/polling/SSE.
       function placeShot() {
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         if (!window.matchMedia("(min-width: 981px)").matches) return;
         var shot = document.querySelector("#jx-shot-track .shot");
         if (!shot) return;
+        var fromSide = shot.getAttribute("data-from-side");
         var from = shot.getAttribute("data-from-slot");
         var side = shot.getAttribute("data-to-side");
         var slot = shot.getAttribute("data-to-slot");
-        if (from === null || side === null || slot === null) return;
+        if (fromSide === null || from === null || side === null || slot === null) return;
+        var attacker = document.querySelector('.fighter[data-side="' + fromSide + '"][data-slot="' + from + '"]');
         var target = document.querySelector('.fighter[data-side="' + side + '"][data-slot="' + slot + '"]');
-        if (!target) return;
-        var shotBox = shot.getBoundingClientRect();
+        if (!attacker || !target) return;
+        // Base do .shot na track medida por LAYOUT (offsetLeft/Top), nao pelo
+        // rect: "htmx:afterSettle" dispara por no OOB (#jx-gates tambem), entao o
+        // handler roda 2x e um rect ja transformado pelo --fx-ox cairia em erro.
+        var trackBox = shot.parentElement.getBoundingClientRect();
+        var baseX = trackBox.left + shot.offsetLeft + shot.offsetWidth / 2;
+        var baseY = trackBox.top + shot.offsetTop + shot.offsetHeight / 2;
         var targetBox = target.getBoundingClientRect();
-        var dy = targetBox.top + targetBox.height / 2 - (shotBox.top + shotBox.height / 2);
-        shot.style.setProperty("--fx-dy", dy + "px");
+        var attackerBox = attacker.getBoundingClientRect();
+        // Destino: centro do card do alvo (eixo x fica com o rail de 0087).
+        shot.style.setProperty("--fx-dy", targetBox.top + targetBox.height / 2 - baseY + "px");
+        // Origem (gap do Passo 4): centro do card do atacante, nos dois eixos,
+        // consumido pelo keyframe `from` — sem isso o projetil saia do rail base.
+        shot.style.setProperty("--fx-ox", attackerBox.left + attackerBox.width / 2 - baseX + "px");
+        shot.style.setProperty("--fx-oy", attackerBox.top + attackerBox.height / 2 - baseY + "px");
       }
       document.addEventListener("htmx:afterSettle", placeShot);
     </script>

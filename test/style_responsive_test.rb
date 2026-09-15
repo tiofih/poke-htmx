@@ -2,7 +2,7 @@
 
 require_relative "test_helper"
 
-class StyleResponsiveTest < Minitest::Test
+class StyleResponsiveTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   def style_content
     File.read(File.join(__dir__, "../public/style.css"))
   end
@@ -477,6 +477,11 @@ class StyleResponsiveTest < Minitest::Test
       refute_nil block, "keyframe de travel #{keyframe} deve existir (C5)"
       assert_match(/translate\(\s*calc\(-?100%[^;]*var\(--fx-travel\)\s*\)\s*,[^;]*var\(--fx-dy/m, block,
                    "keyframe #{keyframe} le --fx-travel no eixo x e --fx-dy no eixo y (0088 D1a)")
+      # 0088 Passo 5: o keyframe `from` parte do centro do card do atacante
+      # (--fx-ox/--fx-oy medidos no handler), com fallback 0 — sem JS a origem
+      # segue a do rail de 0087 (D4a).
+      assert_match(/from\s*\{[^}]*translate\(\s*var\(--fx-ox\s*,\s*0\)\s*,\s*var\(--fx-oy\s*,\s*0\)\s*\)/m, block,
+                   "keyframe #{keyframe} parte do offset de origem medido (0088 Passo 5)")
       assert_match(/var\(--fx-dy\s*,\s*0\)/, block,
                    "keyframe #{keyframe} consome --fx-dy com fallback 0 — sem JS o rail de 0087 fica intacto (D4a)")
       refute_match(/\d+(?:\.\d+)?(?:vw|px|cqi)/, block,

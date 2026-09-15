@@ -163,21 +163,23 @@ async function buildBudgetTeam(page: Page) {
   }
 }
 
+type Point = { x: number; y: number };
+type SlotBox = { x: number; y: number; left: number; right: number };
 type Arrival = {
   from: string | null;
   to: string | null;
   arenaWidth: number;
-  shotX: number;
-  shotRight: number;
-  targetColX: number;
-  targetColRight: number;
-  cardX: number;
-  cardRight: number;
-  tx: number;
+  attacker: Point; // centro medido do card do atacante
+  target: SlotBox; // caixa medida do card do alvo
+  origin: Point; // centro do .shot no keyframe `from`
+  dest: Point; // centro do .shot no keyframe `to` (fim)
 };
 
 // Um Batalhar = 1 entrada OOB que troca o `.shot` da track. Espera o NOVO no
-// (marca o anterior) e a animacao terminar antes de medir.
+// (marca o anterior) e a animacao terminar. Depois SEGURA a animacao nos dois
+// keyframes (`0` e `endTime`) para medir origem e destino reais — o eixo y so
+// existe via --fx-dy/--fx-ox medidos no handler, entao a prova tem que vir do
+// keyframe resolvido, nao do CSS estatico.
 async function strikeAndMeasure(page: Page): Promise<Arrival | null> {
   await page.evaluate(() => document.querySelector('#jx-shot-track .shot')?.setAttribute('data-probe-old', '1'));
   await page.getByRole('button', { name: 'Batalhar', exact: true }).click();
@@ -197,33 +199,40 @@ async function strikeAndMeasure(page: Page): Promise<Arrival | null> {
 
   return page.evaluate(() => {
     const shot = document.querySelector('#jx-shot-track .shot') as HTMLElement | null;
-    if (!shot || !shot.getAttribute('data-from-side')) return null;
-    const arena = document.querySelector('.arena') as HTMLElement;
+    const from = shot?.getAttribute('data-from-side');
+    if (!shot || !from) return null;
     const to = shot.getAttribute('data-to-side');
-    const targetCol = document.querySelector(`.battle-column[data-side="${to}"]`) as HTMLElement | null;
-    const card = targetCol?.querySelector('li.fighter') as HTMLElement | null;
-    if (!targetCol || !card) return null;
-    const b = (el: Element) => el.getBoundingClientRect();
-    const shotRect = b(shot);
-    const colRect = b(targetCol);
-    const cardRect = b(card);
-    const tx = new DOMMatrixReadOnly(getComputedStyle(shot).transform).m41;
+    const card = (side: string | null, slot: string | null) =>
+      document.querySelector(`.fighter[data-side="${side}"][data-slot="${slot}"]`) as HTMLElement | null;
+    const attacker = card(from, shot.getAttribute('data-from-slot'));
+    const target = card(to, shot.getAttribute('data-to-slot'));
+    const anim = shot.getAnimations()[0];
+    if (!attacker || !target || !anim) return null;
+    const centre = (el: Element) => {
+      const r = el.getBoundingClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    };
+    anim.pause();
+    anim.currentTime = 0; // keyframe `from` = origem do projetil
+    const origin = centre(shot);
+    anim.currentTime = anim.effect!.getComputedTiming().endTime as number; // `to` = destino
+    const dest = centre(shot);
+    anim.play();
+    const ar = attacker.getBoundingClientRect();
+    const tr = target.getBoundingClientRect();
     return {
-      from: shot.getAttribute('data-from-side'),
+      from,
       to,
-      arenaWidth: b(arena).width,
-      shotX: shotRect.x,
-      shotRight: shotRect.right,
-      targetColX: colRect.x,
-      targetColRight: colRect.right,
-      cardX: cardRect.x,
-      cardRight: cardRect.right,
-      tx,
+      arenaWidth: (document.querySelector('.arena') as HTMLElement).getBoundingClientRect().width,
+      attacker: { x: ar.x + ar.width / 2, y: ar.y + ar.height / 2 },
+      target: { x: tr.x + tr.width / 2, y: tr.y + tr.height / 2, left: tr.left, right: tr.right },
+      origin,
+      dest,
     };
   });
 }
 
-test('projectile reaches the target card border (cqi travel measured live)', async ({ page }) => {
+test('projectile leaves the attacker slot and reaches the target slot (measured pair)', async ({ page }) => {
   await page.setViewportSize({ width: 1600, height: 900 });
   await buildBudgetTeam(page);
   await page.goto('/battle');
@@ -239,28 +248,29 @@ test('projectile reaches the target card border (cqi travel measured live)', asy
     if (!obs || !obs.to) continue;
     seen.add(obs.from ?? '');
 
-    const arenaWidth = obs.arenaWidth;
-    expect(arenaWidth).toBe(1200);
+    expect(obs.arenaWidth).toBe(1200);
     expect(['0', '1']).toContain(obs.to);
 
-    // D5: o travel resolvido e `35cqi + 42px` + a propria largura do .shot
-    // (keyframe `100% + var(--fx-travel)`), medido contra a arena — nao o viewport.
-    const expected = 0.35 * arenaWidth + TRAVEL_PX + SHOT_W;
-    expect(Math.abs(obs.tx)).toBeGreaterThan(expected - 2);
-    expect(Math.abs(obs.tx)).toBeLessThan(expected + 2);
+    // 0088 C6 origem: o keyframe `from` tem que pousar no CENTRO do card do
+    // atacante (x e y) — era o gap declarado no Passo 4 (saida no rail base).
+    expect(Math.abs(obs.origin.x - obs.attacker.x), `origem x (from=${obs.from})`).toBeLessThan(2);
+    expect(Math.abs(obs.origin.y - obs.attacker.y), `origem y (from=${obs.from})`).toBeLessThan(2);
+
+    // 0088 C6 destino: par ordenado medido contra o slot REAL do alvo — y no
+    // centro do card; x na borda proxima (o rail de 0087 segue dono do eixo x —
+    // aqui a assercao e contra a caixa medida do card, nao contra uma constante).
+    expect(Math.abs(obs.dest.y - obs.target.y), `destino y (to=${obs.to})`).toBeLessThan(2);
 
     if (obs.to === '0') {
       // Alvo = coluna esquerda; borda proxima = direita do card (atacante veio da direita).
       expect(obs.from).toBe('1');
-      expect(obs.shotRight).toBeGreaterThan(obs.targetColX - 1);
-      const gap = obs.shotRight - obs.cardRight; // >=0 = chegou a borda; <0 = parou n px antes
+      const gap = obs.dest.x - obs.target.right; // >=0 = chegou a borda; <0 = parou n px antes
       expect(gap).toBeGreaterThan(-40);
       expect(gap).toBeLessThanOrEqual(20);
     } else {
       // Alvo = coluna direita; borda proxima = esquerda do card.
       expect(obs.from).toBe('0');
-      expect(obs.shotX).toBeLessThan(obs.targetColRight + 1);
-      const gap = obs.shotX - obs.cardX;
+      const gap = obs.dest.x - obs.target.left;
       expect(gap).toBeGreaterThan(-20);
       expect(gap).toBeLessThan(40);
     }
@@ -270,6 +280,8 @@ test('projectile reaches the target card border (cqi travel measured live)', asy
 });
 
 test('container gate disables projectile travel below 981px', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 900, height: 900 });
   await buildBudgetTeam(page);
   await page.goto('/battle');
@@ -300,6 +312,102 @@ test('container gate disables projectile travel below 981px', async ({ page }) =
       { timeout: 5000 },
     )
     .toEqual({ display: 'none', animation: 'none' });
+
+  // C9 (0088 Passo 5): coluna unica = no-op tambem no JS — o handler nao escreve
+  // nenhuma var de origem/destino e nada estoura na pagina.
+  const vars = await page.locator(`${SHOT}[data-from-side]`).first().evaluate((el) => ({
+    ox: (el as HTMLElement).style.getPropertyValue('--fx-ox'),
+    oy: (el as HTMLElement).style.getPropertyValue('--fx-oy'),
+    dy: (el as HTMLElement).style.getPropertyValue('--fx-dy'),
+  }));
+  expect(vars).toEqual({ ox: '', oy: '', dy: '' });
+  expect(errors).toEqual([]);
+});
+
+// C8 (0088 Passo 5): reduced motion mantem o comportamento atual — sem travel.
+// O CSS final zera a animacao do .shot e o handler tambem e no-op explicito.
+test('reduced motion keeps the projectile without travel', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await buildBudgetTeam(page);
+  await page.goto('/battle');
+  await expect(page.locator('.arena')).toBeVisible();
+
+  let ok = false;
+  for (let i = 0; i < 5 && !ok; i++) {
+    await page.getByRole('button', { name: 'Batalhar', exact: true }).click();
+    ok = (await page.locator(`${SHOT}[data-from-side]`).count()) > 0;
+    if (!ok) await page.waitForTimeout(300);
+  }
+  expect(ok).toBe(true);
+
+  await expect
+    .poll(
+      () => page.locator(`${SHOT}[data-from-side]`).first().evaluate((el) => getComputedStyle(el).animationName),
+      { timeout: 5000 },
+    )
+    .toBe('none');
+  const vars = await page.locator(`${SHOT}[data-from-side]`).first().evaluate((el) => ({
+    ox: (el as HTMLElement).style.getPropertyValue('--fx-ox'),
+    dy: (el as HTMLElement).style.getPropertyValue('--fx-dy'),
+  }));
+  expect(vars).toEqual({ ox: '', dy: '' });
+});
+
+// C7 (0088 Passo 5): SEM JavaScript o rail de 0087 continua — travel so no eixo
+// x, sem as vars inline do handler. Sem JS o htmx nao roda (o golpe e dado no
+// contexto normal), entao a mesma sessao (cookie = mesmo user_id / mesma batalha
+// no registry) reabre o full render, que ja traz o .shot do ultimo strike; o
+// gate e ligado por instrumentacao do teste, como o OOB do htmx ligaria.
+test('without JavaScript the 0087 rail remains (x only, no inline vars)', async ({ page, browser }) => {
+  await page.setViewportSize({ width: 1600, height: 900 });
+  await buildBudgetTeam(page);
+  await page.goto('/battle');
+  await expect(page.locator('.arena')).toBeVisible();
+  await page.getByRole('button', { name: 'Batalhar', exact: true }).click();
+  await expect(page.locator(`${SHOT}[data-from-slot]`)).toHaveCount(1);
+  const state = await page.context().storageState();
+
+  const noJs = await browser.newContext({
+    javaScriptEnabled: false,
+    viewport: { width: 1600, height: 900 },
+    storageState: state,
+  });
+  const p = await noJs.newPage();
+  await p.goto('/battle');
+  await expect(p.locator('.arena')).toBeVisible();
+
+  const rail = await p.evaluate(() => {
+    const shot = document.querySelector('#jx-shot-track .shot') as HTMLElement | null;
+    if (!shot) return null;
+    document.querySelector('#jx-gates')?.setAttribute('data-jx-shot', 'on');
+    const anim = shot.getAnimations()[0];
+    if (!anim) return null;
+    anim.pause();
+    anim.currentTime = anim.effect!.getComputedTiming().endTime as number;
+    const m = new DOMMatrixReadOnly(getComputedStyle(shot).transform);
+    return {
+      x: m.m41,
+      y: m.m42,
+      arena: (document.querySelector('.arena') as HTMLElement).getBoundingClientRect().width,
+      from: shot.getAttribute('data-from-side'),
+      vars: {
+        ox: shot.style.getPropertyValue('--fx-ox'),
+        oy: shot.style.getPropertyValue('--fx-oy'),
+        dy: shot.style.getPropertyValue('--fx-dy'),
+      },
+    };
+  });
+  expect(rail, 'o full render deve trazer o .shot do ultimo strike').not.toBeNull();
+  expect(['0', '1']).toContain(rail!.from);
+  // Sem JS nao existe var inline: o keyframe cai inteiro no fallback.
+  expect(rail!.vars).toEqual({ ox: '', oy: '', dy: '' });
+  // fallback = rail de 0087: horizontal puro (y zerado) e o travel borda->borda.
+  expect(rail!.y).toBe(0);
+  const expected = 0.35 * rail!.arena + TRAVEL_PX + SHOT_W;
+  expect(Math.abs(rail!.x)).toBeGreaterThan(expected - 2);
+  expect(Math.abs(rail!.x)).toBeLessThan(expected + 2);
+  await noJs.close();
 });
 
 // ---------------------------------------------------------------------------

@@ -81,12 +81,13 @@ class LayoutViewportTest < Minitest::Test
                     "expected the back link only on /battle, not on /"
   end
 
-  # 0088 Passo 4 (D1a/D2a — excecao estreita ao RNF-01): unico handler JS do
+  # 0088 Passo 4/5 (D1a/D2a — excecao estreita ao RNF-01): unico handler JS do
   # projetil slot-a-slot. Prova estatica: existe, e ligado a um evento htmx
-  # (que dispara depois do swap, OOB incluso), le o slot do alvo, escreve
-  # --fx-dy inline no .shot e mantem os no-ops (reduced motion, coluna unica)
-  # sem lib/polling/SSE. A prova de que o projetil POUSA no slot do alvo e o
-  # e2e do Passo 5 — aqui nao se afirma comportamento.
+  # (que dispara depois do swap, OOB incluso), le os slots do atacante e do
+  # alvo, escreve --fx-dy (destino) e --fx-ox/--fx-oy (origem) inline no .shot e
+  # mantem os no-ops (reduced motion, coluna unica) sem lib/polling/SSE. A prova
+  # de que o projetil SAI e POUSA nos slots e o e2e do Passo 5 — aqui nao se
+  # afirma comportamento.
   def test_projectile_handler_measures_target_slot_offset
     layout = File.read(File.join(__dir__, "../views/layout.erb"))
 
@@ -99,7 +100,15 @@ class LayoutViewportTest < Minitest::Test
     assert_match(/getAttribute\(\s*["']data-to-slot["']\)/, layout,
                  "o slot de destino e lido do proprio .shot")
     assert_match(/setProperty\(\s*["']--fx-dy["']/, layout,
-                 "o deslocamento vertical vai para --fx-dy inline do .shot (D1a)")
+                 "o deslocamento vertical do destino vai para --fx-dy inline (D1a)")
+    # 0088 Passo 5: a origem (centro do card do atacante) e o gap que faltava —
+    # o keyframe `from` consome --fx-ox/--fx-oy com fallback 0.
+    assert_match(/getAttribute\(\s*["']data-from-slot["']\)/, layout,
+                 "o slot de origem e lido do proprio .shot (origem x/y)")
+    assert_match(/setProperty\(\s*["']--fx-ox["']/, layout,
+                 "o offset horizontal da origem vai para --fx-ox inline")
+    assert_match(/setProperty\(\s*["']--fx-oy["']/, layout,
+                 "o offset vertical da origem vai para --fx-oy inline")
     assert_match(/prefers-reduced-motion:\s*reduce/, layout,
                  "reduced motion e no-op explicito no JS (D4a/C8)")
     assert_match(/min-width:\s*981px/, layout,

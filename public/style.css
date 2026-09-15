@@ -1586,10 +1586,13 @@ li.fighter {
    (@container 0087 C3/C4).
    0088 Passo 4 (D1a/D4a): o eixo y entra por --fx-dy — offset medido no handler
    de views/layout.erb — consumido com fallback 0; sem JS, em reduced motion ou
-   em coluna unica o travel fica EXATAMENTE o rail de 0087 (so eixo x). */
+   em coluna unica o travel fica EXATAMENTE o rail de 0087 (so eixo x).
+   0088 Passo 5: a ORIGEM tambem e medida no handler (--fx-ox/--fx-oy, centro do
+   card do atacante) e consumida no keyframe `from` com fallback 0; sem JS a
+   origem segue no rail base de 0087. */
 @keyframes juice-shot-ltr {
 	from {
-		transform: translate(0, 0) scale(1);
+		transform: translate(var(--fx-ox, 0), var(--fx-oy, 0)) scale(1);
 		opacity: 1;
 	}
 	to {
@@ -1600,7 +1603,7 @@ li.fighter {
 
 @keyframes juice-shot-rtl {
 	from {
-		transform: translate(0, 0) scale(1);
+		transform: translate(var(--fx-ox, 0), var(--fx-oy, 0)) scale(1);
 		opacity: 1;
 	}
 	to {
