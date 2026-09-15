@@ -120,6 +120,44 @@ O projétil de golpe deixa o teto direcional (0086/C9) e passa a ter **chegada r
 > - **C9 da 0086 (projétil direcional)** muda de teto direcional para **chegada real na borda do alvo** (D1b/D3b) — mesmo contrato, geometria nova.
 > - **C13 da 0086 (sync)** não muda de semântica; se a 0087 redefinir a aritmética de duração do projétil, o teste deve ser reexecutado na fase 3.
 
+### Progresso da implementação (fase 2 — TDD)
+
+- **Passo 5 (C6/D5 — chegada real e2e):** dois testes novos em
+  `e2e/specs/battle-log.spec.ts` — `projectile reaches the target card border
+  (cqi travel measured live)` (arena ancorada em 1200px num viewport 1600px para
+  discriminar `cqi` de `vw`; mede o translate computado do `.shot` contra a borda
+  do card alvo nas duas direções) e `container gate disables projectile travel
+  below 981px`. Implementado e verde; commit `Passo 5:` `222d918`.
+- **Defeito de geometria descoberto nos Passos 1–4:** a track do projétil entrou
+  no fluxo do grid como 4º item e deslocava as 3 colunas; em RTL o `.shot` caía
+  fora da tela (x≈−497). Correção mínima neste passo: `.arena{position:relative}`
+  + `.shot-track{position:absolute;inset:0;pointer-events:none}` (fora do fluxo),
+  com ancoragem por lado `.shot[data-from-side="0"|"1"]{left:…}`.
+- **Ruído de swap no teste do gate:** `getComputedStyle(el).display` pode voltar
+  `""` (não `"none"`) quando a locator casa o nó **já destacado** pela troca OOB do
+  htmx — no Chromium `connected:false` devolve string vazia. Trocado por
+  `expect.poll` (tolera a janela de swap; um gate quebrado devolveria `"block"`
+  até o timeout). 10/10 verdes com `--repeat-each=5`.
+- **Observação (pré-existente — não é regressão deste passo):** 4 testes do mesmo
+  arquivo já estão vermelhos neste ambiente — `round headers…`,
+  `reduced-motion disables juice`, `auto toggle chains…` e
+  `consumption and reward copy` — todos falhando em `buildTeamOfSix`
+  (`e2e/specs/battle-log.spec.ts:17`) porque o 6º add bloqueia com
+  "Orçamento insuficiente".
+- Suíte completa **1173 runs / 6159 assertions, 0 failures / 0 errors / 0 skips**;
+  lint **0 offenses** em 136 arquivos.
+- **PARADA (regra do AGENTS.md):** registro apenas do Passo 5; nada marcado como
+  `Concluída` e nenhuma alegação de validação — a fase 3 é do usuário.
+- **Passo 6 (C8/G1–G3 — sync + limpeza):** `test_shake_synced_to_impact_instant`
+  reexecutado — verde (1 run, 21 assertions, 0 failures). Suíte total **1173 runs /
+  6159 assertions, 0 failures / 0 errors / 0 skips**; `./scripts/lint` **0 offenses**
+  em 136 arquivos; `./scripts/check_docs` **ok** (docs consistentes). G2: diff do
+  intervalo da sessão `0637cb6..HEAD` toca só `public/style.css` + ERBs
+  (`views/_fighter_panel.erb`, `views/_jx_shot.erb`, `views/battle.erb`), **nenhum
+  `.js` novo**. Nenhum arquivo temporário de e2e restante (`e2e/specs/` limpo).
+- **PARADA:** fase 2 encerra aqui; a validação (fase 3) é do usuário — nada marcado
+  como `Concluída` e nenhuma alegação de validação neste arquivo.
+
 ## 8. Observações
 
 - **Não tocado nesta tarefa (por ordem):** `sessions/0086-battle-log-juice.md`, `SESSIONS.md`, `docs/draft-backlog.md`, commits.
