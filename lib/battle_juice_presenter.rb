@@ -48,6 +48,16 @@ class BattleJuicePresenter
     entry[:action] == :item ? from_side(entry) : 1 - from_side(entry)
   end
 
+  # Slot (indice no time) de origem/destino quando o entry carrega os indices
+  # serializados pelo engine (0088); entries antigos/fakes sem a chave -> nil.
+  def from_slot(entry)
+    entry[:attacker_index]
+  end
+
+  def to_slot(entry)
+    entry[:target_index]
+  end
+
   private
 
   def damage_taken(side, name)

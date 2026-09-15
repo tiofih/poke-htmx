@@ -43,6 +43,26 @@ class BattleJuicePresenterTest < Minitest::Test
     assert_equal 0, presenter.to_side(log.first), "to_side = lado oposto em ataque"
   end
 
+  def test_from_and_to_slot_tolerate_missing_keys
+    with_slots = attack_entry(round: 1, side: 0, attacker: "pikachu", target: "squirtle",
+                              move: "thunder-shock", damage: 18).merge(attacker_index: 1, target_index: 2)
+    presenter = BattleJuicePresenter.new(log: [with_slots], final_hp: {})
+
+    assert_equal 1, presenter.from_slot(with_slots), "slot do atacante vem do log (0088)"
+    assert_equal 2, presenter.to_slot(with_slots), "slot do alvo vem do log (0088)"
+    assert_nil presenter.from_slot(item_entry(round: 1, attacker: "pikachu", item: "potion", healed: 20)),
+               "item sem indice nao explode"
+  end
+
+  def test_from_and_to_slot_are_nil_on_legacy_entries
+    legacy = attack_entry(round: 1, side: 0, attacker: "pikachu", target: "squirtle",
+                          move: "thunder-shock", damage: 18)
+    presenter = BattleJuicePresenter.new(log: [legacy], final_hp: {})
+
+    assert_nil presenter.from_slot(legacy), "fake antigo sem a chave nao assume slot"
+    assert_nil presenter.to_slot(legacy), "fake antigo sem a chave nao assume slot"
+  end
+
   def test_fighter_juice_flags_damage_ko_and_shooting
     log = [
       attack_entry(round: 1, side: 0, attacker: "pikachu", target: "squirtle",

@@ -56,7 +56,14 @@ class BattleLogPresenter # rubocop:disable Metrics/ClassLength
       text: entry_text(entry, index),
       from_side: from_side(entry),
       to_side: to_side(entry)
-    }.merge(outcome_fields(entry)).merge(stock_fields(index))
+    }.merge(outcome_fields(entry)).merge(stock_fields(index)).merge(slot_fields(entry))
+  end
+
+  # Slot (indice no time) de origem/destino quando o entry carrega os indices
+  # serializados pelo engine (0088); entradas antigas/fakes sem a chave -> nil.
+  # Anexadas por ultimo para preservar o contrato de ordem round/side/text.
+  def slot_fields(entry)
+    { from_slot: entry[:attacker_index], to_slot: entry[:target_index] }
   end
 
   def outcome_fields(entry)

@@ -126,6 +126,25 @@ class BattleLogPresenterTest < Minitest::Test
     assert_includes entries[0][:text], "42 de dano"
   end
 
+  def test_entries_expose_slots_appended_last
+    log = [attack_entry(round: 1, side: 0, attacker: "a", target: "b", move: "m", damage: 5)
+      .merge(attacker_index: 1, target_index: 2)]
+    entry = BattleLogPresenter.new(log).entries.first
+
+    assert_equal 1, entry[:from_slot], "slot do atacante exposto no presenter (0088)"
+    assert_equal 2, entry[:to_slot], "slot do alvo exposto no presenter (0088)"
+    assert_equal %i[from_slot to_slot], entry.keys.last(2),
+                 "chaves novas por ultimo (contrato de ordem preservado)"
+  end
+
+  def test_entries_tolerate_missing_slot_keys
+    legacy = attack_entry(round: 1, side: 0, attacker: "a", target: "b", move: "m", damage: 5)
+    entry = BattleLogPresenter.new([legacy]).entries.first
+
+    assert_nil entry[:from_slot], "fake antigo sem a chave nao explode"
+    assert_nil entry[:to_slot], "fake antigo sem a chave nao explode"
+  end
+
   def test_entries_all_include_from_to_side
     log = [
       attack_entry(round: 1, side: 0, attacker: "a", target: "b", move: "m1", damage: 5),

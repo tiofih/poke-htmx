@@ -163,6 +163,28 @@ class BattleEngineBattleTest < Minitest::Test
     assert_equal 1, at_b2[:target_index], "b1 KO -> mira o slot 1"
   end
 
+  def test_target_strategy_selects_the_serialized_target_index
+    a = fire_pokemon(name: "a", hp: 200, attack: 100, defense: 10)
+    b0 = grass_pokemon(name: "b0", hp: 20, speed: 1, defense: 40)
+    b1 = grass_pokemon(name: "b1", hp: 300, speed: 1, defense: 40)
+    seen = []
+    strategy = lambda do |team|
+      seen << team.map(&:name)
+      alive = team.each_index.select { |index| team[index].alive? }
+      alive.min_by { |index| team[index].hp_current }
+    end
+
+    result = BattleEngine.new(team_a: [a], team_b: [b0, b1],
+                              effectiveness: type_effectiveness, target_strategy: strategy).battle
+
+    a_strikes = result.log.select { |entry| entry[:attacker].zero? }
+    assert_equal %w[b0 b1 b1], a_strikes.map { |entry| entry[:target_name] },
+                 "estrategia foca o slot 0 e, apos o KO, passa ao slot 1"
+    assert_equal [0, 1, 1], a_strikes.map { |entry| entry[:target_index] },
+                 "indice serializado = escolha da estrategia, nao o primeiro vivo"
+    assert_equal %w[b0 b1], seen.first, "estrategia recebe o time alvo (oponente)"
+  end
+
   def test_log_records_attacker_and_target_names
     a = fire_pokemon(hp: 60)
     d = grass_pokemon(hp: 60)
