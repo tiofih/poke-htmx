@@ -365,3 +365,59 @@ refinamento: tabs vs empilhado, podium vs res-top, formato do log, dot-por-tipo
 ### 4.F Anomalia de numeração
 
 `SESSIONS.md:403` reservava **0084** (CSRF) e **0085** (respiro) — e antes `:402` reservava 0080/0081/0082 para escritas atômicas/CSRF/respiro. Com a 0083 virando `ui-polish` e a numeração saltando para **0086**, os slots **0084/0085** seguem livres. Proposta: quando os itens de §4.B virarem sessão, usar **0084 = escritas atômicas + idempotência** e **0085 = CSRF/identidade** (o "respiro" pode absorver `pry` ou ser descartado).
+
+---
+
+## 5. Higiene e descartáveis (anotado 2026-09-15 para execução futura)
+
+> **Nada aqui foi executado.** Tudo aguarda aprovação do usuário. Proposto como sessão **0089**
+> (0084/0085 seguem reservadas a atomicidade/CSRF, §4.F). Levantamento read-only com evidência já
+> verificada — a sessão futura age direto daqui, sem re-survey.
+
+### 5.A Lixo / regenerável — apagar é seguro (risco baixo, ~1,26 GB)
+
+- `tmp/pokeapi_cache.json` **378 MB** — cache default de `lib/gateways/poke_api.rb:32`; regenera.
+- `.zvec-grep/` **263 MB** — índice regenerável.
+- `tmp/test_pokeapi_cache.json` **213 MB** — stale, sem referência.
+- `graphify-out/cache/` **5,4 MB** — manter o `graph.json` (usado por `scripts/medir-uso-grafo:16-18`).
+- `open-design/prints/backup-2026-09-10/` **1,1 MB** — duplicata exata de `prints/`.
+- `test/cassettes/ServerMartTest/test_mart_fragment_shows_affordable_quantity.yml` **604 KB** — **único cassette órfão** (o teste não existe; 34/35 casam).
+- `refs/` 396 KB, `landing` 270 KB, `test-results/`, `.DS_Store`×2, `_ai_context/legacy/README.md`, `_temp_notes.md` (~700 KB, 0 citações).
+
+### 5.B Código/CSS morto — apagar com ajuste de testes
+
+- Família `--jx-*` inteira (`public/style.css:933,958-971,2529-2537`) — `var(--jx-` → 0 consumers; só `test/style_responsive_test.rb:586-595` pinam as definições.
+- Gate `@container` duplicado (`public/style.css:1030-1035`, idêntico ao de `:2483`; o teste lê `gates.last`, então apagar o primeiro é invisível a ele).
+- `@media (max-width:700px) .podium{position:static}` (`:619-623` — o `sticky` de `:789` vence).
+- Seletores sem uso: `.mtags:1382`, `.side-title:1778`, `.mart .muted-row:1841`, `.log-round:2318`, `.gameloop-cta*:2236-2249`, `.team-tools:2352-2376`, `.evolution-overlay/modal-*:2381,2403,2409,2417,2426,2431`, `.fighter--*/projectile:2513-2517`.
+- `@team_s_count` write-only (`server.rb:1032`, tornando `team_s_count:696` órfão).
+- `base_form_names` (`server.rb:402`).
+- `oob_battle_view` (`server.rb:784` — só `_forced` é usada).
+- `OpponentGenerator#in_band?` / `#in_rating_band?` (`lib/opponent_generator.rb:184,192`) — `trace_path` inbound 0.
+- **NÃO tocar (já verificado como vivo):** `ftag--/ptag--/mtag--` (montados dinamicamente no ERB), `.htmx-request` (classe injetada pelo htmx), os 15 `@keyframes` (0 órfãos), constantes, e os `def self.registered(app)` (reflection do Sinatra).
+
+### 5.C Duplicações → juntar
+
+- **strike-log:** `views/battle.erb:199-221` duplica `views/_strike_log_entry.erb:1-19`; diferença real = só `--log-delay` (inline calcula, partial fixa `0s`). Proposta: partial canônico com local opcional `log_delay`, **mantendo `style` depois de `data-round`** senão `battle_view_test.rb:244` quebra.
+- **teste duplicado:** `history_view_test.rb:98-110` ≡ `history_curation_test.rb:27-30`; manter o segundo (tem os contratos de `data-od-id`/rank-bar).
+- **estado de sessão em 3 lugares:** `SESSIONS.md` (tabela), `docs/draft-backlog.md:313-315` (§4.A) e o Status de cada sessão — canônico `SESSIONS.md`; o draft aponta em vez de reafirmar.
+
+### 5.D Citações penduradas a corrigir (não há arquivo para apagar)
+
+- `notes/pending-spacing-replication-across-screens.md`
+- `vaults/Projetos/poke-htmx/draft-futuro.md` (`GDD.md:69`)
+- `gotchas/open-design-views-mockup-rotas-futuras.md`
+- `draft-design-system.md`
+- `sessions/0086:209` cita `public/type-effects-lab.html` quando o arquivo está em `docs/`.
+
+### 5.E Riscos encontrados (não são descarte)
+
+- **`rake db:setup` re-executa TODAS as 11 migrações sem ledger** (`Rakefile:16-24`) e as migrações 0003/0007 fazem `TRUNCATE team_pokemons CASCADE` — rodar o setup de novo **apaga os times**; nenhum teste pega (`schema_test.rb:21` não vê). Recomendação: manter as 11 (não há como provar que nunca rodaram) e tratar o perigo como item próprio de estabilidade.
+- `user_state` (ver §5.F.1).
+
+### 5.F Decisões pendentes do usuário (com a evidência para decidir)
+
+1. **`user_state`** — caminho de escrita vivo mas vestigial (`server.rb:599` → `journey_service.rb:23-28` → `user_state_repository.rb:21-27` INSERT/upsert); caminho de leitura morto (`UserStateRepository#started?` sem chamador; `journey_started` só na migração; `user_state` não aparece em `db/schema.sql`). Apagar tabela+repo+wire+testes, ou manter documentado enquanto J4 (`docs/draft-backlog.md:133`) e onboarding (`GDD.md:27`) planejam reusar? Inclinação: apagar salvo se J4 estiver próximo.
+2. **Os 4 e2e vermelhos** (`e2e/specs/battle-log.spec.ts`) — bloqueio é **premissa de teste stale**, não regressão: orçamento 450 (`lib/team_budget.rb:8`) e o spec nasceu depois (2026-09-11); o próprio arquivo já tem `buildBudgetTeam` (`:157-164`) e o comentário admite em `:153-154`. Inclinação: **reparar** os 4 call sites (~5 linhas) em vez de apagar — é a única cobertura e2e de round-headers/chips, reduced-motion, auto-chain e reward copy.
+3. `open-design/prints/` (3,7 MB, declarado obsoleto em `sessions/0080:21`) e `_ai_context/` (472 KB, contém `HANDOFF.md`/`decisions.md`) — descartar ou preservar como histórico?
+4. Cassette de 197 MB (`test/cassettes/…` usado por `test/team_routes_test.rb:938,980`) — regenerar menor ou apenas fazer o stub pendente (`docs/draft-backlog.md:207`)?
