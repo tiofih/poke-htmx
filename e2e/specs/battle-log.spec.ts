@@ -139,3 +139,165 @@ test('consumption and reward copy', async ({ page }) => {
     if (badge.includes('Seu Time')) await expect(rewards).toContainText('ganhou');
   }
 });
+
+// ---------------------------------------------------------------------------
+// 0087 C6/D5 — chegada real do projetil (a unica prova de `cqi` e a pagina viva).
+// O CSS estatico resolve var/calc, mas nao resolve `cqi` contra a largura da
+// arena. Aqui o container e ancorado FORA do viewport (arena max-width 1200 num
+// viewport 1600) para discriminar `cqi` de `vw`, e o destino do `.shot` e
+// comparado com a borda proxima do card alvo.
+// ---------------------------------------------------------------------------
+const SHOT = '#jx-shot-track .shot';
+const SHOT_W = 10;
+const TRAVEL_PX = 42;
+// Time barato (custo <= 450 do orcamento): o helper de 6 starters do topo
+// estoura o orcamento neste seed e nao abre a arena.
+const CHEAP_TEAM = ['caterpie', 'weedle', 'rattata', 'spearow', 'ekans', 'nidoran-f'];
+
+async function buildBudgetTeam(page: Page) {
+  await page.goto('/');
+  await expect(page.locator('#pokemon-list li.pcard').first()).toBeVisible();
+  for (const [i, name] of CHEAP_TEAM.entries()) {
+    await page.getByRole('button', { name: `Adicionar ${name} ao time` }).click();
+    await expect(page.locator('#nav-badge')).toContainText(`${i + 1}/6`);
+  }
+}
+
+type Arrival = {
+  from: string | null;
+  to: string | null;
+  arenaWidth: number;
+  shotX: number;
+  shotRight: number;
+  targetColX: number;
+  targetColRight: number;
+  cardX: number;
+  cardRight: number;
+  tx: number;
+};
+
+// Um Batalhar = 1 entrada OOB que troca o `.shot` da track. Espera o NOVO no
+// (marca o anterior) e a animacao terminar antes de medir.
+async function strikeAndMeasure(page: Page): Promise<Arrival | null> {
+  await page.evaluate(() => document.querySelector('#jx-shot-track .shot')?.setAttribute('data-probe-old', '1'));
+  await page.getByRole('button', { name: 'Batalhar', exact: true }).click();
+  await page
+    .waitForFunction(() => {
+      const s = document.querySelector('#jx-shot-track .shot');
+      return !!s && !s.hasAttribute('data-probe-old');
+    }, undefined, { timeout: 5000 })
+    .catch(() => undefined);
+  await page
+    .waitForFunction(() => {
+      const s = document.querySelector('#jx-shot-track .shot');
+      const anims = s?.getAnimations() ?? [];
+      return anims.length > 0 && anims.every((a) => a.playState === 'finished');
+    }, undefined, { timeout: 5000 })
+    .catch(() => undefined);
+
+  return page.evaluate(() => {
+    const shot = document.querySelector('#jx-shot-track .shot') as HTMLElement | null;
+    if (!shot || !shot.getAttribute('data-from-side')) return null;
+    const arena = document.querySelector('.arena') as HTMLElement;
+    const to = shot.getAttribute('data-to-side');
+    const targetCol = document.querySelector(`.battle-column[data-side="${to}"]`) as HTMLElement | null;
+    const card = targetCol?.querySelector('li.fighter') as HTMLElement | null;
+    if (!targetCol || !card) return null;
+    const b = (el: Element) => el.getBoundingClientRect();
+    const shotRect = b(shot);
+    const colRect = b(targetCol);
+    const cardRect = b(card);
+    const tx = new DOMMatrixReadOnly(getComputedStyle(shot).transform).m41;
+    return {
+      from: shot.getAttribute('data-from-side'),
+      to,
+      arenaWidth: b(arena).width,
+      shotX: shotRect.x,
+      shotRight: shotRect.right,
+      targetColX: colRect.x,
+      targetColRight: colRect.right,
+      cardX: cardRect.x,
+      cardRight: cardRect.right,
+      tx,
+    };
+  });
+}
+
+test('projectile reaches the target card border (cqi travel measured live)', async ({ page }) => {
+  await page.setViewportSize({ width: 1600, height: 900 });
+  await buildBudgetTeam(page);
+  await page.goto('/battle');
+  await expect(page.locator('.arena')).toBeVisible();
+  // Ancora o container longe do viewport: `cqi` mede 1200, `vw` mediria 1600.
+  await page.addStyleTag({ content: '.arena { max-width: 1200px; }' });
+  await expect(page.locator('.arena')).toHaveCSS('width', '1200px');
+
+  const seen = new Set<string>();
+  for (let i = 0; i < 12 && seen.size < 2; i++) {
+    if ((await page.getByRole('button', { name: 'Batalhar', exact: true }).count()) === 0) break;
+    const obs = await strikeAndMeasure(page);
+    if (!obs || !obs.to) continue;
+    seen.add(obs.from ?? '');
+
+    const arenaWidth = obs.arenaWidth;
+    expect(arenaWidth).toBe(1200);
+    expect(['0', '1']).toContain(obs.to);
+
+    // D5: o travel resolvido e `35cqi + 42px` + a propria largura do .shot
+    // (keyframe `100% + var(--fx-travel)`), medido contra a arena — nao o viewport.
+    const expected = 0.35 * arenaWidth + TRAVEL_PX + SHOT_W;
+    expect(Math.abs(obs.tx)).toBeGreaterThan(expected - 2);
+    expect(Math.abs(obs.tx)).toBeLessThan(expected + 2);
+
+    if (obs.to === '0') {
+      // Alvo = coluna esquerda; borda proxima = direita do card (atacante veio da direita).
+      expect(obs.from).toBe('1');
+      expect(obs.shotRight).toBeGreaterThan(obs.targetColX - 1);
+      const gap = obs.shotRight - obs.cardRight; // >=0 = chegou a borda; <0 = parou n px antes
+      expect(gap).toBeGreaterThan(-40);
+      expect(gap).toBeLessThanOrEqual(20);
+    } else {
+      // Alvo = coluna direita; borda proxima = esquerda do card.
+      expect(obs.from).toBe('0');
+      expect(obs.shotX).toBeLessThan(obs.targetColRight + 1);
+      const gap = obs.shotX - obs.cardX;
+      expect(gap).toBeGreaterThan(-20);
+      expect(gap).toBeLessThan(40);
+    }
+  }
+  // O engine alterna atacante: as duas direcoes (ltr/rtl) precisam ser provadas.
+  expect([...seen].sort()).toEqual(['0', '1']);
+});
+
+test('container gate disables projectile travel below 981px', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 900 });
+  await buildBudgetTeam(page);
+  await page.goto('/battle');
+  await expect(page.locator('.arena')).toBeVisible();
+
+  let ok = false;
+  for (let i = 0; i < 5 && !ok; i++) {
+    await page.getByRole('button', { name: 'Batalhar', exact: true }).click();
+    ok = (await page.locator(`${SHOT}[data-from-side]`).count()) > 0;
+    if (!ok) await page.waitForTimeout(300);
+  }
+  expect(ok).toBe(true);
+
+  const arenaWidth = await page.locator('.arena').evaluate((el) => el.getBoundingClientRect().width);
+  expect(arenaWidth).toBeLessThan(981);
+  // Polling (nao medicao unica): logo apos o clique o htmx troca o .shot e a
+  // locator pode casar o no JA DESTACADO — nesse estado o Chromium devolve
+  // `getComputedStyle(el).display === ""` (nao "none"), o que e ruido de swap,
+  // nao gate aberto. O poll tolera essa janela: em 900px o valor estavel e
+  // sempre "none" e um gate quebrado devolveria "block" ate o timeout.
+  await expect
+    .poll(
+      () =>
+        page.locator(`${SHOT}[data-from-side]`).first().evaluate((el) => ({
+          display: getComputedStyle(el).display,
+          animation: getComputedStyle(el).animationName,
+        })),
+      { timeout: 5000 },
+    )
+    .toEqual({ display: 'none', animation: 'none' });
+});

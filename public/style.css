@@ -606,6 +606,8 @@
 	gap: var(--gap-lg);
 	align-items: start;
 	container-type: inline-size;
+	/* 0087 C6: ancora da track do projetil (fora do fluxo do grid). */
+	position: relative;
 }
 
 @media (max-width: 980px) {
@@ -989,7 +991,16 @@ li.fighter {
 /* Projetil — so com a arena em 3 colunas (@container); abaixo disso so flash no alvo.
    0087 Passo 1/4: o no vive na track dedicada do .arena (nao mais dentro do card
    do lutador), entao o gate acende o .shot DENTRO da track; a cor por tipo chega
-   pelo carrier #jx-gates do .arena (unico ancestral comum). */
+   pelo carrier #jx-gates do .arena (unico ancestral comum).
+   0087 Passo 5/C6: a track cobre a arena FORA do fluxo do grid (como item ela
+   deslocava as 3 colunas) e ancora o .shot na borda da coluna do atacante; o
+   travel (--fx-travel) cruza ate a borda proxima do alvo. */
+.shot-track {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+}
+
 .shot {
 	display: none;
 	position: absolute;
@@ -1000,6 +1011,14 @@ li.fighter {
 	background: radial-gradient(circle, var(--fx-color, var(--t-normal)), transparent);
 	box-shadow: 0 0 6px rgba(245, 124, 0, 0.8);
 	z-index: 2;
+}
+
+.shot[data-from-side="0"] {
+	left: calc((100% - 2 * var(--gap-lg)) / 3.06);
+}
+
+.shot[data-from-side="1"] {
+	left: calc(100% - (100% - 2 * var(--gap-lg)) / 3.06);
 }
 
 @container (min-width: 981px) {
