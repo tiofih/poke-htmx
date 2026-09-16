@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — escolhas do usuário em 2026-09-09 (fatiamento por tela, deslizamento 0077-0079→resíduo / 0080-0082→estabilidade, fidelidade híbrida, backend thin listado, S1 com 1 teste novo + extensões — ver seção 5) |
-| Implementação (fase 2, TDD) | **TDD concluído** — árvore verde no HEAD (escopo 35/565, lint 0 no escopo) + docs (Passo 3); os commits da 0079 **não** são auto-consistentes: `cad1f49`/`6e41875` estão RED no teste C2, pois o bloco CSS só entrou em `9b421c4` (commit rotulado Passo 1 da 0078) — ver §8:106; **aguardando Revisor S7. PARAR — sem Done, sem §7, sem commit de conclusão** |
-| Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
+| Implementação (fase 2, TDD) | **Concluída** — Passos 1–2 (`cad1f49`/`6e41875`) + CSS no bloco (entrou em `9b421c4`, rotulado 0078); Revisor S7 `Aprovado` (`reviews/review-2026-09-15T15-00-22-0079.md`, 1 rodada, sem S3); os commits da 0079 **não** são auto-consistentes (o C2 ficou RED naqueles SHAs — quebra bisect, HEAD correto) — ver §8:106 |
+| Validação (fase 3) | **Concluída** — validada pelo usuário em 2026-09-16 (C1–C2 + G1–G3 + M1 ok, sem `nok`); a validação é do usuário — nada foi autoproclamado |
 
 ---
 
@@ -88,12 +88,14 @@ Aplicar a **curadoria fina 1:1** do protótipo `open-design/history.html` (13KB)
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (curadoria 1:1) | | | pendente |
-| C2 (CSS 0079 no bloco) | | | pendente |
-| G1 (sem regressão) | | | pendente |
-| G2 (backend listado) | | | pendente |
-| G3 (docs + revisão) | | | pendente |
-| M1 (history visual) | — | | pendente |
+| C1 (curadoria 1:1) | `test/history_curation_test.rb` (`test_history_matches_prototype`, `test_history_empty_notice_intact`) + `test/history_view_test.rb:98` (`test_history_cards_wear_tight_class_without_inline_style`) | `/history` com cards **Ranking**/**Recentes** com padding correto e **sem** `style="padding..."` inline (devtools), `data-od-id` presentes; `/history?as=<id-novo-qualquer>` mostrando "Você ainda não batalhou." com `notice--info` | ok (2026-09-16) |
+| C2 (CSS 0079 no bloco) | `test/design_system_test.rb` `test_design_system_history_curation_classes` (classes do bloco `0079`) | efeito visual indireto na mesma tela (padding dos cards sem inline) | ok (2026-09-16) |
+| G1 (sem regressão) | conforme review: `./scripts/test` = **1180 runs / 6219 asserts / 0 falhas**; `./scripts/lint` = **136 arquivos / 0 offenses** (números medidos na revisão, não reproduzidos nesta fase documental) | — | ok (2026-09-16) |
+| G2 (backend listado) | `git diff --stat <base>..HEAD -- lib server.rb db Gemfile Gemfile.lock` vazio (sem migração/schema/gems/services; `server.rb` intacto) | — | ok (2026-09-16) |
+| G3 (docs + revisão) | `./scripts/check_docs` + `./scripts/checar-sessao 0079` verdes; Revisor S7 `Aprovado` (`reviews/review-2026-09-15T15-00-22-0079.md`, 0 blocker / 0 alta / 1 média / 3 baixa / 2 info) | — | ok (2026-09-16) |
+| M1 (history visual) | — | validação do usuário em 2026-09-16 (navegador, `/history` e `/history?as=<id-novo>`, janela ≤920px sem overflow-x) | ok (2026-09-16) |
+
+> **Ressalvas aceitas na validação (2026-09-16):** (a) os commits `cad1f49`/`6e41875` da 0079 **não são auto-consistentes** — o CSS de C2 entrou só em `9b421c4` (rotulado 0078), então aqueles SHAs ficam RED no teste C2 (quebra bisect naqueles pontos; HEAD correto); (b) `.card--tight` está **fora da lista canônica do `DESIGN.md`** — item anotado para triagem, sem impacto no que foi validado.
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
