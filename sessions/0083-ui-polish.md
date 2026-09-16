@@ -116,6 +116,26 @@ Polimento visual das telas home/team/battle — header gate do CTA Batalhar, lab
   §7 (validação do usuário) e `reviews/`.
 - **Notas de execução:** `git diff --stat -- lib/ db/ config/` vazio (G2); `TODO.md` teve o item
   `T1` (fechar 0077) removido — critério já cumprido.
+- **Rodada 2 da revisão S7 (2026-09-16, `Requer ajuste` → correções):** (a) o hint do CTA
+  deixou de sumir em `<=720px` — agora só compacta (`font-size: 11px`, `max-width: none`) e
+  o `title` (inalcançável por `pointer-events:none`) saiu; o hint ganhou `id` e o CTA
+  `aria-describedby`, então a explicação existe em texto em qualquer largura. (b) o hint
+  distingue **game over** (`@game_over` primeiro: "Jornada encerrada…") de time ferido com
+  saldo; o gating continua `@can_battle == false` (nil-safe). (c) `.btn--gated` trocou
+  `opacity: .45` por tokens (`--fg-soft`/`--muted`, contraste) + `:focus-visible`; o
+  `tabindex="-1"` segue impedindo ativação por teclado. (d) removidas `.pill.warn`/`.pill.danger`
+  globais (CSS morto — `rg` confirmou zero consumidor em `views/`); convenção única `pill--*`.
+  (e) breakpoint dos filtros 360px → **420px** (cobre 375px). (f) C4 com `refute_nil` +
+  `assert_operator` (o `cost.nil? ||` anterior virava no-op se o `.poke-cost` sumisse).
+- **Limites honestos (medicao manual/e2e):** "sem overflow horizontal em 360/375px" é provado
+  aqui só pela regra CSS que o sustenta (`@media (max-width:420px)` → 1 coluna) e "o hint não
+  estoura o topnav em 720px" só por ausência de `display:none`; a **medição real de overflow e
+  de quebra do topnav é manual/e2e** (não há browser em Minitest) — registrado nos comentários
+  dos testes `test_filter_labels_count_no_overflow` e `test_battle_cta_hint_stays_visible_and_described`.
+- **Info S7 registrada sem mudança:** os counts "Resultados · N" (`_filter_controls`) e
+  "Arquivo · N" (`pokemon_list`) seguem duplicados de propósito — `filter_param_present?`
+  (`params.key?`) + `hx-include` mantêm os dois sincronizados e remover um deles era mudança
+  de copy fora do escopo desta rodada. `@team_size.to_i.zero?` mantido: `.to_i` já cobre nil.
 
 ## 9. Gotchas / Lições (memória — S6)
 
