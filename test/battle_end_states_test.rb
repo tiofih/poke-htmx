@@ -70,8 +70,13 @@ class BattleEndStatesTest < Minitest::Test
     finish_battle
 
     body = last_response.body
-    assert_equal 1, body.scan('class="state-pill ').size,
+    result = body[/<div id="result-box">.*?<div class="log-title"/m].to_s
+    assert_equal 1, result.scan('class="state-pill ').size,
                  "0078 A-1: um único .state-pill no fim (sem res-top duplicando pill/título)"
+    assert_equal 1, result.scan("<h2").size,
+                 "0078 A-1b: um único <h2> no fim (título só no state-head, não no modal-head)"
+    refute_match(/<div class="modal-head">\s*<h2/, body,
+                 "0078 A-1b: modal-head sem <h2> (mantém só o botão fechar)")
     refute_match(/class="res-top/, body,
                  "0078 A-1: a variante res-top (results-desktop) não compõe a tela")
     assert_match(/<div class="result-card">.*?<p class="rewards">.*?<div class="ctas">/m, body,

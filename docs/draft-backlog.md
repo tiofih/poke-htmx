@@ -389,7 +389,7 @@ refinamento: tabs vs empilhado, podium vs res-top, formato do log, dot-por-tipo
 - Família `--jx-*` inteira (`public/style.css:933,958-971,2529-2537`) — `var(--jx-` → 0 consumers; só `test/style_responsive_test.rb:586-595` pinam as definições.
 - Gate `@container` duplicado (`public/style.css:1030-1035`, idêntico ao de `:2483`; o teste lê `gates.last`, então apagar o primeiro é invisível a ele).
 - `@media (max-width:700px) .podium{position:static}` (`:619-623` — o `sticky` de `:789` vence).
-- Seletores sem uso: `.mtags:1382`, `.side-title:1778`, `.mart .muted-row:1841`, `.log-round:2318`, `.gameloop-cta*:2236-2249`, `.team-tools:2352-2376`, `.evolution-overlay/modal-*:2381,2403,2409,2417,2426,2431`, `.fighter--*/projectile:2513-2517`.
+- Seletores sem uso: `.mtags:1382`, `.mart .muted-row:1841`, `.log-round:2318`, `.gameloop-cta*:2236-2249`, `.team-tools:2352-2376`, `.evolution-overlay/modal-*:2381,2403,2409,2417,2426,2431`, `.fighter--*/projectile:2513-2517`.
 - `@team_s_count` write-only (`server.rb:1032`, tornando `team_s_count:696` órfão).
 - `base_form_names` (`server.rb:402`).
 - `oob_battle_view` (`server.rb:784` — só `_forced` é usada).

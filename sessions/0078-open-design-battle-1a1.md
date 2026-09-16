@@ -65,7 +65,7 @@ Portar o **resíduo da batalha** dos protótipos `open-design/battle.html` (30KB
 
 > **S1:** cada critério acima aponta o teste que o prova (arquivo + método); o único critério puramente manual é **M1**. **Ao fim da fase 2 (suíte + lint verdes, revisor S7 `Aprovado`), PARAR e aguardar a validação do usuário — não marcar Done, não preencher a seção 7, não commitar conclusão.**
 >
-> **S3 — alteração de critério na revisão S7 (2026-09-16):** C2 era "mini-arena + `rewards` no padrão `battle-results-desktop.html`" e C3 citava "os 3 protótipos". Como os dois protótipos de fim são **variantes alternativas** (não composição), a variante `res-top`/`state-title` do `battle-results-desktop.html` foi descartada e as células foram reescritas para o que de fato se entrega (`battle-end-states.html`); pendente de reaprovação do usuário na validação.
+> **S3 — alteração de critério na revisão S7 (2026-09-16):** C2 era "mini-arena + `rewards` no padrão `battle-results-desktop.html`" e C3 citava "os 3 protótipos". Como os dois protótipos de fim são **variantes alternativas** (não composição), a variante `res-top`/`state-title` do `battle-results-desktop.html` foi descartada e as células foram reescritas para o que de fato se entrega (`battle-end-states.html`). **Reaprovada pelo usuário em 2026-09-16** (reaprovação explícita registrada na rodada 3 do loop S7, antes da validação M1).
 
 ## 5. Decisões de refinamento (fechadas com o usuário em 2026-09-09 — prevalecem sobre o mapa)
 
