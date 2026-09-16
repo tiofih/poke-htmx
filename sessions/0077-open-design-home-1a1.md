@@ -48,8 +48,10 @@ Portar o **resíduo da home** do protótipo `open-design/home-team.html` (50KB, 
 | --- | --- | --- |
 | C1 miolo dos modais: `_center` com `heal-list`/`heal-item` (cura por membro + custo) e `_mart` com `mart`/`mart-name`/`item-icon`/`price`/`tabs` (buy+sell), overlay/rotas 0076 intactos | `test/home_residue_test.rb` `test_center_mart_inner` (novo) + `test/modal_routes_test.rb` verde | pendente |
 | C2 manage + evolução: `team_manage.erb` com `stat-grid`/`mv-row`/`evo-row`/`equip-row` (golpes/itens/evoluir por membro) e `_evolution_modal` no padrão `.modal` (mantém `id` + close + 3 estados) | `test/home_residue_test.rb` `test_manage_evolution` (novo) + `test/evolution_routes_test.rb:91-135` verdes | pendente |
-| C3 catálogo + detalhe: `pokemon_list_item.erb` com `pcard-meta`/`name` e `pokemon_detail.erb` com `tag-row`/`stat-grid`/`evo-row`, htmx (`hx-get`/`hx-swap`) preservado | `test/home_residue_test.rb` `test_catalog_detail` (novo) + `test/home_view_test.rb` estendido | pendente |
+| C3 catálogo + detalhe: `pokemon_list_item.erb` com `pcard-meta`/`name` e `pokemon_detail.erb` com `tag-row`/`stat-grid`/`evo-row`, htmx (`hx-get`/`hx-swap`) preservado | `test/home_residue_test.rb` `test_catalog_detail` + `test_catalog_cards` (novos; o segundo cobre a metade list-item, `:103-125`) + `test/home_view_test.rb` estendido | pendente |
 | C4 CSS 0077 no bloco: classes do `home-team.html` aplicáveis ao escopo, aditivas, ANTES da linha `fim`, com delimitador próprio `0077` | `test/design_system_test.rb` `test_design_system_home_residue_classes` (estendido) | pendente |
+
+> **Correção de proveniência (2026-09-16 — registrada na rodada 1 de correção da revisão S7; NÃO é mudança de escopo):** o bloco CSS `Home 1:1 (0077)` **não** foi commitado por nenhum dos 5 commits da 0077 (`ea7192a`/`a00db99`/`2671204`/`d0832bf`/`d922add`) — ele entrou no git em `4f1538c` (2026-09-11), cuja mensagem é da **sessão 0086**. Consequência: o C4 e o verde do Passo 1 existiram apenas na **árvore de trabalho suja** (`public/style.css` não commitado), então **os SHAs da 0077 são RED numa cópia limpa** (`git show ea7192a:public/style.css | grep -c heal-list` = 0, idem `d922add`) e a série **não é bisect-clean**. No HEAD o C4 é provado por `test/design_system_test.rb::test_design_system_home_residue_classes` (bloco em `public/style.css:1816+`). Idem **G1**: o 1068/5033 do Passo 1 saiu da mesma árvore suja — sem regressão fecha-se pela suíte do **HEAD**, não pelos SHAs da 0077. **O usuário deve estar ciente disso no M1.**
 
 ### Garantias
 
@@ -143,3 +145,43 @@ Portar o **resíduo da home** do protótipo `open-design/home-team.html` (50KB, 
 - **Baseline medido (one-off, sem Puma):** 1068/5033 + 1 falha (`battle_end_states`,
   escopo 0078 em progresso paralelo); fim da fase 2: **1075/5204, 0 falhas**.
   (+7 runs: C4, C1, C2, catalog_cards, catalog_detail + 2 home_view).
+
+### Correção pós-revisão S7 (rodada 1 — 2026-09-16; documental, sem escopo novo)
+
+- **Proveniência do C4 (blocker do review):** o bloco CSS `Home 1:1 (0077)` foi carregado
+  por `4f1538c` (2026-09-11, mensagem da sessão **0086**), não pelos 5 commits da 0077;
+  `grep -c heal-list` = 0 em `ea7192a` e `d922add` → **todos os SHAs da 0077 são RED numa
+  cópia limpa** (série não bisect-clean) e o verde do Passo 1/G1 veio de árvore suja. No
+  HEAD o C4 é provado por `test/design_system_test.rb::test_design_system_home_residue_classes`.
+  Detalhe no §4 (bloco "Correção de proveniência"). **Não mudou escopo.**
+- **Duplicação removida (altas — históricas, HEAD limpo):** no estado de `d922add`,
+  `views/team.erb:23-27` renderizava `_center`/`_mart` inline **e** os overlays 0076
+  renderizavam os mesmos fragmentos (`_center_modal.erb:4,11`, `_mart_modal.erb:4,8`) →
+  fragmento 2x, ids duplicados (`mart-tab-buy/sell`) e grupo `name="mart-tab"` compartilhado
+  (clicar numa aba desmarcava a outra). A duplicação foi **removida por `41adcaf`**
+  (2026-09-10) — no HEAD está correto; o C1 ("overlay/rotas 0076 intactos") **não** se
+  verificava naquele estado. `views/team.erb` foi tocado fora do escopo declarado em
+  `a00db99`, origem da duplicação.
+- **Regra CSS órfã removida (media 1):** `.mart .muted-row` no bloco `0077` não tinha
+  consumidor (o `<li>` de estoque vazio do protótipo não foi portado, e portá-lo seria
+  escopo novo) → removida, aditiva e dentro do bloco. Nenhuma view usa `muted-row` e
+  `test/design_system_test.rb` não a assertava.
+- **`.tag-row` acoplada ao roster (media 2 — não movida):** a classe do bloco `0077` estiliza
+  também `views/team.erb:38` (roster, fora do escopo). Não se moveu CSS entre blocos (risco
+  alto, sem ganho); ambiguidade anotada em `docs/draft-backlog.md`.
+- **`@member_levels` (media 3 — origem na própria 0077, não consertada):** introduzido no
+  `expose_manage_data` por `2671204` (**Passo 3 da 0077**); `a37fee0` (sessão posterior,
+  2026-09-10) re-adicionou a mesma linha em `expose_team`. Faz um `progression.get` por
+  membro em todo render de center/mart/manage e `rescue → 1` degrada falha como "Nível 1".
+  Mantido (mudança de comportamento fora do escopo desta rodada; `server.rb` é read-only
+  aqui) e anotado em `docs/draft-backlog.md`.
+- **`filter-grid` em `4f1538c` (info — benigno):** as 4 linhas deletadas alheias eram a
+  versão antiga de `.filter-grid` (`repeat(auto-fit, minmax(140px,1fr))` + `gap: .75em`),
+  **substituídas na mesma edição** por `1fr 1fr` + `gap: 8px` + `margin-top: 10px`
+  (`public/style.css:432-436`, exigido por `test/style_responsive_test.rb:87`) — não houve
+  remoção de regra viva; nenhuma ação.
+- **Higiene de teste (baixas, corrigidas com TDD leve):** o assert de `price` em
+  `test/home_residue_test.rb` passou a ancorar o markup novo (`/class="num price">¥\d/`,
+  falha se regredir ao legado sem cifrão); os `refute_includes "onclick"` foram movidos para
+  **logo após** `assert last_response.ok?` (antes das contagens), deixando de ser guarda
+  morta após asserts que abortam o método; o §4/C3 passou a citar `test_catalog_cards`.

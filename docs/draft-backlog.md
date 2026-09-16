@@ -242,6 +242,15 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **Info: payload não consumido** — `lib/battle_log_presenter.rb:65-67` (`from_slot`/`to_slot`) é exigido por C3/testado, mas nenhuma view consome hoje.
 - **Info: gate `@container` duplicado** — `public/style.css:1030` vs `:2480` (pré-existente, `docs/draft-backlog.md:222`; a 0088 não agravou).
 
+### Achados não bloqueantes da revisão da 0077 (anotado 2026-09-16 para triagem)
+
+> A rodada 1 de correção da revisão S7 da 0077 foi **documental + higiene de teste**. Itens abaixo são **NÃO bloqueadores** e **NÃO fazem parte dos critérios validados** da 0077 — a sessão ainda **aguarda a validação do usuário (fase 3)**.
+
+- **Média (viva):** `@member_levels` em `expose_manage_data` (`server.rb:52-64`) foi introduzido por `2671204` (Passo 3 da própria 0077; `a37fee0` re-adicionou a linha em `expose_team` depois). Faz um `progression.get` por membro em **todo** render de center/mart/manage — mesmo quando ninguém lê `@member_levels` — e `rescue StandardError → 1` degrada falha silenciosamente para "Nível 1". Candidato: memoizar por request ou restringir ao caminho do manage (proposta do review; fora do escopo da rodada de correção).
+- **Média (viva):** `.tag-row` do bloco CSS `Home 1:1 (0077)` (`public/style.css:1867`) também estiliza o roster (`views/team.erb:38`), fora do escopo declarado da 0077 (`views/team_manage.erb:14` e `views/pokemon_detail.erb:4` estão dentro). Sem teste que cubra a mudança do card do time ao mexer no bloco 0077. Candidato: escopar (`.member .tag-row`) ou declarar a classe como compartilhada — não foi feito (mover CSS entre blocos = risco alto, sem ganho).
+
+---
+
 ### Achados não bloqueantes da revisão da 0079 (anotado 2026-09-15 para triagem)
 
 > O review da 0079 deu veredito `Aprovado`. Os itens abaixo são **NÃO bloqueadores** e **NÃO fazem parte dos critérios validados** da 0079 — a sessão 0079 ainda **aguarda a validação do usuário (fase 3)**. Ficam anotados para triagem futura.
