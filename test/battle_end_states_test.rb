@@ -71,12 +71,14 @@ class BattleEndStatesTest < Minitest::Test
 
     body = last_response.body
     result = body[/<div id="result-box">.*?<div class="log-title"/m].to_s
+    # A-1b vem antes das contagens: se a contagem abortar, este refute ainda roda.
+    # Ancorado ao fragmento porque _strike_result.erb mantém modal-head + h2.
+    refute_match(/<div class="modal-head">\s*<h2/, result,
+                 "0078 A-1b: modal-head sem <h2> (mantém só o botão fechar)")
     assert_equal 1, result.scan('class="state-pill ').size,
                  "0078 A-1: um único .state-pill no fim (sem res-top duplicando pill/título)"
     assert_equal 1, result.scan("<h2").size,
                  "0078 A-1b: um único <h2> no fim (título só no state-head, não no modal-head)"
-    refute_match(/<div class="modal-head">\s*<h2/, body,
-                 "0078 A-1b: modal-head sem <h2> (mantém só o botão fechar)")
     refute_match(/class="res-top/, body,
                  "0078 A-1: a variante res-top (results-desktop) não compõe a tela")
     assert_match(/<div class="result-card">.*?<p class="rewards">.*?<div class="ctas">/m, body,

@@ -1759,8 +1759,10 @@ li.fighter {
    revisao S7 (A-1): compunha com a state-card e duplicava pill + titulo. === */
 .res-screen { padding: 26px 0 40px; border-top: 1px solid var(--border); }
 .res-screen:first-of-type { border-top: 0; padding-top: 0; }
-/* A-1b: o titulo fica so no .state-head; o .modal-head guarda apenas o fechar. */
-.res-screen .modal-head { justify-content: flex-end; margin-bottom: 0; }
+/* A-1b: na variante state-card o titulo fica so no .state-head e o .modal-head
+   guarda apenas o fechar. Escopado a .end-state-modal: _strike_result.erb tambem
+   usa .res-screen e ali o h2 e o unico titulo do modal-head. */
+.end-state-modal .modal-head { justify-content: flex-end; margin-bottom: 0; }
 .state-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; display: flex; flex-direction: column; gap: 18px; }
 .state-head { display: flex; align-items: center; gap: 12px; margin-bottom: 2px; order: 0; }
 .state-head h2 { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; }

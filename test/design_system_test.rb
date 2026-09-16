@@ -81,6 +81,19 @@ class DesignSystemTest < Minitest::Test
     assert_match(%r{/\* === Battle 1:1 \(0078\)}, block,
                  "expected the 0078 delimiter marking the additive block (C3)")
     refute_match(/\.res-top\b/, block, "A-1: sem regra órfã da variante res-top")
+
+    # A-1b: o alinhamento do cabeçalho no fim de batalha vale só para o modal da
+    # variante state-card. `views/_strike_result.erb:11-13` também carrega
+    # `.res-screen` e tem o `h2` como único título — um `.res-screen .modal-head`
+    # nu empurraria aquele título contra o `×` e mataria o respiro do header.
+    assert_match(/\.end-state-modal\s+\.modal-head\s*\{[^}]*justify-content:\s*flex-end/m, block,
+                 "A-1b: o alinhamento do fim de batalha fica escopado ao modal de fim (.end-state-modal)")
+    refute_match(/^\s*\.res-screen\s+\.modal-head/m, block,
+                 "A-1b: o alinhamento não pode vazar para todo .res-screen (_strike_result.erb)")
+
+    battle = File.read(File.join(__dir__, "../views/battle.erb"))
+    assert_includes battle, 'class="modal end-state-modal"',
+                    "A-1b: o modal de fim carrega o hook .end-state-modal que o CSS escopa"
   end
 
   def test_design_system_battle_screen_classes
