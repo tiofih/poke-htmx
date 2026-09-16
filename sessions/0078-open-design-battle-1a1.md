@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — escolhas do usuário em 2026-09-09 (fatiamento por tela, deslizamento 0077-0079→resíduo / 0080-0082→estabilidade, fidelidade híbrida, backend thin listado, S1 com 1 teste novo + extensões — ver seção 5) |
 | Implementação (fase 2, TDD) | **Verde** — Passos 1-4 commitados (9b421c4, 924e5b6, 4604ee9, 39f3de6) + ajustes da revisão S7 (814b722); escopo 0078 verde, suíte completa 1180/6208 com 0 falhas — ver §8 |
-| Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
+| Validação (fase 3) | **Concluída** — validada pelo usuário em 2026-09-16 (C1–C3 + G1–G3 + M1 ok, sem `nok`); a validação é do usuário — nada foi autoproclamado |
 
 ---
 
@@ -92,13 +92,13 @@ Portar o **resíduo da batalha** dos protótipos `open-design/battle.html` (30KB
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (end-states 4 estados) | | | pendente |
-| C2 (results-desktop) | | | pendente |
-| C3 (CSS 0078 no bloco) | | | pendente |
-| G1 (sem regressão) | | | pendente |
-| G2 (backend listado/motor leitura) | | | pendente |
-| G3 (docs + revisão) | | | pendente |
-| M1 (fim de batalha visual) | — | | pendente |
+| C1 (end-states 4 estados) | `test/battle_end_states_test.rb` (`test_battle_end_states`, `test_battle_end_states_defeat`, `test_battle_end_states_draw`, `test_battle_end_states_game_over`, `test_lost_follows_fainted_not_rounded_hp`) + `test/battle_routes_test.rb` (fim/game-over) | `http://localhost:3000/battle` — JOGAR-AUTO/Batalhar até o fim: **um** título de estado + **um** badge, CTAs "Novo confronto"/"Poke Center"/"Poke Mart" e restart no game-over | ok (2026-09-16) |
+| C2 (results-desktop) | `test/battle_end_states_test.rb` `test_results_card_rewards` — assert estrutural ancorado `%r{<div class="result-card">.*?<p class="rewards">.*?<div class="ctas">}m`, provado não-vacuoso por mutação (RED ao reinserir o `<h2>` duplicado) | linha de rewards (XP + dinheiro) e mini-arena visíveis na tela de fim | ok (2026-09-16) |
+| C3 (CSS 0078 no bloco) | `test/design_system_test.rb` `test_design_system_battle_end_states_classes` (classes do bloco `0078` + assert do delimitador `/* === Battle 1:1 (0078)` + `refute` do `.res-screen .modal-head` nu) | efeito visual indireto na mesma tela de fim (alinhamento do modal, escopado a `.end-state-modal`) | ok (2026-09-16) |
+| G1 (sem regressão) | `./scripts/test` = **1180 runs / 6217 asserts / 0 falhas**; `./scripts/lint` = **136 arquivos / 0 offenses** | — | ok (2026-09-16) |
+| G2 (backend listado/motor leitura) | `git diff --stat <base>..HEAD -- lib server.rb db Gemfile Gemfile.lock` vazio (`resolve`/`finish_effects`/`expose_battle_result` read-only; sem migração/schema/gems) | — | ok (2026-09-16) |
+| G3 (docs + revisão) | `./scripts/check_docs` + `./scripts/checar-sessao 0078` verdes; Revisor S7 `Aprovado` — veredito final `reviews/review-2026-09-16T18-14-26-0078-final.md` (sobre `3770ba2`), que fecha o achado médio da rodada 3 | — | ok (2026-09-16) |
+| M1 (fim de batalha visual) | — | validação do usuário em 2026-09-16 (navegador, `/battle` até o fim: título único + badge, CTAs, restart, rewards/mini-arena, janela ≤920px sem overflow-x). Ressalva: **empate e game-over são praticamente inalcançáveis à mão** — cobertos só por teste automatizado | ok (2026-09-16) |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
