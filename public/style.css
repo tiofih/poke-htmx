@@ -1836,7 +1836,6 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 .mart li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
 .mart li:first-child { border-top: 0; }
 .mart .price { color: var(--fg); font-weight: 700; }
-.mart .muted-row { color: var(--muted); }
 .item-icon { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--fg); display: grid; place-items: center; font-weight: 800; font-size: 15px; }
 .mart-name { display: flex; align-items: center; gap: 10px; }
 

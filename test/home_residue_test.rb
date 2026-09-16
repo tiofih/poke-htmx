@@ -24,6 +24,7 @@ class HomeResidueTest < Minitest::Test
 
     assert last_response.ok?
     center = last_response.body
+    refute_includes center, "onclick"
     assert_includes center, 'id="center-modal"'
     assert_match(/class="heal-list"/, center)
     assert_match(/class="heal-item"/, center)
@@ -31,7 +32,6 @@ class HomeResidueTest < Minitest::Test
     assert_includes center, "20/35"
     assert_includes center, "Custo total:"
     assert_includes center, %(hx-post="/team/heal")
-    refute_includes center, "onclick"
 
     @inventory.add(HOME_USER, "potion", 2)
 
@@ -39,18 +39,18 @@ class HomeResidueTest < Minitest::Test
 
     assert last_response.ok?
     mart = last_response.body
+    refute_includes mart, "onclick"
     assert_includes mart, 'id="mart-modal"'
     assert_match(/class="tabs"/, mart)
     assert_match(/class="mart"/, mart)
     assert_match(/class="mart-name"/, mart)
     assert_match(/class="item-icon"/, mart)
-    assert_match(/class="[^"]*\bprice\b[^"]*"/, mart)
+    assert_match(/class="num price">¥\d/, mart)
     assert_includes mart, "Comprar ×5"
     assert_includes mart, "+20 HP"
     assert_includes mart, %(hx-post="/mart/buy")
     assert_includes mart, %(hx-post="/mart/sell")
     assert_includes mart, "Saldo: ¥100"
-    refute_includes mart, "onclick"
   end
 
   def test_manage_evolution
@@ -71,6 +71,7 @@ class HomeResidueTest < Minitest::Test
 
     assert last_response.ok?
     manage = last_response.body
+    refute_includes manage, "onclick"
     assert_includes manage, 'id="manage-modal"'
     assert_match(/class="stat-grid"/, manage)
     assert_match(/class="mv-row marked"/, manage)
@@ -79,7 +80,6 @@ class HomeResidueTest < Minitest::Test
     assert_match(/class="tag-row"/, manage)
     assert_includes manage, "Nível 5"
     assert_includes manage, "Voltar"
-    refute_includes manage, "onclick"
 
     PokeApiStub.with_stone_evolutions([
                                         { number: 26, name: "raichu", item: "thunder-stone" },
@@ -90,6 +90,7 @@ class HomeResidueTest < Minitest::Test
 
     assert last_response.ok?
     modal = last_response.body
+    refute_includes modal, "onclick"
     assert_includes modal, 'id="evolution-modal"'
     assert_match(/class="[^"]*\bmodal\b/, modal)
     assert_match(/class="evo-row"/, modal)
@@ -97,7 +98,6 @@ class HomeResidueTest < Minitest::Test
     assert_includes modal, "Inventário: 2"
     assert_includes modal, %(hx-post="/team/#{pikachu_id}/evolve")
     refute_includes modal, "evolution-modal-box"
-    refute_includes modal, "onclick"
   end
 
   def test_catalog_cards
@@ -117,11 +117,11 @@ class HomeResidueTest < Minitest::Test
 
     assert last_response.ok?
     catalog = last_response.body
+    refute_includes catalog, "onclick"
     assert_match(/<li class="pcard">/, catalog)
     assert_match(/class="pcard-name"/, catalog)
     assert_match(/class="pcard-meta"/, catalog)
     assert_match(%r{hx-get="/pokemon/4"[^>]*hx-target="#pokemon-detail"}, catalog)
-    refute_includes catalog, "onclick"
   end
 
   def test_catalog_detail
@@ -148,6 +148,7 @@ class HomeResidueTest < Minitest::Test
 
     assert last_response.ok?
     detail = last_response.body
+    refute_includes detail, "onclick"
     assert_match(/class="tag-row"/, detail)
     assert_match(/class="stat-grid"/, detail)
     assert_match(/class="evo-row"/, detail)
@@ -157,6 +158,5 @@ class HomeResidueTest < Minitest::Test
     assert_match(%r{hx-get="/pokemon/4"[^>]*hx-target="#pokemon-detail"}, detail)
     assert_includes detail, %(hx-post="/team")
     assert_includes detail, %(hx-get="/pokemon/close")
-    refute_includes detail, "onclick"
   end
 end
