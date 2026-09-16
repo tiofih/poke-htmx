@@ -67,8 +67,10 @@ class HomeViewTest < Minitest::Test
     refute_nil block, "expected a delimited 0083 UI polish block in style.css"
     assert_match(/\.filter-grid\s*\.field[^}]*margin-bottom:\s*0/m, block,
                  "cada select dentro de um .field, sem empilhar margem (C2)")
-    assert_match(/@media\s*\(max-width:\s*360px\)[\s\S]*?\.filter-grid[^}]*grid-template-columns:\s*1fr;/m, block,
-                 "360px: grade de filtros em 1 coluna, sem overflow horizontal (C2)")
+    assert_match(/@media\s*\(max-width:\s*420px\)[\s\S]*?\.filter-grid[^}]*grid-template-columns:\s*1fr;/m, block,
+                 "420px (cobre 360 e 375): grade de filtros em 1 coluna, " \
+                 "sem overflow horizontal (C2) — a MEDICAO real de overflow " \
+                 "e manual/e2e; aqui so a regra que a sustenta")
   end
 
   # 0083 C3: a pill de prontidao separa time VAZIO (empty, neutra) de time que
@@ -104,6 +106,9 @@ class HomeViewTest < Minitest::Test
                  "pill empty neutra, distinta da stale (C3)")
     assert_match(/\.pill--stale\s*\{[^}]*background:\s*var\(--warn\)/m, block,
                  "pill stale no tom de atencao (C3)")
+    style = File.read(File.join(__dir__, "../public/style.css"))
+    refute_match(/\.pill\.(?:warn|danger)\s*\{/, style,
+                 "sem a convencao antiga .pill.warn/.pill.danger — uma convencao so (C3, revisao S7)")
   end
 
   # 0083 C4: .pcard-meta vira flex (custo a esquerda, + a direita) — antes o
@@ -131,7 +136,9 @@ class HomeViewTest < Minitest::Test
                  "o botao + vive no .pcard-meta (C4)")
     cost = meta.index('class="poke-cost')
     add = meta.index('class="pcard-add')
-    assert cost.nil? || cost < add, "custo antes do + no .pcard-meta (C4)"
+    refute_nil cost, "o custo aparece no .pcard-meta (C4)"
+    refute_nil add, "o botao + aparece no .pcard-meta (C4)"
+    assert_operator cost, :<, add, "custo antes do + no .pcard-meta (C4)"
 
     block = ui_polish_block
     refute_nil block, "expected a delimited 0083 UI polish block in style.css"

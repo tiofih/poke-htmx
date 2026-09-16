@@ -110,6 +110,9 @@ class LayoutViewportTest < Minitest::Test
 
     fill_team("cta-hurt")
     @repository.all("cta-hurt").each { |m| @progression.update_hp("cta-hurt", m.id, 200, 0) }
+    # Saldo para curar: ferido != game over (rodada 2 — sem isso o estado e o
+    # terminal `@game_over` e o hint passa a ser o de jornada encerrada).
+    @wallet.grant("cta-hurt", 10_000)
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/", {}, user_session("cta-hurt")
     end
@@ -125,6 +128,56 @@ class LayoutViewportTest < Minitest::Test
     refute_nil cta, "o CTA Batalhar continua no header de /battle"
     refute_match(/aria-disabled|btn--gated/, cta,
                  "@can_battle nil (layout compartilhado): sem gate — nil-safe (C1)")
+  end
+
+  # 0083 rodada 2 (revisao S7): o hint TEM de existir em qualquer largura — antes
+  # o bloco 0083 o escondia em <=720px e o `title` era inalcancavel
+  # (pointer-events:none mata o hover), deixando um botao apagado sem explicacao.
+  # Limite honesto: "nao estoura o topnav em 720px" e medicao real (manual/e2e);
+  # aqui provamos que o hint nao tem display:none e que o vinculo a11y existe.
+  def test_battle_cta_hint_stays_visible_and_described
+    block = ui_polish_block
+    refute_nil block, "expected a delimited 0083 UI polish block in style.css"
+    refute_match(/\.cta-hint[^}]*display:\s*none/m, block,
+                 "o hint do CTA gated nao some em nenhuma largura (revisao S7)")
+    assert_match(/@media\s*\(max-width:\s*720px\)\s*\{\s*\.cta-hint\s*\{[^}]*font-size/m, block,
+                 "<=720px: hint compacto, nao escondido (revisao S7)")
+    assert_match(/\.btn--gated:focus-visible\s*\{[^}]*outline/m, block,
+                 "CTA gated tem foco visivel (a11y, revisao S7)")
+
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("hint-a11y")
+    end
+    body = last_response.body
+    cta = body[/<a[^>]*data-od-id="cta-battle"[^>]*>/]
+    assert_match(/aria-describedby="cta-hint"/, cta.to_s,
+                 "CTA gated aponta para o hint (a11y, revisao S7)")
+    assert_match(%r{<span class="cta-hint meta" id="cta-hint">Monte seu time para batalhar\.</span>}, body,
+                 "hint visivel em texto e alvo do aria-describedby")
+  end
+
+  # 0083 rodada 2 (revisao S7): no game over `@can_battle == false` e nao ha
+  # dinheiro para curar — o hint nao pode mandar "Cure o time antes de batalhar."
+  def test_battle_cta_hint_distinguishes_game_over_from_hurt
+    fill_team("cta-game-over")
+    @repository.all("cta-game-over").each { |m| @progression.update_hp("cta-game-over", m.id, 200, 0) }
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("cta-game-over")
+    end
+    assert last_response.ok?
+    assert_includes last_response.body, "Jornada encerrada",
+                    "game over: hint explica o estado terminal (revisao S7)"
+    refute_includes last_response.body, "Cure o time antes de batalhar.",
+                    "game over: nao manda curar sem dinheiro (revisao S7)"
+
+    fill_team("cta-hurt-rich")
+    @repository.all("cta-hurt-rich").each { |m| @progression.update_hp("cta-hurt-rich", m.id, 200, 0) }
+    @wallet.grant("cta-hurt-rich", 10_000)
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("cta-hurt-rich")
+    end
+    assert_includes last_response.body, "Cure o time antes de batalhar.",
+                    "time ferido com saldo para curar: hint de cura (nao regride)"
   end
 
   # 0088 Passo 4/5 (D1a/D2a — excecao estreita ao RNF-01): unico handler JS do
@@ -161,5 +214,11 @@ class LayoutViewportTest < Minitest::Test
                  "coluna unica (<981px) e no-op explicito, mesmo breakpoint do CSS (D5/C9)")
     refute_match(/setInterval|EventSource|new WebSocket/, layout,
                  "sem polling/SSE — so o handler htmx (G2)")
+  end
+
+  # Bloco CSS delimitado da sessao 0083 (C1/C2/C3/C4) — visual-only.
+  def ui_polish_block
+    style = File.read(File.join(__dir__, "../public/style.css"))
+    style[/UI polish \(0083\): inicio.*?UI polish \(0083\): fim/m]
   end
 end
