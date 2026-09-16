@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — escolhas do usuário em 2026-09-09 (fatiamento por tela, deslizamento 0077-0079→resíduo / 0080-0082→estabilidade, fidelidade híbrida, backend thin listado, S1 com 1 teste novo + extensões — ver seção 5) |
 | Implementação (fase 2, TDD) | **Concluída em 2026-09-09** — Passos 1–5: `ea7192a` (C4/teste `home_residue_test.rb`), `a00db99` (`heal-list`/`heal-item`/`mart-name`/`item-icon`), `2671204` (`stat-grid`/`mv-row`/`evo-row`/`equip-row`), `d0832bf` (`pcard-meta`/`tag-row`), `d922add` (Passo 5 — resíduo home fechado + §9) |
-| Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
+| Validação (fase 3) | **Concluída** — validada pelo usuário em 2026-09-16 (C1–C4 + G1–G3 + M1 ok, sem `nok`); a validação é do usuário — nada foi autoproclamado |
 
 ---
 
@@ -95,14 +95,16 @@ Portar o **resíduo da home** do protótipo `open-design/home-team.html` (50KB, 
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (miolo center/mart) | | | pendente |
-| C2 (manage + evolução) | | | pendente |
-| C3 (catálogo + detalhe) | | | pendente |
-| C4 (CSS 0077 no bloco) | | | pendente |
-| G1 (sem regressão) | | | pendente |
-| G2 (backend listado) | | | pendente |
-| G3 (docs + revisão) | | | pendente |
-| M1 (passada visual home) | — | | pendente |
+| C1 (miolo center/mart) | `test/home_residue_test.rb` `test_center_mart_inner` + `test/modal_routes_test.rb` (verdes) | `http://localhost:3000/team/center` e `/team/mart` — miolo interno (`heal-list`/`heal-item`; `mart-name`/`item-icon`) e overlays, **sem** a duplicação antiga (dois blocos com mesmo título/ids `mart-tab-buy/sell`) | ok (2026-09-16) |
+| C2 (manage + evolução) | `test/home_residue_test.rb` `test_manage_evolution` + `test/evolution_routes_test.rb` (verdes) | `/team/manage` (`stat-grid`/`mv-row`/`equip-row`) e `/team/<id>/evolution` (`evo-row`) | ok (2026-09-16) |
+| C3 (catálogo + detalhe) | `test/home_residue_test.rb` `test_catalog_detail` + `test_catalog_cards` + `test/home_view_test.rb` (verdes) | catálogo com `pcard-meta`/`tag-row` e detalhe do Pokémon | ok (2026-09-16) |
+| C4 (CSS 0077 no bloco) | `test/design_system_test.rb` `test_design_system_home_residue_classes` (bloco em `public/style.css:1816+`) | efeito visual indireto na home/modais. **Ressalva de proveniência:** o bloco CSS `Home 1:1 (0077)` entrou no git por `4f1538c` (2026-09-11, mensagem da sessão 0086) — nenhum SHA da 0077 é bisect-clean; correção registrada em §4, **não** é mudança de escopo | ok (2026-09-16) |
+| G1 (sem regressão) | `./scripts/test` = **1180 runs / 6217 asserts / 0 falhas**; `./scripts/lint` = **136 arquivos / 0 offenses** (números do implementador/review, não reproduzidos nesta fase documental) | — | ok (2026-09-16) |
+| G2 (backend listado) | backend só no listado declarado em §3 (sem migração/schema/gems/services); `2671204` (Passo 3) tocou `server.rb` (+12) dentro do `expose_manage_data` declarado — **legítimo**; a versão forte "nenhum commit toca `server.rb`" **não** é o que a sessão garante | — | ok (2026-09-16) |
+| G3 (docs + revisão) | `./scripts/check_docs` + `./scripts/checar-sessao 0077` verdes; Revisor S7 `Aprovado` na rodada 2 (`reviews/review-2026-09-16T21-42-00-0077-rodada2.md`; rodada 1 = `reviews/review-2026-09-16T21-40-00-0077.md`) | — | ok (2026-09-16) |
+| M1 (passada visual home) | — | validação do usuário em 2026-09-16 (navegador, `/team` + center/mart/manage/evolution, catálogo/detalhe, janela ≤920px sem overflow-x) | ok (2026-09-16) |
+
+> **Ressalvas aceitas na validação (2026-09-16):** (a) `.tag-row` do bloco `0077` está **acoplada ao roster** — estiliza também `views/team.erb:38` (fora do escopo); (b) `@member_levels` (`server.rb:52-67`) faz um `progression.get` por membro em todo render de center/mart/manage e `rescue → 1` degrada falha como "Nível 1"; ambos **anotados no draft, não corrigidos**; (c) a duplicação Center/Mart histórica (introduzida em `d922add`, removida por `41adcaf`) **não** se verificava no HEAD — C1 ok no estado atual.
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
