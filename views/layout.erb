@@ -17,7 +17,15 @@
           <a href="/" class="<%= "active" if request.path == "/" %>"<%= ' aria-current="page"' if request.path == "/" %>>Time <span class="nav-badge num" id="nav-badge"><%= @team_size || 0 %>/6</span></a>
           <a href="/history" class="<%= "active" if request.path == "/history" %>"<%= ' aria-current="page"' if request.path == "/history" %>>Histórico</a>
         </nav>
-        <a href="/battle" class="btn btn-primary" data-od-id="cta-battle">Batalhar</a>
+        <%
+          # 0083 C1 — gate VISUAL (sem regra nova): so gata quando o estado existe
+          # (@can_battle == false). Rotas que compartilham o layout sem passar por
+          # load_journey_state (ex.: erb :battle_page) tem @can_battle nil -> CTA normal.
+          cta_gated = @can_battle == false
+          cta_hint = @team_size.to_i.zero? ? "Monte seu time para batalhar." : "Cure o time antes de batalhar."
+        %>
+        <a href="/battle" class="btn btn-primary<%= " btn--gated" if cta_gated %>" data-od-id="cta-battle"<%= %( aria-disabled="true" tabindex="-1" title="#{cta_hint}") if cta_gated %>>Batalhar</a>
+        <% if cta_gated %><span class="cta-hint meta"><%= cta_hint %></span><% end %>
         <% if request.path == "/battle" %>
           <a href="/" class="btn btn-secondary">◀ Voltar ao time</a>
         <% end %>

@@ -81,6 +81,52 @@ class LayoutViewportTest < Minitest::Test
                     "expected the back link only on /battle, not on /"
   end
 
+  # 0083 C1: o CTA Batalhar do topnav passa a refletir o estado do time (gate
+  # visual, sem regra nova). Nil-safe: rotas que renderizam o layout sem passar
+  # por load_journey_state (ex.: GET /battle) deixam @can_battle nil e o CTA
+  # segue habilitado — o gate so aparece quando o estado existe.
+  def test_battle_cta_gated_hint # rubocop:disable Metrics/AbcSize
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("cta-empty")
+    end
+    assert last_response.ok?
+    cta = last_response.body[/<a[^>]*data-od-id="cta-battle"[^>]*>/]
+    refute_nil cta, "o CTA Batalhar continua no header"
+    assert_match(/aria-disabled="true"/, cta, "time vazio: CTA gated no header (C1)")
+    assert_match(/btn--gated/, cta, "o gate veste .btn--gated (C1)")
+    assert_includes last_response.body, "Monte seu time para batalhar.",
+                    "time vazio: hint de como destravar o CTA (C1)"
+
+    fill_team("cta-ready")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("cta-ready")
+    end
+    assert last_response.ok?
+    body = last_response.body
+    cta = body[/<a[^>]*data-od-id="cta-battle"[^>]*>/]
+    refute_nil cta, "o CTA Batalhar continua no header"
+    refute_match(/aria-disabled|btn--gated/, cta, "time valido: CTA habilitado (C1)")
+    refute_includes body, "Monte seu time para batalhar.", "sem hint com time valido"
+
+    fill_team("cta-hurt")
+    @repository.all("cta-hurt").each { |m| @progression.update_hp("cta-hurt", m.id, 200, 0) }
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("cta-hurt")
+    end
+    cta = last_response.body[/<a[^>]*data-od-id="cta-battle"[^>]*>/]
+    assert_match(/aria-disabled="true"/, cta.to_s, "time invalido: CTA gated (C1)")
+    assert_includes last_response.body, "Cure o time antes de batalhar.",
+                    "time invalido: hint de cura (C1)"
+
+    # nil-safe: GET /battle nao passa por load_journey_state -> @can_battle nil.
+    get "/battle", {}, user_session("cta-battle-page")
+    assert last_response.ok?
+    cta = last_response.body[/<a[^>]*data-od-id="cta-battle"[^>]*>/]
+    refute_nil cta, "o CTA Batalhar continua no header de /battle"
+    refute_match(/aria-disabled|btn--gated/, cta,
+                 "@can_battle nil (layout compartilhado): sem gate — nil-safe (C1)")
+  end
+
   # 0088 Passo 4/5 (D1a/D2a — excecao estreita ao RNF-01): unico handler JS do
   # projetil slot-a-slot. Prova estatica: existe, e ligado a um evento htmx
   # (que dispara depois do swap, OOB incluso), le os slots do atacante e do

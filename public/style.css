@@ -2049,6 +2049,16 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 }
 /* === Juice polish + reduced-motion (0086 C2, fim) === */
 
+/* === UI polish (0083): inicio — polimento visual home/team/battle (visual-only,
+   aditivo; reusa tokens; nao redefine .btn/.pcard/.pill existentes). === */
+/* C1 — gate visual do CTA Batalhar: so desabilita o clique (pointer-events) e
+   apaga o botao; nenhuma regra de negocio ou rota muda. O hint some <=720px
+   para nao estourar o topnav estreito. */
+.btn--gated { opacity: 0.45; pointer-events: none; }
+.cta-hint { font-size: 12px; color: var(--muted); max-width: 22ch; line-height: 1.25; }
+@media (max-width: 720px) { .cta-hint { display: none; } }
+/* === UI polish (0083): fim === */
+
 /* === Open Design System (0072): fim === */
 
 /* Layout interno das seções da página única */
