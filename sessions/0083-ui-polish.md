@@ -136,11 +136,14 @@ Polimento visual das telas home/team/battle — header gate do CTA Batalhar, lab
   prova apenas a **presença do texto CSS** do breakpoint (`@media (max-width:420px)`, que cobre
   360/375px) — não há browser em Minitest. Quem valida de fato é a **medição manual no checklist
   M1** (ou e2e): medir `scrollWidth <= clientWidth` em 360/375px e a quebra do topnav em 720px.
-- **Achado baixa aberto (não bloqueante) — `:focus-visible` do `.btn--gated` é regra morta:**
-  o `tabindex="-1"` tira o CTA gated da tabulação, logo a regra criada na rodada 2 nunca é
-  alcançável por teclado. Decisão adiada para o **M1 do usuário**: (i) remover a regra morta; ou
-  (ii) `tabindex="0"` no CTA gated (era o pedido original de a11y da rodada 1, com o estado já
-  explicado em texto visível pelo hint). Nada foi alterado no CSS.
+- **Achado baixa de a11y — `:focus-visible` do `.btn--gated` era regra morta (RESOLVIDO):**
+  o `tabindex="-1"` tira o CTA gated da tabulação, logo a regra criada na rodada 2 nunca era
+  alcançável por teclado. **Decisão do usuário em 2026-09-16: opção (i) — regra removida.**
+  A opção (ii) (`tabindex="0"`) foi descartada; o `tabindex="-1"` permanece. A remoção é
+  somente do tratamento de foco (os tokens `--fg-soft`/`--muted` e o `pointer-events:none`
+  ficaram); `test/layout_test.rb#test_battle_cta_hint_stays_visible_and_described` passou a
+  **refutar** a presença do seletor (provado por mutação: reintroduzir a regra deixa o teste
+  vermelho) e a explicação visível segue garantida pelo hint + `aria-describedby`.
 - **Info S7 registrada sem mudança:** os counts "Resultados · N" (`_filter_controls`) e
   "Arquivo · N" (`pokemon_list`) seguem duplicados de propósito — `filter_param_present?`
   (`params.key?`) + `hx-include` mantêm os dois sincronizados e remover um deles era mudança

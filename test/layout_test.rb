@@ -142,8 +142,11 @@ class LayoutViewportTest < Minitest::Test
                  "o hint do CTA gated nao some em nenhuma largura (revisao S7)")
     assert_match(/@media\s*\(max-width:\s*720px\)\s*\{\s*\.cta-hint\s*\{[^}]*font-size/m, block,
                  "<=720px: hint compacto, nao escondido (revisao S7)")
-    assert_match(/\.btn--gated:focus-visible\s*\{[^}]*outline/m, block,
-                 "CTA gated tem foco visivel (a11y, revisao S7)")
+    # Decisao do usuario em 2026-09-16 (opcao (i) do achado de a11y): o CTA
+    # gated tem `tabindex="-1"` e nunca recebe foco por teclado, entao uma regra
+    # `:focus-visible` aqui seria inalcancavel — regra morta removida.
+    refute_match(/\.btn--gated:focus-visible/, block,
+                 "CTA gated nao e focavel por teclado: sem regra de foco morta (opcao i)")
 
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       get "/", {}, user_session("hint-a11y")

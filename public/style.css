@@ -2046,9 +2046,9 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
    apaga o botao; nenhuma regra de negocio ou rota muda. O hint fica SEMPRE
    visivel (rodada 2/revisao S7: antes sumia <=720px e o title era inalcancavel
    por hover) — em telas estreitas ele apenas compacta; tokens no lugar de
-   opacity para preservar contraste, com foco visivel p/ navegacao por teclado. */
+   opacity para preservar contraste; sem regra de foco — o CTA gated tem
+   `tabindex="-1"` e nao entra na navegacao por teclado (opcao (i), 2026-09-16). */
 .btn--gated { background: var(--fg-soft); color: var(--muted); pointer-events: none; }
-.btn--gated:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .cta-hint { font-size: 12px; color: var(--muted); max-width: 22ch; line-height: 1.25; }
 @media (max-width: 720px) { .cta-hint { max-width: none; font-size: 11px; } }
 /* C2 — filtros: cada select vive num .field com label visivel (sem empilhar a
