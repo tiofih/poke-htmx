@@ -132,6 +132,15 @@ Polimento visual das telas home/team/battle — header gate do CTA Batalhar, lab
   estoura o topnav em 720px" só por ausência de `display:none`; a **medição real de overflow e
   de quebra do topnav é manual/e2e** (não há browser em Minitest) — registrado nos comentários
   dos testes `test_filter_labels_count_no_overflow` e `test_battle_cta_hint_stays_visible_and_described`.
+- **Evidência do C2 é proxy — medição real no M1/e2e:** o assert "sem overflow em 360px"
+  prova apenas a **presença do texto CSS** do breakpoint (`@media (max-width:420px)`, que cobre
+  360/375px) — não há browser em Minitest. Quem valida de fato é a **medição manual no checklist
+  M1** (ou e2e): medir `scrollWidth <= clientWidth` em 360/375px e a quebra do topnav em 720px.
+- **Achado baixa aberto (não bloqueante) — `:focus-visible` do `.btn--gated` é regra morta:**
+  o `tabindex="-1"` tira o CTA gated da tabulação, logo a regra criada na rodada 2 nunca é
+  alcançável por teclado. Decisão adiada para o **M1 do usuário**: (i) remover a regra morta; ou
+  (ii) `tabindex="0"` no CTA gated (era o pedido original de a11y da rodada 1, com o estado já
+  explicado em texto visível pelo hint). Nada foi alterado no CSS.
 - **Info S7 registrada sem mudança:** os counts "Resultados · N" (`_filter_controls`) e
   "Arquivo · N" (`pokemon_list`) seguem duplicados de propósito — `filter_param_present?`
   (`params.key?`) + `hx-include` mantêm os dois sincronizados e remover um deles era mudança
