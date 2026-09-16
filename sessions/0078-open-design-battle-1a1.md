@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — escolhas do usuário em 2026-09-09 (fatiamento por tela, deslizamento 0077-0079→resíduo / 0080-0082→estabilidade, fidelidade híbrida, backend thin listado, S1 com 1 teste novo + extensões — ver seção 5) |
-| Implementação (fase 2, TDD) | **Verde** — Passos 1-3 commitados (9b421c4, 924e5b6, 4604ee9); escopo 0078 verde, suíte com 8 falhas alheias (0077, `_center`/`_mart` dirty) — ver §8 |
+| Implementação (fase 2, TDD) | **Verde** — Passos 1-4 commitados (9b421c4, 924e5b6, 4604ee9, 39f3de6) + ajustes da revisão S7 (814b722); escopo 0078 verde, suíte completa 1180/6208 com 0 falhas — ver §8 |
 | Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
 
 ---
@@ -45,15 +45,15 @@ Portar o **resíduo da batalha** dos protótipos `open-design/battle.html` (30KB
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| C1 end-states: fim de `battle.erb` com `res-screen`/`state-card` cobrindo vitória/derrota/empate/game-over (CTAs Novo confronto/Center/Mart + restart game-over intactos) | `test/battle_end_states_test.rb` `test_battle_end_states` (novo) + `test/battle_routes_test.rb` (fim/game-over) verdes | verde (fase 2) |
-| C2 results-desktop: mini-arena + `rewards` (XP/dinheiro) no padrão `battle-results-desktop.html`, juice/`data-side`/`#battle-view` preservados | `test/battle_end_states_test.rb` `test_results_desktop` (novo) + `test/battle_view_test.rb` estendido | verde (fase 2) |
-| C3 CSS 0078 no bloco: classes dos 3 protótipos aplicáveis ao fim de batalha, aditivas, ANTES da linha `fim`, com delimitador próprio `0078` | `test/design_system_test.rb` `test_design_system_battle_end_states_classes` (estendido) | verde (fase 2) |
+| C1 end-states: fim de `battle.erb` com `res-screen`/`state-card` cobrindo vitória/derrota/empate/game-over (CTAs Novo confronto/Center/Mart + restart game-over intactos) | `test/battle_end_states_test.rb` `test_battle_end_states`, `test_battle_end_states_defeat`, `test_battle_end_states_draw`, `test_battle_end_states_game_over`, `test_lost_follows_fainted_not_rounded_hp` + `test/battle_routes_test.rb` (fim/game-over) | verde (fase 2) |
+| C2 **reescrito na revisão S7**: mini-arena + `rewards` (XP/dinheiro) dentro de `.result-card`, no padrão `battle-end-states.html`; header único (`state-pill`) sem a variante `res-top`; juice/`data-side`/`#battle-view` preservados | `test/battle_end_states_test.rb` `test_results_card_rewards` (substitui `test_results_desktop`) | verde (fase 2 + revisão S7) |
+| C3 CSS 0078 no bloco: classes do protótipo `battle-end-states.html` aplicáveis ao fim de batalha, aditivas, ANTES da linha `fim`, com delimitador próprio `0078` | `test/design_system_test.rb` `test_design_system_battle_end_states_classes` (classes + assert do delimitador `0078` + ausência de regra órfã) | verde (fase 2) |
 
 ### Garantias
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| G1 sem regressão — suíte completa (baseline **1057/4900** + novos) + lint 0; `style.css` DIRTY conferido/stash antes de editar (não commitar alheio) | `./scripts/test` + `./scripts/lint` + `git status -- public/style.css` | verde no escopo (1070/5088; 8 falhas em `team/mart_routes` vindas do `_center`/`_mart` dirty da 0077, fora de escopo) |
+| G1 sem regressão — suíte completa + lint 0; `style.css` DIRTY conferido/stash antes de editar (não commitar alheio) | `./scripts/test` + `./scripts/lint` + `git status -- public/style.css` | verde — suíte completa **1180 runs/6208 assertions/0 falhas** e lint **0 offenses** (medido em 2026-09-16, HEAD `814b722`); escopo 0078 sem falhas (as "8 falhas alheias" registradas na fase 2 eram do dirty da 0077 e **não se reproduzem** no HEAD — ver §8) |
 | G2 backend só no listado (§3) — `resolve`/`finish_effects`/`expose_battle_result` intocados (leitura); sem migração/schema/gems/services; testes sem rede | `git diff -- lib/battle_service.rb` vazio (ou só leitura) + `git diff --stat -- db/ Gemfile*` vazio + revisão S7 confere | verde (fase 2: `git diff --stat -- db/ Gemfile*` vazio; `server.rb` intocado) |
 | G3 S4/S5 + revisão — `SESSIONS.md` + `check_docs` + `checar-sessao 0078` verdes; revisor S7 `Aprovado` antes da 3 | `./scripts/check_docs` + `./scripts/checar-sessao 0078` + veredito do Revisor | parcial (docs verdes; Revisor pendente) |
 
@@ -64,6 +64,8 @@ Portar o **resíduo da batalha** dos protótipos `open-design/battle.html` (30KB
 | M1 fim de batalha no navegador (vitória/derrota/empate/game-over + rewards + CTAs, ≤920px sem overflow-x) | `manual` (`./scripts/run`, `/battle` até o fim) | pendente |
 
 > **S1:** cada critério acima aponta o teste que o prova (arquivo + método); o único critério puramente manual é **M1**. **Ao fim da fase 2 (suíte + lint verdes, revisor S7 `Aprovado`), PARAR e aguardar a validação do usuário — não marcar Done, não preencher a seção 7, não commitar conclusão.**
+>
+> **S3 — alteração de critério na revisão S7 (2026-09-16):** C2 era "mini-arena + `rewards` no padrão `battle-results-desktop.html`" e C3 citava "os 3 protótipos". Como os dois protótipos de fim são **variantes alternativas** (não composição), a variante `res-top`/`state-title` do `battle-results-desktop.html` foi descartada e as células foram reescritas para o que de fato se entrega (`battle-end-states.html`); pendente de reaprovação do usuário na validação.
 
 ## 5. Decisões de refinamento (fechadas com o usuário em 2026-09-09 — prevalecem sobre o mapa)
 
@@ -102,6 +104,7 @@ Portar o **resíduo da batalha** dos protótipos `open-design/battle.html` (30KB
 
 ## 8. Observações
 
+- **Rodada de correção da revisão S7 (2026-09-16) — commit `814b722`:** endereça os achados 2M/5B do `reviews/review-2026-09-16T20-25-33-0078.md`. (A-1, decisão de composição) os dois protótipos de fim são **variantes alternativas**: ficou só a `state-card` do `battle-end-states.html` (com seu `state-head` + pill, `mini-arena`, `result-card` com rewards/CTAs) e a `res-top`/`state-title` do `battle-results-desktop.html` foi removida — `reviews`/M1 julgavam os dois blocos juntos como duplicata visível. (A-2) `rewards` ficam dentro do `.result-card` (posição do `battle-end-states.html`), o assert vacuoso virou ancorado no elemento (`test_results_card_rewards`) e as regras `.state-title*` saíram por não ter consumidor. (A-3) 7 regras órfãs removidas do bloco 0078 (`.res-top`, `.res-top-left`, `.res-top .ctas`, `.state-title h2/.rewards/.rewards strong`, `.side-title`); o bloco segue aditivo e dentro do delimitador. (A-4) `frow.lost` passou a derivar de `poke.fainted?` (hp 1/300 arredondava para 0% e marcava derrotado sem estar caído). (A-5) C1 cita os 4 métodos de estado; C3 ganhou assert do delimitador `/* === Battle 1:1 (0078)`. (A-6) Status/G1 atualizados para a árvore atual: **suíte completa 1180/6208/0 falhas + lint 0** (as "8 falhas alheias" da fase 2 eram do dirty da 0077 e não reproduzem no HEAD). (A-7) os 6 asserts duplicados do Passo 3 (`4604ee9`, que só tocou teste — o C2 de produção saiu no Passo 2 `924e5b6`) foram removidos de `test/battle_view_test.rb`; a cobertura vive em `test/battle_end_states_test.rb`.
 - **`public/style.css` DIRTY (~1129+/1003-):** conferir/stash antes de editar; nunca commitar junto sem revisar (Passo 1).
 - **Fase 2 executada em 2026-09-09 (paralelismo com 0077/0079):** o dirty do `style.css` era reformat espaços→tabs do lint universal (sem mudança funcional) — conferido via `git diff`, bloco 0078 anexado antes da linha `fim` e commitado no Passo 1; o bloco `Home 1:1 (0077)` entrou depois no working tree (não commitado por esta sessão).
 - **Suíte total 1070/5088 com 8 falhas fora de escopo:** todas em `test/team_routes_test.rb` (7) + `test/mart_routes_test.rb` (1), que renderizam `views/_center.erb`/`views/_mart.erb` — arquivos dirty da 0077 em meio ao red dela (markup novo `heal-list`/`heal-item` vs. asserts antigos). Nenhuma falha em battle/design/history; escopo 0078 100% verde. Não tocar nesses arquivos (RNF-04, escopo 0077).
