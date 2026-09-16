@@ -171,10 +171,11 @@ Portar o **resíduo da home** do protótipo `open-design/home-team.html` (50KB, 
   alto, sem ganho); ambiguidade anotada em `docs/draft-backlog.md`.
 - **`@member_levels` (media 3 — origem na própria 0077, não consertada):** introduzido no
   `expose_manage_data` por `2671204` (**Passo 3 da 0077**); `a37fee0` (sessão posterior,
-  2026-09-10) re-adicionou a mesma linha em `expose_team`. Faz um `progression.get` por
+  2026-09-10) **adicionou** a mesma linha em `prepare_team_fragment_data`. Faz um `progression.get` por
   membro em todo render de center/mart/manage e `rescue → 1` degrada falha como "Nível 1".
-  Mantido (mudança de comportamento fora do escopo desta rodada; `server.rb` é read-only
-  aqui) e anotado em `docs/draft-backlog.md`.
+  Mantido (mudança de comportamento fora do escopo desta rodada; `server.rb` **não foi
+  alterado nesta rodada de correção** — o toque da 0077 está no `expose_manage_data`,
+  dentro do "thin listado" de §3) e anotado em `docs/draft-backlog.md`.
 - **`filter-grid` em `4f1538c` (info — benigno):** as 4 linhas deletadas alheias eram a
   versão antiga de `.filter-grid` (`repeat(auto-fit, minmax(140px,1fr))` + `gap: .75em`),
   **substituídas na mesma edição** por `1fr 1fr` + `gap: 8px` + `margin-top: 10px`
@@ -185,3 +186,7 @@ Portar o **resíduo da home** do protótipo `open-design/home-team.html` (50KB, 
   falha se regredir ao legado sem cifrão); os `refute_includes "onclick"` foram movidos para
   **logo após** `assert last_response.ok?` (antes das contagens), deixando de ser guarda
   morta após asserts que abortam o método; o §4/C3 passou a citar `test_catalog_cards`.
+- **`¥` do assert de price (info, rodada 2):** o `¥` de `test/home_residue_test.rb:48` veio da
+  copy de `5795866` (Passo 18, 2026-09-11, **posterior à 0077**) → é guard de regressão da
+  copy atual, **não** prova do port da 0077; reverter a copy do `¥` quebraria o teste com o
+  port intacto. A alternativa `class="num price">` (sem o `¥`) é a versão vacuosa vetada na rodada 1 — não usar.
