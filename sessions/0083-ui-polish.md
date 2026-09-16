@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — roteamento confirmado em 2026-09-10 (visual-only; diagnósticos: layout.erb:20, _filter_controls overflow, team.erb:18, pcard-meta, pill stale; playtest mediums T-playtest) |
-| Implementação (fase 2, TDD) | Pendente |
+| Implementação (fase 2, TDD) | **Concluída em 2026-09-16** — 4 passos (red→green) + suíte 1184 runs / lint 0; revisão S7 pendente |
 | Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
 
 ---
@@ -47,18 +47,18 @@ Polimento visual das telas home/team/battle — header gate do CTA Batalhar, lab
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| C1 header gate: CTA Batalhar exibe estado disabled + hint quando time inválido/vazio; habilitado quando válido | `test/layout_test.rb` `test_battle_cta_gated_hint` (novo; view test) | pendente |
-| C2 filtros com labels + count: `_filter_controls` com labels visíveis, contagem de resultados e sem overflow em 360px | `test/home_view_test.rb` `test_filter_labels_count_no_overflow` (novo; system test 360px) | pendente |
-| C3 pills empty/stale: `team.erb:18` pill empty dedicada + estilo pill stale distinguível | `test/home_view_test.rb` `test_team_empty_stale_pills` (novo; view test) | pendente |
-| C4 pcard add position: `.pcard-meta` em flex com botão adicionar posicionado conforme protótipo | `test/home_view_test.rb` `test_pcard_meta_flex_add_position` (novo; view test) | pendente |
+| C1 header gate: CTA Batalhar exibe estado disabled + hint quando time inválido/vazio; habilitado quando válido | `test/layout_test.rb` `test_battle_cta_gated_hint` (novo; view test) | verde (fase 2) — Passo 1 `294cb55` |
+| C2 filtros com labels + count: `_filter_controls` com labels visíveis, contagem de resultados e sem overflow em 360px | `test/home_view_test.rb` `test_filter_labels_count_no_overflow` (novo; view test + CSS) | verde (fase 2) — Passo 2 `cbd3653` |
+| C3 pills empty/stale: `team.erb:18` pill empty dedicada + estilo pill stale distinguível | `test/home_view_test.rb` `test_team_empty_stale_pills` (novo; view test + CSS) | verde (fase 2) — Passo 3 `45e2528` |
+| C4 pcard add position: `.pcard-meta` em flex com botão adicionar posicionado conforme protótipo | `test/home_view_test.rb` `test_pcard_meta_flex_add_position` (novo; view test + CSS) | verde (fase 2) — Passo 3 `45e2528` |
 
 ### Garantias
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| G1 sem regressão — suíte completa + lint 0 | `./scripts/test` + `./scripts/lint` | pendente |
-| G2 escopo contido — só views + CSS bloco `0083`; sem mudança de regra/rota/migração | `git diff --stat -- lib/ db/ config/` vazio + revisão S7 confere | pendente |
-| G3 docs + revisão — `checar-sessao 0083` verde; revisor S7 `Aprovado` antes da 3 | `./scripts/checar-sessao 0083` + veredito do Revisor | pendente |
+| G1 sem regressão — suíte completa + lint 0 | `./scripts/test` + `./scripts/lint` | verde (fase 2) — 1184 runs / 0 falhas; lint 0 offenses |
+| G2 escopo contido — só views + CSS bloco `0083`; sem mudança de regra/rota/migração | `git diff --stat -- lib/ db/ config/` vazio + revisão S7 confere | verde (fase 2) — diff vazio em lib/ db/ config/; revisão S7 pendente |
+| G3 docs + revisão — `checar-sessao 0083` verde; revisor S7 `Aprovado` antes da 3 | `./scripts/checar-sessao 0083` + veredito do Revisor | parcial (fase 2) — `check_docs` + `checar-sessao 0083` verdes; veredito S7 pendente |
 
 > **S1:** cada critério acima aponta o teste que o prova (arquivo + método). Playtest mediums (confirm remoção, labels, legenda, copy) cobertos como asserts de texto nos testes de C1–C3. **Ao fim da fase 2 (suíte + lint verdes, revisor S7 `Aprovado`), PARAR e aguardar a validação do usuário — não marcar Done, não preencher a seção 7, não commitar conclusão.**
 
@@ -99,9 +99,23 @@ Polimento visual das telas home/team/battle — header gate do CTA Batalhar, lab
 
 ## 8. Observações
 
-- **Não tocado nesta tarefa (por ordem):** demais arquivos, commits.
-- **Leitura exata antes de editar:** ERB `not_tracked` — confirmar `layout.erb:20`, `team.erb:18`, `_filter_controls`, `pcard-meta` no arquivo antes do Passo 1.
-- **CSS:** só dentro do bloco ODS, ANTES da linha `fim`, com delimitador próprio `0083`.
+- **Fase 2 (TDD) executada em 2026-09-16** — 4 passos red→green com commit por passo:
+  `294cb55` (C1), `cbd3653` (C2), `45e2528` (C3+C4), e este Passo 4 (regressão + docs).
+- **Gate nil-safe (C1):** `cta_gated = @can_battle == false` em `views/layout.erb` — só gata
+  quando o estado existe; `@can_battle` nil (layout compartilhado, ex. `erb :battle_page`) sai
+  com o CTA normal. Hint derivado de `@team_size` ("Monte seu time…" vs "Cure o time…"),
+  estado visual por `.btn--gated` (`pointer-events: none` + opacidade) e `aria-disabled`.
+- **Contagem nos filtros (C2):** derivada na view (`@starters.size + @items.size`, mesmo dado
+  do `Arquivo · N`), sem tocar `server.rb`; labels viram `.field` com `label for`/`id` próprios.
+- **Pills (C3):** estados explícitos `pill--empty|stale|ready|danger` (só classe + texto).
+- **Pcard (C4):** `.pcard-meta` em flex; `margin-top` legado do `.pcard-add` neutralizado
+  apenas dentro do `.pcard-meta`.
+- **CSS:** tudo dentro do bloco novo delimitado `UI polish (0083): inicio … fim`, antes do
+  `fim` do bloco ODS (0072); blocos `0077`/`0078`/`0079` intocados, nenhum whitespace fora do bloco.
+- **Fora do escopo (não tocado):** `lib/`, `server.rb`, `db/`, rotas, `SESSIONS.md`/`REQUIREMENTS.md`,
+  §7 (validação do usuário) e `reviews/`.
+- **Notas de execução:** `git diff --stat -- lib/ db/ config/` vazio (G2); `TODO.md` teve o item
+  `T1` (fechar 0077) removido — critério já cumprido.
 
 ## 9. Gotchas / Lições (memória — S6)
 
