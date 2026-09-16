@@ -148,6 +148,20 @@ Polimento visual das telas home/team/battle — header gate do CTA Batalhar, lab
   "Arquivo · N" (`pokemon_list`) seguem duplicados de propósito — `filter_param_present?`
   (`params.key?`) + `hx-include` mantêm os dois sincronizados e remover um deles era mudança
   de copy fora do escopo desta rodada. `@team_size.to_i.zero?` mantido: `.to_i` já cobre nil.
+- **Higiene do worktree (2026-09-16, pós-fase 2):** os runs de teste em `record: :new_episodes`
+  re-gravaram os 2 cassettes versionados (appends puros) e criaram cassettes novos untracked em
+  `test/cassettes/`. Os 2 versionados foram **restaurados** ao estado do HEAD (o contrato offline
+  válido é o commitado — o acúmulo era ruído de re-gravação, +21 860 linhas em um deles); os
+  untracked ficaram **intocados** (não adicionados ao git, apenas listados). **Correção de
+  redação:** o registro de que o VCR re-gravou "2 dos 4 cassettes do `b578cc9`" é impreciso —
+  apenas **1** dos modificados veio do `b578cc9`
+  (`ServerTeamRemoveHtmxTest/test_htmx_delete_team_removes_and_swaps_both_fragments.yml`);
+  `ServerHealJourneyGateTest/test_heal_released_after_journey_started.yml` veio do **`d28fb28`**.
+- **Limitação de escopo do assert de foco (`refute_match` do `:focus-visible`):** o
+  `test/layout_test.rb:148` casa apenas contra o trecho devolvido por `ui_polish_block`
+  (`test/layout_test.rb:223-226`, recorte entre `UI polish (0083): inicio … fim`); uma regra
+  `:focus-visible` anexada **fora** desse bloco passaria batido. Limitação conhecida e aceita
+  (o reforço seria casar também contra o arquivo inteiro) — **sem** alterar o teste nesta rodada.
 
 ## 9. Gotchas / Lições (memória — S6)
 
