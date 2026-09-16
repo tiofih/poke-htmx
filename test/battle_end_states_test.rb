@@ -3,9 +3,11 @@
 require_relative "server_test_helpers"
 require_relative "battle_test_helpers"
 
-# Resíduo battle 1:1 (sessão 0078) — fim de batalha nos protótipos
-# open-design/battle-end-states.html + battle-results-desktop.html: res-screen,
-# state-card (4 estados), mini-arena (frow), res-top/state-title (desktop).
+# Resíduo battle 1:1 (sessão 0078) — fim de batalha no protótipo
+# open-design/battle-end-states.html: res-screen, state-card (4 estados),
+# mini-arena (frow), result-card (rewards/CTAs).
+# Revisão S7: a variante res-top/state-title do battle-results-desktop foi
+# descartada (compunha com a state-card e duplicava pill + título).
 # Motor só leitura: winner nil = empate, @game_over do journey.
 class BattleEndStatesTest < Minitest::Test
   include ServerTestHelpers
@@ -63,19 +65,47 @@ class BattleEndStatesTest < Minitest::Test
     refute_includes body, "Novo confronto", "game over hides new confront"
   end
 
-  def test_results_desktop
+  def test_results_card_rewards
     start_battle_for("user-a")
     finish_battle
 
     body = last_response.body
-    assert_match(/class="res-top"/, body, "expected .res-top result bar (desktop)")
-    assert_match(/class="res-top-left"/, body, "expected .res-top-left pill + title")
-    assert_match(/class="state-title"/, body, "expected .state-title with winner + rewards")
-    assert_match(/class="rewards"/, body, "rewards with XP/money preserved")
+    assert_equal 1, body.scan('class="state-pill ').size,
+                 "0078 A-1: um único .state-pill no fim (sem res-top duplicando pill/título)"
+    refute_match(/class="res-top/, body,
+                 "0078 A-1: a variante res-top (results-desktop) não compõe a tela")
+    assert_match(/<div class="result-card">.*?<p class="rewards">.*?<div class="ctas">/m, body,
+                 "C2: rewards dentro do .result-card (padrão battle-end-states.html)")
+    assert_includes body, "Vencedor:", "winner banner text preserved"
     assert_match(/data-side="0"/, body, "player column keeps data-side=0")
     assert_match(/data-side="1"/, body, "opponent column keeps data-side=1")
     assert_includes body, 'hx-post="/battle/new"', "new confront posts to /battle/new"
     assert_includes body, 'hx-target="#battle-view"', "fragment swaps into #battle-view"
+  end
+
+  # 0078 A-4: "derrotado" deriva de fainted?, não do hp_percent arredondado —
+  # hp 1/300 arredonda para 0% mas o pokémon está vivo.
+  def test_lost_follows_fainted_not_rounded_hp
+    grazed = BattlePokemon.new(
+      number: 1, name: "grazed", types: ["normal"],
+      stats: [{ name: "HP", value: 300 }, { name: "Attack", value: 50 },
+              { name: "Defense", value: 1 }, { name: "Speed", value: 50 }],
+      hp_max: 300, hp_current: 1, moves: []
+    )
+    koed = build_pokemon(number: 2, name: "koed", hp: 0)
+    engine = BattleEngine.new(team_a: [grazed], team_b: [koed])
+    engine.play_round until engine.finished?
+    Server.settings.battles.set("user-a", engine)
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    rows = last_response.body.scan(%r{<li class="frow[^"]*">.*?</li>}m)
+    grazed_row = rows.find { |row| row.include?("grazed") }
+    koed_row = rows.find { |row| row.include?("koed") }
+    refute_nil grazed_row, "expected the grazed fighter row"
+    refute_nil koed_row, "expected the koed fighter row"
+    refute_includes grazed_row, " lost", "hp 1/300 vivo não pode virar 'lost' (A-4)"
+    assert_includes koed_row, " lost", "fainted continua marcando 'lost'"
   end
 
   private

@@ -64,11 +64,12 @@ class DesignSystemTest < Minitest::Test
 
     refute_nil block, "expected a delimited Open Design System block in style.css"
 
-    # Classes do fim de batalha (sessão 0078, C3): res-screen/res-top do
-    # battle-results-desktop.html + state-card/mini-arena/result-card do
-    # battle-end-states.html — aditivas, antes da linha fim.
+    # Classes do fim de batalha (sessão 0078, C3): state-card/mini-arena/
+    # result-card do battle-end-states.html — aditivas, antes da linha fim.
+    # A variante res-top/state-title (results-desktop) foi descartada na
+    # revisão S7 por compor com a state-card e duplicar pill + título.
     %w[
-      res-screen res-top res-top-left state-title
+      res-screen
       state-card state-head state-pill
       mini-arena mini-side-title fighter-rows frow
       result-card
@@ -76,6 +77,10 @@ class DesignSystemTest < Minitest::Test
       assert_match(/\.#{Regexp.escape(klass)}\b/, block,
                    "expected design system block to define .#{klass}")
     end
+
+    assert_match(%r{/\* === Battle 1:1 \(0078\)}, block,
+                 "expected the 0078 delimiter marking the additive block (C3)")
+    refute_match(/\.res-top\b/, block, "A-1: sem regra órfã da variante res-top")
   end
 
   def test_design_system_battle_screen_classes

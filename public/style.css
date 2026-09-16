@@ -1752,18 +1752,13 @@ li.fighter {
 	padding: 8px 10px;
 }
 
-/* === Battle 1:1 (0078) — fim de batalha: res-screen/res-top do prototipo
-   open-design/battle-results-desktop.html + state-card/mini-arena/result-card do
-   open-design/battle-end-states.html. Aditivo; .arena/.fighters/.result/.ctas
-   existentes (0074) nao sao redefinidos. === */
+/* === Battle 1:1 (0078) — fim de batalha: res-screen + state-card/mini-arena/
+   result-card do prototipo open-design/battle-end-states.html. Aditivo;
+   .arena/.fighters/.result/.ctas existentes (0074) nao sao redefinidos.
+   A variante res-top/state-title do battle-results-desktop foi descartada na
+   revisao S7 (A-1): compunha com a state-card e duplicava pill + titulo. === */
 .res-screen { padding: 26px 0 40px; border-top: 1px solid var(--border); }
 .res-screen:first-of-type { border-top: 0; padding-top: 0; }
-.res-top { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px 24px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
-.res-top-left { display: flex; align-items: center; gap: 16px; }
-.res-top .ctas { display: flex; gap: 10px; flex-wrap: wrap; }
-.state-title h2 { font-size: 19px; }
-.state-title .rewards { margin: 5px 0 0; color: var(--muted); font-size: 13.5px; }
-.state-title .rewards strong { color: var(--ok); }
 .state-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px; display: flex; flex-direction: column; gap: 18px; }
 .state-head { display: flex; align-items: center; gap: 12px; margin-bottom: 2px; order: 0; }
 .state-head h2 { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; }
@@ -1775,7 +1770,6 @@ li.fighter {
 .mini-arena { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap-md); order: 2; }
 @media (max-width: 600px) { .mini-arena { grid-template-columns: 1fr; } }
 .mini-side-title { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-.side-title { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
 .fighter-rows { list-style: none; margin: 0; padding: 0; }
 .frow { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-top: 1px solid var(--border); }
 .frow:first-child { border-top: 0; }

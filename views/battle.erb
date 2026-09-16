@@ -97,12 +97,6 @@
                 <h2><%= end_title %></h2>
                 <label for="res-dismiss" class="modal-close" data-od-id="res-close" aria-label="Fechar">×</label>
               </div>
-            <div class="res-top">
-              <div class="res-top-left">
-                <span class="state-pill <%= end_state %>"><%= end_label %></span>
-                <div class="state-title"><h2><%= winner_name ? "Vencedor: #{winner_name}" : end_title %></h2></div>
-              </div>
-            </div>
             <section class="state-card" data-od-id="end-<%= end_slug %>">
               <div class="state-head"><span class="state-pill <%= end_state %>"><%= end_label %></span><h2><%= end_title %></h2></div>
               <div class="mini-arena">
@@ -113,7 +107,7 @@
                       <% @engine.teams[side].each do |poke| %>
                         <% fighter = FighterPresenter.new(poke) %>
                         <% hp_fill = { high: "ok", medium: "warn", low: "danger" }.fetch(fighter.hp_tier, "ok") %>
-                        <li class="frow<%= " lost" if fighter.hp_percent.zero? %>">
+                        <li class="frow<%= " lost" if poke.fainted? %>">
                           <span class="th"><img src="<%= fighter.sprite %>" alt="<%= fighter.alt %>"></span>
                           <span class="fid"><span class="fn"><%= fighter.name %><span class="ft"><% fighter.types.each do |tag| %><span class="ftg" style="background:var(--t-<%= tag %>)"><%= tag %></span><% end %></span></span></span>
                           <span class="hp"><span class="bg"><span class="fill" style="width:<%= fighter.hp_percent %>%;background:var(--<%= hp_fill %>)"></span></span><span class="lbl"><%= fighter.hp_label %></span></span>

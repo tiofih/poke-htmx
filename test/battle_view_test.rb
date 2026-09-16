@@ -358,21 +358,6 @@ class BattleViewTest < Minitest::Test
                     "render full sem golpe corrente omite data-move-type (Passo 29)"
   end
 
-  def test_battle_end_uses_results_desktop_markup
-    start_battle_for("user-a")
-    play_until_finish
-
-    assert last_response.ok?
-    body = last_response.body
-    assert_match(/class="[^"]*res-screen[^"]*"/, body, "expected .res-screen wrapping the battle end")
-    assert_match(/class="res-top"/, body, "expected .res-top result bar (desktop)")
-    assert_match(/class="state-title"/, body, "expected .state-title with winner")
-    assert_match(/class="state-card"/, body, "expected .state-card for the end state")
-    assert_match(/class="mini-arena"/, body, "expected .mini-arena with both sides")
-    assert_match(/<li class="frow[ "]/, body, "expected li.frow rows per fighter")
-    assert_match(/class="result-card"/, body, "expected .result-card with winner + rewards")
-  end
-
   def test_battle_result_gated_modal_after_log
     start_battle_for("user-a")
     play_until_finish
