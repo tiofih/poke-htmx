@@ -5,7 +5,7 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — escolhas do usuário em 2026-09-09 (fatiamento por tela, deslizamento 0077-0079→resíduo / 0080-0082→estabilidade, fidelidade híbrida, backend thin listado, S1 com 1 teste novo + extensões — ver seção 5) |
-| Implementação (fase 2, TDD) | Pendente |
+| Implementação (fase 2, TDD) | **Concluída em 2026-09-09** — Passos 1–5: `ea7192a` (C4/teste `home_residue_test.rb`), `a00db99` (`heal-list`/`heal-item`/`mart-name`/`item-icon`), `2671204` (`stat-grid`/`mv-row`/`evo-row`/`equip-row`), `d0832bf` (`pcard-meta`/`tag-row`), `d922add` (Passo 5 — resíduo home fechado + §9) |
 | Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
 
 ---
@@ -132,9 +132,14 @@ Portar o **resíduo da home** do protótipo `open-design/home-team.html` (50KB, 
   nos golpes manteve-se o rótulo plano (menos churn que reescrever asserts).
 - **`form=` externo não é serializado pelo htmx:** select de item/segurável precisa
   ficar DENTRO do form (classe `equip-row` foi para o form).
-- **`style.css` não commitado:** reformat alheio (1129+/1003-, neutro) + bloco 0077 +
-  remoção do legado `evolution-*` (0068) seguem no working tree; commits da sessão
-  cobrem só views/testes/server.rb. Decisão de commit do CSS é do usuário (fase 3).
+- **`style.css` não commitado pelos commits da 0077:** o bloco `Home 1:1 (0077)` só
+  entrou no git em `4f1538c` (2026-09-11), junto de um commit cuja mensagem é da
+  **sessão 0086** (sweep de CSS sujo) — não é commit da 0077. Os 5 commits da 0077
+  cobrem só views/testes/`server.rb`.
+- **Estado real da sessão:** fase 2 concluída em 2026-09-09 (4 runs / 110 assertions
+  verdes em `test/home_residue_test.rb`), mas a sessão **não passou por Revisor (S7)
+  nem por validação do usuário** (não existe artefato em `reviews/`; §7 segue com as
+  evidências em branco). Aguarda ambos.
 - **Baseline medido (one-off, sem Puma):** 1068/5033 + 1 falha (`battle_end_states`,
   escopo 0078 em progresso paralelo); fim da fase 2: **1075/5204, 0 falhas**.
   (+7 runs: C4, C1, C2, catalog_cards, catalog_detail + 2 home_view).
