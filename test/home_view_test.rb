@@ -44,6 +44,34 @@ class HomeViewTest < Minitest::Test
                     "expected Limpar filtros to reset the team filter"
   end
 
+  # 0083 C2: filtros com labels visiveis + contagem de resultados; em 360px a
+  # grade colapsa para 1 coluna (sem scroll-x) e cada select vive num .field.
+  def test_filter_labels_count_no_overflow
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/"
+    end
+
+    assert last_response.ok?
+    body = last_response.body
+    {
+      "type" => "Tipo", "generation" => "Geração", "tier" => "Tier",
+      "cost_max" => "Custo máx", "sort" => "Ordenação", "team" => "Disponibilidade"
+    }.each do |name, label|
+      assert_match(%r{<label for="filter-#{name}">#{label}</label>}, body,
+                   "filtro #{name} precisa de label visivel (C2)")
+    end
+    assert_match(%r{<span class="filter-count[^"]*"[^>]*>Resultados · \d+</span>}, body,
+                 "contagem de resultados visivel nos filtros (C2)")
+
+    style = File.read(File.join(__dir__, "../public/style.css"))
+    block = style[/UI polish \(0083\): inicio.*?UI polish \(0083\): fim/m]
+    refute_nil block, "expected a delimited 0083 UI polish block in style.css"
+    assert_match(/\.filter-grid\s*\.field[^}]*margin-bottom:\s*0/m, block,
+                 "cada select dentro de um .field, sem empilhar margem (C2)")
+    assert_match(/@media\s*\(max-width:\s*360px\)[\s\S]*?\.filter-grid[^}]*grid-template-columns:\s*1fr;/m, block,
+                 "360px: grade de filtros em 1 coluna, sem overflow horizontal (C2)")
+  end
+
   def test_home_app_head_lead_meter_catalog
     PokeApiStub.with_all_names(two_hundred_fifty_names) do
       PokeApiStub.with_find(build_pokemon_record("pokemon1", 1)) do
