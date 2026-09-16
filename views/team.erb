@@ -14,9 +14,13 @@
 <div class="card">
   <div class="row-between">
     <h2>Seu time</h2>
-    <span class="pill<%= " warn" if @journey_started && @can_battle == false %><%= " danger" if @game_over %>" id="readiness-pill">
-      <%= @game_over ? "Game over" : (@can_battle ? "Pronto p/ batalhar" : "Precisa de cura") %>
-    </span>
+    <%
+      # 0083 C3 — estados da pill separados: vazio (neutro) / stale (precisa de cura)
+      # / ready (verde) / danger (game over). So classe+texto; nenhuma regra nova.
+      pill_mod = if @game_over then "danger" elsif @team.empty? then "empty" elsif @can_battle then "ready" else "stale" end
+      pill_text = if @game_over then "Game over" elsif @team.empty? then "Time vazio" elsif @can_battle then "Pronto p/ batalhar" else "Precisa de cura" end
+    %>
+    <span class="pill pill--<%= pill_mod %>" id="readiness-pill"><%= pill_text %></span>
   </div>
   <ul class="roster roster-grid" id="roster" data-od-id="members">
     <% @team.each do |poke| %>

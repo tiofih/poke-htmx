@@ -63,13 +63,81 @@ class HomeViewTest < Minitest::Test
     assert_match(%r{<span class="filter-count[^"]*"[^>]*>Resultados · \d+</span>}, body,
                  "contagem de resultados visivel nos filtros (C2)")
 
-    style = File.read(File.join(__dir__, "../public/style.css"))
-    block = style[/UI polish \(0083\): inicio.*?UI polish \(0083\): fim/m]
+    block = ui_polish_block
     refute_nil block, "expected a delimited 0083 UI polish block in style.css"
     assert_match(/\.filter-grid\s*\.field[^}]*margin-bottom:\s*0/m, block,
                  "cada select dentro de um .field, sem empilhar margem (C2)")
     assert_match(/@media\s*\(max-width:\s*360px\)[\s\S]*?\.filter-grid[^}]*grid-template-columns:\s*1fr;/m, block,
                  "360px: grade de filtros em 1 coluna, sem overflow horizontal (C2)")
+  end
+
+  # 0083 C3: a pill de prontidao separa time VAZIO (empty, neutra) de time que
+  # PRECISA de cura (stale) — antes o time vazio tambem dizia "Precisa de cura".
+  def test_team_empty_stale_pills
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("pill-empty")
+    end
+    body = last_response.body
+    assert_match(%r{<span class="pill pill--empty" id="readiness-pill">Time vazio</span>}, body,
+                 "time vazio: pill empty dedicada (C3)")
+
+    # 5 membros: time incompleto (journey nao started?) -> stale, sem game over.
+    fill_team("pill-stale", members: DEFAULT_TEAM_SPECS[0, 5])
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("pill-stale")
+    end
+    body = last_response.body
+    assert_match(%r{<span class="pill pill--stale" id="readiness-pill">Precisa de cura</span>}, body,
+                 "time invalido: pill stale (C3)")
+
+    fill_team("pill-ready")
+    PokeApiStub.with_all_names(two_hundred_fifty_names) do
+      get "/", {}, user_session("pill-ready")
+    end
+    body = last_response.body
+    assert_match(%r{<span class="pill pill--ready" id="readiness-pill">Pronto p/ batalhar</span>}, body,
+                 "time pronto: pill ready (C3)")
+
+    block = ui_polish_block
+    refute_nil block, "expected a delimited 0083 UI polish block in style.css"
+    assert_match(/\.pill--empty\s*\{[^}]*background:\s*var\(--fg-soft\)/m, block,
+                 "pill empty neutra, distinta da stale (C3)")
+    assert_match(/\.pill--stale\s*\{[^}]*background:\s*var\(--warn\)/m, block,
+                 "pill stale no tom de atencao (C3)")
+  end
+
+  # 0083 C4: .pcard-meta vira flex (custo a esquerda, + a direita) — antes o
+  # botao caia embaixo do custo por ser filho de bloco.
+  def test_pcard_meta_flex_add_position
+    names = %w[charmander]
+    find_map = {
+      "charmander" => Pokemon.new(name: "charmander", sprite: "s", number: 4, types: %w[fire])
+    }
+    forms = names.to_h { |name| [name, true] }
+    PokeApiStub.with_all_names(names) do
+      PokeApiStub.with_find(find_map) do
+        PokeApiStub.with_base_forms(forms) do
+          get "/pokemons"
+        end
+      end
+    end
+
+    assert last_response.ok?
+    meta = last_response.body[%r{<div class="pcard-meta">.*?</div>}m]
+    refute_nil meta, "expected .pcard-meta no card do catalogo"
+    assert_match(/<form[^>]*>\s*<input[^>]*name="pokeName"/, meta,
+                 "o form de adicionar vive no .pcard-meta (C4)")
+    assert_match(/<button type="submit" class="pcard-add"/, meta,
+                 "o botao + vive no .pcard-meta (C4)")
+    cost = meta.index('class="poke-cost')
+    add = meta.index('class="pcard-add')
+    assert cost.nil? || cost < add, "custo antes do + no .pcard-meta (C4)"
+
+    block = ui_polish_block
+    refute_nil block, "expected a delimited 0083 UI polish block in style.css"
+    assert_match(/\.pcard-meta\s*\{[^}]*display:\s*flex/m, block, ".pcard-meta em flex (C4)")
+    assert_match(/\.pcard-meta\s*\{[^}]*justify-content:\s*space-between/m, block,
+                 "custo a esquerda, + a direita (C4)")
   end
 
   def test_home_app_head_lead_meter_catalog
@@ -178,5 +246,11 @@ class HomeViewTest < Minitest::Test
                  "expected evolution links to keep htmx targets")
     assert_includes body, %(hx-post="/team")
     refute_includes body, "onclick"
+  end
+
+  # Bloco CSS delimitado da sessao 0083 (C2/C3/C4) — visual-only.
+  def ui_polish_block
+    style = File.read(File.join(__dir__, "../public/style.css"))
+    style[/UI polish \(0083\): inicio.*?UI polish \(0083\): fim/m]
   end
 end
