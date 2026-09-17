@@ -78,6 +78,35 @@ class BattleEndStatesTest < Minitest::Test
     refute_includes rewards, "ganhou", "nunca a copy de vitoria quando o oponente venceu"
   end
 
+  # Rodada 2 (0089 review): game over por KO duplo e EMPATE — o state e "over"
+  # (sem dinheiro para curar) mas o resultado real da ultima batalha foi empate.
+  # A copy de recompensa nao pode dizer "Derrota".
+  def test_game_over_draw_reward_copy_says_draw
+    body = finish_broke_and_draw
+
+    assert_match(/class="state-pill over"/, body, "game over continua marcado")
+    rewards = body[%r{<p class="rewards">.*?</p>}m].to_s
+    refute_empty rewards, "recompensa de participacao presente no fim"
+    assert_includes rewards, "Empate", "KO duplo (winner nil) => Empate, nao Derrota"
+    refute_includes rewards, "Derrota", "game over nao transforma empate em derrota"
+  end
+
+  # Rodada 2 (0089 review): a sentenca inteira sai do presenter (fonte unica),
+  # byte-identica ao texto que as views montavam antes da extracao.
+  def test_reward_sentence_is_byte_identical
+    win = BattleEndStatePresenter.new(Struct.new(:winner).new(0), game_over: false)
+    loss = BattleEndStatePresenter.new(Struct.new(:winner).new(1), game_over: false)
+    draw = BattleEndStatePresenter.new(Struct.new(:winner).new(nil), game_over: false)
+
+    assert_equal "Seu Time ganhou 10 XP por Pokémon e +¥40.",
+                 win.reward_sentence(xp_gained: 10, money_gained: 40)
+    assert_equal "Derrota — +10 XP por Pokémon.",
+                 loss.reward_sentence(xp_gained: 10, money_gained: nil)
+    assert_equal "Empate — +10 XP por Pokémon.",
+                 draw.reward_sentence(xp_gained: 10, money_gained: nil)
+    assert_nil loss.reward_sentence(xp_gained: 0, money_gained: nil)
+  end
+
   def test_results_card_rewards
     start_battle_for("user-a")
     finish_battle
@@ -153,6 +182,21 @@ class BattleEndStatesTest < Minitest::Test
   end
 
   def finish_draw
+    fainted_a = build_pokemon(number: 1, name: "drawee-a", hp: 0, attack: 1, defense: 1, speed: 1)
+    fainted_b = build_pokemon(number: 2, name: "drawee-b", hp: 0, attack: 1, defense: 1, speed: 1)
+    engine = BattleEngine.new(team_a: [fainted_a], team_b: [fainted_b])
+    Server.settings.battles.set("user-a", engine)
+    post "/battle/play", {}, user_session("user-a")
+
+    assert last_response.ok?
+    last_response.body
+  end
+
+  def finish_broke_and_draw
+    TestDatabase.clear_team!
+    fill_team("user-a")
+    @repository.all("user-a").each { |member| @progression.update_hp("user-a", member.id, 200, 0) }
+
     fainted_a = build_pokemon(number: 1, name: "drawee-a", hp: 0, attack: 1, defense: 1, speed: 1)
     fainted_b = build_pokemon(number: 2, name: "drawee-b", hp: 0, attack: 1, defense: 1, speed: 1)
     engine = BattleEngine.new(team_a: [fainted_a], team_b: [fainted_b])

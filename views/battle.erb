@@ -122,12 +122,9 @@
             <% else %>
               <p class="winner-badge"><strong><%= end_state.title %></strong></p>
             <% end %>
-            <% if @xp_gained.to_i.positive? %>
-              <% if end_state.reward_lead %>
-                <p class="rewards"><strong><%= end_state.reward_lead %> — +<%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
-              <% else %>
-                <p class="rewards"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
-              <% end %>
+            <% rewards = end_state.reward_sentence(xp_gained: @xp_gained, money_gained: @money_gained) %>
+            <% if rewards %>
+                <p class="rewards"><strong><%= rewards %></strong></p>
             <% end %>
             <% if defined?(@evolution_news) && !@evolution_news&.empty? %>
               <ul class="evolution-news news--pop">

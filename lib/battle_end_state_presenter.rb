@@ -14,11 +14,6 @@ class BattleEndStatePresenter
     "over" => { slug: "gameover", label: "Game Over", title: "Sem dinheiro para curar" }
   }.freeze
 
-  # Lead da copy de recompensa por estado; ausente (vitoria) => copy "ganhou".
-  # over e loss partilham "Derrota" mesmo com badges diferentes (badge usa o
-  # vencedor real do engine).
-  REWARD_LEADS = { "loss" => "Derrota", "over" => "Derrota", "draw" => "Empate" }.freeze
-
   def initialize(engine, game_over:)
     @engine = engine
     @game_over = game_over
@@ -49,7 +44,24 @@ class BattleEndStatePresenter
     @engine.winner.zero? ? "Seu Time" : "Oponente"
   end
 
+  # Lead da copy derivado do RESULTADO real da ultima batalha, nao do state:
+  # vitoria => nil (copy "ganhou"); empate (KO duplo) => "Empate"; oponente
+  # venceu => "Derrota" — inclusive no game over, onde o state e "over" mas o
+  # resultado pode ter sido derrota ou empate. Rotulos vem de STATES (fonte unica).
   def reward_lead
-    REWARD_LEADS[state]
+    return nil if @engine.winner&.zero?
+
+    @engine.winner.nil? ? STATES.fetch("draw")[:label] : STATES.fetch("loss")[:label]
+  end
+
+  # Sentenca completa da recompensa (fonte unica dos dois views): devolve nil
+  # quando nao houve XP, senao o texto final montado.
+  def reward_sentence(xp_gained:, money_gained:)
+    xp = xp_gained.to_i
+    return nil unless xp.positive?
+
+    tail = money_gained ? " e +¥#{money_gained}." : "."
+    lead = reward_lead
+    lead ? "#{lead} — +#{xp} XP por Pokémon#{tail}" : "Seu Time ganhou #{xp} XP por Pokémon#{tail}"
   end
 end
