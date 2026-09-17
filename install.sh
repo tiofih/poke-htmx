@@ -15,16 +15,22 @@ usage() {
 Uso: sdd/install.sh [DIR_ALVO] [opções]
 
 Instala o framework SDD no projeto em DIR_ALVO (default: diretório atual).
-Cria/atualiza: REQUIREMENTS.md, SESSIONS.md, STACK.md, sessions/ (template.md +
-sessão 0001) e os scripts de apoio em scripts/ (check_docs, levantar-roadmap,
-iniciar-sessao, levantar-sessao, levantar-requisito, levantar-testes, checar-sessao,
-resumo-commit), e anexa as regras em AGENTS.md.
+Cria se faltarem (e NUNCA sobrescreve, nem com --force): REQUIREMENTS.md, SESSIONS.md,
+STACK.md, sessions/template.md e os arquivos de .opencode/ (agentes de papel, comando
+/sessao e skill sdd).
+Cria: sessions/ (a sessão 0001 só num projeto que ainda não tem sessões) e os scripts
+de apoio em scripts/ (check_docs, levantar-roadmap, iniciar-sessao, levantar-sessao,
+levantar-requisito, levantar-testes, checar-sessao, resumo-commit), e anexa as regras
+em AGENTS.md.
 
 Opções:
   --projeto "Nome"    nome do projeto ({PROJETO}; default: basename do DIR_ALVO)
   --proxima "texto"   texto da seção "Próxima sessão" (default: "0001 — Incremento inicial")
   --primeira "nome"   nome da 1ª sessão (default: "Incremento inicial")
-  --force             sobrescreve arquivos existentes
+  --force             sobrescreve os arquivos do kit já existentes — exceto
+                      REQUIREMENTS.md, SESSIONS.md, STACK.md, AGENTS.md,
+                      sessions/template.md e .opencode/**, que são create-only
+                      (criados se faltarem, nunca sobrescritos)
   --no-agents         não altera o AGENTS.md
   --with-indexing     instala tooling/INDEX-FIRST.md + adapters/graphify-cbm-zvec.md (opt-in)
   --with-context-mode instala tooling/adapters/context-mode.md + adapters/ai-memory.md (opt-in)
@@ -158,10 +164,40 @@ install_file() { # src dst [key=value ...]
   render "$src" "$dst" "$@"
 }
 
+# Create-only: cria se faltar, NUNCA sobrescreve (nem com --force). O destino é conteúdo
+# do PROJETO depois da primeira instalação (slots de prosa preenchidos à mão, adaptação
+# local dos papéis/comandos), e o --force o reverteria para o texto neutro do kit. Efeito
+# colateral aceito: melhorias futuras do kit nesses arquivos NÃO chegam sozinhas — o
+# projeto faz o merge à mão (o `sdd/` fica no repo via subtree justamente para isso).
+install_create_only() { # src dst [key=value ...]
+  local src="$1" dst="$2"
+  shift 2
+  if [ -e "$dst" ]; then
+    echo "install> já existe, mantendo: $dst (template em ${src#"$SCRIPT_DIR"/})"
+    return
+  fi
+  echo "install> criando: $dst"
+  render "$src" "$dst" "$@"
+}
+
 # --- artefatos do projeto ---
 mkdir -p "$TARGET/sessions"
-install_file "$SKELETON_DIR/REQUIREMENTS.md" "$TARGET/REQUIREMENTS.md"
-install_file "$SKELETON_DIR/SESSIONS.md" "$TARGET/SESSIONS.md"
+# REQUIREMENTS.md/SESSIONS.md são do usuário depois da primeira instalação: é onde ele
+# escreve os requisitos reais e o histórico das sessões. Mesmo tratamento do STACK.md
+# (abaixo): cria se faltar, mas NUNCA sobrescreve — nem com --force, que trocava os
+# arquivos maduros pelos stubs do skeleton (perda de requisitos e de histórico).
+if [ ! -e "$TARGET/REQUIREMENTS.md" ]; then
+  echo "install> criando: $TARGET/REQUIREMENTS.md"
+  render "$SKELETON_DIR/REQUIREMENTS.md" "$TARGET/REQUIREMENTS.md"
+else
+  echo "install> já existe, mantendo: $TARGET/REQUIREMENTS.md (template em skeleton/REQUIREMENTS.md)"
+fi
+if [ ! -e "$TARGET/SESSIONS.md" ]; then
+  echo "install> criando: $TARGET/SESSIONS.md"
+  render "$SKELETON_DIR/SESSIONS.md" "$TARGET/SESSIONS.md"
+else
+  echo "install> já existe, mantendo: $TARGET/SESSIONS.md (template em skeleton/SESSIONS.md)"
+fi
 # STACK.md é default (não opt-in): o skeleton delega a ele ("conforme o STACK.md"),
 # então instalá-lo só com --with-stack deixava AGENTS.md/agents apontando para um
 # arquivo inexistente. Cria se faltar, mas NUNCA sobrescreve — nem com --force,
@@ -172,12 +208,27 @@ if [ ! -e "$TARGET/STACK.md" ]; then
 else
   echo "install> já existe, mantendo: $TARGET/STACK.md (template em skeleton/STACK.md)"
 fi
-# template.md fica como referência (NNNN/NOME/DATA/slug permanecem placeholders)
-install_file "$SKELETON_DIR/sessions/template.md" "$TARGET/sessions/template.md"
-# primeira sessão já instanciada (check_docs precisa dela + da linha 0001)
-install_file "$SKELETON_DIR/sessions/template.md" \
-  "$TARGET/sessions/0001-primeiro-incremento.md" \
-  "NNNN=0001" "NOME=$PRIMEIRA" "DATA=$TODAY" "slug=primeiro-incremento"
+# template.md: create-only, como os quatro acima. A usage documenta que os slots de prosa
+# dele são preenchidos À MÃO, por projeto — então o --force revertia texto do próprio
+# projeto (2 slots preenchidos → 0). Trade-off aceito: melhorias do kit no template não
+# chegam sozinhas ao projeto (merge à mão). Se um dia o kit precisar de trecho de template
+# que DEVE refrescar, use o padrão que o --with-pr já usa nesta linha: bloco delimitado por
+# marcador (`<!-- sdd-pr:bloco -->`) anexado ao fim, sem tocar na prosa acima.
+install_create_only "$SKELETON_DIR/sessions/template.md" "$TARGET/sessions/template.md"
+# primeira sessão já instanciada (check_docs precisa dela + da linha 0001) — mas só num
+# projeto que ainda não tem sessões: num repo maduro a 0001 nasceria órfã, sem linha na
+# tabela do SESSIONS.md, e ainda mexeria com a S5c, que exige a MAIOR sessão na seção
+# "Próxima sessão". Condição = a MESMA glob que o check_docs usa para achar sessões.
+created_0001=0
+existing_sessions=("$TARGET/sessions"/[0-9][0-9][0-9][0-9]-*.md)
+if [ ! -e "${existing_sessions[0]}" ]; then
+  install_file "$SKELETON_DIR/sessions/template.md" \
+    "$TARGET/sessions/0001-primeiro-incremento.md" \
+    "NNNN=0001" "NOME=$PRIMEIRA" "DATA=$TODAY" "slug=primeiro-incremento"
+  created_0001=1
+else
+  echo "install> já existem sessões, não criando a 0001: $TARGET/sessions/ (template em skeleton/sessions/)"
+fi
 
 mkdir -p "$TARGET/scripts"
 for s in check_docs levantar-roadmap iniciar-sessao levantar-sessao \
@@ -187,15 +238,20 @@ for s in check_docs levantar-roadmap iniciar-sessao levantar-sessao \
 done
 
 # --- agents de papel (subagents do opencode) ---
+# .opencode/** é create-only: num consumidor real esses arquivos carregam adaptação pesada
+# que o kit neutro não tem (papel extra, prompt orquestrador, protocolo graph-first,
+# model/permission por agente). O --force ali não é update, é REGRESSÃO — troca o arquivo
+# adaptado pelo default do kit. Trade-off: melhoria do kit nos defaults dos papéis passa a
+# exigir merge à mão.
 mkdir -p "$TARGET/.opencode/agent"
 for a in refinador implementador-teste revisor playtester; do
-  install_file "$SKELETON_DIR/agents/$a.md" "$TARGET/.opencode/agent/$a.md"
+  install_create_only "$SKELETON_DIR/agents/$a.md" "$TARGET/.opencode/agent/$a.md"
 done
 
 # --- command orquestrador de sessão + skill sdd ---
 mkdir -p "$TARGET/.opencode/commands" "$TARGET/.opencode/skills/sdd"
-install_file "$SKELETON_DIR/commands/sessao.md" "$TARGET/.opencode/commands/sessao.md"
-install_file "$SKELETON_DIR/skills/sdd/SKILL.md" "$TARGET/.opencode/skills/sdd/SKILL.md"
+install_create_only "$SKELETON_DIR/commands/sessao.md" "$TARGET/.opencode/commands/sessao.md"
+install_create_only "$SKELETON_DIR/skills/sdd/SKILL.md" "$TARGET/.opencode/skills/sdd/SKILL.md"
 
 # --- perfis opt-in (default off = comportamento atual) ---
 if [ "$WITH_INDEXING" -eq 1 ]; then
@@ -217,10 +273,10 @@ if [ "$WITH_STACK" -eq 1 ]; then
 fi
 
 if [ "$WITH_EXTRA_COMMANDS" -eq 1 ]; then
-  install_file "$SKELETON_DIR/commands/iniciar-sessao.md" "$TARGET/.opencode/commands/iniciar-sessao.md"
-  install_file "$SKELETON_DIR/commands/levantar-roadmap.md" "$TARGET/.opencode/commands/levantar-roadmap.md"
+  install_create_only "$SKELETON_DIR/commands/iniciar-sessao.md" "$TARGET/.opencode/commands/iniciar-sessao.md"
+  install_create_only "$SKELETON_DIR/commands/levantar-roadmap.md" "$TARGET/.opencode/commands/levantar-roadmap.md"
   mkdir -p "$TARGET/.opencode/agent/optional"
-  install_file "$SKELETON_DIR/agents/optional/debugger.md" "$TARGET/.opencode/agent/optional/debugger.md"
+  install_create_only "$SKELETON_DIR/agents/optional/debugger.md" "$TARGET/.opencode/agent/optional/debugger.md"
 fi
 
 # --- AGENTS.md: cria se faltar, ou anexa as regras de workflow (idempotente) ---
@@ -328,7 +384,13 @@ if [ "$WITH_PR" -eq 1 ] && [ -x "$TARGET/scripts/checar-pr" ]; then
 fi
 
 echo "install> SDD instalado em $TARGET (projeto '$PROJETO')."
-echo "install> Próximo: edite REQUIREMENTS.md (Visão/Stack), refine a sessão 0001 em sessions/0001-primeiro-incremento.md e commit o refinamento atualizando SESSIONS.md (S4)."
+# A instrução depende do que ESTA execução fez: num projeto maduro a 0001 não é criada, e
+# apontar para ela mandava editar um arquivo que não existe.
+if [ "$created_0001" -eq 1 ]; then
+  echo "install> Próximo: edite REQUIREMENTS.md (Visão/Stack), refine a sessão 0001 em sessions/0001-primeiro-incremento.md e commit o refinamento atualizando SESSIONS.md (S4)."
+else
+  echo "install> Próximo: abra a sessão da seção 'Próxima sessão' do SESSIONS.md (é um refresh — a 0001 não foi criada) e commit o refinamento atualizando o SESSIONS.md (S4)."
+fi
 
 # Última saída do install: o modo PR sem o marcador em AGENTS.md é inerte, e o usuário
 # não pode descobrir isso só quando o checar-pr falhar.
