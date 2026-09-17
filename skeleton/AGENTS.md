@@ -14,8 +14,9 @@
 ## SDD — robustez do fluxo (regras do processo)
 
 - **S1 — Critérios apontam os testes que os provam.** Cada critério de aceite (seções
-  "Resultado"/"Garantias" do arquivo da sessão) referencia o **teste (arquivo/nome
-  Minitest)** que o prova; critério sem teste automatizado registra `manual` explícito.
+  "Resultado"/"Garantias" do arquivo da sessão) referencia o **teste (arquivo/nome)**
+  que o prova — no framework do projeto (ver `STACK.md`); critério sem teste
+  automatizado registra `manual` explícito.
   Fecha-se isso no **refinamento (fase 1)**, antes de codar.
 - **S2 — Validação é tabela por critério.** A fase 3 registra
   `critério | evidência automatizada | evidência manual | resultado (ok/nok)` — um
@@ -28,11 +29,12 @@
   sessão — inclusive sessões fora da fila.
 - **S5 — `./scripts/check_docs` valida a consistência.** Confere `sessions/` ↔ tabela de
   progresso do `SESSIONS.md` ↔ "Próxima sessão". Rodar ao fechar refinamento e validação.
-- **S6 — Memória da sessão (handoff + gotchas) na validação.** Ao fechar a fase 3, o
+- **S6 — Memória da sessão (handoff + gotchas) no Revisor APROVADO (fim da fase 2), SEM validação do usuário, SEM commit.** Com veredito `Aprovado`, o
   implementador grava **handoff** (`memory_handoff_begin` — o que foi entregue, perguntas
-  em aberto, próximos passos) e **gotchas** levantados na sessão (`memory_write_page` em
-  `gotchas/`), sempre escopados ao projeto corrente — para o próximo agente partir com
-  contexto e as lições virarem conhecimento duradouro.
+  em aberto, próximos passos, marcado `provisional:true`) e **gotchas** levantados na sessão
+  (`memory_write_page` em `gotchas/`, marcados `provisional:true`), sempre escopados ao projeto
+  corrente — sem aguardar a fase 3 e sem commitar a conclusão. A validação do usuário (fase 3)
+  só confirma/enriquece a memória, nunca bloqueia o save.
 - **S7 — Loop Implementador↔Revisor na fase 2c.** Ao fim da fase 2 (TDD), o **Revisor**
   devolve um **veredito fechado** (`Aprovado` | `Requer ajuste` + severidade). Se não aprovado,
   volta ao **Implementador**, que resolve os achados e re-commita; o Revisor re-revisa.
@@ -54,20 +56,22 @@
 ## Draft de ideias — anotar para fases futuras
 
 - **Ideias, refatorações e decisões de mudanças grandes** (identificadas em qualquer
-  fase da sessão) são **anotadas em `draft-*.md`** para serem **incluídas em fases
+  fase da sessão) são **anotadas em `{{DRAFT_PATH}}`** (o draft único e
+  consolidado — catálogo de feito/pendente) para serem **incluídas em fases
   futuras** — seja em uma fase específica mais adiante, seja quando todas as fases
   correntes/agendadas estiverem finalizadas.
 - O draft é **fora do fluxo** (não gera critérios de aceite nem plano TDD na hora).
   Registrar uma ideia no draft **não** abre novo escopo nem atrasa a sessão em curso.
 - Ao concluir as fases, o draft é **revisado**: o que entra vira sessão, o que não se
   aplica é descartado — decisão do usuário.
-- Convenção de commit para anotações do tipo: `Draft: <resumo do que foi anotado>`.
+- Convenção de commit para anotações do tipo: `Draft: <resumo do que foi anotado>`
+  (contexto `Draft:`, seguindo o formato de commit do projeto).
 
 ## Formato de commit (regra do projeto)
 
-- **Formato:** uma linha `Contexto: descrição concisa`. **Sem** prefixos genéricos
-  (`feat:`, `fix:`, `chore:`). Descrever o que mudou e por quê (resultado), não
-  "teste"/"implementação".
+- **Formato:** uma linha `Contexto: descrição concisa`, **com prefixo genérico
+  opcional** (`feat:`, `fix:`, `docs:`, `chore:` — ajuste a lista à convenção do
+  projeto). Descrever o que mudou e por quê (resultado), não "teste"/"implementação".
 - **Corpo opcional:** linha em branco + bullets para detalhar decisões.
 
 | Contexto | Quando usar | Exemplo |
@@ -79,6 +83,7 @@
 | `Sessao 00NN concluida: ...` | sessão fechada | `Sessao 0001 concluida: validacao integrada, proxima sessao 0002` |
 | `Regra: ...` | mudança de convenção/regra | `Regra: validacao e feita pelo usuario — parar na fase 3` |
 | `Draft: ...` | anotação de ideia/draft | `Draft: performance da gateway anotada` |
+| `Atualizar progresso da sessão 00NN (...)` | checkpoint de progresso | `Atualizar progresso da sessão 0001 (passo 4 verde e validado)` |
 
 > Substitua o bloco `# Projeto — índice rápido` (comandos do projeto, mapa de código,
 > armadilhas) pelo seu conteúdo específico — ele **não** faz parte do protocolo.

@@ -41,6 +41,12 @@ if [ "$IMPL" -ge 1 ] && [ "$VALID" -eq 0 ]; then
   warn "implementação concluída sem linha de Validação — validação é do usuário (fase 3), não marcar Done nem commitar a conclusão"
 fi
 
+# Modo PR (--with-pr): sem o marcador em AGENTS.md a regra S8 não existe (default intocado).
+if [ -f AGENTS.md ] && grep -qF '<!-- sdd-pr: ativo -->' AGENTS.md; then
+  grep -qE '^> Reprodução: (seed|script|manual|nao-aplicavel)$' "$F" ||
+    warn "modo PR ativo e a sessão $NUM não declara '> Reprodução: seed|script|manual|nao-aplicavel' (S8.3) — feche no refinamento"
+fi
+
 if [ "$FAIL" -eq 1 ]; then
   exit 1
 fi

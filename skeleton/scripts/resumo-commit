@@ -21,15 +21,16 @@ git log --oneline -8 | sed 's/^/  /'
 
 echo
 echo "== sugestão de contexto =="
+# Pastas/globs de código do projeto — ajuste esta lista ao layout do seu repo.
 if git status --short | grep -q 'sessions/'; then
   NUM="$(ls sessions/[0-9][0-9][0-9][0-9]-*.md 2>/dev/null | sort | tail -1 | xargs -n1 basename | cut -d- -f1)"
   echo "  Contexto: Sessao $NUM: refinamento concluido — <resultado> (ou Validacao sessao $NUM: ... se fase 3)"
-elif git status --short | grep -qE '^[^ ]+ (lib/|test/|server\.rb)'; then
+elif git status --short | grep -qE '^[^ ]+ (src/|app/|lib/|test/|tests/|spec/)'; then
   echo "  Contexto: Passo N: <descrição do resultado>  (ou Passos N-M: ... agrupado)"
 elif git status --short | grep -q 'draft-'; then
   echo "  Contexto: Draft: <resumo do que foi anotado>"
 else
-  echo "  Contexto: <descrição concisa do que mudou e por quê> (sem feat:/fix:/chore:)"
+  echo "  Contexto: <descrição concisa do que mudou e por quê> (prefixo genérico opcional: feat:/fix:/docs:/chore:)"
 fi
 echo
 echo "  Contextos: Passo N: / Passos N-M: | Sessao NNNN: refinamento | Validacao sessao NNNN: | Sessao NNNN concluida: | Regra: | Draft:"

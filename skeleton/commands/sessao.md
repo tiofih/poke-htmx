@@ -3,7 +3,7 @@ description: Abre/continua uma sessão SDD RODANDO OS PAPÉIS como subagents (Re
 agent: build
 ---
 
-Você está iniciando/continuando uma **sessão SDD do Poke-HTMX** usando os **papéis de subagent**
+Você está iniciando/continuando uma **sessão SDD do {{PROJETO}}** usando os **papéis de subagent**
 (chame o skill `sdd` se precisar do guia). Regras base: `AGENTS.md` (S1–S7), `SESSIONS.md`,
 `REQUIREMENTS.md`. **Ressalto:** a execução é feita pelos **subagents**, não por você inline.
 
@@ -23,6 +23,7 @@ decida pelo estado do projeto.
 | Refinamento feito, Implementação pendente | **fase 2** → subagent `implementador-teste` (TDD, suíte+lint verdes, commits `Passo N:`). |
 | Implementação feita | **fase 2c** → subagent `revisor`; se `VEREDITO: Requer ajuste`, re-dispare `implementador-teste` e depois `revisor` de novo (**loop S7, teto 3 rodadas**, senão escalar S3) até `Aprovado`. |
 | Pronto para validar | **fase 3** → **PARE** (é do usuário). NÃO marcar Done, NÃO validar, NÃO commitar conclusão. |
+| Implementação feita (modo PR ativo) | **passo PR** → subagent `implementador-teste` escreve o corpo (`sessions/pr/NNNN-pr-body.md`), roda `./scripts/checar-pr NNNN` e commita `PR sessao 00NN:`; → **fase 2c** subagent `revisor` revisa o diff **+ o corpo** (`CORPO DO PR: publicável`); com `Aprovado`, `implementador-teste` roda `./scripts/abrir-pr NNNN --open` e registra `> PR: <url>`; → **PARE** — a validação é a revisão do PR, nunca o merge pelo agente. Só vale com o marcador `<!-- sdd-pr: ativo -->` em `AGENTS.md`; **um PR por sessão**. |
 | Playtester | só dispare se o usuário pedir / tiver valor (advisory, não substitui a S2). |
 
 ## 2b. Refinamento = conversa (regra de ouro)
@@ -40,3 +41,6 @@ escolhas. Aplicar ao objetivo, escopo/fora-de-escopo, critérios→teste (S1) e 
 ## 4. Ao encerrar cada papel
 - Reporte o estado (commit/SHA, suíte+lint, veredito) e a **próxima etapa**.
 - **Nunca** salte a validação do usuário; **nunca** marque a sessão como `Done` antes dela.
+- **Modo PR (só com `--with-pr`):** registre `> PR: <url>` na seção de Validação do arquivo da sessão
+  assim que o `./scripts/abrir-pr` devolver a URL (o script não edita a sessão — quem registra é o
+  `implementador-teste`, antes de parar). No modo PR a fase "Pronto para validar" é o **PR aberto**.

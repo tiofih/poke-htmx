@@ -1,9 +1,9 @@
 ---
 name: sdd
-description: Fluxo de papéis do SDD do Poke-HTMX — Refinador → Implementador/Teste → Revisor → (Playtester opcional) → validação do usuário. Use quando for abrir/refinar uma sessão, implementar TDD, revisar um diff ou decidir a próxima etapa do ciclo. Também cobre o loop Implementador↔Revisor (S7) e o gatilho de parada antes da validação.
+description: Fluxo de papéis do SDD do {{PROJETO}} — Refinador → Implementador/Teste → Revisor → (Playtester opcional) → validação do usuário. Use quando for abrir/refinar uma sessão, implementar TDD, revisar um diff ou decidir a próxima etapa do ciclo. Também cobre o loop Implementador↔Revisor (S7) e o gatilho de parada antes da validação.
 ---
 
-# SDD — ciclo de papéis (Poke-HTMX)
+# SDD — ciclo de papéis ({{PROJETO}})
 
 ## Fases e papéis (cada fase = um subagent, despachado via `task` `subagent_type`)
 
@@ -12,6 +12,7 @@ description: Fluxo de papéis do SDD do Poke-HTMX — Refinador → Implementado
 | 1 — Refinamento (CONVERSA) | `refinador` (investigação → finalize) | **investigação**: mapa de decisões (opções A/B/C, recomendada). **finalize**: sessão `sessions/NNNN-*.md` + `SESSIONS.md` (S4) | sessão nova / refinamento pendente |
 | 2 — TDD | `implementador-teste` | código + testes, commits `Passo N:`, suíte+lint verdes | refinamento aprovado |
 | 2c — Revisão | `revisor` | diff revisado + `VEREDITO: Aprovado` \| `Requer ajuste` | implementação feita |
+| 2d — Entrega (modo PR) | `implementador-teste` (corpo + `checar-pr` + commit) → `revisor` (parecer sobre o corpo) → `implementador-teste` (`abrir-pr`) | corpo do PR em `sessions/pr/NNNN-pr-body.md` + PR/MR aberto e registrado na sessão | só com o marcador `<!-- sdd-pr: ativo -->` em `AGENTS.md` |
 | 3 — pré-validação | `playtester` (OPCIONAL) | achados de UX/comportamento no app rodando | só se o usuário pedir / tiver valor |
 | 3 — Validação | **usuário** | tabela por critério (S2) / S3 | **nunca a IA** |
 
@@ -30,6 +31,13 @@ description: Fluxo de papéis do SDD do Poke-HTMX — Refinador → Implementado
   `implementador-teste` para resolver os achados e re-commitar, depois `revisor` de novo.
   **Teto 3 rodadas**; sem convergência, **escalar S3** (reabrir critério com o usuário).
   Só `implementador-teste` edita; `revisor` nunca edita.
+- **S8 — modo PR (só com `--with-pr`, marcador `<!-- sdd-pr: ativo -->` em `AGENTS.md`):** a entrega
+  da sessão é **um PR/MR** — um PR por sessão, corpo escrito pelo `implementador-teste` para quem
+  **não** trabalha no projeto (rastreabilidade no `## Anexo` do fim) — e a validação do usuário é a
+  **revisão desse PR**. Todo critério declara a reprodução (`seed`/`script`/`manual`/`nao-aplicavel`)
+  e o e2e onde houver harness; o `./scripts/checar-pr` é o portão mecânico e diz o que não verifica
+  (compreensão do texto, passos, veracidade da evidência — isso é do `revisor`); o teto de 3 rodadas
+  do loop Implementador↔Revisor **não muda**; **merge é do usuário, nunca do agente**.
 - **Parada obrigatória na fase 3:** NUNCA marcar a sessão como `Done`, NUNCA commitar
   conclusão nem preencher a tabela de validação — a fase 3 é do usuário.
 - **S6:** ao fechar, gravar **handoff** (`memory_handoff_begin`) e **gotchas**
@@ -37,8 +45,28 @@ description: Fluxo de papéis do SDD do Poke-HTMX — Refinador → Implementado
 - **Contexto mínimo:** cada papel lê `./scripts/levantar-sessao NNNN`,
   `./scripts/levantar-requisito RF-XX`, `./scripts/levantar-testes`, `./scripts/levantar-roadmap`.
   NUNCA ler `REQUIREMENTS.md`/`SESSIONS.md` inteiros.
-- **Comandos de projeto:** `./scripts/test`, `./scripts/lint`, `./scripts/check_docs`.
-  NUNCA `rake`/`rubocop` no host.
+- **Comandos de projeto:** teste e lint conforme o `STACK.md` do projeto, mais
+  `./scripts/check_docs` (do kit). NUNCA rode teste/lint fora do ambiente do projeto.
+
+## Economia de tokens (hábitos)
+- **Digest antes de leitura integral:** prefira o resumo/digest da sessão, do requisito
+  e do roadmap ao arquivo inteiro; leia na íntegra só o arquivo da sessão corrente.
+- **Snippet escopado antes de busca ampla:** parta da definição/símbolo exato
+  (arquivo + linhas) antes de varrer a base; amplie o escopo só se o snippet não bastar.
+- **Orquestrador injeta contexto nos filhos:** o filho não redescobre — recebe no
+  `prompt` os `paths`/`qualified_names`/trechos já levantados.
+
+## Papéis SDD → fallback no harness
+
+| Papel SDD | `subagent_type` preferido | Se indisponível |
+|---|---|---|
+| `refinador` | `planner` | executar a fase inline seguindo `skeleton/agents/refinador.md` |
+| `implementador-teste` | `coder` | executar a fase inline seguindo `skeleton/agents/implementador-teste.md` |
+| `revisor` | `reviewer` | executar a fase inline seguindo `skeleton/agents/revisor.md` |
+| `playtester` (opcional) | sem fallback — pule a fase | só existe se o usuário pedir |
+
+Sem contraparte SDD (advisory, usáveis dentro de qualquer fase, nunca donos de
+transição de fase): `researcher`, `designer`, `gitter`.
 
 ## Regra de ouro para o agente
 Ao receber um pedido de sessão SDD, **decida a fase pelo estado** (session file `## Status`)
