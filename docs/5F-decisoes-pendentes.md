@@ -6,7 +6,7 @@ por já ter outro dono. Investigado sem rodar suíte/e2e/docker.
 ## 5.F.1 — `user_state`: apagar ou manter?
 
 **O que é.** Tabela `user_state(user_id TEXT PK, journey_started BOOLEAN)`, criada só por
-`db/migrations/0036_add_user_state.sql:4-7` (não está em `db/schema.sql`, que só cria `team_pokemons`
+`db/migrations/0036_add_user_state.sql:4-7` (**arquivo removido na sessão 0089**) (não está em `db/schema.sql`, que só cria `team_pokemons`
 — `db/schema.sql:4`). Repositório `lib/user_state_repository.rb` (upsert `mark_started`, SELECT `started?`).
 
 **Estado hoje: escrita viva mas inútil; leitura morta.**
