@@ -207,6 +207,12 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 
 **Lição de ambiente (bancos compartilhados):** rodar **duas suítes em paralelo** no mesmo container/banco produz `PG::TRDeadlockDetected`/`TeamFullError` e **mascara resultados** (deadlock/contaminação no review) — **serializar**: uma execução de teste por vez (ou parar o `web` antes de validar).
 
+### Fechamento da fase 2 (S6 — 2026-09-17)
+
+- **Veredito do Revisor (S7):** `Aprovado` na **rodada 3** (`reviews/review-2026-09-17T01-49-27-0089-rodada3.md`) — 0 high / 0 medium / 2 low / 1 info; os 5 achados das rodadas 1–2 (`...-blocoA.md`, `...-passos6-8.md`) fecham com prova. **O teto de 3 rodadas do loop S7 foi atingido**, então os 4 achados remanescentes da rodada 3 são `low`/`info` e ficaram **registrados, não corrigidos**; a fase 2 fecha sem nova rodada.
+- **Achados `low` registrados no `TODO.md`** (fora do escopo desta sessão; não invalidam o veredito): (1) o `<p class="rewards">` ficou 4 espaços a mais que o `if` que o envolve em `views/battle.erb:126-128` e `views/_strike_result.erb:23-25` (cosmético); (2) `test/battle_routes_test.rb:793-794` (**pré-existente**) usa assert com `||` frouxo que aceita trocar vitória por derrota — deveria ser string exata.
+- **Achados `info` não anotados** (fracos demais para tarefa; sem lugar natural no `docs/draft-backlog.md`, que não tem seção de testes): `test/battle_end_states_test.rb:96-108` não cobre `loss`/`draw` **com** dinheiro nem `money_gained: 0`; `lib/battle_end_state_presenter.rb:52-54` chama `@engine.winner` 2×.
+- **A sessão segue `Pendente`:** a §7 não foi tocada e a validação (fase 3) é do usuário — este bloco é o registro de handoff/gotchas (S6), não conclusão.
 
 ## 9. Gotchas / Lições (memória — S6)
 
