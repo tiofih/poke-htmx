@@ -22,5 +22,14 @@ printf -- '- [ ] consultar REQUIREMENTS.md por busca (grep/ctx_search), NÃO ler
 printf -- '- [ ] fechar objetivo/escopo/critérios e plano TDD; cada critério aponta o teste que o prova (S1); sem teste → `manual`\n'
 printf -- '- [ ] no commit do refinamento: atualizar SESSIONS.md (tabela + "Próxima sessão" — S4) e rodar ./scripts/check_docs (S5)\n'
 
+# Modo PR (--with-pr): o marcador em AGENTS.md liga o passo PR (S8). Sem o marcador,
+# NENHUMA linha nova na saída — default byte-idêntico.
+if [ -f AGENTS.md ] && grep -qF '<!-- sdd-pr: ativo -->' AGENTS.md; then
+  printf '\n## Modo PR ativo\n'
+  printf -- '- [ ] a entrega da sessão é o PR (S8); corpo em sessions/pr/NNNN-pr-body.md\n'
+  printf -- '- [ ] antes de commitar o corpo: ./scripts/checar-pr NNNN\n'
+  printf -- '- [ ] após Aprovado (S7): ./scripts/abrir-pr NNNN --open\n'
+fi
+
 printf '\n--- digest do roadmap ---\n'
 "$(dirname "$0")/levantar-roadmap"
