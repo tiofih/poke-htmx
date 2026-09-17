@@ -6,7 +6,7 @@
 | --- | --- |
 | Refinamento | **Concluída** — roteamento confirmado em 2026-09-10 (visual-only; diagnósticos: layout.erb:20, _filter_controls overflow, team.erb:18, pcard-meta, pill stale; playtest mediums T-playtest) |
 | Implementação (fase 2, TDD) | **Concluída em 2026-09-16** — 4 passos (red→green) + suíte 1184 runs / lint 0; revisão S7 pendente |
-| Validação (fase 3) | Pendente — **fase do usuário; ao fim da fase 2, PARAR e aguardar** |
+| Validação (fase 3) | **Concluída em 2026-09-16** — validada pelo usuário (S2 por critério, todas `ok`, sem `nok`): C1–C4 + G1–G3 + M1 |
 
 ---
 
@@ -87,15 +87,18 @@ Polimento visual das telas home/team/battle — header gate do CTA Batalhar, lab
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 (header gate) | | | pendente |
-| C2 (filtros labels+count) | | | pendente |
-| C3 (pills empty/stale) | | | pendente |
-| C4 (card add position) | | | pendente |
-| G1 (sem regressão) | | | pendente |
-| G2 (escopo contido) | | | pendente |
-| G3 (docs + revisão) | | | pendente |
+| C1 (header gate) | `test/layout_test.rb` `test_battle_cta_gated_hint` + `test_battle_cta_hint_stays_visible_and_described` + `test_battle_cta_hint_distinguishes_game_over_from_hurt` (verdes) | CTA apagado (`.btn--gated`) com **hint em texto visível em qualquer largura** (inclusive ≤720px, onde só compacta); no **game over** o hint fala em jornada encerrada (não em "cure o time") | ok (2026-09-16) |
+| C2 (filtros labels+count) | `test/home_view_test.rb` `test_filter_labels_count_no_overflow` (verde) | labels visíveis + "Resultados · N" no `#filter-controls`; **medição real de overflow em 375px/360px** feita pelo usuário (o assert automatizado é **proxy**: só prova a presença do texto CSS do breakpoint `@media (max-width:420px)` — quem mede overflow é o M1) | ok (2026-09-16) |
+| C3 (pills empty/stale) | `test/home_view_test.rb` `test_team_empty_stale_pills` (verde) | pills `pill--empty`/`--stale`/`--ready`/`--danger` no `/team` | ok (2026-09-16) |
+| C4 (card add position) | `test/home_view_test.rb` `test_pcard_meta_flex_add_position` (verde) | card do Pokémon com custo e botão adicionar alinhados (`.pcard-meta` flex) | ok (2026-09-16) |
+| G1 (sem regressão) | `./scripts/test` = **1186 runs / 6305 asserts / 0 falhas**; `./scripts/lint` = **136 arquivos / 0 offenses** (números do implementador/review, não reproduzidos nesta fase documental) | — | ok (2026-09-16) |
+| G2 (escopo contido) | `git diff --stat` vazio em `lib/`, `server.rb`, `db/`, `config/`, `Gemfile*` (visual-only) | — | ok (2026-09-16) |
+| G3 (docs + revisão) | `./scripts/check_docs` + `./scripts/checar-sessao 0083` verdes; Revisor S7 **`Aprovado`** na rodada 2 (`reviews/review-2026-09-16T22-20-37-0083-rodada2.md`) + mini-passe final `reviews/review-2026-09-16T22-42-04-0083-final.md` (rodada 1 = `Requer ajuste`, `reviews/review-2026-09-16T22-11-03-0083.md`) | — | ok (2026-09-16) |
+| M1 (passada visual) | — | validação do usuário em 2026-09-16 (app em `http://localhost:3000`): home com filtros rotulados + contagem, `/team` com as pills, card do Pokémon, CTA Batalhar gated com hint visível; **medição de overflow em 375/360px e quebra do topnav ≤920px** | ok (2026-09-16) |
 
-> **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário. **Ao fim da fase 2, PARAR na fase 2 — não preencher esta seção, não marcar Done, não commitar conclusão sem a validação do usuário (fase 3).**
+> **Ressalvas aceitas na validação (2026-09-16):** (a) limitação de escopo do assert do `:focus-visible` — `test/layout_test.rb:148` casa apenas contra o recorte do bloco `ui_polish_block` (`test/layout_test.rb:223-226`), então uma regra `:focus-visible` anexada fora dele passaria batido (reforço seria casar contra o arquivo inteiro); (b) **decisão de a11y tomada pelo usuário: opção (i)** — a regra `:focus-visible` morta do `.btn--gated` foi **removida** no commit `91103f7` (o `tabindex="-1"` permanece; tokens e `pointer-events:none` intactos); (c) os appends de cassette gerados pelos runs de teste foram **revertidos** (ruído de re-gravação; +21 860 linhas em um deles) e os cassettes novos ficaram **untracked**.
+
+> **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
 ## 8. Observações
 
@@ -165,4 +168,7 @@ Polimento visual das telas home/team/battle — header gate do CTA Batalhar, lab
 
 ## 9. Gotchas / Lições (memória — S6)
 
-A preencher na validação (fase 3): gate visual vs regra, overflow de filtros em 360px, pill stale vs empty.
+Lições da validação (2026-09-16) já registradas em §8 — sem gotcha nova no ai-memory:
+(a) gate visual nil-safe vs regra de foco morta (decisão (i) do usuário, `91103f7`);
+(b) evidência do C2 é proxy de CSS — overflow/`scrollWidth` só se mede manualmente/e2e;
+(c) pill `empty` vs `stale` distinguíveis só por classe + texto (`pill--*` convenção única).
