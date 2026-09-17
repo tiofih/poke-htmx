@@ -21,8 +21,9 @@
           <p class="winner-badge"><strong><%= end_title %></strong></p>
         <% end %>
         <% if @xp_gained.to_i.positive? %>
-          <% if end_state == "loss" %>
-            <p class="rewards"><strong>Derrota — +<%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
+          <% reward_lead = { "loss" => "Derrota", "over" => "Derrota", "draw" => "Empate" }.fetch(end_state, nil) %>
+          <% if reward_lead %>
+            <p class="rewards"><strong><%= reward_lead %> — +<%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
           <% else %>
             <p class="rewards"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
           <% end %>

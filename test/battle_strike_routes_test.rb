@@ -78,6 +78,32 @@ class BattleStrikeRoutesTest < Minitest::Test
     assert_includes last_response.body, "Vencedor:"
   end
 
+  # Passo 7 (0089): game over com o oponente vencendo (time sem dinheiro para
+  # curar) — o strike final precisa fechar badge e copy coerentes: "Derrota",
+  # nunca a copy de vitória ("ganhou ... XP"), mesmo trilho de battle.erb.
+  def test_strike_game_over_loss_copy_matches_badge
+    @repository.all("user-a").each { |member| @progression.update_hp("user-a", member.id, 200, 0) }
+    weak = build_pokemon(number: 1, name: "weak", hp: 1, speed: 1)
+    strong = build_pokemon(number: 2, name: "strong", hp: 100, attack: 50, defense: 50, speed: 50)
+    engine = BattleEngine.new(team_a: [weak], team_b: [strong])
+    Server.settings.battles.set("user-a", engine)
+
+    body = nil
+    300.times do
+      post "/battle/strike", {}, user_session("user-a")
+      body = last_response.body
+      break if body.include?('id="result-modal"')
+    end
+
+    assert last_response.ok?
+    assert_includes body, 'id="result-modal"', "strike final abre o modal"
+    assert_includes body, "Vencedor: Oponente", "badge aponta o oponente vencedor"
+    rewards = body[%r{<p class="rewards">.*?</p>}m].to_s
+    refute_empty rewards, "recompensa de participacao presente no fim"
+    assert_includes rewards, "Derrota", "copy de derrota coerente com o badge"
+    refute_includes rewards, "ganhou", "nunca a copy de vitoria quando o oponente venceu"
+  end
+
   # Review round 11 (0086 Passo 31): o golpe final desabilita o botao primario
   # via OOB; sem isso #play-btn fica vivo apos o fim e cliques devolvem "".
   def test_strike_disables_play_button_when_finished
