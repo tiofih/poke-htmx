@@ -5,19 +5,9 @@ import { test, expect, type Page } from '@playwright/test';
 // POST /battle/strike (hx-swap="none") — cada clique faz append OOB de
 // exatamente 1 .log__entry em #battle-log (sem re-render, sem replay).
 // Harness: fresh context => fresh server session => empty team. Build 6 via the
-// real catalog UI (nth(i) distinct cards; added cards relabel to "ja esta no
-// time", so .first() would re-add), then drive /battle through its buttons.
-// Role > accessible name for actions; CSS only for the log itself (no roles).
-async function buildTeamOfSix(page: Page) {
-  await page.goto('/');
-  await expect(page.locator('#pokemon-list li.pcard').first()).toBeVisible();
-
-  for (let i = 0; i < 6; i++) {
-    await page.getByRole('button', { name: /Adicionar .* ao time/ }).nth(i).click();
-    await expect(page.locator('#nav-badge')).toContainText(`${i + 1}/6`);
-  }
-}
-
+// real catalog UI by exact name (buildBudgetTeam below), then drive /battle
+// through its buttons. Role > accessible name for actions; CSS only for the log
+// itself (no roles).
 async function strikeCount(page: Page) {
   return page.locator('#battle-log .log__entry').count();
 }
@@ -48,7 +38,7 @@ async function playUntilDone(page: Page) {
 // chronological, chips. (Round headers so existem no render inicial com log;
 // strikes fazem append so de .log__entry via OOB, sem headers.)
 test('round headers chronological with data-round and damage/KO chips', async ({ page }) => {
-  await buildTeamOfSix(page);
+  await buildBudgetTeam(page);
   await page.goto('/battle');
   await expect(page.locator('#battle-view')).toBeVisible();
   await playOneStrike(page);
@@ -74,7 +64,7 @@ test('round headers chronological with data-round and damage/KO chips', async ({
 // C2: juice CSS-only + reduced-motion — final net kills all juice (runtime
 // proof via getComputedStyle; getAnimations() is empty after 0.3-0.5s).
 test('reduced-motion disables juice', async ({ page }) => {
-  await buildTeamOfSix(page);
+  await buildBudgetTeam(page);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/battle');
   await playOneStrike(page);
@@ -98,7 +88,7 @@ test('reduced-motion disables juice', async ({ page }) => {
 // re-render), entao o fim se prova pelo modal OOB (#result-modal), nao pelo
 // banner .turn-status nem pela remocao do botao (ambos intactos no DOM).
 test('auto toggle chains to finish without further clicks', async ({ page }) => {
-  await buildTeamOfSix(page);
+  await buildBudgetTeam(page);
   await page.goto('/battle');
   await expect(page.locator('#battle-view')).toBeVisible();
   await page.locator('#auto-play').check();
@@ -109,7 +99,7 @@ test('auto toggle chains to finish without further clicks', async ({ page }) => 
 // C3: consumo/recompensa visivel — stock chips when items were used, defeat
 // copy iff the opponent won, participation (Derrota) vs win (ganhou) rewards.
 test('consumption and reward copy', async ({ page }) => {
-  await buildTeamOfSix(page);
+  await buildBudgetTeam(page);
   await page.goto('/battle');
   await playOneStrike(page);
 
@@ -150,8 +140,8 @@ test('consumption and reward copy', async ({ page }) => {
 const SHOT = '#jx-shot-track .shot';
 const SHOT_W = 10;
 const TRAVEL_PX = 42;
-// Time barato (custo <= 450 do orcamento): o helper de 6 starters do topo
-// estoura o orcamento neste seed e nao abre a arena.
+// Time barato (custo <= 450 do orcamento): 6 membros que cabem no teto sem
+// depender de quais starters o catalogo devolve naquele seed.
 const CHEAP_TEAM = ['caterpie', 'weedle', 'rattata', 'spearow', 'ekans', 'nidoran-f'];
 
 async function buildBudgetTeam(page: Page) {
