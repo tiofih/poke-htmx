@@ -6,3 +6,5 @@
   accept: o `<p class="rewards">` em `views/battle.erb:126-128` e `views/_strike_result.erb:23-25` fica no nível de indentação do `if` que o envolve; e2e `battle-log.spec.ts` segue 9 passed e `./scripts/lint` 0 offenses.
 - T4: Trocar o assert frouxo (OR) de battle_routes_test.rb:793-794 por string exata
   accept: `test/battle_routes_test.rb:793-794` usa `assert_equal`/`assert_includes` da copy exata (trocar vitória por derrota passa a falhar) e a suíte completa segue verde.
+- T5: Atualizar o CTA Batalhar (gate + hint) do cabecalho via OOB nas rotas que mexem no time
+  accept: Extrair CTA+hint de `views/layout.erb:36-37` para um slot com id estavel (`#cta-slot`) + partial, e anexar o fragmento `hx-swap-oob="outerHTML"` nas respostas de `POST /team` (add/budget-blocked), `DELETE /team`, `POST /team/heal`, `POST /journey/restart` e `/mart/buy|sell`; teste Minitest novo assevera o estado do CTA no corpo do POST (nao so no GET /) e a suite+e2e seguem verdes sem mudanca nos 4 estados da pill/0083.

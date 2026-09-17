@@ -165,6 +165,12 @@ Polimento visual das telas home/team/battle — header gate do CTA Batalhar, lab
   (`test/layout_test.rb:223-226`, recorte entre `UI polish (0083): inicio … fim`); uma regra
   `:focus-visible` anexada **fora** desse bloco passaria batido. Limitação conhecida e aceita
   (o reforço seria casar também contra o arquivo inteiro) — **sem** alterar o teste nesta rodada.
+- **Achado pós-validação (2026-09-16, de outra sessão):** o gate do CTA "Batalhar" fica **stale
+  até um F5** nos dois sentidos; superfície = **CTA + hint** (a casca em `views/layout.erb:20-37`
+  não é re-renderizada por swap htmx e nenhuma rota que mexe no time emite o CTA em OOB —
+  `server.rb:603-605` manda só `team`/`pokemon`/`nav-badge`). **Não** é falha do C1 (o escopo
+  declarava "full reload preservado") e a correção ficou como **T5** no `TODO.md`; status e
+  critérios desta sessão permanecem intocados (`Concluída`).
 
 ## 9. Gotchas / Lições (memória — S6)
 
