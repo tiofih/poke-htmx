@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — decisões do usuário em 2026-09-16 (D1–D7) |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (executada pelo usuário) |
+| Implementação (fase 2, TDD) | **Concluída em 2026-09-16** — 8 passos (red→green) + Bloco B isolado; suíte 1185 runs / 6332 asserts / 0 falhas e lint 136 arquivos / 0 offenses; Revisor S7 `Aprovado` na rodada 3 |
+| Validação (fase 3) | **Concluída em 2026-09-16** — validada pelo usuário (S2 por critério, todas `ok`, sem `nok`): C1–C9 + G1–G3 + M1 |
 
 ---
 
@@ -69,15 +69,15 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| C1 a tabela `user_state` não existe após o setup (nunca criada ou dropada pela 0037) | `test/user_state_removal_test.rb` (`test_user_state_removal_test.rb#test_user_state_table_is_gone_after_setup`, consulta `to_regclass('user_state') IS NULL`) | pendente |
-| C2 `lib/user_state_repository.rb` removido e zero referência de produção a `UserState`/`user_state` | `manual` — `rg -n -e UserState -e user_state lib/ server.rb Rakefile db/ test/` deve sobrar só `db/migrations/0037_drop_user_state.sql` e `test/user_state_removal_test.rb` (evidência de grep registrada no commit/§7) + guarda estrutural `test/user_state_removal_test.rb#test_user_state_repository_constant_is_gone` | pendente |
-| C3 `JourneyService` sem o kwarg `user_state:` e sem `mark_started`/`mark_started_when_full` | `test/user_state_removal_test.rb#test_journey_service_has_no_persisted_start_hooks` (inspeciona `JourneyService.instance_method(:initialize).parameters` e `instance_methods`) | pendente |
-| C4 o gate da jornada continua **derivado do time** (`team >= 6`), sem estado persistido | guarda de regressão (4 verdes): `test/journey_service_test.rb#test_not_started_with_empty_team_and_no_flag` (`:32`), `#test_team_of_six_derives_started_without_flag` (`:36`), `#test_team_size_liberates_even_without_flag` (`:55`) + `JourneyGameOverTest#test_not_game_over_below_team_of_six` (`:164`) | pendente |
-| C5 os 4 testes vaciosos do estado persistido foram removidos e a suíte total cai no número exato | `test/journey_service_test.rb` sem `test_flag_alone_does_not_liberate_with_empty_team` (`:42`), `test_flag_alone_does_not_liberate_below_six` (`:48`), `test_mark_when_full_persists_flag_at_six_members` (`:103`), `test_mark_when_full_does_not_persist_below_six` (`:113`) e sem `test/user_state_repository_test.rb` — prova: `./scripts/test` (contagem de runs da suíte = baseline − 4 − os testes do repo) e `test/user_state_removal_test.rb` verde | pendente |
-| C6 nenhum teste depende de `start_journey`/`clear_user_state!`/`UserStateRepository` | `test/user_state_removal_test.rb#test_test_help_has_no_user_state_hooks` (checa que `TestDatabase` não responde a `clear_user_state!`) + `manual` — `rg -n -e start_journey -e clear_user_state -e UserStateRepository test/` = vazio; os 4 testes de `test/team_routes_test.rb` (`:354`, `:470`, `:480`, `:592`) seguem verdes | pendente |
-| C7 os 4 e2e vermelhos passam com `buildBudgetTeam` **e** o bug de copy de `end_state` que o 4º (`consumption and reward copy`) revelou foi corrigido nos Passos 7–8 | `e2e/specs/battle-log.spec.ts` — `round headers chronological with data-round and damage/KO chips` (`:40`), `reduced-motion disables juice` (`:66`), `auto toggle chains to finish without further clicks` (`:90`), `consumption and reward copy` (`:101`); reparo do helper provado no commit `48a6774` (Passo 6) | pendente |
-| C8 docs sincronizados com a remoção no mesmo commit (GDD/REQUIREMENTS/draft/5F) | `manual` — revisão de diff de `GDD.md:27`, `REQUIREMENTS.md:638-643`, `docs/draft-backlog.md:109`, `docs/5F-decisoes-pendentes.md` (§5.F.1 + itens 1 e 2 de "Para fechar"); `./scripts/check_docs` verde | pendente |
-| C9 a copy de recompensa do `end_state` é coerente com o badge nos **dois** caminhos: com o oponente vencedor (incluindo game over `over`) emite "Derrota" e **não** emite copy de vitória; `draw` emite "Empate"; derivação em ponto único no presenter, sem mapa duplicado nas views | render full: `test/battle_end_states_test.rb#test_game_over_reward_copy_matches_badge` (`:71`, cobre `views/battle.erb:126-132`); modal de strike: `test/battle_strike_routes_test.rb#test_strike_game_over_loss_copy_matches_badge` (`:84`, cobre `views/_strike_result.erb:23-29`); e2e: `consumption and reward copy` (`e2e/specs/battle-log.spec.ts:101`) | pendente |
+| C1 a tabela `user_state` não existe após o setup (nunca criada ou dropada pela 0037) | `test/user_state_removal_test.rb` (`test_user_state_removal_test.rb#test_user_state_table_is_gone_after_setup`, consulta `to_regclass('user_state') IS NULL`) | verde (fase 2) — Passo 1 `d57947c` |
+| C2 `lib/user_state_repository.rb` removido e zero referência de produção a `UserState`/`user_state` | `manual` — `rg -n -e UserState -e user_state lib/ server.rb Rakefile db/ test/` deve sobrar só `db/migrations/0037_drop_user_state.sql` e `test/user_state_removal_test.rb` (evidência de grep registrada no commit/§7) + guarda estrutural `test/user_state_removal_test.rb#test_user_state_repository_constant_is_gone` | verde (fase 2) — Passo 2 `d6f1ff3` |
+| C3 `JourneyService` sem o kwarg `user_state:` e sem `mark_started`/`mark_started_when_full` | `test/user_state_removal_test.rb#test_journey_service_has_no_persisted_start_hooks` (inspeciona `JourneyService.instance_method(:initialize).parameters` e `instance_methods`) | verde (fase 2) — Passo 2 `d6f1ff3` |
+| C4 o gate da jornada continua **derivado do time** (`team >= 6`), sem estado persistido | guarda de regressão (4 verdes): `test/journey_service_test.rb#test_not_started_with_empty_team_and_no_flag` (`:32`), `#test_team_of_six_derives_started_without_flag` (`:36`), `#test_team_size_liberates_even_without_flag` (`:55`) + `JourneyGameOverTest#test_not_game_over_below_team_of_six` (`:164`) | verde (fase 2) — Passos 1–3 + fronteira `5b36a24` |
+| C5 os 4 testes vaciosos do estado persistido foram removidos e a suíte total cai no número exato | `test/journey_service_test.rb` sem `test_flag_alone_does_not_liberate_with_empty_team` (`:42`), `test_flag_alone_does_not_liberate_below_six` (`:48`), `test_mark_when_full_persists_flag_at_six_members` (`:103`), `test_mark_when_full_does_not_persist_below_six` (`:113`) e sem `test/user_state_repository_test.rb` — prova: `./scripts/test` (contagem de runs da suíte = baseline − 4 − os testes do repo) e `test/user_state_removal_test.rb` verde | verde (fase 2) — Passo 3 `e7bcaf3` |
+| C6 nenhum teste depende de `start_journey`/`clear_user_state!`/`UserStateRepository` | `test/user_state_removal_test.rb#test_test_help_has_no_user_state_hooks` (checa que `TestDatabase` não responde a `clear_user_state!`) + `manual` — `rg -n -e start_journey -e clear_user_state -e UserStateRepository test/` = vazio; os 4 testes de `test/team_routes_test.rb` (`:354`, `:470`, `:480`, `:592`) seguem verdes | verde (fase 2) — Passo 3 `e7bcaf3` |
+| C7 os 4 e2e vermelhos passam com `buildBudgetTeam` **e** o bug de copy de `end_state` que o 4º (`consumption and reward copy`) revelou foi corrigido nos Passos 7–8 | `e2e/specs/battle-log.spec.ts` — `round headers chronological with data-round and damage/KO chips` (`:40`), `reduced-motion disables juice` (`:66`), `auto toggle chains to finish without further clicks` (`:90`), `consumption and reward copy` (`:101`); reparo do helper provado no commit `48a6774` (Passo 6) | verde (fase 2) — Passos 6–8 (`48a6774`/`dfd3741`/`85f48af`) |
+| C8 docs sincronizados com a remoção no mesmo commit (GDD/REQUIREMENTS/draft/5F) | `manual` — revisão de diff de `GDD.md:27`, `REQUIREMENTS.md:638-643`, `docs/draft-backlog.md:109`, `docs/5F-decisoes-pendentes.md` (§5.F.1 + itens 1 e 2 de "Para fechar"); `./scripts/check_docs` verde | verde (fase 2) — Passo 2 `d6f1ff3` |
+| C9 a copy de recompensa do `end_state` é coerente com o badge nos **dois** caminhos: com o oponente vencedor (incluindo game over `over`) emite "Derrota" e **não** emite copy de vitória; `draw` emite "Empate"; derivação em ponto único no presenter, sem mapa duplicado nas views | render full: `test/battle_end_states_test.rb#test_game_over_reward_copy_matches_badge` (`:71`, cobre `views/battle.erb:126-132`); modal de strike: `test/battle_strike_routes_test.rb#test_strike_game_over_loss_copy_matches_badge` (`:84`, cobre `views/_strike_result.erb:23-29`); e2e: `consumption and reward copy` (`e2e/specs/battle-log.spec.ts:101`) | verde (fase 2) — Passos 7–8 (`dfd3741`/`85f48af`) + ajuste `4e19b47` |
 
 > **C7 — duas possibilidades registradas:** se a execução local for viável na fase 2 (D6 autoriza; app no ar em `:3000`), C7 é **automatizado** pelo run de `cd e2e && npx playwright test specs/battle-log.spec.ts` (9 verdes / 0 vermelhos). Se inviável no momento do green, C7 vira `manual` — evidência esperada: rodada local do mesmo comando registrada na §7 com o resultado por teste. **Resultado real (2026-09-16):** os 3 primeiros ficaram verdes já no Passo 6 e o 4º (`consumption and reward copy`) revelou um **bug real de produto** — a copy de recompensa do `end_state` — corrigido nos Passos 7–8 (C9).
 >
@@ -87,9 +87,9 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 
 | Critério | Teste que o prova | Estado |
 | --- | --- | --- |
-| G1 suíte completa verde com baseline preservado + novos testes e lint 0 em todo green; commit obrigatório por passo | `./scripts/test` + `./scripts/lint` (cada passo) | pendente |
-| G2 escopo contido: sem gems novas, sem mudança de schema além da 0037, sem rede nos testes, sem tocar motor/economia/rotas/CSS/budget 450 | `git diff --stat` + revisão de diff (`manual`) | pendente |
-| G3 docs + revisão: `./scripts/check_docs` e `./scripts/checar-sessao 0089` verdes, docs do D7 no mesmo commit da remoção, Revisor (2c) `Aprovado` antes da fase 3 | `./scripts/check_docs` + `./scripts/checar-sessao 0089` + revisão de diff (`manual`) | pendente |
+| G1 suíte completa verde com baseline preservado + novos testes e lint 0 em todo green; commit obrigatório por passo | `./scripts/test` + `./scripts/lint` (cada passo) | verde (fase 2) — 1185 runs / 6332 asserts / 0 falhas; lint 136/0 |
+| G2 escopo contido: sem gems novas, sem mudança de schema além da 0037, sem rede nos testes, sem tocar motor/economia/rotas/CSS/budget 450 | `git diff --stat` + revisão de diff (`manual`) | verde (fase 2) — escopo contido (revisão S7) |
+| G3 docs + revisão: `./scripts/check_docs` e `./scripts/checar-sessao 0089` verdes, docs do D7 no mesmo commit da remoção, Revisor (2c) `Aprovado` antes da fase 3 | `./scripts/check_docs` + `./scripts/checar-sessao 0089` + revisão de diff (`manual`) | verde (fase 2) — `check_docs` + `checar-sessao 0089` + S7 `Aprovado` rodada 3 |
 
 > **S1:** cada critério acima aponta o teste que o prova (arquivo + método Minitest); critério sem teste automatizado registra `manual` explícito com a evidência esperada. As fases 2–3 e a implementação de D5 **não** acontecem aqui: esta sessão entrega só o refinamento (fase 1).
 
@@ -124,21 +124,25 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 
 ## 7. Validação (executada pelo usuário)
 
-**Pendente.** *(Ao validar — S2: uma linha por critério, nunca bloco único.)*
+**Concluída em 2026-09-16.** Validada pelo usuário no navegador (S2 — uma linha por critério); todas `ok`, **sem `nok`**.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 | `./scripts/test test/user_state_removal_test.rb -n /table_is_gone/` | — | |
-| C2 | `./scripts/test test/user_state_removal_test.rb -n /repository_constant_is_gone/` | `rg -n -e UserState -e user_state lib/ server.rb db/ test/` só com a 0037 e o teste de remoção | |
-| C3 | `./scripts/test test/user_state_removal_test.rb -n /no_persisted_start_hooks/` | — | |
-| C4 | `./scripts/test test/journey_service_test.rb` (4 testes do gate derivado, `:32`,`:36`,`:55`,`:164`) | abrir o gate só com 6 membros no navegador | |
-| C5 | `./scripts/test` (runs do baseline − 4 − os do repo morto) | — | |
-| C6 | `./scripts/test test/team_routes_test.rb` + `./scripts/test test/user_state_removal_test.rb -n /no_user_state_hooks/` | `rg -n -e start_journey -e clear_user_state -e UserStateRepository test/` = vazio | |
-| C7 | `cd e2e && npx playwright test specs/battle-log.spec.ts` (4 testes, 9 verdes no arquivo) | rodar o mesmo comando se a execução automática for inviável | |
-| C8 | `./scripts/check_docs` | revisar o diff de `GDD.md:27`, `REQUIREMENTS.md:638-643`, `docs/draft-backlog.md:109`, `docs/5F-decisoes-pendentes.md` | |
-| G1 | `./scripts/test` + `./scripts/lint` | — | |
-| G2 | `git diff --stat` | revisar diff por gems/schema/motor/economia/budget/CSS | |
-| G3 | `./scripts/check_docs` + `./scripts/checar-sessao 0089` | revisão `Aprovado` na 2c | |
+| C1 (tabela `user_state` ausente após o setup) | `test/user_state_removal_test.rb#test_user_state_table_is_gone_after_setup` (verde) | o app sobe e opera sem a tabela (`to_regclass('user_state')` = NULL após `rake db:setup`) | ok (2026-09-16) |
+| C2 (repo removido, zero referência de produção) | `test/user_state_removal_test.rb#test_user_state_repository_constant_is_gone` (verde) | `rg -n -e UserState -e user_state lib/ server.rb db/ test/` = só `db/migrations/0037_drop_user_state.sql` e `test/user_state_removal_test.rb` | ok (2026-09-16) |
+| C3 (`JourneyService` sem kwarg/hooks persistidos) | `test/user_state_removal_test.rb#test_journey_service_has_no_persisted_start_hooks` (verde) | — | ok (2026-09-16) |
+| C4 (gate derivado do time, `team >= 6`) | `test/journey_service_test.rb`: `test_not_started_with_empty_team_and_no_flag` (`:30`), `test_team_of_six_derives_started_without_flag` (`:34`), `test_team_of_five_is_not_started` (`:42`, fronteira restaurada em `5b36a24`), `test_team_size_liberates_even_without_flag` (`:48`) + `JourneyGameOverTest#test_not_game_over_below_team_of_six` (`:136`) — verdes | abrir o gate só com 6 membros no navegador | ok (2026-09-16) |
+| C5 (testes vacuosos/flags removidos) | `rg -n -e test_flag_alone -e test_mark_when_full -e user_state_repository_test test/` = vazio; `test/user_state_removal_test.rb` verde | — | ok (2026-09-16) |
+| C6 (nenhum teste depende de `start_journey`/`clear_user_state!`/`UserStateRepository`) | `test/user_state_removal_test.rb#test_test_help_has_no_user_state_hooks` + os 4 testes de `test/team_routes_test.rb` (antigos `:354`,`:470`,`:480`,`:592`) verdes | `rg -n -e start_journey -e clear_user_state -e UserStateRepository test/` = vazio | ok (2026-09-16) |
+| C7 (os 4 e2e verdes com `buildBudgetTeam`) | `cd e2e && npx playwright test specs/battle-log.spec.ts` = **9 passed / 0 failed** (após `docker compose restart web`), incluindo `consumption and reward copy` | mesmo comando, com o app no ar em `:3000` | ok (2026-09-16) |
+| C8 (docs sincronizados) | `./scripts/check_docs` verde | diff revisado: `GDD.md:27`, `REQUIREMENTS.md:638-643`, `docs/draft-backlog.md:109` (obsoleto) e `docs/5F-decisoes-pendentes.md` (ressalva da 0036 removida) | ok (2026-09-16) |
+| C9 (copy do `end_state` coerente nos dois caminhos) | `test/battle_strike_routes_test.rb#test_strike_game_over_loss_copy_matches_badge` (`:84`); `test/battle_end_states_test.rb#test_game_over_reward_copy_matches_badge` (`:71`), `#test_game_over_draw_reward_copy_says_draw` (`:84`, game over com empate) e `#test_reward_sentence_is_byte_identical` (`:96`); e2e **incondicional** (`e2e/specs/battle-log.spec.ts`, guards `if:` removidos no ajuste `4e19b47`) | usuário viu os 4 estados no navegador (relatou o CTA, não a copy) | ok (2026-09-16) |
+| G1 (sem regressão) | `./scripts/test` = **1185 runs / 6332 asserts / 0 falhas / 0 errors**; `./scripts/lint` = **136 arquivos / 0 offenses** | — | ok (2026-09-16) |
+| G2 (escopo contido) | diff da sessão (Passos 1–8 + ajustes de review) só com o escopo do §3: `db/migrations/0037_drop_user_state.sql` (+/‑ da 0036), `lib/user_state_repository.rb` + `test/user_state_repository_test.rb` (removidos), `lib/journey_service.rb`, `lib/battle_end_state_presenter.rb`, `server.rb`, views do `end_state`, `e2e/specs/battle-log.spec.ts`, testes/docs do escopo — sem gems, sem schema além da 0037, sem rede, sem tocar motor/economia/rotas/CSS/budget 450 | revisão de diff (`manual`) | ok (2026-09-16) |
+| G3 (docs + revisão) | `./scripts/check_docs` + `./scripts/checar-sessao 0089` verdes; Revisor S7 **`Aprovado`** na **rodada 3** (`reviews/review-2026-09-17T01-49-27-0089-rodada3.md`), depois de `...-blocoA.md` e `...-passos6-8.md` | — | ok (2026-09-16) |
+| M1 (validação manual no navegador) | — | validação do usuário em 2026-09-16, com o app reiniciado e o **time recriado** (os setups limpam o banco de dev — ressalva (a)): remoção do `user_state` sem quebra, gate da jornada abrindo com 6 membros e copy do `end_state` coerente nos 4 estados | ok (2026-09-16) |
+
+> **Ressalvas aceitas na validação (2026-09-16):** (a) o `TRUNCATE team_pokemons CASCADE` **pré-existente** (`db/migrations/0003:4`/`0007:4`) apaga o conteúdo do banco de dev a cada setup — validar manualmente exige **recriar o time** (rastreado como **T2** no `TODO.md`); (b) os **2 `low`** da rodada 3 do Revisor ficaram **registrados, não corrigidos** (teto do loop S7 atingido) e viraram **T3** (`<p class="rewards">` desindentado em `views/battle.erb`/`views/_strike_result.erb`) e **T4** (assert frouxo com `||` em `test/battle_routes_test.rb:793-794`); (c) o achado de validação de que o **CTA "Batalhar" do cabeçalho só muda de estado depois de um F5** é de **outra sessão** (0083) e virou **T5** — **não** é defeito da 0089 nem reabre critério dela.
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
@@ -212,8 +216,15 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 - **Veredito do Revisor (S7):** `Aprovado` na **rodada 3** (`reviews/review-2026-09-17T01-49-27-0089-rodada3.md`) — 0 high / 0 medium / 2 low / 1 info; os 5 achados das rodadas 1–2 (`...-blocoA.md`, `...-passos6-8.md`) fecham com prova. **O teto de 3 rodadas do loop S7 foi atingido**, então os 4 achados remanescentes da rodada 3 são `low`/`info` e ficaram **registrados, não corrigidos**; a fase 2 fecha sem nova rodada.
 - **Achados `low` registrados no `TODO.md`** (fora do escopo desta sessão; não invalidam o veredito): (1) o `<p class="rewards">` ficou 4 espaços a mais que o `if` que o envolve em `views/battle.erb:126-128` e `views/_strike_result.erb:23-25` (cosmético); (2) `test/battle_routes_test.rb:793-794` (**pré-existente**) usa assert com `||` frouxo que aceita trocar vitória por derrota — deveria ser string exata.
 - **Achados `info` não anotados** (fracos demais para tarefa; sem lugar natural no `docs/draft-backlog.md`, que não tem seção de testes): `test/battle_end_states_test.rb:96-108` não cobre `loss`/`draw` **com** dinheiro nem `money_gained: 0`; `lib/battle_end_state_presenter.rb:52-54` chama `@engine.winner` 2×.
-- **A sessão segue `Pendente`:** a §7 não foi tocada e a validação (fase 3) é do usuário — este bloco é o registro de handoff/gotchas (S6), não conclusão.
+- **A sessão seguia `Pendente` aí:** o painel acima era o registro de handoff/gotchas (S6); a validação (fase 3) foi feita depois — ver a subseção seguinte.
+
+### Validação (fase 3 — 2026-09-16)
+
+- **Validada pelo usuário** no navegador, com o app reiniciado e o **time recriado** (os setups limpam o banco de dev): **todas `ok`, sem `nok`** — §7 com uma linha por critério (C1–C9, G1–G3 e M1) e as ressalvas aceitas (a) `TRUNCATE` pré-existente/`T2`, (b) os 2 `low` do teto S7 (`T3`/`T4`), (c) o achado do **CTA stale** de **outra sessão** (`T5`), que **não** é defeito desta e **não** reabre critério.
+- **Nova sessão aberta na fila:** nenhuma — o próximo item é o **`T5`** (CTA "Batalhar" do cabeçalho stale após swaps htmx; recomendação: OOB do CTA/hint, o padrão que o projeto já usa), **a refinar**. Sem gotcha nova no ai-memory (S6 já registrado).
 
 ## 9. Gotchas / Lições (memória — S6)
 
 Preenchido na validação (fase 3) — alimenta `memory_write_page` em `gotchas/`.
+
+Lições da validação (2026-09-16) já registradas em §8/§7 — **sem gotcha nova** no ai-memory (os achados viraram `TODO.md`: `T3`/`T4` da rodada 3 e `T5` do CTA stale, este de outra sessão).
