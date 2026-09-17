@@ -4,26 +4,24 @@
     controle presente para o layout (e a11y/foco) porem inerte. %>
 <button id="play-btn" class="btn btn-primary btn-lg" data-od-id="cta-play" disabled hx-swap-oob="outerHTML">Batalhar</button>
 <div id="result-box" hx-swap-oob="innerHTML">
-  <% end_state = @game_over ? "over" : (@engine.winner.nil? ? "draw" : (@engine.winner.zero? ? "win" : "loss")) %>
-  <% end_slug, end_label, end_title = { "win" => ["victory", "Vitória", "Seu Time venceu"], "loss" => ["defeat", "Derrota", "Oponente venceu"], "draw" => ["draw", "Empate", "Empate — ninguém venceu"], "over" => ["gameover", "Game Over", "Sem dinheiro para curar"] }.fetch(end_state) %>
-  <% winner_name = @engine.winner.nil? ? nil : (@engine.winner.zero? ? "Seu Time" : "Oponente") %>
+  <% end_state = BattleEndStatePresenter.new(@engine, game_over: @game_over) %>
+  <% winner_name = end_state.winner_name %>
   <input type="checkbox" id="res-dismiss" class="res-dismiss-input">
-  <div class="overlay open res-screen res-overlay" id="result-modal" data-od-id="res-<%= end_slug %>">
-    <div class="modal" role="dialog" aria-modal="true" aria-label="<%= end_title %>">
+  <div class="overlay open res-screen res-overlay" id="result-modal" data-od-id="res-<%= end_state.slug %>">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="<%= end_state.title %>">
       <div class="modal-head">
-        <h2><%= end_title %></h2>
+        <h2><%= end_state.title %></h2>
         <label for="res-dismiss" class="modal-close" data-od-id="res-close" aria-label="Fechar">×</label>
       </div>
       <div class="result">
         <% if winner_name %>
           <p class="winner-badge"><strong>Vencedor: <%= winner_name %></strong></p>
         <% else %>
-          <p class="winner-badge"><strong><%= end_title %></strong></p>
+          <p class="winner-badge"><strong><%= end_state.title %></strong></p>
         <% end %>
         <% if @xp_gained.to_i.positive? %>
-          <% reward_lead = { "loss" => "Derrota", "over" => "Derrota", "draw" => "Empate" }.fetch(end_state, nil) %>
-          <% if reward_lead %>
-            <p class="rewards"><strong><%= reward_lead %> — +<%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
+          <% if end_state.reward_lead %>
+            <p class="rewards"><strong><%= end_state.reward_lead %> — +<%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
           <% else %>
             <p class="rewards"><strong>Seu Time ganhou <%= @xp_gained %> XP por Pokémon<%= @money_gained ? " e +¥#{@money_gained}." : "." %></strong></p>
           <% end %>

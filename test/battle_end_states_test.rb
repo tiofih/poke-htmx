@@ -65,6 +65,19 @@ class BattleEndStatesTest < Minitest::Test
     refute_includes body, "Novo confronto", "game over hides new confront"
   end
 
+  # Passo 8 (0089): mesmo contrato do strike (Passo 7) no render full — com o
+  # oponente vencendo e game over, badge e copy de recompensa precisam fechar
+  # coerentes: "Derrota", nunca a copy de vitória ("ganhou ... XP").
+  def test_game_over_reward_copy_matches_badge
+    body = finish_broke_and_defeated
+
+    assert_includes body, "Vencedor: Oponente", "badge aponta o oponente vencedor"
+    rewards = body[%r{<p class="rewards">.*?</p>}m].to_s
+    refute_empty rewards, "recompensa de participacao presente no fim"
+    assert_includes rewards, "Derrota", "copy de derrota coerente com o badge"
+    refute_includes rewards, "ganhou", "nunca a copy de vitoria quando o oponente venceu"
+  end
+
   def test_results_card_rewards
     start_battle_for("user-a")
     finish_battle
