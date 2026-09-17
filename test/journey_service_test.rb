@@ -37,6 +37,14 @@ class JourneyStartedTest < Minitest::Test
     assert_equal true, @journey.started?("user-a")
   end
 
+  # Rodada 2 (0089 review): fronteira do gate derivado — 5 membros ainda NAO
+  # inicia a jornada (protege o `>= MAX_TEAM_SIZE` de lib/journey_service.rb).
+  def test_team_of_five_is_not_started
+    (1..5).each { |number| @team.add("user-a", build_pokemon_record("pokemon#{number}", number)) }
+
+    assert_equal false, @journey.started?("user-a")
+  end
+
   def test_team_size_liberates_even_without_flag
     fill_team("user-b")
 

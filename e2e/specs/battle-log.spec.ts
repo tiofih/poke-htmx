@@ -122,12 +122,14 @@ test('consumption and reward copy', async ({ page }) => {
     await expect(defeat).toBeVisible();
     await expect(defeat).toContainText(/Derrota.*Cure no Poke Center/);
   }
-  if ((await page.locator('#result-box .rewards').count()) > 0) {
-    const rewards = page.locator('#result-box .rewards').first();
-    await expect(rewards).toContainText('XP');
-    if (badge.includes('Oponente')) await expect(rewards).toContainText('Derrota');
-    if (badge.includes('Seu Time')) await expect(rewards).toContainText('ganhou');
-  }
+  // C9 (rodada 2): prova incondicional — o fixture e uma derrota estavel do
+  // CHEAP_TEAM (10/10 runs), entao o badge e a copy sao fixos; sem guard, uma
+  // regressao na copy nao passa em silencio.
+  await expect(page.locator('#result-box .rewards')).toHaveCount(1);
+  expect(badge).toContain('Vencedor: Oponente');
+  const rewards = page.locator('#result-box .rewards').first();
+  await expect(rewards).toContainText('Derrota');
+  await expect(rewards).not.toContainText('ganhou');
 });
 
 // ---------------------------------------------------------------------------
