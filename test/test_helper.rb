@@ -81,10 +81,6 @@ module TestDatabase # rubocop:disable Metrics/ModuleLength
     with_db { |connection| connection.exec("TRUNCATE #{tables}") }
   end
 
-  def self.clear_user_state!
-    with_db { |connection| connection.exec("TRUNCATE user_state") }
-  end
-
   def self.inventory_quantity(user_id, item_name)
     with_db do |connection|
       row = connection.exec_params(

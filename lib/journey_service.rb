@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 class JourneyService
-  def initialize(user_state:, team:, wallet: nil, heal_preview: nil)
-    @user_state = user_state
+  def initialize(team:, wallet: nil, heal_preview: nil)
     @team = team
     @wallet = wallet
     @heal_preview = heal_preview
@@ -18,14 +17,6 @@ class JourneyService
 
   def game_over?(user_id)
     started?(user_id) && !battle_ready?(user_id) && !affordable_heal?(user_id)
-  end
-
-  def mark_started(user_id)
-    @user_state.mark_started(user_id)
-  end
-
-  def mark_started_when_full(user_id)
-    mark_started(user_id) if @team.all(user_id).size >= TeamRepository::MAX_TEAM_SIZE
   end
 
   private

@@ -13,7 +13,6 @@ module ServerTestHelpers
   def setup
     TestDatabase.setup!
     TestDatabase.clear_team!
-    TestDatabase.clear_user_state!
     Server.settings.battles.clear_all
     @repository = TeamRepository.new
     @progression = ProgressionRepository.new
@@ -21,9 +20,9 @@ module ServerTestHelpers
     @inventory = InventoryRepository.new
   end
 
-  def start_journey(user_id)
-    UserStateRepository.new.mark_started(user_id)
-  end
+  # Sessao 0089: esvaziado no Passo 2 (a flag que ele escrevia nao existe mais);
+  # o helper e os 4 chamadores saem no Passo 3.
+  def start_journey(_user_id); end
 
   def fill_team(user_id, members: DEFAULT_TEAM_SPECS)
     add_team(user_id, members)

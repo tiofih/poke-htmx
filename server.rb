@@ -21,7 +21,6 @@ require_relative "lib/item_catalog"
 require_relative "lib/mart_service"
 require_relative "lib/battle_service"
 require_relative "lib/team_service"
-require_relative "lib/user_state_repository"
 require_relative "lib/journey_service"
 require_relative "db/seeds/saldo_inicial"
 require_relative "lib/parallelizer"
@@ -596,7 +595,6 @@ module ServerTeamActions
 
   def add_team_success(pokemon)
     notice = add_team_notice(pokemon)
-    settings.journey.mark_started_when_full(current_user)
     settings.battle.invalidate(current_user) unless notice
     @notice = notice || "Adicionado ao time."
     @notice_kind = notice ? :error : :success
@@ -1442,9 +1440,8 @@ class Server < Sinatra::Base
       path: ENV["POKERATING_CACHE_PATH"] || "tmp/pokemon_rating_cache.json"
     )
     set :inventory, InventoryRepository.new
-    set :user_state, UserStateRepository.new
     set :journey, JourneyService.new(
-      user_state: settings.user_state, team: settings.team,
+      team: settings.team,
       wallet: settings.wallet,
       heal_preview: ->(user_id) { settings.heal.preview_cost(user_id) }
     )

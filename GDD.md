@@ -24,7 +24,7 @@ Onboarding (nome+avatar) → montar time (1 inicial ou pré-montado) → [escolh
 - **PvP assíncrono:** fantasma = snapshot de time real (6 + moves + hold) + IA mesma do PvE; rank local/global já existe via `GET /history`, estender com temporada por ginásio.
 
 ## 5. Telas novas (uma fatia por tela)
-1. **Onboarding** — nome + avatar (escolha entre N sprites, CSS-only). Persiste em `user_state`. Empty-state modelo: copy convidativa + CTA único.
+1. **Onboarding** — nome + avatar (escolha entre N sprites, CSS-only). ~~Persiste em `user_state`~~ *(a tabela `user_state` foi removida na sessão 0089, 2026-09-16 — o onboarding precisa de um novo lar de persistência, a definir no refinamento; ver `docs/draft-backlog.md:344`)*. Empty-state modelo: copy convidativa + CTA único.
 2. **Montagem de time** — duas vias: (a) escolher 1 a 1 do catálogo, (b) pegar time fechado (3 pré-montados por arquétipo: fogo/água/grama). Debate em aberto (decidir em sessão): começar com **1** e capturar/comprar o resto no caminho vs. manter 6 iniciais — GDD recomenda: **começar com 1 + 2 capturas/compras garantidas até o 1º ginásio**, teto segue 6.
 3. **Escolha de oponente (PvE)** — 3 cartas forte/médio/forte com risco↔recompensa explícitos (moedas/XP escalam; derrota p/ fraco paga XP-only).
 4. **Ginásio temático** — tela por líder (tipo dominante, cor via `--t-*`, arena 3col→1). Intro de chefe (banner + stagger, sem JS).

@@ -36,6 +36,11 @@ por já ter outro dono. Investigado sem rodar suíte/e2e/docker.
 **Do usuário:** J4 (apelido no ranking) e onboarding entram no próximo ciclo? Se sim → (a) e a tabela é
 o alvo de J4; se não → (b) com a migração de drop.
 
+**FECHADO (2026-09-16, D2/D3):** (b) apagar — **executado na sessão 0089** (Passo 1/2: `0037_drop_user_state.sql`
++ deleção de `lib/user_state_repository.rb` e da escrita vestigial; a criação `0036` saiu). O gate da
+jornada segue derivado de `team >= 6`. As linhas acima ficam como registro do digest; J4/onboarding
+precisam de novo lar de persistência (registrado em `docs/draft-backlog.md:133,344` e na §8 da 0089).
+
 ## 5.F.2 — Os 4 e2e vermelhos de `e2e/specs/battle-log.spec.ts`
 
 **O que é.** 12 testes no arquivo, 5 já usam `buildBudgetTeam` (`:157-164`, `CHEAP_TEAM`), e **4 ainda
@@ -101,6 +106,6 @@ uso (os hooks dizem que sim)? Se estiver abandonado, descartar é uma limpeza gr
 
 ## Para fechar (marque 1 por item)
 
-1. `user_state` → (a) manter (J4 próximo) · (b) apagar agora
-2. 4 e2e `battle-log` → (a) reparar (`buildBudgetTeam`) · (b) apagar os 4
+1. ~~`user_state` → (a) manter (J4 próximo) · (b) apagar agora~~ → **(b) apagar agora — decidido em 2026-09-16 e executado na sessão 0089 (Bloco A)**
+2. ~~4 e2e `battle-log` → (a) reparar (`buildBudgetTeam`) · (b) apagar os 4~~ → **(a) reparar — decidido em 2026-09-16; execução no Bloco B (Passo 6) da sessão 0089**
 3. `prints/` → (a) tudo · (b) só backup · (c) preservar ‖ `_ai_context/` → (b) limpeza fina · (c) tudo

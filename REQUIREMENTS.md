@@ -640,7 +640,9 @@ Para que um requisito seja considerado **completo**, todos os itens abaixo devem
       `JourneyService#started?` = `user_state.started? || team >= 6`. **Decisão (0052):**
       o gate re-fecha quando o time fica < 6 — `started?` passa a ser **derivado** só do
       tamanho do time (`team >= 6`); a flag deixa de liberar (vestigial, escrita
-      preservada).
+      preservada). **Limpeza (0089, 2026-09-16):** a flag/tabela `user_state` foi
+      **removida** (migração `0037_drop_user_state.sql` + deleção do repositório e da
+      escrita vestigial); o gate segue derivado de `team >= 6` (C4 da 0089).
 - [x] **Bug/UX: busca só acha formas base (anotado 2026-08-25, no QA; **RESOLVIDO na
       sessão 0053, 2026-08-25**):** "pika" retornava vazio (pikachu é não-base da cadeia
       pichu→pikachu→raichu), "pichu" ok; "char" não achava charmander (starter excluído do

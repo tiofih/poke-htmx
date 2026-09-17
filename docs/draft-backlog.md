@@ -106,7 +106,7 @@ e entra como a **Onda open-design** (sessões 0072–0076). Os tokens hex antigo
 - **Atualizar para HTMX 4.0** + **adicionar skills da atualização** (routing AGENTS/CLAUDE).
   - T128: pinado `htmx.org@2.0.3` (`views/layout.erb:7`); breaking hits: rename de eventos (`layout.erb:38-53`), `hx-disabled-elt`→`hx-disable` (`team.erb:57`), `hx-params` removido (`team.erb:53`) + `hx-delete` form-data, flip ordem OOB, swap default 4xx/5xx (`server.rb:1296`), `HX-Trigger`→`HX-Source`.
   - Checklist: renomear eventos/atributos, pinar 4.0.0 + upgrade-check, fallback `htmx-2-compat`, verificar OOB/indicators/modais; esforço ~M (maioria verificação); skill `htmx-upgrade-from-htmx2`; implementação futura, fora do fluxo (RNF-04).
-- **Flag `user_state` vestigial** — `JourneyService#started?` agora só usa `team>=6`; remover/redefinir papel. **Decidido e em execução na sessão 0089 (refinada em 2026-09-16, D2/D3):** apagar a tabela (migração `0037_drop_user_state.sql` + remoção da criação `0036`), o repo morto e a escrita vestigial; o gate segue derivado do time. Este item fica obsoleto quando o Passo 2 da 0089 entrar.
+- **Flag `user_state` vestigial** — ~~`JourneyService#started?` agora só usa `team>=6`; remover/redefinir papel.~~ **OBSOLETO — removido na sessão 0089 (2026-09-16, Passo 2):** a tabela foi dropada pela migração `0037_drop_user_state.sql` (criação `0036` apagada), o repo morto e a escrita vestigial saíram; o gate segue derivado de `team>=6`. Sem trabalho pendente aqui.
 
 ### Auto-battler / Motor
 - **D4 — modos de draft temático** — regras de validação na montagem (1 por tipo, ban de lendários…); cruza com J1.

@@ -703,39 +703,6 @@ class ServerHealJourneyGateTest < Minitest::Test
   end
 end
 
-class ServerTeamJourneyMarkTest < Minitest::Test
-  include ServerTestHelpers
-  include TestSupport
-
-  def test_post_team_marks_journey_on_sixth_member
-    5.times { |n| @repository.add("user-a", build_pokemon_record("pokemon#{n}", n + 1)) }
-    state = UserStateRepository.new
-
-    refute state.started?("user-a")
-
-    PokeApiStub.with_find(pikachu_pokemon) do
-      PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
-        post "/team", { pokeName: "pikachu" }, user_session("user-a")
-      end
-    end
-
-    assert last_response.ok?
-    assert_equal 6, @repository.all("user-a").size
-    assert_equal true, state.started?("user-a")
-  end
-
-  def test_post_team_below_six_does_not_mark_journey
-    PokeApiStub.with_find(pikachu_pokemon) do
-      PokeApiStub.with_learnable_moves([{ level: 1, name: "growl" }]) do
-        post "/team", { pokeName: "pikachu" }, user_session("user-a")
-      end
-    end
-
-    assert last_response.ok?
-    assert_equal false, UserStateRepository.new.started?("user-a")
-  end
-end
-
 class ServerTeamHpGateTest < Minitest::Test
   include ServerTestHelpers
   include TestSupport
@@ -1184,8 +1151,7 @@ class TeamBudgetRoutesTest < Minitest::Test
     refute_match(/m[aá]ximo.*3.*S/i, last_response.body)
     assert_equal 3, @repository.all("user-a").size
     refute_includes @repository.all("user-a").map(&:name), "candidate-pure"
-    # jornada não marcada e batalha não invalidada (time segue <6)
-    refute UserStateRepository.new.started?("user-a")
+    # batalha não invalidada (time segue <6)
   end
 
   # C4 — 4º S restrito (110) também bloqueado só por orçamento
