@@ -46,7 +46,7 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
 ### 2. Implementação (TDD)
 
 - `red` (teste falha) → `green` (implementação mínima, suíte + lint verdes) → `refactor`.
-- **Commit obrigatório após cada green** (1 passo = 1 commit `Passo N:`).
+- **Commit obrigatório após cada green** (1 passo = 1 commit `test(passo N):`).
 - Suíte completa verde em **todo** green — o baseline (N runs/M asserts) é preservado.
 - Atualizar `REQUIREMENTS.md`/`SESSIONS.md` **no mesmo escopo** quando o comportamento
   dos requisitos mudar.
@@ -55,7 +55,7 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
 - **Modo PR (`--with-pr`) — passo PR, ainda na fase 2:** com a implementação e os testes verdes,
   o Implementador **entrega** a sessão: (1) escreve `sessions/pr/NNNN-pr-body.md` a partir de
   `docs/pr/TEMPLATE-pr-body.md` (S8.2), roda `./scripts/checar-pr NNNN` até passar e commita
-  `PR sessao 00NN: corpo do PR — <resumo>`; (2) o **Revisor** (fase 2c) revisa o diff **incluindo
+  `docs(pr 00NN): corpo do PR — <resumo>`; (2) o **Revisor** (fase 2c) revisa o diff **incluindo
   o corpo** e emite o veredito `Aprovado` (S7); (3) só então o Implementador abre o PR/MR com
   `./scripts/abrir-pr NNNN --open` (o script recusa abrir se o `checar-pr` não passar) e
   registra `> PR: <url>` no arquivo da sessão. Com o PR aberto vale a **PARADA** — a fase 3 é a
@@ -93,7 +93,7 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
   um segundo PR**.
 - **Quem faz merge é o usuário** — nunca o agente. Só depois do merge: registrar a validação como
   tabela por critério (S2), com o link do PR como entrega, atualizar `REQUIREMENTS.md`/
-  `SESSIONS.md` e commitar `Validacao sessao 00NN: ...`.
+  `SESSIONS.md` e commitar `docs(sessao 00NN): validacao — ...`.
 - **Modo degradado (projeto sem remote ou sem CLI da plataforma):** o corpo versionado em
   `sessions/pr/NNNN-pr-body.md` passa a ser a entrega, e a validação acontece sobre ele. A
   validação continua sendo do usuário: o modo PR muda o meio, nunca o validador.
@@ -177,27 +177,33 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
   de feito/pendente), fora do fluxo — revisados apenas ao concluir as fases agendadas
   (o que entra vira sessão, o que não se aplica é descartado — decisão do usuário).
   Registrar no draft **não** abre escopo nem atrasa a sessão em curso.
-- Convenção de commit para anotações do tipo: `Draft: <resumo do que foi anotado>`.
+- Convenção de commit para anotações do tipo: `draft: <resumo do que foi anotado>`.
 
 ## Convenções de commit
 
-- **Formato:** uma linha `Contexto: descrição concisa`, **com prefixo genérico
-  opcional** (`feat:`, `fix:`, `docs:`, `chore:` — ajuste a lista à convenção do
-  projeto).
+- **Formato:** `tipo[(escopo)]: descrição concisa`. O **tipo é obrigatório** e sai da
+  lista: `feat`, `fix`, `docs`, `test`, `chore`, `refactor`, `draft`; a descrição diz o
+  **resultado**, não a atividade ("implementacao", "ajustes").
+- **Escopo opcional** entre parênteses: o contexto do kit vira escopo — `(passo N)`,
+  `(passos N-M)`, `(sessao 00NN)`, `(pr 00NN)`. O histórico sem tipo (`Passo N: ...`,
+  `Sessao 0001: ...`) permanece; a regra vale do próximo commit em diante. `Draft:` já
+  era um tipo — passa a ser `draft:`.
 - **Idioma:** qualquer (consistente com o projeto); português/inglês.
 - **Corpo opcional:** linha em branco + bullets de decisões.
 
-| Contexto | Quando usar | Exemplo |
+| Tipo | Quando usar | Exemplo |
 | --- | --- | --- |
-| `Passo N:` | green do passo TDD `N` | `Passo 1: repository#all via schema + setup` |
-| `PR sessao 00NN: corpo do PR — ...` | corpo do PR commitado (modo `--with-pr`) | `PR sessao 0002: corpo do PR — recarga por arrasto (#12)` |
-| `Passos N-M:` | green de passos agrupados | `Passos 3-4: testes de DELETE idempotente` |
-| `Sessao 00NN: refinamento concluido — ...` | refinamento (fase 1) fechado | `Sessao 0002: refinamento concluido — criterios e plano TDD fechados` |
-| `Validacao sessao 00NN: ...` | validação do usuário (fase 3) | `Validacao sessao 0002: requisito Done, criterios verificados, prox sessao 0003` |
-| `Sessao 00NN concluida: ...` | sessão fechada | `Sessao 0001 concluida: validacao integrada, proxima sessao 0002` |
-| `Regra: ...` | mudança de convenção/regra | `Regra: validacao e feita pelo usuario — parar na fase 3` |
-| `Draft: ...` | anotação de ideia/draft | `Draft: performance da gateway anotada` |
-| `Atualizar progresso da sessão 00NN (...)` | checkpoint de progresso | `Atualizar progresso da sessão 0001 (passo 4 verde e validado)` |
+| `test(passo N):` | green do passo TDD `N` | `test(passo 1): repository#all via schema + setup` |
+| `test(passos N-M):` | green de passos agrupados | `test(passos 3-4): DELETE idempotente` |
+| `docs(pr 00NN):` | corpo do PR commitado (modo `--with-pr`) | `docs(pr 0002): corpo do PR — recarga por arrasto (#12)` |
+| `docs(sessao 00NN):` | refinamento (fase 1) fechado | `docs(sessao 0002): refinamento concluido — criterios e plano TDD fechados` |
+| `docs(sessao 00NN):` | validação do usuário (fase 3) | `docs(sessao 0002): validacao — requisito Done, criterios verificados, prox 0003` |
+| `docs(sessao 00NN):` | sessão fechada | `docs(sessao 0001): concluida — validacao integrada, proxima sessao 0002` |
+| `docs(sessao 00NN):` | checkpoint de progresso | `docs(sessao 0001): progresso — passo 4 verde e validado` |
+| `docs:` | mudança de convenção/regra | `docs: validacao e feita pelo usuario — parar na fase 3` |
+| `chore:` | kit/tooling (install, scripts, config) | `chore: install --force preserva conteudo de autoria` |
+| `draft:` | anotação de ideia/draft | `draft: performance da gateway anotada` |
+| `feat:` `fix:` `refactor:` | comportamento novo / correção / refatoração | `feat: tambor aceita drop por pointer` |
 
 ## Estrutura do arquivo de sessão
 

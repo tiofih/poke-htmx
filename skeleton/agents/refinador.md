@@ -64,7 +64,7 @@ Quando você receber as escolhas do usuário (via prompt/args), aí sim:
   gotchas `provisional:true`) acontece no Revisor APROVADO, fim da fase 2 (S6) —
   SEM validação, SEM commit — não aqui.
 - Atualize `SESSIONS.md` (tabela + "Próxima sessão" — S4), rode `./scripts/checar-sessao NNNN`
-  e `./scripts/check_docs`, e commite `Sessao NNNN: refinamento concluido — ...`.
+  e `./scripts/check_docs`, e commite `docs(sessao NNNN): refinamento concluido — ...`.
 - Grave handoff (`memory_handoff_begin`) de fase para o Implementador (não é a
   memória S6 — essa só acontece no Revisor APROVADO, fim da fase 2, SEM validação, SEM commit).
 - **Modo PR (só com `--with-pr`):** escreva também, logo abaixo da tabela de `## Status`, as duas
@@ -75,5 +75,5 @@ Quando você receber as escolhas do usuário (via prompt/args), aí sim:
 ## Regras
 - Contexto mínimo; sempre **levante opções**; a decisão é **do usuário**.
 - Rode a partir de `{{ROOT}}` (cd se o cwd for outro).
-- Formato de commit do projeto (português; prefixo genérico **opcional** — ver a regra
-  de commit em `AGENTS.md`); NÃO use curl/wget.
+- Formato de commit do projeto (`tipo[(escopo)]: descrição` — tipo obrigatório da lista;
+  ver a regra de commit em `AGENTS.md`); NÃO use curl/wget.

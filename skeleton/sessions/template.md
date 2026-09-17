@@ -65,9 +65,9 @@ descrição do resultado futuro — estado ANTES do code.)
 
 | Passo | Escopo (red → green) | Verificação |
 | --- | --- | --- |
-| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `Sessao {{NNNN}}: refinamento concluido — ...` |
-| 1 | {{teste que falha → implementação mínima}} | suíte verde + lint 0, commit `Passo 1:` |
-| 2 | {{...}} | suíte verde + lint 0, commit `Passo 2:` |
+| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `docs(sessao {{NNNN}}): refinamento concluido — ...` |
+| 1 | {{teste que falha → implementação mínima}} | suíte verde + lint 0, commit `test(passo 1):` |
+| 2 | {{...}} | suíte verde + lint 0, commit `test(passo 2):` |
 | — | **Fase 2 concluída** → **Revisor (2c)**: loop Implementador↔Revisor até veredito `Aprovado` (teto 3 rodadas, senão S3) → **PARAR** e aguardar a validação do usuário (fase 3). |
 
 ## 7. Validação (executada pelo usuário)

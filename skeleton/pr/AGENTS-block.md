@@ -21,7 +21,7 @@
 
 1. escrever `sessions/pr/NNNN-pr-body.md` a partir de `docs/pr/TEMPLATE-pr-body.md`;
 2. rodar `./scripts/checar-pr NNNN` e corrigir até passar;
-3. commitar `PR sessao 00NN: corpo do PR — <resumo>`;
+3. commitar `docs(pr 00NN): corpo do PR — <resumo>`;
 4. Revisor (2c) — o corpo do PR faz parte do que ele revisa, junto com o diff;
 5. com `Aprovado` + `CORPO DO PR: publicável`: `./scripts/abrir-pr NNNN --open`;
 6. registrar `> PR: <url>` na seção de Validação do arquivo da sessão;

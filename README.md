@@ -30,6 +30,8 @@ Projetos adotam o kit por `git subtree` (veja "Adicionar via git" abaixo).
 | `skeleton/STACK.md` | Template de especialização por área (tokens `{{AREA_*}}`/`{{PATHS_*}}` preenchidos à mão) — instalado por padrão; nunca sobrescrito. |
 | `skeleton/commands/iniciar-sessao.md` + `levantar-roadmap.md` | Comandos extras de abertura/digest — instalados só com `--with-extra-commands`. |
 | `skeleton/agents/optional/debugger.md` | Agente opcional de diagnóstico (read-only) — agrupamento provisório com `--with-extra-commands` (ver tabela de perfis). |
+| `skeleton/agents/optional/arquiteto.md` | Agente opcional de **desenho técnico** (fase 1b, read-only) — instalado só com `--with-arquiteto`; as dependências dele estão declaradas no próprio arquivo (`## Dependências`). |
+| `skeleton/arquiteto/*-block.md` | Blocos de invocação da fase 1b (marcador `<!-- sdd-arquiteto:bloco -->`) anexados a `.opencode/skills/sdd/SKILL.md` e `.opencode/commands/sessao.md` — instalados só com `--with-arquiteto`. |
 
 ## Instalação (recomendada — `install.sh`)
 
@@ -64,6 +66,7 @@ Perfis opt-in (default off = comportamento atual):
 | `--with-extra-commands` | `skeleton/commands/iniciar-sessao.md` + `levantar-roadmap.md` → `.opencode/commands/` |
 | `--with-extra-commands` (+ debugger, agrupamento provisório — plano §2.6/§2.7 separam, §2.8 sem flag própria) | `skeleton/agents/optional/debugger.md` → `.opencode/agent/` |
 | `--with-pr` | Modo PR (a entrega da sessão é um PR/MR): `skeleton/scripts/checar-pr` + `skeleton/scripts/abrir-pr` → `scripts/` (+x); `skeleton/pr/` (template + exemplo do corpo do PR + README do modo) → `docs/pr/` (**create-only**); bloco do modo PR (marcador `<!-- sdd-pr: ativo -->`) anexado ao `AGENTS.md` e ao `sessions/template.md`; cria `docs/pr/` + `sessions/pr/`. Sem a flag, nada disso existe. |
+| `--with-arquiteto` | Papel de **desenho técnico (fase 1b, opcional, read-only)**: `skeleton/agents/optional/arquiteto.md` → `.opencode/agent/arquiteto.md` (**create-only**); blocos de invocação (`skeleton/arquiteto/`) anexados sob marcador `<!-- sdd-arquiteto:bloco -->` a `.opencode/skills/sdd/SKILL.md` e `.opencode/commands/sessao.md` (append idempotente, arquivo-base intacto). **Não toca `AGENTS.md`.** Dependências declaradas no próprio agente (`## Dependências`) — o install avisa o que falta, sem falhar. |
 
 ## Adicionar o SDD a outro projeto via git (subtree)
 

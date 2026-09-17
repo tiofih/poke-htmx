@@ -10,7 +10,7 @@ description: Fluxo de papéis do SDD do {{PROJETO}} — Refinador → Implementa
 | Fase | Papel (subagent_type) | Entregável | Quando disparar |
 |---|---|---|---|
 | 1 — Refinamento (CONVERSA) | `refinador` (investigação → finalize) | **investigação**: mapa de decisões (opções A/B/C, recomendada). **finalize**: sessão `sessions/NNNN-*.md` + `SESSIONS.md` (S4) | sessão nova / refinamento pendente |
-| 2 — TDD | `implementador-teste` | código + testes, commits `Passo N:`, suíte+lint verdes | refinamento aprovado |
+| 2 — TDD | `implementador-teste` | código + testes, commits `test(passo N):`, suíte+lint verdes | refinamento aprovado |
 | 2c — Revisão | `revisor` | diff revisado + `VEREDITO: Aprovado` \| `Requer ajuste` | implementação feita |
 | 2d — Entrega (modo PR) | `implementador-teste` (corpo + `checar-pr` + commit) → `revisor` (parecer sobre o corpo) → `implementador-teste` (`abrir-pr`) | corpo do PR em `sessions/pr/NNNN-pr-body.md` + PR/MR aberto e registrado na sessão | só com o marcador `<!-- sdd-pr: ativo -->` em `AGENTS.md` |
 | 3 — pré-validação | `playtester` (OPCIONAL) | achados de UX/comportamento no app rodando | só se o usuário pedir / tiver valor |

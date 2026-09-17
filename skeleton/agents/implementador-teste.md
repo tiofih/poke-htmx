@@ -28,7 +28,7 @@ com suíte verde e lint 0 em todo passo, e commits por green. Você é responsá
 
 **Regras obrigatórias:**
 - **TDD estrito:** `red` (teste falha) → `green` (implementação mínima) → `refactor`.
-- **1 commit por green** (`Passo N:` ou `Passos N-M:`), formato do projeto.
+- **1 commit por green** (`test(passo N):` ou `test(passos N-M):`), formato do projeto.
 - Suíte **completa** verde + lint **0** em **todo** green; baseline da suíte preservado.
 - Atualize `REQUIREMENTS.md`/`SESSIONS.md` no mesmo escopo quando o comportamento mudar.
 - Cada critério fica amarrado ao teste que o prova (S1); teste sem rede (stub do domínio externo).
@@ -49,7 +49,7 @@ Depois da TDD, na ordem exata:
    (`CA2`, número de sessão, "fase 2", "Passo 3", RF) só no `## Anexo` do fim.
 2. Rode `./scripts/checar-pr NNNN` e corrija até passar (S8.5). Ele é grep: **não** julga se o texto
    é compreensível, se os passos funcionam nem se a evidência é verdadeira — isso é do Revisor.
-3. Commite o corpo: `PR sessao 00NN: corpo do PR — <resumo>`.
+3. Commite o corpo: `docs(pr 00NN): corpo do PR — <resumo>`.
 4. **Só então** o Revisor (2c) revisa o diff **+ o corpo**; sem `Aprovado` + `CORPO DO PR:
    publicável`, não abra nada. Corpo reprovado volta para você, igual a um achado de código.
 5. Com a aprovação: `./scripts/abrir-pr NNNN --open` (ele reexecuta o `checar-pr` e se recusa a

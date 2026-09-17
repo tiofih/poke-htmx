@@ -39,6 +39,12 @@ Opções:
   --with-pr           instala o modo PR (entrega da sessão = PR/MR): docs/pr/ (template, exemplo,
                       README), scripts/checar-pr e abrir-pr, sessions/pr/ e os blocos de regras do
                       modo anexados a AGENTS.md e sessions/template.md (opt-in)
+  --with-arquiteto    instala o papel de desenho técnico (fase 1b, opcional, read-only):
+                      skeleton/agents/optional/arquiteto.md → .opencode/agent/arquiteto.md
+                      (create-only) + blocos de invocação anexados a .opencode/skills/sdd/SKILL.md
+                      e .opencode/commands/sessao.md. Não toca AGENTS.md. As dependências estão
+                      declaradas no próprio agente (## Dependências) — o install avisa o que falta,
+                      sem falhar (opt-in)
   -h, --help          mostra esta ajuda
 
 Render: o install substitui os globais {{PROJETO}}, {{PRÓXIMA_SESSAO}}, {{ROOT}},
@@ -59,6 +65,11 @@ WITH_CONTEXT_MODE=0
 WITH_STACK=0
 WITH_EXTRA_COMMANDS=0
 WITH_PR=0
+WITH_ARQUITETO=0
+# Destinos que o --force substituiu apesar de DIVERGIREM do conteúdo renderizado do kit
+# (byte a byte). Ver install_file(): a divergência costuma ser adaptação local do projeto
+# pós-instalação, que o kit genérico não tem. Resumo no fim do install.
+FORCE_REPLACED=()
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -70,6 +81,7 @@ while [ $# -gt 0 ]; do
     --with-stack) WITH_STACK=1 ;;
     --with-extra-commands) WITH_EXTRA_COMMANDS=1 ;;
     --with-pr) WITH_PR=1 ;;
+    --with-arquiteto) WITH_ARQUITETO=1 ;;
     --projeto) PROJETO="${2:-}"; shift ;;
     --proxima) PROXIMA="${2:-}"; shift ;;
     --primeira) PRIMEIRA="${2:-}"; shift ;;
@@ -153,7 +165,21 @@ install_file() { # src dst [key=value ...]
   shift 2
   if [ -e "$dst" ]; then
     if [ "$FORCE" -eq 1 ]; then
-      echo "install> sobrescrevendo (--force): $dst"
+      # Compara o resultado RENDERIZADO com o arquivo instalado. Comparar o skeleton-fonte
+      # não serve: os placeholders {{...}} só existem na origem e fariam TODO arquivo
+      # parecer divergente. Byte a byte (cmp) basta e não precisa de dependência; igual =
+      # nada a avisar, divergente = o --force vai trocar conteúdo (quase sempre adaptação
+      # local pós-instalação) pelo texto genérico do kit.
+      local probe
+      probe="$(mktemp "${TMPDIR:-/tmp}/sdd-probe.XXXXXX")"
+      render "$src" "$probe" "$@"
+      if cmp -s "$probe" "$dst"; then
+        echo "install> sobrescrevendo (--force): $dst"
+      else
+        echo "install> ATENÇÃO: $dst difere do kit instalado — substituindo (--force); a cópia atual será perdida"
+        FORCE_REPLACED+=("$dst")
+      fi
+      rm -f "$probe"
     else
       echo "install> já existe, pulando: $dst (use --force para sobrescrever)"
       return
@@ -178,6 +204,24 @@ install_create_only() { # src dst [key=value ...]
   fi
   echo "install> criando: $dst"
   render "$src" "$dst" "$@"
+}
+
+# Anexa um bloco delimitado por marcador ao FIM de um arquivo já instalado, idempotente.
+# Nunca reescreve o arquivo-base: só acrescenta o conteúdo do bloco (que já traz os próprios
+# marcadores de abertura/fechamento) — é o único jeito de o papel/bloco aparecer num projeto
+# que já tinha o kit (a cópia dele desses arquivos é create-only). `marker` é a âncora de
+# idempotência. Destino ausente = aviso, não erro (o arquivo-base tem outro caminho de install).
+install_block() { # src dst marker [rotulo]
+  local src="$1" dst="$2" marker="$3" rot="${4:-$(basename "$2")}"
+  if [ ! -f "$dst" ]; then
+    echo "install> AVISO: $dst não existe — bloco '$rot' não anexado." >&2
+  elif grep -qF "$marker" "$dst"; then
+    echo "install> $rot já contém o bloco, pulando."
+  else
+    printf '\n' >> "$dst"
+    cat "$src" >> "$dst"
+    echo "install> bloco '$rot' anexado ao fim de: $dst"
+  fi
 }
 
 # --- artefatos do projeto ---
@@ -277,6 +321,42 @@ if [ "$WITH_EXTRA_COMMANDS" -eq 1 ]; then
   install_create_only "$SKELETON_DIR/commands/levantar-roadmap.md" "$TARGET/.opencode/commands/levantar-roadmap.md"
   mkdir -p "$TARGET/.opencode/agent/optional"
   install_create_only "$SKELETON_DIR/agents/optional/debugger.md" "$TARGET/.opencode/agent/optional/debugger.md"
+fi
+
+# --- perfil opt-in --with-arquiteto (fase 1b: desenho técnico, opcional) ---
+# Só com a flag. O papel é um agente a MAIS (não muda regra S nem o PROTOCOL.md — fase 1b é
+# passo opcional, sem portão) e por isso NÃO toca AGENTS.md. Ordem: arquivo do agente
+# (create-only) → blocos de invocação (append sob marcador) → avisos de dependência.
+if [ "$WITH_ARQUITETO" -eq 1 ]; then
+  # create-only: depois da 1ª instalação o papel é do projeto (ele pode adaptar o prompt);
+  # o --force NÃO o reverte (ver install_create_only). Vai FLAT em .opencode/agent/.
+  install_create_only "$SKELETON_DIR/agents/optional/arquiteto.md" "$TARGET/.opencode/agent/arquiteto.md"
+
+  # Invocação por bloco anexado sob os próprios marcadores `<!-- sdd-arquiteto:bloco -->`,
+  # idempotente, sem tocar na tabela/prosa acima. Os blocos são autossuficientes (têm o
+  # portão "só dispare se .opencode/agent/arquiteto.md existir").
+  install_block "$SKELETON_DIR/arquiteto/SKILL-block.md" \
+    "$TARGET/.opencode/skills/sdd/SKILL.md" '<!-- sdd-arquiteto:bloco -->' "skills/sdd/SKILL.md"
+  install_block "$SKELETON_DIR/arquiteto/sessao-block.md" \
+    "$TARGET/.opencode/commands/sessao.md" '<!-- sdd-arquiteto:bloco -->' "commands/sessao.md"
+
+  # Aviso de dependência: NUNCA erro (exit != 0 por dependência ausente quebraria o install de
+  # um projeto que legitimamente roda sem índice) e NUNCA claim de MCP alcançável — offline, um
+  # shell só confere presença de arquivo/config no disco. Cada linha diz o que DEGRADA; o detalhe
+  # canônico é o bloco `## Dependências` do próprio agente.
+  aviso_arq() { echo "install> AVISO: $1 ausente — arquiteto: $2" >&2; }
+  # Áreas = linha `**Paths:**` PREENCHIDA (sem placeholder `{{...}}`): o skeleton sem preencher
+  # tem `- **Paths:** \`{{PATHS_*}}\`` e não conta — senão o aviso nunca sairia num projeto real.
+  grep -E '^[-*]? ?\*\*Paths:\*\*' "$TARGET/STACK.md" 2>/dev/null | grep -qv '{{' \
+    || aviso_arq "áreas no STACK.md" "devolve UMA fatia + 'areas: desconhecidas'"
+  { [ -e "$TARGET/tooling/INDEX-FIRST.md" ] || [ -d "$TARGET/graphify-out" ] \
+    || [ -d "$TARGET/.codebase-memory" ]; } \
+    || aviso_arq "índice/grafo (--with-indexing)" "lê a fonte direto; 'descoberta: leitura direta, tier: Scout'"
+  grep -q 'ai-memory:start' "$TARGET/AGENTS.md" "$TARGET/CLAUDE.md" 2>/dev/null \
+    || aviso_arq "ai-memory (--with-context-mode)" "contexto só pelo prompt; não grava memória"
+  grep -q 'context-mode' "$TARGET/AGENTS.md" "$TARGET/opencode.json" 2>/dev/null \
+    || aviso_arq "context-mode (--with-context-mode)" "análise ampla entra crua; cita arquivo:linha"
+  echo "install>   (detalhe por dependência: .opencode/agent/arquiteto.md § Dependências)" >&2
 fi
 
 # --- AGENTS.md: cria se faltar, ou anexa as regras de workflow (idempotente) ---
@@ -383,6 +463,19 @@ if [ "$WITH_PR" -eq 1 ] && [ -x "$TARGET/scripts/checar-pr" ]; then
   }
 fi
 
+# Resumo do --force: quantos arquivos divergentes foram substituídos e quais. O aviso
+# per-file do install_file aparece na hora, mas espalhado no log; este bloco fecha a
+# execução com o número e a lista (a categoria já é o 1º segmento do caminho relativo).
+if [ "${#FORCE_REPLACED[@]}" -gt 0 ]; then
+  echo >&2
+  echo "install> AVISO: --force substituiu ${#FORCE_REPLACED[@]} arquivo(s) que divergiam do kit:" >&2
+  for f in "${FORCE_REPLACED[@]}"; do
+    echo "install>   ${f#"$TARGET"/}" >&2
+  done
+  echo "install>   Divergir do kit costuma ser adaptação local pós-instalação; se ela era" >&2
+  echo "install>   intencional, restaure-a (git/histórico) e faça o merge à mão. O kit não guarda backup." >&2
+fi
+
 echo "install> SDD instalado em $TARGET (projeto '$PROJETO')."
 # A instrução depende do que ESTA execução fez: num projeto maduro a 0001 não é criada, e
 # apontar para ela mandava editar um arquivo que não existe.
@@ -401,4 +494,30 @@ if [ "$WITH_PR" -eq 1 ] && [ "$DO_AGENTS" -eq 0 ]; then
   echo "install>   modo: sem ele, ./scripts/checar-pr e ./scripts/abrir-pr falham alto e nenhuma" >&2
   echo "install>   regra de PR vale. Cole o bloco de skeleton/pr/AGENTS-block.md à mão em AGENTS.md," >&2
   echo "install>   ou rode de novo: install.sh <DIR> --with-pr (sem --no-agents)." >&2
+fi
+
+# Fecha a lacuna da meia-ativação: o perfil PR não vive só nos arquivos dele — ele liga
+# comportamento GATED A MARCADOR dentro de checar-sessao e iniciar-sessao (o marcador em
+# AGENTS.md é a fonte de verdade; os scripts o consultam). Num projeto que JÁ tinha esses
+# scripts, sem --force o install_file os pulou e o perfil ficou pela metade: AGENTS.md
+# declara o modo, os scripts o ignoram — e o install reportava sucesso. O probe é o
+# próprio literal do gate, que o kit já usa: sem dependência nova. Aviso, nunca erro (o
+# install segue exit 0; a correção é re-rodar com --force).
+if [ "$WITH_PR" -eq 1 ]; then
+  pr_faltando=()
+  for s in scripts/checar-sessao scripts/iniciar-sessao; do
+    grep -qF '<!-- sdd-pr: ativo -->' "$TARGET/$s" 2>/dev/null || pr_faltando+=("$s")
+  done
+  if [ "${#pr_faltando[@]}" -gt 0 ]; then
+    echo >&2
+    echo "install> AVISO: modo PR NÃO está totalmente ativo — script(s) sem o bloco do perfil:" >&2
+    for s in "${pr_faltando[@]}"; do
+      echo "install>   $s" >&2
+    done
+    echo "install>   O marcador em AGENTS.md sozinho não liga o modo: quem o aplica são esses" >&2
+    echo "install>   scripts. Atualize-os repetindo o install com --force:" >&2
+    echo "install>   ./sdd/install.sh <DIR> --with-pr --force" >&2
+  elif [ "$DO_AGENTS" -eq 1 ]; then
+    echo "install> modo PR ativo: scripts checar-sessao/iniciar-sessao carregam o bloco do perfil."
+  fi
 fi
