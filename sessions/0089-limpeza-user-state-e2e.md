@@ -147,6 +147,37 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 - **Não commitar:** `reviews/`, cassettes, `_ai_context/`, `open-design/prints/`.
 - **Leitura exata antes de editar (Passo 1):** reler `db/migrations/0036_add_user_state.sql`, `lib/journey_service.rb`, `lib/user_state_repository.rb`, `server.rb:20-30/595-605/1440-1450`, `test/test_helper.rb:80-90`, `test/server_test_helpers.rb:10-30` e `test/journey_service_test.rb` inteiro (225 linhas) — as linhas citadas aqui foram verificadas nesta fase 1, mas o diff pode ter se deslocado.
 
+### Bloco A — execução da fase 2 (Passos 1–5, 2026-09-16)
+
+> **A sessão continua `Pendente`:** a validação (fase 3) é do usuário e a §7 não foi tocada. O Bloco B (Passo 6) foi executado por outro agente (`48a6774`).
+
+| Passo | SHA | Entrega |
+| --- | --- | --- |
+| 1 | `d57947c` | `db/migrations/0037_drop_user_state.sql` (novo) + `test/user_state_removal_test.rb` com `test_user_state_table_is_gone_after_setup`. **RED** real: 1 run / 1 failure (`Expected "user_state" to be nil`). **GREEN** após a 0037: 1 run / 0 failures; lint 0. |
+| 2 | `d6f1ff3` | **RED** (3 asserts estruturais em `user_state_removal_test.rb`): 4 runs / 3 failures. **GREEN**: remove `lib/user_state_repository.rb`, `test/user_state_repository_test.rb`, kwarg `user_state:` + `mark_started`/`mark_started_when_full` de `lib/journey_service.rb`, o wire de `server.rb` (`:24`,`:599`,`:1445-1447`), `clear_user_state!` (`test/test_helper.rb` + `test/server_test_helpers.rb:16`), o require/chamada/kwargs de `test/journey_service_test.rb`; docs do D7 no mesmo commit (`GDD.md:27`, `REQUIREMENTS.md:638-643`, `docs/draft-backlog.md:109` → obsoleto, `docs/5F-decisoes-pendentes.md` §5.F.1 + "Para fechar" 1–2). 13 arquivos, +42/−175. |
+| 3 | `e7bcaf3` | Remove o helper `start_journey` (já no-op) + os 4 chamadores de `test/team_routes_test.rb`; 2 arquivos, −9 linhas. |
+| 4 | `34b07b0` | Apaga `db/migrations/0036_add_user_state.sql`. **Idempotência provada:** 3 execuções consecutivas de `rake db:setup` sem erro; `to_regclass('user_state')` = NULL e 5 tabelas intactas (`team_pokemons`, `team_pokemon_progress`, `battles`, `wallet`, `inventory`) em `pokedex` **e** `pokedex_test`. |
+| 5 | (este) | Verificação final do Bloco A: suíte completa **1181 runs / 6309 assertions / 0 failures / 0 errors**; lint dos 7 arquivos tocados **0 offenses**; `./scripts/check_docs` ok; `./scripts/checar-sessao 0089` ok; C2 grep = só `db/migrations/0037_drop_user_state.sql` + `test/user_state_removal_test.rb`; C4 (4 testes do gate derivado) verdes individualmente. |
+
+**Desvios do plano (registrados, sem reabrir critério):**
+
+- **Passo 2 absorveu parte do Passo 3.** O plano mandava remover os 2 testes vacuosos da flag, a classe `JourneyMarkWhenFullTest` e os 4 chamadores de `start_journey` no Passo 3 — mas `mark_started`/`mark_started_when_full` saem no Passo 2 e esses testes os chamam (RED no meio do caminho, violando o green por commit da G1). Os testes vaciosos e `JourneyMarkWhenFullTest` foram para o Passo 2; `start_journey` virou no-op explícito (`def start_journey(_user_id); end`) no Passo 2 e foi removido com os 4 chamadores no Passo 3 (que assim ficou sem o resto do escopo previsto). C5 continua provado (as 4 remoções + o repo morto aconteceram; só mudou o commit em que entraram).
+- **Risco 1 materializou-se em forma NÃO listada no refinamento.** O grep do C2 achou **3** sites de `UserStateRepository` em `test/team_routes_test.rb` que a §3/§2 não citava: `:712` e `:735` (classe `ServerTeamJourneyMarkTest`, 706–737 — provava o persistido que foi removido) e `:1188` (um `refute UserStateRepository.new.started?` solto dentro do teste de budget da sessão C4). A classe inteira (2 testes) saiu e o `refute`+comentário saíram no Passo 2; sem isso a suíte derrubaria com `NameError`/`NoMethodError`. **Lição:** a lista "dependências de teste da tabela" do refinamento estava incompleta — o grep de `UserStateRepository` no `test/` era o inventário correto.
+- **Passo 4 fez 3 setups, não 2** (um a mais para conferir as bases após a remoção da 0036) — comportamento idêntico em todas.
+
+**Riscos vigiados — resultado:**
+
+- **Risco 1 (`TRUNCATE user_state` explode pós-0037):** neutralizado. `clear_user_state!` saiu junto com **todos** os chamadores no Passo 2 (`test/test_helper.rb`, `test/server_test_helpers.rb:16`, `test/journey_service_test.rb:16`) — nenhum `PG::UndefinedTable` na suíte.
+- **Risco 2 (apagar a 0036 é irreversível):** aceito (D3); a 0037 cobre bancos onde a 0036 rodou e é no-op em banco novo — conferido nas duas bases.
+- **Risco 3 (`docs/draft-backlog.md:133` J4 e `:344` onboarding):** **não tocados**; a anotação de "novo lar de persistência" fica só no §8/5F/GDD acima (o `GDD.md:27` aponta para `:344`).
+- **Risco 4 (cassettes / `reviews/`):** nada commitado; `test/cassettes/**` (untracked de outras sessões) ficou fora de todos os commits.
+
+**Ruído do ambiente (não é do Bloco A):**
+
+- **Agente concorrente no mesmo working tree:** o commit do Bloco B (`48a6774`, Passo 6) entrou em paralelo e, durante os Passos 2–4, `test/battle_strike_routes_test.rb` e `views/_strike_result.erb` estavam **dirty** (trabalho em voo de outro agente, +1 teste). Por isso os primeiros runs completos variaram (2 e 1 falhas em arquivos alheios). No run final (Passo 5) a suíte ficou **verde**: `1181 runs` = baseline 1186 − 4 (`UserStateStartedTest`) − 4 (vacuosos) − 2 (`ServerTeamJourneyMarkTest`) + 4 (`user_state_removal_test.rb`) **+ 1** (teste novo do agente concorrente). **A única offense de lint global** (`test/battle_strike_routes_test.rb:101`, `Style/RegexpLiteral`) é desse arquivo dirty, não do Bloco A (os 7 arquivos tocados aqui têm 0).
+- **Flake pré-existente encontrado (fora de escopo):** `SeedScriptsTest#test_team_evolucao_seeds_near_evolution_thresholds` (`test/seed_scripts_test.rb:38`) falhou num run completo (seed 29866: `Expected: 15, Actual: 5`) e **passou** isolado e no run final. Causa provável: `TestDatabase.team_row(name)` (`test/test_helper.rb:124-128`) não filtra por `user_id` nem ordena → pode devolver o `charmander` de outro usuário. Ordem-dependente, pré-existente, **não** causado por esta sessão. Anotado como TODO para sessão própria (não abrir escopo aqui).
+
+
 ## 9. Gotchas / Lições (memória — S6)
 
 Preenchido na validação (fase 3) — alimenta `memory_write_page` em `gotchas/`.
