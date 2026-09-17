@@ -29,6 +29,15 @@ da sessão quando receber as escolhas.
    - **Objetivo** da sessão (1 frase).
    - **Escopo**: produção / testes / **fora de escopo** (explícito).
    - **Critérios de aceite** e o **teste que prova cada um** (S1) — ou a opção `manual`.
+   - **Modo PR (só com `--with-pr`):** cada critério também declara **como um terceiro chega ao
+     estado inicial do teste** — `seed`, `script`, `manual` ou `nao-aplicavel` (S8.3) — porque o
+     corpo do PR depende disso e a declaração fecha **aqui**, não no fim. Havendo harness de ponta
+     a ponta no projeto, o critério já nasce com o teste e2e (S8.4); não havendo, ele nasce
+     `manual` + roteiro manual — o kit não inventa harness que o projeto não tem.
+     `manual` é uma saída **legítima**, não uma falta: use quando não existe teste automatizado.
+     Mas ela **custa**, e o custo fica escrito: roteiro manual no corpo do PR e um limite nomeado
+     em "O que NÃO foi validado" dizendo o que isso custa (ex.: "verificado só numa máquina; outra
+     pessoa não reproduz sem X"). Não use `manual` sem declarar o custo.
    - **Decisões de design** relevantes (ex.: como variar a resposta por tipo de
      requisição, estratégia de status, contenção).
    - **Tamanho/contenção** (o que entra e o que fica de fora desta sessão).
@@ -55,11 +64,16 @@ Quando você receber as escolhas do usuário (via prompt/args), aí sim:
   gotchas `provisional:true`) acontece no Revisor APROVADO, fim da fase 2 (S6) —
   SEM validação, SEM commit — não aqui.
 - Atualize `SESSIONS.md` (tabela + "Próxima sessão" — S4), rode `./scripts/checar-sessao NNNN`
-  e `./scripts/check_docs`, e commite `Sessao NNNN: refinamento concluido — ...`.
+  e `./scripts/check_docs`, e commite `docs(sessao NNNN): refinamento concluido — ...`.
 - Grave handoff (`memory_handoff_begin`) de fase para o Implementador (não é a
   memória S6 — essa só acontece no Revisor APROVADO, fim da fase 2, SEM validação, SEM commit).
+- **Modo PR (só com `--with-pr`):** escreva também, logo abaixo da tabela de `## Status`, as duas
+  linhas de declaração fechadas no mapa de decisões — `> Reprodução: seed|script|manual|nao-aplicavel`
+  e `> E2E: sim|nao` (S8.3/S8.4). É o que o `./scripts/checar-pr` confere contra o `**Estado
+  inicial:**` do corpo do PR; sem elas o corpo não fecha.
 
 ## Regras
 - Contexto mínimo; sempre **levante opções**; a decisão é **do usuário**.
 - Rode a partir de `{{ROOT}}` (cd se o cwd for outro).
-- Formato de commit do projeto (português, sem prefixos genéricos); NÃO use curl/wget.
+- Formato de commit do projeto (`tipo[(escopo)]: descrição` — tipo obrigatório da lista;
+  ver a regra de commit em `AGENTS.md`); NÃO use curl/wget.

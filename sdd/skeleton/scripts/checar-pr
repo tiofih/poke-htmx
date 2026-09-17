@@ -1,0 +1,306 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+# checar-pr — portão mecânico do corpo de PR do modo `--with-pr` (SDD).
+# uso: ./scripts/checar-pr [NNNN] [--corpo ARQUIVO] [--exemplo]
+#
+# Resolução do corpo: --exemplo (docs/pr/ ou pr/EXEMPLO-pr-body.md) → --corpo ARQUIVO
+# → sessions/pr/NNNN-pr-body.md, com NNNN default = sessão de maior número em
+# sessions/ (mesma resolução do resumo-commit). `--corpo` sem NNNN pula os
+# cross-checks 13/14 (não há sessão para cruzar); `--exemplo` roda 2–12.
+#
+# O QUE ESTE SCRIPT NÃO VERIFICA (julgamento do Revisor (S7) e do usuário, nunca daqui):
+#   - se o texto é compreensível para quem não é do time;
+#   - se os passos do roteiro manual realmente funcionam;
+#   - se a evidência citada é verdadeira (inclusive a e2e: a checagem 14 só exige
+#     que a camada seja NOMEADA — um 'E2E: sim' com o path citado não prova que o
+#     e2e roda ou passa);
+#   - se os limites declarados estão completos (um limite omitido passa pelo grep);
+#   - se o código do diff corresponde ao que o corpo afirma.
+# Ele é grep/awk/sed, sem rede: prova presença, forma, ordem e coerência textual —
+# nunca veracidade. Não existe lint semântico nem LLM aqui, e o script não finge ter.
+#
+# CONTRATO DE SAÍDA (do qual `abrir-pr` depende):
+#   exit 0 = aprovado (AVISO em stderr pode existir e não bloqueia);
+#   exit 1 = reprovado: ao menos um `checar-pr> FALHA:` foi emitido em stderr;
+#   exit 2 = uso incorreto OU arquivo ausente (corpo, ou sessão do cross-check).
+#            "Ausente" é erro de invocação, não de conteúdo: um arquivo que não
+#            existe não reprova, ele não pode ser checado. Por isso a checagem 2
+#            só emite FALHA (exit 1) para corpo presente mas casca — 0 bytes ou
+#            sem `\n` final; ausência sai por exit 2 com mensagem própria.
+#
+# Limites conhecidos:
+#   - a remoção de comentários HTML (checagens 6, 7 e 11) é uma máquina de estado
+#     em awk que não trata `<!--` dentro de comentário (aninhamento não suportado);
+#     as checagens 4, 5 e 8 rodam no arquivo cru, como manda o design;
+#   - as fronteiras de palavra de §6.1.1 usam [^[:alnum:]_] em vez de `\b`
+#     (semântica idêntica, sem depender de grep GNU);
+#   - a checagem 7 é MAIS larga que a lista canônica de §6.1.1 (que só fecha o
+#     caso exato): casa variação de caixa (`Fase 2`, `passo 2`, `ca2`), hífen em
+#     CA (`CA-2`), `Sessão`/`sessao` com 1–4 dígitos (`Sessão 12` e `Sessão 0012`)
+#     e caminho de sessão aninhado (`sessions/pr/0001-pr-body.md`, que a forma
+#     `sessions?/[0-9]{4}` não alcança por causa do segmento `pr/`). O preço é
+#     declarado: prosa legítima que use `passo N`/`Fase N` numerados é reprovada
+#     (falso-positivo aceito — o termo é o mesmo shorthand interno);
+#   - a checagem 14 é FALHA, não AVISO: o design a listava como aviso, mas o aviso
+#     era inalcançável (a seção canônica '## Roteiro de teste manual' já contém
+#     "teste", então o grep antigo sempre casava). Um portão que nunca dispara dá
+#     falsa segurança — melhor reprovar e mandar declarar 'E2E: nao'. A evidência é
+#     procurada só na narrativa (antes do '## Anexo'), pela mesma divisão da checagem
+#     7: nomear a camada só no Anexo não vale — o Anexo é trilha interna, e é a
+#     narrativa que quem revisa lê;
+#   - este script NÃO inspeciona a linha `PR_CMD` (não é uma das checagens de
+#     §6.1): quem resolve o comando de abertura é o `abrir-pr`.
+
+cd "$(dirname "$0")/.." || exit 2
+
+USO='uso: ./scripts/checar-pr [NNNN] [--corpo ARQUIVO] [--exemplo]'
+
+NUM=""; CORPO=""; EXEMPLO=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --exemplo) EXEMPLO=1; shift ;;
+    --corpo)
+      shift
+      CORPO="${1:-}"
+      [ -n "$CORPO" ] || { echo "$USO" >&2; exit 2; }
+      shift ;;
+    -h|--help) echo "$USO"; exit 0 ;;
+    [0-9][0-9][0-9][0-9]) NUM="$1"; shift ;;
+    *) echo "$USO" >&2; exit 2 ;;
+  esac
+done
+
+FAIL=0
+ok()   { printf 'ok> %s\n' "$*"; }
+warn() { printf 'checar-pr> AVISO: %s\n' "$*" >&2; }
+fail() { printf 'checar-pr> FALHA: %s\n' "$*" >&2; FAIL=1; }
+ausente() { printf 'checar-pr> %s\n' "$*" >&2; exit 2; }
+
+# --- 1. modo ativo (fora do --exemplo: o exemplo embarcado roda no kit, sem marcador)
+if [ "$EXEMPLO" -eq 0 ]; then
+  if [ ! -f AGENTS.md ] || ! grep -qF '<!-- sdd-pr: ativo -->' AGENTS.md; then
+    fail "modo PR inativo: falta '<!-- sdd-pr: ativo -->' em AGENTS.md — rode './install.sh --with-pr' (ou 'sdd/install.sh --with-pr') ou cole a linha do bloco do modo PR"
+  fi
+fi
+
+# --- resolução do corpo
+if [ "$EXEMPLO" -eq 1 ]; then
+  F=""
+  for c in docs/pr/EXEMPLO-pr-body.md pr/EXEMPLO-pr-body.md; do
+    if [ -f "$c" ]; then F="$c"; break; fi
+  done
+  if [ -z "$F" ]; then
+    warn "exemplo ausente (docs/pr/EXEMPLO-pr-body.md, pr/EXEMPLO-pr-body.md) — nada a checar"
+    ok "exemplo não encontrado: um projeto pode removê-lo de propósito"
+    exit 0
+  fi
+elif [ -n "$CORPO" ]; then
+  [ -f "$CORPO" ] || ausente "corpo ausente: '$CORPO' não existe — nada a checar (exit 2)"
+  F="$CORPO"
+else
+  if [ -z "$NUM" ]; then
+    ultimo="$(ls sessions/[0-9][0-9][0-9][0-9]-*.md 2>/dev/null | sort | tail -1)"
+    [ -n "$ultimo" ] || ausente "nenhuma sessão em sessions/ — passe NNNN ou --corpo ARQUIVO (exit 2)"
+    NUM="$(basename "$ultimo" | cut -d- -f1)"
+  fi
+  F="sessions/pr/$NUM-pr-body.md"
+  [ -f "$F" ] || ausente "corpo ausente: '$F' não existe — o Implementador escreve o corpo antes de checar (exit 2)"
+fi
+
+# --- 2. existe e não é casca
+if [ ! -s "$F" ]; then
+  fail "corpo vazio (0 bytes): $F"
+  exit 1
+fi
+if [ -n "$(tail -c 1 "$F")" ]; then
+  fail "corpo não termina com nova linha (\\n): $F"
+fi
+
+TMP="$(mktemp "${TMPDIR:-/tmp}/checar-pr.XXXXXX")" || ausente "mktemp falhou (exit 2)"
+trap 'rm -f "$TMP"' EXIT
+
+# remove comentários HTML (multi-linha) para as checagens 6, 7 e 11.
+# Imprime uma linha por linha de entrada → os números de linha citados nas
+# FALHAs continuam batendo com o arquivo cru.
+awk '
+  {
+    linha = $0; saida = ""
+    while (length(linha) > 0) {
+      if (!dentro) {
+        i = index(linha, "<!--")
+        if (i == 0) { saida = saida linha; linha = "" }
+        else { saida = saida substr(linha, 1, i - 1); linha = substr(linha, i + 4); dentro = 1 }
+      } else {
+        j = index(linha, "-->")
+        if (j == 0) { linha = "" }
+        else { linha = substr(linha, j + 3); dentro = 0 }
+      }
+    }
+    print saida
+  }' "$F" > "$TMP"
+
+# --- 3. título antes da primeira seção
+titulo_ln="$(awk '/^## /{exit} /^# /{print; exit}' "$F")"
+if [ -z "$titulo_ln" ]; then
+  fail "título ausente: nenhuma linha '^# ' antes da primeira seção '^## '"
+else
+  titulo="$(printf '%s' "$titulo_ln" | sed 's/^#  *//')"
+  if [ -z "$(printf '%s' "$titulo" | tr -d '[:space:]')" ]; then
+    fail "título vazio (linha '# ')"
+  elif [ "${#titulo}" -gt 120 ]; then
+    warn "título com ${#titulo} caracteres (> 120): encurte para caber na lista de PRs"
+  fi
+fi
+
+# --- 4. fronteira da narrativa
+anexo_ln="$(grep -nE '^## Anexo' "$F" | head -1 | cut -d: -f1)"
+if [ -z "$anexo_ln" ]; then
+  fail "fronteira da narrativa ausente: falta uma linha '^## Anexo' (é ela que separa o texto para leigo da trilha interna)"
+fi
+
+# --- 5. seções canônicas presentes e na ordem (extras são ignoradas)
+secoes=(
+  "## O que muda para quem usa o produto"
+  "## O que foi implementado"
+  "## O que foi validado"
+  "## O que NÃO foi validado (limites conhecidos)"
+  "## Como rodar e chegar ao estado inicial do teste"
+  "## Roteiro de teste manual (o que fazer e o que observar)"
+  "## Comandos do projeto"
+  "## Anexo — rastreabilidade interna (equipe)"
+)
+anterior=0
+for s in "${secoes[@]}"; do
+  ln="$(grep -nxF "$s" "$F" | head -1 | cut -d: -f1)"
+  if [ -z "$ln" ]; then
+    fail "seção canônica ausente: '$s'"
+    continue
+  fi
+  if [ "$ln" -lt "$anterior" ]; then
+    fail "seção fora da ordem canônica: '$s' (linha $ln) vem depois de uma seção que deveria vir depois dela (linha $anterior)"
+  fi
+  anterior="$ln"
+done
+
+# --- 6. placeholder pendente (narrativa e Anexo; texto sem comentários)
+if grep -qF '{{' "$TMP"; then
+  fail "placeholder pendente '{{': $(grep -nF '{{' "$TMP" | head -1)"
+fi
+
+# --- 7. termo interno na narrativa (antes do Anexo)
+if [ -n "$anexo_ln" ]; then
+  narrativa="$(head -n "$((anexo_ln - 1))" "$TMP")"
+else
+  narrativa="$(cat "$TMP")"
+fi
+padroes=(
+  '(^|[^[:alnum:]_])Q[0-9]+([^[:alnum:]_]|$)'
+  '(^|[^[:alnum:]_])[Cc][Aa]-?[0-9]+([^[:alnum:]_]|$)'
+  '(^|[^[:alnum:]_])(C|S)[0-9]+([^[:alnum:]_]|$)'
+  '(^|[^[:alnum:]_])RF-?[0-9]+([^[:alnum:]_]|$)'
+  '(^|[^[:alnum:]_])RNF-?[0-9]+([^[:alnum:]_]|$)'
+  '(^|[^[:alnum:]_])Sess(ã|a)o[[:space:]]+[0-9]{1,4}($|[^[:alnum:]_])'
+  '(^|[^[:alnum:]_])sessions?/[^[:space:]]*[0-9]{4}'
+  '(^|[^[:alnum:]_])[Ff]ase[[:space:]]+[0-9]'
+  '(^|[^[:alnum:]_])[Pp]asso[[:space:]]+[0-9]+'
+  '(^|[^[:alnum:]_])crit(é|e)rio[[:space:]]+[0-9]+'
+  '(^|[^[:alnum:]_])Draft:'
+  '(^|[^[:alnum:]_])(TODO|FIXME|WIP)([^[:alnum:]_]|$)'
+)
+for p in "${padroes[@]}"; do
+  l="$(printf '%s\n' "$narrativa" | grep -nE "$p" | head -1)"
+  [ -n "$l" ] || continue
+  fail "termo interno na narrativa (antes do '## Anexo'): padrão '$p' casou em $l"
+  # Prosa legítima paga o mesmo preço do shorthand numerado do kit (`Passo N`/`Fase N`):
+  # a FALHA então diz o que escrever no lugar, não só o padrão que casou.
+  case "$p" in
+    *'[Pp]asso'*) printf 'checar-pr>   reescreva: cite a linha do roteiro ("na 2ª linha do roteiro acima") ou descreva o passo pelo que o usuário faz\n' >&2 ;;
+    *'[Ff]ase'*)  printf 'checar-pr>   reescreva: nomeie a etapa em termos do produto ("na implementação", "no teste automatizado"), não "Fase N"\n' >&2 ;;
+  esac
+done
+
+# --- 8. bloco de comandos na seção "Como rodar..."
+sec_comandos="$(awk '/^## Como rodar e chegar ao estado inicial do teste/{f=1; next} f && /^## /{f=0} f' "$F")"
+n_cercas="$(printf '%s\n' "$sec_comandos" | grep -c '^```')"
+if [ "$n_cercas" -lt 2 ] || [ $((n_cercas % 2)) -ne 0 ]; then
+  fail "seção 'Como rodar e chegar ao estado inicial do teste' sem bloco \`\`\` fechado (cercas encontradas: $n_cercas)"
+fi
+
+# --- 9. estado inicial declarado
+val=""
+linha_est="$(grep -nE '\*\*Estado inicial:\*\*' "$F" | head -1)"
+if [ -z "$linha_est" ]; then
+  fail "falta a declaração '**Estado inicial:** \`seed|script|manual|nao-aplicavel\`'"
+else
+  val="$(printf '%s\n' "${linha_est#*:}" | sed -nE 's/.*\*\*Estado inicial:\*\* `([^`]*)`.*/\1/p')"
+  case "$val" in
+    seed|script|manual) : ;;
+    nao-aplicavel)
+      resto="$(printf '%s\n' "${linha_est#*:}" | sed -nE 's/.*`nao-aplicavel`(.*)$/\1/p' | sed -E 's/^[[:space:]—–-]*//')"
+      if [ "${#resto}" -lt 20 ]; then
+        fail "'nao-aplicavel' sem justificativa na mesma linha (≥ 20 caracteres, tem ${#resto})"
+      fi ;;
+    *) fail "**Estado inicial:** com valor inválido ('${val:-vazio}') — use seed|script|manual|nao-aplicavel" ;;
+  esac
+fi
+
+# --- 10. roteiro manual: tabela com cabeçalho + separador + ≥ 1 linha
+sec_rot="$(awk '/^## Roteiro de teste manual/{f=1; next} f && /^## /{f=0} f' "$F")"
+linhas_tab="$(printf '%s\n' "$sec_rot" | grep -cE '^\|')"
+separador="$(printf '%s\n' "$sec_rot" | grep -cE '^\| *:?-+')"
+if [ "$linhas_tab" -lt 3 ] || [ "$separador" -lt 1 ]; then
+  fail "roteiro manual sem tabela 'ação → o que observar' (linhas '|': $linhas_tab, separador: $separador; esperado cabeçalho + separador + ≥ 1 linha)"
+fi
+
+# --- 11. evidência automatizada citada (texto sem comentários)
+sec_val="$(awk '/^## O que foi validado/{f=1; next} f && /^## /{f=0} f' "$TMP")"
+if ! printf '%s\n' "$sec_val" | grep -q '```' && ! printf '%s\n' "$sec_val" | grep -qE '`[^`]+`'; then
+  fail "seção 'O que foi validado' sem comando citado (nenhum bloco \`\`\` nem \`código inline\`)"
+fi
+
+# --- 12. limites declarados com conteúdo
+sec_nao="$(awk '/^## O que NÃO foi validado/{f=1; next} f && /^## /{f=0} f' "$F")"
+conteudo="$(printf '%s\n' "$sec_nao" | grep -vE '^[[:space:]]*$' | head -1)"
+if [ -z "$conteudo" ]; then
+  fail "seção 'O que NÃO foi validado (limites conhecidos)' ausente ou sem nenhuma linha de conteúdo"
+elif printf '%s\n' "$conteudo" | grep -qiE '^(nada|nenhum|-|n/a)\.?$'; then
+  warn "seção 'O que NÃO foi validado' só diz '$conteudo': o kit espera limites nomeados quando existem"
+fi
+
+# --- 13/14. cross-check com o arquivo da sessão (só quando há NNNN)
+if [ -n "$NUM" ] && [ "$EXEMPLO" -eq 0 ]; then
+  S="$(ls sessions/"$NUM"-*.md 2>/dev/null | head -1)"
+  [ -n "$S" ] || ausente "sessão $NUM não encontrada em sessions/ — não dá para cruzar Reprodução/E2E (exit 2)"
+
+  rep="$(grep -E '^> Reprodução: ' "$S" | head -1)"
+  if [ -z "$rep" ]; then
+    fail "sessão $NUM sem '> Reprodução: (seed|script|manual|nao-aplicavel)' (S8.3)"
+  elif ! grep -qxE '> Reprodução: (seed|script|manual|nao-aplicavel)' "$S"; then
+    fail "sessão $NUM com '$rep' — valor fora do enum (seed|script|manual|nao-aplicavel)"
+  else
+    rv="$(printf '%s' "$rep" | sed -nE 's/^> Reprodução: (.*)$/\1/p')"
+    if [ -n "$val" ] && [ "$(printf '%s' "$rv" | tr '_' '-')" != "$(printf '%s' "$val" | tr '_' '-')" ]; then
+      fail "declaração divergente: a sessão diz 'Reprodução: $rv' e o corpo diz 'Estado inicial: $val'"
+    fi
+  fi
+
+  e2e="$(grep -E '^> E2E: ' "$S" | head -1)"
+  if [ -z "$e2e" ]; then
+    fail "sessão $NUM sem '> E2E: (sim|nao)' (S8.4)"
+  elif ! grep -qxE '> E2E: (sim|nao)' "$S"; then
+    fail "sessão $NUM com '$e2e' — valor fora do enum (sim|nao)"
+  elif [ "$e2e" = '> E2E: sim' ] && ! printf '%s\n' "$narrativa" | grep -qiE '(^|[^[:alnum:]_])(e2e|end-to-end|end to end|ponta[ -]a[ -]ponta|playwright|cypress|selenium)([^[:alnum:]_]|$)'; then
+    fail "sessão $NUM declara 'E2E: sim' mas a narrativa (antes do '## Anexo') não nomeia a camada e2e (path/comando com 'e2e', 'end-to-end', 'ponta a ponta', Playwright/Cypress/Selenium) — cite a evidência na narrativa ou declare 'E2E: nao'"
+  fi
+fi
+
+if [ "$FAIL" -eq 1 ]; then
+  exit 1
+fi
+if [ "$EXEMPLO" -eq 1 ]; then
+  ok "exemplo aprovado nas checagens mecânicas ($F)"
+else
+  ok "corpo aprovado nas checagens mecânicas ($F)"
+fi
+exit 0

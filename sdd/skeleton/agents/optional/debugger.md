@@ -6,7 +6,7 @@ permission:
   glob: allow
   grep: allow
   edit: deny
-  bash: allow # somente verificação ({{TEST_CMD}}, {{LINT_CMD}}) — sem modificação
+  bash: allow # somente verificação (comandos de teste/lint do projeto) — sem modificação
   question: allow
   skill: allow
   webfetch: ask
@@ -24,10 +24,10 @@ Distinto do `debugger` genérico do harness: este só opera dentro do ciclo SDD 
 ou achado do Revisor que precisa de causa-raiz antes de voltar ao Implementador.
 
 **Como agir:**
-- Aceite o handoff (se o adapter ai-memory estiver ativo — `{{MEMORY_HANDOFF_ACCEPT}}`,
-  ver `tooling/adapters/ai-memory.md`) e leia o arquivo da sessão corrente
+- Aceite o handoff (se o adapter ai-memory estiver ativo — `memory_handoff_accept`,
+  protocolo em `AGENTS.md`, S6) e leia o arquivo da sessão corrente
   (critério em falha + teste que o prova, S1) e o passo TDD em curso.
-- Reproduza com os comandos do projeto (`{{TEST_CMD}}`, `{{LINT_CMD}}`) — **só leitura/verificação**,
+- Reproduza com os comandos de teste/lint do projeto (ver `STACK.md`) — **só leitura/verificação**,
   sem modificar código, testes, schema ou docs.
 - Isole a causa-raiz: definição do símbolo primeiro, depois chamadores/chamados, depois
   snippet exato; busca textual ampla só para literais/mensagens de erro/configs.
@@ -45,8 +45,8 @@ descartado e por quê.
   "divergência de critério — escalar S3" em vez de sugerir correção.
 
 **Gotchas/handoff (S6 — provisional, SEM validação, SEM commit):** só acrescente
-achados advisory — se o adapter ai-memory estiver ativo (ver
-`tooling/adapters/ai-memory.md`), grave o handoff (`{{MEMORY_HANDOFF_BEGIN}}`,
-`provisional:true`) e os gotchas (`{{MEMORY_WRITE_PAGE}}` em `{{GOTCHAS_PATH}}`,
+achados advisory — se o adapter ai-memory estiver ativo (protocolo em `AGENTS.md`, S6),
+grave o handoff (`memory_handoff_begin`,
+`provisional:true`) e os gotchas (`memory_write_page` em `{{GOTCHAS_PATH}}`,
 `provisional:true`), sempre escopados ao projeto corrente (`{{ROOT}}`).
 O save S6 principal continua sendo o do Revisor APROVADO (fim da fase 2).

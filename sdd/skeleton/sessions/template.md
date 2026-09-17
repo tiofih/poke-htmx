@@ -40,14 +40,14 @@ descrição do resultado futuro — estado ANTES do code.)
 
 ### Resultado
 
-- [ ] **{{Critério 1}}** — prova: `test/{{arquivo}}` ({{nome do teste}}).
-- [ ] **{{Critério 2}}** — prova: `test/{{arquivo}}` ({{nome do teste}}).
+- [ ] **{{Critério 1}}** — prova: `{{arquivo de teste}}` ({{nome do teste}}).
+- [ ] **{{Critério 2}}** — prova: `{{arquivo de teste}}` ({{nome do teste}}).
 
 ### Garantias (RNF)
 
 - [ ] Suíte completa verde com **baseline preservado (N runs/M asserts)** + novos testes e
       lint 0 em **todo** green; commit obrigatório por passo; 0 regressão.
-- [ ] Sem gems novas / sem mudança de schema / testes sem rede / sem `rubocop:disable`
+- [ ] Sem dependência nova / sem mudança de schema / testes sem rede / sem supressão de lint injustificada
       *(ajuste ao projeto).*
 - [ ] `REQUIREMENTS.md` + `SESSIONS.md` atualizados no mesmo escopo do passo docs;
       *status de validação* só após o usuário validar (S4).
@@ -65,9 +65,9 @@ descrição do resultado futuro — estado ANTES do code.)
 
 | Passo | Escopo (red → green) | Verificação |
 | --- | --- | --- |
-| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `Sessao {{NNNN}}: refinamento concluido — ...` |
-| 1 | {{teste que falha → implementação mínima}} | suíte verde + lint 0, commit `Passo 1:` |
-| 2 | {{...}} | suíte verde + lint 0, commit `Passo 2:` |
+| 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `docs(sessao {{NNNN}}): refinamento concluido — ...` |
+| 1 | {{teste que falha → implementação mínima}} | suíte verde + lint 0, commit `test(passo 1):` |
+| 2 | {{...}} | suíte verde + lint 0, commit `test(passo 2):` |
 | — | **Fase 2 concluída** → **Revisor (2c)**: loop Implementador↔Revisor até veredito `Aprovado` (teto 3 rodadas, senão S3) → **PARAR** e aguardar a validação do usuário (fase 3). |
 
 ## 7. Validação (executada pelo usuário)
@@ -76,8 +76,8 @@ descrição do resultado futuro — estado ANTES do code.)
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| {{Critério 1}} | `./scripts/test -n /.../` | {{o que observar}} | |
-| {{Critério 2}} | `./scripts/test -n /.../` | {{o que observar}} | |
+| {{Critério 1}} | `{{comando de teste do projeto}}` | {{o que observar}} | |
+| {{Critério 2}} | `{{comando de teste do projeto}}` | {{o que observar}} | |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data
 > e obter nova aprovação do usuário.

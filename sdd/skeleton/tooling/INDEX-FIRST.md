@@ -1,8 +1,9 @@
 # INDEX-FIRST — index-first discipline core (optional include)
 
 Tool-agnostic core. Concrete tool names, index names, paths, and measured
-numbers live in `tooling/adapters/*.md` — never here. Include this file when
-the project has any code index; skip it when working index-free.
+numbers live in the `tooling/adapters/` files installed alongside this one —
+never here. Include this file when the project has any code index; skip it when
+working index-free.
 
 ## Rules
 

@@ -14,8 +14,9 @@
 ## SDD — robustez do fluxo (regras do processo)
 
 - **S1 — Critérios apontam os testes que os provam.** Cada critério de aceite (seções
-  "Resultado"/"Garantias" do arquivo da sessão) referencia o **teste (arquivo/nome
-  Minitest)** que o prova; critério sem teste automatizado registra `manual` explícito.
+  "Resultado"/"Garantias" do arquivo da sessão) referencia o **teste (arquivo/nome)**
+  que o prova — no framework do projeto (ver `STACK.md`); critério sem teste
+  automatizado registra `manual` explícito.
   Fecha-se isso no **refinamento (fase 1)**, antes de codar.
 - **S2 — Validação é tabela por critério.** A fase 3 registra
   `critério | evidência automatizada | evidência manual | resultado (ok/nok)` — um
@@ -63,26 +64,33 @@
   Registrar uma ideia no draft **não** abre novo escopo nem atrasa a sessão em curso.
 - Ao concluir as fases, o draft é **revisado**: o que entra vira sessão, o que não se
   aplica é descartado — decisão do usuário.
-- Convenção de commit para anotações do tipo: `Draft: <resumo do que foi anotado>`
-  (contexto `Draft:`, seguindo o formato de commit do projeto).
+- Convenção de commit para anotações do tipo: `draft: <resumo do que foi anotado>`
+  (tipo `draft:`, seguindo o formato de commit do projeto).
 
 ## Formato de commit (regra do projeto)
 
-- **Formato:** uma linha `Contexto: descrição concisa`. **Sem** prefixos genéricos
-  (`feat:`, `fix:`, `chore:`). Descrever o que mudou e por quê (resultado), não
-  "teste"/"implementação".
+- **Formato:** `tipo[(escopo)]: descrição concisa`. O **tipo é obrigatório** e sai da
+  lista abaixo; a descrição diz o **resultado**, não a atividade ("implementacao",
+  "ajustes").
+- **Escopo opcional** entre parênteses: o contexto do kit vira escopo — `(passo N)`,
+  `(passos N-M)`, `(sessao 00NN)`.
 - **Corpo opcional:** linha em branco + bullets para detalhar decisões.
+- **Histórico:** a regra vale do próximo commit em diante — os commits antigos
+  (`Passo N: ...`, `Sessao 0001: ...`) permanecem. `Draft:` já era um tipo: agora é
+  `draft:` (minúsculo).
 
-| Contexto | Quando usar | Exemplo |
+| Tipo | Quando usar | Exemplo |
 | --- | --- | --- |
-| `Passo N:` | green do passo TDD `N` | `Passo 1: repository#all via schema + setup` |
-| `Passos N-M:` | green de passos agrupados | `Passos 3-4: testes de DELETE idempotente` |
-| `Sessao 00NN: refinamento concluido — ...` | refinamento (fase 1) fechado | `Sessao 0002: refinamento concluido — criterios e plano TDD fechados` |
-| `Validacao sessao 00NN: ...` | validação do usuário (fase 3) | `Validacao sessao 0002: requisito Done, criterios verificados, prox sessao 0003` |
-| `Sessao 00NN concluida: ...` | sessão fechada | `Sessao 0001 concluida: validacao integrada, proxima sessao 0002` |
-| `Regra: ...` | mudança de convenção/regra | `Regra: validacao e feita pelo usuario — parar na fase 3` |
-| `Draft: ...` | anotação de ideia/draft | `Draft: performance da gateway anotada` |
-| `Atualizar progresso da sessão 00NN (...)` | checkpoint de progresso | `Atualizar progresso da sessão 0001 (passo 4 verde e validado)` |
+| `test(passo N):` | green do passo TDD `N` | `test(passo 1): repository#all via schema + setup` |
+| `test(passos N-M):` | green de passos agrupados | `test(passos 3-4): DELETE idempotente` |
+| `docs(sessao 00NN):` | refinamento (fase 1) fechado | `docs(sessao 0002): refinamento concluido — criterios e plano TDD fechados` |
+| `docs(sessao 00NN):` | validação do usuário (fase 3) | `docs(sessao 0002): validacao — requisito Done, criterios verificados, prox 0003` |
+| `docs(sessao 00NN):` | sessão fechada | `docs(sessao 0001): concluida — validacao integrada, proxima sessao 0002` |
+| `docs(sessao 00NN):` | checkpoint de progresso | `docs(sessao 0001): progresso — passo 4 verde e validado` |
+| `docs:` | mudança de convenção/regra | `docs: validacao e feita pelo usuario — parar na fase 3` |
+| `chore:` | kit/tooling (install, scripts, config) | `chore: install --force preserva conteudo de autoria` |
+| `draft:` | anotação de ideia/draft | `draft: performance da gateway anotada` |
+| `feat:` `fix:` `refactor:` | comportamento novo / correção / refatoração | `feat: tambor aceita drop por pointer` |
 
 > Substitua o bloco `# Projeto — índice rápido` (comandos do projeto, mapa de código,
 > armadilhas) pelo seu conteúdo específico — ele **não** faz parte do protocolo.

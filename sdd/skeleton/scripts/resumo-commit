@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# Ajuda a escrever o commit no formato do projeto (Contexto: descrição).
-# Mostra as mudanças pendentes + os últimos commits e sugere o contexto adequado.
+# Ajuda a escrever o commit no formato do projeto (tipo[(escopo)]: descrição).
+# Mostra as mudanças pendentes + os últimos commits e sugere o tipo/escopo adequado.
 
 cd "$(dirname "$0")/.."
 
@@ -20,16 +20,33 @@ echo "== últimos commits (formato do projeto) =="
 git log --oneline -8 | sed 's/^/  /'
 
 echo
-echo "== sugestão de contexto =="
-if git status --short | grep -q 'sessions/'; then
-  NUM="$(ls sessions/[0-9][0-9][0-9][0-9]-*.md 2>/dev/null | sort | tail -1 | xargs -n1 basename | cut -d- -f1)"
-  echo "  Contexto: Sessao $NUM: refinamento concluido — <resultado> (ou Validacao sessao $NUM: ... se fase 3)"
-elif git status --short | grep -qE '^[^ ]+ (lib/|test/|server\.rb)'; then
-  echo "  Contexto: Passo N: <descrição do resultado>  (ou Passos N-M: ... agrupado)"
-elif git status --short | grep -q 'draft-'; then
-  echo "  Contexto: Draft: <resumo do que foi anotado>"
+echo "== sugestão de commit =="
+# Pastas/globs de código do projeto — ajuste esta lista ao layout do seu repo.
+STATUS="$(git status --short)"
+# Ramo de código: `git status --short` traz duas colunas de estado antes do caminho (' M', 'M ',
+# '??', 'A ', 'R  ...') e o git ainda aspas caminhos com espaço ('?? "src/a b.js"'). O padrão pula
+# as colunas (^.. ), aceita a aspa opcional e casa o destino do rename ( -> ).
+CODIGO='(^.. | -> )"?(src|app|lib|test|tests|spec)/'
+# O número do PR vem do próprio status, não de `ls`: o arquivo pode estar deletado
+# (' D sessions/pr/0007-pr-body.md') e aí `ls` não o acha — sem número o escopo sairia vazio,
+# fora do formato `tipo[(escopo)]: descrição`.
+PRNUM="$(printf '%s\n' "$STATUS" | grep -oE 'sessions/pr/[0-9][0-9][0-9][0-9]-' | head -1 | sed 's|sessions/pr/||; s|-.*||')"
+SNUM="$(ls sessions/[0-9][0-9][0-9][0-9]-*.md 2>/dev/null | sort | tail -1 | xargs -n1 basename 2>/dev/null | cut -d- -f1)"
+if [ -n "$PRNUM" ]; then
+  # Antes do ramo 'sessions/': o corpo do PR também casa 'sessions/', e a sugestão de PR é a
+  # específica (docs(pr 00NN):, tabela de contexto do PROTOCOL.md). Sem número resolvido (nome
+  # fora de 'NNNN-'), cai no ramo de sessões em vez de emitir escopo vazio.
+  echo "  docs(pr $PRNUM): corpo do PR — <resumo>"
+elif [ -n "$SNUM" ] && printf '%s\n' "$STATUS" | grep -q 'sessions/'; then
+  echo "  docs(sessao $SNUM): refinamento concluido — <resultado>   (ou docs(sessao $SNUM): validacao — ... na fase 3)"
+elif printf '%s\n' "$STATUS" | grep -qE "$CODIGO"; then
+  echo "  test(passo N): <descrição do resultado>   (ou test(passos N-M): ... agrupado)"
+elif printf '%s\n' "$STATUS" | grep -q 'draft-'; then
+  echo "  draft: <resumo do que foi anotado>"
 else
-  echo "  Contexto: <descrição concisa do que mudou e por quê> (sem feat:/fix:/chore:)"
+  echo "  chore: <descrição concisa do resultado>"
+  echo "  (troque o tipo se couber melhor: feat: / fix: / docs: / test: / refactor: / draft:)"
 fi
 echo
-echo "  Contextos: Passo N: / Passos N-M: | Sessao NNNN: refinamento | Validacao sessao NNNN: | Sessao NNNN concluida: | Regra: | Draft:"
+echo "  Tipos: feat: / fix: / docs: / test: / chore: / refactor: / draft:"
+echo "  Escopos (opcionais): (passo N) / (passos N-M) / (sessao NNNN) / (pr NNNN)"

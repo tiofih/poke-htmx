@@ -12,22 +12,26 @@ Projetos adotam o kit por `git subtree` (veja "Adicionar via git" abaixo).
 
 | Caminho | Papel |
 | --- | --- |
-| `PROTOCOL.md` | Metodologia canônica: ciclo de 3 fases, donos, regras S1–S5, convenções de commit. **O ponto único de verdade do processo.** |
+| `PROTOCOL.md` | Metodologia canônica: ciclo de 3 fases, donos, regras S1–S8, convenções de commit. **O ponto único de verdade do processo.** |
 | `install.sh` | Instalador: copia o skeleton, substitui placeholders, anexa as regras no `AGENTS.md` e valida com o `check_docs` (idempotente). |
 | `skeleton/` | Modelos para instanciar o SDD num projeto novo (copie e adapte). |
 | `skeleton/AGENTS.md` | Bloco de regras para o agente/assistente seguir (cola no `AGENTS.md` do projeto). |
 | `skeleton/REQUIREMENTS.md` | Stub da fonte da verdade dos requisitos (`{{PROJETO}}`). |
 | `skeleton/SESSIONS.md` | Stub do registro de sessões (ciclo + tabela + "Próxima sessão"). |
-| `skeleton/sessions/template.md` | Modelo do arquivo de cada sessão (as 6 seções + S1/S2). |
+| `skeleton/sessions/template.md` | Modelo do arquivo de cada sessão (as 9 seções + S1/S2). |
 | `skeleton/agents/` | Subagents (opencode) por papel do fluxo: `refinador`, `implementador-teste`, `revisor`, `playtester` — instalados no projeto em `.opencode/agent/`. |
 | `skeleton/commands/` | Comando orquestrador `/sessao` — abre/continua a sessão despachando os papéis. |
 | `skeleton/skills/sdd/` | Skill `sdd` — guia do ciclo de papéis (fases, S7 loop, parada na validação). |
 | `skeleton/scripts/check_docs` | Verificação de consistência (roda no host, só grep). |
+| `skeleton/scripts/checar-pr` + `skeleton/scripts/abrir-pr` | Portão mecânico do corpo do PR (seções, placeholders, termos internos, cross-check com a sessão) + abertura do PR/MR — instalados só com `--with-pr` (ver tabela de perfis). |
+| `skeleton/pr/**` | Modo PR: template/exemplo do corpo do PR, README do modo e os blocos anexados ao `AGENTS.md`/`sessions/template.md` — instalados só com `--with-pr`. |
 | `skeleton/tooling/INDEX-FIRST.md` | Disciplina tool-agnostic (definitions-before-grep) — instalado só com `--with-indexing`. |
 | `skeleton/tooling/adapters/*` | Adaptadores (`graphify-cbm-zvec.md`, `context-mode.md`, `ai-memory.md`) — instalados só com `--with-indexing` / `--with-context-mode` (ver tabela de perfis). |
-| `skeleton/STACK.md` | Template de especialização por área (tokens `{{AREAS}}`) — instalado só com `--with-stack`. |
+| `skeleton/STACK.md` | Template de especialização por área (tokens `{{AREA_*}}`/`{{PATHS_*}}` preenchidos à mão) — instalado por padrão; nunca sobrescrito. |
 | `skeleton/commands/iniciar-sessao.md` + `levantar-roadmap.md` | Comandos extras de abertura/digest — instalados só com `--with-extra-commands`. |
 | `skeleton/agents/optional/debugger.md` | Agente opcional de diagnóstico (read-only) — agrupamento provisório com `--with-extra-commands` (ver tabela de perfis). |
+| `skeleton/agents/optional/arquiteto.md` | Agente opcional de **desenho técnico** (fase 1b, read-only) — instalado só com `--with-arquiteto`; as dependências dele estão declaradas no próprio arquivo (`## Dependências`). |
+| `skeleton/arquiteto/*-block.md` | Blocos de invocação da fase 1b (marcador `<!-- sdd-arquiteto:bloco -->`) anexados a `.opencode/skills/sdd/SKILL.md` e `.opencode/commands/sessao.md` — instalados só com `--with-arquiteto`. |
 
 ## Instalação (recomendada — `install.sh`)
 
@@ -46,15 +50,23 @@ Opções: `--proxima "texto"` (seção "Próxima sessão"), `--primeira "nome"` 
 sessão), `--no-agents`, `--force` — mais os perfis opt-in `--with-*` (ver tabela abaixo).
 _Um diretório posicional primeiro (o alvo)._
 
+Render: o install resolve sozinho os globais `{{PROJETO}}`, `{{PRÓXIMA_SESSAO}}`,
+`{{ROOT}}` (dir alvo, absoluto), `{{DRAFT_PATH}}`, `{{GOTCHAS_PATH}}` e `{{INDEX}}` — e
+`NNNN`/`NOME`/`DATA`/`slug` na sessão 0001. Só os tokens de área do `STACK.md` e os slots
+de prosa do `sessions/template.md` ficam para preencher à mão (por projeto) — nenhum
+deles é revertido pelo `--force`, porque `STACK.md` nunca é sobrescrito.
+
 Perfis opt-in (default off = comportamento atual):
 
 | Flag | Instala (origem → destino no projeto) |
 | --- | --- |
 | `--with-indexing` | `skeleton/tooling/INDEX-FIRST.md` → `tooling/INDEX-FIRST.md` + `skeleton/tooling/adapters/graphify-cbm-zvec.md` → `tooling/adapters/` |
 | `--with-context-mode` | `skeleton/tooling/adapters/context-mode.md` + `ai-memory.md` → `tooling/adapters/` |
-| `--with-stack` | `skeleton/STACK.md` (template, tokens `{{AREAS}}`) → `STACK.md` |
+| `--with-stack` | (obsoleto) `skeleton/STACK.md` agora é instalado **por padrão**; a flag é aceita como no-op. |
 | `--with-extra-commands` | `skeleton/commands/iniciar-sessao.md` + `levantar-roadmap.md` → `.opencode/commands/` |
 | `--with-extra-commands` (+ debugger, agrupamento provisório — plano §2.6/§2.7 separam, §2.8 sem flag própria) | `skeleton/agents/optional/debugger.md` → `.opencode/agent/` |
+| `--with-pr` | Modo PR (a entrega da sessão é um PR/MR): `skeleton/scripts/checar-pr` + `skeleton/scripts/abrir-pr` → `scripts/` (+x); `skeleton/pr/` (template + exemplo do corpo do PR + README do modo) → `docs/pr/` (**create-only**); bloco do modo PR (marcador `<!-- sdd-pr: ativo -->`) anexado ao `AGENTS.md` e ao `sessions/template.md`; cria `docs/pr/` + `sessions/pr/`. Sem a flag, nada disso existe. |
+| `--with-arquiteto` | Papel de **desenho técnico (fase 1b, opcional, read-only)**: `skeleton/agents/optional/arquiteto.md` → `.opencode/agent/arquiteto.md` (**create-only**); blocos de invocação (`skeleton/arquiteto/`) anexados sob marcador `<!-- sdd-arquiteto:bloco -->` a `.opencode/skills/sdd/SKILL.md` e `.opencode/commands/sessao.md` (append idempotente, arquivo-base intacto). **Não toca `AGENTS.md`.** Dependências declaradas no próprio agente (`## Dependências`) — o install avisa o que falta, sem falhar. |
 
 ## Adicionar o SDD a outro projeto via git (subtree)
 
@@ -104,7 +116,9 @@ Regras de sync:
 
 1. Copie `skeleton/REQUIREMENTS.md`, `skeleton/SESSIONS.md` e `skeleton/scripts/` para a
    raiz do projeto novo.
-2. Substitua `{{PROJETO}}` e `{{PRÓXIMA_SESSAO}}` pelos valores reais.
+2. Substitua os globais pelos valores reais — o `install.sh` faz isso sozinho; na cópia
+   manual, faça à mão: `{{PROJETO}}`, `{{PRÓXIMA_SESSAO}}`, `{{ROOT}}` (dir do projeto,
+   absoluto), `{{DRAFT_PATH}}`, `{{GOTCHAS_PATH}}` e `{{INDEX}}`.
 3. Copie `skeleton/sessions/template.md` → `sessions/0001-<slug>.md` (e mantenha o
    `template.md` como modelo para as próximas).
 4. Copie `skeleton/agents/*.md` → `.opencode/agent/` no projeto (opcional; roles do fluxo).
