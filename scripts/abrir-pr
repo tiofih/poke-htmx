@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+# abrir-pr — abre o PR/MR da sessão no modo `--with-pr` (SDD), depois do portão.
+# uso: ./scripts/abrir-pr [NNNN] [--open|--no-open]
+#
+# Ordem: marcador '<!-- sdd-pr: ativo -->' em AGENTS.md → NNNN (default: sessão de
+# maior número em sessions/) → corpo sessions/pr/NNNN-pr-body.md → ./scripts/checar-pr
+# NNNN (se reprovar, ABORTA sem abrir nada) → base (origin/HEAD, fallback `main`) →
+# comando de abertura → URL → instrução de registrar '> PR: <url>' na sessão.
+#
+# CONTRATO DE SAÍDA:
+#   exit 0 = PR aberto, ou modo degradado honesto (--no-open, ou sem CLI/remote)
+#            com AVISO, o corpo e o comando exato impressos;
+#   exit 1 = portão reprovado, branch base, modo inativo, corpo ausente,
+#            PR_CMD inválida, ou --open impossível;
+#   exit 2 = uso incorreto.
+#
+# `PR_CMD`: lido do AGENTS.md (nunca editado por este script). A forma embarcada —
+# a que `skeleton/pr/AGENTS-block.md` entrega — é o primeiro span entre crases que
+# contenha `<corpo>`, numa linha que mencione `PR_CMD`:
+#   - **Ferramenta (`PR_CMD`):** `gh pr create --base <base> --title "<titulo>" --body-file <corpo>`
+# (GitLab: troque o span por `glab mr create --yes --target-branch <base> --title
+# "<titulo>" --description "$(cat <corpo>)"`.)
+# Precedência: span entre crases (embarcado) → linha literal `PR_CMD="..."` (§6.2.4
+# do design) → default `gh pr create --base <base> --title "<titulo>" --body-file <corpo>`.
+# Substitutos: `<base>` e `<titulo>` (H1 do corpo, cortado em 120 chars, escapados
+# para uso dentro de aspas duplas); `<corpo>` vira o caminho entre aspas simples —
+# serve tanto para `--body-file <corpo>` quanto para `"$(cat <corpo>)"` do glab.
+# Sem camada de abstração de plataforma: o kit não detecta host, uma linha resolve.
+#
+# Este script NUNCA edita o arquivo da sessão — quem registra '> PR: <url>' é o
+# Implementador (S8); aqui só se imprime a instrução.
+
+cd "$(dirname "$0")/.." || exit 2
+
+USO='uso: ./scripts/abrir-pr [NNNN] [--open|--no-open]'
+
+NUM=""; OPEN=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --open) OPEN=1; shift ;;
+    --no-open) OPEN=0; shift ;;
+    -h|--help) echo "$USO"; exit 0 ;;
+    [0-9][0-9][0-9][0-9]) NUM="$1"; shift ;;
+    *) echo "$USO" >&2; exit 2 ;;
+  esac
+done
+
+ok()   { printf 'ok> %s\n' "$*"; }
+warn() { printf 'abrir-pr> AVISO: %s\n' "$*" >&2; }
+fail() { printf 'abrir-pr> FALHA: %s\n' "$*" >&2; exit 1; }
+
+# --- 1. modo ativo + NNNN + corpo
+if [ ! -f AGENTS.md ] || ! grep -qF '<!-- sdd-pr: ativo -->' AGENTS.md; then
+  fail "modo PR inativo: falta '<!-- sdd-pr: ativo -->' em AGENTS.md — rode './install.sh --with-pr'"
+fi
+
+if [ -z "$NUM" ]; then
+  ultimo="$(ls sessions/[0-9][0-9][0-9][0-9]-*.md 2>/dev/null | sort | tail -1)"
+  [ -n "$ultimo" ] || fail "nenhuma sessão em sessions/ — passe NNNN"
+  NUM="$(basename "$ultimo" | cut -d- -f1)"
+fi
+
+CORPO="sessions/pr/$NUM-pr-body.md"
+[ -f "$CORPO" ] || fail "corpo ausente: '$CORPO' não existe — o Implementador escreve e commita o corpo antes de abrir o PR"
+
+# --- 2. portão: corpo reprovado não abre nada
+if [ ! -x ./scripts/checar-pr ]; then
+  fail "./scripts/checar-pr ausente ou sem permissão de execução — rerode './install.sh --with-pr' (o portão é obrigatório)"
+fi
+./scripts/checar-pr "$NUM" || fail "corpo reprovado por ./scripts/checar-pr — abortando sem abrir PR (corrija e rode de novo)"
+
+# --- 3. base: nunca entregar da branch base
+base="$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)"
+base="${base#origin/}"
+[ -n "$base" ] || base="main"
+atual="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+[ -n "$atual" ] || fail "não é um repositório git (ou HEAD inválido) — abrir PR exige um repo com remote"
+[ "$atual" != "$base" ] || fail "a entrega não pode sair da branch base ('$base') — crie uma branch: git switch -c <nome-que-você-quiser>"
+
+# --- 4. comando de abertura: PR_CMD do AGENTS.md (forma embarcada primeiro)
+pr_cmd="$(awk '
+  /PR_CMD/ { f=1 }
+  f {
+    n = split($0, p, "`")
+    for (i = 2; i <= n; i += 2) if (index(p[i], "<corpo>")) { print p[i]; exit }
+    if (++seguidas > 4) exit
+  }' AGENTS.md 2>/dev/null)"
+if [ -z "$pr_cmd" ]; then
+  # linha literal PR_CMD="...": ancora no prefixo e captura até a ÚLTIMA aspa da
+  # linha — o valor traz aspas internas em volta de <titulo> (e do $(cat <corpo>)
+  # do glab), então cortar na primeira aspa truncaria o comando.
+  pr_cmd="$(sed -n 's/.*PR_CMD="\(.*\)".*/\1/p' AGENTS.md 2>/dev/null | head -1)"
+fi
+[ -n "$pr_cmd" ] || pr_cmd='gh pr create --base <base> --title "<titulo>" --body-file <corpo>'
+case "$pr_cmd" in
+  *'<corpo>'*) : ;;
+  *) fail "linha PR_CMD inválida (não contém <corpo>): '$pr_cmd' — use o span entre crases com <base>, <titulo> e <corpo> ou a linha literal PR_CMD=\"... <corpo> ...\"" ;;
+esac
+
+titulo="$(awk '/^## /{exit} /^# /{sub(/^# +/, ""); print; exit}' "$CORPO")"
+titulo="${titulo:0:120}"
+
+escapar_aspas() { printf '%s' "$1" | sed -e 's/[\\$`"]/\\&/g'; }
+p_base='<base>'; p_titulo='<titulo>'; p_corpo='<corpo>'
+cmd="$pr_cmd"
+cmd="${cmd//$p_base/$(escapar_aspas "$base")}"
+cmd="${cmd//$p_titulo/$(escapar_aspas "$titulo")}"
+cmd="${cmd//$p_corpo/'$CORPO'}"
+
+# --- 5. tentar ou cair no modo degradado honesto
+cli="${pr_cmd%% *}"
+tem_cli=0
+[ -n "$cli" ] && command -v "$cli" >/dev/null 2>&1 && tem_cli=1
+tem_remote=0
+[ -n "$(git remote 2>/dev/null)" ] && tem_remote=1
+
+tentar=0
+if [ "$OPEN" = 1 ]; then
+  [ "$tem_cli" -eq 1 ] || fail "--open pedido mas o CLI '$cli' não está no PATH — instale-o ou rode sem --open (o modo degradado imprime o comando)"
+  [ "$tem_remote" -eq 1 ] || fail "--open pedido mas o repositório não tem remote git — configure 'origin' ou rode sem --open"
+  tentar=1
+elif [ "$OPEN" = 0 ]; then
+  tentar=0
+elif [ "$tem_cli" -eq 1 ] && [ "$tem_remote" -eq 1 ]; then
+  tentar=1
+fi
+
+if [ "$tentar" -ne 1 ]; then
+  if [ "$OPEN" = 0 ]; then
+    extra=""
+    [ "$tem_cli" -eq 1 ] || extra="; o CLI '$cli' também está fora do PATH"
+    [ "$tem_remote" -eq 1 ] || extra="$extra; o repositório também está sem remote git"
+    warn "--no-open pedido: o PR não foi aberto por escolha (nada foi tentado)$extra"
+    quando="para abrir: rode de novo com --open"
+  elif [ "$tem_cli" -eq 0 ] && [ "$tem_remote" -eq 0 ]; then
+    warn "modo degradado: CLI '$cli' fora do PATH e repositório sem remote git — o PR não foi aberto"
+    quando="rode quando o CLI e o remote estiverem disponíveis"
+  elif [ "$tem_cli" -eq 0 ]; then
+    warn "modo degradado: CLI '$cli' não está no PATH — o PR não foi aberto"
+    quando="rode quando o CLI '$cli' estiver no PATH"
+  else
+    warn "modo degradado: repositório sem remote git — o PR não foi aberto"
+    quando="rode quando o repositório tiver um remote"
+  fi
+  echo "corpo versionado: $CORPO"
+  echo
+  echo "comando exato ($quando):"
+  echo "  $cmd"
+  echo
+  printf 'ok> corpo pronto para %s — confira e rode de novo com --open\n' "$CORPO"
+  exit 0
+fi
+
+saida="$(eval "$cmd" 2>&1)"; rc=$?
+if [ "$rc" -ne 0 ]; then
+  printf '%s\n' "$saida" >&2
+  fail "o comando de abertura falhou (exit $rc): $cmd"
+fi
+
+url="$(printf '%s\n' "$saida" | grep -oE 'https?://[^[:space:]]+' | tail -1)"
+if [ -n "$url" ]; then
+  ok "PR aberto: $url"
+else
+  warn "o comando saiu com sucesso mas nenhuma URL foi capturada; saída: $(printf '%s\n' "$saida" | head -3 | tr '\n' ' ')"
+fi
+printf 'registre "> PR: %s" na seção de Validação da sessão %s — quem edita é o Implementador (S8); este script não toca no arquivo\n' "${url:-<url>}" "$NUM"
+exit 0
