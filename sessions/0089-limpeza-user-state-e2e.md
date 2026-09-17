@@ -53,7 +53,7 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 - **`test/server_test_helpers.rb`** — remove `clear_user_state!` (`:16`) e o helper `start_journey` (`:24-26`); mantém `fill_team` (`:28-30`), que é o caminho real de abrir o gate.
 - **`test/team_routes_test.rb`** — remove as **4** chamadas `start_journey("user-a")` (`:355,471,481,593`); **nada mais** muda (o helper é no-op: escrevia um flag que nada lia).
 - **`test/home_view_test.rb:86`** — comentário mantido (não é dependência).
-- **`e2e/specs/battle-log.spec.ts`** — os 4 call sites de `buildTeamOfSix` (`:51,77,101,112`) passam a `buildBudgetTeam`; `buildTeamOfSix` (`:11-19`) fica órfão (file-local, 4 usos) e é **removido** (~10 linhas). Sem mudança de asserção.
+- **`e2e/specs/battle-log.spec.ts`** — os 4 call sites de `buildTeamOfSix` (linhas do refinamento `:51,77,101,112`; na execução já estavam em `:41,67,91,102`) passam a `buildBudgetTeam`; `buildTeamOfSix` (`:11-19`) fica órfão (file-local, 4 usos) e é **removido** (~10 linhas). Sem mudança de asserção.
 
 ### Fora de escopo (não abrir)
 
@@ -75,10 +75,13 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 | C4 o gate da jornada continua **derivado do time** (`team >= 6`), sem estado persistido | guarda de regressão (4 verdes): `test/journey_service_test.rb#test_not_started_with_empty_team_and_no_flag` (`:32`), `#test_team_of_six_derives_started_without_flag` (`:36`), `#test_team_size_liberates_even_without_flag` (`:55`) + `JourneyGameOverTest#test_not_game_over_below_team_of_six` (`:164`) | pendente |
 | C5 os 4 testes vaciosos do estado persistido foram removidos e a suíte total cai no número exato | `test/journey_service_test.rb` sem `test_flag_alone_does_not_liberate_with_empty_team` (`:42`), `test_flag_alone_does_not_liberate_below_six` (`:48`), `test_mark_when_full_persists_flag_at_six_members` (`:103`), `test_mark_when_full_does_not_persist_below_six` (`:113`) e sem `test/user_state_repository_test.rb` — prova: `./scripts/test` (contagem de runs da suíte = baseline − 4 − os testes do repo) e `test/user_state_removal_test.rb` verde | pendente |
 | C6 nenhum teste depende de `start_journey`/`clear_user_state!`/`UserStateRepository` | `test/user_state_removal_test.rb#test_test_help_has_no_user_state_hooks` (checa que `TestDatabase` não responde a `clear_user_state!`) + `manual` — `rg -n -e start_journey -e clear_user_state -e UserStateRepository test/` = vazio; os 4 testes de `test/team_routes_test.rb` (`:354`, `:470`, `:480`, `:592`) seguem verdes | pendente |
-| C7 os 4 e2e vermelhos passam com `buildBudgetTeam` | `e2e/specs/battle-log.spec.ts` — `round headers chronological with data-round and damage/KO chips` (`:50`), `reduced-motion disables juice` (`:76`), `auto toggle chains to finish without further clicks` (`:100`), `consumption and reward copy` (`:111`) | pendente |
+| C7 os 4 e2e vermelhos passam com `buildBudgetTeam` **e** o bug de copy de `end_state` que o 4º (`consumption and reward copy`) revelou foi corrigido nos Passos 7–8 | `e2e/specs/battle-log.spec.ts` — `round headers chronological with data-round and damage/KO chips` (`:40`), `reduced-motion disables juice` (`:66`), `auto toggle chains to finish without further clicks` (`:90`), `consumption and reward copy` (`:101`); reparo do helper provado no commit `48a6774` (Passo 6) | pendente |
 | C8 docs sincronizados com a remoção no mesmo commit (GDD/REQUIREMENTS/draft/5F) | `manual` — revisão de diff de `GDD.md:27`, `REQUIREMENTS.md:638-643`, `docs/draft-backlog.md:109`, `docs/5F-decisoes-pendentes.md` (§5.F.1 + itens 1 e 2 de "Para fechar"); `./scripts/check_docs` verde | pendente |
+| C9 a copy de recompensa do `end_state` é coerente com o badge nos **dois** caminhos: com o oponente vencedor (incluindo game over `over`) emite "Derrota" e **não** emite copy de vitória; `draw` emite "Empate"; derivação em ponto único no presenter, sem mapa duplicado nas views | render full: `test/battle_end_states_test.rb#test_game_over_reward_copy_matches_badge` (`:71`, cobre `views/battle.erb:126-132`); modal de strike: `test/battle_strike_routes_test.rb#test_strike_game_over_loss_copy_matches_badge` (`:84`, cobre `views/_strike_result.erb:23-29`); e2e: `consumption and reward copy` (`e2e/specs/battle-log.spec.ts:101`) | pendente |
 
-> **C7 — duas possibilidades registradas:** se a execução local for viável na fase 2 (D6 autoriza; app no ar em `:3000`), C7 é **automatizado** pelo run de `cd e2e && npx playwright test specs/battle-log.spec.ts` (9 verdes / 0 vermelhos). Se inviável no momento do green, C7 vira `manual` — evidência esperada: rodada local do mesmo comando registrada na §7 com o resultado por teste.
+> **C7 — duas possibilidades registradas:** se a execução local for viável na fase 2 (D6 autoriza; app no ar em `:3000`), C7 é **automatizado** pelo run de `cd e2e && npx playwright test specs/battle-log.spec.ts` (9 verdes / 0 vermelhos). Se inviável no momento do green, C7 vira `manual` — evidência esperada: rodada local do mesmo comando registrada na §7 com o resultado por teste. **Resultado real (2026-09-16):** os 3 primeiros ficaram verdes já no Passo 6 e o 4º (`consumption and reward copy`) revelou um **bug real de produto** — a copy de recompensa do `end_state` — corrigido nos Passos 7–8 (C9).
+>
+> **C9 — acrescentado em 2026-09-16 por decisão explícita do usuário (S3, alteração de escopo/critério):** o plano do refinamento cobria só os Passos 1–6; o 4º e2e expôs o mesmo bug de copy no render full (`views/battle.erb`, sem cobertura) e o usuário decidiu corrigi-lo **dentro desta sessão**, como Passo 8, extraindo a derivação para um ponto único (`lib/battle_end_state_presenter.rb`) em vez de duplicar o mapa do Passo 7 nas duas views.
 
 ### Garantias (RNF)
 
@@ -102,7 +105,7 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 
 ## 6. Plano TDD (passos)
 
-> Cada passo = `red` → `green` (suíte completa + lint 0) → commit `Passo N: ...`. Bloco B (Passo 6) é isolado do Bloco A. Termina em Revisor (2c, S7, teto 3 rodadas) → **PARAR** para a validação do usuário (fase 3). Nada aqui roda suíte/lint/e2e na fase 1.
+> Cada passo = `red` → `green` (suíte completa + lint 0) → commit `Passo N: ...`. Bloco B (Passos 6–8) é isolado do Bloco A. Termina em Revisor (2c, S7, teto 3 rodadas) → **PARAR** para a validação do usuário (fase 3). Nada aqui roda suíte/lint/e2e na fase 1.
 
 | Passo | Escopo (red → green) | Verificação |
 | --- | --- | --- |
@@ -112,8 +115,12 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 | 3 | **red→green — C5/C6**: remover o helper `start_journey` (`test/server_test_helpers.rb:24-26`) + as 4 chamadas (`test/team_routes_test.rb:355,471,481,593`) + os 2 testes vacuosos da flag (`test/journey_service_test.rb:42-53`) + a classe `JourneyMarkWhenFullTest` (`:100-119`) | `./scripts/test test/journey_service_test.rb test/team_routes_test.rb` + lint 0; commit `Passo 3:` |
 | 4 | **red→green — C1/G2**: apagar a migração de criação `db/migrations/0036_add_user_state.sql` (D3) e provar a idempotência — 2 execuções consecutivas de `rake db:setup` (ou `TestDatabase.setup!`) sem erro e com `user_state` ausente nas duas | `rake db:setup` 2× + `./scripts/test test/user_state_removal_test.rb` + `./scripts/test test/schema_test.rb` (se aplicável) + lint 0; commit `Passo 4:` |
 | 5 | **green — C4/G1/G3 (verificação final do Bloco A)**: suíte completa + lint 0 + `check_docs` + grep manual do C2; confirmar os 4 testes do gate derivado verdes (C4) e o baseline de runs ajustado (C5) | `./scripts/test` + `./scripts/lint` + `./scripts/check_docs` + `rg -n -e UserState -e user_state lib/ server.rb db/ test/`; commit `Passo 5:` |
-| 6 | **Bloco B, isolado — red→green — C7/D4**: os 4 call sites (`e2e/specs/battle-log.spec.ts:51,77,101,112`) passam a `buildBudgetTeam`; `buildTeamOfSix` (`:11-19`) é removido; nenhuma asserção muda | `cd e2e && npx playwright test specs/battle-log.spec.ts` (9 verdes / 0 vermelhos; se inviável → C7 `manual`) + lint 0; commit `Passo 6:` |
+| 6 | **Bloco B, isolado — red→green — C7/D4**: os 4 call sites (`e2e/specs/battle-log.spec.ts:41,67,91,102`) passam a `buildBudgetTeam`; `buildTeamOfSix` (`:11-19`) é removido; nenhuma asserção muda. **Resultado:** 3 dos 4 verdes; o 4º (`consumption and reward copy`) revelou o bug de copy do `end_state` (Passo 7) | `cd e2e && npx playwright test specs/battle-log.spec.ts` + lint 0; commit `Passo 6:` (`48a6774`) |
+| 7 | **red→green — C9 (render do modal de strike)**: com `end_state == "over"` (game over) a view `views/_strike_result.erb` só tratava `"loss"` e emitia copy de vitória; o teste novo `test/battle_strike_routes_test.rb` (`test_strike_game_over_loss_copy_matches_badge`, `:84`) prova o RED; fix inicial por mapa `{"loss"=>"Derrota","over"=>"Derrota","draw"=>"Empate"}` | `./scripts/test test/battle_strike_routes_test.rb` + lint 0; commit `Passo 7:` (`dfd3741`) |
+| 8 | **red→green — C9 (ponto único, corrige o render full junto)**: o mesmo bug existia em `views/battle.erb:126-132` (`@game_over` + oponente vencedor), sem teste; extrair a derivação para **`lib/battle_end_state_presenter.rb`** (classe pura, padrão `BattleJuicePresenter`/`BattleLogPresenter`/`FighterPresenter`), carregada por 1 linha em `server.rb:30` e consumida por **ambos** os views; teste do caminho full em `test/battle_end_states_test.rb` (`test_game_over_reward_copy_matches_badge`, `:71`) prova o RED (`Expected "...ganhou 10 XP..." to include "Derrota"`); `TODO.md` T2 removido | `./scripts/test test/battle_end_states_test.rb` + `./scripts/test` + lint 0 + `cd e2e && npx playwright test specs/battle-log.spec.ts` (9 verdes); commit `Passo 8:` (`85f48af`) |
 | — | **Fase 2 concluída** → **Revisor (2c)**: loop Implementador↔Revisor até veredito `Aprovado` (teto 3 rodadas, senão S3) → **PARAR** e aguardar a validação do usuário (fase 3). | — |
+
+> **Passos 7–8 foram acrescentados ao plano por decisão explícita do usuário em 2026-09-16 (S3, alteração de escopo/critério)** — o plano refinado cobria só os Passos 0–6 e esta sessão passou de **6 para 8 passos**. O usuário preferiu corrigir o bug irmão do render full **dentro desta sessão**, extraindo a derivação para um ponto único em vez de duplicar o mapa do Passo 7 nas duas views; o critério correspondente é o **C9**.
 
 ## 7. Validação (executada pelo usuário)
 
@@ -149,7 +156,7 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 
 ### Bloco A — execução da fase 2 (Passos 1–5, 2026-09-16)
 
-> **A sessão continua `Pendente`:** a validação (fase 3) é do usuário e a §7 não foi tocada. O Bloco B (Passo 6) foi executado por outro agente (`48a6774`).
+> **A sessão continua `Pendente`:** a validação (fase 3) é do usuário e a §7 não foi tocada. O Bloco B (Passos 6–8) foi executado por outro agente (`48a6774`, `dfd3741`, `85f48af`) e está registrado na subseção seguinte.
 
 | Passo | SHA | Entrega |
 | --- | --- | --- |
@@ -176,6 +183,27 @@ Dívida técnica em dois blocos numa única sessão (D1): **(A)** apagar o estad
 
 - **Agente concorrente no mesmo working tree:** o commit do Bloco B (`48a6774`, Passo 6) entrou em paralelo e, durante os Passos 2–4, `test/battle_strike_routes_test.rb` e `views/_strike_result.erb` estavam **dirty** (trabalho em voo de outro agente, +1 teste). Por isso os primeiros runs completos variaram (2 e 1 falhas em arquivos alheios). No run final (Passo 5) a suíte ficou **verde**: `1181 runs` = baseline 1186 − 4 (`UserStateStartedTest`) − 4 (vacuosos) − 2 (`ServerTeamJourneyMarkTest`) + 4 (`user_state_removal_test.rb`) **+ 1** (teste novo do agente concorrente). **A única offense de lint global** (`test/battle_strike_routes_test.rb:101`, `Style/RegexpLiteral`) é desse arquivo dirty, não do Bloco A (os 7 arquivos tocados aqui têm 0).
 - **Flake pré-existente encontrado (fora de escopo):** `SeedScriptsTest#test_team_evolucao_seeds_near_evolution_thresholds` (`test/seed_scripts_test.rb:38`) falhou num run completo (seed 29866: `Expected: 15, Actual: 5`) e **passou** isolado e no run final. Causa provável: `TestDatabase.team_row(name)` (`test/test_helper.rb:124-128`) não filtra por `user_id` nem ordena → pode devolver o `charmander` de outro usuário. Ordem-dependente, pré-existente, **não** causado por esta sessão. Anotado como TODO para sessão própria (não abrir escopo aqui).
+
+### Bloco B — execução da fase 2 (Passos 6–8, 2026-09-16)
+
+> **A sessão continua `Pendente`:** a validação (fase 3) é do usuário e a §7 não foi tocada. Os Passos 7–8 foram **acrescentados ao plano por decisão explícita do usuário (2026-09-16, S3)** — a sessão passou de 6 para 8 passos e o critério **C9** nasceu daí.
+
+| Passo | SHA | Entrega |
+| --- | --- | --- |
+| 6 | `48a6774` | `e2e/specs/battle-log.spec.ts` (+9/−19): os 4 call sites (`:41,:67,:91,:102`) passam a `buildBudgetTeam`; o helper órfão `buildTeamOfSix` (file-local) é removido. Motivo provado: `nth(i)` sobre a lista que encolhe clicava as cartas 1,3,5,7,9,11 → chimchar (linha S = 120) → 470 > 450 e o 6º add era barrado; **não havia bug de produto** nem premissa stale de orçamento (fonte única `lib/team_budget.rb:8`). **Resultado: 3 dos 4 verdes; o 4º (`consumption and reward copy`) revelou um bug real de produto** (Passo 7). |
+| 7 | `dfd3741` | Copy de derrota/jornada encerrada coerente com o badge no resultado de **strike**: `views/_strike_result.erb:23-29` só tratava `"loss"` e, com `end_state == "over"` (game over, oponente vencedor), emitia a copy de vitória ("Seu Time ganhou 10 XP por Pokémon e +¥40."). Teste novo `test/battle_strike_routes_test.rb:84` (`test_strike_game_over_loss_copy_matches_badge`) provou o RED; fix inicial por mapa `{"loss"=>"Derrota","over"=>"Derrota","draw"=>"Empate"}`. |
+| 8 | `85f48af` | **Ponto único da copy do `end_state`** (corrige o render full junto do modal de strike): o mesmo bug existia em `views/battle.erb:126-132` (`@game_over` + oponente vencedor → rewards "Seu Time ganhou ..."), **sem teste**. Para não duplicar lógica, nasceu **`lib/battle_end_state_presenter.rb`** (classe pura de apresentação, seguindo o padrão `BattleJuicePresenter`/`BattleLogPresenter`/`FighterPresenter`), com `state`/`slug`/`label`/`title`/`winner_name`/`reward_lead`, carregada por 1 linha em `server.rb:30` e consumida por **ambos** os views (`_strike_result.erb` e `battle.erb`); markup/`state-card`/badge/CTA/juice intactos. Teste novo do caminho full: `test/battle_end_states_test.rb:71` (`test_game_over_reward_copy_matches_badge`), RED com `Expected "...ganhou 10 XP..." to include "Derrota"`. `TODO.md`: **T2 removido** (resolvido); **T1 mantido** (flake pré-existente). |
+
+**Decisão do usuário (2026-09-16, S3 — alteração de escopo/critério):** corrigir o bug irmão do render full **dentro desta sessão**, como Passo 8, **preferindo extrair a derivação para um ponto único** em vez de duplicar o mapa do Passo 7 nas duas views — assim os dois caminhos não voltam a divergir. Registrado em §4 (nota do C9) e no §6.
+
+**Verdes finais do Bloco B:** `./scripts/test` = **1182 runs / 6318 asserts / 0 falhas / 0 errors / 0 skips**; `./scripts/lint` = **136 arquivos / 0 offenses**; `./scripts/check_docs` ok; e2e `specs/battle-log.spec.ts` = **9 passed** (após `docker compose restart web`).
+
+**Riscos materializados no Bloco B (os dois do refinamento que se confirmaram fora do previsto):**
+
+1. **Dependências de teste não inventariadas (mesma lição do Bloco A, agora no `test/`):** o grep do C2 achou **3** usos de `UserStateRepository` em `test/team_routes_test.rb` (`:712`, `:735`, classe `ServerTeamJourneyMarkTest:706-737`, e um `refute` órfão em `:1188`) que o refinamento não previa — removidos no Passo 2. Sem isso a suíte derrubaria com `NameError`/`NoMethodError`.
+2. **Inconsistência interna do plano:** o Passo 2 removia `mark_started` mas o Passo 3 era dono dos testes que o chamam → as remoções foram movidas para o Passo 2, para o **verde por commit** valer em cada SHA; o critério C5 segue atendido (as 4 remoções + o repo morto aconteceram, só mudou o commit).
+
+**Lição de ambiente (container):** editar `lib/`/`server.rb` com o container `web` no ar deixa classes **velhas em memória** (`$LOADED_FEATURES`): o app passou a responder 500 (`ArgumentError - missing keyword: :user_state`) e **nenhum** e2e passava até `docker compose restart web`. Sempre reiniciar o container após mudar arquivos carregados no boot antes de rodar e2e.
 
 
 ## 9. Gotchas / Lições (memória — S6)
