@@ -20,10 +20,6 @@ module ServerTestHelpers
     @inventory = InventoryRepository.new
   end
 
-  # Sessao 0089: esvaziado no Passo 2 (a flag que ele escrevia nao existe mais);
-  # o helper e os 4 chamadores saem no Passo 3.
-  def start_journey(_user_id); end
-
   def fill_team(user_id, members: DEFAULT_TEAM_SPECS)
     add_team(user_id, members)
   end

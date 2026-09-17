@@ -352,7 +352,6 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_team_page_is_removed_and_returns_404_without_htmx
-    start_journey("user-a")
     add_team("user-a", [["pikachu", 25]])
 
     env = user_session("user-a")
@@ -468,7 +467,6 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_team_member_sprite_has_alt_text
-    start_journey("user-a")
     add_team("user-a", [["pikachu", 25]])
 
     get "/team", {}, htmx_session("user-a")
@@ -478,7 +476,6 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_team_slot_controls_have_aria_labels
-    start_journey("user-a")
     add_team("user-a", [["pikachu", 25]])
 
     get "/team", {}, htmx_session("user-a")
@@ -590,8 +587,6 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def test_team_heal_with_empty_team_does_not_break
-    start_journey("user-a")
-
     post "/team/heal", {}, user_session("user-a")
 
     assert last_response.ok?
