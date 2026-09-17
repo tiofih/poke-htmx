@@ -18,7 +18,7 @@ awk '/^## Próxima sessão/{f=1; next} f && /^## /{f=0} f && NF' SESSIONS.md | s
 printf '\n## Fase 1 (refinamento) — checklist\n'
 printf -- '- [ ] consultar **./scripts/levantar-roadmap** para o digest do backlog/limitações abertas\n'
 printf -- '- [ ] ler na íntegra **apenas** o arquivo da sessão corrente em sessions/ (criar a partir de sessions/template.md se for nova)\n'
-printf -- '- [ ] consultar REQUIREMENTS.md por busca (grep/ctx_idx), NÃO ler o arquivo inteiro\n'
+printf -- '- [ ] consultar REQUIREMENTS.md por busca (grep/ctx_search), NÃO ler o arquivo inteiro\n'
 printf -- '- [ ] fechar objetivo/escopo/critérios e plano TDD; cada critério aponta o teste que o prova (S1); sem teste → `manual`\n'
 printf -- '- [ ] no commit do refinamento: atualizar SESSIONS.md (tabela + "Próxima sessão" — S4) e rodar ./scripts/check_docs (S5)\n'
 
