@@ -424,10 +424,6 @@ registriert den `ai-context`-Server mit den Werkzeugen `locate`,
 dann direkt diese nutzen statt der Bash-Route.
 <!-- ai-context:managed:end -->
 
-# Agent Rules <!-- tessl-managed -->
-
-@.tessl/RULES.md follow the [instructions](.tessl/RULES.md)
-
 # --- SDD/PR (--with-pr) ---
 
 <!-- sdd-pr: ativo -->
