@@ -89,8 +89,8 @@ class HomeViewTest < Minitest::Test
       get "/", {}, user_session("pill-stale")
     end
     body = last_response.body
-    assert_match(%r{<span class="pill pill--stale" id="readiness-pill">Precisa de cura</span>}, body,
-                 "time invalido: pill stale (C3)")
+    assert_match(%r{<span class="pill pill--stale" id="readiness-pill">Falta 1</span>}, body,
+                 "time incompleto: pill pede mais (S3)")
 
     fill_team("pill-ready")
     PokeApiStub.with_all_names(two_hundred_fifty_names) do

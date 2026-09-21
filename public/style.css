@@ -2043,14 +2043,10 @@ body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--fo
 /* === UI polish (0083): inicio — polimento visual home/team/battle (visual-only,
    aditivo; reusa tokens; nao redefine .btn/.pcard/.pill existentes). === */
 /* C1 — gate visual do CTA Batalhar: so desabilita o clique (pointer-events) e
-   apaga o botao; nenhuma regra de negocio ou rota muda. O hint fica SEMPRE
-   visivel (rodada 2/revisao S7: antes sumia <=720px e o title era inalcancavel
-   por hover) — em telas estreitas ele apenas compacta; tokens no lugar de
-   opacity para preservar contraste; sem regra de foco — o CTA gated tem
-   `tabindex="-1"` e nao entra na navegacao por teclado (opcao (i), 2026-09-16). */
+   apaga o botao; nenhuma regra de negocio ou rota muda. S3 2026-09-21: o hint
+   de texto saiu (a pill do time explica o gate); sem regra de foco — o CTA
+   gated tem `tabindex="-1"` e nao entra na navegacao por teclado. */
 .btn--gated { background: var(--fg-soft); color: var(--muted); pointer-events: none; }
-.cta-hint { font-size: 12px; color: var(--muted); max-width: 22ch; line-height: 1.25; }
-@media (max-width: 720px) { .cta-hint { max-width: none; font-size: 11px; } }
 /* C2 — filtros: cada select vive num .field com label visivel (sem empilhar a
    margem do grid) e a grade colapsa para 1 coluna em telas estreitas (360px e
    375px cobertos por 420px), sem scroll-x. */

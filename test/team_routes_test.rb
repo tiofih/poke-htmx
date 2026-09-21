@@ -93,7 +93,8 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_includes last_response.body, 'id="cta-slot"'
     assert_includes last_response.body, 'hx-swap-oob="outerHTML"'
     assert_includes last_response.body, "btn--gated"
-    assert_includes last_response.body, "Cure o time antes de batalhar."
+    assert_match(/Faltam 5/, last_response.body, "time de 1: pill pede mais (S3)")
+    refute_includes last_response.body, "cta-hint", "sem mensagem ao lado do botao (S3)"
   end
 
   def test_post_team_blocked_still_includes_cta_slot_oob
@@ -117,7 +118,8 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert last_response.ok?
     assert_includes last_response.body, 'id="cta-slot"'
     assert_includes last_response.body, 'hx-swap-oob="outerHTML"'
-    assert_includes last_response.body, "Monte seu time para batalhar."
+    assert_match(/Time vazio/, last_response.body, "time esvaziado: pill neutra (S3)")
+    refute_includes last_response.body, "cta-hint", "sem mensagem ao lado do botao (S3)"
   end
 
   def test_remove_from_full_team_returns_active_add_buttons_oob

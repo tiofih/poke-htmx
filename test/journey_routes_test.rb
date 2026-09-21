@@ -48,7 +48,8 @@ class JourneyRestartTest < Minitest::Test
     assert last_response.ok?
     assert_includes last_response.body, 'id="cta-slot"'
     assert_includes last_response.body, 'hx-swap-oob="outerHTML"'
-    assert_includes last_response.body, "Monte seu time para batalhar."
+    assert_match(/Time vazio/, last_response.body, "pos-restart: pill neutra (S3)")
+    refute_includes last_response.body, "cta-hint", "sem mensagem ao lado do botao (S3)"
   end
 
   def test_restart_journey_full_page_redirects_to_root

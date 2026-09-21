@@ -624,21 +624,10 @@ module ServerTeamActions
   # 0083 C1 — gate VISUAL (sem regra nova): so gata quando o estado existe
   # (@can_battle == false). Rotas que compartilham o layout sem passar por
   # load_journey_state (ex.: erb :battle_page) tem @can_battle nil -> CTA normal.
-  # Rodada 2 (revisao S7): o hint NUNCA e escondido (nao depende de hover —
-  # pointer-events:none mataria o title) e vai ligado por aria-describedby;
-  # game over vem primeiro porque @can_battle == false sem dinheiro para curar.
+  # S3 2026-09-21 (comentario PR#2): o hint de texto saiu — quem fala e a pill
+  # do time (`views/team.erb`); o CTA gated segue apagado e fora do teclado.
   def cta_gated?
     @can_battle == false
-  end
-
-  def cta_hint
-    if @game_over
-      "Jornada encerrada: sem dinheiro para curar. Recomece a jornada."
-    elsif @team_size.to_i.zero?
-      "Monte seu time para batalhar."
-    else
-      "Cure o time antes de batalhar."
-    end
   end
 
   def oob_cta_slot
