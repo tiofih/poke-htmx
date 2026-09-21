@@ -131,6 +131,29 @@ class ServerMartTest < Minitest::Test
     assert_equal 110, @wallet.balance("user-a")
   end
 
+  def test_mart_buy_includes_cta_slot_out_of_band_swap
+    @wallet.grant("user-a", 100)
+
+    post "/mart/buy", { item_name: "potion", quantity: "2" }, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="cta-slot"'
+    assert_includes last_response.body, 'hx-swap-oob="outerHTML"'
+    assert_includes last_response.body, 'data-od-id="cta-battle"'
+  end
+
+  def test_mart_sell_includes_cta_slot_out_of_band_swap
+    @wallet.grant("user-a", 100)
+    @inventory.add("user-a", "potion", 2)
+
+    post "/mart/sell", { item_name: "potion", quantity: "1" }, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="cta-slot"'
+    assert_includes last_response.body, 'hx-swap-oob="outerHTML"'
+    assert_includes last_response.body, 'data-od-id="cta-battle"'
+  end
+
   def test_mart_sell_with_insufficient_stock_does_not_credit
     @wallet.grant("user-a", 100)
     @inventory.add("user-a", "potion", 1)

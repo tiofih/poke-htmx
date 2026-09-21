@@ -779,7 +779,7 @@ module ServerTeamActions
   def render_mart_result_notice(result)
     @notice = result[:notice]
     @notice_kind = result[:kind]
-    "#{render_team_fragment_with_notice}#{oob_mart_modal}"
+    "#{render_team_fragment_with_notice}#{oob_mart_modal}#{oob_cta_slot}"
   end
 
   def oob_mart_modal
