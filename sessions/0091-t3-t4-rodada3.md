@@ -71,6 +71,8 @@ Fechar os dois achados `low` da rodada 3 da 0089: indentação do `<p class="rew
 
 ## 7. Validação (revisão do PR pelo usuário)
 
+> PR: https://github.com/tiofih/poke-htmx/pull/3
+
 **Pendente.**
 
 Roteiro manual (vai ao corpo do PR): ver o fonte da página de fim de batalha (indentação do `<p class="rewards">` alinhada ao `if`); ler o teste e confirmar as duas copies exatas.
