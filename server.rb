@@ -797,7 +797,8 @@ module ServerTeamActions
     @notice_kind = result[:kind]
     settings.battle.invalidate(current_user)
     battle_oob = heal_and_battle ? oob_battle_view_forced : ""
-    "#{render_team_fragment_with_notice}#{oob_close_center_modal}#{oob_team_view}#{oob_nav_badge}#{battle_oob}#{oob_cta_slot}"
+    base = "#{render_team_fragment_with_notice}#{oob_close_center_modal}#{oob_team_view}"
+    "#{base}#{oob_nav_badge}#{battle_oob}#{oob_cta_slot}"
   end
 
   def heal_and_battle_requested?
