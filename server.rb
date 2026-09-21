@@ -602,7 +602,7 @@ module ServerTeamActions
     @toast_pokemon = pokemon unless notice
     mini_status = erb :team_add_result, layout: false
     prepare_team_fragment_data
-    "#{mini_status}#{oob_team_view}#{oob_pokemon_list}#{oob_nav_badge}"
+    "#{mini_status}#{oob_team_view}#{oob_pokemon_list}#{oob_nav_badge}#{oob_cta_slot}"
   end
 
   def budget_blocked_response(msg)
@@ -610,7 +610,7 @@ module ServerTeamActions
     @notice_kind = :error
     mini_status = erb :team_add_result, layout: false
     prepare_team_fragment_data
-    "#{mini_status}#{oob_team_view}#{oob_pokemon_list}#{oob_nav_badge}"
+    "#{mini_status}#{oob_team_view}#{oob_pokemon_list}#{oob_nav_badge}#{oob_cta_slot}"
   end
 
   def oob_team_view
@@ -619,6 +619,19 @@ module ServerTeamActions
 
   def oob_nav_badge
     %(<span id="nav-badge" hx-swap-oob="innerHTML">#{@team_size || @team.size}/6</span>)
+  end
+
+  # 0083 C1 — gate VISUAL (sem regra nova): so gata quando o estado existe
+  # (@can_battle == false). Rotas que compartilham o layout sem passar por
+  # load_journey_state (ex.: erb :battle_page) tem @can_battle nil -> CTA normal.
+  # S3 2026-09-21 (comentario PR#2): o hint de texto saiu — quem fala e a pill
+  # do time (`views/team.erb`); o CTA gated segue apagado e fora do teclado.
+  def cta_gated?
+    @can_battle == false
+  end
+
+  def oob_cta_slot
+    erb(:_cta_slot, layout: false).sub('id="cta-slot"', 'id="cta-slot" hx-swap-oob="outerHTML"')
   end
 
   def oob_pokemon_list
@@ -715,12 +728,12 @@ module ServerTeamActions
         @notice = "Pokémon derrotado — cure antes de remover"
         @notice_kind = :error
         fragment = render_team_fragment_with_notice
-        return "#{fragment}#{oob_pokemon_list}#{oob_nav_badge}"
+        return "#{fragment}#{oob_pokemon_list}#{oob_nav_badge}#{oob_cta_slot}"
       end
     end
     settings.battle.invalidate(current_user)
     fragment = render_team_fragment_with_notice
-    "#{fragment}#{oob_pokemon_list}#{oob_nav_badge}"
+    "#{fragment}#{oob_pokemon_list}#{oob_nav_badge}#{oob_cta_slot}"
   end # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def move_team_member
@@ -755,7 +768,7 @@ module ServerTeamActions
   def render_mart_result_notice(result)
     @notice = result[:notice]
     @notice_kind = result[:kind]
-    "#{render_team_fragment_with_notice}#{oob_mart_modal}"
+    "#{render_team_fragment_with_notice}#{oob_mart_modal}#{oob_cta_slot}"
   end
 
   def oob_mart_modal
@@ -765,7 +778,7 @@ module ServerTeamActions
   def render_result_notice(result)
     @notice = result[:notice]
     @notice_kind = result[:kind]
-    "#{render_team_fragment_with_notice}#{oob_center_modal}#{oob_team_view}#{oob_nav_badge}"
+    "#{render_team_fragment_with_notice}#{oob_center_modal}#{oob_team_view}#{oob_nav_badge}#{oob_cta_slot}"
   end
 
   def render_heal_success_notice(result, heal_and_battle: false)
@@ -773,7 +786,8 @@ module ServerTeamActions
     @notice_kind = result[:kind]
     settings.battle.invalidate(current_user)
     battle_oob = heal_and_battle ? oob_battle_view_forced : ""
-    "#{render_team_fragment_with_notice}#{oob_close_center_modal}#{oob_team_view}#{oob_nav_badge}#{battle_oob}"
+    base = "#{render_team_fragment_with_notice}#{oob_close_center_modal}#{oob_team_view}"
+    "#{base}#{oob_nav_badge}#{battle_oob}#{oob_cta_slot}"
   end
 
   def heal_and_battle_requested?
@@ -953,6 +967,7 @@ module ServerJourneyActions
     content = render_team_fragment_with_notice
     content += oob_pokemon_list if list_state_present?
     content += oob_nav_badge
+    content += oob_cta_slot
     content
   end
 

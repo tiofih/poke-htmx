@@ -58,7 +58,9 @@ O CTA "Batalhar" (gate + hint) do cabeçalho passa a atualizar via OOB nas rotas
 - [ ] Suíte completa verde com **baseline preservado (1185/6332 da 0089)** + novos testes e lint 0 em **todo** green; commit obrigatório por passo; 0 regressão.
 - [ ] Sem dependência nova / sem mudança de schema / testes sem rede / sem supressão de lint injustificada.
 - [ ] `REQUIREMENTS.md` + `SESSIONS.md` atualizados no mesmo escopo do passo docs; *status de validação* só após o usuário validar revisando o PR (S4).
-- [ ] **M1** — os 4 estados da pill/0083 inalterados — prova: testes existentes (`test/layout_test.rb`, asserts da pill).
+- [ ] **M1** — os 4 estados da pill/0083 (emendados pela S3 2026-09-21: time incompleto fala "Faltam N", hint removido em todo gate) — prova: testes existentes atualizados (`test/layout_test.rb`, `test/home_view_test.rb`).
+
+> **S3 2026-09-21 (comentário na revisão do PR):** C2 reaberto — remover com time cheio mostrava "Precisa de cura" + hint de cura num time saudável porém incompleto. Pill passa a falar "Faltam N" e o hint ao lado do botão sai em todo gate (emenda formal à C1 da 0083 e a este M1). Provas atualizadas nos mesmos arquivos.
 
 > **S1:** cada critério acima aponta o teste que o prova. Roteiros manuais R1/R2 vão ao corpo do PR (E2E: nao).
 
@@ -80,6 +82,8 @@ O CTA "Batalhar" (gate + hint) do cabeçalho passa a atualizar via OOB nas rotas
 | — | **Fase 2 concluída** → corpo do PR (`sessions/pr/0090-pr-body.md`, `checar-pr`) → **Revisor (2c)** até `Aprovado` + `CORPO DO PR: publicável` (teto 3 rodadas, senão S3) → `abrir-pr 0090` → **PARAR** (fase 3 = revisão do PR). | `> PR: <url>` na §7 |
 
 ## 7. Validação (revisão do PR pelo usuário)
+
+> PR: https://github.com/tiofih/poke-htmx/pull/2
 
 **Pendente.**
 

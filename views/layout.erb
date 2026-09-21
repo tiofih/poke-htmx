@@ -17,24 +17,7 @@
           <a href="/" class="<%= "active" if request.path == "/" %>"<%= ' aria-current="page"' if request.path == "/" %>>Time <span class="nav-badge num" id="nav-badge"><%= @team_size || 0 %>/6</span></a>
           <a href="/history" class="<%= "active" if request.path == "/history" %>"<%= ' aria-current="page"' if request.path == "/history" %>>Histórico</a>
         </nav>
-        <%
-          # 0083 C1 — gate VISUAL (sem regra nova): so gata quando o estado existe
-          # (@can_battle == false). Rotas que compartilham o layout sem passar por
-          # load_journey_state (ex.: erb :battle_page) tem @can_battle nil -> CTA normal.
-          # Rodada 2 (revisao S7): o hint NUNCA e escondido (nao depende de hover —
-          # pointer-events:none mataria o title) e vai ligado por aria-describedby;
-          # game over vem primeiro porque @can_battle == false sem dinheiro para curar.
-          cta_gated = @can_battle == false
-          cta_hint = if @game_over
-                       "Jornada encerrada: sem dinheiro para curar. Recomece a jornada."
-                     elsif @team_size.to_i.zero?
-                       "Monte seu time para batalhar."
-                     else
-                       "Cure o time antes de batalhar."
-                     end
-        %>
-        <a href="/battle" class="btn btn-primary<%= " btn--gated" if cta_gated %>" data-od-id="cta-battle"<%= %( aria-disabled="true" tabindex="-1" aria-describedby="cta-hint") if cta_gated %>>Batalhar</a>
-        <% if cta_gated %><span class="cta-hint meta" id="cta-hint"><%= cta_hint %></span><% end %>
+        <%= erb :_cta_slot, layout: false %>
         <% if request.path == "/battle" %>
           <a href="/" class="btn btn-secondary">◀ Voltar ao time</a>
         <% end %>
