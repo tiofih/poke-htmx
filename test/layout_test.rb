@@ -65,10 +65,11 @@ class LayoutViewportTest < Minitest::Test
   end
 
   def test_topnav_cta_always_btn_and_back_link_only_on_battle
-    layout = File.read(File.join(__dir__, "../views/layout.erb"))
+    cta_slot = File.read(File.join(__dir__, "../views/_cta_slot.erb"))
 
-    assert_match(%r{href="/battle" class="btn}, layout,
+    assert_match(%r{href="/battle" class="btn}, cta_slot,
                  "expected the /battle CTA to always wear .btn (no active-text)")
+    layout = File.read(File.join(__dir__, "../views/layout.erb"))
     assert_match(/Voltar ao time/, layout,
                  "expected a Voltar ao time link in the topnav")
 
