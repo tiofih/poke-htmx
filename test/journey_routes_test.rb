@@ -42,6 +42,15 @@ class JourneyRestartTest < Minitest::Test
     assert_match(/Monte seu time inicial/i, last_response.body)
   end
 
+  def test_restart_journey_includes_cta_slot_out_of_band_swap
+    post "/journey/restart", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="cta-slot"'
+    assert_includes last_response.body, 'hx-swap-oob="outerHTML"'
+    assert_includes last_response.body, "Monte seu time para batalhar."
+  end
+
   def test_restart_journey_full_page_redirects_to_root
     post "/journey/restart", {}, user_session("user-a")
 

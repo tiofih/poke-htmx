@@ -247,4 +247,16 @@ class ModalRoutesTest < Minitest::Test
     assert_match(/já está curado/i, body)
     assert_match(%r{<strong>Time já curado</strong>}, body)
   end
+
+  def test_heal_success_includes_cta_slot_out_of_band_swap
+    pokemon_id = TestDatabase.team_id("pikachu", "user-a")
+    @progression.update_hp("user-a", pokemon_id, 200, 100)
+
+    post "/team/heal", {}, htmx_session("user-a")
+
+    assert last_response.ok?
+    assert_includes last_response.body, 'id="cta-slot"'
+    assert_includes last_response.body, 'hx-swap-oob="outerHTML"'
+    assert_includes last_response.body, 'data-od-id="cta-battle"'
+  end
 end

@@ -789,7 +789,7 @@ module ServerTeamActions
   def render_result_notice(result)
     @notice = result[:notice]
     @notice_kind = result[:kind]
-    "#{render_team_fragment_with_notice}#{oob_center_modal}#{oob_team_view}#{oob_nav_badge}"
+    "#{render_team_fragment_with_notice}#{oob_center_modal}#{oob_team_view}#{oob_nav_badge}#{oob_cta_slot}"
   end
 
   def render_heal_success_notice(result, heal_and_battle: false)
@@ -797,7 +797,7 @@ module ServerTeamActions
     @notice_kind = result[:kind]
     settings.battle.invalidate(current_user)
     battle_oob = heal_and_battle ? oob_battle_view_forced : ""
-    "#{render_team_fragment_with_notice}#{oob_close_center_modal}#{oob_team_view}#{oob_nav_badge}#{battle_oob}"
+    "#{render_team_fragment_with_notice}#{oob_close_center_modal}#{oob_team_view}#{oob_nav_badge}#{battle_oob}#{oob_cta_slot}"
   end
 
   def heal_and_battle_requested?
@@ -977,6 +977,7 @@ module ServerJourneyActions
     content = render_team_fragment_with_notice
     content += oob_pokemon_list if list_state_present?
     content += oob_nav_badge
+    content += oob_cta_slot
     content
   end
 
