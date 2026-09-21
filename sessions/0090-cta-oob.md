@@ -81,6 +81,8 @@ O CTA "Batalhar" (gate + hint) do cabeçalho passa a atualizar via OOB nas rotas
 
 ## 7. Validação (revisão do PR pelo usuário)
 
+> PR: https://github.com/tiofih/poke-htmx/pull/2
+
 **Pendente.**
 
 Roteiros manuais (vão ao corpo do PR):
