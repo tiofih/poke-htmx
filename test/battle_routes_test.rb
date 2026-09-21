@@ -790,9 +790,13 @@ class ServerBattleTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert last_response.ok?
     assert_match(/¥\d+/, last_response.body)
     body = last_response.body
-    assert(body.match?(/ganhou \d+ XP por Pokémon e \+¥\d+/) ||
-           body.match?(/Derrota — \+\d+ XP por Pokémon e \+¥\d+/),
-           "XP de vitoria ou derrota")
+    if body.match?(/Vencedor: Seu Time/)
+      assert_match(/Seu Time ganhou \d+ XP por Pokémon( e \+¥\d+)?\./, body,
+                   "copy exata de vitoria (T4 — trocar por derrota falha)")
+    else
+      assert_match(/(Derrota|Empate) — \+\d+ XP por Pokémon( e \+¥\d+)?\./, body,
+                   "copy exata de derrota/empate (T4 — trocar por vitoria falha)")
+    end
   end
 
   def test_battle_finish_evolves_member_when_level_reaches_min_level
