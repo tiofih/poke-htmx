@@ -4,10 +4,10 @@
 
 ## O que muda para quem usa o produto
 
-O botão "Batalhar" do cabeçalho (com o cadeado e a dica de texto) agora reage na hora
-sempre que o time muda: adicionar ou remover um Pokémon, curar no Poke Center, comprar
-ou vender no Poke Mart e recomeçar a jornada atualizam o botão e a dica sem recarregar
-a página.
+O botão "Batalhar" do cabeçalho (com o cadeado e a tag de estado do time) agora
+reage na hora sempre que o time muda: adicionar ou remover um Pokémon, curar no
+Poke Center, comprar ou vender no Poke Mart e recomeçar a jornada atualizam o botão
+e a tag sem recarregar a página.
 
 **Antes:** o botão ficava desatualizado até um F5 — mostrava "Monte seu time" mesmo
 depois de adicionar membros, ou liberado mesmo com o time vazio após uma remoção.
@@ -16,20 +16,20 @@ tela pelo mecanismo de atualização parcial já usado no resto do app.
 
 ## O que foi implementado
 
-- O botão e a dica saíram do molde geral da página para um trecho próprio com
+- O botão saiu do molde geral da página para um trecho próprio com
   identificador estável, reutilizado tanto na página cheia quanto nas respostas
   parciais das cinco ações (adicionar com ou sem bloqueio de orçamento, remover,
   curar, recomeçar a jornada, comprar/vender).
-- A lógica do cadeado e das três dicas ("jornada encerrada", "monte seu time",
-  "cure o time") foi movida para dois métodos no servidor, sem mudar nenhuma regra:
-  mesmos estados, mesmos textos.
+- A lógica do cadeado foi movida para um método no servidor, sem mudar nenhuma regra.
+  Quem explica o estado é a tag do time: time vazio, "Faltam N" com time incompleto,
+  estado de cura com time cheio machucado — sem mensagem ao lado do botão.
 - Testes novos conferem, no corpo de cada resposta parcial, a presença do trecho do
   botão com o estado certo (bloqueado com a dica de cura ao adicionar, dica de montar
   o time ao esvaziar, etc.).
 
 ## O que foi validado
 
-- **Testes automatizados:** suíte completa `1192 testes / 6381 asserções`, zero falha,
+- **Testes automatizados:** suíte completa `1192 testes / 6389 asserções`, zero falha,
   lint zero — para rodar: `./scripts/test` e `./scripts/lint`
 - **Ponta a ponta:** rodada completa no navegador (15 cenários): 12 passaram. Os 3 que
   falharam foram repetidos na árvore sem esta mudança e falham igual — contraste de cor
@@ -60,11 +60,11 @@ a jornada zera o time, se preciso).
 
 | # | O que fazer | O que deve acontecer |
 | --- | --- | --- |
-| 1 | Com o time vazio, adicionar 1 Pokémon pela lista | O botão destrava na hora, sem recarregar; some a dica "Monte seu time para batalhar" |
-| 2 | Remover esse Pokémon | O botão volta a bloqueado na hora, sem recarregar, com a dica "Monte seu time para batalhar" |
+| 1 | Com o time vazio, adicionar 1 Pokémon pela lista | O botão destrava na hora, sem recarregar; a tag sai de "Time vazio" |
+| 2 | Remover esse Pokémon | O botão volta a bloqueado na hora, sem recarregar; a tag volta a "Time vazio" |
 | 3 | Com o time cheio e machucado, curar no Poke Center | O botão destrava na hora, sem recarregar |
-| 4 | Comprar e vender um item no Poke Mart; recomeçar a jornada | Botão e dica acompanham cada ação, sem recarregar; após recomeçar, dica de montar o time |
-| 5 | Em nenhum passo | A pílula de estado do time ("Pronto p/ batalhar", "Precisa de cura", etc.) não muda de comportamento |
+| 4 | Comprar e vender um item no Poke Mart; recomeçar a jornada | Botão e tag acompanham cada ação, sem recarregar |
+| 5 | Com 5 Pokémon saudáveis | A tag mostra "Falta 1" em vez de falar de cura |
 
 ## Comandos do projeto
 
@@ -90,9 +90,12 @@ a jornada zera o time, se preciso).
   `test/journey_routes_test.rb`
   (`test_restart_journey_includes_cta_slot_out_of_band_swap`); comprar/vender →
   `test/mart_routes_test.rb` (`test_mart_buy_includes_cta_slot_out_of_band_swap`,
-  `test_mart_sell_includes_cta_slot_out_of_band_swap`); pílula intacta → testes
-  existentes de layout e do time.
+  `test_mart_sell_includes_cta_slot_out_of_band_swap`); pílula e ausência de hint →
+  testes atualizados de layout e da home (`test_battle_cta_gated_hint`,
+  `test_battle_cta_pill_incomplete_team_asks_for_more`,
+  `test_battle_cta_pill_distinguishes_gated_states`, `test_team_empty_stale_pills`).
 - Rastreabilidade de requisitos: item T5 do `TODO.md` (achado pós-validação da sessão
   de polimento visual, consequência aceita do escopo dela).
 - Commits desta entrega: `717485f` (refinamento), `fe0c225`, `4dcc548`, `fb4b24a`,
-  `8bd2abc` (implementação em três frentes mais ajuste de lint).
+  `8bd2abc` (implementação em três frentes mais ajuste de lint), `184e831` (ajuste
+  de revisão: pill "Faltam N", hint removido).
