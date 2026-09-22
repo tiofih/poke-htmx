@@ -22,7 +22,7 @@ class SeedTeamTest < Minitest::Test
       level: 5, experience: 1499
     )
 
-    row = TestDatabase.team_row("pikachu")
+    row = TestDatabase.team_row("pikachu", @user_id)
     refute_nil row
     assert_equal @user_id, row["user_id"]
     assert_equal "25", row["number"]
@@ -42,7 +42,7 @@ class SeedTeamTest < Minitest::Test
       name: "pikachu", sprite: "sprite", number: 25, slot: 1
     )
 
-    row = TestDatabase.team_row("pikachu")
+    row = TestDatabase.team_row("pikachu", @user_id)
     progress = TestDatabase.progress_row(row["id"])
     assert_equal 1, progress["level"].to_i
     assert_equal 0, progress["xp"].to_i
@@ -55,7 +55,7 @@ class SeedTeamTest < Minitest::Test
       name: "pikachu", sprite: "sprite", number: 25, slot: 1
     )
 
-    row = TestDatabase.team_row("pikachu")
+    row = TestDatabase.team_row("pikachu", @user_id)
     assert_equal "{}", row["moves"]
   end
 
@@ -99,7 +99,7 @@ class SeedTeamTest < Minitest::Test
 
     seed.clear!
 
-    assert_nil TestDatabase.team_row("pikachu")
-    refute_nil TestDatabase.team_row("charmander")
+    assert_nil TestDatabase.team_row("pikachu", @user_id)
+    refute_nil TestDatabase.team_row("charmander", "other-user")
   end
 end

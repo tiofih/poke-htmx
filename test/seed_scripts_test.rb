@@ -27,17 +27,37 @@ class SeedScriptsTest < Minitest::Test
     end
   end
 
+  def test_team_row_filtra_por_user_id
+    seed_a = SeedTeam.new(user_id: "team-row-a")
+    seed_a.clear!
+    seed_a.add_member(name: "charmander", sprite: "s", number: 4, slot: 1, level: 5, experience: 100)
+    seed_b = SeedTeam.new(user_id: "team-row-b")
+    seed_b.clear!
+    seed_b.add_member(name: "charmander", sprite: "s", number: 4, slot: 1, level: 40, experience: 900)
+
+    row_a = TestDatabase.team_row("charmander", "team-row-a")
+    refute_nil row_a
+    assert_equal "team-row-a", row_a["user_id"]
+    assert_equal 5, TestDatabase.progress_row(row_a["id"])["level"].to_i
+
+    row_b = TestDatabase.team_row("charmander", "team-row-b")
+    refute_nil row_b
+    assert_equal "team-row-b", row_b["user_id"]
+
+    assert_nil TestDatabase.team_row("charmander", "user-sem-time")
+  end
+
   def test_team_evolucao_seeds_near_evolution_thresholds
     load_seed("team_evolucao", "team-evol")
     members = team_pokemon_names("team-evol")
     assert_equal 6, members.size
 
-    charmander = TestDatabase.team_row("charmander")
+    charmander = TestDatabase.team_row("charmander", "team-evol")
     refute_nil charmander
     charmander_progress = TestDatabase.progress_row(charmander["id"])
     assert_equal 15, charmander_progress["level"].to_i
 
-    charmeleon = TestDatabase.team_row("charmeleon")
+    charmeleon = TestDatabase.team_row("charmeleon", "team-evol")
     refute_nil charmeleon
     charmeleon_progress = TestDatabase.progress_row(charmeleon["id"])
     assert_equal 35, charmeleon_progress["level"].to_i
