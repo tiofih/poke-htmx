@@ -5,8 +5,8 @@
 | Fase | Status |
 | --- | --- |
 | Refinamento | **Concluída** — sem decisões abertas (aceites literais do `TODO.md`) em 2026-09-21 |
-| Implementação | **Pendente** |
-| Validação | **Pendente** (revisão do PR — modo PR ativo) |
+| Implementação | **Concluída** — TDD fechado, Revisor `Aprovado` e PR publicado em 2026-09-21 |
+| Validação | **Concluída (Done)** — PR #3 revisado e mergeado pelo usuário em 2026-09-21 |
 
 > Reprodução: manual
 > E2E: sim
@@ -43,14 +43,14 @@ Fechar os dois achados `low` da rodada 3 da 0089: indentação do `<p class="rew
 
 ### Resultado
 
-- [ ] **C1** — `<p class="rewards">` no nível do `if` nos dois arquivos — prova: `e2e/battle-log.spec.ts` (9 passed, renderiza o fragmento) + diff só-whitespace.
-- [ ] **C2** — trocar vitória por derrota no teste passa a falhar — prova: `test/battle_routes_test.rb` (`test_battle_finish_shows_money_gained_message` com asserções exatas).
+- [x] **C1** — `<p class="rewards">` no nível do `if` nos dois arquivos — prova: `e2e/battle-log.spec.ts` (9 passed, renderiza o fragmento) + diff só-whitespace.
+- [x] **C2** — trocar vitória por derrota no teste passa a falhar — prova: `test/battle_routes_test.rb` (`test_battle_finish_shows_money_gained_message` com asserções exatas).
 
 ### Garantias (RNF)
 
-- [ ] Suíte completa verde + lint 0 em **todo** green; commit por passo; 0 regressão.
-- [ ] Sem dependência nova / sem schema / sem rede / sem supressão de lint.
-- [ ] `SESSIONS.md` atualizado; validação só após o usuário revisar o PR (S4).
+- [x] Suíte completa verde + lint 0 em **todo** green; commit por passo; 0 regressão.
+- [x] Sem dependência nova / sem schema / sem rede / sem supressão de lint.
+- [x] `SESSIONS.md` atualizado; validação só após o usuário revisar o PR (S4).
 
 > **S1:** cada critério acima aponta o teste que o prova. Roteiro manual vai ao corpo do PR junto do e2e.
 
@@ -73,14 +73,14 @@ Fechar os dois achados `low` da rodada 3 da 0089: indentação do `<p class="rew
 
 > PR: https://github.com/tiofih/poke-htmx/pull/3
 
-**Pendente.**
+**Mergeado pelo usuário em 2026-09-21** — validação da fase 3 concluída.
 
 Roteiro manual (vai ao corpo do PR): ver o fonte da página de fim de batalha (indentação do `<p class="rewards">` alinhada ao `if`); ler o teste e confirmar as duas copies exatas.
 
 | Critério | Evidência automatizada | Evidência manual | Resultado (ok/nok) |
 | --- | --- | --- | --- |
-| C1 | `e2e/battle-log.spec.ts` (9 passed) | fonte da página | |
-| C2 | `test/battle_routes_test.rb` | leitura do teste | |
+| C1 | `e2e/battle-log.spec.ts` (9 passed) | fonte da página | ok |
+| C2 | `test/battle_routes_test.rb` | leitura do teste | ok |
 
 > **S3:** ajuste identificado aqui = reabrir o critério, registrar a alteração com data e obter nova aprovação do usuário.
 
