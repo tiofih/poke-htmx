@@ -121,9 +121,12 @@ module TestDatabase # rubocop:disable Metrics/ModuleLength
     connection&.close
   end
 
-  def self.team_row(name)
+  def self.team_row(name, user_id)
     with_db do |connection|
-      connection.exec_params("SELECT * FROM team_pokemons WHERE name = $1", [name]).first
+      connection.exec_params(
+        "SELECT * FROM team_pokemons WHERE name = $1 AND user_id = $2",
+        [name, user_id]
+      ).first
     end
   end
 
