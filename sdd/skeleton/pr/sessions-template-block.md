@@ -1,14 +1,15 @@
 <!-- sdd-pr:bloco -->
 > **Modo PR ativo (`--with-pr`).** Bloco anexado pelo instalador. Para desligar o modo, remova
-> este bloco junto com o bloco `SDD/PR` do `AGENTS.md` e os scripts `checar-pr`/`abrir-pr`.
+> este bloco junto com o bloco `SDD/PR` do `AGENTS.md` e o script `abrir-pr`.
 
 ## Declarações do modo PR (fechadas no refinamento)
 
-Logo **abaixo** da tabela de `## Status`, escreva as duas linhas — e feche-as na fase 1, não
-depois:
+Logo **abaixo** da tabela de `## Status`, escreva as linhas abaixo — e feche-as na fase 1, não
+depois (as duas primeiras só no modo PR; a `Revisão` vale sempre):
 
 > Reprodução: seed|script|manual|nao-aplicavel
 > E2E: sim|nao
+> Revisão: exigida|dispensada
 
 - `Reprodução` responde: *como um terceiro chega ao estado inicial do teste?* Havendo script de
   seed/fixture no projeto, use `seed` ou `script` e cite o comando. Sem caminho automatizado,
@@ -18,8 +19,15 @@ depois:
   harness, `sim`. Não havendo, `nao` — e então cada critério observável registra `manual` (S1) e
   o roteiro manual vai para o corpo do PR.
 
-O `./scripts/checar-pr` confere que o `**Estado inicial:**` do corpo do PR bate com o valor
-declarado aqui.
+- Quem lê confere que o `**Estado inicial:**` do corpo do PR bate com o valor declarado
+  aqui — **não há portão mecânico** (`checar-pr` removido); é julgamento de quem revisa.
+
+## A linha `Revisão` / `Converge`
+
+`Revisão: exigida|dispensada` (S7) — `exigida` = sessão de risco (dados persistidos, auth,
+dinheiro, refatoração ampla) e dispara o Revisor; `dispensada` (default) = direto à
+validação. Ao fim da fase 2 o Implementador troca `Converge: —` por `> Converge: sim`
+(ou `nao` + pendências) — diff × critérios — antes do passo PR.
 
 ## A linha `Validação` do Status
 
@@ -28,7 +36,8 @@ No modo PR ela se refere à **revisão do PR**, não a uma execução local do u
 
 ## Onde entra o link do PR (seção 7)
 
-Ao abrir o PR (fim da fase 2, após o veredito `Aprovado`), registre na seção `## 7. Validação`:
+Ao abrir o PR (fim da fase 2, com `> Converge: sim` e, se houver revisão, `Aprovado`),
+registre na seção `## 7. Validação`:
 
 > PR: <url>
 

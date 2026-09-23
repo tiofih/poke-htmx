@@ -34,10 +34,20 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
   apenas o arquivo da sessão corrente**; todo o resto via **digests** (`levantar-sessao`,
   `levantar-requisito`, `levantar-testes` — providos em `scripts/`) ou **busca**
   (grep/índice) em `REQUIREMENTS.md`/`SESSIONS.md`, nunca lendo-os inteiros.
+- **Refinamento inline / modo rápido (`/sessao --rapido`):** escopo de uma tela/RF
+  menor, sem decisão de arquitetura → clarificações **em cima** (2–4 perguntas no
+  kickoff) e refinamento **inline na conversa principal**, gerando os artefatos de uma
+  vez, sem subagente `refinador` e sem gates entre artefatos (medição: 246k in de
+  média com spawn vs ~50k inline). Subagente `refinador` (investigação → finalize)
+  só para escopo grande ou decisões múltiplas.
 - Fechar: **objetivo**, **escopo** ("fora de escopo" explícito), **critérios de
   aceite** e **plano TDD**.
 - **Cada critério de aceite referencia o teste que o prova** (S1) — critério sem
-  teste automatizado registra `manual` explícito.
+  teste automatizado registra `manual` explícito. Critério de **comportamento** é
+  escrito no padrão **EARS** quando couber (`QUANDO/SE <gatilho> ENTÃO <resultado>
+  — <qualificador>`): ambiguidade de critério é a maior fonte de retrabalho medido
+  (36% UX); completaude do EARS é a falha conhecida — todo gatilho, resultado e
+  limite no mesmo critério.
 - Registrar decisões de design no arquivo da sessão.
 - **Entrega:** arquivo da sessão com critérios fechados + plano TDD, commit do
   refinamento **atualizando também `SESSIONS.md`** (tabela + "Próxima sessão" — S4).
@@ -50,21 +60,39 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
 - Suíte completa verde em **todo** green — o baseline (N runs/M asserts) é preservado.
 - Atualizar `REQUIREMENTS.md`/`SESSIONS.md` **no mesmo escopo** quando o comportamento
   dos requisitos mudar.
+- **Converge (auto-verificação barata, fim da fase 2):** antes de declarar a fase 2
+  pronta, o Implementador percorre **diff × cada critério de aceite** e registra no
+  arquivo da sessão `> Converge: sim` — ou `nao` + as pendências, que viram mais um
+  passo TDD ou escalação (S3). É o checkpoint que substitui a revisão padrão no fluxo
+  opt-in (S7); não é revisor, é o próprio autor conferindo cobertura.
+- **Especialistas (fase 2 paralela — opt-in `> Equipe:`, perfil `--with-especialistas`):**
+  com `> Equipe: <papéis>` no arquivo da sessão (fechado no refinamento) e os agentes em
+  `.opencode/agent/`, a fase 2 pode despachar especialistas por **lane** (`backend`,
+  `frontend` editam; `qa`/`ui-designer`/`game-designer` são read-only) **em paralelo só
+  com lanes disjuntas**. Cada especialista roda TDD na sua lane **sem commitar**; o
+  Implementador integra, roda a suíte completa, commite por lane/green e responde pelo
+  **Converge**/S6. Sem o portão duplo (agente ausente ou `> Equipe: —`), a fase 2 é o
+  Implementador sozinho — fluxo padrão inalterado. Detalhe: bloco `sdd-especialistas:bloco`.
 - **PARADA obrigatória ao fim da fase 2:** aguardar a validação do usuário. Não marcar
   status de validação, não atualizar docs de validação, não commitar a conclusão.
+- **Mostrar antes de pedir (validação visual):** quando a mudança tem superfície
+  visual, o agente exibe o resultado ao usuário (`browser.preview` ou screenshot do
+  arquivo/roda) **junto do pedido de validação** — o usuário valida vendo, não
+  imaginando (atitude que ataca o retrabalho UX medido).
 - **Modo PR (`--with-pr`) — passo PR, ainda na fase 2:** com a implementação e os testes verdes,
-  o Implementador **entrega** a sessão: (1) escreve `sessions/pr/NNNN-pr-body.md` a partir de
-  `docs/pr/TEMPLATE-pr-body.md` (S8.2), roda `./scripts/checar-pr NNNN` até passar e commita
-  `docs(pr 00NN): corpo do PR — <resumo>`; (2) o **Revisor** (fase 2c) revisa o diff **incluindo
-  o corpo** e emite o veredito `Aprovado` (S7); (3) só então o Implementador abre o PR/MR com
-  `./scripts/abrir-pr NNNN --open` (o script recusa abrir se o `checar-pr` não passar) e
-  registra `> PR: <url>` no arquivo da sessão. Com o PR aberto vale a **PARADA** — a fase 3 é a
-  revisão do PR.
-- **Memória da sessão (S6) no Revisor APROVADO, ainda na fase 2:** com veredito
-  `Aprovado` (S7), gravar **handoff** (`memory_handoff_begin` — o que foi entregue,
-  perguntas em aberto, próximos passos, marcado `provisional:true`) e **gotchas**
-  (`memory_write_page` em `gotchas/`, marcados `provisional:true`), escopados ao
-  projeto corrente — **SEM aguardar a fase 3 e SEM commitar a conclusão**.
+  o Implementador **entrega** a sessão: (1) **gera** `sessions/pr/NNNN-pr-body.md` do próprio
+  arquivo da sessão (o que muda para quem usa, o que foi implementado, o que **não** foi
+  validado, roteiro manual) — rascunho **delegável ao `redator-pr`** (papel barato, instalado
+  pelo `--with-pr`; bloco `sdd-redator:bloco`) e commita `docs(pr 00NN): corpo do PR — <resumo>`; (2) abre o PR/MR
+  com `./scripts/abrir-pr NNNN --open` e registra `> PR: <url>` no arquivo da sessão. Sem
+  `checar-pr`, sem template de narrativa: o corpo é consequência do refinamento, não tarefa
+  nova. Com o PR aberto vale a **PARADA** — a fase 3 é a revisão do PR.
+- **Memória da sessão (S6) ao fim da fase 2, ainda sem validação:** com o TDD verde (e
+  veredito `Aprovado` quando houver revisão — S7), gravar **handoff**
+  (`memory_handoff_begin` — o que foi entregue, perguntas em aberto, próximos passos,
+  marcado `provisional:true`) e **gotchas** (`memory_write_page` em `gotchas/`, marcados
+  `provisional:true`), escopados ao projeto corrente — **SEM aguardar a fase 3 e SEM
+  commitar a conclusão**.
 
 ### 3. Validação (verificação) — executada pelo USUÁRIO
 
@@ -78,7 +106,8 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
 - Só então atualizar `REQUIREMENTS.md` (status) e `SESSIONS.md` (progresso + próxima)
   e commitar a validação.
 - **Memória (S6) só confirma/enriquece:** o handoff + gotchas já foram gravados como
-  `provisional:true` no Revisor APROVADO (fim da fase 2); a validação apenas confirma
+  `provisional:true` no fim da fase 2 (com veredito `Aprovado` quando houver revisão);
+  a validação apenas confirma
   ou enriquece o registro, nunca bloqueia o save.
 
 ### 3b. Modo PR — a validação é a revisão do PR (quando `--with-pr` está ativo)
@@ -98,72 +127,78 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
   `sessions/pr/NNNN-pr-body.md` passa a ser a entrega, e a validação acontece sobre ele. A
   validação continua sendo do usuário: o modo PR muda o meio, nunca o validador.
 
+### 3c. Caminho bugfix (enxuto — sem refinador completo)
+
+Correção de comportamento quebrado **não** é sessão de feature: mesmo ciclo, forma
+reduzida.
+
+- **Análise (inline, na conversa):** registrar no arquivo da sessão (ou nota curta se
+  a sessão for trivial) **comportamento atual / esperado / inalterado** — os três,
+  sempre. Sem plano TDD longo: o critério é **um teste de regressão que reproduz o
+  bug**.
+- **Patch em TDD:** `red` = teste de regressão falha reproduzindo o bug → `green` =
+  correção mínima → suíte completa + lint verdes → commit (`fix: ...`).
+- **Sem subagente `refinador`; revisor (S7) só se o bug tocar risco** (dados,
+  auth, dinheiro). **Converge** (diff × critério) vale igual.
+- **Entrega:** mesmo passo PR do modo PR (corpo gerado da sessão) ou, sem modo PR,
+  direto à validação do usuário. `> Reprodução:`/`> E2E:` seguem o S8.3.
+- Escopo que **não** couber no patch vira sessão normal (refinamento → TDD →
+  validação) — o caminho bugfix não é porta de entrada de feature.
+
 ## Regras do processo (S1–S8)
 
 - **S1 — Critérios apontam os testes que os provam.** Cada critério de aceite
   referencia o teste (arquivo/nome) que o prova; sem teste → `manual` explícito.
-  Fechado no refinamento, antes de codar.
+  Fechado no refinamento, antes de codar. **UI é `manual` por padrão:** critério
+  puramente visual (layout, copy, cor, posicionamento) nunca exige teste automatizado.
+  Critério de comportamento em **EARS** (`QUANDO/SE ... ENTÃO ...`) quando couber —
+  completude acima de formalismo.
 - **S2 — Validação é tabela por critério.** `critério | evidência automatizada |
   evidência manual | resultado`, um resultado por critério.
 - **S3 — Ajuste de validação é alteração formal de critério.** Falha de critério
   reabre o critério, registra a alteração com data e o usuário reaprova.
+  **Exceção UI (S3 leve):** ajuste puramente visual (layout/copy/cor) é anotado na
+  sessão com data e aplicado — sem reabrir o critério nem exigir nova aprovação;
+  reabre só se mudar comportamento observável.
 - **S4 — `SESSIONS.md` acompanha todo refinamento.** "Próxima sessão" + tabela são
   atualizados **no commit do refinamento** de toda sessão (inclusive fora de fila).
 - **S5 — `scripts/check_docs` valida a consistência.** Confere `sessions/` ↔ tabela de
   progresso ↔ "Próxima sessão". Rodar ao fechar refinamento e validação.
-- **S6 — Memória da sessão (handoff + gotchas) no Revisor APROVADO (fim da fase 2),
-  SEM validação do usuário, SEM commit.** Com veredito `Aprovado` (S7), o implementador
+- **S6 — Memória da sessão (handoff + gotchas) ao fim da fase 2, SEM validação do
+  usuário, SEM commit.** Com o TDD verde (e veredito `Aprovado` quando houver revisão
+  — S7), o implementador
   grava **handoff** (`memory_handoff_begin`) e **gotchas** (`memory_write_page` em
   `gotchas/`), marcados `provisional:true` e escopados ao projeto corrente — sem aguardar
   a fase 3 e sem commitar a conclusão. A validação (fase 3) só confirma/enriquece a
   memória, nunca bloqueia o save.
-- **S7 — Loop Implementador↔Revisor na fase 2c.** Ao fim da fase 2 (TDD), o **Revisor**
-  revisa o diff e devolve um **veredito fechado**: `Aprovado` ou `Requer ajuste` (com
-  severidade Bloqueante/Ajuste). Se não aprovado, volta ao **Implementador**, que resolve
-  os achados e re-commita; o Revisor então re-revisa. **Teto: 3 rodadas** (3 passos do
-  Implementador) — sem convergência, **escalar ao usuário (S3)**. Só o Implementador edita;
-  o Revisor nunca edita. Só ir à validação (fase 3, do usuário) com veredito `Aprovado`.
+- **S7 — Revisão (fase 2c) é opt-in por risco.** Por padrão a fase 2 vai direto à
+  validação do usuário (com o **Converge** do Implementador — diff × critérios — como
+  auto-verificação). A revisão **só dispara** quando o refinamento marca a sessão
+  como de **risco** (`> Revisão: exigida` — mudança em dados persistidos, auth,
+  dinheiro, refatoração ampla) ou quando o usuário pedir. Havendo revisão, o **Revisor** revisa o diff e devolve
+  veredito fechado: `Aprovado` ou `Requer ajuste`; não aprovado → volta ao
+  **Implementador** (resolve e re-commita) → re-revisa. **Teto: 3 rodadas** — sem
+  convergência, **escalar ao usuário (S3)**. Só o Implementador edita — e, com
+  `> Equipe:` (perfil `--with-especialistas`), os especialistas **nas suas lanes**;
+  o Revisor nunca edita. Medido: taxa de apreensão de 4% (4 ajustes em 91 sessões) — por isso opt-in.
 - **S8 — Modo PR (`--with-pr`): a entrega é o PR e a validação é a revisão do PR.** Só se aplica
   com o marcador `<!-- sdd-pr: ativo -->` em `AGENTS.md`; sem ele, S8 não existe.
-  1. **S8.1 — A entrega da sessão é um PR/MR.** Com a fase 2 (TDD) verde, o Implementador executa
-     o passo PR (corpo escrito e commitado, `checar-pr` verde) ainda **antes** do veredito; só
-     depois do `Aprovado` (S7) sobre o diff **incluindo o corpo** o PR é aberto. **Um PR por
-     sessão.** O agente nunca faz merge.
-  2. **S8.2 — Corpo do PR para quem não trabalha no projeto, com rastreabilidade no fim.** O
-     corpo (a partir de `docs/pr/TEMPLATE-pr-body.md`) diz o que muda para quem usa o produto, o
-     que foi implementado, o que foi validado, o que **não** foi validado, como chegar ao estado
-     inicial do teste e o roteiro manual. **Nada de `Q1`, `S3`, `CA2`, número de sessão,
-     "fase 2", "Passo 3" ou sigla de requisito na narrativa** — isso vive apenas no `## Anexo`
-     do fim, que preserva a rastreabilidade requisito → sessão → passos → commits.
-  3. **S8.3 — Reprodução é obrigatória e declarada.** No refinamento, **todo critério** declara
-     como um terceiro chega ao estado inicial, com um destes valores: `seed`, `script`, `manual`,
-     `nao-aplicavel` (gravado como `> Reprodução: <valor>` no arquivo da sessão). O corpo do PR
-     repete a declaração em `**Estado inicial:**` e o `./scripts/checar-pr` confere que os dois
-     batem. `nao-aplicavel` exige justificativa na mesma linha — é a saída honesta, não um atalho.
-     `manual` e `nao-aplicavel` são legítimos, mas **pagam preço declarado**: a seção "O que NÃO
-     foi validado" do corpo diz o que ninguém conferiu, em que ambiente, com que dados, e o que
-     pode quebrar por isso.
-  4. **S8.4 — Peso novo de teste e e2e.** Se o projeto tem harness de ponta a ponta, os critérios
-     de comportamento observável **têm** cobertura e2e. Se não tem, o critério registra `manual`
-     explícito (S1) **e** o roteiro manual entra no corpo do PR — o kit não inventa harness que o
-     projeto não tem, nem exige o que ele não consegue prover. Declarar `E2E: sim` **obriga** a
-     **narrativa** do corpo a nomear a camada e2e — o portão aceita qualquer menção a `e2e`,
-     `end-to-end`/`end to end`, `ponta a ponta`, Playwright, Cypress ou Selenium. Não nomear é
-     **falha** do `./scripts/checar-pr` (não aviso): portão que aprova um corpo alegando validação
-     que não existe é a falsa segurança que este kit recusa — sem evidência a citar, declare
-     `E2E: nao`. Comando de teste e baseline
-     (N runs/M asserts, ver `STACK.md`) vão no corpo. Recomendação (não regra): quando a
-     preparação do ambiente passar de três passos, versionar um script de reprodução da sessão.
-  5. **S8.5 — `./scripts/checar-pr NNNN` fecha o portão.** Roda no fim da fase 2 (antes do commit
-     do corpo) e de novo dentro do `abrir-pr`, que se recusa a abrir o PR se ele falhar. Ele
-     falha alto quando falta seção obrigatória, sobra placeholder, a declaração de reprodução não
-     bate com a sessão ou aparece termo interno na narrativa. O que ele **não** verifica (o texto
-     ser compreensível para quem é de fora, os passos realmente funcionarem, a evidência ser
-     verdadeira) é julgamento do Revisor (S7) e do usuário — declarado como tal, não simulado.
-  6. **S8.6 — S1–S7 continuam valendo.** S2 (tabela por critério na validação), S3 (achado reabre
-     critério), S4, S5 e S7 (teto de 3 rodadas) não mudam. S6 mantém o gatilho no veredito
-     `Aprovado` e o handoff passa a citar o link do PR. A revisão do PR pelo usuário **não** entra
-     no teto de 3 rodadas — o teto é do loop Implementador↔Revisor.
+  1. **S8.1 — Um PR por sessão; o agente nunca faz merge.** Com a fase 2 (TDD) verde, o
+     Implementador gera o corpo, commita e abre o PR (`./scripts/abrir-pr NNNN --open`),
+     registrando `> PR: <url>` na sessão. Vale a **PARADA** — a fase 3 é a revisão do PR.
+  2. **S8.2 — Corpo gerado do arquivo da sessão.** O corpo (`sessions/pr/NNNN-pr-body.md`)
+     deriva do refinamento: o que muda para quem usa o produto, o que foi implementado, o que
+     foi validado, o que **não** foi validado, estado inicial e roteiro manual. Sem template
+     de narrativa, sem `checar-pr` — o arquivo da sessão é a fonte, o corpo é sua projeção.
+     Rastreabilidade (requisito → sessão → passos → commits) fica num `## Anexo` no fim.
+  3. **S8.3 — Reprodução declarada no refinamento.** Todo critério declara
+     `seed|script|manual|nao-aplicavel` (gravado como `> Reprodução: <valor>`) e `> E2E: sim|nao`;
+     `nao-aplicavel` exige justificativa na mesma linha. O corpo repete em `**Estado inicial:**`
+     e a seção "O que NÃO foi validado" diz o que ninguém conferiu e o que pode quebrar por isso.
+  4. **S8.4 — Ajuste do usuário atualiza o PR.** Comentário no PR ou feedback reabre o critério
+     (S3) com data; o Implementador corrige, atualiza o corpo e re-empurra a branch — **sem
+     segundo PR**. Só o usuário faz merge; depois do merge, registra-se a validação (S2) com o
+     link do PR como entrega. S1–S7 continuam valendo.
 
 ## Escopo grande / ideias fora de fase
 
@@ -219,7 +254,12 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
 
 > **Modo PR (`--with-pr`):** o arquivo da sessão declara, logo abaixo da tabela de `## Status`,
 > `> Reprodução: seed|script|manual|nao-aplicavel` e `> E2E: sim|nao` (fechados no refinamento —
-> S8.3/S8.4) e registra `> PR: <url>` na seção de Validação ao abrir o PR.
+> S8.3) e registra `> PR: <url>` na seção de Validação ao abrir o PR.
+> **Sessão de risco** (dispara a revisão opcional — S7) é marcada no refinamento:
+> `> Revisão: exigida|dispensada` (default quando ausente: `dispensada`).
+> **Equipe** (perfil `--with-especialistas`) também no refinamento:
+> `> Equipe: <papéis>` — especialistas da fase 2 por lane (paralelo só com lanes
+> disjuntas; default `—`/ausente = `implementador-teste` sozinho).
 
 ## Verificação de consistência (S5)
 
@@ -227,10 +267,12 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
 
 1. toda sessão em `sessions/` tem linha na tabela de progresso do `SESSIONS.md`;
 2. toda linha da tabela tem seu arquivo;
-3. a seção "Próxima sessão" cita a sessão de maior número (a aberta no topo da fila).
+3. a seção "Próxima sessão" cita a sessão de maior número (a aberta no topo da fila);
+4. (aviso, não falha) todo RF da tabela de `REQUIREMENTS.md` tem ao menos uma menção
+   em `sessions/` — requisito órfão = **drift spec↔código** (risco #1 do campo).
 
 Rodar ao **fechar refinamento** e ao **fechar validação**.
 
-No modo PR, `./scripts/checar-pr NNNN` confere o **corpo do PR**
-(`sessions/pr/NNNN-pr-body.md`) antes do commit do corpo e antes de abrir o PR (S8.5).
-`./scripts/check_docs` não muda.
+No modo PR não há portão mecânico do corpo: `./scripts/checar-pr` e
+`docs/pr/TEMPLATE-pr-body.md` foram removidos (medição: 2 gates por sessão para
+produzir texto que já vive no arquivo da sessão). `./scripts/check_docs` não muda.

@@ -46,6 +46,6 @@ agentes em `.opencode/agent/`, a fase 2 muda **só a montagem**, não o ciclo:
 3. `> Revisão: exigida` (S7): o Revisor revisa o **diff consolidado** — nunca uma lane isolada.
 
 Sem o portão duplo (agente ausente ou `> Equipe: —`), despache o `implementador-teste`
-direto, como sempre. Read-only (`qa`, `ui-designer`, `game-designer`) podem rodar
-**antes ou durante** — não disputam arquivos.
+direto, como sempre. Read-only (`qa`, `ui-designer`, `game-designer`, `security-reviewer`, `a11y-auditor`)
+podem rodar **antes ou durante** — não disputam arquivos.
 <!-- fim sdd-especialistas:bloco -->

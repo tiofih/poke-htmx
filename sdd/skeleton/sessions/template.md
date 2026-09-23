@@ -11,6 +11,11 @@
 | Implementação | **Pendente** |
 | Validação | **Pendente** (executada pelo usuário) |
 
+> Revisão: dispensada
+> Converge: — (fim da fase 2: `sim` | `nao` + pendências)
+> Equipe: — (fase 2: especialistas por lane, ex. `backend, frontend, qa` — paralelo só
+> com lanes disjuntas; `—`/ausente = implementador-teste sozinho)
+
 ---
 
 ## 1. Objetivo
@@ -53,7 +58,9 @@ descrição do resultado futuro — estado ANTES do code.)
       *status de validação* só após o usuário validar (S4).
 
 > **S1:** cada critério acima aponta o teste que o prova. Sem teste automatizado →
-> escrever `manual` explícito + a evidência manual esperada.
+> escrever `manual` explícito + a evidência manual esperada. Critério de comportamento
+> em **EARS** (`QUANDO/SE <gatilho> ENTÃO <resultado> — <qualificador>`) quando couber;
+> UI puramente visual nasce `manual`.
 
 ## 5. Decisões de refinamento (fechadas com o usuário)
 
@@ -68,7 +75,7 @@ descrição do resultado futuro — estado ANTES do code.)
 | 0 | **Refinamento** — este arquivo com critérios e plano fechados | commit `docs(sessao {{NNNN}}): refinamento concluido — ...` |
 | 1 | {{teste que falha → implementação mínima}} | suíte verde + lint 0, commit `test(passo 1):` |
 | 2 | {{...}} | suíte verde + lint 0, commit `test(passo 2):` |
-| — | **Fase 2 concluída** → **Revisor (2c)**: loop Implementador↔Revisor até veredito `Aprovado` (teto 3 rodadas, senão S3) → **PARAR** e aguardar a validação do usuário (fase 3). |
+| — | **Fase 2 concluída** → **Converge** (`> Converge: sim` — diff × critérios); **Revisor (2c) só se `> Revisão: exigida`** (loop teto 3 rodadas, senão S3) → **PARAR** e aguardar a validação do usuário (fase 3). |
 
 ## 7. Validação (executada pelo usuário)
 

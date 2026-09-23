@@ -8,15 +8,13 @@ teste. Rastreabilidade interna fica no `## Anexo` do fim.
 
 ## O que este perfil instala
 
-- `docs/pr/TEMPLATE-pr-body.md` — modelo do corpo do PR. Copie para `sessions/pr/NNNN-pr-body.md`.
-- `docs/pr/EXEMPLO-pr-body.md` — exemplo preenchido ponta a ponta (passa em `checar-pr --exemplo`).
 - `docs/pr/README.md` — este arquivo.
 - bloco anexado ao `AGENTS.md` (marcador `sdd-pr: ativo`) — as regras do modo, autossuficientes.
-- bloco anexado ao `sessions/template.md` — as declarações `Reprodução`/`E2E` e onde vai o link do PR.
-- `scripts/checar-pr` (portão do corpo) e `scripts/abrir-pr` (abertura do PR).
+- bloco anexado ao `sessions/template.md` — as declarações `Reprodução`/`E2E`/`Revisão` e onde vai o link do PR.
+- `scripts/abrir-pr` (abertura do PR; sem portão de texto — o corpo é gerado do arquivo da sessão).
 
 ## Desligar o modo
 
 Remova o bloco entre `# --- SDD/PR (--with-pr) ---` e `# --- fim SDD/PR rules ---` do `AGENTS.md`
-e os dois scripts de `scripts/`. Nada nos seus docs é reescrito: `docs/pr/` e `sessions/pr/` são
+e o script `abrir-pr` de `scripts/`. Nada nos seus docs é reescrito: `docs/pr/` e `sessions/pr/` são
 aditivos e podem ficar como histórico.

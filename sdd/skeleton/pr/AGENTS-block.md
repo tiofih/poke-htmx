@@ -9,7 +9,8 @@
 
 ## A entrega da sessão é um PR/MR; a validação é a revisão do PR
 
-- Fechada a fase 2 (TDD) com veredito `Aprovado` do Revisor, o Implementador **entrega a sessão
+- Fechada a fase 2 (TDD) com **Converge verde** (`> Converge: sim`; e veredito `Aprovado`
+  quando houver revisão por risco — S7), o Implementador **entrega a sessão
   como PR/MR**: a fase 3 deixa de ser "usuário valida na máquina" e passa a ser "usuário valida
   revisando o PR".
 - **Um PR por sessão.** **Quem faz merge é o usuário** — o agente nunca faz merge, nunca aprova e
@@ -19,24 +20,28 @@
 
 ## Ordem fina do passo PR (fim da fase 2)
 
-1. escrever `sessions/pr/NNNN-pr-body.md` a partir de `docs/pr/TEMPLATE-pr-body.md`;
-2. rodar `./scripts/checar-pr NNNN` e corrigir até passar;
+1. escrever `sessions/pr/NNNN-pr-body.md` **gerado do próprio arquivo da sessão** (o que
+   muda para quem usa, o que foi implementado, o que **não** foi validado, estado inicial,
+   roteiro manual — sem template, sem `checar-pr`);
+2. conferir o **Converge** (`> Converge: sim` — diff × critérios);
 3. commitar `docs(pr 00NN): corpo do PR — <resumo>`;
-4. Revisor (2c) — o corpo do PR faz parte do que ele revisa, junto com o diff;
-5. com `Aprovado` + `CORPO DO PR: publicável`: `./scripts/abrir-pr NNNN --open`;
+4. **Revisor (2c) só se `> Revisão: exigida`** — aí o corpo entra no escopo dela;
+5. `./scripts/abrir-pr NNNN --open`;
 6. registrar `> PR: <url>` na seção de Validação do arquivo da sessão;
 7. handoff (S6) citando o link do PR → **PARADA**. A fase 3 é a revisão do PR.
 
 ## O corpo do PR é escrito para quem NÃO trabalha no projeto
 
-- Primeiro **o que muda para quem usa o produto** (linguagem de produto), depois o que foi
+- Gerado do **arquivo da sessão** — o refinamento é a fonte, o corpo é sua projeção.
+  Primeiro **o que muda para quem usa o produto** (linguagem de produto), depois o que foi
   implementado, o que foi validado, o que **não** foi validado, como chegar ao estado inicial do
   teste e o roteiro manual (ação → o que deve acontecer).
 - **Nenhuma sigla interna, número de sessão, número de fase/passo ou ID de requisito na
   narrativa** — nada disso acima do `## Anexo`. Toda a rastreabilidade (requisito → sessão →
   passos → commits) vive no Anexo do fim; o Anexo é trilha, não o lugar de guardar a explicação.
 - Quem revisa precisa conseguir **entender, preparar o ambiente, executar e observar** sem
-  perguntar nada a ninguém.
+  perguntar nada a ninguém. Sem `checar-pr`: essa sobra é julgamento do Revisor (quando
+  houver) e do usuário — declarado, não simulado por um gate de grep.
 
 ## Reprodução e evidência — o peso novo de teste/e2e
 
@@ -44,8 +49,8 @@
   da sessão grava, abaixo da tabela de Status: `> Reprodução: seed|script|manual|nao-aplicavel` e
   `> E2E: sim|nao`. `nao-aplicavel` exige justificativa na mesma linha — é a saída honesta, não
   um atalho.
-- O corpo do PR repete a declaração em `**Estado inicial:**` e o `./scripts/checar-pr` confere
-  que os dois batem.
+- O corpo do PR repete a declaração em `**Estado inicial:**` — quem lê confere contra o
+  arquivo da sessão (não há portão mecânico).
 - Havendo script de seed/fixture no projeto, usá-lo é obrigatório (não invente caminho paralelo).
   Não havendo, passos manuais numerados e copiáveis, capazes de deixar o app **no ponto exato em
   que o teste começa**.
@@ -57,16 +62,12 @@
 - Recomendação (não regra): preparação de ambiente passando de três passos → versione um script
   de reprodução da sessão.
 
-## Portão mecânico: `./scripts/checar-pr`
+## Sem portão mecânico de texto
 
-- Roda no fim da fase 2 (antes do commit do corpo) e de novo dentro do `abrir-pr`, que **se
-  recusa a abrir o PR** se ele falhar — não existe caminho que abra PR com corpo reprovado.
-- Falha alto quando falta seção obrigatória, sobra placeholder, a declaração de reprodução não
-  bate com a sessão, a sessão declara `E2E: sim` sem nomear a camada e2e na narrativa ou aparece
-  termo interno na narrativa.
-- **O que ele não verifica** (julgamento do Revisor e do usuário, declarado, não simulado): se o
-  texto é compreensível para quem é de fora, se os passos do roteiro realmente funcionam, se a
-  evidência citada é verdadeira e se os limites declarados estão completos.
+- `checar-pr` e `TEMPLATE-pr-body.md` foram **removidos**: o corpo deriva do arquivo da
+  sessão e o custo de 2 gates por sessão não pagava o que produziam (texto já existente
+  no refinamento). O que nenhum gate captura (compreensão, passos funcionando, evidência
+  verdadeira) é julgamento do Revisor (quando houver) e do usuário — declarado como tal.
 
 ## Ferramenta de abertura (`PR_CMD`)
 
@@ -80,10 +81,10 @@
 
 ## Ajuste do usuário = S3, sem segundo PR
 
-- Comentário no PR ou feedback do usuário **reabre o critério** (S3), com data. O Implementador
+- Feedback do usuário (ou comentários na plataforma) **reabre o critério** (S3), com data. O Implementador
   corrige, **atualiza o corpo do PR** e re-empurra a branch — **sem abrir um segundo PR**.
 - A revisão do PR pelo usuário **não** entra no teto de 3 rodadas (o teto é do loop
-  Implementador↔Revisor).
+  Implementador↔Revisor, quando a revisão estiver ativa por risco — S7).
 - S1–S7 continuam valendo sem alteração; a validação registrada (S2) só é preenchida **depois do
   merge**, com o link do PR como entrega.
 

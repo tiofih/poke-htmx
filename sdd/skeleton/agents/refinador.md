@@ -29,10 +29,15 @@ da sessão quando receber as escolhas.
    - **Objetivo** da sessão (1 frase).
    - **Escopo**: produção / testes / **fora de escopo** (explícito).
    - **Critérios de aceite** e o **teste que prova cada um** (S1) — ou a opção `manual`.
+     Critério de **comportamento** no padrão **EARS** quando couber (`QUANDO/SE <gatilho>
+     ENTÃO <resultado> — <qualificador>`), com gatilho, resultado e limite no mesmo
+     critério; **UI puramente visual** nasce `manual` (nunca exige teste automatizado).
+   - **Risco / revisão:** decidir `> Revisão: exigida` ou `dispensada` (default) — exigida
+     só para dados persistidos, auth, dinheiro ou refatoração ampla (S7 opt-in).
    - **Modo PR (só com `--with-pr`):** cada critério também declara **como um terceiro chega ao
      estado inicial do teste** — `seed`, `script`, `manual` ou `nao-aplicavel` (S8.3) — porque o
      corpo do PR depende disso e a declaração fecha **aqui**, não no fim. Havendo harness de ponta
-     a ponta no projeto, o critério já nasce com o teste e2e (S8.4); não havendo, ele nasce
+     a ponta no projeto, o critério já nasce com o teste e2e (S8.3); não havendo, ele nasce
      `manual` + roteiro manual — o kit não inventa harness que o projeto não tem.
      `manual` é uma saída **legítima**, não uma falta: use quando não existe teste automatizado.
      Mas ela **custa**, e o custo fica escrito: roteiro manual no corpo do PR e um limite nomeado
@@ -61,16 +66,16 @@ Quando você receber as escolhas do usuário (via prompt/args), aí sim:
 - Escreva `sessions/NNNN-<slug>.md` com objetivo/contexto/escopo/critérios (S1)/decisões/
   plano TDD **refletindo as escolhas feitas** (não reintroduza outras opções).
 - Registre gotchas/lições na seção da sessão; o save em memória (handoff +
-  gotchas `provisional:true`) acontece no Revisor APROVADO, fim da fase 2 (S6) —
-  SEM validação, SEM commit — não aqui.
+  gotchas `provisional:true`) acontece ao fim da fase 2 (S6) — SEM validação,
+  SEM commit — não aqui.
 - Atualize `SESSIONS.md` (tabela + "Próxima sessão" — S4), rode `./scripts/checar-sessao NNNN`
   e `./scripts/check_docs`, e commite `docs(sessao NNNN): refinamento concluido — ...`.
 - Grave handoff (`memory_handoff_begin`) de fase para o Implementador (não é a
-  memória S6 — essa só acontece no Revisor APROVADO, fim da fase 2, SEM validação, SEM commit).
-- **Modo PR (só com `--with-pr`):** escreva também, logo abaixo da tabela de `## Status`, as duas
+  memória S6 — essa só acontece ao fim da fase 2, SEM validação, SEM commit).
+- **Modo PR (só com `--with-pr`):** escreva também, logo abaixo da tabela de `## Status`, as
   linhas de declaração fechadas no mapa de decisões — `> Reprodução: seed|script|manual|nao-aplicavel`
-  e `> E2E: sim|nao` (S8.3/S8.4). É o que o `./scripts/checar-pr` confere contra o `**Estado
-  inicial:**` do corpo do PR; sem elas o corpo não fecha.
+  e `> E2E: sim|nao` (S8.3). Escreva também `> Revisão: exigida|dispensada` (S7 — risco).
+  É o que o corpo do PR repete em `**Estado inicial:**`; sem elas o corpo não fecha.
 
 ## Regras
 - Contexto mínimo; sempre **levante opções**; a decisão é **do usuário**.

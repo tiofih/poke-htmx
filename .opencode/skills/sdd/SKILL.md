@@ -61,6 +61,8 @@ com o usuário quando envolver decisão (objetivo/escopo/critérios/ajustes).
 | `qa` | cobertura S1/EARS, estado da suíte | não (read-only) | `> Equipe:` cita `qa` |
 | `ui-designer` | decisões visuais (propõe; `frontend` implementa) | não (read-only) | `> Equipe:` cita `ui-designer` |
 | `game-designer` | mecânica/balanceamento (recomenda; decide o usuário) | não (read-only) | `> Equipe:` cita `game-designer` |
+| `security-reviewer` | auth/dados/segredos/entradas de confiança (achado ranqueado; sugere `> Revisão: exigida`) | não (read-only) | `> Equipe:` cita `security-reviewer` |
+| `a11y-auditor` | acessibilidade da lane UI: teclado, foco, semântica, contraste, toque, motion (tabela WCAG) | não (read-only) | `> Equipe:` cita `a11y-auditor` |
 
 - **Portão duplo:** o agente em `.opencode/agent/<papel>.md` **E** `> Equipe: <papéis>`
   no arquivo da sessão (fechado no refinamento). Sem os dois, a fase 2 é o

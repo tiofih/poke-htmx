@@ -49,4 +49,4 @@ achados advisory — se o adapter ai-memory estiver ativo (protocolo em `AGENTS.
 grave o handoff (`memory_handoff_begin`,
 `provisional:true`) e os gotchas (`memory_write_page` em `{{GOTCHAS_PATH}}`,
 `provisional:true`), sempre escopados ao projeto corrente (`{{ROOT}}`).
-O save S6 principal continua sendo o do Revisor APROVADO (fim da fase 2).
+O save S6 principal continua sendo o ao fim da fase 2 (TDD verde; com veredito `Aprovado` quando houver revisão — S7).

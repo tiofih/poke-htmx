@@ -40,6 +40,17 @@ if [ -n "$max" ]; then
   fi
 fi
 
+# S5d (aviso, não falha) — todo RF da tabela do REQUIREMENTS.md tem ao menos uma menção
+# em sessions/; requisito órfão = drift spec↔código.
+if [ -f REQUIREMENTS.md ] && [ -d "$SESSIONS_DIR" ]; then
+  while read -r rf; do
+    [ -z "$rf" ] && continue
+    if ! grep -q "$rf" "$SESSIONS_DIR"/*.md 2>/dev/null; then
+      printf 'check_docs> AVISO: %s (REQUIREMENTS.md) sem nenhuma menção em %s/ — drift spec↔codigo\n' "$rf" "$SESSIONS_DIR" >&2
+    fi
+  done < <(grep -Eo '^\| RF-[0-9A-Za-z._-]+' REQUIREMENTS.md | awk '{print $2}' | sort -u)
+fi
+
 if [ "$FAIL" -eq 1 ]; then
   exit 1
 fi

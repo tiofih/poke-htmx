@@ -65,7 +65,7 @@ ou exaustiva**.
 - **Não escreve** código, teste, arquivo da sessão, draft ou commit — e **não marca critério** ok/nok.
 - **Não despacha subagente** (`task: deny`) e **não dá veredito**: o desenho é advisory, a
   implementação é da fase 2, o veredito é do `revisor` (S7).
-- **Não é dono da memória (S6):** o save é do Revisor APROVADO (fim da fase 2). Se o adapter
+- **Não é dono da memória (S6):** o save é ao fim da fase 2 (TDD verde; com veredito `Aprovado` quando houver revisão — S7). Se o adapter
   ai-memory estiver ativo, **não** aceite o handoff do refinador — ele é de **uso único** e é do
   `implementador-teste`; receba o contexto pelo prompt.
 

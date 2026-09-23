@@ -1,6 +1,8 @@
 ---
 description: Playtest (Fase 3 pre-validacao, OPCIONAL). Sobe o app e faz um playtest manual/advisory: UX, fluxos e bugs de comportamento. NAO e a validacao formal (essa e do usuário). Use apenas quando o usuario pedir.
 mode: subagent
+# model: <provider>/<modelo>  # opcional: pin de modelo do papel (advisory = modelo barato
+# da sua gateway resolve; ex.: omniroute/auto/coding:free — só se o provider existir)
 permission:
   read: allow
   glob: allow
@@ -40,4 +42,4 @@ Distinga **bug** de **dúvida de comportamento** (o que é "jogabilidade" pode s
   chegar lá e os resultados que não se observam. Achado advisory, como os outros — você continua sem
   marcar critérios (S2 é do usuário) e sem commitar.
 
-**Gotchas/handoff (S6 — provisional, SEM validação, SEM commit):** o save S6 já aconteceu no Revisor APROVADO (fim da fase 2); você só acrescenta achados advisory — grave o handoff (`memory_handoff_begin`, `provisional:true`) e os gotchas (`memory_write_page` em `{{GOTCHAS_PATH}}`, `provisional:true`) — se o adapter ai-memory estiver ativo (protocolo em `AGENTS.md`, S6) — com os achados, para o usuário considerar na validação (S2). Nunca marque critérios ok/nok nem commite.
+**Gotchas/handoff (S6 — provisional, SEM validação, SEM commit):** o save S6 já aconteceu ao fim da fase 2 (TDD verde; com veredito `Aprovado` quando houver revisão — S7); você só acrescenta achados advisory — grave o handoff (`memory_handoff_begin`, `provisional:true`) e os gotchas (`memory_write_page` em `{{GOTCHAS_PATH}}`, `provisional:true`) — se o adapter ai-memory estiver ativo (protocolo em `AGENTS.md`, S6) — com os achados, para o usuário considerar na validação (S2). Nunca marque critérios ok/nok nem commite.

@@ -16,30 +16,42 @@
 - **S1 — Critérios apontam os testes que os provam.** Cada critério de aceite (seções
   "Resultado"/"Garantias" do arquivo da sessão) referencia o **teste (arquivo/nome)**
   que o prova — no framework do projeto (ver `STACK.md`); critério sem teste
-  automatizado registra `manual` explícito.
+  automatizado registra `manual` explícito. Critério de **comportamento** no padrão
+  **EARS** quando couber (`QUANDO/SE <gatilho> ENTÃO <resultado> — <qualificador>`);
+  **UI puramente visual** (layout/copy/cor) é `manual` por padrão — nunca exige teste
+  automatizado.
   Fecha-se isso no **refinamento (fase 1)**, antes de codar.
 - **S2 — Validação é tabela por critério.** A fase 3 registra
   `critério | evidência automatizada | evidência manual | resultado (ok/nok)` — um
   resultado **por critério**, nunca um bloco único ("todos atendidos").
 - **S3 — Ajuste de validação é uma alteração formal de critério.** Falha de critério na
   validação **reabre o critério**, registra a alteração com data e o usuário **reaprova**;
-  nunca aplicar "ajuste" de validação sem registrar essa alteração.
+  nunca aplicar "ajuste" de validação sem registrar essa alteração. **Exceção UI (S3
+  leve):** ajuste puramente visual (layout/copy/cor) é anotado na sessão com data e
+  aplicado — sem reabrir o critério; reabre só se mudar comportamento observável.
 - **S4 — `SESSIONS.md` acompanha todo refinamento.** A seção "Próxima sessão" e a
   tabela de progresso são atualizadas **no commit do refinamento (fase 1)** de **toda**
   sessão — inclusive sessões fora da fila.
 - **S5 — `./scripts/check_docs` valida a consistência.** Confere `sessions/` ↔ tabela de
-  progresso do `SESSIONS.md` ↔ "Próxima sessão". Rodar ao fechar refinamento e validação.
-- **S6 — Memória da sessão (handoff + gotchas) no Revisor APROVADO (fim da fase 2), SEM validação do usuário, SEM commit.** Com veredito `Aprovado`, o
-  implementador grava **handoff** (`memory_handoff_begin` — o que foi entregue, perguntas
-  em aberto, próximos passos, marcado `provisional:true`) e **gotchas** levantados na sessão
-  (`memory_write_page` em `gotchas/`, marcados `provisional:true`), sempre escopados ao projeto
+  progresso do `SESSIONS.md` ↔ "Próxima sessão" (+ aviso de RF sem sessão — drift).
+  Rodar ao fechar refinamento e validação.
+- **S6 — Memória da sessão (handoff + gotchas) ao fim da fase 2, SEM validação do
+  usuário, SEM commit.** Com o TDD verde (e veredito `Aprovado` quando houver revisão —
+  S7), o implementador grava **handoff** (`memory_handoff_begin` — o que foi entregue,
+  perguntas em aberto, próximos passos, marcado `provisional:true`) e **gotchas**
+  levantados na sessão (`memory_write_page` em `gotchas/`, marcados `provisional:true`), sempre escopados ao projeto
   corrente — sem aguardar a fase 3 e sem commitar a conclusão. A validação do usuário (fase 3)
   só confirma/enriquece a memória, nunca bloqueia o save.
-- **S7 — Loop Implementador↔Revisor na fase 2c.** Ao fim da fase 2 (TDD), o **Revisor**
-  devolve um **veredito fechado** (`Aprovado` | `Requer ajuste` + severidade). Se não aprovado,
+- **S7 — Revisão (fase 2c) é opt-in por risco.** Por padrão a fase 2 vai direto à
+  validação do usuário, com o **Converge** do Implementador (diff × cada critério,
+  registrado como `> Converge: sim|nao` na sessão) como auto-verificação. A revisão
+  **só dispara** quando o refinamento marca `> Revisão: exigida` (mudança em dados
+  persistidos, auth, dinheiro, refatoração ampla) ou quando o usuário pedir. Havendo
+  revisão, o **Revisor** devolve um **veredito fechado** (`Aprovado` | `Requer ajuste` + severidade). Se não aprovado,
   volta ao **Implementador**, que resolve os achados e re-commita; o Revisor re-revisa.
-  **Teto: 3 rodadas** — sem convergir, **escalar ao usuário (S3)**. Só o Implementador edita;
-  o Revisor nunca. Vai à validação (fase 3) apenas com veredito `Aprovado`.
+  **Teto: 3 rodadas** — sem convergir, **escalar ao usuário (S3)**. Só o Implementador edita —
+  e, com `> Equipe:` (perfil `--with-especialistas`), os especialistas **nas suas lanes**;
+  o Revisor nunca.
 
 ## Ideias, melhorias e escopos grandes — anotar, refinar depois
 

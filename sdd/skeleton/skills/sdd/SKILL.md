@@ -1,6 +1,6 @@
 ---
 name: sdd
-description: Fluxo de papéis do SDD do {{PROJETO}} — Refinador → Implementador/Teste → Revisor → (Playtester opcional) → validação do usuário. Use quando for abrir/refinar uma sessão, implementar TDD, revisar um diff ou decidir a próxima etapa do ciclo. Também cobre o loop Implementador↔Revisor (S7) e o gatilho de parada antes da validação.
+description: Fluxo de papéis do SDD do {{PROJETO}} — Refinador (ou modo rápido inline) → Implementador/Teste → Revisor (opt-in por risco) → (Playtester opcional) → validação do usuário. Use quando for abrir/refinar uma sessão, implementar TDD, revisar um diff ou decidir a próxima etapa do ciclo. Também cobre o Converge (auto-verificação fim da fase 2), o loop Implementador↔Revisor (S7, só em sessão de risco), o caminho bugfix e o gatilho de parada antes da validação.
 ---
 
 # SDD — ciclo de papéis ({{PROJETO}})
@@ -9,10 +9,10 @@ description: Fluxo de papéis do SDD do {{PROJETO}} — Refinador → Implementa
 
 | Fase | Papel (subagent_type) | Entregável | Quando disparar |
 |---|---|---|---|
-| 1 — Refinamento (CONVERSA) | `refinador` (investigação → finalize) | **investigação**: mapa de decisões (opções A/B/C, recomendada). **finalize**: sessão `sessions/NNNN-*.md` + `SESSIONS.md` (S4) | sessão nova / refinamento pendente |
-| 2 — TDD | `implementador-teste` | código + testes, commits `test(passo N):`, suíte+lint verdes | refinamento aprovado |
-| 2c — Revisão | `revisor` | diff revisado + `VEREDITO: Aprovado` \| `Requer ajuste` | implementação feita |
-| 2d — Entrega (modo PR) | `implementador-teste` (corpo + `checar-pr` + commit) → `revisor` (parecer sobre o corpo) → `implementador-teste` (`abrir-pr`) | corpo do PR em `sessions/pr/NNNN-pr-body.md` + PR/MR aberto e registrado na sessão | só com o marcador `<!-- sdd-pr: ativo -->` em `AGENTS.md` |
+| 1 — Refinamento (CONVERSA) | `refinador` (investigação → finalize) — ou **inline** com `--rapido` (clarificações em cima, artefatos de uma vez) | **investigação**: mapa de decisões (opções A/B/C, recomendada). **finalize**: sessão `sessions/NNNN-*.md` + `SESSIONS.md` (S4) | sessão nova / refinamento pendente |
+| 2 — TDD | `implementador-teste` | código + testes, commits `test(passo N):`, suíte+lint verdes, `> Converge: sim` (diff × critérios) | refinamento aprovado |
+| 2c — Revisão | `revisor` | diff revisado + `VEREDITO: Aprovado` \| `Requer ajuste` | **só** com `> Revisão: exigida` (risco) ou pedido do usuário (S7) |
+| 2d — Entrega (modo PR) | `implementador-teste` (corpo gerado da sessão + commit → `abrir-pr`) | corpo do PR em `sessions/pr/NNNN-pr-body.md` + PR/MR aberto e registrado na sessão | só com o marcador `<!-- sdd-pr: ativo -->` em `AGENTS.md` |
 | 3 — pré-validação | `playtester` (OPCIONAL) | achados de UX/comportamento no app rodando | só se o usuário pedir / tiver valor |
 | 3 — Validação | **usuário** | tabela por critério (S2) / S3 | **nunca a IA** |
 
@@ -27,21 +27,31 @@ description: Fluxo de papéis do SDD do {{PROJETO}} — Refinador → Implementa
 ## Regras que guiam o despacho
 
 - **S1:** cada critério referencia o teste que o prova; sem teste → `manual` explícito.
-- **S7 — loop Implementador↔Revisor:** se o `revisor` devolver `Requer ajuste`, re-dispare
-  `implementador-teste` para resolver os achados e re-commitar, depois `revisor` de novo.
-  **Teto 3 rodadas**; sem convergência, **escalar S3** (reabrir critério com o usuário).
-  Só `implementador-teste` edita; `revisor` nunca edita.
+  Critério de comportamento em **EARS** (`QUANDO/SE ... ENTÃO ...`) quando couber; UI
+  puramente visual é `manual` por padrão.
+- **Converge (fim da fase 2):** antes de sinalizar pronto, o `implementador-teste` percorre
+  **diff × cada critério** e registra `> Converge: sim` (ou `nao` + pendências) na sessão.
+- **S7 — revisão opt-in por risco:** por padrão a fase 2 vai direto à validação (com o
+  Converge). Dispare o `revisor` **só** se a sessão marcar `> Revisão: exigida` (dados
+  persistidos, auth, dinheiro, refatoração ampla) ou se o usuário pedir. Havendo revisão: se
+  ele devolver `Requer ajuste`, re-dispare `implementador-teste` e depois `revisor` de novo
+  (**teto 3 rodadas**; sem convergência, **escalar S3**). Só `implementador-teste` edita.
+- **Caminho bugfix (PROTOCOL 3c):** correção de bug não roda refinador — análise inline
+  (atual/esperado/inalterado) → teste de regressão red→green → Converge → entrega. Revisor
+  só se o bug tocar risco. Escopo maior vira sessão normal.
 - **S8 — modo PR (só com `--with-pr`, marcador `<!-- sdd-pr: ativo -->` em `AGENTS.md`):** a entrega
   da sessão é **um PR/MR** — um PR por sessão, corpo escrito pelo `implementador-teste` para quem
   **não** trabalha no projeto (rastreabilidade no `## Anexo` do fim) — e a validação do usuário é a
   **revisão desse PR**. Todo critério declara a reprodução (`seed`/`script`/`manual`/`nao-aplicavel`)
-  e o e2e onde houver harness; o `./scripts/checar-pr` é o portão mecânico e diz o que não verifica
-  (compreensão do texto, passos, veracidade da evidência — isso é do `revisor`); o teto de 3 rodadas
-  do loop Implementador↔Revisor **não muda**; **merge é do usuário, nunca do agente**.
+  e o e2e onde houver harness; **sem `checar-pr`** — o corpo é gerado do arquivo da sessão e a
+  sobra (compreensão, passos, veracidade da evidência) é julgamento do `revisor` (quando houver)
+  e do usuário; o teto de 3 rodadas do loop Implementador↔Revisor **não muda**;
+  **merge é do usuário, nunca do agente**.
 - **Parada obrigatória na fase 3:** NUNCA marcar a sessão como `Done`, NUNCA commitar
   conclusão nem preencher a tabela de validação — a fase 3 é do usuário.
-- **S6:** ao fechar, gravar **handoff** (`memory_handoff_begin`) e **gotchas**
-  (`memory_write_page` em `gotchas/`), escopados ao projeto.
+- **S6:** ao fechar a fase 2 (TDD verde; com `Aprovado` quando houver revisão), gravar
+  **handoff** (`memory_handoff_begin`) e **gotchas** (`memory_write_page` em `gotchas/`),
+  escopados ao projeto.
 - **Contexto mínimo:** cada papel lê `./scripts/levantar-sessao NNNN`,
   `./scripts/levantar-requisito RF-XX`, `./scripts/levantar-testes`, `./scripts/levantar-roadmap`.
   NUNCA ler `REQUIREMENTS.md`/`SESSIONS.md` inteiros.

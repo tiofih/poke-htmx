@@ -19,12 +19,14 @@ Projetos adotam o kit por `git subtree` (veja "Adicionar via git" abaixo).
 | `skeleton/REQUIREMENTS.md` | Stub da fonte da verdade dos requisitos (`{{PROJETO}}`). |
 | `skeleton/SESSIONS.md` | Stub do registro de sessões (ciclo + tabela + "Próxima sessão"). |
 | `skeleton/sessions/template.md` | Modelo do arquivo de cada sessão (as 9 seções + S1/S2). |
-| `skeleton/agents/` | Subagents (opencode) por papel do fluxo: `refinador`, `implementador-teste`, `revisor`, `playtester` — instalados no projeto em `.opencode/agent/`. |
-| `skeleton/commands/` | Comando orquestrador `/sessao` — abre/continua a sessão despachando os papéis. |
+| `skeleton/agents/` | Subagents (opencode) por papel do fluxo: `refinador`, `implementador-teste`, `revisor`, `playtester`, `redator-pr` (corpo do PR, barato — `--with-pr`) — instalados no projeto em `.opencode/agent/`. |
+| `skeleton/agents/specialists/` | Especialistas da fase 2 por lane: `backend`, `frontend`, `qa`, `ui-designer`, `game-designer`, `security-reviewer`, `a11y-auditor` — instalados só com `--with-especialistas`; inerte sem `> Equipe:` na sessão. |
+| `skeleton/especialistas/` | Blocos de invocação dos especialistas (`<!-- sdd-especialistas:bloco -->`) para `.opencode/skills/sdd/SKILL.md` e `.opencode/commands/sessao.md`. |
+| `skeleton/commands/` | Comandos orquestradores `/sessao` (ciclo de papéis, `--rapido` inline) e `/bugfix` (caminho enxuto PROTOCOL 3c). |
 | `skeleton/skills/sdd/` | Skill `sdd` — guia do ciclo de papéis (fases, S7 loop, parada na validação). |
 | `skeleton/scripts/check_docs` | Verificação de consistência (roda no host, só grep). |
-| `skeleton/scripts/checar-pr` + `skeleton/scripts/abrir-pr` | Portão mecânico do corpo do PR (seções, placeholders, termos internos, cross-check com a sessão) + abertura do PR/MR — instalados só com `--with-pr` (ver tabela de perfis). |
-| `skeleton/pr/**` | Modo PR: template/exemplo do corpo do PR, README do modo e os blocos anexados ao `AGENTS.md`/`sessions/template.md` — instalados só com `--with-pr`. |
+| `skeleton/scripts/abrir-pr` | Abertura do PR/MR do modo `--with-pr` (corpo já gerado do arquivo da sessão; sem portão de texto) — instalado só com `--with-pr` (ver tabela de perfis). |
+| `skeleton/pr/**` | Modo PR: README do modo e os blocos anexados ao `AGENTS.md`/`sessions/template.md` — instalados só com `--with-pr`. |
 | `skeleton/tooling/INDEX-FIRST.md` | Disciplina tool-agnostic (definitions-before-grep) — instalado só com `--with-indexing`. |
 | `skeleton/tooling/adapters/*` | Adaptadores (`graphify-cbm-zvec.md`, `context-mode.md`, `ai-memory.md`) — instalados só com `--with-indexing` / `--with-context-mode` (ver tabela de perfis). |
 | `skeleton/STACK.md` | Template de especialização por área (tokens `{{AREA_*}}`/`{{PATHS_*}}` preenchidos à mão) — instalado por padrão; nunca sobrescrito. |
@@ -65,8 +67,9 @@ Perfis opt-in (default off = comportamento atual):
 | `--with-stack` | (obsoleto) `skeleton/STACK.md` agora é instalado **por padrão**; a flag é aceita como no-op. |
 | `--with-extra-commands` | `skeleton/commands/iniciar-sessao.md` + `levantar-roadmap.md` → `.opencode/commands/` |
 | `--with-extra-commands` (+ debugger, agrupamento provisório — plano §2.6/§2.7 separam, §2.8 sem flag própria) | `skeleton/agents/optional/debugger.md` → `.opencode/agent/` |
-| `--with-pr` | Modo PR (a entrega da sessão é um PR/MR): `skeleton/scripts/checar-pr` + `skeleton/scripts/abrir-pr` → `scripts/` (+x); `skeleton/pr/` (template + exemplo do corpo do PR + README do modo) → `docs/pr/` (**create-only**); bloco do modo PR (marcador `<!-- sdd-pr: ativo -->`) anexado ao `AGENTS.md` e ao `sessions/template.md`; cria `docs/pr/` + `sessions/pr/`. Sem a flag, nada disso existe. |
+| `--with-pr` | Modo PR (a entrega da sessão é um PR/MR): `skeleton/scripts/abrir-pr` → `scripts/` (+x); `skeleton/pr/` (README do modo) → `docs/pr/` (**create-only**); bloco do modo PR (marcador `<!-- sdd-pr: ativo -->`) anexado ao `AGENTS.md` e ao `sessions/template.md`; cria `docs/pr/` + `sessions/pr/`. Corpo do PR gerado do arquivo da sessão (sem template, sem `checar-pr`). Sem a flag, nada disso existe. |
 | `--with-arquiteto` | Papel de **desenho técnico (fase 1b, opcional, read-only)**: `skeleton/agents/optional/arquiteto.md` → `.opencode/agent/arquiteto.md` (**create-only**); blocos de invocação (`skeleton/arquiteto/`) anexados sob marcador `<!-- sdd-arquiteto:bloco -->` a `.opencode/skills/sdd/SKILL.md` e `.opencode/commands/sessao.md` (append idempotente, arquivo-base intacto). **Não toca `AGENTS.md`.** Dependências declaradas no próprio agente (`## Dependências`) — o install avisa o que falta, sem falhar. |
+| `--with-especialistas` | **Especialistas da fase 2 (lane por papel)**: `skeleton/agents/specialists/{backend,frontend,qa,ui-designer,game-designer}.md` → `.opencode/agent/` (**create-only**); blocos (`skeleton/especialistas/`) sob marcador `<!-- sdd-especialistas:bloco -->` a `.opencode/skills/sdd/SKILL.md` e `.opencode/commands/sessao.md`. Paralelo só com lanes disjuntas; portão duplo com `> Equipe:` na sessão. **Não toca `AGENTS.md`.** |
 
 ## Adicionar o SDD a outro projeto via git (subtree)
 

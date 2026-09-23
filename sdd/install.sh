@@ -36,15 +36,23 @@ Opções:
   --with-context-mode instala tooling/adapters/context-mode.md + adapters/ai-memory.md (opt-in)
   --with-stack        (obsoleto — STACK.md já é instalado por padrão; flag no-op)
   --with-extra-commands instala commands/iniciar-sessao.md + levantar-roadmap.md e agents/optional/debugger.md (opt-in)
-  --with-pr           instala o modo PR (entrega da sessão = PR/MR): docs/pr/ (template, exemplo,
-                      README), scripts/checar-pr e abrir-pr, sessions/pr/ e os blocos de regras do
-                      modo anexados a AGENTS.md e sessions/template.md (opt-in)
+  --with-pr           instala o modo PR (entrega da sessão = PR/MR): docs/pr/ (README do modo),
+                      scripts/abrir-pr, sessions/pr/, o agente barato redator-pr
+                      (create-only) e os blocos de regras do modo anexados a
+                      AGENTS.md, sessions/template.md e o bloco do redator ao SKILL.md (opt-in)
   --with-arquiteto    instala o papel de desenho técnico (fase 1b, opcional, read-only):
                       skeleton/agents/optional/arquiteto.md → .opencode/agent/arquiteto.md
                       (create-only) + blocos de invocação anexados a .opencode/skills/sdd/SKILL.md
                       e .opencode/commands/sessao.md. Não toca AGENTS.md. As dependências estão
                       declaradas no próprio agente (## Dependências) — o install avisa o que falta,
                       sem falhar (opt-in)
+  --with-especialistas instala os especialistas da fase 2 (lane por papel, opt-in):
+                      skeleton/agents/specialists/{backend,frontend,qa,ui-designer,
+                      game-designer,security-reviewer,a11y-auditor}.md → .opencode/agent/ (create-only) + blocos de
+                      invocação anexados a .opencode/skills/sdd/SKILL.md e
+                      .opencode/commands/sessao.md sob marcador <!-- sdd-especialistas:bloco -->.
+                      Inertes sem `> Equipe:` na sessão (default `—` = fluxo padrão). Não toca
+                      AGENTS.md (opt-in)
   -h, --help          mostra esta ajuda
 
 Render: o install substitui os globais {{PROJETO}}, {{PRÓXIMA_SESSAO}}, {{ROOT}},
@@ -66,6 +74,7 @@ WITH_STACK=0
 WITH_EXTRA_COMMANDS=0
 WITH_PR=0
 WITH_ARQUITETO=0
+WITH_ESPECIALISTAS=0
 # Destinos que o --force substituiu apesar de DIVERGIREM do conteúdo renderizado do kit
 # (byte a byte). Ver install_file(): a divergência costuma ser adaptação local do projeto
 # pós-instalação, que o kit genérico não tem. Resumo no fim do install.
@@ -82,6 +91,7 @@ while [ $# -gt 0 ]; do
     --with-extra-commands) WITH_EXTRA_COMMANDS=1 ;;
     --with-pr) WITH_PR=1 ;;
     --with-arquiteto) WITH_ARQUITETO=1 ;;
+    --with-especialistas) WITH_ESPECIALISTAS=1 ;;
     --projeto) PROJETO="${2:-}"; shift ;;
     --proxima) PROXIMA="${2:-}"; shift ;;
     --primeira) PRIMEIRA="${2:-}"; shift ;;
@@ -295,6 +305,7 @@ done
 # --- command orquestrador de sessão + skill sdd ---
 mkdir -p "$TARGET/.opencode/commands" "$TARGET/.opencode/skills/sdd"
 install_create_only "$SKELETON_DIR/commands/sessao.md" "$TARGET/.opencode/commands/sessao.md"
+install_create_only "$SKELETON_DIR/commands/bugfix.md" "$TARGET/.opencode/commands/bugfix.md"
 install_create_only "$SKELETON_DIR/skills/sdd/SKILL.md" "$TARGET/.opencode/skills/sdd/SKILL.md"
 
 # --- perfis opt-in (default off = comportamento atual) ---
@@ -359,6 +370,20 @@ if [ "$WITH_ARQUITETO" -eq 1 ]; then
   echo "install>   (detalhe por dependência: .opencode/agent/arquiteto.md § Dependências)" >&2
 fi
 
+# --- perfil opt-in --with-especialistas (fase 2 paralela por lane) ---
+# Mesmo desenho do --with-arquiteto: agentes create-only + blocos de invocação idempotentes
+# sob marcador; sem `> Equipe:` na sessão os papéis ficam inertes (portão duplo no bloco).
+if [ "$WITH_ESPECIALISTAS" -eq 1 ]; then
+  for a in backend frontend qa ui-designer game-designer security-reviewer a11y-auditor; do
+    install_create_only "$SKELETON_DIR/agents/specialists/$a.md" \
+      "$TARGET/.opencode/agent/$a.md"
+  done
+  install_block "$SKELETON_DIR/especialistas/SKILL-block.md" \
+    "$TARGET/.opencode/skills/sdd/SKILL.md" '<!-- sdd-especialistas:bloco -->' "skills/sdd/SKILL.md"
+  install_block "$SKELETON_DIR/especialistas/sessao-block.md" \
+    "$TARGET/.opencode/commands/sessao.md" '<!-- sdd-especialistas:bloco -->' "commands/sessao.md"
+fi
+
 # --- AGENTS.md: cria se faltar, ou anexa as regras de workflow (idempotente) ---
 # Nunca sobrescreve AGENTS.md (nem com --force): depois da primeira instalação ele é do
 # usuário. Mas se o arquivo NÃO existe, ele é criado com as regras — instalar tudo menos
@@ -395,20 +420,23 @@ fi
 # Só com a flag: sem ela, nenhum arquivo, diretório ou script do modo entra no alvo.
 if [ "$WITH_PR" -eq 1 ]; then
   mkdir -p "$TARGET/docs/pr" "$TARGET/sessions/pr"
-  # create-only, mesmo padrão do STACK.md: template/exemplo/README já customizados pelo
-  # projeto nunca são revertidos — nem com --force.
-  for f in TEMPLATE-pr-body.md EXEMPLO-pr-body.md README.md; do
-    if [ ! -e "$TARGET/docs/pr/$f" ]; then
-      echo "install> criando: $TARGET/docs/pr/$f"
-      render "$SKELETON_DIR/pr/$f" "$TARGET/docs/pr/$f"
-    else
-      echo "install> já existe, mantendo: $TARGET/docs/pr/$f (template em skeleton/pr/$f)"
-    fi
-  done
-  for s in checar-pr abrir-pr; do
-    install_file "$SKELETON_DIR/scripts/$s" "$TARGET/scripts/$s"
-    chmod +x "$TARGET/scripts/$s" 2>/dev/null || true
-  done
+  # create-only, mesmo padrão do STACK.md: README já customizado pelo
+  # projeto nunca é revertido — nem com --force.
+  f=README.md
+  if [ ! -e "$TARGET/docs/pr/$f" ]; then
+    echo "install> criando: $TARGET/docs/pr/$f"
+    render "$SKELETON_DIR/pr/$f" "$TARGET/docs/pr/$f"
+  else
+    echo "install> já existe, mantendo: $TARGET/docs/pr/$f (template em skeleton/pr/$f)"
+  fi
+  install_file "$SKELETON_DIR/scripts/abrir-pr" "$TARGET/scripts/abrir-pr"
+  chmod +x "$TARGET/scripts/abrir-pr" 2>/dev/null || true
+  # Redator do PR: papel barato (modelo barato, proja derivada da sessão) — create-only e
+  # gated pelo bloco no SKILL.md (sem agente ou sem bloco, o implementador-teste continua
+  # escrevendo o corpo, fluxo padrão).
+  install_create_only "$SKELETON_DIR/agents/redator-pr.md" "$TARGET/.opencode/agent/redator-pr.md"
+  install_block "$SKELETON_DIR/pr/redator-SKILL-block.md" \
+    "$TARGET/.opencode/skills/sdd/SKILL.md" '<!-- sdd-redator:bloco -->' "skills/sdd/SKILL.md"
 
   # Blocos de regras: append sob os marcadores do próprio bloco, nunca rewrite (o
   # AGENTS-block.md já traz os delimitadores `# --- SDD/PR (--with-pr) ---`/fim).
@@ -453,16 +481,6 @@ if [ -x "$TARGET/scripts/check_docs" ]; then
   }
 fi
 
-# --- verificação do modo PR: o exemplo embarcado tem de passar no próprio portão ---
-if [ "$WITH_PR" -eq 1 ] && [ -x "$TARGET/scripts/checar-pr" ]; then
-  echo "install> verificando o corpo de PR de exemplo:"
-  (cd "$TARGET" && ./scripts/checar-pr --exemplo) || {
-    echo "install> ERRO: docs/pr/EXEMPLO-pr-body.md não passa em ./scripts/checar-pr --exemplo." >&2
-    echo "install> corrija o exemplo (ou remova o arquivo) e rode o install de novo." >&2
-    exit 1
-  }
-fi
-
 # Resumo do --force: quantos arquivos divergentes foram substituídos e quais. O aviso
 # per-file do install_file aparece na hora, mas espalhado no log; este bloco fecha a
 # execução com o número e a lista (a categoria já é o 1º segmento do caminho relativo).
@@ -486,12 +504,12 @@ else
 fi
 
 # Última saída do install: o modo PR sem o marcador em AGENTS.md é inerte, e o usuário
-# não pode descobrir isso só quando o checar-pr falhar.
+# não pode descobrir isso só quando o abrir-pr falhar.
 if [ "$WITH_PR" -eq 1 ] && [ "$DO_AGENTS" -eq 0 ]; then
   echo >&2
   echo "install> AVISO: --no-agents com --with-pr — o modo PR ficou INERTE." >&2
   echo "install>   O marcador '<!-- sdd-pr: ativo -->' em AGENTS.md é a única fonte de verdade do" >&2
-  echo "install>   modo: sem ele, ./scripts/checar-pr e ./scripts/abrir-pr falham alto e nenhuma" >&2
+  echo "install>   modo: sem ele, ./scripts/abrir-pr falha alto e nenhuma" >&2
   echo "install>   regra de PR vale. Cole o bloco de skeleton/pr/AGENTS-block.md à mão em AGENTS.md," >&2
   echo "install>   ou rode de novo: install.sh <DIR> --with-pr (sem --no-agents)." >&2
 fi
