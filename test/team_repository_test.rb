@@ -61,13 +61,13 @@ class TeamAddTest < Minitest::Test
     rows = @repository.all("user-a")
     assert_equal [1, 2, 3], rows.map(&:slot)
     assert_equal %w[pikachu bulbasaur charmander], rows.map(&:name)
-    assert_equal 3, TestDatabase.team_row("charmander")["slot"].to_i
+    assert_equal 3, TestDatabase.team_row("charmander", "user-a")["slot"].to_i
   end
 
   def test_add_persists_pokemon_with_user_id
     @repository.add("user-a", build_pokemon_record("pikachu", 25))
 
-    row = TestDatabase.team_row("pikachu")
+    row = TestDatabase.team_row("pikachu", "user-a")
     assert_equal "user-a", row["user_id"]
   end
 end
