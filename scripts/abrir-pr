@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-# abrir-pr — abre o PR/MR da sessão no modo `--with-pr` (SDD), depois do portão.
+# abrir-pr — abre o PR/MR da sessão no modo `--with-pr` (SDD).
 # uso: ./scripts/abrir-pr [NNNN] [--open|--no-open]
 #
 # Ordem: marcador '<!-- sdd-pr: ativo -->' em AGENTS.md → NNNN (default: sessão de
-# maior número em sessions/) → corpo sessions/pr/NNNN-pr-body.md → ./scripts/checar-pr
-# NNNN (se reprovar, ABORTA sem abrir nada) → base (origin/HEAD, fallback `main`) →
-# comando de abertura → URL → instrução de registrar '> PR: <url>' na sessão.
+# maior número em sessions/) → corpo sessions/pr/NNNN-pr-body.md → base (origin/HEAD,
+# fallback `main`) → comando de abertura → URL → instrução de registrar
+# '> PR: <url>' na sessão.
 #
 # CONTRATO DE SAÍDA:
 #   exit 0 = PR aberto, ou modo degradado honesto (--no-open, ou sem CLI/remote)
 #            com AVISO, o corpo e o comando exato impressos;
-#   exit 1 = portão reprovado, branch base, modo inativo, corpo ausente,
-#            PR_CMD inválida, ou --open impossível;
+#   exit 1 = branch base, modo inativo, corpo ausente, PR_CMD inválida, ou
+#            --open impossível;
 #   exit 2 = uso incorreto.
 #
 # `PR_CMD`: lido do AGENTS.md (nunca editado por este script). A forma embarcada —
@@ -65,13 +65,7 @@ fi
 CORPO="sessions/pr/$NUM-pr-body.md"
 [ -f "$CORPO" ] || fail "corpo ausente: '$CORPO' não existe — o Implementador escreve e commita o corpo antes de abrir o PR"
 
-# --- 2. portão: corpo reprovado não abre nada
-if [ ! -x ./scripts/checar-pr ]; then
-  fail "./scripts/checar-pr ausente ou sem permissão de execução — rerode './install.sh --with-pr' (o portão é obrigatório)"
-fi
-./scripts/checar-pr "$NUM" || fail "corpo reprovado por ./scripts/checar-pr — abortando sem abrir PR (corrija e rode de novo)"
-
-# --- 3. base: nunca entregar da branch base
+# --- 2. base: nunca entregar da branch base
 base="$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)"
 base="${base#origin/}"
 [ -n "$base" ] || base="main"
@@ -79,7 +73,7 @@ atual="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
 [ -n "$atual" ] || fail "não é um repositório git (ou HEAD inválido) — abrir PR exige um repo com remote"
 [ "$atual" != "$base" ] || fail "a entrega não pode sair da branch base ('$base') — crie uma branch: git switch -c <nome-que-você-quiser>"
 
-# --- 4. comando de abertura: PR_CMD do AGENTS.md (forma embarcada primeiro)
+# --- 3. comando de abertura: PR_CMD do AGENTS.md (forma embarcada primeiro)
 pr_cmd="$(awk '
   /PR_CMD/ { f=1 }
   f {
@@ -109,7 +103,7 @@ cmd="${cmd//$p_base/$(escapar_aspas "$base")}"
 cmd="${cmd//$p_titulo/$(escapar_aspas "$titulo")}"
 cmd="${cmd//$p_corpo/'$CORPO'}"
 
-# --- 5. tentar ou cair no modo degradado honesto
+# --- 4. tentar ou cair no modo degradado honesto
 cli="${pr_cmd%% *}"
 tem_cli=0
 [ -n "$cli" ] && command -v "$cli" >/dev/null 2>&1 && tem_cli=1

@@ -50,3 +50,49 @@ description: Fluxo de papéis do SDD do Poke-HTMX — Refinador → Implementado
 Ao receber um pedido de sessão SDD, **decida a fase pelo estado** (session file `## Status`)
 e **dispache o papel certo**, em vez de fazer tudo inline. Confirme cada transição de papel
 com o usuário quando envolver decisão (objetivo/escopo/critérios/ajustes).
+
+<!-- sdd-especialistas:bloco -->
+## Fase 2 paralela — especialistas (`--with-especialistas`)
+
+| Papel (`subagent_type`) | Lane | Edit | Quando disparar |
+|---|---|---|---|
+| `backend` | servidor/API/dados + testes da lane | sim | `> Equipe:` cita `backend` |
+| `frontend` | templates/CSS/JS cliente + testes da lane | sim | `> Equipe:` cita `frontend` |
+| `qa` | cobertura S1/EARS, estado da suíte | não (read-only) | `> Equipe:` cita `qa` |
+| `ui-designer` | decisões visuais (propõe; `frontend` implementa) | não (read-only) | `> Equipe:` cita `ui-designer` |
+| `game-designer` | mecânica/balanceamento (recomenda; decide o usuário) | não (read-only) | `> Equipe:` cita `game-designer` |
+
+- **Portão duplo:** o agente em `.opencode/agent/<papel>.md` **E** `> Equipe: <papéis>`
+  no arquivo da sessão (fechado no refinamento). Sem os dois, a fase 2 é o
+  `implementador-teste` sozinho, como sempre — não existe "fase degradada".
+- **Paralelo só com lanes disjuntas** (arquivos de produção não-sobrepostos):
+  `backend ∥ frontend ∥ qa ∥ ui-designer ∥ game-designer` vale; dois editores na mesma
+  lane, ou lane com dependência de arquivo do outro → **sequencial**. Read-only disputam
+  nada e rodam com qualquer um.
+- **Durante o paralelismo:** cada especialista edita **só a sua lane** e roda **apenas
+  testes da lane** (filtro por arquivo). **Suíte completa + lint 0 + commits** são do
+  `implementador-teste` ao **integrar** (1 commit por lane/green — especialista não
+  commita, para o índice não disputar em paralelo).
+- **Integração, `> Converge:` e S6** continuam com o `implementador-teste` — ele é quem
+  responde pela fase 2. **S7 amendado:** "só o Implementador edita" inclui os
+  especialistas **nas suas lanes**; o Revisor continua nunca editando, e revisa o diff
+  consolidado.
+- Sem contraparte no harness (task sem o subagente): despache inline pelo orquestrador
+  injetando no prompt o papel + a lane + a regra "não commita"; integre do mesmo jeito.
+<!-- fim sdd-especialistas:bloco -->
+
+<!-- sdd-redator:bloco -->
+## Corpo do PR com `redator-pr` (papel barato — só com `--with-pr`)
+
+- **Portão:** só se `.opencode/agent/redator-pr.md` existir. Sem ele, o
+  `implementador-teste` escreve o corpo no passo PR — fluxo padrão, inalterado.
+- Com ele, na fase 2: no spawn do `implementador-teste` acrescente ao prompt *"o corpo do
+  PR será gerado por outro papel — faça TDD + Converge e **pare antes** de escrever
+  `sessions/pr/NNNN-pr-body.md`"*.
+- Depois do Converge: dispare `redator-pr` (modelo barato — proza derivada da sessão) →
+  confira a coerência com o arquivo da sessão → commite
+  (`docs(pr 00NN): corpo do PR — <resumo>`) → `./scripts/abrir-pr NNNN --open` →
+  registre `> PR: <url>` na sessão.
+- `> Revisão: exigida` (S7): o corpo entra na revisão **antes** do abrir-pr.
+- S8 vale inteiro: um PR por sessão, nunca merge, feedback = S3 atualizando o corpo.
+<!-- fim sdd-redator:bloco -->
