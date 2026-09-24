@@ -92,4 +92,20 @@ class HygieneTest < Minitest::Test
     assert_match(/data-round="[^"]*"[^>]*style="--log-delay:/m, partial,
                  "style depois de data-round (contrato battle_view_test.rb:244)")
   end
+
+  # C5 — teste de history sem duplicata (§5.C): os contratos (.card--tight,
+  # sem inline) vivem so em history_curation_test (test_history_matches_prototype).
+  def test_duplicate_history_test_removed
+    all_tests = Dir[File.join(repo_root, "test/*.rb")].map { |f| File.read(f) }
+    occurrences = all_tests.count do |src|
+      src.match?(/^\s*def test_history_cards_wear_tight_class_without_inline_style/)
+    end
+    assert_equal 0, occurrences,
+                 "o teste duplicado saiu de history_view_test (contratos na curation)"
+    curation = File.read(File.join(repo_root, "test/history_curation_test.rb"))
+    assert_includes curation, 'body.scan(\'class="card card--tight"\').size',
+                    "a cobertura restante fica em history_curation_test"
+    assert_includes curation, 'refute_match(/class="card" style=/',
+                    "a refutacao de inline fica em history_curation_test"
+  end
 end

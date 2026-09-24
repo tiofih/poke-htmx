@@ -95,20 +95,6 @@ class HistoryViewTest < Minitest::Test
                  "ranking section wears the spacing class")
   end
 
-  def test_history_cards_wear_tight_class_without_inline_style
-    seed_battles
-
-    get "/history", {}, user_session("user-a")
-
-    assert last_response.ok?
-    body = last_response.body
-    # Curadoria 0079 (C1): ex-inline do prototipo vira classe do bloco.
-    refute_match(/class="card" style=/, body,
-                 "history cards must not carry inline style")
-    assert_equal 2, body.scan('class="card card--tight"').size,
-                 "ranking + recent cards wear .card--tight"
-  end
-
   def test_history_recent_battles_list
     seed_battles
 
