@@ -35,6 +35,20 @@ require_relative "lib/stone_rotation"
 module ServerCommon
   private
 
+  # 0096 C1 — caminho unico de OOB: injeta hx-swap-oob logo apos id="<id>"
+  # (substituicao literal — a ordem id= -> hx-swap-oob= e contrato de teste).
+  def render_oob(partial, id:, swap: "outerHTML", locals: {})
+    rendered = erb(partial, layout: false, locals: locals)
+    rendered.sub(%(id="#{id}"), %(id="#{id}" hx-swap-oob="#{swap}"))
+  end
+
+  # 0096 C1 — wrapper de conteudo (o id nao esta no partial, esta no div que o
+  # embrulha): substitui as strings inline dos helpers oob_* e o template
+  # views/team_view_oob.erb (apagado).
+  def oob_wrap(id:, content:, swap: "innerHTML")
+    %(<div id="#{id}" hx-swap-oob="#{swap}">#{content}</div>)
+  end
+
   def current_user
     session[:user_id]
   end
@@ -127,7 +141,7 @@ module ServerListActions
   end
 
   def oob_filter_controls
-    %(<div id="filter-controls" hx-swap-oob="innerHTML">#{erb :_filter_controls, layout: false}</div>)
+    oob_wrap(id: "filter-controls", content: erb(:_filter_controls, layout: false))
   end
 
   def filter_controls_needs_sync?
@@ -609,7 +623,7 @@ module ServerTeamActions
   end
 
   def oob_team_view
-    erb :team_view_oob, layout: false
+    oob_wrap(id: "team-view", content: erb(:team, layout: false))
   end
 
   def oob_nav_badge
@@ -626,14 +640,14 @@ module ServerTeamActions
   end
 
   def oob_cta_slot
-    erb(:_cta_slot, layout: false).sub('id="cta-slot"', 'id="cta-slot" hx-swap-oob="outerHTML"')
+    render_oob(:_cta_slot, id: "cta-slot")
   end
 
   def oob_pokemon_list
     @offset = params[:offset].to_i
     @q = params[:q].to_s
     load_pokemon_page
-    %(<div id="pokemon-list" hx-swap-oob="innerHTML">#{erb :pokemon_list, layout: false}</div>)
+    oob_wrap(id: "pokemon-list", content: erb(:pokemon_list, layout: false))
   end
 
   def new_member_from_api
@@ -762,7 +776,7 @@ module ServerTeamActions
   end
 
   def oob_mart_modal
-    erb(:_mart_modal, layout: false).sub('id="mart-modal"', 'id="mart-modal" hx-swap-oob="outerHTML"')
+    render_oob(:_mart_modal, id: "mart-modal")
   end
 
   def render_result_notice(result)
@@ -785,15 +799,15 @@ module ServerTeamActions
   end
 
   def oob_battle_view_forced
-    %(<div id="battle-view" hx-swap-oob="innerHTML">#{prepare_battle_fragment}</div>)
+    oob_wrap(id: "battle-view", content: prepare_battle_fragment)
   end
 
   def oob_close_center_modal
-    erb(:_center_slot, layout: false).sub('id="center-modal"', 'id="center-modal" hx-swap-oob="outerHTML"')
+    render_oob(:_center_slot, id: "center-modal")
   end
 
   def oob_center_modal
-    erb(:_center_modal, layout: false).sub('id="center-modal"', 'id="center-modal" hx-swap-oob="outerHTML"')
+    render_oob(:_center_modal, id: "center-modal")
   end
 
   def save_team_moves
