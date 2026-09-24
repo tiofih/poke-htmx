@@ -10,6 +10,7 @@ TEST_FILES=()
 NAME_FILTER=""
 EXTRA_ARGS=()
 NEXT_IS_NAME=false
+FAILED=0
 
 for arg in "$@"; do
   if [ "$NEXT_IS_NAME" = true ]; then
@@ -21,6 +22,8 @@ for arg in "$@"; do
     NAME_FILTER="${arg#-n=}"
   elif [[ "$arg" == --name=* ]]; then
     NAME_FILTER="${arg#--name=}"
+  elif [ "$arg" = "--failed" ]; then
+    FAILED=1
   elif [ -f "$arg" ]; then
     TEST_FILES+=("$arg")
   else
@@ -33,6 +36,21 @@ if [ "$NEXT_IS_NAME" = true ]; then
   exit 2
 fi
 
+# --failed: re-rodar so os arquivos citados no tmp/fails.md do passo anterior
+if [ "$FAILED" -eq 1 ]; then
+  if [ ! -f tmp/fails.md ]; then
+    echo "test> tmp/fails.md ausente — rode ./scripts/test com falha antes de usar --failed" >&2
+    exit 2
+  fi
+  falhos="$(./scripts/fails-report --files tmp/fails.md)"
+  if [ -z "$falhos" ]; then
+    echo "test> tmp/fails.md sem arquivos de falha reconheciveis (test/*.rb)" >&2
+    exit 2
+  fi
+  IFS=',' read -r -a FALHOS <<< "$falhos"
+  TEST_FILES+=("${FALHOS[@]}")
+fi
+
 if [ "${#TEST_FILES[@]}" -gt 0 ]; then
   EXTRA_ARGS+=(TEST="$(IFS=,; echo "${TEST_FILES[*]}")")
 fi
@@ -41,10 +59,27 @@ if [ -n "$NAME_FILTER" ]; then
   EXTRA_ARGS+=(TESTOPTS="--name=$NAME_FILTER")
 fi
 
+# Captura da saida (tee): em exit != 0 vira tmp/fails.md via fails-report,
+# com o exit do docker preservado pelo pipefail.
+SAIDA="tmp/test.out"
 if [ "$(docker compose ps --filter status=running --services | grep -c '^web$')" -eq 1 ]; then
   echo "test> Container 'web' ativo — rake test nele."
-  docker compose exec -T web bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
+  if docker compose exec -T web bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"} 2>&1 | tee "$SAIDA"; then
+    rc=0
+  else
+    rc=$?
+  fi
 else
   echo "test> Container 'web' inativo — one-off para rake test."
-  docker compose run --rm web bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
+  if docker compose run --rm web bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"} 2>&1 | tee "$SAIDA"; then
+    rc=0
+  else
+    rc=$?
+  fi
 fi
+
+if [ "$rc" -ne 0 ]; then
+  ./scripts/fails-report "$SAIDA" > tmp/fails.md || true
+fi
+
+exit "$rc"
