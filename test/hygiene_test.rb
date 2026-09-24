@@ -37,4 +37,18 @@ class HygieneTest < Minitest::Test
     assert File.exist?(File.join(repo_root, "graphify-out/graph.json")), "graph.json e duravel, fica"
     assert File.exist?(File.join(repo_root, "open-design/prints")), "prints/ (sem backup/) fica"
   end
+
+  # C2 — codigo Ruby morto ausente (§5.B): sem consumidor alem da definicao.
+  def test_dead_ruby_helpers_removed
+    server = File.read(File.join(repo_root, "server.rb"))
+    generator = File.read(File.join(repo_root, "lib/opponent_generator.rb"))
+    ["def base_form_names(", "def team_s_count(", "@team_s_count =",
+     "def oob_battle_view\n", "def oob_battle_view "].each do |snippet|
+      refute_includes server, snippet, "#{snippet.strip} morto (§5.B)"
+    end
+    ["def in_band?(", "def in_rating_band?("].each do |snippet|
+      refute_includes generator, snippet, "#{snippet} morto (§5.B)"
+    end
+    assert_includes server, "def oob_battle_view_forced", "a _forced e viva (:788)"
+  end
 end

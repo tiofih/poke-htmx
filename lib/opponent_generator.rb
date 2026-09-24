@@ -180,18 +180,5 @@ class OpponentGenerator
     @restricted_checker = options.fetch(:restricted_checker, ->(_name) { false })
     @budget_limit = options.fetch(:budget_limit, TeamBudget::BUDGET)
   end
-
-  def in_band?(name)
-    pokemon = @fetcher.call(name)
-    return false unless pokemon
-
-    moves = @moves_fetcher.call(pokemon.number)
-    @band.include?(@rater.call(pokemon, moves))
-  end
-
-  def in_rating_band?(name)
-    tier = @ratings.call(name)
-    tier && @band.include?(tier)
-  end
 end
 # rubocop:enable Metrics/ClassLength
