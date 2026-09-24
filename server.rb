@@ -37,16 +37,16 @@ module ServerCommon
 
   # 0096 C1 — caminho unico de OOB: injeta hx-swap-oob logo apos id="<id>"
   # (substituicao literal — a ordem id= -> hx-swap-oob= e contrato de teste).
-  def render_oob(partial, id:, swap: "outerHTML", locals: {})
+  def render_oob(partial, id:, locals: {})
     rendered = erb(partial, layout: false, locals: locals)
-    rendered.sub(%(id="#{id}"), %(id="#{id}" hx-swap-oob="#{swap}"))
+    rendered.sub(%(id="#{id}"), %(id="#{id}" hx-swap-oob="outerHTML"))
   end
 
   # 0096 C1 — wrapper de conteudo (o id nao esta no partial, esta no div que o
   # embrulha): substitui as strings inline dos helpers oob_* e o template
   # views/team_view_oob.erb (apagado).
-  def oob_wrap(id:, content:, swap: "innerHTML")
-    %(<div id="#{id}" hx-swap-oob="#{swap}">#{content}</div>)
+  def oob_wrap(id:, content:)
+    %(<div id="#{id}" hx-swap-oob="innerHTML">#{content}</div>)
   end
 
   # 0096 — contratos explicitos de dados (builder para view com 3+ call sites).
@@ -63,6 +63,22 @@ module ServerCommon
       team: @team, team_types: @team_types, member_levels: @member_levels,
       available_moves: @available_moves, inventory: @inventory,
       draft_moves: @draft_moves, notice: @notice, notice_kind: @notice_kind
+    }
+  end
+
+  # 0096 pos-revisao (2026-09-24) — builder com 2 call sites: o hash duplicado
+  # par a par (render_*_modal vs oob_*_modal) era risco de drift.
+  def center_modal_locals
+    {
+      notice: @notice, notice_kind: @notice_kind, avg_level: @avg_level,
+      balance: @balance, heal_cost: @heal_cost, team: @team
+    }
+  end
+
+  def mart_modal_locals
+    {
+      notice: @notice, notice_kind: @notice_kind, balance: @balance,
+      catalog: @catalog, inventory: @inventory, rotation: @rotation
     }
   end
 
@@ -624,18 +640,12 @@ module ServerTeamActions
 
   def render_team_center
     prepare_team_fragment_data
-    erb :_center_modal, layout: false, locals: {
-      notice: @notice, notice_kind: @notice_kind, avg_level: @avg_level,
-      balance: @balance, heal_cost: @heal_cost, team: @team
-    }
+    erb :_center_modal, layout: false, locals: center_modal_locals
   end
 
   def render_team_mart
     prepare_team_fragment_data
-    erb :_mart_modal, layout: false, locals: {
-      notice: @notice, notice_kind: @notice_kind, balance: @balance,
-      catalog: @catalog, inventory: @inventory, rotation: @rotation
-    }
+    erb :_mart_modal, layout: false, locals: mart_modal_locals
   end
 
   def close_team_center
@@ -682,7 +692,10 @@ module ServerTeamActions
   end
 
   def oob_team_view
-    oob_wrap(id: "team-view", content: erb(:team, layout: false, locals: team_locals))
+    # 0096 C5 — bytes identicos ao views/team_view_oob.erb apagado: o wrapper
+    # antigo embrulhava em "\n  ... \n"; sem isso a saida perde 4 bytes.
+    time = erb(:team, layout: false, locals: team_locals)
+    oob_wrap(id: "team-view", content: "\n  #{time}\n")
   end
 
   def oob_nav_badge
@@ -835,10 +848,7 @@ module ServerTeamActions
   end
 
   def oob_mart_modal
-    render_oob(:_mart_modal, id: "mart-modal", locals: {
-                 notice: @notice, notice_kind: @notice_kind, balance: @balance,
-                 catalog: @catalog, inventory: @inventory, rotation: @rotation
-               })
+    render_oob(:_mart_modal, id: "mart-modal", locals: mart_modal_locals)
   end
 
   def render_result_notice(result)
@@ -869,10 +879,7 @@ module ServerTeamActions
   end
 
   def oob_center_modal
-    render_oob(:_center_modal, id: "center-modal", locals: {
-                 notice: @notice, notice_kind: @notice_kind, avg_level: @avg_level,
-                 balance: @balance, heal_cost: @heal_cost, team: @team
-               })
+    render_oob(:_center_modal, id: "center-modal", locals: center_modal_locals)
   end
 
   def save_team_moves
