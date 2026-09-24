@@ -108,4 +108,62 @@ class HygieneTest < Minitest::Test
     assert_includes curation, 'refute_match(/class="card" style=/',
                     "a refutacao de inline fica em history_curation_test"
   end
+
+  # C6 — citacoes penduradas corrigidas/anotadas em docs vivos (§5.D).
+  # GDD.md e sessions/ sao symlinks para ../vaults (fora do repo); o vault so
+  # existe na maquina local (compose monta ../vaults) — em CI sem vault as
+  # leituras ficam inertes, os docs do repo (README/SESSIONS/docs/*) seguem
+  # sempre cobertos.
+  def read_live(path)
+    File.read(path)
+  rescue Errno::ENOENT
+    nil
+  end
+
+  def test_dangling_citations_fixed_or_annotated
+    gdd = read_live(File.join(repo_root, "GDD.md"))
+    refute_includes gdd.to_s, "draft-futuro", "GDD.md nao cita mais draft-futuro (§5.D)"
+
+    assert_absence_markers_on_live_docs
+    assert_session_0086_lab_path
+  end
+
+  def assert_absence_markers_on_live_docs
+    targets = %w[
+      pending-spacing-replication-across-screens
+      draft-futuro
+      open-design-views-mockup
+      draft-design-system
+    ]
+    markers = /ausente|removid|superseded/i
+    live_docs = %w[GDD.md README.md REQUIREMENTS.md SESSIONS.md]
+                .map { |f| File.join(repo_root, f) } +
+                Dir[File.join(repo_root, "docs/*.md")]
+    live_docs.each do |path|
+      content = read_live(path)
+      next if content.nil?
+
+      content.each_line.with_index do |line, index|
+        target = targets.find { |name| line.include?(name) }
+        next unless target
+
+        assert_match markers, line,
+                     "#{File.basename(path)}:#{index + 1} cita #{target} sem marcador de ausencia"
+      end
+    end
+  end
+
+  def assert_session_0086_lab_path
+    session = Dir[File.join(repo_root, "sessions/0086*.md")].first
+    return if session.nil? # vault ausente (CI): sessions/ nao existe
+
+    lab_lines = read_live(session).to_s.each_line.select { |line| line.include?("type-effects-lab") }
+    refute_empty lab_lines, "sessions/0086 citado na §5.D precisa citar o lab"
+    lab_lines.each do |line|
+      assert_includes line, "docs/type-effects-lab.html",
+                      "sessions/0086 aponta o caminho factual docs/ (§5.D)"
+      refute_includes line, "public/type-effects-lab.html",
+                      "o caminho antigo public/ sai de sessions/0086"
+    end
+  end
 end

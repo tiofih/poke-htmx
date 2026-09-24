@@ -3,6 +3,10 @@ services:
     build: .
     volumes:
       - .:/var/www/pokedex/
+      # Vault do SDD (GDD.md e sessions/ sao symlinks para ../vaults/...);
+      # sem este mount os symlinks ficam quebrados dentro do container e os
+      # testes que leem GDD/sessions (hygiene C6) ficam inertes.
+      - ../vaults:/var/www/vaults
     ports:
       - "3000:3000"
     depends_on:
