@@ -13,8 +13,9 @@
 
 > Revisão: dispensada
 > Converge: — (fim da fase 2: `sim` | `nao` + pendências)
-> Equipe: — (fase 2: especialistas por lane, ex. `backend, frontend, qa` — paralelo só
-> com lanes disjuntas; `—`/ausente = implementador-teste sozinho)
+> Equipe: — (decidido no refinamento: produção → lane; editores só com ≥2 lanes
+> disjuntas; read-only por risco — ex. auth → `security-reviewer`, UI nova → `a11y-auditor`;
+> `—`/ausente = implementador-teste sozinho)
 
 ---
 

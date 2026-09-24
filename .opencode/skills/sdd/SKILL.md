@@ -65,7 +65,9 @@ com o usuário quando envolver decisão (objetivo/escopo/critérios/ajustes).
 | `a11y-auditor` | acessibilidade da lane UI: teclado, foco, semântica, contraste, toque, motion (tabela WCAG) | não (read-only) | `> Equipe:` cita `a11y-auditor` |
 
 - **Portão duplo:** o agente em `.opencode/agent/<papel>.md` **E** `> Equipe: <papéis>`
-  no arquivo da sessão (fechado no refinamento). Sem os dois, a fase 2 é o
+  no arquivo da sessão (fechado no refinamento — o refinador **decide** a escala:
+  produção → lane; editores só com ≥2 lanes disjuntas; read-only por risco; `—` = sozinho).
+  Sem os dois, a fase 2 é o
   `implementador-teste` sozinho, como sempre — não existe "fase degradada".
 - **Paralelo só com lanes disjuntas** (arquivos de produção não-sobrepostos):
   `backend ∥ frontend ∥ qa ∥ ui-designer ∥ game-designer` vale; dois editores na mesma

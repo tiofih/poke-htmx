@@ -58,6 +58,26 @@ Quando você receber as escolhas do usuário (via prompt/args), aí sim:
   e `./scripts/check_docs`, e commite `Sessao NNNN: refinamento concluido — ...`.
 - Grave handoff (`memory_handoff_begin`) para o Implementador.
 
+## Equipe (`> Equipe:`) — decida a escala no refinamento
+
+Ao fechar o escopo, **escreva a linha `> Equipe:`** no arquivo da sessão — não deixe `—`
+por padrão quando houver paralelismo a ganhar ou risco no escopo:
+
+- **Mapeie produção → lane:** servidor/API/persistência → `backend`; templates/CSS/JS do
+  cliente → `frontend`; mecânica/balanceamento → `game-designer`; decisão visual de
+  layout/copy/cor → `ui-designer`; auth/dados sensíveis/dinheiro/segredos →
+  `security-reviewer`; UI nova ou toque com risco de foco/contraste/teclado/motion →
+  `a11y-auditor`; critérios/EARS ambíguos ou suíte em dúvida → `qa`.
+- **Escale quando paga:** editores (`backend`/`frontend`) só com **≥2 lanes disjuntas**
+  (paralelo justifica o custo) — uma lane única → `—` (implementador sozinho). Read-only
+  entram conforme o **risco:** auth/dados → `security-reviewer` (+ `> Revisão: exigida`,
+  S7); UI nova → `a11y-auditor`; escopo pouco claro → `qa`; balanço de jogo →
+  `game-designer`; decisão visual → `ui-designer`.
+- **Portão duplo:** só cite papel com agente em `.opencode/agent/` — sem o agente, não
+  escreva o nome. Nunca escale "por precaução": cada especialista é custo de dispatch.
+- O usuário pode mudar a linha depois — você decide pelo risco/paralelismo e registra a
+  recomendação já escrita; a escolha final é dele.
+
 ## Regras
 - Contexto mínimo; sempre **levante opções**; a decisão é **do usuário**.
 - **Ponytail LITE:** vale a ladder só como checagem de escopo (o critério precisa existir? já existe algo que resolve?); NÃO minimize as opções — o mapa de decisões precisa de nuance completa para o usuário escolher bem.

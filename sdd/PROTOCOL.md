@@ -42,6 +42,13 @@ A próxima fase só começa quando a atual estiver concluída (marcada no arquiv
   só para escopo grande ou decisões múltiplas.
 - Fechar: **objetivo**, **escopo** ("fora de escopo" explícito), **critérios de
   aceite** e **plano TDD**.
+- **Equipe (escala da fase 2):** o refinador decide e escreve `> Equipe:` no arquivo da
+  sessão — mapeia produção para lanes (`backend`/`frontend` editam; `qa`, `ui-designer`,
+  `game-designer`, `security-reviewer`, `a11y-auditor` são read-only), escala editores só
+  com **≥2 lanes disjuntas** e read-only conforme o risco (auth/dados →
+  `security-reviewer` + `> Revisão: exigida`; UI nova → `a11y-auditor`; critério ambíguo
+  → `qa`). `—` = uma lane única ou nenhum risco (implementador sozinho). Portão duplo
+  vale: só papel com agente em `.opencode/agent/`.
 - **Cada critério de aceite referencia o teste que o prova** (S1) — critério sem
   teste automatizado registra `manual` explícito. Critério de **comportamento** é
   escrito no padrão **EARS** quando couber (`QUANDO/SE <gatilho> ENTÃO <resultado>
