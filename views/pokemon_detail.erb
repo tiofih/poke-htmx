@@ -1,21 +1,21 @@
-<img src="<%= @pokemon.sprite %>" alt="<%= @pokemon.name %>">
-<%= @pokemon.name %><br>
-<% unless @pokemon.types.empty? %>
+<img src="<%= pokemon.sprite %>" alt="<%= pokemon.name %>">
+<%= pokemon.name %><br>
+<% unless pokemon.types.empty? %>
   <div class="tag-row">
-    <% @pokemon.types.each do |type| %><span class="ptag ptag--<%= type %>"><%= type %></span><% end %>
+    <% pokemon.types.each do |type| %><span class="ptag ptag--<%= type %>"><%= type %></span><% end %>
   </div>
 <% end %>
-<% unless @pokemon.stats.empty? %>
+<% unless pokemon.stats.empty? %>
   <p class="section-label">Status</p>
   <div class="stat-grid">
-    <% @pokemon.stats.each do |stat| %>
+    <% pokemon.stats.each do |stat| %>
       <div class="stat-row"><span class="lab"><%= stat[:name] %></span><div class="stat-bar"><span style="width:<%= [(stat[:value].to_f / 255 * 100).round, 100].min %>%"></span></div><span class="val"><%= stat[:value] %></span></div>
     <% end %>
   </div>
 <% end %>
-<% unless @pokemon.evolutions.empty? %>
+<% unless pokemon.evolutions.empty? %>
   <p class="section-label">Evoluções</p>
-  <% @pokemon.evolutions.each do |evolution| %>
+  <% pokemon.evolutions.each do |evolution| %>
     <div class="evo-row">
       <span class="evo-info"><img src="<%= evolution.sprite %>" alt="<%= evolution.name %>" loading="lazy" width="40" height="40"><strong><%= evolution.name %></strong></span>
       <a class="btn btn-secondary btn-sm" href="#" hx-get="/pokemon/<%= evolution.number %>" hx-target="#pokemon-detail" hx-swap="innerHTML">Ver</a>
@@ -26,7 +26,7 @@
     hx-post="/team"
     hx-target="#add-status"
     hx-swap="innerHTML">
-  <input type="hidden" name="pokeName" value="<%= @pokemon.name %>">
+  <input type="hidden" name="pokeName" value="<%= pokemon.name %>">
   <button class="btn">Adicionar ao time</button>
 </form>
 <button

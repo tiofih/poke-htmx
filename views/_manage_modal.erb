@@ -5,6 +5,6 @@
       <button type="button" class="modal-close" aria-label="Fechar" data-od-id="modal-manage-close"
          hx-get="/team/manage/close" hx-target="#manage-modal" hx-swap="outerHTML">×</button>
     </div>
-    <%= erb :team_manage, layout: false %>
+    <%= erb :team_manage, layout: false, locals: { team: team, team_types: team_types, member_levels: member_levels, available_moves: available_moves, inventory: inventory, draft_moves: draft_moves, notice: notice, notice_kind: notice_kind } %>
   </div>
 </div>

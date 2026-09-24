@@ -1,8 +1,8 @@
-<% if @notice %>
-  <div class="add-toast notice notice--<%= @notice_kind || "info" %>" role="status">
-    <% if @toast_pokemon %>
-      <img class="add-toast__sprite" src="<%= @toast_pokemon.sprite %>" alt="">
+<% if notice %>
+  <div class="add-toast notice notice--<%= notice_kind || "info" %>" role="status">
+    <% if toast_pokemon %>
+      <img class="add-toast__sprite" src="<%= toast_pokemon.sprite %>" alt="">
     <% end %>
-    <span class="add-toast__text"><%= @notice %></span>
+    <span class="add-toast__text"><%= notice %></span>
   </div>
 <% end %>

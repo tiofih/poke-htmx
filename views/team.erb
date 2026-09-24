@@ -1,11 +1,11 @@
-<% if @notice %>
-  <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
+<% if notice %>
+  <p class="notice<%= " notice--#{notice_kind}" if notice_kind %>"><%= notice %></p>
 <% end %>
-<% unless @journey_started %>
-  <p class="journey-progress">Time: <%= @team.size %>/6</p>
+<% unless journey_started %>
+  <p class="journey-progress">Time: <%= team.size %>/6</p>
   <p class="notice notice--info">Monte seu time inicial de 6 Pokémon para iniciar a jornada.</p>
 <% end %>
-<% if @game_over %>
+<% if game_over %>
   <p class="notice notice--error">Game Over — seu time está derrotado e você não tem dinheiro para curar. Venda itens no Poke Mart ou recomece a jornada.</p>
     <form hx-post="/journey/restart" hx-target="#team-view" hx-swap="innerHTML">
     <button type="submit" class="btn btn-secondary">Recomeçar jornada</button>
@@ -18,22 +18,22 @@
       # 0083 C3 — estados da pill separados (+ S3 2026-09-21: time incompleto
       # fala "Faltam N" em vez de "Precisa de cura"; o hint do header saiu, a
       # pill e quem explica o gate). So classe+texto; nenhuma regra nova.
-      faltam = TeamRepository::MAX_TEAM_SIZE - @team.size
-      pill_mod = if @game_over then "danger" elsif @team.empty? then "empty" elsif @can_battle then "ready" else "stale" end
-      pill_text = if @game_over then "Game over" elsif @team.empty? then "Time vazio" elsif @can_battle then "Pronto p/ batalhar" elsif faltam.positive? then (faltam == 1 ? "Falta 1" : "Faltam #{faltam}") else "Precisa de cura" end
+      faltam = TeamRepository::MAX_TEAM_SIZE - team.size
+      pill_mod = if game_over then "danger" elsif team.empty? then "empty" elsif can_battle then "ready" else "stale" end
+      pill_text = if game_over then "Game over" elsif team.empty? then "Time vazio" elsif can_battle then "Pronto p/ batalhar" elsif faltam.positive? then (faltam == 1 ? "Falta 1" : "Faltam #{faltam}") else "Precisa de cura" end
     %>
     <span class="pill pill--<%= pill_mod %>" id="readiness-pill"><%= pill_text %></span>
   </div>
   <ul class="roster roster-grid" id="roster" data-od-id="members">
-    <% @team.each do |poke| %>
+    <% team.each do |poke| %>
       <% pct = poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f * 100).round : 0 %>
       <% ratio = poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f) : 0 %>
       <% hp_cls = ratio < 0.35 ? " low" : (ratio < 0.7 ? " mid" : "") %>
-      <% member_types = @team_types && @team_types[poke.id] %>
+      <% member_types = team_types && team_types[poke.id] %>
       <li class="member" data-od-id="member-<%= poke.name.downcase %>">
         <div class="member-top">
           <div class="sprite-tile"><img src="<%= poke.sprite %>" alt="<%= poke.name %>" width="96" height="96"></div>
-          <div><span class="slot">#<%= poke.slot %></span><span class="member-name"><%= poke.name %></span><span class="member-lvl num">Nível <%= @member_levels.fetch(poke.id.to_s, 1) %></span></div>
+          <div><span class="slot">#<%= poke.slot %></span><span class="member-name"><%= poke.name %></span><span class="member-lvl num">Nível <%= member_levels.fetch(poke.id.to_s, 1) %></span></div>
         </div>
         <div class="hp">
           <span class="hp-label">HP</span>

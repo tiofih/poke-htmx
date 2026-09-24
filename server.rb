@@ -49,6 +49,42 @@ module ServerCommon
     %(<div id="#{id}" hx-swap-oob="#{swap}">#{content}</div>)
   end
 
+  # 0096 — contratos explicitos de dados (builder para view com 3+ call sites).
+  def team_locals
+    {
+      team: @team, team_types: @team_types, member_levels: @member_levels,
+      notice: @notice, notice_kind: @notice_kind, can_battle: @can_battle,
+      game_over: @game_over, journey_started: @journey_started
+    }
+  end
+
+  def team_manage_locals
+    {
+      team: @team, team_types: @team_types, member_levels: @member_levels,
+      available_moves: @available_moves, inventory: @inventory,
+      draft_moves: @draft_moves, notice: @notice, notice_kind: @notice_kind
+    }
+  end
+
+  def filter_controls_locals
+    {
+      cost_max: @cost_max, generation: @generation, items: @items, q: @q,
+      sort: @sort, starters: @starters, team_filter: @team_filter,
+      tier: @tier, type: @type
+    }
+  end
+
+  def pokemon_list_locals
+    {
+      items: @items, starters: @starters, offset: @offset, q: @q, type: @type,
+      generation: @generation, tier: @tier, cost_max: @cost_max, sort: @sort,
+      team_filter: @team_filter, current_page: @current_page, prev_offset: @prev_offset,
+      next_offset: @next_offset, search_hint: @search_hint, notice: @notice,
+      notice_kind: @notice_kind, pokemon_costs: @pokemon_costs, team_full: @team_full,
+      team_names: @team_names
+    }
+  end
+
   def current_user
     session[:user_id]
   end
@@ -137,11 +173,12 @@ module ServerListActions
     @offset = params[:offset].to_i
     @q = params[:q].to_s
     load_pokemon_page
-    erb(:pokemon_list, layout: false) + (filter_controls_needs_sync? ? oob_filter_controls : "")
+    list = erb(:pokemon_list, layout: false, locals: pokemon_list_locals)
+    list + (filter_controls_needs_sync? ? oob_filter_controls : "")
   end
 
   def oob_filter_controls
-    oob_wrap(id: "filter-controls", content: erb(:_filter_controls, layout: false))
+    oob_wrap(id: "filter-controls", content: erb(:_filter_controls, layout: false, locals: filter_controls_locals))
   end
 
   def filter_controls_needs_sync?
@@ -484,7 +521,7 @@ module ServerListActions
   def render_pokemon_fragment
     @pokemon = settings.api.find(params[:name])
     if @pokemon
-      erb :pokemon, layout: false
+      erb :pokemon, layout: false, locals: { pokemon: @pokemon }
     else
       @message = "Pokémon não encontrado."
       erb :error, layout: false
@@ -494,7 +531,7 @@ module ServerListActions
   def render_pokemon_detail
     @pokemon = settings.api.detail(params[:poke_id])
     if @pokemon
-      erb :pokemon_detail, layout: false
+      erb :pokemon_detail, layout: false, locals: { pokemon: @pokemon }
     else
       @message = "Pokémon não encontrado."
       erb :error, layout: false
@@ -531,7 +568,7 @@ module ServerTeamActions
 
   def render_team
     prepare_team_fragment_data
-    return erb :team, layout: false if htmx_request?
+    return erb :team, layout: false, locals: team_locals if htmx_request?
 
     halt 404, "Página não encontrada."
   end
@@ -556,7 +593,7 @@ module ServerTeamActions
 
   def render_team_manage
     team_manage_context
-    erb :_manage_modal, layout: false, locals: {}
+    erb :_manage_modal, layout: false, locals: team_manage_locals
   end
 
   def render_team_manage_member
@@ -564,7 +601,7 @@ module ServerTeamActions
     return member_not_found_notice unless member
 
     @team = [member]
-    erb :_manage_modal, layout: false, locals: {}
+    erb :_manage_modal, layout: false, locals: team_manage_locals
   end
 
   def close_team_manage
@@ -615,7 +652,8 @@ module ServerTeamActions
     @notice = notice || "Adicionado ao time."
     @notice_kind = notice ? :error : :success
     @toast_pokemon = pokemon unless notice
-    mini_status = erb :team_add_result, layout: false
+    locals = { notice: @notice, notice_kind: @notice_kind, toast_pokemon: @toast_pokemon }
+    mini_status = erb :team_add_result, layout: false, locals: locals
     prepare_team_fragment_data
     "#{mini_status}#{oob_team_view}#{oob_pokemon_list}#{oob_nav_badge}#{oob_cta_slot}"
   end
@@ -623,13 +661,14 @@ module ServerTeamActions
   def budget_blocked_response(msg)
     @notice = msg
     @notice_kind = :error
-    mini_status = erb :team_add_result, layout: false
+    locals = { notice: @notice, notice_kind: @notice_kind, toast_pokemon: @toast_pokemon }
+    mini_status = erb :team_add_result, layout: false, locals: locals
     prepare_team_fragment_data
     "#{mini_status}#{oob_team_view}#{oob_pokemon_list}#{oob_nav_badge}#{oob_cta_slot}"
   end
 
   def oob_team_view
-    oob_wrap(id: "team-view", content: erb(:team, layout: false))
+    oob_wrap(id: "team-view", content: erb(:team, layout: false, locals: team_locals))
   end
 
   def oob_nav_badge
@@ -653,7 +692,7 @@ module ServerTeamActions
     @offset = params[:offset].to_i
     @q = params[:q].to_s
     load_pokemon_page
-    oob_wrap(id: "pokemon-list", content: erb(:pokemon_list, layout: false))
+    oob_wrap(id: "pokemon-list", content: erb(:pokemon_list, layout: false, locals: pokemon_list_locals))
   end
 
   def new_member_from_api
@@ -827,7 +866,7 @@ module ServerTeamActions
     @notice = params[:draft] ? preview_member_moves(member) : persist_member_moves(member)
     @notice_kind = :error if @notice
     @team = settings.team.all(current_user)
-    erb :team_manage, layout: false
+    erb :team_manage, layout: false, locals: team_manage_locals
   end
 
   def persist_member_moves(member)
@@ -853,7 +892,7 @@ module ServerTeamItemActions
     member = team_manage_context(params[:id])
     @notice = settings.team_strategy.assign_item(current_user, member, params[:item_name].to_s)
     reload_manage_state
-    erb :team_manage, layout: false
+    erb :team_manage, layout: false, locals: team_manage_locals
   end
 end
 
@@ -864,7 +903,7 @@ module ServerTeamHeldActions
     member = team_manage_context(params[:id])
     @notice = settings.team_strategy.assign_held_item(current_user, member, params[:item_name].to_s)
     reload_manage_state
-    erb :team_manage, layout: false
+    erb :team_manage, layout: false, locals: team_manage_locals
   end
 end
 
@@ -1064,7 +1103,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
   def render_team_fragment_with_notice
     prepare_team_fragment_data
-    erb :team, layout: false
+    erb :team, layout: false, locals: team_locals
   end
 
   def htmx_request?
