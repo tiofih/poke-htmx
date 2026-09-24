@@ -1,8 +1,9 @@
 <% side_class = entry[:side] == "Seu Time" ? "team" : "opp" %>
 <% fx_class = entry[:ko] ? "fx--ko" : (entry[:damage] ? "fx--hit" : (entry[:healed] ? "fx--heal" : "fx--tick")) %>
+<% log_delay ||= 0 %>
 <li class="log__entry"
-    style="--log-delay: 0s"
     data-round="<%= entry[:round] %>"
+    style="--log-delay: <%= log_delay %>s"
     data-strategy="strike"
     data-from-side="<%= entry[:from_side] %>"
     data-to-side="<%= entry[:to_side] %>"<% if entry[:move_type] %>

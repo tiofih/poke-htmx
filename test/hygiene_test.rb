@@ -77,4 +77,19 @@ class HygieneTest < Minitest::Test
     assert_match(/\.ptags\s*\{/, css, ".ptags vira selector unico")
     assert_match(/\.log__entry\s*\{[^}]*--fx-color/m, raw, "bloco .log__entry mantem --fx-color")
   end
+
+  # C4 — strike-log num unico partial (§5.C): battle.erb delega, partial aceita
+  # log_delay e mantem o contrato de ordem de atributos.
+  def test_battle_strike_log_uses_shared_partial
+    battle = File.read(File.join(repo_root, "views/battle.erb"))
+    partial = File.read(File.join(repo_root, "views/_strike_log_entry.erb"))
+
+    refute_match(/<li class="log__entry"/, battle,
+                 "battle.erb nao pode ter <li class=\"log__entry\" inline")
+    assert_includes battle, "erb :_strike_log_entry",
+                    "battle.erb delega o strike-log ao partial"
+    assert_match(/log_delay/, partial, "partial aceita o local log_delay")
+    assert_match(/data-round="[^"]*"[^>]*style="--log-delay:/m, partial,
+                 "style depois de data-round (contrato battle_view_test.rb:244)")
+  end
 end

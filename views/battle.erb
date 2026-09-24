@@ -188,25 +188,8 @@
             <% groups.each_with_index do |group, group_index| %>
               <li class="log-round-head" data-round="<%= group[:round] %>" id="round-<%= group[:round] %>">Rodada <%= group[:round] %></li>
               <% group[:entries].each do |entry| %>
-                <% side_class = entry[:side] == "Seu Time" ? "team" : "opp" %>
                 <% line_delay = (group_index * 0.25 + step_delay[entry.object_id]).round(2) %>
-                <% fx_class = entry[:ko] ? "fx--ko" : (entry[:damage] ? "fx--hit" : (entry[:healed] ? "fx--heal" : "fx--tick")) %>
-                <li class="log__entry"
-                    data-round="<%= entry[:round] %>"
-                    data-strategy="strike"
-                    data-from-side="<%= entry[:from_side] %>"
-                    data-to-side="<%= entry[:to_side] %>"<% if entry[:move_type] %>
-                    data-move-type="<%= entry[:move_type] %>"<% end %>
-                    style="--log-delay: <%= line_delay %>s">
-                  <span class="fx <%= fx_class %>" aria-hidden="true"></span>
-                  <span class="lside <%= side_class %>"><%= entry[:side] %></span>
-                  <span class="txt"><strong><%= entry[:text] %></strong>
-                    <% if entry[:damage] %><span class="chip chip--dmg"><%= entry[:damage] %> de dano</span><% end %>
-                    <% if entry[:ko] %><span class="chip chip--ko">KO!</span><% end %>
-                    <% unless entry[:remaining].nil? %><span class="chip chip--stock">restam <%= entry[:remaining] %></span><% end %>
-                    <% if entry[:last_unit] %><span class="chip chip--empty">última unidade</span><% end %>
-                  </span>
-                </li>
+                <%= erb :_strike_log_entry, layout: false, locals: { entry: entry, log_delay: line_delay } %>
               <% end %>
             <% end %>
             <% if @engine.finished? && @engine.winner == 1 %>
