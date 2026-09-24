@@ -1284,7 +1284,7 @@ module PokemonRoutes
   end
 
   def self.register_pokemon_close(app)
-    app.get("/pokemon/close") { erb :pokemon_close, layout: false }
+    app.get("/pokemon/close") { erb :pokemon_close, layout: false, locals: {} }
   end
 
   def self.register_pokemon_detail(app)
