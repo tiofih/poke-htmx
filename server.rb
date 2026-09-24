@@ -74,6 +74,20 @@ module ServerCommon
     }
   end
 
+  def battle_locals
+    {
+      engine: @engine, game_over: @game_over, message: @message,
+      can_new_confront: @can_new_confront, gate_action: @gate_action,
+      gate_cta: @gate_cta, gate_disabled_cta: @gate_disabled_cta,
+      xp_gained: @xp_gained, money_gained: @money_gained,
+      evolution_news: @evolution_news || [], learned_news: @learned_news || []
+    }
+  end
+
+  def error_locals
+    { message: @message }
+  end
+
   def pokemon_list_locals
     {
       items: @items, starters: @starters, offset: @offset, q: @q, type: @type,
@@ -166,7 +180,7 @@ module ServerListActions
     @q = ""
     prepare_team_fragment_data
     load_pokemon_page
-    erb :index
+    erb :index, locals: { balance: @balance, team_budget: @team_budget, team_cost: @team_cost }
   end
 
   def render_pokemons_list
@@ -524,7 +538,7 @@ module ServerListActions
       erb :pokemon, layout: false, locals: { pokemon: @pokemon }
     else
       @message = "Pokémon não encontrado."
-      erb :error, layout: false
+      erb :error, layout: false, locals: error_locals
     end
   end
 
@@ -534,7 +548,7 @@ module ServerListActions
       erb :pokemon_detail, layout: false, locals: { pokemon: @pokemon }
     else
       @message = "Pokémon não encontrado."
-      erb :error, layout: false
+      erb :error, layout: false, locals: error_locals
     end
   end
 end
@@ -1029,7 +1043,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     return content if htmx_request?
 
     @battle_content = content
-    erb :battle_page
+    erb :battle_page, locals: { battle_content: @battle_content }
   end
 
   def prepare_battle_fragment
@@ -1042,7 +1056,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
     @engine = result[:engine]
     expose_new_confront_state
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def expose_new_confront_state
@@ -1065,21 +1079,21 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
   def journey_gate_fragment
     @message = "Monte seu time inicial de 6 Pokémon para iniciar a jornada."
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def defeated_gate_fragment
     @message = "Seu time está todo derrotado. Cure seus Pokémon no Poke Center."
     @gate_cta = { href: "/", label: "Ir para o Poke Center" }
     @gate_disabled_cta = { label: "Novo confronto", title: "Recupere seus pokémons no Poke Center para batalhar." }
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def game_over_fragment
     @message = "Game Over — seu time está derrotado e você não tem dinheiro para curar no Poke Center."
     @gate_cta = { href: "/", label: "Vender itens no Poke Mart" }
     @gate_action = { href: "/journey/restart", label: "Recomeçar jornada" }
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def prepare_team_fragment_data
@@ -1112,21 +1126,21 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
   def empty_team_fragment
     @message = "Forme seu time para batalhar."
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def battle_error_fragment
     @message = "Não foi possível preparar a batalha. Tente novamente."
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def advance_battle
     result = settings.battle.advance(current_user)
-    return erb :battle, layout: false unless result
+    return erb :battle, layout: false, locals: battle_locals unless result
 
     expose_battle_result(result)
     response.headers["HX-Trigger"] = "next-round" if auto_play_requested? && !result[:engine].finished?
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def auto_play_requested?
@@ -1235,7 +1249,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
     @engine = result[:engine]
     expose_new_confront_state
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def expose_battle_result(result)
@@ -1385,9 +1399,10 @@ module ServerHistoryActions
 
   def render_history
     load_history_data
-    return erb :history, layout: false if htmx_request?
+    locals = { current_user: @current_user, rank: @rank, stats: @stats, position: @position, recent: @recent }
+    return erb :history, layout: false, locals: locals if htmx_request?
 
-    erb :history_page
+    erb :history_page, locals: locals
   end
 
   def load_history_data
@@ -1454,7 +1469,7 @@ module ErrorHandling
       logger.error "#{env['sinatra.error'].class}: #{env['sinatra.error'].message}" if env["sinatra.error"]
       @message = "Algo deu errado. Tente novamente."
       status(htmx_request? ? 200 : 500)
-      erb :error, layout: false
+      erb :error, layout: false, locals: error_locals
     end
   end
 end

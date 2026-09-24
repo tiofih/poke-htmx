@@ -4,11 +4,11 @@
       <div>
         <p class="eyebrow">Seu time · Jornada</p>
         <h1 class="app-title">Monte o esquadrão, batalhe, avance.</h1>
-        <p class="lead">Seis vagas, um orçamento de <%= @team_budget %> e um loop de cura e itens para manter a equipe de pé.</p>
+        <p class="lead">Seis vagas, um orçamento de <%= team_budget %> e um loop de cura e itens para manter a equipe de pé.</p>
       </div>
       <div class="budget-summary">
-        <div class="budget-meta row">Custo do time <strong class="num" id="budget-text"><%= @team_cost %>/<%= @team_budget %> pts</strong></div>
-        <div class="meter" role="progressbar" aria-label="Orçamento do time"><span class="meter-fill<%= @team_cost > @team_budget ? ' over' : (@team_cost >= @team_budget * 0.9 ? ' near' : '') %>" id="budget-fill" style="width:<%= (@team_cost.to_f / @team_budget * 100) %>%"></span></div>
+        <div class="budget-meta row">Custo do time <strong class="num" id="budget-text"><%= team_cost %>/<%= team_budget %> pts</strong></div>
+        <div class="meter" role="progressbar" aria-label="Orçamento do time"><span class="meter-fill<%= team_cost > team_budget ? ' over' : (team_cost >= team_budget * 0.9 ? ' near' : '') %>" id="budget-fill" style="width:<%= (team_cost.to_f / team_budget * 100) %>%"></span></div>
         <a class="btn btn-secondary btn-sm" href="#manage-modal" data-od-id="open-modal-manage" hx-get="/team/manage" hx-target="body" hx-swap="beforeend">Gerenciar time</a>
       </div>
     </div>
@@ -19,7 +19,7 @@
           <%= erb :team, layout: false, locals: team_locals %>
         </div>
         <div class="card services" data-od-id="services">
-          <div class="row-between" style="flex-wrap: wrap; gap: 12px;"><h2>Serviços</h2><span class="meta num">Saldo <strong>¥<%= @balance %></strong></span></div>
+          <div class="row-between" style="flex-wrap: wrap; gap: 12px;"><h2>Serviços</h2><span class="meta num">Saldo <strong>¥<%= balance %></strong></span></div>
           <p class="muted" style="margin: 8px 0 0;">Cure o time no Poke Center ou compre/venda itens no Poke Mart.</p>
           <div class="services-row">
             <button type="button" class="btn btn-secondary" data-od-id="open-modal-center" hx-get="/team/center" hx-target="#center-modal" hx-swap="outerHTML" hx-push-url="false">Curar no Poke Center</button>

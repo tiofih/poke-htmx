@@ -1,5 +1,5 @@
 <% lead_index = presenters.index { |f| !juice.fighter_juice(side, f.name)[:ko] } %>
-<% step_pause = (defined?(side_delay) && side_delay ? side_delay.fetch(side, 0).to_f : 0.0).round(2) %>
+<% step_pause = (side_delay ? side_delay.fetch(side, 0).to_f : 0.0).round(2) %>
 <% presenters.each_with_index do |fighter, idx| %>
 <% juice_data = juice.fighter_juice(side, fighter.name) %>
 <% max_hp = fighter.hp_label.split("/").last.to_i %>
