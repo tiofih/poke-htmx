@@ -284,8 +284,9 @@ class DesignSystemTest < Minitest::Test
     assert_match(/\.section\s*\{[^}]*var\(--gap-xl\)/m, block, "section breathes with gap-xl")
     assert_match(/\.grid-2-1\s*\{[^}]*var\(--gap-xl\)/m, block, "home grid gaps with gap-xl")
     assert_match(/\.arena\s*\{[^}]*var\(--gap-lg\)/m, block, "arena gaps with gap-lg")
-    assert_match(/@media\s*\(max-width:\s*700px\)[^}]*\.podium[^}]*position:\s*static/m, block,
-                 "podium unstickies on narrow battle screens")
+    # `.podium{position: static}` em @media 700px saiu na higiene 0093 (C3):
+    # o `sticky` de :780 vence por ordem — a regra era inerte. Prova em
+    # test/hygiene_test.rb (test_dead_css_removed).
   end
 
   def test_design_system_history_curation_classes

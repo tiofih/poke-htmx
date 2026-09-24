@@ -51,4 +51,30 @@ class HygieneTest < Minitest::Test
     end
     assert_includes server, "def oob_battle_view_forced", "a _forced e viva (:788)"
   end
+
+  # C3 — CSS morto ausente (§5.B), sem quebrar os pins vivos.
+  def test_dead_css_removed
+    raw = File.read(File.join(repo_root, "public/style.css"))
+    css = raw.gsub(%r{/\*.*?\*/}m, "") # comentarios historicos ficam (:921, :2009)
+    refute_match(/--jx-/, css, "familia --jx-* morta: nenhum var(--jx- em views/JS (§5.B)")
+    assert_equal 1, css.scan(/@container \(min-width: 981px\)/).size,
+                 "gate @container 981px duplicado deve restar 1"
+    refute_match(/position:\s*static/, css, ".podium static morto (:610 vence por ordem)")
+    refute_match(/\.mtags/, css, ".mtags morto (nenhuma view usa)")
+    refute_match(/\.log-round\s*\{/, css, ".log-round solto morto (.log-round-head e vivo)")
+    refute_match(/gameloop-cta/, css, "gameloop-cta morto (nenhuma view tem)")
+    refute_match(/team-tools/, css, "team-tools .gameloop-cta morto")
+    refute_match(/evolution-overlay|evolution-modal-box|evolution-modal-header|evolution-modal-close/,
+                 css, "modal de evolucao antigo morto (markup usa #evolution-modal + .overlay.open)")
+    refute_match(/fighter--flash|fighter--ko\b|fighter--shooting|\.projectile\b/, css,
+                 "classes do reduce sem markup/JS emissor")
+
+    # pins vivos que o apagamento nao pode tocar
+    assert_match(/\.log-round-head\s*\{/, css, ".log-round-head e vivo")
+    assert_match(/button[^{}]*\{[^}]*transition:/m, css, "transition de button viva")
+    assert_match(/@keyframes\s+juice-shake/, css, "@keyframes juice vivos")
+    assert_match(/\.evolution-row\s*\{/, css, ".evolution-row e vivo")
+    assert_match(/\.ptags\s*\{/, css, ".ptags vira selector unico")
+    assert_match(/\.log__entry\s*\{[^}]*--fx-color/m, raw, "bloco .log__entry mantem --fx-color")
+  end
 end

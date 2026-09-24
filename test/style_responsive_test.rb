@@ -2,7 +2,7 @@
 
 require_relative "test_helper"
 
-class StyleResponsiveTest < Minitest::Test # rubocop:disable Metrics/ClassLength
+class StyleResponsiveTest < Minitest::Test
   def style_content
     File.read(File.join(__dir__, "../public/style.css"))
   end
@@ -202,9 +202,9 @@ class StyleResponsiveTest < Minitest::Test # rubocop:disable Metrics/ClassLength
                    "keyframe #{name} deve existir no style.css")
     end
 
-    assert_match(/button[^{}]*,[^{}]*\.gameloop-cta[^{}]*\{[^}]*transition:/m, content,
+    assert_match(/button\s*\{[^}]*transition:/m, content,
                  "botoes devem ter transition para hover/active")
-    assert_match(/\.gameloop-cta:active[^{}]*\{[^}]*transform:/m, content,
+    assert_match(/button:active\s*\{[^}]*transform:/m, content,
                  "active do botao deve ter transform (juice de clique)")
   end
 
@@ -217,9 +217,6 @@ class StyleResponsiveTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
     %w[
       .battle-log__entry
-      .fighter--flash
-      .fighter--ko
-      .projectile
       .battle-layout
       .hp-bar
       .add-toast
@@ -583,18 +580,8 @@ class StyleResponsiveTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
     # Passo 11 (0086): agregado default OFF (mute ate stepping por linha),
     # per-line timed ON, modal gated com gate capado; um bloco por toggle.
-    assert_match(/li\.fighter\s*\{[^}]*--jx-hit:\s*0/m, content,
-                 "li.fighter deve desligar --jx-hit por padrao")
-    assert_match(/li\.fighter\s*\{[^}]*--jx-dmg:\s*0/m, content,
-                 "li.fighter deve desligar --jx-dmg por padrao")
-    assert_match(/li\.fighter\s*\{[^}]*--jx-ko:\s*0/m, content,
-                 "li.fighter deve desligar --jx-ko por padrao")
-    assert_match(/li\.fighter\s*\{[^}]*--jx-shot:\s*0/m, content,
-                 "li.fighter deve desligar --jx-shot por padrao")
-    assert_match(/li\.fighter\s*\{[^}]*--jx-hp:\s*0/m, content,
-                 "li.fighter deve desligar --jx-hp por padrao")
-    assert_match(/\.arena\s*\{[^}]*--jx-shake:\s*0/m, content,
-                 "arena deve desligar --jx-shake por padrao")
+    # A familia --jx-* morreu na higiene 0093 (C3): a refutacao vive no
+    # test/hygiene_test.rb (test_dead_css_removed).
     %w[hit dmg ko shot hp shake log fx chip modal].each do |aspect|
       assert_match(/data-jx-#{aspect}="on"/, content,
                    "aspecto #{aspect} deve ter um bloco gated por data-jx-#{aspect}")
