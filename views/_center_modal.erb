@@ -5,9 +5,9 @@
       <button type="button" class="modal-close" aria-label="Fechar" data-od-id="modal-center-close"
          hx-get="/team/center/close" hx-target="#center-modal" hx-swap="outerHTML">×</button>
     </div>
-    <% if @notice %>
-      <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
+    <% if notice %>
+      <p class="notice<%= " notice--#{notice_kind}" if notice_kind %>"><%= notice %></p>
     <% end %>
-    <%= erb :_center, layout: false %>
+    <%= erb :_center, layout: false, locals: { avg_level: avg_level, balance: balance, heal_cost: heal_cost, team: team } %>
   </div>
 </div>

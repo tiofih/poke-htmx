@@ -26,8 +26,8 @@
             <a class="btn btn-secondary" href="#mart-modal" data-od-id="open-modal-mart" hx-get="/team/mart" hx-target="#mart-modal" hx-swap="outerHTML">Poke Mart</a>
           </div>
           <p class="notice" id="team-notice" style="margin-top: 12px;"></p>
-          <%= erb :_center_slot, layout: false %>
-          <%= erb :_mart_slot, layout: false %>
+          <%= erb :_center_slot, layout: false, locals: {} %>
+          <%= erb :_mart_slot, layout: false, locals: {} %>
         </div>
       </div>
       <aside class="catalog-pane stack">

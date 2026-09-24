@@ -1,28 +1,28 @@
 <div id="evolution-modal" class="overlay open" data-od-id="modal-evolution" role="dialog" aria-modal="true" aria-labelledby="evolution-modal-title">
   <div class="modal">
     <div class="modal-head">
-      <h2 id="evolution-modal-title">Evoluir <%= @member.name %></h2>
+      <h2 id="evolution-modal-title">Evoluir <%= member.name %></h2>
       <button type="button" class="modal-close" aria-label="Fechar" data-od-id="modal-evolution-close"
-              hx-get="/team/<%= @member.id %>/evolution/close"
+              hx-get="/team/<%= member.id %>/evolution/close"
               hx-target="#evolution-modal" hx-swap="outerHTML">×</button>
     </div>
-    <% if @notice %>
-      <p class="notice notice--<%= @notice_kind %>"><%= @notice %></p>
+    <% if notice %>
+      <p class="notice notice--<%= notice_kind %>"><%= notice %></p>
     <% end %>
-    <% if @evolutions.any? %>
-      <% @evolutions.each do |evo| %>
+    <% if evolutions.any? %>
+      <% evolutions.each do |evo| %>
         <% item = ItemCatalog.find(evo[:item]) %>
-        <% qty = @inventory_qty.fetch(evo[:item], 0) %>
+        <% qty = inventory_qty.fetch(evo[:item], 0) %>
         <div class="evo-row">
           <span class="evo-info"><span class="evo-item"><%= item&.display_name || evo[:item] %></span><span class="evo-arrow">→</span><strong><%= evo[:name] %></strong><span class="meta">· Inventário: <%= qty %>×</span></span>
-          <form hx-post="/team/<%= @member.id %>/evolve" hx-target="#evolution-modal" hx-swap="outerHTML">
+          <form hx-post="/team/<%= member.id %>/evolve" hx-target="#evolution-modal" hx-swap="outerHTML">
             <input type="hidden" name="item_name" value="<%= evo[:item] %>">
             <button type="submit" class="btn btn-secondary btn-sm"<%= " disabled" if qty.zero? %> >Evoluir</button>
           </form>
         </div>
       <% end %>
     <% else %>
-      <p class="notice">Nenhuma evolução por pedra disponível para <%= @member.name %>.</p>
+      <p class="notice">Nenhuma evolução por pedra disponível para <%= member.name %>.</p>
     <% end %>
   </div>
 </div>

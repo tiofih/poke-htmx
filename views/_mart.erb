@@ -1,4 +1,4 @@
-<p class="modal-sub">Compre itens ou venda do seu estoque. <span class="num">Saldo: ¥<%= @balance %></span></p>
+<p class="modal-sub">Compre itens ou venda do seu estoque. <span class="num">Saldo: ¥<%= balance %></span></p>
 <input class="mart-tab-input" type="radio" name="mart-tab" id="mart-tab-buy" checked>
 <input class="mart-tab-input" type="radio" name="mart-tab" id="mart-tab-sell">
 <div class="tabs" role="tablist">
@@ -7,9 +7,9 @@
 </div>
 <div class="tab-panel" id="tab-buy" role="tabpanel">
   <ul class="mart">
-    <% @catalog.each do |item| %>
-      <% next if item.category == "stone" && !@rotation.include?(item.name) %>
-      <% affordable = @balance / item.price %>
+    <% catalog.each do |item| %>
+      <% next if item.category == "stone" && !rotation.include?(item.name) %>
+      <% affordable = balance / item.price %>
       <li>
         <span class="mart-name"><span class="item-icon" aria-hidden="true"><%= item.display_name[0] %></span><span><%= item.display_name %></span></span>
         <span class="row">
@@ -26,13 +26,13 @@
       </li>
     <% end %>
   </ul>
-  <% out_rotation = @catalog.select { |item| item.category == "stone" && !@rotation.include?(item.name) } %>
+  <% out_rotation = catalog.select { |item| item.category == "stone" && !rotation.include?(item.name) } %>
   <% if out_rotation.any? %>
     <p class="meta">Fora da oferta desta rodada: <%= out_rotation.map(&:display_name).join(", ") %></p>
   <% end %>
 </div>
 <div class="tab-panel" id="tab-sell" role="tabpanel">
-  <% sellable = @inventory.select { |entry| entry[:quantity].positive? } %>
+  <% sellable = inventory.select { |entry| entry[:quantity].positive? } %>
   <% if sellable.any? %>
     <ul class="mart">
       <% sellable.each do |entry| %>

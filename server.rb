@@ -556,7 +556,7 @@ module ServerTeamActions
 
   def render_team_manage
     team_manage_context
-    erb :_manage_modal, layout: false
+    erb :_manage_modal, layout: false, locals: {}
   end
 
   def render_team_manage_member
@@ -564,7 +564,7 @@ module ServerTeamActions
     return member_not_found_notice unless member
 
     @team = [member]
-    erb :_manage_modal, layout: false
+    erb :_manage_modal, layout: false, locals: {}
   end
 
   def close_team_manage
@@ -573,20 +573,26 @@ module ServerTeamActions
 
   def render_team_center
     prepare_team_fragment_data
-    erb :_center_modal, layout: false
+    erb :_center_modal, layout: false, locals: {
+      notice: @notice, notice_kind: @notice_kind, avg_level: @avg_level,
+      balance: @balance, heal_cost: @heal_cost, team: @team
+    }
   end
 
   def render_team_mart
     prepare_team_fragment_data
-    erb :_mart_modal, layout: false
+    erb :_mart_modal, layout: false, locals: {
+      notice: @notice, notice_kind: @notice_kind, balance: @balance,
+      catalog: @catalog, inventory: @inventory, rotation: @rotation
+    }
   end
 
   def close_team_center
-    erb :_center_slot, layout: false
+    erb :_center_slot, layout: false, locals: {}
   end
 
   def close_team_mart
-    erb :_mart_slot, layout: false
+    erb :_mart_slot, layout: false, locals: {}
   end
 
   def add_team_member
@@ -640,7 +646,7 @@ module ServerTeamActions
   end
 
   def oob_cta_slot
-    render_oob(:_cta_slot, id: "cta-slot")
+    render_oob(:_cta_slot, id: "cta-slot", locals: {})
   end
 
   def oob_pokemon_list
@@ -776,7 +782,10 @@ module ServerTeamActions
   end
 
   def oob_mart_modal
-    render_oob(:_mart_modal, id: "mart-modal")
+    render_oob(:_mart_modal, id: "mart-modal", locals: {
+                 notice: @notice, notice_kind: @notice_kind, balance: @balance,
+                 catalog: @catalog, inventory: @inventory, rotation: @rotation
+               })
   end
 
   def render_result_notice(result)
@@ -803,11 +812,14 @@ module ServerTeamActions
   end
 
   def oob_close_center_modal
-    render_oob(:_center_slot, id: "center-modal")
+    render_oob(:_center_slot, id: "center-modal", locals: {})
   end
 
   def oob_center_modal
-    render_oob(:_center_modal, id: "center-modal")
+    render_oob(:_center_modal, id: "center-modal", locals: {
+                 notice: @notice, notice_kind: @notice_kind, avg_level: @avg_level,
+                 balance: @balance, heal_cost: @heal_cost, team: @team
+               })
   end
 
   def save_team_moves
@@ -916,7 +928,10 @@ module ServerTeamEvolutionActions
     @notice_kind = kind
     @evolutions = settings.api.stone_evolutions(@member.number)
     @inventory_qty = @evolutions.to_h { |evo| [evo[:item], settings.inventory.count(current_user, evo[:item])] }
-    erb :_evolution_modal, layout: false
+    erb :_evolution_modal, layout: false, locals: {
+      member: @member, notice: @notice, notice_kind: @notice_kind,
+      evolutions: @evolutions, inventory_qty: @inventory_qty
+    }
   end
 
   def evolution_modal_error(member, message)
@@ -1096,8 +1111,16 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     entry = result[:entry]
     formatted = BattleLogPresenter.new(engine.log, stock: engine.items).format_single(entry)
     log_line = erb :_strike_log_entry, layout: false, locals: { entry: formatted }
-    modal = result[:finished] ? erb(:_strike_result, layout: false) : ""
+    modal = result[:finished] ? strike_result_modal : ""
     "#{log_line}#{strike_gates_oob(entry)}#{strike_shot_oob(engine, entry)}#{strike_hp_oob(engine, entry)}#{modal}"
+  end
+
+  def strike_result_modal
+    erb :_strike_result, layout: false, locals: {
+      engine: @engine, game_over: @game_over, can_new_confront: @can_new_confront,
+      xp_gained: @xp_gained, money_gained: @money_gained,
+      evolution_news: @evolution_news, learned_news: @learned_news
+    }
   end
 
   def strike_hp_oob(engine, entry = nil)

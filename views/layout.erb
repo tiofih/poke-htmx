@@ -17,7 +17,7 @@
           <a href="/" class="<%= "active" if request.path == "/" %>"<%= ' aria-current="page"' if request.path == "/" %>>Time <span class="nav-badge num" id="nav-badge"><%= @team_size || 0 %>/6</span></a>
           <a href="/history" class="<%= "active" if request.path == "/history" %>"<%= ' aria-current="page"' if request.path == "/history" %>>Histórico</a>
         </nav>
-        <%= erb :_cta_slot, layout: false %>
+        <%= erb :_cta_slot, layout: false, locals: {} %>
         <% if request.path == "/battle" %>
           <a href="/" class="btn btn-secondary">◀ Voltar ao time</a>
         <% end %>
