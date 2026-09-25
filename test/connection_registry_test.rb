@@ -5,6 +5,7 @@ require_relative "test_helper"
 class ConnectionRegistryTest < Minitest::Test
   def setup
     TestDatabase.setup!
+    TestDatabase.clear_team!
   end
 
   def teardown
