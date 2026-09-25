@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# profile-report — agrega as linhas `-v` do minitest (`Classe#metodo = 0.06 s = .`)
+# por arquivo de teste (convencao CamelCase -> test/snake_test.rb; fallback: classe
+# localizada por grep em test/*_test.rb) e imprime o ranking desc com total
+# (stdout-only; o caller redireciona para tmp/profile.md).
+# uso: scripts/profile-report <saida_bruta>
+
+cd "$(dirname "$0")/.."
+
+SAIDA="${1:-}"
+[ -n "$SAIDA" ] && [ -f "$SAIDA" ] || { echo "profile-report> uso: profile-report <saida_bruta>" >&2; exit 2; }
+
+# arquivos de teste existentes, delimitados por \n para match exato no awk
+export PROFILE_EXISTENTES=$'\n'"$(ls test/*_test.rb 2>/dev/null)"$'\n'
+
+# mapa classe->arquivo real: fallback quando a convencao CamelCase nao bate
+# (ex.: ServerBattleTest vive em test/battle_routes_test.rb)
+MAPA="tmp/.profile_map"
+grep -H -E '^class [A-Za-z0-9_]+' test/*_test.rb 2>/dev/null |
+  sed -E 's/^([^:]+):class ([A-Za-z0-9_]+).*/\2 \1/' | sort -u > "$MAPA"
+
+awk 'FNR == NR { if (!($1 in real)) real[$1] = $2; next }
+function snake(s,   i, c, out) {
+  out = ""
+  for (i = 1; i <= length(s); i++) {
+    c = substr(s, i, 1)
+    if (c ~ /[A-Z]/) { if (i > 1) out = out "_"; out = out tolower(c) }
+    else out = out c
+  }
+  return out
+}
+# linha -v: Classe#metodo = 0.06 s = .
+{
+  if (split($0, a, " = ") < 3) next
+  if (index(a[1], "#") == 0) next
+  if (a[2] !~ /^[0-9]+(\.[0-9]+)? s$/) next
+  cls = substr(a[1], 1, index(a[1], "#") - 1)
+  t = a[2]; sub(/ s$/, "", t)
+  key = "<" cls ">"
+  if (cls ~ /Test$/) {
+    base = cls; sub(/Test$/, "", base)
+    cand = "test/" snake(base) "_test.rb"
+    if (index(ENVIRON["PROFILE_EXISTENTES"], "\n" cand "\n") > 0) key = cand
+    else if (cls in real) key = real[cls]
+  }
+  sum[key] += t
+  cnt[key]++
+  total += t
+  testes++
+}
+END {
+  n = 0
+  for (k in sum) { n++; kk[n] = k; tt[n] = sum[k]; cc[n] = cnt[k] }
+  # insertion sort desc por duracao (n pequeno: ~1 bucket por arquivo da suite)
+  for (i = 2; i <= n; i++) {
+    x = kk[i]; y = tt[i]; z = cc[i]; j = i - 1
+    while (j >= 1 && tt[j] < y) { kk[j + 1] = kk[j]; tt[j + 1] = tt[j]; cc[j + 1] = cc[j]; j-- }
+    kk[j + 1] = x; tt[j + 1] = y; cc[j + 1] = z
+  }
+  arquivos = 0; sem_arq = 0
+  for (i = 1; i <= n; i++) {
+    if (kk[i] ~ /^</) sem_arq++; else arquivos++
+    printf "%s %.2f s (%d testes)\n", kk[i], tt[i], cc[i]
+  }
+  if (sem_arq > 0)
+    printf "# ponytail: %d classe(s) sem arquivo (nem homonimo nem definida em test/*_test.rb) — teto: agrega por classe\n", sem_arq
+  if (n == 0) print "profile-report> nenhuma linha -v encontrada (rode com --profile)"
+  else printf "total %.2f s — %d testes em %d chaves (%d arquivos + %d classes sem arquivo)\n", total, testes, n, arquivos, sem_arq
+}
+' "$MAPA" "$SAIDA"

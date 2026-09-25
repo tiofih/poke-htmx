@@ -11,6 +11,7 @@ NAME_FILTER=""
 EXTRA_ARGS=()
 NEXT_IS_NAME=false
 FAILED=0
+PROFILE=0
 
 for arg in "$@"; do
   if [ "$NEXT_IS_NAME" = true ]; then
@@ -24,6 +25,8 @@ for arg in "$@"; do
     NAME_FILTER="${arg#--name=}"
   elif [ "$arg" = "--failed" ]; then
     FAILED=1
+  elif [ "$arg" = "--profile" ]; then
+    PROFILE=1
   elif [ -f "$arg" ]; then
     TEST_FILES+=("$arg")
   else
@@ -55,8 +58,14 @@ if [ "${#TEST_FILES[@]}" -gt 0 ]; then
   EXTRA_ARGS+=(TEST="$(IFS=,; echo "${TEST_FILES[*]}")")
 fi
 
+TESTOPTS_VAL=""
+if [ "$PROFILE" -eq 1 ]; then
+  TESTOPTS_VAL="-v "
+fi
 if [ -n "$NAME_FILTER" ]; then
-  EXTRA_ARGS+=(TESTOPTS="--name=$NAME_FILTER")
+  EXTRA_ARGS+=(TESTOPTS="${TESTOPTS_VAL}--name=$NAME_FILTER")
+elif [ -n "$TESTOPTS_VAL" ]; then
+  EXTRA_ARGS+=(TESTOPTS="${TESTOPTS_VAL% }")
 fi
 
 # Captura da saida (tee): em exit != 0 vira tmp/fails.md via fails-report,
@@ -80,6 +89,10 @@ fi
 
 if [ "$rc" -ne 0 ]; then
   ./scripts/fails-report "$SAIDA" > tmp/fails.md || true
+fi
+
+if [ "$PROFILE" -eq 1 ]; then
+  ./scripts/profile-report "$SAIDA" > tmp/profile.md || true
 fi
 
 exit "$rc"

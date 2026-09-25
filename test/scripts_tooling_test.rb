@@ -81,6 +81,34 @@ class ScriptsToolingTest < Minitest::Test
     end
   end
 
+  VERBOSE_OUTPUT = <<~OUT
+    Run options: --seed 999 -v
+
+    # Running:
+
+    BattleRoutesTest#test_ataque = 30.10 s = .
+    BattleRoutesTest#test_defesa = 4.50 s = .
+    BattleRoutesSetup#test_semente = 0.50 s = .
+    GatewayInterfaceTest#test_injecao = 12.40 s = .
+
+    4 runs, 4 assertions, 0 failures, 0 errors, 0 skips
+  OUT
+
+  def test_profile_report_agrega_duracao_por_arquivo
+    with_raw_output(VERBOSE_OUTPUT) do |raw|
+      out, err, status = run_script("profile-report", raw)
+      assert status.success?, "exit #{status.exitstatus}: #{err}"
+      assert_includes out, "test/battle_routes_test.rb 34.60 s"
+      assert_includes out, "test/gateway_interface_test.rb 12.40 s"
+      assert_includes out, "<BattleRoutesSetup>"
+      assert_includes out, "2 arquivos"
+      assert_includes out, "total 47.50 s"
+      # ranking desc: battle (34.60) antes de gateway (12.40)
+      assert_operator out.index("test/battle_routes_test.rb"), :<,
+                      out.index("test/gateway_interface_test.rb")
+    end
+  end
+
   private
 
   def run_script(name, *)
