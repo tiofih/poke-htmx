@@ -27,6 +27,15 @@ require_relative "vcr_setup"
 
 module Minitest
   class Test
+    # Garante banco+schema antes de QUALQUER teste (idempotente, paga 1x por
+    # processo). Sem isso a ordem aleatoria do Minitest derruba o primeiro
+    # teste a tocar o banco — ex.: SeedTeamTest caindo antes de todo
+    # TestDatabase.setup! ("database pokedex_test does not exist", CI 0093).
+    def before_setup
+      super
+      TestDatabase.setup!
+    end
+
     def after_teardown
       super
       ConnectionRegistry.close_all!

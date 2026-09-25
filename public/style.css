@@ -607,12 +607,6 @@
 	}
 }
 
-@media (max-width: 700px) {
-	.podium {
-		position: static;
-	}
-}
-
 /* Cabecalho lateral do time/oponente */
 .side-head {
 	margin-bottom: 1em;
@@ -921,7 +915,6 @@
    Passo 11 (0086): modular por aspecto — --jx-log no .log__entry (timed ON),
    agregado no li.fighter/shake default OFF ate stepping por linha. */
 .arena {
-	--jx-shake: 0;
 	/* Linha do tempo do turno (0086 T6a): um beat base + instantes nomeados.
 	   A coreografia (approach -> travel -> impacto -> shake -> HP) deriva daqui;
 	   antes eram literais espalhados. O escalonamento por linha (C4) segue no
@@ -946,20 +939,7 @@
 	--fx-shake: 0s;
 }
 .log__entry {
-	--jx-log: 1;
-	--jx-fx: 1;
-	--jx-chip: 1;
 	--fx-color: var(--t-normal);
-}
-li.fighter {
-	--jx-hit: 0;
-	--jx-dmg: 0;
-	--jx-ko: 0;
-	--jx-shot: 0;
-	--jx-hp: 0;
-}
-.res-overlay {
-	--jx-modal: 1;
 }
 .arena[data-jx-log="on"] .log__entry {
 	animation: battle-log-in 0.35s ease-out both;
@@ -1018,10 +998,22 @@ li.fighter {
 	left: calc(100% - (100% - 2 * var(--gap-lg)) / 3.06);
 }
 
+/* 0087 C3/C4: gate do travel por @container na largura REAL da arena (>980px =
+   3 colunas). O antigo gate por @media de 900px deixava travel ativo na faixa
+   900-980px, que ja e single-column (a .arena colapsa em max-width:980px). */
 @container (min-width: 981px) {
 	.arena:has(> #jx-gates[data-jx-shot="on"]) #jx-shot-track .shot {
 		display: block;
 		animation: juice-projectile var(--t-travel) ease-out var(--t-approach) both;
+	}
+	/* Direcao pela origem do golpe (0087 C2: data-from-side no .shot da track):
+	   0 = coluna esquerda -> ltr, 1 = coluna direita -> rtl. C15/C4: travel so
+	   com a arena em 3 colunas. */
+	.arena:has(> #jx-gates[data-jx-shot="on"]) #jx-shot-track .shot[data-from-side="0"] {
+		animation-name: juice-shot-ltr;
+	}
+	.arena:has(> #jx-gates[data-jx-shot="on"]) #jx-shot-track .shot[data-from-side="1"] {
+		animation-name: juice-shot-rtl;
 	}
 }
 
@@ -1369,8 +1361,7 @@ li.fighter {
 
 /* === Tags cor por tipo (0076 2a, C5) — dado real: pcard via api.find,
    membro via enrichment, fighter via FighterPresenter#types === */
-.ptags,
-.mtags {
+.ptags {
 	display: inline-flex;
 	gap: 0.25em;
 	flex-wrap: wrap;
@@ -2246,21 +2237,18 @@ body.page-history {
    os seletores vivos sem equivalente no bloco (.battle-log container, reduce). */
 
 /* Hover/active em botoes (juice fora da batalha) */
-button,
-.gameloop-cta {
+button {
 	transition:
 		transform 0.15s ease,
 		box-shadow 0.15s ease;
 }
 
-button:hover,
-.gameloop-cta:hover {
+button:hover {
 	transform: translateY(-1px);
 	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-button:active,
-.gameloop-cta:active {
+button:active {
 	transform: translateY(1px) scale(0.98);
 }
 
@@ -2329,10 +2317,6 @@ button[disabled="disabled"] {
 	cursor: not-allowed;
 }
 
-.log-round {
-	font-weight: bold;
-}
-
 .battle-loading {
 	display: none;
 	margin-left: 0.6em;
@@ -2362,72 +2346,7 @@ button[disabled="disabled"] {
 	opacity: 1;
 }
 
-/* CTAs de fluxo do circuito (gameloop) */
-.gameloop-ctas {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
-	gap: 0.5em;
-	margin-top: 0.5em;
-}
-
-.gameloop-cta {
-	display: inline-block;
-	padding: 0.4em 0.9em;
-	border: 1px solid #1f6feb;
-	border-radius: 5px;
-	background: #1f6feb;
-	color: #fff;
-	font-size: 0.95em;
-	cursor: pointer;
-	text-decoration: none;
-}
-
-.gameloop-cta:hover {
-	background: #1658c4;
-}
-
-.team-tools .gameloop-cta.battle {
-	margin-bottom: 0.6em;
-}
-
 /* Modal de evolucao (sessao 0068) — overlay htmx + CSS, a11y basica */
-.evolution-overlay {
-	position: fixed;
-	inset: 0;
-	z-index: 1000;
-	background: rgba(0, 0, 0, 0.55);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 1em;
-}
-
-.evolution-modal-box {
-	background: #fff;
-	color: #222;
-	border-radius: 8px;
-	max-width: 420px;
-	width: 100%;
-	padding: 1em 1.2em;
-	max-height: 85vh;
-	overflow-y: auto;
-}
-
-.evolution-modal-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-.evolution-modal-close {
-	background: none;
-	border: none;
-	font-size: 1.4em;
-	line-height: 1;
-	cursor: pointer;
-}
-
 .evolution-row {
 	display: flex;
 	align-items: center;
@@ -2488,24 +2407,6 @@ button[disabled="disabled"] {
 		juice-shake 0.3s ease-out;
 	animation-delay: var(--fx-shake, 0s);
 }
-/* 0087 C3/C4: gate do travel por @container na largura REAL da arena (>980px =
-   3 colunas). O antigo gate por @media de 900px deixava travel ativo na faixa
-   900-980px, que ja e single-column (a .arena colapsa em max-width:980px). */
-@container (min-width: 981px) {
-	.arena:has(> #jx-gates[data-jx-shot="on"]) #jx-shot-track .shot {
-		display: block;
-		animation: juice-projectile var(--t-travel) ease-out var(--t-approach) both;
-	}
-	/* Direcao pela origem do golpe (0087 C2: data-from-side no .shot da track):
-	   0 = coluna esquerda -> ltr, 1 = coluna direita -> rtl. C15/C4: travel so
-	   com a arena em 3 colunas. */
-	.arena:has(> #jx-gates[data-jx-shot="on"]) #jx-shot-track .shot[data-from-side="0"] {
-		animation-name: juice-shot-ltr;
-	}
-	.arena:has(> #jx-gates[data-jx-shot="on"]) #jx-shot-track .shot[data-from-side="1"] {
-		animation-name: juice-shot-rtl;
-	}
-}
 @media (prefers-reduced-motion: reduce) {
 	.log__entry,
 	.log__entry .fx,
@@ -2524,11 +2425,6 @@ button[disabled="disabled"] {
 	.rewards,
 	.result .news--pop li,
 	.battle-log__entry,
-	.fighter--flash,
-	.fighter--flash::after,
-	.fighter--ko img,
-	.fighter--ko .fighter-name,
-	.fighter--shooting .projectile,
 	.battle-layout,
 	.hp-bar .bar-fill,
 	.add-toast,
@@ -2540,15 +2436,6 @@ button[disabled="disabled"] {
 		animation: none !important;
 		transition: none !important;
 		--step-delay: 0s !important;
-		--jx-log: 0 !important;
-		--jx-fx: 0 !important;
-		--jx-chip: 0 !important;
-		--jx-hit: 0 !important;
-		--jx-dmg: 0 !important;
-		--jx-ko: 0 !important;
-		--jx-shot: 0 !important;
-		--jx-hp: 0 !important;
-		--jx-shake: 0 !important;
 	}
 	.res-overlay {
 		animation: none !important;

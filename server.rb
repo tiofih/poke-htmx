@@ -399,11 +399,6 @@ module ServerListActions
   end
   # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
 
-  def base_form_names(batch)
-    forms = Parallelizer.map(batch) { |name| [name, settings.api.base_form?(name)] }
-    forms.select { |_name, is_base| is_base }.map(&:first)
-  end
-
   def filter_by_team(names)
     member_set = Set.new(@team_names)
     if @team_filter == "in"
@@ -704,11 +699,6 @@ module ServerTeamActions
     end
   end
 
-  # Contagem de membros de linha S no time.
-  def team_s_count(team)
-    team.count { |member| line_tier_for(member) == :S }
-  end
-
   def pokemon_cost(pokemon, line_tier)
     restricted = settings.api.evolution_restricted?(pokemon.name)
     TeamBudget.cost_for(line_tier: line_tier.to_s, restricted: restricted)
@@ -794,21 +784,8 @@ module ServerTeamActions
     params[:heal_and_battle].to_s == "1"
   end
 
-  def oob_battle_view
-    return "" unless battle_view_requested?
-
-    oob_battle_view_forced
-  end
-
   def oob_battle_view_forced
     %(<div id="battle-view" hx-swap-oob="innerHTML">#{prepare_battle_fragment}</div>)
-  end
-
-  def battle_view_requested?
-    current = request.env["HTTP_HX_CURRENT_URL"].to_s
-    return true if current.include?("/battle")
-
-    request.referer.to_s.include?("/battle")
   end
 
   def oob_close_center_modal
@@ -1043,7 +1020,6 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     @team_size = @team.size
     @team_cost = team_total_cost(@team)
     @team_budget = TeamBudget::BUDGET
-    @team_s_count = team_s_count(@team)
     @team_types = team_types_map(@team)
     @member_levels = member_levels_map(@team)
     center_data
