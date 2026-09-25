@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# check — rubocop + rake test numa unica invocacao de container (herda o
+# parser de args do scripts/test).
+CHECK=1 exec ./scripts/test "$@"

@@ -12,6 +12,7 @@ EXTRA_ARGS=()
 NEXT_IS_NAME=false
 FAILED=0
 PROFILE=0
+CHECK="${CHECK:-0}"
 
 for arg in "$@"; do
   if [ "$NEXT_IS_NAME" = true ]; then
@@ -27,6 +28,8 @@ for arg in "$@"; do
     FAILED=1
   elif [ "$arg" = "--profile" ]; then
     PROFILE=1
+  elif [ "$arg" = "--check" ]; then
+    CHECK=1
   elif [ -f "$arg" ]; then
     TEST_FILES+=("$arg")
   else
@@ -71,16 +74,29 @@ fi
 # Captura da saida (tee): em exit != 0 vira tmp/fails.md via fails-report,
 # com o exit do docker preservado pelo pipefail.
 SAIDA="tmp/test.out"
+
+# --check: uma unica invocacao de container com `rubocop && rake test` —
+# args quotados com printf %q para sobreviverem ao bash -lc.
+RUN=(bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"})
+if [ "$CHECK" -eq 1 ]; then
+  cmd="bundle exec rubocop && bundle exec rake test"
+  for a in ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}; do
+    printf -v q '%q ' "$a"
+    cmd="$cmd $q"
+  done
+  RUN=(bash -lc "${cmd% }")
+fi
+
 if [ "$(docker compose ps --filter status=running --services | grep -c '^web$')" -eq 1 ]; then
   echo "test> Container 'web' ativo — rake test nele."
-  if docker compose exec -T web bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"} 2>&1 | tee "$SAIDA"; then
+  if docker compose exec -T web ${RUN[@]+"${RUN[@]}"} 2>&1 | tee "$SAIDA"; then
     rc=0
   else
     rc=$?
   fi
 else
   echo "test> Container 'web' inativo — one-off para rake test."
-  if docker compose run --rm web bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"} 2>&1 | tee "$SAIDA"; then
+  if docker compose run --rm web ${RUN[@]+"${RUN[@]}"} 2>&1 | tee "$SAIDA"; then
     rc=0
   else
     rc=$?
