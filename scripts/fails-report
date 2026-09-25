@@ -11,7 +11,7 @@ cd "$(dirname "$0")/.."
 if [ "${1:-}" = "--files" ]; then
   F="${2:-}"
   [ -n "$F" ] && [ -f "$F" ] || { echo "fails-report> uso: fails-report --files <fails.md>" >&2; exit 2; }
-  grep -oE 'test/[A-Za-z0-9_]+\.rb' "$F" | sort -u | paste -sd, -
+  grep -oE 'test/[A-Za-z0-9_]+\.rb' "$F" | sort -u | paste -sd, - || true
   exit 0
 fi
 

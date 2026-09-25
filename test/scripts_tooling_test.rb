@@ -93,6 +93,18 @@ class ScriptsToolingTest < Minitest::Test
     end
   end
 
+  def test_fails_report_files_sem_match_devolve_vazio
+    # saida sem test/*.rb (ex.: falha de rubocop no scripts/check): a lista vazia
+    # e contrato (exit 0) — senao o caller aborta no set -e antes da mensagem
+    report = File.expand_path("tmp/fails_fixture_#{Process.pid}.md")
+    File.write(report, "rake aborted!\nsem arquivo de teste na saida\n")
+    out, err, status = run_script("fails-report", "--files", report)
+    assert status.success?, "exit #{status.exitstatus}: #{err}"
+    assert_empty out.strip
+  ensure
+    FileUtils.rm_f(report)
+  end
+
   VERBOSE_OUTPUT = <<~OUT
     Run options: --seed 999 -v
 
@@ -167,11 +179,39 @@ class ScriptsToolingTest < Minitest::Test
     end
   end
 
+  def test_checar_sessao_exige_justificativa_no_nao_aplicavel
+    # AGENTS/template: 'nao-aplicavel exige justificativa na mesma linha'
+    with_sessao_fixture("> Reprodução: nao-aplicavel") do |path|
+      _out, err, status = run_script("checar-sessao", path)
+      assert status.success?, "aviso não derruba o exit: #{err}"
+      assert_includes err, "AVISO"
+      assert_includes err, "Reprodução"
+    end
+  end
+
+  def test_checar_sessao_exit_1_em_celula_vazia
+    # a FALHA impressa tem que sobreviver ao exit: linter que imprime FALHA e
+    # sai 0 (mais 'ok>') e sucesso fingido
+    vazia = <<~MD
+      ### Critério → teste
+
+      | Critério | Teste | Resultado |
+      | --- | --- | --- |
+      | RF-1 | test/foo_test.rb |  |
+    MD
+    with_sessao_fixture("> Reprodução: script", vazia) do |path|
+      out, err, status = run_script("checar-sessao", path)
+      assert_equal 1, status.exitstatus, "esperava exit 1; stdout: #{out}; stderr: #{err}"
+      assert_includes err, "FALHA"
+      assert_includes err, "célula vazia"
+    end
+  end
+
   private
 
-  def with_sessao_fixture(reproducao)
+  def with_sessao_fixture(reproducao, extra = "")
     path = File.expand_path("tmp/sessao_fixture_#{Process.pid}.md")
-    File.write(path, "#{SESSAO_MINIMA}\n#{reproducao}\n")
+    File.write(path, "#{SESSAO_MINIMA}\n#{reproducao}\n#{extra}")
     yield path
   ensure
     FileUtils.rm_f(path)

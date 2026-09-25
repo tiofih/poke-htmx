@@ -2,6 +2,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+mkdir -p tmp   # artefatos (test.out, fails.md, profile.md) em clone novo sem tmp/
 
 # Garantir que o banco esteja de pé antes de rodar a suíte
 docker compose up -d db
