@@ -1,15 +1,15 @@
-<% if @notice %>
-  <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
+<% if notice %>
+  <p class="notice<%= " notice--#{notice_kind}" if notice_kind %>"><%= notice %></p>
 <% end %>
-<% @team.each do |poke| %>
-  <% level = @member_levels && @member_levels[poke.id.to_s] || 1 %>
+<% team.each do |poke| %>
+  <% level = member_levels && member_levels[poke.id.to_s] || 1 %>
   <div class="manage-member">
     <div class="mg-head">
       <div class="sprite-tile"><img src="<%= poke.sprite %>" alt="<%= poke.name %>" width="96" height="96"></div>
       <div>
         <h2><%= poke.name %></h2>
         <p class="meta num">Nível <%= level %> · #<%= poke.slot %></p>
-        <% manage_types = @team_types && @team_types[poke.id] %>
+        <% manage_types = team_types && team_types[poke.id] %>
         <% unless manage_types.nil? || manage_types.empty? %>
           <div class="tag-row">
             <% manage_types.each do |tag| %><span class="mtag mtag--<%= tag %>"><%= tag %></span><% end %>
@@ -23,11 +23,11 @@
     <div class="stat-grid">
       <div class="stat-row"><span class="lab">HP</span><div class="stat-bar"><span style="width:<%= poke.hp_max.to_i.positive? ? (poke.hp_current.to_f / poke.hp_max.to_f * 100).round : 0 %>%"></span></div><span class="val"><%= poke.hp_current %>/<%= poke.hp_max %></span></div>
       <div class="stat-row"><span class="lab">Nível</span><div class="stat-bar"><span style="width:<%= [level.to_i, 100].min %>%"></span></div><span class="val"><%= level %></span></div>
-      <div class="stat-row"><span class="lab">Golpes</span><div class="stat-bar"><span style="width:<%= ((@draft_moves&.[](poke.id) || poke.moves.to_a).size / 4.0 * 100).round %>%"></span></div><span class="val"><%= (@draft_moves&.[](poke.id) || poke.moves.to_a).size %>/4</span></div>
+      <div class="stat-row"><span class="lab">Golpes</span><div class="stat-bar"><span style="width:<%= ((draft_moves&.[](poke.id) || poke.moves.to_a).size / 4.0 * 100).round %>%"></span></div><span class="val"><%= (draft_moves&.[](poke.id) || poke.moves.to_a).size %>/4</span></div>
     </div>
     <p class="section-label">Golpes <span class="meta">· selecione até 4</span></p>
-    <% current_moves = @draft_moves&.[](poke.id) || poke.moves.to_a %>
-    <% @available_moves[poke.id].to_a.each do |move| %>
+    <% current_moves = draft_moves&.[](poke.id) || poke.moves.to_a %>
+    <% available_moves[poke.id].to_a.each do |move| %>
       <form class="mv-row<%= " marked" if current_moves.include?(move[:name]) %>"
             data-move="<%= move[:name] %>"
             hx-post="/team/<%= poke.id %>/moves"
@@ -58,7 +58,7 @@
       <label>Item:
         <select class="select" name="item_name">
           <option value=""<%= poke.assigned_item.to_s.empty? ? " selected" : "" %>>Nenhum</option>
-          <% @inventory.to_a.each do |entry| %>
+          <% inventory.to_a.each do |entry| %>
             <% item = ItemCatalog.find(entry[:name]) %>
             <% next unless item && item.heal_amount.to_i.positive? %>
             <option value="<%= item.name %>"<%= poke.assigned_item == item.name ? " selected" : "" %><%= " disabled" if entry[:quantity].to_i <= 0 && poke.assigned_item != item.name %>>
@@ -80,7 +80,7 @@
       <label>Segurável:
         <select class="select" name="item_name">
           <option value=""<%= poke.held_item.to_s.empty? ? " selected" : "" %>>Nenhum</option>
-          <% @inventory.to_a.each do |entry| %>
+          <% inventory.to_a.each do |entry| %>
             <% item = ItemCatalog.find(entry[:name]) %>
             <% next unless item && item.category == "held" %>
             <option value="<%= item.name %>"<%= poke.held_item == item.name ? " selected" : "" %><%= " disabled" if entry[:quantity].to_i <= 0 && poke.held_item != item.name %>>

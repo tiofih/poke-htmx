@@ -1,1 +1,1 @@
-<span id="jx-gates" hx-swap-oob="outerHTML" hidden<% gates.each do |aspect, on| %> data-jx-<%= aspect %>="<%= on ? "on" : "off" %>"<% end %><% if defined?(move_type) && move_type %> data-move-type="<%= move_type %>"<% end %>></span>
+<span id="jx-gates" hx-swap-oob="outerHTML" hidden<% gates.each do |aspect, on| %> data-jx-<%= aspect %>="<%= on ? "on" : "off" %>"<% end %><% if move_type %> data-move-type="<%= move_type %>"<% end %>></span>

@@ -35,6 +35,86 @@ require_relative "lib/stone_rotation"
 module ServerCommon
   private
 
+  # 0096 C1 — caminho unico de OOB: injeta hx-swap-oob logo apos id="<id>"
+  # (substituicao literal — a ordem id= -> hx-swap-oob= e contrato de teste).
+  def render_oob(partial, id:, locals: {})
+    rendered = erb(partial, layout: false, locals: locals)
+    rendered.sub(%(id="#{id}"), %(id="#{id}" hx-swap-oob="outerHTML"))
+  end
+
+  # 0096 C1 — wrapper de conteudo (o id nao esta no partial, esta no div que o
+  # embrulha): substitui as strings inline dos helpers oob_* e o template
+  # views/team_view_oob.erb (apagado).
+  def oob_wrap(id:, content:)
+    %(<div id="#{id}" hx-swap-oob="innerHTML">#{content}</div>)
+  end
+
+  # 0096 — contratos explicitos de dados (builder para view com 3+ call sites).
+  def team_locals
+    {
+      team: @team, team_types: @team_types, member_levels: @member_levels,
+      notice: @notice, notice_kind: @notice_kind, can_battle: @can_battle,
+      game_over: @game_over, journey_started: @journey_started
+    }
+  end
+
+  def team_manage_locals
+    {
+      team: @team, team_types: @team_types, member_levels: @member_levels,
+      available_moves: @available_moves, inventory: @inventory,
+      draft_moves: @draft_moves, notice: @notice, notice_kind: @notice_kind
+    }
+  end
+
+  # 0096 pos-revisao (2026-09-24) — builder com 2 call sites: o hash duplicado
+  # par a par (render_*_modal vs oob_*_modal) era risco de drift.
+  def center_modal_locals
+    {
+      notice: @notice, notice_kind: @notice_kind, avg_level: @avg_level,
+      balance: @balance, heal_cost: @heal_cost, team: @team
+    }
+  end
+
+  def mart_modal_locals
+    {
+      notice: @notice, notice_kind: @notice_kind, balance: @balance,
+      catalog: @catalog, inventory: @inventory, rotation: @rotation
+    }
+  end
+
+  def filter_controls_locals
+    {
+      cost_max: @cost_max, generation: @generation, items: @items, q: @q,
+      sort: @sort, starters: @starters, team_filter: @team_filter,
+      tier: @tier, type: @type
+    }
+  end
+
+  def battle_locals
+    {
+      engine: @engine, game_over: @game_over, message: @message,
+      can_new_confront: @can_new_confront, gate_action: @gate_action,
+      gate_cta: @gate_cta, gate_disabled_cta: @gate_disabled_cta,
+      xp_gained: @xp_gained, money_gained: @money_gained,
+      evolution_news: @evolution_news || [], learned_news: @learned_news || []
+    }
+  end
+
+  def error_locals
+    { message: @message }
+  end
+
+  def pokemon_list_locals
+    {
+      items: @items, starters: @starters, offset: @offset, q: @q, type: @type,
+      generation: @generation, tier: @tier, cost_max: @cost_max, sort: @sort,
+      team_filter: @team_filter, current_page: @current_page, prev_offset: @prev_offset,
+      next_offset: @next_offset, search_hint: @search_hint, notice: @notice,
+      notice_kind: @notice_kind, pokemon_costs: @pokemon_costs, team_full: @team_full,
+      team_names: @team_names
+    }
+  end
+
   def current_user
     session[:user_id]
   end
@@ -116,18 +196,19 @@ module ServerListActions
     @q = ""
     prepare_team_fragment_data
     load_pokemon_page
-    erb :index
+    erb :index, locals: { balance: @balance, team_budget: @team_budget, team_cost: @team_cost }
   end
 
   def render_pokemons_list
     @offset = params[:offset].to_i
     @q = params[:q].to_s
     load_pokemon_page
-    erb(:pokemon_list, layout: false) + (filter_controls_needs_sync? ? oob_filter_controls : "")
+    list = erb(:pokemon_list, layout: false, locals: pokemon_list_locals)
+    list + (filter_controls_needs_sync? ? oob_filter_controls : "")
   end
 
   def oob_filter_controls
-    %(<div id="filter-controls" hx-swap-oob="innerHTML">#{erb :_filter_controls, layout: false}</div>)
+    oob_wrap(id: "filter-controls", content: erb(:_filter_controls, layout: false, locals: filter_controls_locals))
   end
 
   def filter_controls_needs_sync?
@@ -470,20 +551,20 @@ module ServerListActions
   def render_pokemon_fragment
     @pokemon = settings.api.find(params[:name])
     if @pokemon
-      erb :pokemon, layout: false
+      erb :pokemon, layout: false, locals: { pokemon: @pokemon }
     else
       @message = "Pokémon não encontrado."
-      erb :error, layout: false
+      erb :error, layout: false, locals: error_locals
     end
   end
 
   def render_pokemon_detail
     @pokemon = settings.api.detail(params[:poke_id])
     if @pokemon
-      erb :pokemon_detail, layout: false
+      erb :pokemon_detail, layout: false, locals: { pokemon: @pokemon }
     else
       @message = "Pokémon não encontrado."
-      erb :error, layout: false
+      erb :error, layout: false, locals: error_locals
     end
   end
 end
@@ -517,7 +598,7 @@ module ServerTeamActions
 
   def render_team
     prepare_team_fragment_data
-    return erb :team, layout: false if htmx_request?
+    return erb :team, layout: false, locals: team_locals if htmx_request?
 
     halt 404, "Página não encontrada."
   end
@@ -542,7 +623,7 @@ module ServerTeamActions
 
   def render_team_manage
     team_manage_context
-    erb :_manage_modal, layout: false
+    erb :_manage_modal, layout: false, locals: team_manage_locals
   end
 
   def render_team_manage_member
@@ -550,7 +631,7 @@ module ServerTeamActions
     return member_not_found_notice unless member
 
     @team = [member]
-    erb :_manage_modal, layout: false
+    erb :_manage_modal, layout: false, locals: team_manage_locals
   end
 
   def close_team_manage
@@ -559,20 +640,20 @@ module ServerTeamActions
 
   def render_team_center
     prepare_team_fragment_data
-    erb :_center_modal, layout: false
+    erb :_center_modal, layout: false, locals: center_modal_locals
   end
 
   def render_team_mart
     prepare_team_fragment_data
-    erb :_mart_modal, layout: false
+    erb :_mart_modal, layout: false, locals: mart_modal_locals
   end
 
   def close_team_center
-    erb :_center_slot, layout: false
+    erb :_center_slot, layout: false, locals: {}
   end
 
   def close_team_mart
-    erb :_mart_slot, layout: false
+    erb :_mart_slot, layout: false, locals: {}
   end
 
   def add_team_member
@@ -595,7 +676,8 @@ module ServerTeamActions
     @notice = notice || "Adicionado ao time."
     @notice_kind = notice ? :error : :success
     @toast_pokemon = pokemon unless notice
-    mini_status = erb :team_add_result, layout: false
+    locals = { notice: @notice, notice_kind: @notice_kind, toast_pokemon: @toast_pokemon }
+    mini_status = erb :team_add_result, layout: false, locals: locals
     prepare_team_fragment_data
     "#{mini_status}#{oob_team_view}#{oob_pokemon_list}#{oob_nav_badge}#{oob_cta_slot}"
   end
@@ -603,13 +685,17 @@ module ServerTeamActions
   def budget_blocked_response(msg)
     @notice = msg
     @notice_kind = :error
-    mini_status = erb :team_add_result, layout: false
+    locals = { notice: @notice, notice_kind: @notice_kind, toast_pokemon: @toast_pokemon }
+    mini_status = erb :team_add_result, layout: false, locals: locals
     prepare_team_fragment_data
     "#{mini_status}#{oob_team_view}#{oob_pokemon_list}#{oob_nav_badge}#{oob_cta_slot}"
   end
 
   def oob_team_view
-    erb :team_view_oob, layout: false
+    # 0096 C5 — bytes identicos ao views/team_view_oob.erb apagado: o wrapper
+    # antigo embrulhava em "\n  ... \n"; sem isso a saida perde 4 bytes.
+    time = erb(:team, layout: false, locals: team_locals)
+    oob_wrap(id: "team-view", content: "\n  #{time}\n")
   end
 
   def oob_nav_badge
@@ -626,14 +712,14 @@ module ServerTeamActions
   end
 
   def oob_cta_slot
-    erb(:_cta_slot, layout: false).sub('id="cta-slot"', 'id="cta-slot" hx-swap-oob="outerHTML"')
+    render_oob(:_cta_slot, id: "cta-slot", locals: {})
   end
 
   def oob_pokemon_list
     @offset = params[:offset].to_i
     @q = params[:q].to_s
     load_pokemon_page
-    %(<div id="pokemon-list" hx-swap-oob="innerHTML">#{erb :pokemon_list, layout: false}</div>)
+    oob_wrap(id: "pokemon-list", content: erb(:pokemon_list, layout: false, locals: pokemon_list_locals))
   end
 
   def new_member_from_api
@@ -762,7 +848,7 @@ module ServerTeamActions
   end
 
   def oob_mart_modal
-    erb(:_mart_modal, layout: false).sub('id="mart-modal"', 'id="mart-modal" hx-swap-oob="outerHTML"')
+    render_oob(:_mart_modal, id: "mart-modal", locals: mart_modal_locals)
   end
 
   def render_result_notice(result)
@@ -785,15 +871,15 @@ module ServerTeamActions
   end
 
   def oob_battle_view_forced
-    %(<div id="battle-view" hx-swap-oob="innerHTML">#{prepare_battle_fragment}</div>)
+    oob_wrap(id: "battle-view", content: prepare_battle_fragment)
   end
 
   def oob_close_center_modal
-    erb(:_center_slot, layout: false).sub('id="center-modal"', 'id="center-modal" hx-swap-oob="outerHTML"')
+    render_oob(:_center_slot, id: "center-modal", locals: {})
   end
 
   def oob_center_modal
-    erb(:_center_modal, layout: false).sub('id="center-modal"', 'id="center-modal" hx-swap-oob="outerHTML"')
+    render_oob(:_center_modal, id: "center-modal", locals: center_modal_locals)
   end
 
   def save_team_moves
@@ -801,7 +887,7 @@ module ServerTeamActions
     @notice = params[:draft] ? preview_member_moves(member) : persist_member_moves(member)
     @notice_kind = :error if @notice
     @team = settings.team.all(current_user)
-    erb :team_manage, layout: false
+    erb :team_manage, layout: false, locals: team_manage_locals
   end
 
   def persist_member_moves(member)
@@ -827,7 +913,7 @@ module ServerTeamItemActions
     member = team_manage_context(params[:id])
     @notice = settings.team_strategy.assign_item(current_user, member, params[:item_name].to_s)
     reload_manage_state
-    erb :team_manage, layout: false
+    erb :team_manage, layout: false, locals: team_manage_locals
   end
 end
 
@@ -838,7 +924,7 @@ module ServerTeamHeldActions
     member = team_manage_context(params[:id])
     @notice = settings.team_strategy.assign_held_item(current_user, member, params[:item_name].to_s)
     reload_manage_state
-    erb :team_manage, layout: false
+    erb :team_manage, layout: false, locals: team_manage_locals
   end
 end
 
@@ -902,7 +988,10 @@ module ServerTeamEvolutionActions
     @notice_kind = kind
     @evolutions = settings.api.stone_evolutions(@member.number)
     @inventory_qty = @evolutions.to_h { |evo| [evo[:item], settings.inventory.count(current_user, evo[:item])] }
-    erb :_evolution_modal, layout: false
+    erb :_evolution_modal, layout: false, locals: {
+      member: @member, notice: @notice, notice_kind: @notice_kind,
+      evolutions: @evolutions, inventory_qty: @inventory_qty
+    }
   end
 
   def evolution_modal_error(member, message)
@@ -961,7 +1050,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     return content if htmx_request?
 
     @battle_content = content
-    erb :battle_page
+    erb :battle_page, locals: { battle_content: @battle_content }
   end
 
   def prepare_battle_fragment
@@ -974,7 +1063,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
     @engine = result[:engine]
     expose_new_confront_state
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def expose_new_confront_state
@@ -997,21 +1086,21 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
   def journey_gate_fragment
     @message = "Monte seu time inicial de 6 Pokémon para iniciar a jornada."
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def defeated_gate_fragment
     @message = "Seu time está todo derrotado. Cure seus Pokémon no Poke Center."
     @gate_cta = { href: "/", label: "Ir para o Poke Center" }
     @gate_disabled_cta = { label: "Novo confronto", title: "Recupere seus pokémons no Poke Center para batalhar." }
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def game_over_fragment
     @message = "Game Over — seu time está derrotado e você não tem dinheiro para curar no Poke Center."
     @gate_cta = { href: "/", label: "Vender itens no Poke Mart" }
     @gate_action = { href: "/journey/restart", label: "Recomeçar jornada" }
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def prepare_team_fragment_data
@@ -1035,7 +1124,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
   def render_team_fragment_with_notice
     prepare_team_fragment_data
-    erb :team, layout: false
+    erb :team, layout: false, locals: team_locals
   end
 
   def htmx_request?
@@ -1044,21 +1133,21 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
   def empty_team_fragment
     @message = "Forme seu time para batalhar."
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def battle_error_fragment
     @message = "Não foi possível preparar a batalha. Tente novamente."
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def advance_battle
     result = settings.battle.advance(current_user)
-    return erb :battle, layout: false unless result
+    return erb :battle, layout: false, locals: battle_locals unless result
 
     expose_battle_result(result)
     response.headers["HX-Trigger"] = "next-round" if auto_play_requested? && !result[:engine].finished?
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def auto_play_requested?
@@ -1082,8 +1171,16 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
     entry = result[:entry]
     formatted = BattleLogPresenter.new(engine.log, stock: engine.items).format_single(entry)
     log_line = erb :_strike_log_entry, layout: false, locals: { entry: formatted }
-    modal = result[:finished] ? erb(:_strike_result, layout: false) : ""
+    modal = result[:finished] ? strike_result_modal : ""
     "#{log_line}#{strike_gates_oob(entry)}#{strike_shot_oob(engine, entry)}#{strike_hp_oob(engine, entry)}#{modal}"
+  end
+
+  def strike_result_modal
+    erb :_strike_result, layout: false, locals: {
+      engine: @engine, game_over: @game_over, can_new_confront: @can_new_confront,
+      xp_gained: @xp_gained, money_gained: @money_gained,
+      evolution_news: @evolution_news, learned_news: @learned_news
+    }
   end
 
   def strike_hp_oob(engine, entry = nil)
@@ -1159,7 +1256,7 @@ module ServerBattleActions # rubocop:disable Metrics/ModuleLength
 
     @engine = result[:engine]
     expose_new_confront_state
-    erb :battle, layout: false
+    erb :battle, layout: false, locals: battle_locals
   end
 
   def expose_battle_result(result)
@@ -1194,7 +1291,7 @@ module PokemonRoutes
   end
 
   def self.register_pokemon_close(app)
-    app.get("/pokemon/close") { erb :pokemon_close, layout: false }
+    app.get("/pokemon/close") { erb :pokemon_close, layout: false, locals: {} }
   end
 
   def self.register_pokemon_detail(app)
@@ -1309,9 +1406,10 @@ module ServerHistoryActions
 
   def render_history
     load_history_data
-    return erb :history, layout: false if htmx_request?
+    locals = { current_user: @current_user, rank: @rank, stats: @stats, position: @position, recent: @recent }
+    return erb :history, layout: false, locals: locals if htmx_request?
 
-    erb :history_page
+    erb :history_page, locals: locals
   end
 
   def load_history_data
@@ -1378,7 +1476,7 @@ module ErrorHandling
       logger.error "#{env['sinatra.error'].class}: #{env['sinatra.error'].message}" if env["sinatra.error"]
       @message = "Algo deu errado. Tente novamente."
       status(htmx_request? ? 200 : 500)
-      erb :error, layout: false
+      erb :error, layout: false, locals: error_locals
     end
   end
 end

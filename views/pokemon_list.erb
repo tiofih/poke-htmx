@@ -1,49 +1,49 @@
 <div class="list-state" hidden>
-  <input type="hidden" name="offset" value="<%= @offset %>">
-  <input type="hidden" name="q" value="<%= @q %>">
-  <input type="hidden" name="type" value="<%= @type %>">
-  <input type="hidden" name="generation" value="<%= @generation %>">
-  <input type="hidden" name="tier" value="<%= @tier %>">
-  <input type="hidden" name="cost_max" value="<%= @cost_max %>">
-  <input type="hidden" name="cost" value="<%= @cost_max %>">
-  <input type="hidden" name="sort" value="<%= @sort %>">
-  <input type="hidden" name="team" value="<%= @team_filter %>">
+  <input type="hidden" name="offset" value="<%= offset %>">
+  <input type="hidden" name="q" value="<%= q %>">
+  <input type="hidden" name="type" value="<%= type %>">
+  <input type="hidden" name="generation" value="<%= generation %>">
+  <input type="hidden" name="tier" value="<%= tier %>">
+  <input type="hidden" name="cost_max" value="<%= cost_max %>">
+  <input type="hidden" name="cost" value="<%= cost_max %>">
+  <input type="hidden" name="sort" value="<%= sort %>">
+  <input type="hidden" name="team" value="<%= team_filter %>">
 </div>
-<div class="row-between"><span class="meta">Arquivo · <%= @starters.size + @items.size %></span><a class="btn btn-ghost btn-sm" href="#" hx-get="/pokemons?offset=0&amp;q=&amp;type=&amp;generation=&amp;tier=&amp;cost=&amp;cost_max=&amp;sort=&amp;team=" hx-target="#pokemon-list" hx-swap="innerHTML">Limpar filtros</a></div>
-<% if @notice %>
-  <p class="notice<%= " notice--#{@notice_kind}" if @notice_kind %>"><%= @notice %></p>
+<div class="row-between"><span class="meta">Arquivo · <%= starters.size + items.size %></span><a class="btn btn-ghost btn-sm" href="#" hx-get="/pokemons?offset=0&amp;q=&amp;type=&amp;generation=&amp;tier=&amp;cost=&amp;cost_max=&amp;sort=&amp;team=" hx-target="#pokemon-list" hx-swap="innerHTML">Limpar filtros</a></div>
+<% if notice %>
+  <p class="notice<%= " notice--#{notice_kind}" if notice_kind %>"><%= notice %></p>
 <% end %>
-<% if @search_hint %>
+<% if search_hint %>
   <p class="notice notice--info">
-    <% if @search_hint[:kind] == :evolution %>
-      "<%= @search_hint[:name] %>" é a evolução de "<%= @search_hint[:base] %>" — monte seu time com a primeira evolução.
-    <% elsif @search_hint[:kind] == :starter %>
-      "<%= @search_hint[:name] %>" é um Pokémon inicial — limpe a busca para escolher nos destaques.
+    <% if search_hint[:kind] == :evolution %>
+      "<%= search_hint[:name] %>" é a evolução de "<%= search_hint[:base] %>" — monte seu time com a primeira evolução.
+    <% elsif search_hint[:kind] == :starter %>
+      "<%= search_hint[:name] %>" é um Pokémon inicial — limpe a busca para escolher nos destaques.
     <% else %>
-      Nenhum Pokémon base encontrado para "<%= @search_hint[:name] %>".
+      Nenhum Pokémon base encontrado para "<%= search_hint[:name] %>".
     <% end %>
   </p>
 <% end %>
 <div class="pokemon-grid">
-  <% unless @starters.empty? %>
+  <% unless starters.empty? %>
     <ul class="pokemon-list starters">
-      <% @starters.each do |name, pokemon| %>
-        <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon } %>
+      <% starters.each do |name, pokemon| %>
+        <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon, pokemon_costs: pokemon_costs, team_full: team_full, team_names: team_names } %>
       <% end %>
     </ul>
   <% end %>
   <ul class="pokemon-list">
-    <% @items.each do |name, pokemon| %>
-      <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon } %>
+    <% items.each do |name, pokemon| %>
+      <%= erb :pokemon_list_item, layout: false, locals: { name: name, pokemon: pokemon, pokemon_costs: pokemon_costs, team_full: team_full, team_names: team_names } %>
     <% end %>
   </ul>
 </div>
 <div class="pagination">
-  <% if @prev_offset %>
-    <a href="#" hx-get="/pokemons?offset=<%= @prev_offset %>&q=<%= @q %>&type=<%= @type %>&generation=<%= @generation %>&tier=<%= @tier %>&cost_max=<%= @cost_max %>&cost=<%= @cost_max %>&sort=<%= @sort %>&team=<%= @team_filter %>" hx-target="#pokemon-list" hx-swap="innerHTML">Anterior</a>
+  <% if prev_offset %>
+    <a href="#" hx-get="/pokemons?offset=<%= prev_offset %>&q=<%= q %>&type=<%= type %>&generation=<%= generation %>&tier=<%= tier %>&cost_max=<%= cost_max %>&cost=<%= cost_max %>&sort=<%= sort %>&team=<%= team_filter %>" hx-target="#pokemon-list" hx-swap="innerHTML">Anterior</a>
   <% end %>
-  Página <%= @current_page %>
-  <% if @next_offset %>
-    <a href="#" hx-get="/pokemons?offset=<%= @next_offset %>&q=<%= @q %>&type=<%= @type %>&generation=<%= @generation %>&tier=<%= @tier %>&cost_max=<%= @cost_max %>&cost=<%= @cost_max %>&sort=<%= @sort %>&team=<%= @team_filter %>" hx-target="#pokemon-list" hx-swap="innerHTML">Próxima</a>
+  Página <%= current_page %>
+  <% if next_offset %>
+    <a href="#" hx-get="/pokemons?offset=<%= next_offset %>&q=<%= q %>&type=<%= type %>&generation=<%= generation %>&tier=<%= tier %>&cost_max=<%= cost_max %>&cost=<%= cost_max %>&sort=<%= sort %>&team=<%= team_filter %>" hx-target="#pokemon-list" hx-swap="innerHTML">Próxima</a>
   <% end %>
 </div>

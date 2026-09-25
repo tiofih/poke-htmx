@@ -5,26 +5,26 @@
     <p class="lead">Sua posição no ranking global, resultados recentes e o placar completo da jornada.</p>
   </div>
 
-  <% if @rank.empty? && @recent.empty? %>
+  <% if rank.empty? && recent.empty? %>
     <p class="notice notice--info">Você ainda não batalhou.</p>
   <% else %>
     <section data-od-id="your-position">
       <div class="pos-card">
         <div class="pos-left">
-          <% if @position %>
-            <div class="pos-badge"><span class="num"><%= @position %>º</span></div>
+          <% if position %>
+            <div class="pos-badge"><span class="num"><%= position %>º</span></div>
           <% end %>
           <div class="pos-title">
             <h2>Sua posição</h2>
-            <p class="meta num">Ranking global · <%= @stats[:wins] %> vitórias em <%= @stats[:total] %> batalhas</p>
+            <p class="meta num">Ranking global · <%= stats[:wins] %> vitórias em <%= stats[:total] %> batalhas</p>
           </div>
         </div>
         <div class="pos-stats">
-          <div class="stat-chip win"><div class="n"><%= @stats[:wins] %></div><div class="l">Vitórias</div></div>
-          <div class="stat-chip loss"><div class="n"><%= @stats[:losses] %></div><div class="l">Derrotas</div></div>
-          <div class="stat-chip draw"><div class="n"><%= @stats[:draws] %></div><div class="l">Empates</div></div>
+          <div class="stat-chip win"><div class="n"><%= stats[:wins] %></div><div class="l">Vitórias</div></div>
+          <div class="stat-chip loss"><div class="n"><%= stats[:losses] %></div><div class="l">Derrotas</div></div>
+          <div class="stat-chip draw"><div class="n"><%= stats[:draws] %></div><div class="l">Empates</div></div>
         </div>
-        <% unless @position %>
+        <% unless position %>
           <p class="meta">Você ainda não tem vitórias.</p>
         <% end %>
       </div>
@@ -34,11 +34,11 @@
       <h2 class="section-title">Ranking global</h2>
       <div class="card card--tight">
         <ul class="rank-list">
-          <% @rank.each_with_index do |row, index| %>
+          <% rank.each_with_index do |row, index| %>
             <% share = row[:total].positive? ? (100.0 * row[:wins] / row[:total]).round : 0 %>
-            <li class="rank-row<%= " you" if row[:user_id] == @current_user %>">
+            <li class="rank-row<%= " you" if row[:user_id] == current_user %>">
               <span class="rank-pos num"><%= index + 1 %></span>
-              <span class="rank-name"><%= row[:user_id] %><% if row[:user_id] == @current_user %><span class="meta">· seu time</span><% end %></span>
+              <span class="rank-name"><%= row[:user_id] %><% if row[:user_id] == current_user %><span class="meta">· seu time</span><% end %></span>
               <div class="rank-bar"><span style="width:<%= share %>%"></span></div>
               <span class="rank-wins"><strong class="num"><%= row[:wins] %></strong> / <%= row[:total] %></span>
             </li>
@@ -51,7 +51,7 @@
       <h2 class="section-title">Últimas batalhas</h2>
       <div class="card card--tight">
         <ul class="history-list">
-          <% @recent.each do |record| %>
+          <% recent.each do |record| %>
             <% badge = { "win" => "win", "lose" => "loss", "draw" => "draw" }.fetch(record[:result], "draw") %>
             <li class="history-row">
               <span class="result-badge <%= badge %>"><%= result_label(record[:result]) %></span>

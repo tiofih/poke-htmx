@@ -1,9 +1,9 @@
 <p class="modal-sub">Recupere o HP de todo o time de uma vez.</p>
-<% avg_lvl = @avg_level || HealCostPolicy::BASE_LEVEL %>
+<% avg_lvl = avg_level || HealCostPolicy::BASE_LEVEL %>
 <% mult = [avg_lvl / HealCostPolicy::BASE_LEVEL.to_f, HealCostPolicy::MAX_LEVEL_MULTIPLIER].min %>
 <% policy = HealCostPolicy.new %>
 <ul class="heal-list">
-  <% @team.each do |poke| %>
+  <% team.each do |poke| %>
     <% missing = poke.hp_max.to_i <= 0 ? 0 : [poke.hp_max.to_i - poke.hp_current.to_i, 0].max %>
     <li class="heal-item">
       <span class="th"><img src="<%= poke.sprite %>" alt="<%= poke.name %>" loading="lazy"></span>
@@ -14,16 +14,16 @@
   <% end %>
 </ul>
 <div class="modal-foot">
-  <span class="meta num">Saldo ¥<%= @balance %> · Custo total: ¥<%= @heal_cost %></span>
+  <span class="meta num">Saldo ¥<%= balance %> · Custo total: ¥<%= heal_cost %></span>
   <span class="meta num">Nível médio <%= avg_lvl %> · base <%= HealCostPolicy::DEFAULT_COST_PER_HP %>/HP · ×<%= mult %> (máx ×<%= HealCostPolicy::MAX_LEVEL_MULTIPLIER %>)</span>
   <div class="heal-actions">
     <form hx-post="/team/heal" hx-swap="none">
-      <% if @heal_cost.zero? %><p class="notice notice--error heal-disabled-reason" role="status"><strong>Time já curado</strong></p><% elsif @balance < @heal_cost %><p class="notice notice--error heal-disabled-reason" role="status"><strong>Saldo insuficiente</strong></p><% end %>
-      <button type="submit" class="btn btn-ghost"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar time</button>
+      <% if heal_cost.zero? %><p class="notice notice--error heal-disabled-reason" role="status"><strong>Time já curado</strong></p><% elsif balance < heal_cost %><p class="notice notice--error heal-disabled-reason" role="status"><strong>Saldo insuficiente</strong></p><% end %>
+      <button type="submit" class="btn btn-ghost"<%= " disabled" if heal_cost.zero? || balance < heal_cost %>>Curar time</button>
     </form>
     <form hx-post="/team/heal" hx-swap="none">
       <input type="hidden" name="heal_and_battle" value="1">
-      <button type="submit" class="btn btn-primary"<%= " disabled" if @heal_cost.zero? || @balance < @heal_cost %>>Curar e batalhar</button>
+      <button type="submit" class="btn btn-primary"<%= " disabled" if heal_cost.zero? || balance < heal_cost %>>Curar e batalhar</button>
     </form>
   </div>
 </div>

@@ -128,9 +128,11 @@ class StyleResponsiveTest < Minitest::Test
   def test_pokemon_erb_has_quoted_value
     content = File.read(File.join(__dir__, "../views/pokemon.erb"))
 
-    assert_match(/value="<%= @pokemon\.name %>"/, content,
-                 'expected pokemon.erb to have value="<%= @pokemon.name %>" with quotes')
-    refute_match(/value=<%= @pokemon\.name %>/, content,
+    # 0096: pokemon.erb usa local `pokemon` (C3 — sem ivars); o contrato do
+    # pin e o value QUOTED, nao a fonte do dado.
+    assert_match(/value="<%= pokemon\.name %>"/, content,
+                 'expected pokemon.erb to have value="<%= pokemon.name %>" with quotes')
+    refute_match(/value=<%= pokemon\.name %>/, content,
                  "expected pokemon.erb not to have unquoted value=")
   end
 

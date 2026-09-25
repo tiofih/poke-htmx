@@ -3,15 +3,15 @@
     <div class="sprite-tile"><a href="#" hx-get="/pokemon/<%= pokemon.number %>" hx-target="#pokemon-detail" hx-swap="innerHTML"><img src="<%= pokemon.sprite %>" alt="<%= name %>" loading="lazy"></a></div>
     <div class="pcard-name"><%= name %></div>
     <div class="pcard-meta">
-      <% info = @pokemon_costs && @pokemon_costs[name] %>
+      <% info = pokemon_costs && pokemon_costs[name] %>
       <% if info %>
         <span class="poke-cost num<%= ' poke-cost--restricted' if info[:restricted] %>" data-tier="<%= info[:tier] %>"><%= info[:tier] %> · <%= info[:cost] %><%= ' ◆' if info[:restricted] %></span>
       <% end %>
       <form hx-post="/team" hx-target="#add-status" hx-swap="innerHTML" hx-include=".list-state">
         <input type="hidden" name="pokeName" value="<%= name %>">
         <%
-          in_team = Array(@team_names).include?(name)
-          disabled = in_team || @team_full
+          in_team = Array(team_names).include?(name)
+          disabled = in_team || team_full
         %>
         <button type="submit" class="pcard-add" aria-label="<%= in_team ? "#{name} já está no time" : "Adicionar #{name} ao time" %>" <%= 'disabled="disabled"' if disabled %>>+</button>
       </form>
@@ -26,8 +26,8 @@
     <form hx-post="/team" hx-target="#add-status" hx-swap="innerHTML" hx-include=".list-state">
       <input type="hidden" name="pokeName" value="<%= name %>">
       <%
-        in_team = Array(@team_names).include?(name)
-        disabled = in_team || @team_full
+        in_team = Array(team_names).include?(name)
+        disabled = in_team || team_full
       %>
       <button type="submit" class="pcard-add" aria-label="<%= in_team ? "#{name} já está no time" : "Adicionar #{name} ao time" %>" <%= 'disabled="disabled"' if disabled %>>+</button>
     </form>
