@@ -4,15 +4,22 @@ set -uo pipefail
 # Linter estrutural de um arquivo de sessão vs. o template SDD. Rode antes do
 # commit do refinamento (fase 1): seções obrigatórias presentes, critério→teste
 # sem célula vazia (S1) e aviso da regra "parar na fase 2" (validação pendente).
+# Aceita o NNNN da sessão ou um caminho de arquivo (testabilidade: fixtures).
 
 cd "$(dirname "$0")/.."
 
-NUM="${1:-}"
-if [ -z "$NUM" ]; then
-  echo "uso: ./scripts/checar-sessao NNNN" >&2
+ARG="${1:-}"
+if [ -z "$ARG" ]; then
+  echo "uso: ./scripts/checar-sessao NNNN|<arquivo.md>" >&2
   exit 2
 fi
-F="$(ls sessions/"$NUM"-*.md 2>/dev/null | head -1)"
+if [ -f "$ARG" ]; then
+  F="$ARG"
+  NUM="$(basename "$F" .md)"
+else
+  NUM="$ARG"
+  F="$(ls sessions/"$NUM"-*.md 2>/dev/null | head -1)"
+fi
 if [ -z "$F" ]; then
   echo "checar-sessao> sessão $NUM não encontrada em sessions/" >&2
   exit 1
@@ -28,11 +35,16 @@ for sec in "Objetivo" "Escopo" "Critérios de aceite" "Plano TDD"; do
 done
 
 # S1 — tabela critério→teste sem célula vazia (exceto header/separador)
-awk '/^#{3,5} .*(teste|Teste|prova)/{f=1; next} f && /^#{1,3} /{exit} f && /^\|/ {
+# captura em var e loop no shell principal: `fail` em subshell de pipeline perde
+# FAIL=1 e o exit 1 (FALHA impresso + exit 0 = sucesso fingido)
+VAZIAS="$(awk '/^###[#]?[#]? .*(teste|Teste|prova)/{f=1; next} f && /^#(#)?#? /{exit} f && /^\|/ {
   n=split($0, c, "|");
   if ($0 ~ /^\| *:?-+:? *\|/) next;
-  for (i=2; i<n; i++) { gsub(/^ +| +$/, "", c[i]); if (c[i]=="") { bad=1; print NR": "$0 } }
-}' "$F" | { while IFS= read -r l; do fail "critério→teste com célula vazia na linha $l"; done; }
+  for (i=2; i<n; i++) { gsub(/^ +| +$/, "", c[i]); if (c[i]=="") { print NR": "$0; break } }
+}' "$F")"
+while IFS= read -r l; do
+  [ -n "$l" ] && fail "critério→teste com célula vazia na linha $l"
+done <<< "$VAZIAS"
 
 # Regra do AGENTS: fase 2 concluída sem validação registrada = aguardar usuário
 IMPL="$(awk '/^\| Implementação/{print}' "$F" | grep -c 'Concluída\|Done')"
@@ -43,7 +55,7 @@ fi
 
 # Modo PR (--with-pr): sem o marcador em AGENTS.md a regra S8 não existe (default intocado).
 if [ -f AGENTS.md ] && grep -qF '<!-- sdd-pr: ativo -->' AGENTS.md; then
-  grep -qE '^> Reprodução: (seed|script|manual|nao-aplicavel)$' "$F" ||
+  grep -qE '^> Reprodução: (seed|script|manual)( .*)?$|^> Reprodução: nao-aplicavel .+$' "$F" ||
     warn "modo PR ativo e a sessão $NUM não declara '> Reprodução: seed|script|manual|nao-aplicavel' (S8.3) — feche no refinamento"
 fi
 

@@ -2,7 +2,7 @@
 set -uo pipefail
 
 # abrir-pr — abre o PR/MR da sessão no modo `--with-pr` (SDD).
-# uso: ./scripts/abrir-pr [NNNN] [--open|--no-open]
+# uso: ./scripts/abrir-pr [NNNN] [--open|--no-open] [--base <branch>]
 #
 # Ordem: marcador '<!-- sdd-pr: ativo -->' em AGENTS.md → NNNN (default: sessão de
 # maior número em sessions/) → corpo sessions/pr/NNNN-pr-body.md → base (origin/HEAD,
@@ -34,13 +34,16 @@ set -uo pipefail
 
 cd "$(dirname "$0")/.." || exit 2
 
-USO='uso: ./scripts/abrir-pr [NNNN] [--open|--no-open]'
+USO='uso: ./scripts/abrir-pr [NNNN] [--open|--no-open] [--base <branch>]'
 
-NUM=""; OPEN=""
+NUM=""; OPEN=""; BASE_FLAG=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --open) OPEN=1; shift ;;
     --no-open) OPEN=0; shift ;;
+    --base)
+      [ $# -ge 2 ] || { echo "$USO" >&2; exit 2; }
+      BASE_FLAG="$2"; shift 2 ;;
     -h|--help) echo "$USO"; exit 0 ;;
     [0-9][0-9][0-9][0-9]) NUM="$1"; shift ;;
     *) echo "$USO" >&2; exit 2 ;;
@@ -66,12 +69,36 @@ CORPO="sessions/pr/$NUM-pr-body.md"
 [ -f "$CORPO" ] || fail "corpo ausente: '$CORPO' não existe — o Implementador escreve e commita o corpo antes de abrir o PR"
 
 # --- 2. base: nunca entregar da branch base
-base="$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)"
-base="${base#origin/}"
-[ -n "$base" ] || base="main"
+if [ -n "$BASE_FLAG" ]; then
+  git rev-parse --verify --quiet "$BASE_FLAG^{commit}" >/dev/null 2>&1 ||
+    fail "--base '$BASE_FLAG' não existe (git rev-parse --verify falhou)"
+  base="$BASE_FLAG"
+else
+  base="$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null || true)"
+  base="${base#origin/}"
+  [ -n "$base" ] || base="main"
+fi
 atual="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
 [ -n "$atual" ] || fail "não é um repositório git (ou HEAD inválido) — abrir PR exige um repo com remote"
 [ "$atual" != "$base" ] || fail "a entrega não pode sair da branch base ('$base') — crie uma branch: git switch -c <nome-que-você-quiser>"
+
+# base empilhada (sem --base): branch local mais recente atrás do HEAD e fora
+# da base — tip == HEAD é a posição atual, não a base; mergeadas na base caem
+# pelo 'não é ancestral da base'.
+if [ -z "$BASE_FLAG" ]; then
+  head_sha="$(git rev-parse HEAD)"
+  while IFS= read -r cand; do
+    [ -n "$cand" ] || continue
+    [ "$cand" = "$atual" ] && continue
+    git merge-base --is-ancestor "$cand" HEAD 2>/dev/null || continue
+    [ "$(git rev-parse "$cand")" = "$head_sha" ] && continue
+    if ! git merge-base --is-ancestor "$cand" "$base" 2>/dev/null; then
+      warn "base detectada (branch empilhada): $cand"
+      base="$cand"
+      break
+    fi
+  done < <(git for-each-ref --sort=-committerdate --format='%(refname:short)' refs/heads)
+fi
 
 # --- 3. comando de abertura: PR_CMD do AGENTS.md (forma embarcada primeiro)
 pr_cmd="$(awk '
@@ -119,6 +146,19 @@ elif [ "$OPEN" = 0 ]; then
   tentar=0
 elif [ "$tem_cli" -eq 1 ] && [ "$tem_remote" -eq 1 ]; then
   tentar=1
+fi
+
+# --- 3b. push automatico: gh pr create exige a branch no remote (falhou na 0095 e
+# na 0096 por branch sem upstream). Só quando vai tentar abrir — --no-open e modo
+# degradado nunca empurram.
+if [ "$tentar" -eq 1 ]; then
+  if ! git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
+    echo "abrir-pr> branch sem upstream — git push -u origin $atual"
+    git push -u origin "$atual" || fail "git push -u origin $atual falhou — o PR exige a branch no remote"
+  elif [ "$(git rev-list --count '@{u}..HEAD')" -gt 0 ]; then
+    echo "abrir-pr> local ahead do upstream — git push"
+    git push || fail "git push falhou — abrir agora deixaria o PR desatualizado"
+  fi
 fi
 
 if [ "$tentar" -ne 1 ]; then

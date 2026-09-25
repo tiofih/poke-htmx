@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# fails-report — extrai seed, blocos de falha/erro e comando de repro da saida
+# bruta do minitest (stdout-only; o caller redireciona para tmp/fails.md).
+# uso: scripts/fails-report <saida_bruta>
+#       scripts/fails-report --files <fails.md>   # lista test/a.rb,test/b.rb (TEST= do rake)
+
+cd "$(dirname "$0")/.."
+
+if [ "${1:-}" = "--files" ]; then
+  F="${2:-}"
+  [ -n "$F" ] && [ -f "$F" ] || { echo "fails-report> uso: fails-report --files <fails.md>" >&2; exit 2; }
+  grep -oE 'test/[A-Za-z0-9_]+\.rb' "$F" | sort -u | paste -sd, - || true
+  exit 0
+fi
+
+SAIDA="${1:-}"
+[ -n "$SAIDA" ] && [ -f "$SAIDA" ] || { echo "fails-report> uso: fails-report <saida_bruta>" >&2; exit 2; }
+
+seed="$(grep -m1 -oE -- '--seed[ =][0-9]+' "$SAIDA" | grep -oE '[0-9]+' || true)"
+[ -z "$seed" ] || printf 'seed %s\n' "$seed"
+
+awk '
+function flush() { if (repro != "") { print ""; print repro; repro = "" } }
+/^Run options:/ {
+  for (i = 1; i <= NF; i++) {
+    if ($i == "--seed") seed = $(i + 1)
+    else if ($i ~ /^--seed=/) { split($i, a, "="); seed = a[2] }
+  }
+}
+/^[ \t]*[0-9]+\) (Failure|Error):/ { flush(); blk = 1; hdr = 1; print; next }
+/^[0-9]+ runs,/ { flush(); blk = 0 }
+blk {
+  print
+  if (hdr) {
+    hdr = 0
+    if (match($0, / \[[^]]*:[0-9]+\]:/)) {
+      loc = substr($0, RSTART + 2, RLENGTH - 4)   # test/arquivo.rb:9
+      method = substr($0, 1, RSTART - 1)          # Classe#metodo
+      file = substr(loc, 1, index(loc, ":") - 1)
+      repro = sprintf("repro: TESTOPTS=\"--seed=%s\" ./scripts/test %s -n /%s/", seed, file, method)
+    }
+  }
+}
+' "$SAIDA"

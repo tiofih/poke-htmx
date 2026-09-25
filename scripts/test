@@ -2,6 +2,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
+mkdir -p tmp   # artefatos (test.out, fails.md, profile.md) em clone novo sem tmp/
 
 # Garantir que o banco esteja de pé antes de rodar a suíte
 docker compose up -d db
@@ -10,6 +11,9 @@ TEST_FILES=()
 NAME_FILTER=""
 EXTRA_ARGS=()
 NEXT_IS_NAME=false
+FAILED=0
+PROFILE=0
+CHECK="${CHECK:-0}"
 
 for arg in "$@"; do
   if [ "$NEXT_IS_NAME" = true ]; then
@@ -21,6 +25,12 @@ for arg in "$@"; do
     NAME_FILTER="${arg#-n=}"
   elif [[ "$arg" == --name=* ]]; then
     NAME_FILTER="${arg#--name=}"
+  elif [ "$arg" = "--failed" ]; then
+    FAILED=1
+  elif [ "$arg" = "--profile" ]; then
+    PROFILE=1
+  elif [ "$arg" = "--check" ]; then
+    CHECK=1
   elif [ -f "$arg" ]; then
     TEST_FILES+=("$arg")
   else
@@ -33,18 +43,73 @@ if [ "$NEXT_IS_NAME" = true ]; then
   exit 2
 fi
 
+# --failed: re-rodar so os arquivos citados no tmp/fails.md do passo anterior
+if [ "$FAILED" -eq 1 ]; then
+  if [ ! -f tmp/fails.md ]; then
+    echo "test> tmp/fails.md ausente — rode ./scripts/test com falha antes de usar --failed" >&2
+    exit 2
+  fi
+  falhos="$(./scripts/fails-report --files tmp/fails.md)"
+  if [ -z "$falhos" ]; then
+    echo "test> tmp/fails.md sem arquivos de falha reconheciveis (test/*.rb)" >&2
+    exit 2
+  fi
+  IFS=',' read -r -a FALHOS <<< "$falhos"
+  TEST_FILES+=("${FALHOS[@]}")
+fi
+
 if [ "${#TEST_FILES[@]}" -gt 0 ]; then
   EXTRA_ARGS+=(TEST="$(IFS=,; echo "${TEST_FILES[*]}")")
 fi
 
+TESTOPTS_VAL=""
+if [ "$PROFILE" -eq 1 ]; then
+  TESTOPTS_VAL="-v "
+fi
 if [ -n "$NAME_FILTER" ]; then
-  EXTRA_ARGS+=(TESTOPTS="--name=$NAME_FILTER")
+  EXTRA_ARGS+=(TESTOPTS="${TESTOPTS_VAL}--name=$NAME_FILTER")
+elif [ -n "$TESTOPTS_VAL" ]; then
+  EXTRA_ARGS+=(TESTOPTS="${TESTOPTS_VAL% }")
+fi
+
+# Captura da saida (tee): em exit != 0 vira tmp/fails.md via fails-report,
+# com o exit do docker preservado pelo pipefail.
+SAIDA="tmp/test.out"
+
+# --check: uma unica invocacao de container com `rubocop && rake test` —
+# args quotados com printf %q para sobreviverem ao bash -lc.
+RUN=(bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"})
+if [ "$CHECK" -eq 1 ]; then
+  cmd="bundle exec rubocop && bundle exec rake test"
+  for a in ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}; do
+    printf -v q '%q ' "$a"
+    cmd="$cmd $q"
+  done
+  RUN=(bash -lc "${cmd% }")
 fi
 
 if [ "$(docker compose ps --filter status=running --services | grep -c '^web$')" -eq 1 ]; then
   echo "test> Container 'web' ativo — rake test nele."
-  docker compose exec -T web bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
+  if docker compose exec -T web ${RUN[@]+"${RUN[@]}"} 2>&1 | tee "$SAIDA"; then
+    rc=0
+  else
+    rc=$?
+  fi
 else
   echo "test> Container 'web' inativo — one-off para rake test."
-  docker compose run --rm web bundle exec rake test ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
+  if docker compose run --rm web ${RUN[@]+"${RUN[@]}"} 2>&1 | tee "$SAIDA"; then
+    rc=0
+  else
+    rc=$?
+  fi
 fi
+
+if [ "$rc" -ne 0 ]; then
+  ./scripts/fails-report "$SAIDA" > tmp/fails.md || true
+fi
+
+if [ "$PROFILE" -eq 1 ]; then
+  ./scripts/profile-report "$SAIDA" > tmp/profile.md || true
+fi
+
+exit "$rc"
