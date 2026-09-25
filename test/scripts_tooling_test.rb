@@ -66,6 +66,18 @@ class ScriptsToolingTest < Minitest::Test
     end
   end
 
+  def test_fails_report_aceita_seed_no_formato_com_igualdade
+    # o proprio comando de repro do fails.md usa --seed=N: se a rerodada falhar,
+    # o minitest ecoa `--seed=6833` e o seed precisa sobreviver de novo
+    saida = MINITEST_FAIL_OUTPUT.sub("--seed 5407", "--seed=5407")
+    with_raw_output(saida) do |path|
+      out, err, status = run_script("fails-report", path)
+      assert status.success?, "exit #{status.exitstatus}: #{err}"
+      assert_includes out, "seed 5407"
+      assert_includes out, 'repro: TESTOPTS="--seed=5407"'
+    end
+  end
+
   def test_fails_report_files_extrai_lista_de_arquivos
     with_raw_output(TWO_FILES_FAIL_OUTPUT) do |raw|
       report = File.expand_path("tmp/fails_fixture_#{Process.pid}.md")
