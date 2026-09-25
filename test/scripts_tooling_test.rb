@@ -109,7 +109,61 @@ class ScriptsToolingTest < Minitest::Test
     end
   end
 
+  SESSAO_MINIMA = <<~MD
+    # Sessão 9999 — fixture
+
+    ## Status
+
+    | Fase | Status |
+    | --- | --- |
+    | Refinamento | Concluída |
+    | Implementação | Pendente |
+    | Validação | Pendente |
+
+    ## 1. Objetivo
+
+    fixture
+
+    ## 2. Escopo
+
+    fixture
+
+    ## 3. Critérios de aceite
+
+    fixture
+
+    ## 4. Plano TDD
+
+    fixture
+  MD
+
+  def test_checar_sessao_aceita_justificativa_na_mesma_linha
+    with_sessao_fixture("> Reprodução: nao-aplicavel — sem estado a montar") do |path|
+      out, err, status = run_script("checar-sessao", path)
+      assert status.success?, "exit #{status.exitstatus}: #{err}#{out}"
+      refute_includes err, "AVISO"
+      refute_includes err, "Reprodução"
+    end
+  end
+
+  def test_checar_sessao_ainda_acusa_valor_invalido
+    with_sessao_fixture("> Reprodução: qualquercoisa") do |path|
+      _out, err, status = run_script("checar-sessao", path)
+      assert status.success?, "aviso não derruba o exit: #{err}"
+      assert_includes err, "AVISO"
+      assert_includes err, "Reprodução"
+    end
+  end
+
   private
+
+  def with_sessao_fixture(reproducao)
+    path = File.expand_path("tmp/sessao_fixture_#{Process.pid}.md")
+    File.write(path, "#{SESSAO_MINIMA}\n#{reproducao}\n")
+    yield path
+  ensure
+    FileUtils.rm_f(path)
+  end
 
   def run_script(name, *)
     Open3.capture3("bash", "scripts/#{name}", *)

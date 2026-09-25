@@ -4,15 +4,22 @@ set -uo pipefail
 # Linter estrutural de um arquivo de sessão vs. o template SDD. Rode antes do
 # commit do refinamento (fase 1): seções obrigatórias presentes, critério→teste
 # sem célula vazia (S1) e aviso da regra "parar na fase 2" (validação pendente).
+# Aceita o NNNN da sessão ou um caminho de arquivo (testabilidade: fixtures).
 
 cd "$(dirname "$0")/.."
 
-NUM="${1:-}"
-if [ -z "$NUM" ]; then
-  echo "uso: ./scripts/checar-sessao NNNN" >&2
+ARG="${1:-}"
+if [ -z "$ARG" ]; then
+  echo "uso: ./scripts/checar-sessao NNNN|<arquivo.md>" >&2
   exit 2
 fi
-F="$(ls sessions/"$NUM"-*.md 2>/dev/null | head -1)"
+if [ -f "$ARG" ]; then
+  F="$ARG"
+  NUM="$(basename "$F" .md)"
+else
+  NUM="$ARG"
+  F="$(ls sessions/"$NUM"-*.md 2>/dev/null | head -1)"
+fi
 if [ -z "$F" ]; then
   echo "checar-sessao> sessão $NUM não encontrada em sessions/" >&2
   exit 1
@@ -43,7 +50,7 @@ fi
 
 # Modo PR (--with-pr): sem o marcador em AGENTS.md a regra S8 não existe (default intocado).
 if [ -f AGENTS.md ] && grep -qF '<!-- sdd-pr: ativo -->' AGENTS.md; then
-  grep -qE '^> Reprodução: (seed|script|manual|nao-aplicavel)$' "$F" ||
+  grep -qE '^> Reprodução: (seed|script|manual|nao-aplicavel)( .*)?$' "$F" ||
     warn "modo PR ativo e a sessão $NUM não declara '> Reprodução: seed|script|manual|nao-aplicavel' (S8.3) — feche no refinamento"
 fi
 
