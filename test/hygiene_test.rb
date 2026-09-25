@@ -34,6 +34,10 @@ class HygieneTest < Minitest::Test
     ].each do |path|
       refute File.exist?(File.join(repo_root, path)), "#{path} devia ter sido apagado (§5.A)"
     end
+    # Pins de dados duraveis valem so no disco local: graphify-out/ e
+    # open-design/prints/ sao gitignored, o checkout de CI nao os tem.
+    return unless File.directory?(File.join(repo_root, "graphify-out"))
+
     assert File.exist?(File.join(repo_root, "graphify-out/graph.json")), "graph.json e duravel, fica"
     assert File.exist?(File.join(repo_root, "open-design/prints")), "prints/ (sem backup/) fica"
   end
