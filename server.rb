@@ -27,6 +27,7 @@ require_relative "lib/parallelizer"
 require_relative "lib/fighter_presenter"
 require_relative "lib/battle_log_presenter"
 require_relative "lib/battle_juice_presenter"
+require_relative "lib/team_presenter"
 require_relative "lib/battle_end_state_presenter"
 require_relative "lib/team_budget"
 require_relative "lib/pokemon_rating_cache"
@@ -50,12 +51,14 @@ module ServerCommon
   end
 
   # 0096 — contratos explicitos de dados (builder para view com 3+ call sites).
+  # 0098 C3 — delegador: o hash vive no TeamPresenter (teste puro); o nome e a
+  # assinatura nao mudam (call sites do ERB em views/index.erb:19 intactos).
   def team_locals
-    {
+    TeamPresenter.new(
       team: @team, team_types: @team_types, member_levels: @member_levels,
       notice: @notice, notice_kind: @notice_kind, can_battle: @can_battle,
       game_over: @game_over, journey_started: @journey_started
-    }
+    ).to_h
   end
 
   def team_manage_locals
