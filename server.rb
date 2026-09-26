@@ -28,6 +28,7 @@ require_relative "lib/fighter_presenter"
 require_relative "lib/battle_log_presenter"
 require_relative "lib/battle_juice_presenter"
 require_relative "lib/team_presenter"
+require_relative "lib/mart_presenter"
 require_relative "lib/battle_end_state_presenter"
 require_relative "lib/team_budget"
 require_relative "lib/pokemon_rating_cache"
@@ -78,11 +79,13 @@ module ServerCommon
     }
   end
 
+  # 0098 C4 — delegador: o hash vive no MartPresenter (teste puro); nome e
+  # assinatura intactos (call sites server.rb:648,851).
   def mart_modal_locals
-    {
+    MartPresenter.new(
       notice: @notice, notice_kind: @notice_kind, balance: @balance,
       catalog: @catalog, inventory: @inventory, rotation: @rotation
-    }
+    ).to_h
   end
 
   def filter_controls_locals
