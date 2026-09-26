@@ -29,6 +29,7 @@ require_relative "lib/battle_log_presenter"
 require_relative "lib/battle_juice_presenter"
 require_relative "lib/team_presenter"
 require_relative "lib/mart_presenter"
+require_relative "lib/pokemon_list_presenter"
 require_relative "lib/battle_end_state_presenter"
 require_relative "lib/team_budget"
 require_relative "lib/pokemon_rating_cache"
@@ -221,28 +222,10 @@ module ServerListActions
     %w[type generation tier cost cost_max sort team].any? { |k| filter_param_present?(k) }
   end
 
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   def load_pokemon_page
     @limit = PAGE_SIZE
-    @type = normalized_type(params[:type]) if filter_param_present?("type")
-    @generation = normalized_generation(params[:generation]) if filter_param_present?("generation")
-    @tier = normalized_tier(params[:tier]) if filter_param_present?("tier")
-    if filter_param_present?("cost_max") || filter_param_present?("cost")
-      @cost_max = normalized_cost_max(params[:cost_max] || params[:cost])
-    end
-    @sort = normalized_sort(params[:sort]) if filter_param_present?("sort")
-    @team_filter = normalized_team(params[:team]) if filter_param_present?("team")
-    # restore from session when no explicit filter param
-    restore_filters_from_session unless any_filter_param_present?
-    # persist when explicit filter params were sent
-    persist_filters_to_session if any_filter_param_present?
-    # ensure nil defaults when no session and no params
-    @type ||= nil
-    @generation ||= nil
-    @tier ||= nil
-    @cost_max ||= nil
-    @sort ||= nil
-    @team_filter ||= nil
+    apply_list_filters
     load_team_names
     @starters = starters_visible? ? load_starters : []
     build_page
@@ -253,62 +236,10 @@ module ServerListActions
     end
     build_pokemon_costs
   end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
   def starters_visible?
     @q.empty? && @offset.zero? && !filter_active? && !sort_active?
-  end
-
-  def normalized_type(value)
-    v = value.to_s.strip.downcase
-    return nil if v.empty?
-    return nil unless PokeApiTypes::TYPE_NAMES.include?(v)
-
-    v
-  end
-
-  def normalized_generation(value)
-    v = value.to_s.strip
-    return nil if v.empty?
-
-    n = Integer(v, 10, exception: false)
-    return nil unless n&.between?(1, 9)
-
-    n
-  end
-
-  def normalized_tier(value)
-    v = value.to_s.strip.upcase
-    return nil if v.empty?
-    return nil unless %w[S A B C D F].include?(v)
-
-    v
-  end
-
-  def normalized_cost_max(value)
-    v = value.to_s.strip
-    return nil if v.empty?
-
-    n = Integer(v, 10, exception: false)
-    return nil unless n && n >= 0
-
-    n
-  end
-
-  def normalized_sort(value)
-    v = value.to_s.strip
-    return nil if v.empty?
-    return nil unless %w[cost_asc cost_desc tier_desc tier_asc].include?(v)
-
-    v
-  end
-
-  def normalized_team(value)
-    v = value.to_s.strip.downcase
-    return nil if v.empty?
-    return nil unless %w[in out].include?(v)
-
-    v
   end
 
   def filter_active?
@@ -323,48 +254,27 @@ module ServerListActions
     params.key?(key) || params.key?(key.to_sym)
   end
 
-  def any_filter_param_present?
-    %w[type generation tier cost cost_max sort team].any? { |k| filter_param_present?(k) }
+  # 0098 C1 — normalizacao/restauracao dos filtros vive no PokemonListPresenter;
+  # a escrita na session continua aqui na rota.
+  def apply_list_filters
+    page = PokemonListPresenter.new(params: params, session_filters: session[:list_filters])
+    write_list_filters(page.session_write)
+    assign_list_filters(page.filters)
   end
 
-  def persist_filters_to_session
-    filters = current_filter_params
-    if filters.empty?
-      session.delete(:list_filters)
-    else
-      session[:list_filters] = filters
-    end
+  def write_list_filters(write)
+    session.delete(:list_filters) if write == :delete
+    session[:list_filters] = write if write.is_a?(Hash)
   end
 
-  def current_filter_params
-    {
-      "type" => @type,
-      "generation" => @generation,
-      "tier" => @tier,
-      "cost_max" => @cost_max,
-      "sort" => @sort,
-      "team" => @team_filter
-    }.compact
+  def assign_list_filters(filters)
+    @type = filters[:type]
+    @generation = filters[:generation]
+    @tier = filters[:tier]
+    @cost_max = filters[:cost_max]
+    @sort = filters[:sort]
+    @team_filter = filters[:team_filter]
   end
-
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
-  def restore_filters_from_session
-    stored = session[:list_filters]
-    return unless stored
-
-    @type = normalized_type(stored["type"] || stored[:type]) if stored["type"] || stored[:type]
-    gen = stored["generation"] || stored[:generation]
-    @generation = normalized_generation(gen) if gen
-    tier_val = stored["tier"] || stored[:tier]
-    @tier = normalized_tier(tier_val) if tier_val
-    cost_val = stored["cost_max"] || stored[:cost_max] || stored["cost"] || stored[:cost]
-    @cost_max = normalized_cost_max(cost_val) if cost_val
-    s = stored["sort"] || stored[:sort]
-    @sort = normalized_sort(s) if s
-    team_val = stored["team"] || stored[:team]
-    @team_filter = normalized_team(team_val) if team_val
-  end
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
 
   def load_search_hint
     @search_hint = search_hint(@q) if !@q.empty? && @items.empty?
