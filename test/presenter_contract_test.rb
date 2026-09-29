@@ -27,7 +27,7 @@ class PresenterContractTest < Minitest::Test
     "def normalized_cost_max", "def normalized_sort", "def normalized_team",
     "def restore_filters_from_session", "def persist_filters_to_session",
     "def current_filter_params", "def any_filter_param_present?",
-    "def apply_list_filters", "def assign_list_filters", "def load_team_names",
+    "def load_team_names",
     "def filter_active?", "def sort_active?", "def starters_visible?",
     "def commons_window", "def fetch_commons", "def collect_base_forms",
     "def collect_all_filtered_base_forms", "def build_page", "def sort_names",

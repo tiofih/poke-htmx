@@ -191,7 +191,7 @@ module ServerListActions
   end
 
   def filter_controls_needs_sync?
-    %w[type generation tier cost cost_max sort team].any? { |k| filter_param_present?(k) }
+    PokemonListPresenter::PRESENCE_KEYS.any? { |k| filter_param_present?(k) }
   end
 
   def filter_param_present?(key)
