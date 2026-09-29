@@ -27,6 +27,9 @@ require_relative "lib/parallelizer"
 require_relative "lib/fighter_presenter"
 require_relative "lib/battle_log_presenter"
 require_relative "lib/battle_juice_presenter"
+require_relative "lib/team_presenter"
+require_relative "lib/mart_presenter"
+require_relative "lib/pokemon_list_presenter"
 require_relative "lib/battle_end_state_presenter"
 require_relative "lib/team_budget"
 require_relative "lib/pokemon_rating_cache"
@@ -50,12 +53,14 @@ module ServerCommon
   end
 
   # 0096 — contratos explicitos de dados (builder para view com 3+ call sites).
+  # 0098 C3 — delegador: o hash vive no TeamPresenter (teste puro); o nome e a
+  # assinatura nao mudam (call sites do ERB em views/index.erb:19 intactos).
   def team_locals
-    {
+    TeamPresenter.new(
       team: @team, team_types: @team_types, member_levels: @member_levels,
       notice: @notice, notice_kind: @notice_kind, can_battle: @can_battle,
       game_over: @game_over, journey_started: @journey_started
-    }
+    ).to_h
   end
 
   def team_manage_locals
@@ -75,19 +80,19 @@ module ServerCommon
     }
   end
 
+  # 0098 C4 — delegador: o hash vive no MartPresenter (teste puro); nome e
+  # assinatura intactos (call sites server.rb:648,851).
   def mart_modal_locals
-    {
+    MartPresenter.new(
       notice: @notice, notice_kind: @notice_kind, balance: @balance,
       catalog: @catalog, inventory: @inventory, rotation: @rotation
-    }
+    ).to_h
   end
 
+  # 0098 C4 — delegador: o hash vive no PokemonListPresenter (teste puro);
+  # nome e assinatura intactos (call sites views/index.erb:36 e server.rb).
   def filter_controls_locals
-    {
-      cost_max: @cost_max, generation: @generation, items: @items, q: @q,
-      sort: @sort, starters: @starters, team_filter: @team_filter,
-      tier: @tier, type: @type
-    }
+    @pokemon_page.filter_controls_locals
   end
 
   def battle_locals
@@ -104,15 +109,10 @@ module ServerCommon
     { message: @message }
   end
 
+  # 0098 C4 — delegador: o hash vive no PokemonListPresenter (teste puro);
+  # nome e assinatura intactos (call sites views/index.erb:40 e server.rb).
   def pokemon_list_locals
-    {
-      items: @items, starters: @starters, offset: @offset, q: @q, type: @type,
-      generation: @generation, tier: @tier, cost_max: @cost_max, sort: @sort,
-      team_filter: @team_filter, current_page: @current_page, prev_offset: @prev_offset,
-      next_offset: @next_offset, search_hint: @search_hint, notice: @notice,
-      notice_kind: @notice_kind, pokemon_costs: @pokemon_costs, team_full: @team_full,
-      team_names: @team_names
-    }
+    @pokemon_page.list_locals
   end
 
   def current_user
@@ -171,38 +171,17 @@ module ServerCommon
   end
 end
 
-STARTER_SLUGS = %w[
-  bulbasaur charmander squirtle
-  chikorita cyndaquil totodile
-  treecko torchic mudkip
-  turtwig chimchar piplup
-  snivy tepig oshawott
-  chespin fennekin froakie
-  rowlet litten popplio
-  grookey scorbunny sobble
-  sprigatito fuecoco quaxly
-].freeze
-
-# rubocop:disable Metrics/ModuleLength
 module ServerListActions
-  PAGE_SIZE = 36
-  FIRST_PAGE_COMMONS = PAGE_SIZE - STARTER_SLUGS.size
-  SCAN_BATCH = 24
-
   private
 
   def render_index
-    @offset = 0
-    @q = ""
     prepare_team_fragment_data
-    load_pokemon_page
+    load_pokemon_page(offset: 0, query: "")
     erb :index, locals: { balance: @balance, team_budget: @team_budget, team_cost: @team_cost }
   end
 
   def render_pokemons_list
-    @offset = params[:offset].to_i
-    @q = params[:q].to_s
-    load_pokemon_page
+    load_pokemon_page(offset: params[:offset].to_i, query: params[:q].to_s)
     list = erb(:pokemon_list, layout: false, locals: pokemon_list_locals)
     list + (filter_controls_needs_sync? ? oob_filter_controls : "")
   end
@@ -212,340 +191,36 @@ module ServerListActions
   end
 
   def filter_controls_needs_sync?
-    %w[type generation tier cost cost_max sort team].any? { |k| filter_param_present?(k) }
-  end
-
-  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-  def load_pokemon_page
-    @limit = PAGE_SIZE
-    @type = normalized_type(params[:type]) if filter_param_present?("type")
-    @generation = normalized_generation(params[:generation]) if filter_param_present?("generation")
-    @tier = normalized_tier(params[:tier]) if filter_param_present?("tier")
-    if filter_param_present?("cost_max") || filter_param_present?("cost")
-      @cost_max = normalized_cost_max(params[:cost_max] || params[:cost])
-    end
-    @sort = normalized_sort(params[:sort]) if filter_param_present?("sort")
-    @team_filter = normalized_team(params[:team]) if filter_param_present?("team")
-    # restore from session when no explicit filter param
-    restore_filters_from_session unless any_filter_param_present?
-    # persist when explicit filter params were sent
-    persist_filters_to_session if any_filter_param_present?
-    # ensure nil defaults when no session and no params
-    @type ||= nil
-    @generation ||= nil
-    @tier ||= nil
-    @cost_max ||= nil
-    @sort ||= nil
-    @team_filter ||= nil
-    load_team_names
-    @starters = starters_visible? ? load_starters : []
-    build_page
-    @items = Parallelizer.map(@page_names) { |name| [name, settings.api.find(name)] }
-    load_search_hint
-    if @page_names.empty? && @q.empty? && !filter_active? && !sort_active?
-      @notice = "Não foi possível carregar a lista de Pokémon."
-    end
-    build_pokemon_costs
-  end
-  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-
-  def starters_visible?
-    @q.empty? && @offset.zero? && !filter_active? && !sort_active?
-  end
-
-  def normalized_type(value)
-    v = value.to_s.strip.downcase
-    return nil if v.empty?
-    return nil unless PokeApiTypes::TYPE_NAMES.include?(v)
-
-    v
-  end
-
-  def normalized_generation(value)
-    v = value.to_s.strip
-    return nil if v.empty?
-
-    n = Integer(v, 10, exception: false)
-    return nil unless n&.between?(1, 9)
-
-    n
-  end
-
-  def normalized_tier(value)
-    v = value.to_s.strip.upcase
-    return nil if v.empty?
-    return nil unless %w[S A B C D F].include?(v)
-
-    v
-  end
-
-  def normalized_cost_max(value)
-    v = value.to_s.strip
-    return nil if v.empty?
-
-    n = Integer(v, 10, exception: false)
-    return nil unless n && n >= 0
-
-    n
-  end
-
-  def normalized_sort(value)
-    v = value.to_s.strip
-    return nil if v.empty?
-    return nil unless %w[cost_asc cost_desc tier_desc tier_asc].include?(v)
-
-    v
-  end
-
-  def normalized_team(value)
-    v = value.to_s.strip.downcase
-    return nil if v.empty?
-    return nil unless %w[in out].include?(v)
-
-    v
-  end
-
-  def filter_active?
-    !@type.nil? || !@generation.nil? || !@tier.nil? || !@cost_max.nil? || !@team_filter.nil?
-  end
-
-  def sort_active?
-    !@sort.nil?
+    PokemonListPresenter::PRESENCE_KEYS.any? { |k| filter_param_present?(k) }
   end
 
   def filter_param_present?(key)
     params.key?(key) || params.key?(key.to_sym)
   end
 
-  def any_filter_param_present?
-    %w[type generation tier cost cost_max sort team].any? { |k| filter_param_present?(k) }
-  end
-
-  def persist_filters_to_session
-    filters = current_filter_params
-    if filters.empty?
-      session.delete(:list_filters)
-    else
-      session[:list_filters] = filters
-    end
-  end
-
-  def current_filter_params
-    {
-      "type" => @type,
-      "generation" => @generation,
-      "tier" => @tier,
-      "cost_max" => @cost_max,
-      "sort" => @sort,
-      "team" => @team_filter
-    }.compact
-  end
-
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
-  def restore_filters_from_session
-    stored = session[:list_filters]
-    return unless stored
-
-    @type = normalized_type(stored["type"] || stored[:type]) if stored["type"] || stored[:type]
-    gen = stored["generation"] || stored[:generation]
-    @generation = normalized_generation(gen) if gen
-    tier_val = stored["tier"] || stored[:tier]
-    @tier = normalized_tier(tier_val) if tier_val
-    cost_val = stored["cost_max"] || stored[:cost_max] || stored["cost"] || stored[:cost]
-    @cost_max = normalized_cost_max(cost_val) if cost_val
-    s = stored["sort"] || stored[:sort]
-    @sort = normalized_sort(s) if s
-    team_val = stored["team"] || stored[:team]
-    @team_filter = normalized_team(team_val) if team_val
-  end
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
-
-  def load_search_hint
-    @search_hint = search_hint(@q) if !@q.empty? && @items.empty?
-  end
-
-  def build_page
-    @page_names, more = commons_window
-    @current_page = current_page_number
-    @prev_offset = previous_offset
-    @next_offset = more ? next_page_offset : nil
-  end
-
-  def commons_window
-    if @q.empty? && @offset.zero? && !filter_active? && !sort_active?
-      fetch_commons(0, FIRST_PAGE_COMMONS)
-    else
-      fetch_commons(@offset, PAGE_SIZE)
-    end
-  end
-
-  # rubocop:disable Metrics/MethodLength
-  def fetch_commons(offset, count)
-    if @sort
-      all = collect_all_filtered_base_forms
-      sorted = sort_names(all)
-      more = sorted.size > offset + count
-      [sorted[offset, count].to_a, more]
-    else
-      base_forms = []
-      collect_base_forms(base_forms, offset + count)
-      more = base_forms.size >= offset + count
-      [base_forms[offset, count].to_a, more]
-    end
-  end
-  # rubocop:enable Metrics/MethodLength
-
-  def collect_base_forms(base_forms, target)
-    common_candidates.each_slice(SCAN_BATCH) do |batch|
-      base_forms.concat(filtered_base_forms(batch))
-      break if base_forms.size >= target
-    end
-  end
-
-  def collect_all_filtered_base_forms
-    all = []
-    common_candidates.each_slice(SCAN_BATCH) do |batch|
-      all.concat(filtered_base_forms(batch))
-    end
-    all
-  end
-
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
-  def sort_names(names)
-    infos = Parallelizer.map(names) do |name|
-      pokemon = settings.api.detail(name) || settings.api.find(name)
-      # guard nil pokemon (should not happen for base forms)
-      tier = pokemon ? line_tier_for(pokemon).to_s : "F"
-      restricted = settings.api.evolution_restricted?(name)
-      cost = TeamBudget.cost_for(line_tier: tier, restricted: restricted)
-      [name, tier, cost]
-    end
-    case @sort
-    when "cost_asc"
-      infos.sort_by { |_n, _t, c| c }.map(&:first)
-    when "cost_desc"
-      infos.sort_by { |_n, _t, c| -c }.map(&:first)
-    when "tier_desc"
-      infos.sort_by { |_n, t, _c| -ServerTeamActions::TIER_ORDER.index(t.to_sym) }.map(&:first)
-    when "tier_asc"
-      infos.sort_by { |_n, t, _c| ServerTeamActions::TIER_ORDER.index(t.to_sym) }.map(&:first)
-    else
-      names
-    end
-  end
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
-
-  def type_pokemon_set
-    return @type_pokemon_set if defined?(@type_pokemon_set) && @type_pokemon_set && @type_pokemon_set_type == @type
-
-    @type_pokemon_set_type = @type
-    @type_pokemon_set = Set.new(settings.api.pokemon_names_by_type(@type))
-  end
-
-  # NOTA PERF 0057-4c: tipo usa endpoint /type (1 fetch_type_json) + interseção Set — rápido (~<1s/1300 nomes).
-  # Geração/tier/cost ainda varrem candidatos em lotes 24 com base_form? + detail (+ line_tier) por item.
-  # Primeira carga fria lê PersistentJsonStore (~60s/300MB em dev, quente ~0.01s — sessao 0050 C4-b);
-  # se p95 rock ainda alto após 4b é warm-up frio, não implementação. Próximo passo: índice
-  # por geração/tier similar a /type ou cap max_candidates (fora deste hotfix, limitação aceita).
-
-  # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
-  def filtered_base_forms(batch)
-    forms = Parallelizer.map(batch) { |name| [name, settings.api.base_form?(name)] }
-    base_names = forms.select { |_name, is_base| is_base }.map(&:first)
-    filtered = base_names
-    if @type
-      type_set = type_pokemon_set
-      filtered = filtered.select { |name| type_set.include?(name) }
-    end
-    if @generation
-      gen = Parallelizer.map(filtered) { |name| [name, settings.api.generation_for(name)] }
-      filtered = gen.select { |_name, gen_val| gen_val == @generation }.map(&:first)
-    end
-    if @tier || @cost_max
-      tier_cost = Parallelizer.map(filtered) do |name|
-        pokemon = settings.api.detail(name) || settings.api.find(name)
-        next [name, nil, nil] unless pokemon
-
-        tier = line_tier_for(pokemon).to_s
-        restricted = settings.api.evolution_restricted?(pokemon.name)
-        cost = TeamBudget.cost_for(line_tier: tier, restricted: restricted)
-        [name, tier, cost]
-      end
-      tier_cost = tier_cost.select { |_name, tier_val, _cost| tier_val == @tier } if @tier
-      tier_cost = tier_cost.select { |_name, _t, cost| cost && cost <= @cost_max } if @cost_max
-      filtered = tier_cost.map(&:first)
-    end
-    filtered = filter_by_team(filtered) if @team_filter
-    filtered
-  end
-  # rubocop:enable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
-
-  def filter_by_team(names)
-    member_set = Set.new(@team_names)
-    if @team_filter == "in"
-      names.select { |name| member_set.include?(name) }
-    else
-      names.reject { |name| member_set.include?(name) }
-    end
-  end
-
-  def common_candidates
-    names = settings.api.fetch_all_names.to_a
-    names = names.select { |name| name.downcase.include?(@q.downcase) } unless @q.empty?
-    return names if filter_active? || sort_active?
-
-    names.reject { |name| STARTER_SLUGS.include?(name) }
-  end
-
-  def standard_pagination?
-    @q.empty? && !filter_active? && !sort_active?
-  end
-
-  def current_page_number
-    if standard_pagination? && !@offset.zero?
-      ((@offset - FIRST_PAGE_COMMONS) / PAGE_SIZE) + 2
-    else
-      (@offset / PAGE_SIZE) + 1
-    end
-  end
-
-  def previous_offset
-    return nil if @offset.zero?
-    return 0 if standard_pagination? && @current_page == 2
-
-    @offset - PAGE_SIZE
-  end
-
-  def next_page_offset
-    return FIRST_PAGE_COMMONS if standard_pagination? && @offset.zero?
-
-    @offset + PAGE_SIZE
-  end
-
-  def load_team_names
+  # 0098 C2 — a montagem da pagina vive no PokemonListPresenter (puro,
+  # testavel); aqui fica so o wiring: time resolvido (DB), escrita da session
+  # e notices que vazam para os demais builders (@notice lido no erb :index).
+  # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+  def load_pokemon_page(offset:, query:)
     team = settings.team.all(current_user)
-    @team_names = team.map(&:name)
-    @team_full = team.size >= TeamRepository::MAX_TEAM_SIZE
+    @pokemon_page = PokemonListPresenter.new(
+      params: params, session_filters: session[:list_filters], offset: offset, q: query,
+      api: settings.api, team_names: team.map(&:name),
+      team_full: team.size >= TeamRepository::MAX_TEAM_SIZE,
+      line_tier: ->(pokemon) { line_tier_for(pokemon) },
+      tier_order: ServerTeamActions::TIER_ORDER,
+      notice: @notice, notice_kind: @notice_kind
+    )
+    write_list_filters(@pokemon_page.session_write)
+    @notice = @pokemon_page.notice
+    @notice_kind = @pokemon_page.notice_kind
   end
+  # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
-  def load_starters
-    Parallelizer.map(STARTER_SLUGS) { |name| [name, settings.api.find(name)] }
-  end
-
-  def build_pokemon_costs
-    @pokemon_costs = {}
-    ((@starters || []) + (@items || [])).each do |name, pokemon|
-      next unless pokemon
-
-      @pokemon_costs[name] = pokemon_cost_info(pokemon)
-    end
-  end
-
-  def pokemon_cost_info(pokemon)
-    tier = line_tier_for(pokemon)
-    restricted = settings.api.evolution_restricted?(pokemon.name)
-    cost = TeamBudget.cost_for(line_tier: tier.to_s, restricted: restricted)
-    { tier: tier, cost: cost, restricted: restricted }
+  def write_list_filters(write)
+    session.delete(:list_filters) if write == :delete
+    session[:list_filters] = write if write.is_a?(Hash)
   end
 
   def render_pokemon_fragment
@@ -566,29 +241,6 @@ module ServerListActions
       @message = "Pokémon não encontrado."
       erb :error, layout: false, locals: error_locals
     end
-  end
-end
-# rubocop:enable Metrics/ModuleLength
-
-module ServerSearchHintActions
-  private
-
-  def search_hint(query)
-    match = first_search_match(query)
-    return nil unless match
-
-    return { kind: :starter, name: match } if STARTER_SLUGS.include?(match)
-
-    base = base_form_for(match)
-    base ? { kind: :evolution, name: match, base: base.name } : { kind: :generic, name: match }
-  end
-
-  def first_search_match(query)
-    settings.api.fetch_all_names.to_a.find { |name| name.downcase.include?(query.downcase) }
-  end
-
-  def base_form_for(match)
-    settings.api.detail(match)&.evolutions&.first
   end
 end
 
@@ -716,9 +368,7 @@ module ServerTeamActions
   end
 
   def oob_pokemon_list
-    @offset = params[:offset].to_i
-    @q = params[:q].to_s
-    load_pokemon_page
+    load_pokemon_page(offset: params[:offset].to_i, query: params[:q].to_s)
     oob_wrap(id: "pokemon-list", content: erb(:pokemon_list, layout: false, locals: pokemon_list_locals))
   end
 
@@ -1560,7 +1210,6 @@ class Server < Sinatra::Base
 
   include ServerCommon
   include ServerListActions
-  include ServerSearchHintActions
   include ServerTeamActions
   include ServerTeamItemActions
   include ServerTeamHeldActions
