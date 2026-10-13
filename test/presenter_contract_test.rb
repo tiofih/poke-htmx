@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "minitest/autorun"
+require_relative "../lib/team_presenter"
 
 # 0098 C6 — pin estrutural: a montagem dos fragments mora nos presenters puros
 # (lib/*_presenter.rb), o server.rb so delega sob os mesmos nomes de sempre e
@@ -75,5 +76,35 @@ class PresenterContractTest < Minitest::Test
         refute_includes source, dirty, "#{name}: presenter deve ficar puro (sem #{dirty})"
       end
     end
+  end
+
+  # 0099 C3 — pin dos locals do team: TeamPresenter::KEYS bate com os
+  # identificadores consumidos por views/team.erb (drift em qualquer lado
+  # quebra aqui). Nomes atribuidos ou iterados na propria view saem da conta;
+  # a constante TeamRepository (MAX_TEAM_SIZE da pill) tambem.
+  def test_team_locals_match_between_presenter_and_view
+    source = VIEWS_SOURCE["team.erb"]
+    keys = TeamPresenter::KEYS.map(&:to_s)
+
+    assert_equal keys.sort, (TeamPresenter::REQUIRED.map(&:to_s) + %w[notice notice_kind]).sort,
+                 "KEYS = REQUIRED + par notice (lib/team_presenter.rb)"
+
+    keys.each do |key|
+      assert_match(/\b#{key}\b/, source, "views/team.erb consome #{key}")
+    end
+
+    open = "<\x25"
+    code = source.scan(/#{open}=?(.*?)%>/m).flatten.join("\n")
+    code = code.gsub(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/, "")
+    code = code.gsub(/#.*$/, "")
+    code = code.gsub(/[A-Z][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)+/, "")
+    assigned = code.scan(/([a-z_][a-z0-9_]*)\s*=/).flatten
+    block_params = code.scan(/do\s*\|([^|]*)\|/).flat_map { |m| m.first.split(",").map(&:strip) }
+    used = code.scan(/[a-z_][a-z0-9_]*[!?]?/).map { |w| w.sub(/[!?]$/, "") }
+    used -= assigned + block_params
+    used -= code.scan(/\.([a-z_][a-z0-9_]*)/).flatten
+    used -= %w[if else elsif end unless then do true false nil and or not]
+    assert_equal keys.sort, used.uniq.sort,
+                 "views/team.erb so le os locals de TeamPresenter::KEYS"
   end
 end
