@@ -96,4 +96,43 @@ class TeamViewTest < Minitest::Test
                     "fainted desabilita Remover"
     assert_equal 1, body.scan(" disabled").size, "so o fainted desabilita (nunca-lutou nao e fainted)"
   end
+
+  def test_readiness_pill_covers_the_five_states
+    full = full_team
+
+    assert_includes render_team(team: [], journey_started: true),
+                    '<span class="pill pill--empty" id="readiness-pill">Time vazio</span>'
+    assert_includes render_team(team: full, game_over: true),
+                    '<span class="pill pill--danger" id="readiness-pill">Game over</span>'
+    assert_includes render_team(team: full, can_battle: true),
+                    '<span class="pill pill--ready" id="readiness-pill">Pronto p/ batalhar</span>'
+    assert_includes render_team(team: full.first(5)),
+                    '<span class="pill pill--stale" id="readiness-pill">Falta 1</span>'
+    assert_includes render_team(team: full.first(4)),
+                    '<span class="pill pill--stale" id="readiness-pill">Faltam 2</span>'
+    assert_includes render_team(team: full),
+                    '<span class="pill pill--stale" id="readiness-pill">Precisa de cura</span>'
+  end
+
+  def test_notices_cover_roster_notice_journey_progress_and_game_over
+    noticed = render_team(notice: "Adicionado ao time.", notice_kind: :success)
+
+    assert_includes noticed, '<p class="notice notice--success">Adicionado ao time.</p>'
+
+    fresh = render_team(team: sample_roster.first(1), journey_started: false)
+
+    assert_includes fresh, '<p class="journey-progress">Time: 1/6</p>'
+    assert_includes fresh, "Monte seu time inicial de 6 Pokémon para iniciar a jornada."
+
+    started = render_team(team: sample_roster.first(1), journey_started: true)
+
+    refute_includes started, "journey-progress"
+    refute_includes started, "Monte seu time inicial"
+
+    over = render_team(team: full_team, game_over: true)
+
+    assert_includes over, "Game Over — seu time está derrotado"
+    assert_includes over, 'hx-post="/journey/restart"'
+    assert_includes over, ">Recomeçar jornada</button>"
+  end
 end
