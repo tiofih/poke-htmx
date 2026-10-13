@@ -1,6 +1,7 @@
 ---
 description: Fase 2 do SDD (Implementacao + Teste, uma sessao so). Aplica TDD red->green->refactor no projeto, mantem suite+lint verdes e para antes da validacao. Use para implementar os critérios ja fechados no refinamento.
 mode: subagent
+model: opencode-go/deepseek-v4.1-flash
 temperature: 0.2
 steps: 100
 permission:
