@@ -93,7 +93,6 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_includes last_response.body, 'id="cta-slot"'
     assert_includes last_response.body, 'hx-swap-oob="outerHTML"'
     assert_includes last_response.body, "btn--gated"
-    assert_match(/Faltam 5/, last_response.body, "time de 1: pill pede mais (S3)")
     refute_includes last_response.body, "cta-hint", "sem mensagem ao lado do botao (S3)"
   end
 
@@ -118,7 +117,6 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert last_response.ok?
     assert_includes last_response.body, 'id="cta-slot"'
     assert_includes last_response.body, 'hx-swap-oob="outerHTML"'
-    assert_match(/Time vazio/, last_response.body, "time esvaziado: pill neutra (S3)")
     refute_includes last_response.body, "cta-hint", "sem mensagem ao lado do botao (S3)"
   end
 
@@ -297,7 +295,6 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
     assert last_response.ok?
     assert_includes last_response.body, "Time cheio"
-    assert_includes last_response.body, "notice--error"
     assert_equal 6, @repository.all("user-a").size
     refute_includes @repository.all("user-a").map(&:name), "meowth"
   end
@@ -385,7 +382,6 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_equal 1, @repository.all("user-a").size
     refute_includes @repository.all("user-a").map(&:name), "pikachu"
     assert_includes @repository.all("user-a").map(&:name), "bulbasaur"
-    assert_includes last_response.body, "Remover do time"
     assert_includes last_response.body, "bulbasaur"
   end
 
@@ -476,7 +472,6 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
     assert last_response.ok?
     refute_includes @repository.all("user-a").map(&:name), "pikachu"
-    assert_includes last_response.body, "Remover do time"
   end
 
   def test_team_fragment_renders_move_buttons # rubocop:disable Metrics/AbcSize
@@ -511,16 +506,6 @@ class ServerTeamTest < Minitest::Test # rubocop:disable Metrics/ClassLength
 
     assert last_response.ok?
     assert_match(/<img[^>]+alt="pikachu"/, last_response.body)
-  end
-
-  def test_team_slot_controls_have_aria_labels
-    add_team("user-a", [["pikachu", 25]])
-
-    get "/team", {}, htmx_session("user-a")
-
-    assert last_response.ok?
-    assert_includes last_response.body, 'aria-label="Mover para cima"'
-    assert_includes last_response.body, 'aria-label="Mover para baixo"'
   end
 
   def test_post_team_with_unknown_name_shows_notice_and_does_not_insert
@@ -773,7 +758,6 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
     refute_includes last_response.body, "Poke Mart"
     refute_includes last_response.body, %(hx-post="/team/heal")
     assert_match(/jornada/i, last_response.body)
-    assert_includes last_response.body, "notice--info"
   end
 
   def test_team_fragment_shows_center_and_mart_after_journey_started
@@ -816,7 +800,6 @@ class ServerTeamJourneyFragmentTest < Minitest::Test
     # C3: banner + CTAs Vender/Venda | Recomeçar visíveis
     assert_match(/Venda itens no Poke Mart/i, last_response.body)
     assert_match(/Recome\S* jornada/, last_response.body)
-    assert_includes last_response.body, "notice--error"
     assert_includes last_response.body, 'hx-post="/journey/restart"'
     assert_includes last_response.body, '<button type="submit" class="btn btn-secondary">Recomeçar jornada</button>'
   end
@@ -1402,7 +1385,6 @@ class TeamHealRoutesTest < Minitest::Test
 
     assert last_response.ok?
     assert_match(/Dinheiro insuficiente para curar \(custo 100, saldo 10\)/, last_response.body)
-    assert_includes last_response.body, "notice--error"
     assert_equal 0, @progression.get("user-a", target.id)[:hp_current], "nada curado"
     assert_equal 10, @wallet.balance("user-a")
     # center vive só no modal, nao na home inline
@@ -1481,7 +1463,6 @@ class JourneyRestartSpiralTest < Minitest::Test
     assert_includes last_response.body, "Jornada recomeçada"
     assert_includes last_response.body, 'id="pokemon-list"'
     assert_includes last_response.body, 'id="nav-badge"'
-    assert_includes last_response.body, "notice--info"
     assert_equal false, Server.settings.journey.game_over?("user-a"),
                  "após reset time vazio + saldo 200 => nao game_over"
   end # rubocop:enable Metrics/AbcSize

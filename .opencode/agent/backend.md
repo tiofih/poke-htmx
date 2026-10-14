@@ -1,6 +1,7 @@
 ---
 description: Especialista backend da fase 2 do SDD (lane servidor/API/dados). Implementa em TDD so os criterios da sua lane; nao toca em UI, nao integra nem commita — integracao e commits sao do implementador-teste. Use so com "> Equipe:" no arquivo da sessao (perfil --with-especialistas).
 mode: subagent
+model: opencode-go/deepseek-v4.1-flash
 permission:
   read: allow
   glob: allow
